@@ -46,16 +46,19 @@ csbuild.SetIntermediateDirectory(f"_int/{outputSubPath}")
 ###################################################################################################
 
 with csbuild.Target("debug"):
+	csbuild.AddDefines("_DEBUG")
 	csbuild.SetDebugLevel(csbuild.DebugLevel.ExternalSymbolsPlus)
 	csbuild.SetOptimizationLevel(csbuild.OptimizationLevel.Disabled)
 	csbuild.SetDebugRuntime(True)
 
 with csbuild.Target("fastdebug"):
+	csbuild.AddDefines("_DEBUG")
 	csbuild.SetDebugLevel(csbuild.DebugLevel.ExternalSymbolsPlus)
 	csbuild.SetOptimizationLevel(csbuild.OptimizationLevel.Max)
-	csbuild.SetDebugRuntime(False)
+	csbuild.SetDebugRuntime(True)
 
 with csbuild.Target("release"):
+	csbuild.AddDefines("NDEBUG")
 	csbuild.SetDebugLevel(csbuild.DebugLevel.Disabled)
 	csbuild.SetOptimizationLevel(csbuild.OptimizationLevel.Max)
 	csbuild.SetDebugRuntime(False)
