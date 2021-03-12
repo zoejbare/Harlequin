@@ -29,6 +29,7 @@
 
 static bool ProgramLoad(
 	XenonProgram* const pOutProgram,
+	XenonProgram::LoadData& outLoadData,
 	XenonVmHandle hVm,
 	XenonSerializerHandle hSerializer
 )
@@ -121,7 +122,9 @@ static bool ProgramLoad(
 
 	// Save the endianness value to the output program since we'll need
 	// that when dispatching bytecode data.
-	pOutProgram->endianness = (commonHeader.bigEndianFlag > 0) ? XENON_ENDIAN_MODE_BIG : XENON_ENDIAN_MODE_LITTLE;
+	pOutProgram->endianness = (commonHeader.bigEndianFlag > 0)
+		? XENON_ENDIAN_MODE_BIG
+		: XENON_ENDIAN_MODE_LITTLE;
 
 	// Now that we know the endianness, we can set it on the serializer.
 	result = XenonSerializerSetEndianness(hSerializer, pOutProgram->endianness);
@@ -167,7 +170,7 @@ static bool ProgramLoad(
 	switch(commonHeader.fileVersion)
 	{
 		case XENON_PROGRAM_VERSION_0001:
-			return XenonProgramVersion0001::Load(pOutProgram, hVm, hSerializer);
+			return XenonProgramVersion0001::Load(pOutProgram, outLoadData, hVm, hSerializer);
 
 		default:
 			break;
@@ -186,13 +189,16 @@ static bool ProgramLoad(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const filePath)
+XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const programName, const char* const filePath)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(programName != nullptr);
 	assert(filePath != nullptr);
 
 	XenonReportHandle hReport = &hVm->report;
 	XenonSerializerHandle hSerializer = XENON_SERIALIZER_HANDLE_NULL;
+
+	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from file: \"%s\"", programName, filePath);
 
 	int result;
 
@@ -230,19 +236,30 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const fil
 		return nullptr;
 	}
 
+	XenonString* const pProgramName = XenonString::Create(programName);
+	if(!pProgramName)
+	{
+		XenonString::Dispose(pProgramName);
+		return nullptr;
+	}
+
 	XenonProgram* pOutput = new XenonProgram();
+
+	pOutput->hVm = hVm;
+	pOutput->pName = pProgramName;
 
 	// Initialize the program data.
 	XenonValue::HandleArray::Initialize(pOutput->constants);
 	XenonByteHelper::Array::Initialize(pOutput->code);
 
-	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program from file: file=\"%s\"", filePath);
+	LoadData loadData;
 
 	// Attempt to load the program.
-	if(!ProgramLoad(pOutput, hVm, hSerializer))
+	if(!ProgramLoad(pOutput, loadData, hVm, hSerializer))
 	{
 		// Failed to load the program from the file.
-		delete pOutput;
+		XenonProgram::Dispose(pOutput);
+
 		pOutput = nullptr;
 	}
 
@@ -258,6 +275,17 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const fil
 			"Failed to dispose of program serializer: error=\"%s\"",
 			errorString
 		);
+	}
+
+	if(pOutput)
+	{
+		// Copy the necessary data to the VM.
+		prv_copyDataToVm(loadData, hVm);
+	}
+	else
+	{
+		// The program failed to load, so any stale load data needs to be freed.
+		prv_freeLoadData(loadData);
 	}
 
 	return pOutput;
@@ -279,6 +307,8 @@ XenonProgramHandle XenonProgram::Create(
 
 	XenonReportHandle hReport = &hVm->report;
 	XenonSerializerHandle hSerializer = XENON_SERIALIZER_HANDLE_NULL;
+
+	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from data buffer", programName);
 
 	int result;
 
@@ -316,19 +346,30 @@ XenonProgramHandle XenonProgram::Create(
 		return nullptr;
 	}
 
+	XenonString* const pProgramName = XenonString::Create(programName);
+	if(!pProgramName)
+	{
+		XenonString::Dispose(pProgramName);
+		return nullptr;
+	}
+
 	XenonProgram* pOutput = new XenonProgram();
+
+	pOutput->hVm = hVm;
+	pOutput->pName = pProgramName;
 
 	// Initialize the program data.
 	XenonValue::HandleArray::Initialize(pOutput->constants);
 	XenonByteHelper::Array::Initialize(pOutput->code);
 
-	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program: name=\"%s\"", programName);
+	LoadData loadData;
 
 	// Attempt to load the program.
-	if(!ProgramLoad(pOutput, hVm, hSerializer))
+	if(!ProgramLoad(pOutput, loadData, hVm, hSerializer))
 	{
 		// Failed to load the program from the file.
-		delete pOutput;
+		XenonProgram::Dispose(pOutput);
+
 		pOutput = nullptr;
 	}
 
@@ -346,6 +387,17 @@ XenonProgramHandle XenonProgram::Create(
 		);
 	}
 
+	if(pOutput)
+	{
+		// Copy the necessary data to the VM.
+		prv_copyDataToVm(loadData, hVm);
+	}
+	else
+	{
+		// The program failed to load, so any stale load data needs to be freed.
+		prv_freeLoadData(loadData);
+	}
+
 	return pOutput;
 }
 
@@ -355,12 +407,8 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 {
 	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
 
-	// Dispose of all program functions.
-	for(auto& kv : hProgram->functions)
-	{
-		XenonString::Dispose(kv.key);
-		XenonFunction::Dispose(kv.value);
-	}
+	// The globals and functions are just references to data in the VM.
+	// This means the VM will handle cleaning them up itself.
 
 	// Dispose of all program dependencies.
 	for(auto& kv : hProgram->dependencies)
@@ -368,13 +416,6 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 		XenonString::Dispose(kv.key);
 
 		// The mapped value doesn't contain anything, so it doesn't need to be released.
-	}
-
-	// Dispose of all program globals.
-	for(auto& kv : hProgram->globals)
-	{
-		XenonString::Dispose(kv.key);
-		XenonValueDispose(kv.value);
 	}
 
 	// Dispose of all program constants.
@@ -386,6 +427,8 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 	// Clean up the data structures.
 	XenonValue::HandleArray::Dispose(hProgram->constants);
 	XenonByteHelper::Array::Dispose(hProgram->code);
+
+	XenonString::Dispose(hProgram->pName);
 
 	delete hProgram;
 }
@@ -399,6 +442,46 @@ XenonValueHandle XenonProgram::GetConstant(XenonProgramHandle hProgram, const ui
 	return (index < hProgram->constants.count)
 		? XenonValueReference(hProgram->constants.pData[index])
 		: XENON_VALUE_HANDLE_NULL;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonProgram::prv_copyDataToVm(const XenonProgram::LoadData& loadData, XenonVmHandle hVm)
+{
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
+	// Transfer the globals to the VM.
+	for(auto& kv : loadData.globals)
+	{
+		hVm->globals.Insert(kv.key, kv.value);
+		kv.value = XENON_VALUE_HANDLE_NULL;
+	}
+
+	// Transfer the functions to the VM.
+	for(auto& kv : loadData.functions)
+	{
+		hVm->functions.Insert(kv.key, kv.value);
+		kv.value = XENON_FUNCTION_HANDLE_NULL;
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonProgram::prv_freeLoadData(XenonProgram::LoadData& loadData)
+{
+	// Dispose of the loaded globals.
+	for(auto& kv : loadData.globals)
+	{
+		XenonString::Dispose(kv.key);
+		XenonValue::Release(kv.value);
+	}
+
+	// Dispose of the loaded functions.
+	for(auto& kv : loadData.functions)
+	{
+		XenonString::Dispose(kv.key);
+		XenonFunction::Dispose(kv.value);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------

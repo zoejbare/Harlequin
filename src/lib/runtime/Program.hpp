@@ -37,10 +37,16 @@ struct XenonProgram
 		XenonString::StlCompare
 	> StringToHandleMap;
 
-	static XenonProgramHandle Create(XenonVmHandle hVm, const char* const filePath);
+	struct LoadData
+	{
+		XenonValue::StringToHandleMap globals;
+		XenonFunction::StringToHandleMap functions;
+	};
+
+	static XenonProgramHandle Create(XenonVmHandle hVm, const char* const programName, const char* const filePath);
 	static XenonProgramHandle Create(
 		XenonVmHandle hVm,
-		const char* const fileName,
+		const char* const programName,
 		const void* const pFileData,
 		const size_t fileLength
 	);
@@ -48,14 +54,21 @@ struct XenonProgram
 
 	static XenonValueHandle GetConstant(XenonProgramHandle hProgram, const uint32_t index);
 
+	static void prv_copyDataToVm(const LoadData& loadData, XenonVmHandle);
+	static void prv_freeLoadData(LoadData& loadData);
+
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonFunction::StringToHandleMap functions;
 	XenonValue::StringToHandleMap dependencies;
-	XenonValue::StringToHandleMap globals;
+	XenonFunction::StringToBoolMap functions;
+	XenonValue::StringToBoolMap globals;
 	XenonValue::HandleArray constants;
 	XenonByteHelper::Array code;
+
+	XenonVmHandle hVm;
+
+	XenonString* pName;
 
 	int endianness;
 };

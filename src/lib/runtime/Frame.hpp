@@ -20,6 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "Decoder.hpp"
 #include "Function.hpp"
 
 #include "../shared/Array.hpp"
@@ -40,18 +41,22 @@ struct XenonFrame
 	static int PopValue(XenonFrameHandle hFrame, XenonValueHandle* const phOutValue);
 	static int PeekValue(XenonFrameHandle hFrame, XenonValueHandle* const phOutValue, const size_t index);
 
-	static void SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, const uint32_t index);
+	static int SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, const uint32_t index);
+	static int SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, XenonString* const pVariableName);
+
 	static XenonValueHandle GetGpRegister(XenonFrameHandle hFrame, const uint32_t index);
+	static XenonValueHandle GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	XenonValue::HandleStack stack;
 	XenonValue::HandleArray registers;
+	XenonValue::StringToHandleMap locals;
 
 	XenonFunctionHandle hFunction;
 
-	uint8_t* ip;
+	XenonDecoder decoder;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

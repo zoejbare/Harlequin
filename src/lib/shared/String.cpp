@@ -118,14 +118,15 @@ XenonString* XenonString::Create(const char* const stringData)
 
 void XenonString::Dispose(XenonString* const pString)
 {
-	assert(pString != nullptr);
-
-	if(pString->data)
+	if(pString)
 	{
-		XenonMemFree(pString->data);
-	}
+		if(pString->data)
+		{
+			XenonMemFree(pString->data);
+		}
 
-	delete pString;
+		delete pString;
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------

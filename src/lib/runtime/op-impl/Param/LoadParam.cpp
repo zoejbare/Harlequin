@@ -16,21 +16,24 @@
 // IN THE SOFTWARE.
 //
 
+#include "../../OpDecl.hpp"
+
+#include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Frame.hpp"
-#include "../../OpDecl.hpp"
 
 #include <inttypes.h>
 #include <stdio.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Set the value in a general-purpose register to an I/O register.
+// Get a value in an I/O register, storing it to a general-purpose register.
+// The I/O register will then be cleared to avoid leaking value data.
 //
-// 0x: SET_PARAM p#, r#
+// 0x: LOAD_PARAM r#, p#
 //
-//   p# = I/O register index
 //   r# = General-purpose register index
+//   p# = I/O register index
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -38,17 +41,28 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_SetParam(XenonExecutionHandle hExec)
+void OpCodeExec_LoadParam(XenonExecutionHandle hExec)
 {
-	const uint32_t ioRegIndex = XenonExecution::LoadBytecodeUint32(hExec);
-	const uint32_t gpRegIndex = XenonExecution::LoadBytecodeUint32(hExec);
+	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	printf("SET_PARAM p%" PRIu32 ", r%" PRIu32 "\n", ioRegIndex, gpRegIndex);
+	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, ioRegIndex);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpRegIndex);
-
-	XenonExecution::SetIoRegister(hExec, hValue, ioRegIndex);
+	XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
+	XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
 	XenonValueDispose(hValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_LoadParam(XenonDisassemble& disasm)
+{
+	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
+
+	char str[64];
+	snprintf(str, sizeof(str), "LOAD_PARAM r%" PRIu32 ", p%" PRIu32, gpRegIndex, ioRegIndex);
+	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus

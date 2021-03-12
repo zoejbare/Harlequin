@@ -133,15 +133,9 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 	// Read the data based on the value type.
 	switch(valueType)
 	{
-		case XENON_VALUE_TYPE_BOOL:
+		case XENON_VALUE_TYPE_NULL:
 		{
-			result = XenonSerializerReadBool(hSerializer, &temp.as.boolean);
-			if(result != XENON_SUCCESS)
-			{
-				break;
-			}
-
-			return XenonValue::CreateBool(temp.as.boolean);
+			return XenonValue::CreateNull();
 		}
 
 		case XENON_VALUE_TYPE_INT8:
@@ -254,9 +248,15 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 			return XenonValue::CreateFloat64(temp.as.float64);
 		}
 
-		case XENON_VALUE_TYPE_NULL:
+		case XENON_VALUE_TYPE_BOOL:
 		{
-			return XenonValue::CreateNull();
+			result = XenonSerializerReadBool(hSerializer, &temp.as.boolean);
+			if(result != XENON_SUCCESS)
+			{
+				break;
+			}
+
+			return XenonValue::CreateBool(temp.as.boolean);
 		}
 
 		case XENON_VALUE_TYPE_STRING:

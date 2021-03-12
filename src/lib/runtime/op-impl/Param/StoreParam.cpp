@@ -20,21 +20,19 @@
 
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
-#include "../../Program.hpp"
-#include "../../Vm.hpp"
+#include "../../Frame.hpp"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Load a global variable to a general-purpose register in the current frame.
+// Set the value in a general-purpose register to an I/O register.
 //
-// 0x: LOAD_GLOBAL r#, c#
+// 0x: STORE_PARAM p#, r#
 //
+//   p# = I/O register index
 //   r# = General-purpose register index
-//   c# = Constant index of the name of the global variable
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -42,50 +40,26 @@
 extern "C" {
 #endif
 
-void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
+void OpCodeExec_StoreParam(XenonExecutionHandle hExec)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex);
-	if(XenonValueIsString(hNameValue))
-	{
-		XenonValueHandle hGlobalVariable = XenonVm::GetGlobalVariable(hExec->hVm, hNameValue->as.pString);
-		if(hGlobalVariable)
-		{
+	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpRegIndex);
 
-			XenonFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
-			XenonValueDispose(hGlobalVariable);
-		}
-		else
-		{
-			// TODO: Raise script exception.
-			hExec->exception = true;
-		}
-	}
-	else
-	{
-		// TODO: Raise script exception.
-		hExec->exception = true;
-	}
-
-	XenonValueDispose(hNameValue);
+	XenonExecution::SetIoRegister(hExec, hValue, ioRegIndex);
+	XenonValueDispose(hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadGlobal(XenonDisassemble& disasm)
+void OpCodeDisasm_StoreParam(XenonDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex);
-	std::string valueData = XenonValue::GetDebugString(hNameValue);
-
-	XenonValueDispose(hNameValue);
-
-	char str[256];
-	snprintf(str, sizeof(str), "LOAD_GLOBAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());
+	char str[64];
+	snprintf(str, sizeof(str), "STORE_PARAM p%" PRIu32 ", r%" PRIu32, ioRegIndex, gpRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

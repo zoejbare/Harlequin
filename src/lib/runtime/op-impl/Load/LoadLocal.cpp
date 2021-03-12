@@ -16,9 +16,11 @@
 // IN THE SOFTWARE.
 //
 
+#include "../../OpDecl.hpp"
+
+#include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Function.hpp"
-#include "../../OpDecl.hpp"
 #include "../../Program.hpp"
 
 #include <assert.h>
@@ -40,17 +42,15 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_LoadLocal(XenonExecutionHandle hExec)
+void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 {
-	const uint32_t registerIndex = XenonExecution::LoadBytecodeUint32(hExec);
-	const uint32_t constIndex = XenonExecution::LoadBytecodeUint32(hExec);
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	printf("LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 "\n", registerIndex, constIndex);
-
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex);
+	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex);
 	if(XenonValueIsString(hNameValue))
 	{
-		XenonValueHandle hLocalVariable = XenonFunction::GetLocalVariable(hExec->hCurrentFrame->hFunction, hNameValue->as.pString);
+		XenonValueHandle hLocalVariable = XenonFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString);
 		if(hLocalVariable)
 		{
 			XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
@@ -64,6 +64,23 @@ void OpCodeImpl_LoadLocal(XenonExecutionHandle hExec)
 	}
 
 	XenonValueDispose(hNameValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_LoadLocal(XenonDisassemble& disasm)
+{
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
+
+	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex);
+	std::string valueData = XenonValue::GetDebugString(hNameValue);
+
+	XenonValueDispose(hNameValue);
+
+	char str[256];
+	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());
+	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus

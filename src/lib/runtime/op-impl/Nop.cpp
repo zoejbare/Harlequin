@@ -18,6 +18,8 @@
 
 #include "../OpDecl.hpp"
 
+#include "../Decoder.hpp"
+
 #include <stdio.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -32,12 +34,16 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_Nop(XenonExecutionHandle hExec)
+void OpCodeExec_Nop(XenonExecutionHandle hExec)
 {
 	(void) hExec;
-	// Do nothing.
+}
 
-	printf("NOP\n");
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_Nop(XenonDisassemble& disasm)
+{
+	disasm.onDisasmFn(disasm.pUserData, "NOP", disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus

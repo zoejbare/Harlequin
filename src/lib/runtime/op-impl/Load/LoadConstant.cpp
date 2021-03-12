@@ -16,8 +16,10 @@
 // IN THE SOFTWARE.
 //
 
-#include "../../Execution.hpp"
 #include "../../OpDecl.hpp"
+
+#include "../../Decoder.hpp"
+#include "../../Execution.hpp"
 #include "../../Program.hpp"
 
 #include <assert.h>
@@ -39,17 +41,32 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_LoadConstant(XenonExecutionHandle hExec)
+void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 {
-	const uint32_t registerIndex = XenonExecution::LoadBytecodeUint32(hExec);
-	const uint32_t constIndex = XenonExecution::LoadBytecodeUint32(hExec);
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	printf("LOAD_CONST r%" PRIu32 ", c%" PRIu32 "\n", registerIndex, constIndex);
-
-	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex);
+	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex);
 
 	XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
 	XenonValueDispose(hValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_LoadConstant(XenonDisassemble& disasm)
+{
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
+
+	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex);
+	std::string valueData = XenonValue::GetDebugString(hValue);
+
+	XenonValueDispose(hValue);
+
+	char instr[512];
+	snprintf(instr, sizeof(instr), "LOAD_CONST r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());
+	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus

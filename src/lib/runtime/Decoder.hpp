@@ -16,57 +16,24 @@
 // IN THE SOFTWARE.
 //
 
-#include "../OpDecl.hpp"
-
-#include "../Decoder.hpp"
-#include "../Execution.hpp"
-
-#include <inttypes.h>
-#include <stdio.h>
+#pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
-//
-// Push the value at the specified general-purpose register index onto the value stack.
-//
-// 0x: PUSH r#
-//
-//   r# = Register index
-//
+
+#include "../XenonScript.h"
+
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_Push(XenonExecutionHandle hExec)
+struct XenonDecoder
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	static XenonDecoder Construct(XenonProgramHandle hProgram, uint32_t offset);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex);
-	const int result = XenonFrame::PushValue(hExec->hCurrentFrame, hValue);
+	static uint8_t LoadUint8(XenonDecoder& decoder);
+	static uint32_t LoadUint32(XenonDecoder& decoder);
 
-	XenonValueDispose(hValue);
+	uint8_t* ip;
 
-	if(result != XENON_SUCCESS)
-	{
-		// TODO: Raise script exception
-		hExec->exception = true;
-	}
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void OpCodeDisasm_Push(XenonDisassemble& disasm)
-{
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-
-	char str[16];
-	snprintf(str, sizeof(str), "PUSH r%" PRIu32, registerIndex);
-	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-}
-
-#ifdef __cplusplus
-}
-#endif
+	bool sameEndian;
+};
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -25,10 +25,10 @@
 #include "../shared/Array.hpp"
 #include "../shared/String.hpp"
 
+#include <SkipProbe/SkipProbe.hpp>
+
 #include <deque>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -46,15 +46,16 @@ struct XenonProgramWriter
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	typedef std::unordered_set<
+	typedef SkipProbe::HashMap<
 		XenonString*,
+		bool,
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> DependencySet;
 
-	typedef std::unordered_map<
+	typedef SkipProbe::HashMap<
 		XenonString*,
-		size_t,
+		uint32_t,
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> GlobalValueMap;

@@ -26,11 +26,13 @@
 #include "../../shared/Value.hpp"
 
 #include <assert.h>
+#include <inttypes.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 static bool ReadHeader(
 	XenonProgramHeader0001& outHeader,
+	XenonString* const pProgramName,
 	XenonSerializerHandle hSerializer,
 	XenonReportHandle hReport
 )
@@ -46,7 +48,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file dependency table offset: error=\"%s\"",
+			"Error reading program file dependency table offset: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -62,7 +65,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file dependency table length: error=\"%s\"",
+			"Error reading program file dependency table length: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -78,7 +82,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file constant table offset: error=\"%s\"",
+			"Error reading program file constant table offset: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -94,7 +99,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file constant table length: error=\"%s\"",
+			"Error reading program file constant table length: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -110,7 +116,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file global table offset: error=\"%s\"",
+			"Error reading program file global table offset: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -126,7 +133,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file global table length: error=\"%s\"",
+			"Error reading program file global table length: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -142,7 +150,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file function table offset: error=\"%s\"",
+			"Error reading program file function table offset: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -158,7 +167,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file function table length: error=\"%s\"",
+			"Error reading program file function table length: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -174,7 +184,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file bytecode offset: error=\"%s\"",
+			"Error reading program file bytecode offset: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -190,7 +201,8 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file bytecode length: error=\"%s\"",
+			"Error reading program file bytecode length: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
 			errorString
 		);
 
@@ -204,6 +216,7 @@ static bool ReadHeader(
 
 static bool ValidateHeader(
 	const XenonProgramHeader0001& header,
+	XenonString* const pProgramName,
 	XenonReportHandle hReport,
 	const uint32_t headerEndPosition
 )
@@ -214,7 +227,8 @@ static bool ValidateHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Invalid program file constant table offset: offset=%u, expected=%u",
+			"Invalid program file constant table offset: program=\"%s\", offset=%" PRIu32 ", expected=%" PRIu32,
+			pProgramName->data,
 			header.constantTableOffset,
 			headerEndPosition
 		);
@@ -227,7 +241,8 @@ static bool ValidateHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Invalid program file global table offset: offset=%u, expected=%u",
+			"Invalid program file global table offset: program=\"%s\", offset=%" PRIu32 ", expected=%" PRIu32,
+			pProgramName->data,
 			header.globalTableOffset,
 			headerEndPosition
 		);
@@ -240,7 +255,8 @@ static bool ValidateHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Invalid program file bytecode offset: offset=%u, expected=%u",
+			"Invalid program file bytecode offset: program=\"%s\", offset=%" PRIu32 ", expected=%" PRIu32,
+			pProgramName->data,
 			header.bytecodeOffset,
 			headerEndPosition
 		);
@@ -256,6 +272,7 @@ static bool ValidateHeader(
 
 bool XenonProgramVersion0001::Load(
 	XenonProgram* const pOutProgram,
+	XenonProgram::LoadData& outLoadData,
 	XenonVmHandle hVm,
 	XenonSerializerHandle hSerializer
 )
@@ -269,7 +286,7 @@ bool XenonProgramVersion0001::Load(
 	int result = XENON_SUCCESS;
 
 	XenonProgramHeader0001 header;
-	if(!ReadHeader(header, hSerializer, hReport))
+	if(!ReadHeader(header, pOutProgram->pName, hSerializer, hReport))
 	{
 		// Failed to read the version header.
 		return false;
@@ -277,7 +294,7 @@ bool XenonProgramVersion0001::Load(
 
 	const uint32_t headerEndPosition = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
-	if(!ValidateHeader(header, hReport, headerEndPosition))
+	if(!ValidateHeader(header, pOutProgram->pName, hReport, headerEndPosition))
 	{
 		// The header data is invalid.
 		return false;
@@ -294,7 +311,8 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the dependency table: error=\"%s\", offset=%u",
+				"Error setting program file stream position to the offset of the dependency table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
+				pOutProgram->pName->data,
 				errorString,
 				header.dependencyTableOffset
 			);
@@ -305,6 +323,7 @@ bool XenonProgramVersion0001::Load(
 		// Initialize the dependency table.
 		pOutProgram->dependencies.Reserve(header.dependencyTableLength);
 
+		// Iterate for each dependency.
 		for(uint32_t index = 0; index < header.dependencyTableLength; ++index)
 		{
 			// Read the name of the dependency.
@@ -331,7 +350,8 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the constant table: error=\"%s\", offset=%u",
+				"Error setting program file stream position to the offset of the constant table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
+				pOutProgram->pName->data,
 				errorString,
 				header.constantTableOffset
 			);
@@ -343,15 +363,16 @@ bool XenonProgramVersion0001::Load(
 		XenonValue::HandleArray::Reserve(pOutProgram->constants, header.constantTableLength);
 		pOutProgram->constants.count = header.constantTableLength;
 
+		// Iterate for each constant.
 		for(uint32_t index = 0; index < header.constantTableLength; ++index)
 		{
-			XenonValue* const pValue = XenonProgramCommonLoader::ReadValue(hSerializer, hReport);
-			if(!pValue)
+			XenonValueHandle hValue = XenonProgramCommonLoader::ReadValue(hSerializer, hReport);
+			if(!hValue)
 			{
 				return false;
 			}
 
-			pOutProgram->constants.pData[index] = pValue;
+			pOutProgram->constants.pData[index] = hValue;
 		}
 	}
 
@@ -366,7 +387,8 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", offset=%u",
+				"Error setting program file stream position to the offset of the global variable table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
+				pOutProgram->pName->data,
 				errorString,
 				header.globalTableOffset
 			);
@@ -377,7 +399,8 @@ bool XenonProgramVersion0001::Load(
 		// Initialize the global table.
 		pOutProgram->globals.Reserve(header.globalTableLength);
 
-		for(uint32_t index = 0; index < header.globalTableLength; ++index)
+		// Iterate for each global variable.
+		for(uint32_t globalIndex = 0; globalIndex < header.globalTableLength; ++globalIndex)
 		{
 			// Read the name of the global variable.
 			XenonString* const pVarName = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
@@ -386,15 +409,65 @@ bool XenonProgramVersion0001::Load(
 				return false;
 			}
 
-			// Read the global variable value data.
-			XenonValue* pGlobalVar = XenonProgramCommonLoader::ReadValue(hSerializer, hReport);
-			if(!pGlobalVar)
+			if(hVm->globals.Contains(pVarName))
 			{
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Global variable conflict: program=\"%s\", variableName=\"%s\"",
+					pOutProgram->pName->data,
+					pVarName->data
+				);
+
 				XenonString::Dispose(pVarName);
+
 				return false;
 			}
 
-			pOutProgram->globals.Insert(pVarName, pGlobalVar);
+			// Read the global variable value index.
+			uint32_t constantIndex = 0;
+			result = XenonSerializerReadUint32(hSerializer, &constantIndex);
+			if(result != XENON_SUCCESS)
+			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to read global variable value index: program=\"%s\", variableName=\"%s\", error=\"%s\"",
+					pOutProgram->pName->data,
+					pVarName->data,
+					errorString
+				);
+
+				XenonString::Dispose(pVarName);
+
+				return false;
+			}
+
+			// Get the value from the constant table.
+			XenonValueHandle hValue;
+			if(size_t(constantIndex) < pOutProgram->constants.count)
+			{
+				hValue = XenonValueReference(pOutProgram->constants.pData[constantIndex]);
+			}
+			else
+			{
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_WARNING,
+					"Global variable points to invalid constant index: program=\"%s\", variableName=\"%s\", index=%" PRIu32,
+					pOutProgram->pName->data,
+					pVarName->data,
+					constantIndex
+				);
+
+				hValue = XenonValueCreateNull();
+			}
+
+			// Map the global variable.
+			pOutProgram->globals.Insert(pVarName, false);
+			outLoadData.globals.Insert(pVarName, hValue);
 		}
 	}
 
@@ -409,7 +482,8 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", offset=%u",
+				"Error setting program file stream position to the offset of the global variable table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
+				pOutProgram->pName->data,
 				errorString,
 				header.globalTableOffset
 			);
@@ -417,24 +491,40 @@ bool XenonProgramVersion0001::Load(
 			return false;
 		}
 
-		for(uint32_t index = 0; index < header.functionTableLength; ++index)
+		// Iterate for each function.
+		for(uint32_t funcIndex = 0; funcIndex < header.functionTableLength; ++funcIndex)
 		{
-			// Read the function signature.
-			XenonString* const pSignature = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
-			if(!pSignature)
+			XenonFunctionHandle hFunction = XenonFunction::Create(pOutProgram);
+			if(!hFunction)
 			{
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function signature"
+					"Failed to create function handle: program=\"%s\"",
+					pOutProgram->pName->data
 				);
+
+				return false;
+			}
+
+			// Read the function signature.
+			hFunction->pSignature = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
+			if(!hFunction->pSignature)
+			{
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to read function signature: program=\"%s\"",
+					pOutProgram->pName->data
+				);
+
+				XenonFunction::Dispose(hFunction);
 
 				return false;
 			}
 
 			// Read the function offset.
-			uint32_t offset = 0;
-			result = XenonSerializerReadUint32(hSerializer, &offset);
+			result = XenonSerializerReadUint32(hSerializer, &hFunction->offset);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -442,19 +532,19 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function bytecode offset: error=\"%s\", function=\"%s\"",
-					errorString,
-					pSignature->data
+					"Failed to read function bytecode offset: program=\"%s\", function=\"%s\", error=\"%s\"",
+					pOutProgram->pName->data,
+					hFunction->pSignature->data,
+					errorString
 				);
 
-				XenonString::Dispose(pSignature);
+				XenonFunction::Dispose(hFunction);
 
 				return false;
 			}
 
 			// Read the function parameter count.
-			uint16_t numParameters = 0;
-			result = XenonSerializerReadUint16(hSerializer, &numParameters);
+			result = XenonSerializerReadUint16(hSerializer, &hFunction->numParameters);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -462,19 +552,19 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function parameter count: error=\"%s\", function=\"%s\"",
-					errorString,
-					pSignature->data
+					"Failed to read function parameter count: program=\"%s\", function=\"%s\", error=\"%s\"",
+					pOutProgram->pName->data,
+					hFunction->pSignature->data,
+					errorString
 				);
 
-				XenonString::Dispose(pSignature);
+				XenonFunction::Dispose(hFunction);
 
 				return false;
 			}
 
 			// Read the function return value count.
-			uint16_t numReturnValues = 0;
-			result = XenonSerializerReadUint16(hSerializer, &numReturnValues);
+			result = XenonSerializerReadUint16(hSerializer, &hFunction->numReturnValues);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -482,49 +572,133 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function return value count: error=\"%s\", function=\"%s\"",
-					errorString,
-					pSignature->data
+					"Failed to read function return value count: program=\"%s\", function=\"%s\", error=\"%s\"",
+					pOutProgram->pName->data,
+					hFunction->pSignature->data,
+					errorString
 				);
 
-				XenonString::Dispose(pSignature);
+				XenonFunction::Dispose(hFunction);
 
 				return false;
 			}
 
-			if(!hVm->functions.Contains(pSignature))
+			// Read the function local variable count.
+			uint32_t numLocalVariables = 0;
+			result = XenonSerializerReadUint32(hSerializer, &numLocalVariables);
+			if(result != XENON_SUCCESS)
 			{
-				XenonFunctionHandle hFunction = XenonFunction::Create(
-					pOutProgram,
-					pSignature,
-					offset,
-					numParameters,
-					numReturnValues
+				const char* const errorString = XenonGetErrorCodeString(result);
+
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to read function local variable count: program=\"%s\", function=\"%s\", error=\"%s\"",
+					pOutProgram->pName->data,
+					hFunction->pSignature->data,
+					errorString
 				);
-				if(!hFunction)
+
+				XenonFunction::Dispose(hFunction);
+
+				return false;
+			}
+
+			if(numLocalVariables > 0)
+			{
+				hFunction->locals.Reserve(numLocalVariables);
+
+				// Iterate for each local variable.
+				for(uint32_t localIndex = 0; localIndex < numLocalVariables; ++localIndex)
 				{
-					XenonReportMessage(
-						hReport,
-						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to create function handle"
-					);
+					// Read the name of the global variable.
+					XenonString* const pVarName = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
+					if(!pVarName)
+					{
+						return false;
+					}
 
-					XenonString::Dispose(pSignature);
+					if(hFunction->locals.Contains(pVarName))
+					{
+						XenonReportMessage(
+							hReport,
+							XENON_MESSAGE_TYPE_ERROR,
+							"Local variable conflict: program=\"%s\", function=\"%s\", variableName=\"%s\"",
+							pOutProgram->pName->data,
+							hFunction->pSignature->data,
+							pVarName->data
+						);
 
-					return false;
+						XenonString::Dispose(pVarName);
+
+						return false;
+					}
+
+					// Read the local variable value index.
+					uint32_t constantIndex = 0;
+					result = XenonSerializerReadUint32(hSerializer, &constantIndex);
+					if(result != XENON_SUCCESS)
+					{
+						const char* const errorString = XenonGetErrorCodeString(result);
+
+						XenonReportMessage(
+							hReport,
+							XENON_MESSAGE_TYPE_ERROR,
+							"Failed to read local variable value index: program=\"%s\", function=\"%s\", variableName=\"%s\", error=\"%s\"",
+							pOutProgram->pName->data,
+							hFunction->pSignature->data,
+							pVarName->data,
+							errorString
+						);
+
+						XenonString::Dispose(pVarName);
+
+						return false;
+					}
+
+					// Get the value from the constant table.
+					XenonValueHandle hValue;
+					if(size_t(constantIndex) < pOutProgram->constants.count)
+					{
+						hValue = XenonValueReference(pOutProgram->constants.pData[constantIndex]);
+					}
+					else
+					{
+						XenonReportMessage(
+							hReport,
+							XENON_MESSAGE_TYPE_WARNING,
+							"Local variable points to invalid constant index: program=\"%s\", function=\"%s\", variableName=\"%s\", index=%" PRIu32,
+							pOutProgram->pName->data,
+							hFunction->pSignature->data,
+							pVarName->data,
+							constantIndex
+						);
+
+						hValue = XenonValueCreateNull();
+					}
+
+					// Map the local variable to the function.
+					hFunction->locals.Insert(pVarName, hValue);
 				}
+			}
 
+			if(!hVm->functions.Contains(hFunction->pSignature))
+			{
 				// Map the function to the signature.
-				hVm->functions.Insert(pSignature, hFunction);
+				pOutProgram->functions.Insert(hFunction->pSignature, false);
+				outLoadData.functions.Insert(hFunction->pSignature, hFunction);
 			}
 			else
 			{
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Function signature conflict: signature=\"%s\", program=\"%s\"",
-					pSignature->data
+					"Function signature conflict: program=\"%s\", function=\"%s\"",
+					pOutProgram->pName->data,
+					hFunction->pSignature->data
 				);
+
+				XenonFunction::Dispose(hFunction);
 			}
 		}
 	}
@@ -540,7 +714,8 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the program bytecode: error=\"%s\", offset=%u",
+				"Error setting program file stream position to the offset of the program bytecode: program=\"%s\", error=\"%s\", offset=%" PRIu32,
+				pOutProgram->pName->data,
 				errorString,
 				header.bytecodeOffset
 			);

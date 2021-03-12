@@ -20,8 +20,8 @@
 
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
+#include "../../Function.hpp"
 #include "../../Program.hpp"
-#include "../../Vm.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -29,12 +29,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Load a global variable to a general-purpose register in the current frame.
+// Load a local variable to a general-purpose register in the current frame.
 //
-// 0x: LOAD_GLOBAL r#, c#
+// 0x: STORE_LOCAL c#, r#
 //
+//   c# = Constant index of the name string of the local variable
 //   r# = General-purpose register index
-//   c# = Constant index of the name of the global variable
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -42,31 +42,24 @@
 extern "C" {
 #endif
 
-void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
+void OpCodeExec_StoreLocal(XenonExecutionHandle hExec)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex);
 	if(XenonValueIsString(hNameValue))
 	{
-		XenonValueHandle hGlobalVariable = XenonVm::GetGlobalVariable(hExec->hVm, hNameValue->as.pString);
-		if(hGlobalVariable)
-		{
+		XenonValueHandle hRegisterValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex);
 
-			XenonFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
-			XenonValueDispose(hGlobalVariable);
-		}
-		else
+		const int result = XenonFrame::SetLocalVariable(hExec->hCurrentFrame, hRegisterValue, hNameValue->as.pString);
+		if(result != XENON_SUCCESS)
 		{
 			// TODO: Raise script exception.
 			hExec->exception = true;
 		}
-	}
-	else
-	{
-		// TODO: Raise script exception.
-		hExec->exception = true;
+
+		XenonValueDispose(hRegisterValue);
 	}
 
 	XenonValueDispose(hNameValue);
@@ -74,10 +67,10 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadGlobal(XenonDisassemble& disasm)
+void OpCodeDisasm_StoreLocal(XenonDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex);
 	std::string valueData = XenonValue::GetDebugString(hNameValue);
@@ -85,7 +78,7 @@ void OpCodeDisasm_LoadGlobal(XenonDisassemble& disasm)
 	XenonValueDispose(hNameValue);
 
 	char str[256];
-	snprintf(str, sizeof(str), "LOAD_GLOBAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());
+	snprintf(str, sizeof(str), "STORE_LOCAL r%" PRIu32 " %s, c%" PRIu32, constantIndex, valueData.c_str(), registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

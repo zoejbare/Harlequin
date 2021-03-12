@@ -18,6 +18,7 @@
 
 #include "../OpDecl.hpp"
 
+#include "../Decoder.hpp"
 #include "../Execution.hpp"
 #include "../Frame.hpp"
 #include "../Program.hpp"
@@ -40,11 +41,9 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_Call(XenonExecutionHandle hExec)
+void OpCodeExec_Call(XenonExecutionHandle hExec)
 {
-	const uint32_t constIndex = XenonExecution::LoadBytecodeUint32(hExec);
-
-	printf("CALL c%" PRIu32 "\n", constIndex);
+	const uint32_t constIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex);
 	if(!XenonValueIsString(hValue))
@@ -67,6 +66,22 @@ void OpCodeImpl_Call(XenonExecutionHandle hExec)
 	}
 
 	XenonValueDispose(hValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_Call(XenonDisassemble& disasm)
+{
+	const uint32_t constIndex = XenonDecoder::LoadUint32(disasm.decoder);
+
+	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constIndex);
+	std::string valueData = XenonValue::GetDebugString(hValue);
+
+	XenonValueDispose(hValue);
+
+	char str[64];
+	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", constIndex, valueData.c_str());
+	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus

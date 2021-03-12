@@ -44,7 +44,7 @@ int XenonCompilerCreate(XenonCompilerHandle* phOutCompiler, XenonCompilerInit in
 	XenonCompilerHandle hCompiler = XenonCompiler::Create(init);
 
 	// The message has to be printed *after* creating the VM state since the state is used in this function.
-	XenonReportMessage(&hCompiler->report, XENON_MESSAGE_TYPE_VERBOSE, "Initializing Xenon compiler ...");
+	XenonReportMessage(&hCompiler->report, XENON_MESSAGE_TYPE_VERBOSE, "Initializing Xenon compiler");
 
 	(*phOutCompiler) = hCompiler;
 
@@ -64,7 +64,7 @@ int XenonCompilerDispose(XenonCompilerHandle* phCompiler)
 
 	(*phCompiler) = XENON_COMPILER_HANDLE_NULL;
 
-	XenonReportMessage(&hCompiler->report, XENON_MESSAGE_TYPE_VERBOSE, "Releasing Xenon compiler ...");
+	XenonReportMessage(&hCompiler->report, XENON_MESSAGE_TYPE_VERBOSE, "Releasing Xenon compiler");
 	XenonCompiler::Dispose(hCompiler);
 
 	return XENON_SUCCESS;
@@ -132,13 +132,13 @@ int XenonProgramWriterAddDependency(XenonProgramWriterHandle hProgramWriter, con
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	if(hProgramWriter->dependencies.count(pProgramName) > 0)
+	if(hProgramWriter->dependencies.Contains(pProgramName))
 	{
 		XenonString::Dispose(pProgramName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
-	hProgramWriter->dependencies.insert(pProgramName);
+	hProgramWriter->dependencies.Insert(pProgramName, false);
 
 	return XENON_SUCCESS;
 }
@@ -188,14 +188,14 @@ int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const c
 	}
 
 	// Verify a value mapped to the input name doesn't already exist.
-	if(hProgramWriter->globals.count(pKey) > 0)
+	if(hProgramWriter->globals.Contains(pKey))
 	{
 		XenonString::Dispose(pKey);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
 	// Map the global variable name to the constant table index.
-	hProgramWriter->globals.emplace(pKey, constantIndex);
+	hProgramWriter->globals.Insert(pKey, constantIndex);
 
 	return XENON_SUCCESS;
 }
@@ -238,7 +238,7 @@ int XenonProgramWriterAddFunction(
 	function.numParameters = numParameters;
 	function.numReturnValues = numReturnValues;
 
-	hProgramWriter->functions.emplace(pSignature, function);
+	hProgramWriter->functions.Insert(pSignature, function);
 
 	return XENON_SUCCESS;
 }
@@ -270,22 +270,22 @@ int XenonProgramWriterAddLocalVariable(
 
 	// Find the desired function by checking what we currently have mapped.
 	auto kv = hProgramWriter->functions.find(pSignature);
-	if(kv != hProgramWriter->functions.end())
+	if(kv == hProgramWriter->functions.end())
 	{
 		XenonString::Dispose(pSignature);
 		return XENON_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
+	// The string object for the function signature is no longer needed.
+	XenonString::Dispose(pSignature);
+
 	XenonString* const pVariableName = XenonString::Create(variableName);
 	if(!pVariableName)
 	{
-		XenonString::Dispose(pSignature);
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonValueHandle hValueRef = XenonValueReference(hProgramWriter->constants[constantIndex]);
-
-	kv->second.locals.Insert(pVariableName, hValueRef);
+	kv->value.locals.Insert(pVariableName, constantIndex);
 
 	return XENON_SUCCESS;
 }
@@ -308,7 +308,13 @@ int XenonProgramWriterSerialize(
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	return XenonProgramWriter::Serialize(hProgramWriter, hCompiler, hSerializer, endianness);
+	// Write the program to the serializer.
+	if(!XenonProgramWriter::Serialize(hProgramWriter, hCompiler, hSerializer, endianness))
+	{
+		return XENON_ERROR_UNSPECIFIED_FAILURE;
+	}
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

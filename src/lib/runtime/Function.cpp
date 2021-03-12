@@ -22,13 +22,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonFunction::Create(
-	XenonProgramHandle hProgram,
-	XenonString* const pSignature,
-	const uint32_t bytecodeOffset,
-	const uint16_t numParameters,
-	const uint16_t numReturnValues
-)
+XenonFunctionHandle XenonFunction::Create(XenonProgramHandle hProgram)
 {
 	XenonFunction* const pOutput = new XenonFunction();
 	if(!pOutput)
@@ -37,10 +31,10 @@ XenonFunctionHandle XenonFunction::Create(
 	}
 
 	pOutput->hProgram = hProgram;
-	pOutput->pSignature = pSignature;
-	pOutput->offset = bytecodeOffset;
-	pOutput->numParameters = numParameters;
-	pOutput->numReturnValues = numReturnValues;
+	pOutput->pSignature = nullptr;
+	pOutput->offset = 0;
+	pOutput->numParameters = 0;
+	pOutput->numReturnValues = 0;
 
 	return pOutput;
 }
@@ -54,16 +48,6 @@ void XenonFunction::Dispose(XenonFunctionHandle hFunction)
 	XenonString::Dispose(hFunction->pSignature);
 
 	delete hFunction;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-XenonValueHandle XenonFunction::GetLocalVariable(XenonFunctionHandle hFunction, XenonString* const pName)
-{
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
-	assert(pName != nullptr);
-
-	return XenonValueReference(hFunction->locals.Get(pName, XENON_VALUE_HANDLE_NULL));
 }
 
 //----------------------------------------------------------------------------------------------------------------------

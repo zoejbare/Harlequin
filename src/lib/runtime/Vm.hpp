@@ -20,8 +20,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "Decoder.hpp"
 #include "Execution.hpp"
 #include "Function.hpp"
+#include "OpDecl.hpp"
 #include "Program.hpp"
 
 #include "../shared/Dependency.hpp"
@@ -34,9 +36,11 @@ struct XenonVm
 {
 	struct OpCode
 	{
-		typedef void (*OpCodeCallback)(XenonExecutionHandle);
+		typedef void (*ExecuteCallback)(XenonExecutionHandle);
+		typedef void (*DisassembleCallback)(XenonDisassemble&);
 
-		OpCodeCallback implFn;
+		ExecuteCallback execFn;
+		DisassembleCallback disasmFn;
 	};
 
 	typedef XenonArray<OpCode> OpCodeArray;
@@ -44,11 +48,14 @@ struct XenonVm
 	static XenonVmHandle Create(const XenonVmInit& init);
 	static void Dispose(XenonVmHandle hState);
 
+	static int SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, XenonString* const pVariableName);
+
 	static XenonProgram* GetProgram(XenonVmHandle hVm, XenonString* const pProgramName);
 	static XenonFunctionHandle GetFunction(XenonVmHandle hVm, XenonString* const pFunctionSignature);
-	static XenonValueHandle GetGlobalVariable(XenonVmHandle hVm, XenonString* const pGlobalName);
+	static XenonValueHandle GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName);
 
-	static void RunOpCode(XenonVmHandle hVm, XenonExecutionHandle hExec, const int opCode);
+	static void ExecuteOpCode(XenonVmHandle hVm, XenonExecutionHandle hExec, const int opCode);
+	static void DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, const int opCode);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

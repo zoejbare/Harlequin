@@ -19,6 +19,7 @@
 #include "Value.hpp"
 
 #include <assert.h>
+#include <inttypes.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -338,6 +339,88 @@ int XenonValue::Release(XenonValueHandle hValue)
 	}
 
 	return -1;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+std::string XenonValue::GetDebugString(XenonValueHandle hValue)
+{
+
+	if(hValue)
+	{
+		// Temporary buffer used by the numerical primitive types. We know the exact maximum size for the non-float types,
+		// but the float types are a little more nebulous. It's easier to just pre-allocate a buffer that we know will
+		// definitely be large enough for all of those types (as well as the object type) and call it a day.
+		char str[128];
+
+		switch(hValue->type)
+		{
+			case XENON_VALUE_TYPE_NULL:
+				// Break here to use the same string value you would get from a null value handle.
+				break;
+
+			case XENON_VALUE_TYPE_INT8:
+				snprintf(str, sizeof(str), "<int8: %" PRId8 ">", hValue->as.int8);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_INT16:
+				snprintf(str, sizeof(str), "<int16: %" PRId16 ">", hValue->as.int16);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_INT32:
+				snprintf(str, sizeof(str), "<int32: %" PRId32 ">", hValue->as.int32);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_INT64:
+				snprintf(str, sizeof(str), "<int64: %" PRId64 ">", hValue->as.int64);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_UINT8:
+				snprintf(str, sizeof(str), "<uint8: %" PRIu8 ">", hValue->as.uint8);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_UINT16:
+				snprintf(str, sizeof(str), "<uint16: %" PRIu16 ">", hValue->as.uint16);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_UINT32:
+				snprintf(str, sizeof(str), "<uint32: %" PRIu32 ">", hValue->as.uint32);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_UINT64:
+				snprintf(str, sizeof(str), "uint64: %" PRIu64 ">", hValue->as.uint64);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_FLOAT32:
+				snprintf(str, sizeof(str), "<float32: %f>", hValue->as.float32);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_FLOAT64:
+				snprintf(str, sizeof(str), "<float64: %f>", hValue->as.float64);
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_BOOL:
+				snprintf(str, sizeof(str), "<bool: %s>", hValue->as.boolean ? "true" : "false");
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_STRING:
+				// The input value is already a string, so we can use it as-is.
+				snprintf(str, sizeof(str), "<string: \"%.32s\"%s>", hValue->as.pString->data, (hValue->as.pString->length > 32) ? "..." : "");
+				return std::string(str);
+
+			case XENON_VALUE_TYPE_OBJECT:
+				// TODO: Implement support for script objects.
+				snprintf(str, sizeof(str), "<object: 0x%" PRIXPTR ">", reinterpret_cast<uintptr_t>(hValue));
+				return std::string(str);
+
+			default:
+				// This should never happen.
+				assert(false);
+				break;
+		}
+	}
+
+	return std::string("<null>");
 }
 
 //----------------------------------------------------------------------------------------------------------------------

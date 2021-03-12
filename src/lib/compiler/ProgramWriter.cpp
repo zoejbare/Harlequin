@@ -25,6 +25,7 @@
 #include "../shared/program-format/VersionHeader0001.hpp"
 
 #include <assert.h>
+#include <inttypes.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -102,7 +103,7 @@ static bool SerializeValue(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to write value type: error=\"%s\", type=%d",
+			"Failed to write value type: error=\"%s\", type=%" PRIu32,
 			errorString,
 			hValue->type
 		);
@@ -112,6 +113,9 @@ static bool SerializeValue(
 
 	switch(hValue->type)
 	{
+		case XENON_VALUE_TYPE_NULL:
+			break;
+
 		case XENON_VALUE_TYPE_INT8:
 			result = XenonSerializerWriteInt8(hSerializer, hValue->as.int8);
 			if(result != XENON_SUCCESS)
@@ -121,7 +125,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as int8: error=\"%s\", data=%d",
+					"Failed to write value data as int8: error=\"%s\", data=%" PRId8,
 					errorString,
 					hValue->as.int8
 				);
@@ -139,7 +143,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as int16: error=\"%s\", data=%d",
+					"Failed to write value data as int16: error=\"%s\", data=%" PRId16,
 					errorString,
 					hValue->as.int16
 				);
@@ -157,7 +161,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as int32: error=\"%s\", data=%d",
+					"Failed to write value data as int32: error=\"%s\", data=%" PRId32,
 					errorString,
 					hValue->as.int32
 				);
@@ -175,7 +179,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as int64: error=\"%s\", data=%d",
+					"Failed to write value data as int64: error=\"%s\", data=%" PRId64,
 					errorString,
 					hValue->as.int64
 				);
@@ -193,7 +197,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as uint8: error=\"%s\", data=%u",
+					"Failed to write value data as uint8: error=\"%s\", data=%" PRIu8,
 					errorString,
 					hValue->as.uint8
 				);
@@ -211,7 +215,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as uint16: error=\"%s\", data=%u",
+					"Failed to write value data as uint16: error=\"%s\", data=%" PRIu16,
 					errorString,
 					hValue->as.uint16
 				);
@@ -229,7 +233,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as uint32: error=\"%s\", data=%u",
+					"Failed to write value data as uint32: error=\"%s\", data=%" PRIu32,
 					errorString,
 					hValue->as.uint32
 				);
@@ -247,7 +251,7 @@ static bool SerializeValue(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to write value data as uint64: error=\"%s\", data=%u",
+					"Failed to write value data as uint64: error=\"%s\", data=%" PRIu64,
 					errorString,
 					hValue->as.uint64
 				);
@@ -292,7 +296,22 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_NULL:
+		case XENON_VALUE_TYPE_BOOL:
+			result = XenonSerializerWriteBool(hSerializer, hValue->as.boolean);
+			if(result != XENON_SUCCESS)
+			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to write value data as bool: error=\"%s\", data=%s",
+					errorString,
+					hValue->as.boolean ? "true" : "false"
+				);
+
+				return false;
+			}
 			break;
 
 		case XENON_VALUE_TYPE_STRING:
@@ -312,7 +331,7 @@ static bool SerializeValue(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Cannot serialize unknown value type: type=%d",
+				"Cannot serialize unknown value type: type=%" PRId32,
 				hValue->type
 			);
 			break;
@@ -337,15 +356,15 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 	assert(hProgramWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
 
 	// Dispose of all dependency names.
-	for(XenonString* const pDependencyName : hProgramWriter->dependencies)
+	for(auto& kv : hProgramWriter->dependencies)
 	{
-		XenonString::Dispose(pDependencyName);
+		XenonString::Dispose(kv.key);
 	}
 
 	// Dispose of all program globals.
 	for(auto& kv : hProgramWriter->globals)
 	{
-		XenonString::Dispose(kv.first);
+		XenonString::Dispose(kv.key);
 	}
 
 	// Dispose of all program constants.
@@ -354,15 +373,14 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 		XenonValueDispose(value);
 	}
 
-	// Dispose of all function signatures.
+	// Dispose of all functions.
 	for(auto& funcKv : hProgramWriter->functions)
 	{
-		XenonString::Dispose(funcKv.first);
+		XenonString::Dispose(funcKv.key);
 
-		for(auto& valueKv : funcKv.second.locals)
+		for(auto& valueKv : funcKv.value.locals)
 		{
 			XenonString::Dispose(valueKv.key);
-			XenonValueDispose(valueKv.value);
 		}
 	}
 
@@ -422,11 +440,11 @@ bool XenonProgramWriter::Serialize(
 
 	struct FunctionBinding
 	{
+		XenonFunction* pFunction;
 		XenonString* pSignature;
 
 		uint32_t offset;
-		uint16_t numParameters;
-		uint16_t numReturnValues;
+
 	};
 
 	std::deque<FunctionBinding> functionBindings;
@@ -441,13 +459,12 @@ bool XenonProgramWriter::Serialize(
 		{
 			FunctionBinding binding;
 
-			binding.pSignature = kv.first;
+			binding.pFunction = &kv.value;
+			binding.pSignature = kv.key;
 			binding.offset = uint32_t(bytecodeLength);
-			binding.numParameters = kv.second.numParameters;
-			binding.numReturnValues = kv.second.numReturnValues;
 
 			// Add the length of the function's bytecode, but also align the length to add padding between each function.
-			bytecodeLength += kv.second.bytecode.size();
+			bytecodeLength += binding.pFunction->bytecode.size();
 			bytecodeLength = getAlignedSize(bytecodeLength);
 
 			functionBindings.push_back(binding);
@@ -462,16 +479,17 @@ bool XenonProgramWriter::Serialize(
 		// Fill out the full program bytecode from each function's individual bytecode.
 		for(const FunctionBinding& binding : functionBindings)
 		{
-			const auto kv = hProgramWriter->functions.find(binding.pSignature);
-			assert(kv != hProgramWriter->functions.end());
-
-			memcpy(pProgramBytecode + binding.offset, kv->second.bytecode.data(), kv->second.bytecode.size());
+			memcpy(
+				pProgramBytecode + binding.offset,
+				binding.pFunction->bytecode.data(),
+				binding.pFunction->bytecode.size()
+			);
 		}
 	}
 
-	versionHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.size());
+	versionHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.Size());
 	versionHeader.constantTableLength = uint32_t(hProgramWriter->constants.size());
-	versionHeader.globalTableLength = uint32_t(hProgramWriter->globals.size());
+	versionHeader.globalTableLength = uint32_t(hProgramWriter->globals.Size());
 	versionHeader.functionTableLength = uint32_t(functionBindings.size());
 	versionHeader.bytecodeLength = uint32_t(bytecode.size());
 
@@ -553,11 +571,11 @@ bool XenonProgramWriter::Serialize(
 	versionHeader.dependencyTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the dependency table.
-	for(XenonString* const pDependencyName : hProgramWriter->dependencies)
+	for(auto& kv : hProgramWriter->dependencies)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", pDependencyName->data);
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", kv.key->data);
 
-		if(!SerializeString(hSerializer, hReport, pDependencyName->data, pDependencyName->length))
+		if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
 		{
 			return false;
 		}
@@ -568,7 +586,7 @@ bool XenonProgramWriter::Serialize(
 	// Write the constant table.
 	for(size_t index = 0; index < hProgramWriter->constants.size(); ++index)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing constant: index=%d", index);
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing constant: index=%" PRIuPTR, index);
 
 		if(!SerializeValue(hSerializer, hProgramWriter->constants[index], hReport))
 		{
@@ -578,23 +596,29 @@ bool XenonProgramWriter::Serialize(
 
 	versionHeader.globalTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
-	// Write the global table.
+	// Write the global variable table.
 	for(auto& kv : hProgramWriter->globals)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", kv.first->data);
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", kv.key->data);
 
 		// First, write the string key of the global.
-		if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
+		if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
 		{
 			return false;
 		}
 
-		// Get the constant this global is mapped to.
-		XenonValueHandle hValue = hProgramWriter->constants[kv.second];
-
-		// Next, write the value of the global.
-		if(!SerializeValue(hSerializer, hValue, hReport))
+		// Write the global's constant index.
+		result = XenonSerializerWriteUint32(hSerializer, kv.value);
+		if(result != XENON_SUCCESS)
 		{
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_ERROR,
+				"Failed to serialize global variable value index: name=\"%s\", index=%" PRIu32,
+				kv.key->data,
+				kv.value
+			);
+
 			return false;
 		}
 	}
@@ -625,36 +649,76 @@ bool XenonProgramWriter::Serialize(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function offset: signature=\"%s\", offset=%u",
+				"Failed to serialize function offset: signature=\"%s\", offset=%" PRIu32,
 				binding.pSignature->data,
 				binding.offset
 			);
 		}
 
 		// Write the function's parameter count into the program file.
-		result = XenonSerializerWriteUint16(hSerializer, binding.numParameters);
+		result = XenonSerializerWriteUint16(hSerializer, binding.pFunction->numParameters);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function parameter count: signature=\"%s\", count=%u",
+				"Failed to serialize function parameter count: signature=\"%s\", count=%" PRIu16,
 				binding.pSignature->data,
-				binding.numParameters
+				binding.pFunction->numParameters
 			);
 		}
 
 		// Write the function's return value count into the program file.
-		result = XenonSerializerWriteUint16(hSerializer, binding.numReturnValues);
+		result = XenonSerializerWriteUint16(hSerializer, binding.pFunction->numReturnValues);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function return value count: signature=\"%s\", count=%u",
+				"Failed to serialize function return value count: signature=\"%s\", count=%" PRIu16,
 				binding.pSignature->data,
-				binding.numReturnValues
+				binding.pFunction->numReturnValues
 			);
+		}
+
+		// Write the function's local variable count.
+		result = XenonSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.Size()));
+		if(result != XENON_SUCCESS)
+		{
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_ERROR,
+				"Failed to serialize function local variable count: signature=\"%s\", count=%" PRIu32,
+				binding.pSignature->data,
+				uint32_t(binding.pFunction->locals.Size())
+			);
+		}
+
+		// Write the function's local variable table.
+		for(auto& kv : binding.pFunction->locals)
+		{
+			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing local variable: name=\"%s\"", kv.key->data);
+
+			// First, write the string key of the local.
+			if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
+			{
+				return false;
+			}
+
+			// Write the local's constant index.
+			result = XenonSerializerWriteUint32(hSerializer, kv.value);
+			if(result != XENON_SUCCESS)
+			{
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to serialize local variable value index: name=\"%s\", index=%" PRIu32,
+					kv.key->data,
+					kv.value
+				);
+
+				return false;
+			}
 		}
 	}
 
@@ -690,7 +754,7 @@ bool XenonProgramWriter::Serialize(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to move serializer position to the start of the file version header: error=\"%s\", position=%zu",
+			"Failed to move serializer position to the start of the file version header: error=\"%s\", position=%" PRIuPTR,
 			errorString,
 			versionHeaderPosition
 		);
@@ -719,7 +783,7 @@ bool XenonProgramWriter::Serialize(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to move serializer position to the end of the file stream: error=\"%s\", position=%zu",
+			"Failed to move serializer position to the end of the file stream: error=\"%s\", position=%" PRIuPTR,
 			errorString,
 			fileEndPosition
 		);

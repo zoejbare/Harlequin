@@ -37,9 +37,6 @@ struct XenonExecution
 	static XenonExecutionHandle Create(XenonVmHandle hVm, XenonFunctionHandle hEntryPoint);
 	static void Dispose(XenonExecutionHandle hExec);
 
-	static uint8_t LoadBytecodeUint8(XenonExecutionHandle hExec);
-	static uint32_t LoadBytecodeUint32(XenonExecutionHandle hExec);
-
 	static int PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hFunction);
 	static int PopFrame(XenonExecutionHandle hExec);
 

@@ -29,6 +29,8 @@
 
 #include <SkipProbe/SkipProbe.hpp>
 
+#include <string>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 // TODO: Implement support for script objects.
@@ -45,6 +47,13 @@ struct XENON_BASE_API XenonValue
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> StringToHandleMap;
+
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		bool,
+		XenonString::StlHash,
+		XenonString::StlCompare
+	> StringToBoolMap;
 
 	static XenonValue NullValue;
 
@@ -66,6 +75,8 @@ struct XENON_BASE_API XenonValue
 
 	static int Acquire(XenonValueHandle hValue);
 	static int Release(XenonValueHandle hValue);
+
+	static std::string GetDebugString(XenonValueHandle hValue);
 
 	static XenonValue* prv_onCreate(int);
 	static void prv_onDestruct(void*);

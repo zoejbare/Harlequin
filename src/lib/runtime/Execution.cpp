@@ -103,44 +103,6 @@ void XenonExecution::Dispose(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint8_t XenonExecution::LoadBytecodeUint8(XenonExecutionHandle hExec)
-{
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hExec->hCurrentFrame != XENON_FRAME_HANDLE_NULL);
-
-	// Get the byte of the current position of the instruction pointer.
-	uint8_t output = *hExec->hCurrentFrame->ip;
-
-	// Move the instruction pointer.
-	hExec->hCurrentFrame->ip += sizeof(uint8_t);
-
-	// Return the data.
-	return output;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-uint32_t XenonExecution::LoadBytecodeUint32(XenonExecutionHandle hExec)
-{
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hExec->hCurrentFrame != XENON_FRAME_HANDLE_NULL);
-
-	// Cast the current position of the instruction pointer to a uint32 and get its value.
-	uint32_t output = *reinterpret_cast<uint32_t*>(hExec->hCurrentFrame->ip);
-
-	// Move the instruction pointer.
-	hExec->hCurrentFrame->ip += sizeof(uint32_t);
-
-	const bool sameEndian = (hExec->endianness == hExec->hCurrentFrame->hFunction->hProgram->endianness);
-
-	// Return the data, endian swapping it if needed.
-	return sameEndian
-		? output
-		: XenonEndianSwapUint32(output);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int XenonExecution::PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hFunction)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
@@ -192,7 +154,6 @@ int XenonExecution::PopFrame(XenonExecutionHandle hExec)
 void XenonExecution::SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, const size_t index)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hValue != XENON_VALUE_HANDLE_NULL);
 	assert(index < XENON_VM_IO_REGISTER_COUNT);
 
 	// Get a reference to the input value first, just in case it
@@ -243,14 +204,9 @@ void XenonExecution::RunStep(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
-	const uintptr_t start = uintptr_t(hExec->hCurrentFrame->hFunction->hProgram->code.pData);
-	const uintptr_t position = uintptr_t(hExec->hCurrentFrame->ip);
-	const uintptr_t offset = position - start;
+	const uint8_t opCode = XenonDecoder::LoadUint8(hExec->hCurrentFrame->decoder);
 
-	const uint8_t opCode = LoadBytecodeUint8(hExec);
-
-	printf("0x%" PRIXPTR ": ", offset);
-	XenonVm::RunOpCode(hExec->hVm, hExec, opCode);
+	XenonVm::ExecuteOpCode(hExec->hVm, hExec, opCode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

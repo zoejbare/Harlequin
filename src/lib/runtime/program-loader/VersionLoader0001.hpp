@@ -20,14 +20,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../XenonScript.h"
+#include "../Program.hpp"
 
 #include "../../shared/program-format/CommonHeader.hpp"
 #include "../../shared/program-format/VersionHeader0001.hpp"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XenonProgram;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -35,6 +31,7 @@ namespace XenonProgramVersion0001
 {
 	bool Load(
 		XenonProgram* const pOutProgram,
+		XenonProgram::LoadData& outLoadData,
 		XenonVmHandle hVm,
 		XenonSerializerHandle hSerializer
 	);

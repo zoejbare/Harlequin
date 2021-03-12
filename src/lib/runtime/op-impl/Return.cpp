@@ -16,8 +16,10 @@
 // IN THE SOFTWARE.
 //
 
-#include "../Execution.hpp"
 #include "../OpDecl.hpp"
+
+#include "../Decoder.hpp"
+#include "../Execution.hpp"
 
 #include <stdio.h>
 
@@ -33,10 +35,8 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_Return(XenonExecutionHandle hExec)
+void OpCodeExec_Return(XenonExecutionHandle hExec)
 {
-	printf("RETURN\n");
-
 	const int result = XenonExecution::PopFrame(hExec);
 
 	if(result != XENON_SUCCESS)
@@ -49,6 +49,13 @@ void OpCodeImpl_Return(XenonExecutionHandle hExec)
 		// The entry point function was popped from the frame stack meaning execution is complete.
 		hExec->finished = true;
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_Return(XenonDisassemble& disasm)
+{
+	disasm.onDisasmFn(disasm.pUserData, "RETURN", disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus

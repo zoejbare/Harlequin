@@ -38,16 +38,15 @@ struct XenonFunction
 		XenonString::StlCompare
 	> StringToHandleMap;
 
-	static XenonFunctionHandle Create(
-		XenonProgramHandle hProgram,
-		XenonString* const pSignature,
-		const uint32_t bytecodeOffset,
-		const uint16_t numParameters,
-		const uint16_t numReturnValues
-	);
-	static void Dispose(XenonFunctionHandle hFunction);
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		bool,
+		XenonString::StlHash,
+		XenonString::StlCompare
+	> StringToBoolMap;
 
-	static XenonValueHandle GetLocalVariable(XenonFunctionHandle hFunction, XenonString* const pName);
+	static XenonFunctionHandle Create(XenonProgramHandle hProgram);
+	static void Dispose(XenonFunctionHandle hFunction);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

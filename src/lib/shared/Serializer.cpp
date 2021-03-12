@@ -129,6 +129,9 @@ int XenonSerializer::LoadFile(XenonSerializerHandle hSerializer, const char* con
 		const size_t itemsRead = fread(hSerializer->stream.pData, fileSize, 1, pFile);
 		assert(itemsRead == 1);
 
+		// Avoid compiler warning in release builds.
+		(void)itemsRead;
+
 		// Since we explicitly loaded new contents into the stream, we set the size of the stream
 		// and reset the serializer position based on the serializer mode.
 		hSerializer->stream.count = fileSize;
@@ -184,6 +187,9 @@ int XenonSerializer::SaveFile(XenonSerializerHandle hSerializer, const char* con
 		// Write the stream data into the file.
 		const size_t itemsWritten = fwrite(hSerializer->stream.pData, streamSize, 1, pFile);
 		assert(itemsWritten == 1);
+
+		// Avoid compiler warning in release builds.
+		(void)itemsWritten;
 	}
 
 	fclose(pFile);

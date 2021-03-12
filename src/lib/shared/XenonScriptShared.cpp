@@ -86,9 +86,9 @@ const char* XenonGetErrorCodeString(int errorCode)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* XenonGetEndianModeString(int endianMode)
+const char* XenonGetEndianModeString(int endianness)
 {
-	switch(endianMode)
+	switch(endianness)
 	{
 		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_MODE_UNKNOWN);
 		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_MODE_NATIVE);

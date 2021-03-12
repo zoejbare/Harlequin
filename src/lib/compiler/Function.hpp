@@ -30,12 +30,21 @@
 
 struct XenonFunction
 {
-	typedef std::unordered_map<
+	typedef SkipProbe::HashMap<
 		XenonString*,
-		XenonFunction
+		XenonFunction,
+		XenonString::StlHash,
+		XenonString::StlCompare
 	> StringToFunctionMap;
 
-	XenonValue::StringToHandleMap locals;
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		uint32_t,
+		XenonString::StlHash,
+		XenonString::StlCompare
+	> LocalVariableMap;
+
+	LocalVariableMap locals;
 
 	std::vector<uint8_t> bytecode;
 

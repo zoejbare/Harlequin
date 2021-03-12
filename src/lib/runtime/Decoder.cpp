@@ -16,45 +16,56 @@
 // IN THE SOFTWARE.
 //
 
-#include "../../Execution.hpp"
-#include "../../Frame.hpp"
-#include "../../OpDecl.hpp"
+#include "Decoder.hpp"
+#include "Program.hpp"
 
-#include <inttypes.h>
-#include <stdio.h>
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
-//
-// Get a value in an I/O register, storing it to a general-purpose register.
-// The I/O register will then be cleared to avoid leaking value data.
-//
-// 0x: GET_PARAM r#, p#
-//
-//   r# = General-purpose register index
-//   p# = I/O register index
-//
-//----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeImpl_GetParam(XenonExecutionHandle hExec)
+XenonDecoder XenonDecoder::Construct(XenonProgramHandle hProgram, uint32_t offset)
 {
-	const uint32_t gpRegIndex = XenonExecution::LoadBytecodeUint32(hExec);
-	const uint32_t ioRegIndex = XenonExecution::LoadBytecodeUint32(hExec);
+	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
 
-	printf("GET_PARAM r%" PRIu32 ", p%" PRIu32 "\n", gpRegIndex, ioRegIndex);
+	XenonDecoder output;
 
-	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, ioRegIndex);
+	output.ip = hProgram->code.pData + offset;
+	output.sameEndian = (hProgram->endianness == XenonGetPlatformEndianMode());
 
-	XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
-	XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
-	XenonValueDispose(hValue);
+	return output;
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+uint8_t XenonDecoder::LoadUint8(XenonDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	// Get the byte of the current position of the instruction pointer.
+	const uint8_t output = *decoder.ip;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(uint8_t);
+
+	return output;
 }
-#endif
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonDecoder::LoadUint32(XenonDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	// Get the byte of the current position of the instruction pointer.
+	const uint32_t output = *reinterpret_cast<uint32_t*>(decoder.ip);
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(uint32_t);
+
+	// Return the data, endian swapping it if needed.
+	return decoder.sameEndian
+		? output
+		: XenonEndianSwapUint32(output);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

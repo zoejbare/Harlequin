@@ -16,8 +16,10 @@
 // IN THE SOFTWARE.
 //
 
-#include "../Execution.hpp"
 #include "../OpDecl.hpp"
+
+#include "../Decoder.hpp"
+#include "../Execution.hpp"
 
 #include <stdio.h>
 
@@ -33,12 +35,17 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_Yield(XenonExecutionHandle hExec)
+void OpCodeExec_Yield(XenonExecutionHandle hExec)
 {
-	printf("YIELD\n");
-
 	// Set the trigger that says we're yielding execution.
 	hExec->yield = true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_Yield(XenonDisassemble& disasm)
+{
+	disasm.onDisasmFn(disasm.pUserData, "YIELD", disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus

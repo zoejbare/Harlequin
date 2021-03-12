@@ -18,7 +18,12 @@
 
 #include "XenonScript.h"
 
+#if defined(XENON_PLATFORM_WINDOWS)
+	#include <crtdbg.h>
+#endif
+
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 
 #include <deque>
@@ -111,14 +116,73 @@ int main(int argc, char* argv[])
 	}
 
 	// Load the test program.
-	if(XenonVmLoadProgramFromFile(hVm, "test.xc") == XENON_SUCCESS)
+	if(XenonVmLoadProgramFromFile(hVm, "test", "test.xc") == XENON_SUCCESS)
 	{
-		XenonFunctionHandle hFunc = XenonVmGetFunction(hVm, "void main()");
+		auto iterateProgram = [](void* const pUserData, XenonProgramHandle hProgram)
+		{
+			auto iterateFunction = [](void* const pUserData, const char* const signature)
+			{
+				auto onDisasm = [](void*, const char* const asmLine, const uintptr_t offset)
+				{
+					printf("\t\t0x%08" PRIXPTR ": %s\n", offset, asmLine);
+				};
+
+				XenonVmHandle hVm = reinterpret_cast<XenonVmHandle>(pUserData);
+				XenonFunctionHandle hFunction = XenonVmGetFunction(hVm, signature);
+
+				assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
+
+				printf("\t%s\n", signature);
+
+				XenonFunctionDisassemble(hFunction, onDisasm, nullptr);
+
+				printf("\n");
+			};
+
+			const char* const programName = XenonProgramGetName(hProgram);
+
+			printf("[Program: \"%s\"]\n", programName);
+
+			// Iterate each function within in the program.
+			XenonProgramIterateFunctions(hProgram, iterateFunction, pUserData);
+		};
+
+		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
+
+		// Iterate all the programs to disassemble them.
+		XenonVmIteratePrograms(hVm, iterateProgram, hVm);
+
+		const char* const entryPoint = "void Program.Main()";
+
+		XenonFunctionHandle hFunc = XenonVmGetFunction(hVm, entryPoint);
 		XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
 
-		XenonExecutionCreate(&hExec, hVm, hFunc);
-		XenonExecutionRun(hExec, XENON_RUN_TO_COMPLETION);
-		XenonExecutionDispose(&hExec);
+		if(XenonExecutionCreate(&hExec, hVm, hFunc) == XENON_SUCCESS)
+		{
+			char msg[256];
+			snprintf(msg, sizeof(msg), "Executing script function: \"%s\"", entryPoint);
+			OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, msg);
+
+			// Run the script until it has completed.
+			for(;;)
+			{
+				XenonExecutionRun(hExec, XENON_RUN_LOOP);
+
+				if(XenonExecutionHasUnhandledExceptionOccurred(hExec))
+				{
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
+					break;
+				}
+
+				if(XenonExecutionHasFinished(hExec))
+				{
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Finished executing script");
+					break;
+				}
+			}
+
+			XenonExecutionDispose(&hExec);
+		}
 	}
 
 	// Dispose of the VM context.

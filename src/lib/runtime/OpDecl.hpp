@@ -23,8 +23,27 @@
 #include "../XenonScript.h"
 #include "../XenonOpCode.h"
 
+#include "Decoder.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
+struct XenonDisassemble
+{
+	XenonProgramHandle hProgram;
+	XenonCallbackOpDisasm onDisasmFn;
+
+	void* pUserData;
+
+	uintptr_t opcodeOffset;
+
+	XenonDecoder decoder;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
 #define XENON_DECLARE_OP_CODE_FN(op_name) \
-	void OpCodeImpl_ ## op_name(XenonExecutionHandle)
+	void OpCodeExec_ ## op_name(XenonExecutionHandle); \
+	void OpCodeDisasm_ ## op_name(XenonDisassemble&)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -39,19 +58,17 @@ XENON_DECLARE_OP_CODE_FN(Return);
 XENON_DECLARE_OP_CODE_FN(Yield);
 XENON_DECLARE_OP_CODE_FN(Call);
 
-XENON_DECLARE_OP_CODE_FN(DebugGpReg);
-XENON_DECLARE_OP_CODE_FN(DebugIoReg);
-XENON_DECLARE_OP_CODE_FN(DebugStack);
-
 XENON_DECLARE_OP_CODE_FN(LoadConstant);
 XENON_DECLARE_OP_CODE_FN(LoadGlobal);
 XENON_DECLARE_OP_CODE_FN(LoadLocal);
+XENON_DECLARE_OP_CODE_FN(LoadParam);
+
+XENON_DECLARE_OP_CODE_FN(StoreGlobal);
+XENON_DECLARE_OP_CODE_FN(StoreLocal);
+XENON_DECLARE_OP_CODE_FN(StoreParam);
 
 XENON_DECLARE_OP_CODE_FN(Push);
 XENON_DECLARE_OP_CODE_FN(Pop);
-
-XENON_DECLARE_OP_CODE_FN(GetParam);
-XENON_DECLARE_OP_CODE_FN(SetParam);
 
 //----------------------------------------------------------------------------------------------------------------------
 

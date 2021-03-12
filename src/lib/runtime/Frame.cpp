@@ -42,8 +42,15 @@ XenonFrameHandle XenonFrame::Create(XenonFunctionHandle hFunction)
 		pOutput->registers.pData[i] = XENON_VALUE_HANDLE_NULL;
 	}
 
+	// Build the local table for the new frame. This will intentionally copy each value from the function's local table
+	// so any changes made the variables in the frame will not affect the prototypes in the function.
+	for(auto& kv : hFunction->locals)
+	{
+		pOutput->locals.Insert(kv.key, XenonValueCopy(kv.value));
+	}
+
 	pOutput->hFunction = hFunction;
-	pOutput->ip = hFunction->hProgram->code.pData + hFunction->offset;
+	pOutput->decoder = XenonDecoder::Construct(hFunction->hProgram, hFunction->offset);
 
 	return pOutput;
 }
@@ -60,10 +67,16 @@ void XenonFrame::Dispose(XenonFrameHandle hFrame)
 		XenonValueDispose(hFrame->stack.memory.pData[i]);
 	}
 
-	// Dispose of the values in the registers to avoid leaking memory.
+	// Dispose of the values in the registers.
 	for(size_t i = 0; i < hFrame->registers.count; ++i)
 	{
 		XenonValueDispose(hFrame->registers.pData[i]);
+	}
+
+	// Dispose of the values used to back the locals.
+	for(auto& kv : hFrame->locals)
+	{
+		XenonValueDispose(kv.value);
 	}
 
 	XenonValue::HandleStack::Dispose(hFrame->stack);
@@ -132,7 +145,7 @@ int XenonFrame::PeekValue(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonFrame::SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, const uint32_t index)
+int XenonFrame::SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, const uint32_t index)
 {
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
@@ -146,6 +159,32 @@ void XenonFrame::SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue,
 	XenonValueDispose(hFrame->registers.pData[index]);
 
 	hFrame->registers.pData[index] = hValueRef;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrame::SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, XenonString* const pVariableName)
+{
+	assert(hFrame != XENON_FRAME_HANDLE_NULL);
+	assert(hValue != XENON_VALUE_HANDLE_NULL);
+	assert(pVariableName != nullptr);
+
+	auto kv = hFrame->locals.find(pVariableName);
+	if(kv == hFrame->locals.end())
+	{
+		return XENON_ERROR_KEY_DOES_NOT_EXIST;
+	}
+
+	XenonValueHandle hValueRef = XenonValueReference(hValue);
+	XenonValueHandle hOldValue = kv->value;
+
+	XenonValueDispose(hOldValue);
+
+	kv->value = hValueRef;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -156,6 +195,16 @@ XenonValueHandle XenonFrame::GetGpRegister(XenonFrameHandle hFrame, const uint32
 	assert(index < XENON_VM_GP_REGISTER_COUNT);
 
 	return XenonValueReference(hFrame->registers.pData[index]);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonFrame::GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName)
+{
+	assert(hFrame != XENON_FRAME_HANDLE_NULL);
+	assert(pVariableName != nullptr);
+
+	return XenonValueReference(hFrame->locals.Get(pVariableName, XENON_VALUE_HANDLE_NULL));
 }
 
 //----------------------------------------------------------------------------------------------------------------------

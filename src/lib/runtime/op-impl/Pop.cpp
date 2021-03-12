@@ -16,8 +16,10 @@
 // IN THE SOFTWARE.
 //
 
-#include "../Execution.hpp"
 #include "../OpDecl.hpp"
+
+#include "../Decoder.hpp"
+#include "../Execution.hpp"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -36,11 +38,9 @@
 extern "C" {
 #endif
 
-void OpCodeImpl_Pop(XenonExecutionHandle hExec)
+void OpCodeExec_Pop(XenonExecutionHandle hExec)
 {
-	const uint32_t registerIndex = XenonExecution::LoadBytecodeUint32(hExec);
-
-	printf("POP r%" PRIu32 "\n", registerIndex);
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
 
@@ -54,6 +54,17 @@ void OpCodeImpl_Pop(XenonExecutionHandle hExec)
 
 	XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
 	XenonValueDispose(hValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_Pop(XenonDisassemble& disasm)
+{
+	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
+
+	char str[16];
+	snprintf(str, sizeof(str), "POP r%" PRIu32, registerIndex);
+	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
 #ifdef __cplusplus
