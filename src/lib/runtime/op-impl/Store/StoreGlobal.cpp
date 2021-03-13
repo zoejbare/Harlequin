@@ -83,7 +83,7 @@ void OpCodeDisasm_StoreGlobal(XenonDisassemble& disasm)
 	XenonValueDispose(hNameValue);
 
 	char str[256];
-	snprintf(str, sizeof(str), "STORE_GLOBAL c%" PRIu32 " %s, c%" PRIu32, constantIndex, valueData.c_str(), registerIndex);
+	snprintf(str, sizeof(str), "STORE_GLOBAL c%" PRIu32 " %s, r%" PRIu32, constantIndex, valueData.c_str(), registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
