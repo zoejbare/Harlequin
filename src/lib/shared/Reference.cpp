@@ -41,14 +41,14 @@ XenonReference XenonReference::Initialize(XenonReferenceDestructCallback onDestr
 
 int32_t XenonReference::Acquire(XenonReference* const pRef)
 {
-	return XenonAtomic::AddFetch(&pRef->count, 1) + 1;
+	return XenonAtomic::FetchAdd(&pRef->count, 1) + 1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 int32_t XenonReference::Release(XenonReference* const pRef)
 {
-	const int32_t currentValue = XenonAtomic::AddFetch(&pRef->count, -1) - 1;
+	const int32_t currentValue = XenonAtomic::FetchAdd(&pRef->count, -1) - 1;
 
 	if(currentValue == 0)
 	{

@@ -28,22 +28,22 @@
 
 struct XenonAtomic
 {
-	static __forceinline int8_t AddFetch(volatile int8_t* const ptr, const int8_t value)
+	static __forceinline int8_t FetchAdd(volatile int8_t* const ptr, const int8_t value)
 	{
 		return _InterlockedExchangeAdd8((volatile char*) ptr, char(value));
 	}
 
-	static __forceinline int16_t AddFetch(volatile int16_t* const ptr, const int16_t value)
+	static __forceinline int16_t FetchAdd(volatile int16_t* const ptr, const int16_t value)
 	{
 		return _InterlockedExchangeAdd16(ptr, value);
 	}
 
-	static __forceinline int32_t AddFetch(volatile int32_t* const ptr, const int32_t value)
+	static __forceinline int32_t FetchAdd(volatile int32_t* const ptr, const int32_t value)
 	{
 		return _InterlockedExchangeAdd((volatile LONG*) ptr, LONG(value));
 	}
 
-	static __forceinline int64_t AddFetch(volatile int64_t* const ptr, const int64_t value)
+	static __forceinline int64_t FetchAdd(volatile int64_t* const ptr, const int64_t value)
 	{
 #if defined(XENON_CPU_WIDTH_32_BIT)
 		int64_t original;

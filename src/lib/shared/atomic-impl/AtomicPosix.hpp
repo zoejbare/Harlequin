@@ -26,24 +26,24 @@
 
 struct XenonAtomic
 {
-	static inline __attribute__((always_inline)) int8_t AddFetch(volatile int8_t* const ptr, const int8_t value)
+	static inline __attribute__((always_inline)) int8_t FetchAdd(volatile int8_t* const ptr, const int8_t value)
 	{
-		return __atomic_add_fetch(ptr, value, __ATOMIC_SEQ_CST);
+		return __atomic_fetch_add(ptr, value, __ATOMIC_SEQ_CST);
 	}
 
-	static inline __attribute__((always_inline)) int16_t AddFetch(volatile int16_t* const ptr, const int16_t value)
+	static inline __attribute__((always_inline)) int16_t FetchAdd(volatile int16_t* const ptr, const int16_t value)
 	{
-		return __atomic_add_fetch(ptr, value, __ATOMIC_SEQ_CST);
+		return __atomic_fetch_add(ptr, value, __ATOMIC_SEQ_CST);
 	}
 
-	static inline __attribute__((always_inline)) int32_t AddFetch(volatile int32_t* const ptr, const int32_t value)
+	static inline __attribute__((always_inline)) int32_t FetchAdd(volatile int32_t* const ptr, const int32_t value)
 	{
-		return __atomic_add_fetch(ptr, value, __ATOMIC_SEQ_CST);
+		return __atomic_fetch_add(ptr, value, __ATOMIC_SEQ_CST);
 	}
 
-	static inline __attribute__((always_inline)) int64_t AddFetch(volatile int64_t* const ptr, const int64_t value)
+	static inline __attribute__((always_inline)) int64_t FetchAdd(volatile int64_t* const ptr, const int64_t value)
 	{
-		return __atomic_add_fetch(ptr, value, __ATOMIC_SEQ_CST);
+		return __atomic_fetch_add(ptr, value, __ATOMIC_SEQ_CST);
 	}
 };
 
