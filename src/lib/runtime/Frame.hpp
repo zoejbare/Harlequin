@@ -44,8 +44,8 @@ struct XenonFrame
 	static int SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, const uint32_t index);
 	static int SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, XenonString* const pVariableName);
 
-	static XenonValueHandle GetGpRegister(XenonFrameHandle hFrame, const uint32_t index);
-	static XenonValueHandle GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName);
+	static XenonValueHandle GetGpRegister(XenonFrameHandle hFrame, const uint32_t index, int* const pOutResult);
+	static XenonValueHandle GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName, int* const pOutResult);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

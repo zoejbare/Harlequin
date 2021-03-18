@@ -435,13 +435,20 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonProgram::GetConstant(XenonProgramHandle hProgram, const uint32_t index)
+XenonValueHandle XenonProgram::GetConstant(XenonProgramHandle hProgram, const uint32_t index, int* const pOutResult)
 {
-	assert(hProgram != nullptr);
+	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
+	assert(pOutResult != nullptr);
 
-	return (index < hProgram->constants.count)
-		? XenonValueReference(hProgram->constants.pData[index])
-		: XENON_VALUE_HANDLE_NULL;
+	if(index >= hProgram->constants.count)
+	{
+		(*pOutResult) = XENON_ERROR_INDEX_OUT_OF_RANGE;
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
+
+	return XenonValueReference(hProgram->constants.pData[index]);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

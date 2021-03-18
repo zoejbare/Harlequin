@@ -52,7 +52,7 @@ struct XenonProgram
 	);
 	static void Dispose(XenonProgramHandle hProgram);
 
-	static XenonValueHandle GetConstant(XenonProgramHandle hProgram, const uint32_t index);
+	static XenonValueHandle GetConstant(XenonProgramHandle hProgram, const uint32_t index, int* const pOutResult);
 
 	static void prv_copyDataToVm(const LoadData& loadData, XenonVmHandle);
 	static void prv_freeLoadData(LoadData& loadData);

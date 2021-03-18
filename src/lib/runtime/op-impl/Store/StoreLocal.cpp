@@ -44,18 +44,27 @@ extern "C" {
 
 void OpCodeExec_StoreLocal(XenonExecutionHandle hExec)
 {
+	int result;
+
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex);
+	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
 	if(XenonValueIsString(hNameValue))
 	{
-		XenonValueHandle hRegisterValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex);
-
-		const int result = XenonFrame::SetLocalVariable(hExec->hCurrentFrame, hRegisterValue, hNameValue->as.pString);
-		if(result != XENON_SUCCESS)
+		XenonValueHandle hRegisterValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
+		if(result == XENON_SUCCESS)
 		{
-			// TODO: Raise script exception.
+			result = XenonFrame::SetLocalVariable(hExec->hCurrentFrame, hRegisterValue, hNameValue->as.pString);
+			if(result != XENON_SUCCESS)
+			{
+				// TODO: Raise script exception.
+				hExec->exception = true;
+			}
+		}
+		else
+		{
+			// TODO: Raise script exception
 			hExec->exception = true;
 		}
 
@@ -69,10 +78,12 @@ void OpCodeExec_StoreLocal(XenonExecutionHandle hExec)
 
 void OpCodeDisasm_StoreLocal(XenonDisassemble& disasm)
 {
+	int result;
+
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex);
+	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hNameValue);
 
 	XenonValueDispose(hNameValue);

@@ -40,14 +40,9 @@ struct XenonExecution
 	static int PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hFunction);
 	static int PopFrame(XenonExecutionHandle hExec);
 
-	static void SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, const size_t index);
-	static XenonValueHandle GetIoRegister(XenonExecutionHandle hExec, const size_t index);
+	static int SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, const size_t index);
 
-	static int ResolveFrameStack(
-		XenonExecutionHandle hExec,
-		XenonCallbackResolveFrame onResolveFrameFn,
-		void* const pUserData
-	);
+	static XenonValueHandle GetIoRegister(XenonExecutionHandle hExec, const size_t index, int* const pOutResult);
 
 	static void RunStep(XenonExecutionHandle hExec);
 

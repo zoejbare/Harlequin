@@ -40,14 +40,21 @@ extern "C" {
 
 void OpCodeExec_Push(XenonExecutionHandle hExec)
 {
+	int result;
+
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex);
-	const int result = XenonFrame::PushValue(hExec->hCurrentFrame, hValue);
-
-	XenonValueDispose(hValue);
-
-	if(result != XENON_SUCCESS)
+	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
+	if(result == XENON_SUCCESS)
+	{
+		result = XenonFrame::PushValue(hExec->hCurrentFrame, hValue);
+		if(result != XENON_SUCCESS)
+		{
+			// TODO: Raise script exception
+			hExec->exception = true;
+		}
+	}
+	else
 	{
 		// TODO: Raise script exception
 		hExec->exception = true;

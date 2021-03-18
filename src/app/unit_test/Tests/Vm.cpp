@@ -95,7 +95,9 @@ TEST(TestVm, ReportMessages)
 	const int createContextResult = XenonVmCreate(&hVm, init);
 	ASSERT_EQ(createContextResult, XENON_SUCCESS);
 
-	XenonReportHandle hReport = XenonVmGetReportHandle(hVm);
+	XenonReportHandle hReport = XENON_REPORT_HANDLE_NULL;
+	const int getReportHandleResult = XenonVmGetReportHandle(hVm, &hReport);
+	ASSERT_EQ(getReportHandleResult, XENON_SUCCESS);
 	EXPECT_NE(hReport, XENON_REPORT_HANDLE_NULL);
 
 	// Test writing a 'verbose' string.

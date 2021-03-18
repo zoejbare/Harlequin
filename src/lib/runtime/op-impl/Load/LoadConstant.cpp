@@ -43,12 +43,27 @@ extern "C" {
 
 void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 {
+	int result;
+
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex);
+	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
+	if(result == XENON_SUCCESS)
+	{
+		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+		if(result != XENON_SUCCESS)
+		{
+			// TODO: Raise script exception
+			hExec->exception = true;
+		}
+	}
+	else
+	{
+		// TODO: Raise script exception
+		hExec->exception = true;
+	}
 
-	XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
 	XenonValueDispose(hValue);
 }
 
@@ -56,10 +71,12 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 
 void OpCodeDisasm_LoadConstant(XenonDisassemble& disasm)
 {
+	int result;
+
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex);
+	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hValue);
 
 	XenonValueDispose(hValue);

@@ -50,9 +50,9 @@ struct XenonVm
 
 	static int SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, XenonString* const pVariableName);
 
-	static XenonProgram* GetProgram(XenonVmHandle hVm, XenonString* const pProgramName);
-	static XenonFunctionHandle GetFunction(XenonVmHandle hVm, XenonString* const pFunctionSignature);
-	static XenonValueHandle GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName);
+	static XenonProgramHandle GetProgram(XenonVmHandle hVm, XenonString* const pProgramName, int* const pOutResult);
+	static XenonFunctionHandle GetFunction(XenonVmHandle hVm, XenonString* const pFunctionSignature, int* const pOutResult);
+	static XenonValueHandle GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName, int* const pOutResult);
 
 	static void ExecuteOpCode(XenonVmHandle hVm, XenonExecutionHandle hExec, const int opCode);
 	static void DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, const int opCode);

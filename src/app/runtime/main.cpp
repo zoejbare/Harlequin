@@ -118,9 +118,9 @@ int main(int argc, char* argv[])
 	// Load the test program.
 	if(XenonVmLoadProgramFromFile(hVm, "test", "test.xc") == XENON_SUCCESS)
 	{
-		auto iterateProgram = [](void* const pUserData, XenonProgramHandle hProgram)
+		auto iterateProgram = [](void* const pUserData, XenonProgramHandle hProgram) -> bool
 		{
-			auto iterateFunction = [](void* const pUserData, const char* const signature)
+			auto iterateFunction = [](void* const pUserData, const char* const signature) -> bool
 			{
 				auto onDisasm = [](void*, const char* const asmLine, const uintptr_t offset)
 				{
@@ -128,34 +128,41 @@ int main(int argc, char* argv[])
 				};
 
 				XenonVmHandle hVm = reinterpret_cast<XenonVmHandle>(pUserData);
-				XenonFunctionHandle hFunction = XenonVmGetFunction(hVm, signature);
+				XenonFunctionHandle hFunction = XENON_FUNCTION_HANDLE_NULL;
+
+				XenonVmGetFunction(hVm, &hFunction, signature);
 
 				assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
-
 				printf("\t%s\n", signature);
 
 				XenonFunctionDisassemble(hFunction, onDisasm, nullptr);
 
 				printf("\n");
+				return true;
 			};
 
-			const char* const programName = XenonProgramGetName(hProgram);
+			const char* programName = nullptr;
+			XenonProgramGetName(hProgram, &programName);
 
 			printf("[Program: \"%s\"]\n", programName);
 
 			// Iterate each function within in the program.
-			XenonProgramIterateFunctions(hProgram, iterateFunction, pUserData);
+			XenonProgramListFunctions(hProgram, iterateFunction, pUserData);
+
+			return true;
 		};
 
 		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
 
 		// Iterate all the programs to disassemble them.
-		XenonVmIteratePrograms(hVm, iterateProgram, hVm);
+		XenonVmListPrograms(hVm, iterateProgram, hVm);
 
 		const char* const entryPoint = "void Program.Main()";
 
-		XenonFunctionHandle hFunc = XenonVmGetFunction(hVm, entryPoint);
+		XenonFunctionHandle hFunc = XENON_FUNCTION_HANDLE_NULL;
 		XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
+
+		XenonVmGetFunction(hVm, &hFunc, entryPoint);
 
 		if(XenonExecutionCreate(&hExec, hVm, hFunc) == XENON_SUCCESS)
 		{
@@ -163,18 +170,43 @@ int main(int argc, char* argv[])
 			snprintf(msg, sizeof(msg), "Executing script function: \"%s\"", entryPoint);
 			OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, msg);
 
+			int result;
+			bool status;
+
 			// Run the script until it has completed.
 			for(;;)
 			{
-				XenonExecutionRun(hExec, XENON_RUN_LOOP);
+				result = XenonExecutionRun(hExec, XENON_RUN_LOOP);
+				if(result != XENON_SUCCESS)
+				{
+					snprintf(msg, sizeof(msg), "Error occurred while executing script: \"%s\"", XenonGetErrorCodeString(result));
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					break;
+				}
 
-				if(XenonExecutionHasUnhandledExceptionOccurred(hExec))
+				// Check if there was an unhandled exception raised.
+				result = XenonExecutionGetStatus(hExec, &status, XENON_EXEC_STATUS_EXCEPTION);
+				if(result != XENON_SUCCESS)
+				{
+					snprintf(msg, sizeof(msg), "Error occurred while retrieving exception status: \"%s\"", XenonGetErrorCodeString(result));
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					break;
+				}
+				if(status)
 				{
 					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
 					break;
 				}
 
-				if(XenonExecutionHasFinished(hExec))
+				// Check if the script has finished running.
+				result = XenonExecutionGetStatus(hExec, &status, XENON_EXEC_STATUS_COMPLETE);
+				if(result != XENON_SUCCESS)
+				{
+					snprintf(msg, sizeof(msg), "Error occurred while retrieving completion status: \"%s\"", XenonGetErrorCodeString(result));
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					break;
+				}
+				if(status)
 				{
 					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Finished executing script");
 					break;

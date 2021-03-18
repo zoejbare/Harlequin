@@ -43,13 +43,36 @@ extern "C" {
 
 void OpCodeExec_LoadParam(XenonExecutionHandle hExec)
 {
+	int result;
+
 	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, ioRegIndex);
+	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, ioRegIndex, &result);
+	if(result == XENON_SUCCESS)
+	{
+		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
+		if(result == XENON_SUCCESS)
+		{
+			result = XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
+			if(result != XENON_SUCCESS)
+			{
+				// TODO: Raise script exception
+				hExec->exception = true;
+			}
+		}
+		else
+		{
+			// TODO: Raise script exception
+			hExec->exception = true;
+		}
+	}
+	else
+	{
+		// TODO: Raise script exception
+		hExec->exception = true;
+	}
 
-	XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
-	XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
 	XenonValueDispose(hValue);
 }
 

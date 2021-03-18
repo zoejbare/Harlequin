@@ -78,47 +78,60 @@ int XenonVmDispose(XenonVmHandle* phVm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonReportHandle XenonVmGetReportHandle(XenonVmHandle hVm)
+int XenonVmGetReportHandle(XenonVmHandle hVm, XenonReportHandle* phOutReport)
 {
-	return hVm
-		? &hVm->report
-		: XENON_REPORT_HANDLE_NULL;
+	if(!hVm || !phOutReport || *phOutReport)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*phOutReport) = &hVm->report;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonProgramHandle XenonVmGetProgram(XenonVmHandle hVm, const char* programName)
+int XenonVmGetProgram(XenonVmHandle hVm, XenonProgramHandle* phOutProgram, const char* programName)
 {
-	if(!hVm || !programName || programName[0] == '\0')
+	if(!hVm || !phOutProgram || *phOutProgram || !programName || programName[0] == '\0')
 	{
-		return XENON_PROGRAM_HANDLE_NULL;
+		return XENON_ERROR_INVALID_ARG;
 	}
 
 	// Create a string object since we need that to look up into the map.
 	XenonString* const pName = XenonString::Create(programName);
 	if(!pName)
 	{
-		return XENON_PROGRAM_HANDLE_NULL;
+		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonProgramHandle hFunction = XenonVm::GetProgram(hVm, pName);
+	int result;
+	(*phOutProgram) = XenonVm::GetProgram(hVm, pName, &result);
 
 	// We no longer need the string object.
 	XenonString::Dispose(pName);
 
-	return hFunction;
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonVmGetProgramCount(XenonVmHandle hVm)
+int XenonVmGetProgramCount(XenonVmHandle hVm, size_t* pOutCount)
 {
-	return hVm ? hVm->programs.Size() : 0;
+	if(!hVm || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hVm->programs.Size();
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmIteratePrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIterateFn, void* pUserData)
+int XenonVmListPrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
@@ -128,7 +141,10 @@ int XenonVmIteratePrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIter
 	// Call the callback for each program we currently have loaded.
 	for(auto& kv : hVm->programs)
 	{
-		onIterateFn(pUserData, kv.value);
+		if(!onIterateFn(pUserData, kv.value))
+		{
+			break;
+		}
 	}
 
 	return XENON_SUCCESS;
@@ -136,38 +152,50 @@ int XenonVmIteratePrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIter
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonVmGetFunction(XenonVmHandle hVm, const char* signature)
+int XenonVmGetFunction(XenonVmHandle hVm, XenonFunctionHandle* phOutFunction, const char* signature)
 {
-	if(!hVm || !signature || signature[0] == '\0')
+	if(!hVm
+		|| !phOutFunction
+		|| *phOutFunction
+		|| !signature
+		|| signature[0] == '\0')
 	{
-		return XENON_FUNCTION_HANDLE_NULL;
+		return XENON_ERROR_INVALID_ARG;
 	}
 
 	// Create a string object since we need that to look up into the map.
 	XenonString* const pSig = XenonString::Create(signature);
 	if(!pSig)
 	{
-		return XENON_FUNCTION_HANDLE_NULL;
+		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonFunctionHandle hFunction = XenonVm::GetFunction(hVm, pSig);
+	int result;
+	(*phOutFunction) = XenonVm::GetFunction(hVm, pSig, &result);
 
 	// We no longer need the string object.
 	XenonString::Dispose(pSig);
 
-	return hFunction;
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonVmGetFunctionCount(XenonVmHandle hVm)
+int XenonVmGetFunctionCount(XenonVmHandle hVm, size_t* pOutCount)
 {
-	return hVm ? hVm->functions.Size() : 0;
+	if(!hVm || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hVm->functions.Size();
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmIterateFunctions(XenonVmHandle hVm, XenonCallbackIterateFunction onIterateFn, void* pUserData)
+int XenonVmListFunctions(XenonVmHandle hVm, XenonCallbackIterateFunction onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
@@ -177,7 +205,10 @@ int XenonVmIterateFunctions(XenonVmHandle hVm, XenonCallbackIterateFunction onIt
 	// Call the callback for each function we currently have loaded.
 	for(auto& kv : hVm->functions)
 	{
-		onIterateFn(pUserData, kv.value);
+		if(!onIterateFn(pUserData, kv.value))
+		{
+			break;
+		}
 	}
 
 	return XENON_SUCCESS;
@@ -209,37 +240,49 @@ int XenonVmSetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, const c
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonVmGetGlobalVariable(XenonVmHandle hVm, const char* variableName)
+int XenonVmGetGlobalVariable(XenonVmHandle hVm, XenonValueHandle* phOutValue, const char* variableName)
 {
-	if(!hVm || !variableName || variableName[0] == '\0')
+	if(!hVm
+		|| !phOutValue
+		|| *phOutValue
+		|| !variableName
+		|| variableName[0] == '\0')
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return XENON_ERROR_INVALID_ARG;
 	}
 
 	// Create a string object in order to look up into the global map.
 	XenonString* const pGlobalName = XenonString::Create(variableName);
 	if(!pGlobalName)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonValueHandle hGlobal = XenonVm::GetGlobalVariable(hVm, pGlobalName);
+	int result;
+	(*phOutValue) = XenonVm::GetGlobalVariable(hVm, pGlobalName, &result);
 
 	XenonString::Dispose(pGlobalName);
 
-	return XenonValueReference(hGlobal);
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonVmGetGlobalVariableCount(XenonVmHandle hVm)
+int XenonVmGetGlobalVariableCount(XenonVmHandle hVm, size_t* pOutCount)
 {
-	return hVm ? hVm->globals.Size() : 0;
+	if(!hVm || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hVm->globals.Size();
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmIterateGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable onIterateFn, void* pUserData)
+int XenonVmListGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
@@ -249,7 +292,10 @@ int XenonVmIterateGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariabl
 	// Call the callback for each global variable we currently have loaded.
 	for(auto& kv : hVm->globals)
 	{
-		onIterateFn(pUserData, kv.key->data, kv.value);
+		if(!onIterateFn(pUserData, kv.key->data, kv.value))
+		{
+			break;
+		}
 	}
 
 	return XENON_SUCCESS;
@@ -257,13 +303,14 @@ int XenonVmIterateGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariabl
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonVmGetObjectProfile(XenonVmHandle hVm, const char* objectTypeName)
+int XenonVmGetObjectProfile(XenonVmHandle hVm, XenonValueHandle* phOutObjectProfile, const char* objectTypeName)
 {
 	// TODO: Implement this
 	(void) hVm;
+	(void) phOutObjectProfile;
 	(void) objectTypeName;
 
-	return XENON_VALUE_HANDLE_NULL;
+	return XENON_ERROR_UNSPECIFIED_FAILURE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -367,21 +414,49 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* XenonProgramGetName(XenonProgramHandle hProgram)
+int XenonProgramGetName(XenonProgramHandle hProgram, const char** pOutName)
 {
-	return hProgram ? hProgram->pName->data : nullptr;
+	if(!hProgram || !pOutName)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutName) = hProgram->pName->data;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramGetEndianness(XenonProgramHandle hProgram)
+int XenonProgramGetEndianness(XenonProgramHandle hProgram, int* pOutEndianness)
 {
-	return hProgram ? hProgram->endianness : XENON_ENDIAN_MODE_UNKNOWN;
+	if(!hProgram || !pOutEndianness)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutEndianness) = hProgram->endianness;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramIterateFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData)
+int XenonProgramGetFunctionCount(XenonProgramHandle hProgram, size_t* pOutCount)
+{
+	if(!hProgram || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hProgram->functions.Size();
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData)
 {
 	if(!hProgram || !onIterateFn)
 	{
@@ -391,7 +466,10 @@ int XenonProgramIterateFunctions(XenonProgramHandle hProgram, XenonCallbackItera
 	// Call the callback for each function signature in the program.
 	for(auto& kv : hProgram->functions)
 	{
-		onIterateFn(pUserData, kv.key->data);
+		if(!onIterateFn(pUserData, kv.key->data))
+		{
+			break;
+		}
 	}
 
 	return XENON_SUCCESS;
@@ -399,7 +477,21 @@ int XenonProgramIterateFunctions(XenonProgramHandle hProgram, XenonCallbackItera
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramIterateGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData)
+int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOutCount)
+{
+	if(!hProgram || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hProgram->globals.Size();
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData)
 {
 	if(!hProgram || !onIterateFn)
 	{
@@ -409,7 +501,10 @@ int XenonProgramIterateGlobalVariables(XenonProgramHandle hProgram, XenonCallbac
 	// Call the callback for each global variable name in the program.
 	for(auto& kv : hProgram->globals)
 	{
-		onIterateFn(pUserData, kv.key->data);
+		if(!onIterateFn(pUserData, kv.key->data))
+		{
+			break;
+		}
 	}
 
 	return XENON_SUCCESS;
@@ -417,23 +512,44 @@ int XenonProgramIterateGlobalVariables(XenonProgramHandle hProgram, XenonCallbac
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* XenonFunctionGetSignature(XenonFunctionHandle hFunction)
+int XenonFunctionGetSignature(XenonFunctionHandle hFunction, const char** pOutSignature)
 {
-	return hFunction ? hFunction->pSignature->data : nullptr;
+	if(!hFunction || !pOutSignature)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutSignature) = hFunction->pSignature->data;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint16_t XenonFunctionGetParameterCount(XenonFunctionHandle hFunction)
+int XenonFunctionGetParameterCount(XenonFunctionHandle hFunction, uint16_t* pOutCount)
 {
-	return hFunction ? hFunction->numParameters : 0;
+	if(!hFunction || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hFunction->numParameters;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint16_t XenonFunctionGetReturnValueCount(XenonFunctionHandle hFunction)
+int XenonFunctionGetReturnValueCount(XenonFunctionHandle hFunction, uint16_t* pOutCount)
 {
-	return hFunction ? hFunction->numReturnValues : 0;
+	if(!hFunction || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hFunction->numReturnValues;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -579,46 +695,153 @@ int XenonExecutionYield(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonExecutionHasYielded(XenonExecutionHandle hExec)
+int XenonExecutionGetStatus(XenonExecutionHandle hExec, bool* pOutStatus, int statusType)
 {
-	return hExec ? hExec->yield : false;
+	if(!hExec || !pOutStatus)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	switch(statusType)
+	{
+		case XENON_EXEC_STATUS_YIELD:
+			(*pOutStatus) = hExec->yield;
+			break;
+
+		case XENON_EXEC_STATUS_RUNNING:
+			(*pOutStatus) = (hExec->started && !hExec->finished) || hExec->exception;
+			break;
+
+		case XENON_EXEC_STATUS_COMPLETE:
+			(*pOutStatus) = hExec->finished || hExec->exception;
+			break;
+
+		case XENON_EXEC_STATUS_EXCEPTION:
+			(*pOutStatus) = hExec->exception;
+			break;
+
+		default:
+			return XENON_ERROR_INVALID_ARG;
+	}
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonExecutionHasStarted(XenonExecutionHandle hExec)
+int XenonExecutionHasUnhandledExceptionOccurred(XenonExecutionHandle hExec, bool* pOutException)
 {
-	return hExec ? hExec->started : false;
+	if(!hExec || !pOutException)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutException) = hExec->exception;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonExecutionHasFinished(XenonExecutionHandle hExec)
+int XenonExecutionGetFrameStackDepth(XenonExecutionHandle hExec, size_t* pOutDepth)
 {
-	return hExec ? hExec->finished : false;
-}
+	if(!hExec || !pOutDepth)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
 
-//----------------------------------------------------------------------------------------------------------------------
+	(*pOutDepth) = hExec->frameStack.nextIndex;
 
-bool XenonExecutionHasUnhandledExceptionOccurred(XenonExecutionHandle hExec)
-{
-	return hExec ? hExec->exception : false;
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 int XenonExecutionResolveFrameStack(
 	XenonExecutionHandle hExec,
-	XenonCallbackResolveFrame onResolveFrameFn,
+	XenonCallbackIterateFrame onIterateFn,
 	void* pUserData
 )
 {
-	if(!hExec || !onResolveFrameFn)
+	if(!hExec || !onIterateFn)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	return XenonExecution::ResolveFrameStack(hExec, onResolveFrameFn, pUserData);
+	for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
+	{
+		// Traverse the frame stack in reverse.
+		XenonFrameHandle hFrame = hExec->frameStack.memory.pData[hExec->frameStack.nextIndex - i - 1];
+
+		if(!onIterateFn(pUserData, hFrame))
+		{
+			break;
+		}
+	}
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonExecutionGetCurrentFrame(XenonExecutionHandle hExec, XenonFrameHandle* phOutFrame)
+{
+	if(!hExec || !phOutFrame || *phOutFrame)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*phOutFrame) = hExec->hCurrentFrame;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonExecutionSetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, int registerIndex)
+{
+	if(!hExec
+		|| !hValue
+		|| registerIndex < 0
+		|| registerIndex >= XENON_VM_IO_REGISTER_COUNT)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	return XenonExecution::SetIoRegister(hExec, hValue, registerIndex);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, XenonValueHandle* phOutValue, int registerIndex)
+{
+	if(!hExec
+		|| !phOutValue
+		|| *phOutValue
+		|| registerIndex < 0
+		|| registerIndex >= XENON_VM_IO_REGISTER_COUNT)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	int result;
+	(*phOutValue) = XenonExecution::GetIoRegister(hExec, registerIndex, &result);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrameGetFunction(XenonFrameHandle hFrame, XenonFunctionHandle* phOutFunction)
+{
+	if(!hFrame || !phOutFunction || (*phOutFunction))
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*phOutFunction) = hFrame->hFunction;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -664,17 +887,124 @@ int XenonFramePopValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue)
 
 int XenonFramePeekValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, int stackIndex)
 {
-	if(!hFrame || !phOutValue)
+	if(!hFrame || !phOutValue || *phOutValue)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	if(*phOutValue)
+	return XenonFrame::PeekValue(hFrame, phOutValue, stackIndex);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrameSetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, int registerIndex)
+{
+	if(!hFrame || registerIndex < 0 || registerIndex >= XENON_VM_GP_REGISTER_COUNT)
 	{
-		XenonValueDispose(*phOutValue);
+		return XENON_ERROR_INVALID_ARG;
 	}
 
-	return XenonFrame::PeekValue(hFrame, phOutValue, stackIndex);
+	return XenonFrame::SetGpRegister(hFrame, hValue, registerIndex);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, int registerIndex)
+{
+	if(!hFrame
+		|| !phOutValue
+		|| *phOutValue
+		|| registerIndex < 0
+		|| registerIndex >= XENON_VM_GP_REGISTER_COUNT)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	int result;
+	(*phOutValue) = XenonFrame::GetGpRegister(hFrame, registerIndex, &result);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, const char* variableName)
+{
+	if(!hFrame || !hValue || !variableName || variableName[0] == '\0')
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonString* const pVarName = XenonString::Create(variableName);
+	if(!pVarName)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	const int result = XenonFrame::SetLocalVariable(hFrame, hValue, pVarName);
+
+	XenonString::Dispose(pVarName);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, const char* variableName)
+{
+	if(!hFrame || !phOutValue || *phOutValue || !variableName || variableName[0] == '\0')
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	// Create a string object to use for the map lookup.
+	XenonString* const pVarName = XenonString::Create(variableName);
+	if(!pVarName)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	int result;
+	(*phOutValue) = XenonFrame::GetLocalVariable(hFrame, pVarName, &result);
+
+	// Dispose of the string object now that we no longer need it.
+	XenonString::Dispose(pVarName);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrameGetLocalVariableCount(XenonFrameHandle hFrame, size_t* pOutCount)
+{
+	if(!hFrame || !pOutCount)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hFrame->locals.Size();
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVariable onIterateFn, void* pUserData)
+{
+	if(!hFrame || !onIterateFn)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	for(auto& kv : hFrame->locals)
+	{
+		if(!onIterateFn(pUserData, kv.key->data, kv.value))
+		{
+			break;
+		}
+	}
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

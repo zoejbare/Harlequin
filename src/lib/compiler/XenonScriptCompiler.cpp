@@ -72,11 +72,16 @@ int XenonCompilerDispose(XenonCompilerHandle* phCompiler)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonReportHandle XenonCompilerGetReportHandle(XenonCompilerHandle hCompiler)
+int XenonCompilerGetReportHandle(XenonCompilerHandle hCompiler, XenonReportHandle* phOutReport)
 {
-	return hCompiler
-		? &hCompiler->report
-		: XENON_REPORT_HANDLE_NULL;
+	if(!hCompiler || !phOutReport)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*phOutReport) = &hCompiler->report;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

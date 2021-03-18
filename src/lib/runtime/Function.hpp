@@ -57,9 +57,17 @@ struct XenonFunction
 
 	XenonValue::StringToHandleMap locals;
 
-	uint32_t offset;
+	union
+	{
+		XenonNativeFunction nativeBinding;
+
+		uint32_t offset;
+	};
+
 	uint16_t numParameters;
 	uint16_t numReturnValues;
+
+	bool isNative;
 };
 
 

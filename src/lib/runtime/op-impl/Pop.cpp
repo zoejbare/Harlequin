@@ -40,11 +40,13 @@ extern "C" {
 
 void OpCodeExec_Pop(XenonExecutionHandle hExec)
 {
+	int result;
+
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
 
-	int result = XenonFrame::PopValue(hExec->hCurrentFrame, &hValue);
+	result = XenonFrame::PopValue(hExec->hCurrentFrame, &hValue);
 	if(result != XENON_SUCCESS)
 	{
 		// TODO: Raise exception
@@ -52,7 +54,13 @@ void OpCodeExec_Pop(XenonExecutionHandle hExec)
 		return;
 	}
 
-	XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+	result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+	if(result != XENON_SUCCESS)
+	{
+		// TODO: Raise script exception
+		hExec->exception = true;
+	}
+
 	XenonValueDispose(hValue);
 }
 

@@ -151,10 +151,15 @@ int XenonExecution::PopFrame(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------;
 
-void XenonExecution::SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, const size_t index)
+int XenonExecution::SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, const size_t index)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(index < XENON_VM_IO_REGISTER_COUNT);
+
+	if(index >= XENON_VM_IO_REGISTER_COUNT)
+	{
+		return XENON_ERROR_INDEX_OUT_OF_RANGE;
+	}
 
 	// Get a reference to the input value first, just in case it
 	// happens to be the value already in this register slot.
@@ -164,38 +169,25 @@ void XenonExecution::SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle 
 	XenonValueDispose(hExec->registers.pData[index]);
 
 	hExec->registers.pData[index] = hValueRef;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-XenonValueHandle XenonExecution::GetIoRegister(XenonExecutionHandle hExec, const size_t index)
-{
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(index < XENON_VM_IO_REGISTER_COUNT);
-
-	return XenonValueReference(hExec->registers.pData[index]);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int XenonExecution::ResolveFrameStack(
-	XenonExecutionHandle hExec,
-	XenonCallbackResolveFrame onResolveFrameFn,
-	void* const pUserData
-)
-{
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(onResolveFrameFn != nullptr);
-
-	for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
-	{
-		// Traverse the frame stack in reverse.
-		XenonFrameHandle hFrame = hExec->frameStack.memory.pData[hExec->frameStack.nextIndex - i - 1];
-
-		onResolveFrameFn(pUserData, hFrame);
-	}
 
 	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonExecution::GetIoRegister(XenonExecutionHandle hExec, const size_t index, int* const pOutResult)
+{
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(pOutResult != nullptr);
+
+	if(index >= XENON_VM_IO_REGISTER_COUNT)
+	{
+		(*pOutResult) = XENON_ERROR_INDEX_OUT_OF_RANGE;
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
+	return XenonValueReference(hExec->registers.pData[index]);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

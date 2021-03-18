@@ -129,32 +129,56 @@ int XenonVm::SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, Xenon
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonProgram* XenonVm::GetProgram(XenonVmHandle hVm, XenonString* const pProgramName)
+XenonProgramHandle XenonVm::GetProgram(XenonVmHandle hVm, XenonString* const pProgramName, int* const pOutResult)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(pProgramName != nullptr);
+	assert(pOutResult != nullptr);
 
-	return hVm->programs.Get(pProgramName, nullptr);
+	if(!hVm->programs.Contains(pProgramName))
+	{
+		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
+		return XENON_PROGRAM_HANDLE_NULL;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
+	return hVm->programs.Get(pProgramName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonVm::GetFunction(XenonVmHandle hVm, XenonString* const pFunctionSignature)
+XenonFunctionHandle XenonVm::GetFunction(XenonVmHandle hVm, XenonString* const pFunctionSignature, int* const pOutResult)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(pFunctionSignature != nullptr);
+	assert(pOutResult != nullptr);
 
-	return hVm->functions.Get(pFunctionSignature, XENON_FUNCTION_HANDLE_NULL);
+	if(!hVm->functions.Contains(pFunctionSignature))
+	{
+		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
+		return XENON_FUNCTION_HANDLE_NULL;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
+	return hVm->functions.Get(pFunctionSignature);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonVm::GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName)
+XenonValueHandle XenonVm::GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName, int* const pOutResult)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(pVariableName != nullptr);
+	assert(pOutResult != nullptr);
 
-	return XenonValueReference(hVm->globals.Get(pVariableName, XENON_VALUE_HANDLE_NULL));
+	if(!hVm->globals.Contains(pVariableName))
+	{
+		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
+	return XenonValueReference(hVm->globals.Get(pVariableName));
 }
 
 //----------------------------------------------------------------------------------------------------------------------

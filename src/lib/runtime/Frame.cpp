@@ -189,22 +189,37 @@ int XenonFrame::SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValu
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonFrame::GetGpRegister(XenonFrameHandle hFrame, const uint32_t index)
+XenonValueHandle XenonFrame::GetGpRegister(XenonFrameHandle hFrame, const uint32_t index, int* const pOutResult)
 {
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
-	assert(index < XENON_VM_GP_REGISTER_COUNT);
+	assert(pOutResult != nullptr);
 
+	if(index >= XENON_VM_GP_REGISTER_COUNT)
+	{
+		(*pOutResult) = XENON_ERROR_INDEX_OUT_OF_RANGE;
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
 	return XenonValueReference(hFrame->registers.pData[index]);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonFrame::GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName)
+XenonValueHandle XenonFrame::GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName, int* const pOutResult)
 {
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(pVariableName != nullptr);
+	assert(pOutResult != nullptr);
 
-	return XenonValueReference(hFrame->locals.Get(pVariableName, XENON_VALUE_HANDLE_NULL));
+	if(!hFrame->locals.Contains(pVariableName))
+	{
+		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
+	return XenonValueReference(hFrame->locals.Get(pVariableName));
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -392,19 +392,29 @@ enum XenoRunMode
 	XENON_RUN_LOOP,
 };
 
+enum XenonExecutionStatus
+{
+	XENON_EXEC_STATUS_YIELD,
+	XENON_EXEC_STATUS_RUNNING,
+	XENON_EXEC_STATUS_COMPLETE,
+	XENON_EXEC_STATUS_EXCEPTION,
+};
+
 typedef struct XenonVm* XenonVmHandle;
 typedef struct XenonProgram* XenonProgramHandle;
 typedef struct XenonFunction* XenonFunctionHandle;
 typedef struct XenonExecution* XenonExecutionHandle;
 typedef struct XenonFrame* XenonFrameHandle;
 
+typedef void (*XenonNativeFunction)(XenonExecutionHandle, XenonFunctionHandle);
 typedef void (*XenonCallbackProgramDependency)(void*, const char*);
-typedef void (*XenonCallbackResolveFrame)(void*, XenonFrameHandle);
-typedef void (*XenonCallbackIterateProgram)(void*, XenonProgramHandle);
-typedef void (*XenonCallbackIterateFunction)(void*, XenonFunctionHandle);
-typedef void (*XenonCallbackIterateVariable)(void*, const char*, XenonValueHandle);
-typedef void (*XenonCallbackIterateString)(void*, const char*);
 typedef void (*XenonCallbackOpDisasm)(void*, const char*, uintptr_t);
+
+typedef bool (*XenonCallbackIterateFrame)(void*, XenonFrameHandle);
+typedef bool (*XenonCallbackIterateProgram)(void*, XenonProgramHandle);
+typedef bool (*XenonCallbackIterateFunction)(void*, XenonFunctionHandle);
+typedef bool (*XenonCallbackIterateVariable)(void*, const char*, XenonValueHandle);
+typedef bool (*XenonCallbackIterateString)(void*, const char*);
 
 typedef struct
 {
@@ -430,29 +440,29 @@ XENON_MAIN_API int XenonVmCreate(XenonVmHandle* phOutVm, XenonVmInit init);
 
 XENON_MAIN_API int XenonVmDispose(XenonVmHandle* phVm);
 
-XENON_MAIN_API XenonReportHandle XenonVmGetReportHandle(XenonVmHandle hVm);
+XENON_MAIN_API int XenonVmGetReportHandle(XenonVmHandle hVm, XenonReportHandle* phOutReport);
 
-XENON_MAIN_API XenonProgramHandle XenonVmGetProgram(XenonVmHandle hVm, const char* programName);
+XENON_MAIN_API int XenonVmGetProgram(XenonVmHandle hVm, XenonProgramHandle* phOutProgram, const char* programName);
 
-XENON_MAIN_API size_t XenonVmGetProgramCount(XenonVmHandle hVm);
+XENON_MAIN_API int XenonVmGetProgramCount(XenonVmHandle hVm, size_t* pOutCount);
 
-XENON_MAIN_API int XenonVmIteratePrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIterateFn, void* pUserData);
+XENON_MAIN_API int XenonVmListPrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIterateFn, void* pUserData);
 
-XENON_MAIN_API XenonFunctionHandle XenonVmGetFunction(XenonVmHandle hVm, const char* signature);
+XENON_MAIN_API int XenonVmGetFunction(XenonVmHandle hVm, XenonFunctionHandle* phOutFunction, const char* signature);
 
-XENON_MAIN_API size_t XenonVmGetFunctionCount(XenonVmHandle hVm);
+XENON_MAIN_API int XenonVmGetFunctionCount(XenonVmHandle hVm, size_t* pOutCount);
 
-XENON_MAIN_API int XenonVmIterateFunctions(XenonVmHandle hVm, XenonCallbackIterateFunction onIterateFn, void* pUserData);
+XENON_MAIN_API int XenonVmListFunctions(XenonVmHandle hVm, XenonCallbackIterateFunction onIterateFn, void* pUserData);
 
 XENON_MAIN_API int XenonVmSetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, const char* variableName);
 
-XENON_MAIN_API XenonValueHandle XenonVmGetGlobalVariable(XenonVmHandle hVm, const char* variableName);
+XENON_MAIN_API int XenonVmGetGlobalVariable(XenonVmHandle hVm, XenonValueHandle* phOutValue, const char* variableName);
 
-XENON_MAIN_API size_t XenonVmGetGlobalVariableCount(XenonVmHandle hVm);
+XENON_MAIN_API int XenonVmGetGlobalVariableCount(XenonVmHandle hVm, size_t* pOutCount);
 
-XENON_MAIN_API int XenonVmIterateGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable onIterateFn, void* pUserData);
+XENON_MAIN_API int XenonVmListGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable onIterateFn, void* pUserData);
 
-XENON_MAIN_API XenonValueHandle XenonVmGetObjectProfile(XenonVmHandle hVm, const char* objectTypeName);
+XENON_MAIN_API int XenonVmGetObjectProfile(XenonVmHandle hVm, XenonValueHandle* phOutObjectProfile, const char* objectTypeName);
 
 XENON_MAIN_API int XenonVmLoadProgram(
 	XenonVmHandle hVm,
@@ -465,21 +475,25 @@ XENON_MAIN_API int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* pro
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-XENON_MAIN_API const char* XenonProgramGetName(XenonProgramHandle hProgram);
+XENON_MAIN_API int XenonProgramGetName(XenonProgramHandle hProgram, const char** pOutName);
 
-XENON_MAIN_API int XenonProgramGetEndianness(XenonProgramHandle hProgram);
+XENON_MAIN_API int XenonProgramGetEndianness(XenonProgramHandle hProgram, int* pOutEndianness);
 
-XENON_MAIN_API int XenonProgramIterateFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData);
+XENON_MAIN_API int XenonProgramGetFunctionCount(XenonProgramHandle hProgram, size_t* pOutCount);
 
-XENON_MAIN_API int XenonProgramIterateGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData);
+XENON_MAIN_API int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData);
+
+XENON_MAIN_API int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOutCount);
+
+XENON_MAIN_API int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-XENON_MAIN_API const char* XenonFunctionGetSignature(XenonFunctionHandle hFunction);
+XENON_MAIN_API int XenonFunctionGetSignature(XenonFunctionHandle hFunction, const char** pOutSignature);
 
-XENON_MAIN_API uint16_t XenonFunctionGetParameterCount(XenonFunctionHandle hFunction);
+XENON_MAIN_API int XenonFunctionGetParameterCount(XenonFunctionHandle hFunction, uint16_t* pOutCount);
 
-XENON_MAIN_API uint16_t XenonFunctionGetReturnValueCount(XenonFunctionHandle hFunction);
+XENON_MAIN_API int XenonFunctionGetReturnValueCount(XenonFunctionHandle hFunction, uint16_t* pOutCount);
 
 XENON_MAIN_API int XenonFunctionDisassemble(XenonFunctionHandle hFunction, XenonCallbackOpDisasm onDisasmFn, void* pUserData);
 
@@ -497,27 +511,45 @@ XENON_MAIN_API int XenonExecutionRun(XenonExecutionHandle hExec, int runMode);
 
 XENON_MAIN_API int XenonExecutionYield(XenonExecutionHandle hExec);
 
-XENON_MAIN_API bool XenonExecutionHasYielded(XenonExecutionHandle hExec);
+XENON_MAIN_API int XenonExecutionGetStatus(XenonExecutionHandle hExec, bool* pOutStatus, int statusType);
 
-XENON_MAIN_API bool XenonExecutionHasStarted(XenonExecutionHandle hExec);
+XENON_MAIN_API int XenonExecutionHasUnhandledExceptionOccurred(XenonExecutionHandle hExec, bool* pOutException);
 
-XENON_MAIN_API bool XenonExecutionHasFinished(XenonExecutionHandle hExec);
-
-XENON_MAIN_API bool XenonExecutionHasUnhandledExceptionOccurred(XenonExecutionHandle hExec);
+XENON_MAIN_API int XenonExecutionGetFrameStackDepth(XenonExecutionHandle hExec, size_t* pOutDepth);
 
 XENON_MAIN_API int XenonExecutionResolveFrameStack(
 	XenonExecutionHandle hExec,
-	XenonCallbackResolveFrame onResolveFrameFn,
+	XenonCallbackIterateFrame onIterateFn,
 	void* pUserData
 );
 
+XENON_MAIN_API int XenonExecutionGetCurrentFrame(XenonExecutionHandle hExec, XenonFrameHandle* phOutFrame);
+
+XENON_MAIN_API int XenonExecutionSetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, int registerIndex);
+
+XENON_MAIN_API int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, XenonValueHandle* phOutValue, int registerIndex);
+
 /*---------------------------------------------------------------------------------------------------------------------*/
+
+XENON_MAIN_API int XenonFrameGetFunction(XenonFrameHandle hFrame, XenonFunctionHandle* phOutFunction);
 
 XENON_MAIN_API int XenonFramePushValue(XenonFrameHandle hFrame, XenonValueHandle hValue);
 
 XENON_MAIN_API int XenonFramePopValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue);
 
 XENON_MAIN_API int XenonFramePeekValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, int stackIndex);
+
+XENON_MAIN_API int XenonFrameSetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, int registerIndex);
+
+XENON_MAIN_API int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, int registerIndex);
+
+XENON_MAIN_API int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, const char* variableName);
+
+XENON_MAIN_API int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, const char* variableName);
+
+XENON_MAIN_API int XenonFrameGetLocalVariableCount(XenonFrameHandle hFrame, size_t* pOutCount);
+
+XENON_MAIN_API int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVariable onIterateFn, void* pUserData);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -546,7 +578,7 @@ XENON_MAIN_API int XenonCompilerCreate(XenonCompilerHandle* phOutCompiler, Xenon
 
 XENON_MAIN_API int XenonCompilerDispose(XenonCompilerHandle* phCompiler);
 
-XENON_MAIN_API XenonReportHandle XenonCompilerGetReportHandle(XenonCompilerHandle hCompiler);
+XENON_MAIN_API int XenonCompilerGetReportHandle(XenonCompilerHandle hCompiler, XenonReportHandle* phOutReport);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
