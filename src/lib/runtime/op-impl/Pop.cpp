@@ -47,17 +47,18 @@ void OpCodeExec_Pop(XenonExecutionHandle hExec)
 	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
 
 	result = XenonFrame::PopValue(hExec->hCurrentFrame, &hValue);
-	if(result != XENON_SUCCESS)
+	if(result == XENON_SUCCESS)
+	{
+		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+		if(result != XENON_SUCCESS)
+		{
+			// TODO: Raise script exception
+			hExec->exception = true;
+		}
+	}
+	else
 	{
 		// TODO: Raise exception
-		hExec->exception = true;
-		return;
-	}
-
-	result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
-	if(result != XENON_SUCCESS)
-	{
-		// TODO: Raise script exception
 		hExec->exception = true;
 	}
 

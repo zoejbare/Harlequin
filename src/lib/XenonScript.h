@@ -392,7 +392,7 @@ enum XenoRunMode
 	XENON_RUN_LOOP,
 };
 
-enum XenonExecutionStatus
+enum XenonExecutionStatusFlag
 {
 	XENON_EXEC_STATUS_YIELD,
 	XENON_EXEC_STATUS_RUNNING,
@@ -491,9 +491,17 @@ XENON_MAIN_API int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, 
 
 XENON_MAIN_API int XenonFunctionGetSignature(XenonFunctionHandle hFunction, const char** pOutSignature);
 
+XENON_MAIN_API int XenonFunctionGetIsNative(XenonFunctionHandle hFunction, bool* pOutNative);
+
 XENON_MAIN_API int XenonFunctionGetParameterCount(XenonFunctionHandle hFunction, uint16_t* pOutCount);
 
 XENON_MAIN_API int XenonFunctionGetReturnValueCount(XenonFunctionHandle hFunction, uint16_t* pOutCount);
+
+XENON_MAIN_API int XenonFunctionGetBytecodeOffset(XenonFunctionHandle hFunction, uint32_t* pOutOffset);
+
+XENON_MAIN_API int XenonFunctionGetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction* pOutBinding);
+
+XENON_MAIN_API int XenonFunctionSetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction bindingFn);
 
 XENON_MAIN_API int XenonFunctionDisassemble(XenonFunctionHandle hFunction, XenonCallbackOpDisasm onDisasmFn, void* pUserData);
 
@@ -532,6 +540,8 @@ XENON_MAIN_API int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, Xenon
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 XENON_MAIN_API int XenonFrameGetFunction(XenonFrameHandle hFrame, XenonFunctionHandle* phOutFunction);
+
+XENON_MAIN_API int XenonFrameGetBytecodeOffset(XenonFrameHandle hFrame, uint32_t* pOutOffset);
 
 XENON_MAIN_API int XenonFramePushValue(XenonFrameHandle hFrame, XenonValueHandle hValue);
 
@@ -597,6 +607,13 @@ XENON_MAIN_API int XenonProgramWriterAddFunction(
 	const char* functionSignature,
 	const void* pFunctionBytecode,
 	size_t bytecodeLength,
+	uint16_t numParameters,
+	uint16_t numReturnValues
+);
+
+XENON_MAIN_API int XenonProgramWriterAddNativeFunction(
+	XenonProgramWriterHandle hProgramWriter,
+	const char* functionSignature,
 	uint16_t numParameters,
 	uint16_t numReturnValues
 );

@@ -196,8 +196,12 @@ void XenonExecution::RunStep(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
-	const uint8_t opCode = XenonDecoder::LoadUint8(hExec->hCurrentFrame->decoder);
+	XenonFrameHandle hFrame = hExec->hCurrentFrame;
 
+	// Save the current instruction pointer position at the start of the opcode that will now be executed.
+	hFrame->decoder.cachedIp = hFrame->decoder.ip;
+
+	const uint8_t opCode = XenonDecoder::LoadUint8(hFrame->decoder);
 	XenonVm::ExecuteOpCode(hExec->hVm, hExec, opCode);
 }
 

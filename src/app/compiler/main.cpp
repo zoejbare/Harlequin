@@ -203,6 +203,7 @@ int main(int argc, char* argv[])
 
 	const char* const mainFuncSignature = "void Program.Main()";
 	const char* const subFuncSignature = "int32 Program.DoWork(float64)";
+	const char* const nativeFuncSignature = "string Program.DoWorkNative(string, string)";
 	const char* const tempLocalName = "temp";
 
 	// Add the program constants.
@@ -214,7 +215,8 @@ int main(int argc, char* argv[])
 	XenonValueHandle hValue5_string = XenonValueCreateString("a test string");
 	XenonValueHandle hValue6_string = XenonValueCreateString("globalTestVar");
 	XenonValueHandle hValue7_string = XenonValueCreateString(subFuncSignature);
-	XenonValueHandle hValue8_string = XenonValueCreateString(tempLocalName);
+	XenonValueHandle hValue8_string = XenonValueCreateString(nativeFuncSignature);
+	XenonValueHandle hValue9_string = XenonValueCreateString(tempLocalName);
 
 	uint32_t constIndex0;
 	XenonProgramWriterAddConstant(hProgramWriter, hValue0_null, &constIndex0);
@@ -242,6 +244,9 @@ int main(int argc, char* argv[])
 
 	uint32_t constIndex8;
 	XenonProgramWriterAddConstant(hProgramWriter, hValue8_string, &constIndex8);
+
+	uint32_t constIndex9;
+	XenonProgramWriterAddConstant(hProgramWriter, hValue9_string, &constIndex9);
 
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, XenonValueGetString(hValue6_string), constIndex4);
@@ -275,12 +280,22 @@ int main(int argc, char* argv[])
 	{
 		writeOpLoadParam(hSubFuncSerializer, 0, 0);
 
-		writeOpLoadLocal(hSubFuncSerializer, 1, constIndex8);
-		writeOpStoreLocal(hSubFuncSerializer, constIndex8, 0);
+		writeOpLoadLocal(hSubFuncSerializer, 1, constIndex9);
+		writeOpStoreLocal(hSubFuncSerializer, constIndex9, 0);
 
 		writeOpPush(hSubFuncSerializer, 0);
 		writeOpYield(hSubFuncSerializer);
 		writeOpPop(hSubFuncSerializer, 1);
+
+		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex4);
+		writeOpStoreParam(hSubFuncSerializer, 0, 0);
+
+		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex5);
+		writeOpStoreParam(hSubFuncSerializer, 1, 1);
+
+		writeOpCall(hSubFuncSerializer, constIndex8);
+		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex0);
+		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 
 		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex1);
 		writeOpStoreParam(hSubFuncSerializer, 0, 1);
@@ -293,6 +308,11 @@ int main(int argc, char* argv[])
 
 		XenonProgramWriterAddFunction(hProgramWriter, subFuncSignature, pSubFuncData, subFuncLength, 1, 1);
 		XenonProgramWriterAddLocalVariable(hProgramWriter, subFuncSignature, tempLocalName, constIndex2);
+	}
+
+	// string Program.DoWorkNative(string, string)
+	{
+		XenonProgramWriterAddNativeFunction(hProgramWriter, nativeFuncSignature, 2, 1);
 	}
 
 	result = XenonProgramWriterSerialize(hProgramWriter, hCompiler, hFileSerializer, XENON_ENDIAN_MODE_NATIVE);
@@ -311,7 +331,6 @@ int main(int argc, char* argv[])
 		fwrite(pFileData, fileLength, 1, pOutputFile);
 		fclose(pOutputFile);
 	}
-
 	XenonSerializerDispose(&hMainFuncSerializer);
 	XenonSerializerDispose(&hSubFuncSerializer);
 	XenonSerializerDispose(&hFileSerializer);
@@ -325,6 +344,7 @@ int main(int argc, char* argv[])
 	XenonValueDispose(hValue6_string);
 	XenonValueDispose(hValue7_string);
 	XenonValueDispose(hValue8_string);
+	XenonValueDispose(hValue9_string);
 
 	// Dispose of the program writer.
 	result = XenonProgramWriterDispose(&hProgramWriter);

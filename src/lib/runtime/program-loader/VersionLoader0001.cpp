@@ -524,7 +524,7 @@ bool XenonProgramVersion0001::Load(
 			}
 
 			// Read the function offset.
-			result = XenonSerializerReadUint32(hSerializer, &hFunction->offset);
+			result = XenonSerializerReadBool(hSerializer, &hFunction->isNative);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -532,7 +532,7 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function bytecode offset: program=\"%s\", function=\"%s\", error=\"%s\"",
+					"Failed to read function 'isNative' flag: program=\"%s\", function=\"%s\", error=\"%s\"",
 					pOutProgram->pName->data,
 					hFunction->pSignature->data,
 					errorString
@@ -583,102 +583,125 @@ bool XenonProgramVersion0001::Load(
 				return false;
 			}
 
-			// Read the function local variable count.
-			uint32_t numLocalVariables = 0;
-			result = XenonSerializerReadUint32(hSerializer, &numLocalVariables);
-			if(result != XENON_SUCCESS)
+			if(!hFunction->isNative)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
-
-				XenonReportMessage(
-					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function local variable count: program=\"%s\", function=\"%s\", error=\"%s\"",
-					pOutProgram->pName->data,
-					hFunction->pSignature->data,
-					errorString
-				);
-
-				XenonFunction::Dispose(hFunction);
-
-				return false;
-			}
-
-			if(numLocalVariables > 0)
-			{
-				hFunction->locals.Reserve(numLocalVariables);
-
-				// Iterate for each local variable.
-				for(uint32_t localIndex = 0; localIndex < numLocalVariables; ++localIndex)
+				// Read the function offset.
+				result = XenonSerializerReadUint32(hSerializer, &hFunction->offset);
+				if(result != XENON_SUCCESS)
 				{
-					// Read the name of the global variable.
-					XenonString* const pVarName = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
-					if(!pVarName)
+					const char* const errorString = XenonGetErrorCodeString(result);
+
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to read function bytecode offset: program=\"%s\", function=\"%s\", error=\"%s\"",
+						pOutProgram->pName->data,
+						hFunction->pSignature->data,
+						errorString
+					);
+
+					XenonFunction::Dispose(hFunction);
+
+					return false;
+				}
+
+				// Read the function local variable count.
+				uint32_t numLocalVariables = 0;
+				result = XenonSerializerReadUint32(hSerializer, &numLocalVariables);
+				if(result != XENON_SUCCESS)
+				{
+					const char* const errorString = XenonGetErrorCodeString(result);
+
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to read function local variable count: program=\"%s\", function=\"%s\", error=\"%s\"",
+						pOutProgram->pName->data,
+						hFunction->pSignature->data,
+						errorString
+					);
+
+					XenonFunction::Dispose(hFunction);
+
+					return false;
+				}
+
+				if(numLocalVariables > 0)
+				{
+					hFunction->locals.Reserve(numLocalVariables);
+
+					// Iterate for each local variable.
+					for(uint32_t localIndex = 0; localIndex < numLocalVariables; ++localIndex)
 					{
-						return false;
+						// Read the name of the global variable.
+						XenonString* const pVarName = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
+						if(!pVarName)
+						{
+							return false;
+						}
+
+						if(hFunction->locals.Contains(pVarName))
+						{
+							XenonReportMessage(
+								hReport,
+								XENON_MESSAGE_TYPE_ERROR,
+								"Local variable conflict: program=\"%s\", function=\"%s\", variableName=\"%s\"",
+								pOutProgram->pName->data,
+								hFunction->pSignature->data,
+								pVarName->data
+							);
+
+							XenonString::Dispose(pVarName);
+
+							return false;
+						}
+
+						// Read the local variable value index.
+						uint32_t constantIndex = 0;
+						result = XenonSerializerReadUint32(hSerializer, &constantIndex);
+						if(result != XENON_SUCCESS)
+						{
+							const char* const errorString = XenonGetErrorCodeString(result);
+
+							XenonReportMessage(
+								hReport,
+								XENON_MESSAGE_TYPE_ERROR,
+								"Failed to read local variable value index: program=\"%s\", function=\"%s\", variableName=\"%s\", error=\"%s\"",
+								pOutProgram->pName->data,
+								hFunction->pSignature->data,
+								pVarName->data,
+								errorString
+							);
+
+							XenonString::Dispose(pVarName);
+
+							return false;
+						}
+
+						// Get the value from the constant table.
+						XenonValueHandle hValue;
+						if(size_t(constantIndex) < pOutProgram->constants.count)
+						{
+							hValue = XenonValueReference(pOutProgram->constants.pData[constantIndex]);
+						}
+						else
+						{
+							XenonReportMessage(
+								hReport,
+								XENON_MESSAGE_TYPE_WARNING,
+								"Local variable points to invalid constant index: program=\"%s\", function=\"%s\", variableName=\"%s\", index=%" PRIu32,
+								pOutProgram->pName->data,
+								hFunction->pSignature->data,
+								pVarName->data,
+								constantIndex
+							);
+
+							hValue = XenonValueCreateNull();
+						}
+
+						// Map the local variable to the function.
+						hFunction->locals.Insert(pVarName, hValue);
 					}
-
-					if(hFunction->locals.Contains(pVarName))
-					{
-						XenonReportMessage(
-							hReport,
-							XENON_MESSAGE_TYPE_ERROR,
-							"Local variable conflict: program=\"%s\", function=\"%s\", variableName=\"%s\"",
-							pOutProgram->pName->data,
-							hFunction->pSignature->data,
-							pVarName->data
-						);
-
-						XenonString::Dispose(pVarName);
-
-						return false;
-					}
-
-					// Read the local variable value index.
-					uint32_t constantIndex = 0;
-					result = XenonSerializerReadUint32(hSerializer, &constantIndex);
-					if(result != XENON_SUCCESS)
-					{
-						const char* const errorString = XenonGetErrorCodeString(result);
-
-						XenonReportMessage(
-							hReport,
-							XENON_MESSAGE_TYPE_ERROR,
-							"Failed to read local variable value index: program=\"%s\", function=\"%s\", variableName=\"%s\", error=\"%s\"",
-							pOutProgram->pName->data,
-							hFunction->pSignature->data,
-							pVarName->data,
-							errorString
-						);
-
-						XenonString::Dispose(pVarName);
-
-						return false;
-					}
-
-					// Get the value from the constant table.
-					XenonValueHandle hValue;
-					if(size_t(constantIndex) < pOutProgram->constants.count)
-					{
-						hValue = XenonValueReference(pOutProgram->constants.pData[constantIndex]);
-					}
-					else
-					{
-						XenonReportMessage(
-							hReport,
-							XENON_MESSAGE_TYPE_WARNING,
-							"Local variable points to invalid constant index: program=\"%s\", function=\"%s\", variableName=\"%s\", index=%" PRIu32,
-							pOutProgram->pName->data,
-							hFunction->pSignature->data,
-							pVarName->data,
-							constantIndex
-						);
-
-						hValue = XenonValueCreateNull();
-					}
-
-					// Map the local variable to the function.
-					hFunction->locals.Insert(pVarName, hValue);
 				}
 			}
 

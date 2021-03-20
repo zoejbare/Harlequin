@@ -50,6 +50,8 @@ struct XenonFunction
 
 	uint16_t numParameters;
 	uint16_t numReturnValues;
+
+	bool isNative;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

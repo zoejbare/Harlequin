@@ -32,6 +32,7 @@ struct XenonDecoder
 	static uint32_t LoadUint32(XenonDecoder& decoder);
 
 	uint8_t* ip;
+	uint8_t* cachedIp;
 
 	bool sameEndian;
 };

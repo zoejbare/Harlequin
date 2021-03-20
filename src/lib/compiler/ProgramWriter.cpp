@@ -443,7 +443,7 @@ bool XenonProgramWriter::Serialize(
 		XenonFunction* pFunction;
 		XenonString* pSignature;
 
-		uint32_t offset;
+		uint32_t finalOffset;
 
 	};
 
@@ -461,7 +461,7 @@ bool XenonProgramWriter::Serialize(
 
 			binding.pFunction = &kv.value;
 			binding.pSignature = kv.key;
-			binding.offset = uint32_t(bytecodeLength);
+			binding.finalOffset = uint32_t(bytecodeLength);
 
 			// Add the length of the function's bytecode, but also align the length to add padding between each function.
 			bytecodeLength += binding.pFunction->bytecode.size();
@@ -480,7 +480,7 @@ bool XenonProgramWriter::Serialize(
 		for(const FunctionBinding& binding : functionBindings)
 		{
 			memcpy(
-				pProgramBytecode + binding.offset,
+				pProgramBytecode + binding.finalOffset,
 				binding.pFunction->bytecode.data(),
 				binding.pFunction->bytecode.size()
 			);
@@ -628,13 +628,29 @@ bool XenonProgramWriter::Serialize(
 	// Write the function table.
 	for(const FunctionBinding& binding : functionBindings)
 	{
-		XenonReportMessage(
-			hReport,
-			XENON_MESSAGE_TYPE_VERBOSE,
-			"Serializing function: signature=\"%s\", offset=%u",
-			binding.pSignature->data,
-			binding.offset
-		);
+		if(binding.pFunction->isNative)
+		{
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_VERBOSE,
+				"Serializing native function: signature=\"%s\", numParams=%" PRIu16 ", numReturnValues=%" PRIu16,
+				binding.pSignature->data,
+				binding.pFunction->numParameters,
+				binding.pFunction->numReturnValues
+			);
+		}
+		else
+		{
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_VERBOSE,
+				"Serializing script function: signature=\"%s\", numParams=%" PRIu16 ", numReturnValues=%" PRIu16 ", offset=%" PRIu32,
+				binding.pSignature->data,
+				binding.pFunction->numParameters,
+				binding.pFunction->numReturnValues,
+				binding.finalOffset
+			);
+		}
 
 		// Write the function signature.
 		if(!SerializeString(hSerializer, hReport, binding.pSignature->data, binding.pSignature->length))
@@ -642,16 +658,16 @@ bool XenonProgramWriter::Serialize(
 			return false;
 		}
 
-		// Write the function's offset into the program file.
-		result = XenonSerializerWriteUint32(hSerializer, binding.offset);
+		// Write the function's native switch into the program file.
+		result = XenonSerializerWriteBool(hSerializer, binding.pFunction->isNative);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function offset: signature=\"%s\", offset=%" PRIu32,
+				"Failed to serialize function 'isNative' flag: signature=\"%s\", native=%s",
 				binding.pSignature->data,
-				binding.offset
+				binding.pFunction->isNative ? "true" : "false"
 			);
 		}
 
@@ -681,43 +697,59 @@ bool XenonProgramWriter::Serialize(
 			);
 		}
 
-		// Write the function's local variable count.
-		result = XenonSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.Size()));
-		if(result != XENON_SUCCESS)
+		if(!binding.pFunction->isNative)
 		{
-			XenonReportMessage(
-				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function local variable count: signature=\"%s\", count=%" PRIu32,
-				binding.pSignature->data,
-				uint32_t(binding.pFunction->locals.Size())
-			);
-		}
-
-		// Write the function's local variable table.
-		for(auto& kv : binding.pFunction->locals)
-		{
-			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing local variable: name=\"%s\"", kv.key->data);
-
-			// First, write the string key of the local.
-			if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
-			{
-				return false;
-			}
-
-			// Write the local's constant index.
-			result = XenonSerializerWriteUint32(hSerializer, kv.value);
+			// Write the function's offset into the program file.
+			result = XenonSerializerWriteUint32(hSerializer, binding.finalOffset);
 			if(result != XENON_SUCCESS)
 			{
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to serialize local variable value index: name=\"%s\", index=%" PRIu32,
-					kv.key->data,
-					kv.value
+					"Failed to serialize function offset: signature=\"%s\", offset=%" PRIu32,
+					binding.pSignature->data,
+					binding.finalOffset
 				);
+			}
 
-				return false;
+			// Write the function's local variable count.
+			result = XenonSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.Size()));
+			if(result != XENON_SUCCESS)
+			{
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to serialize function local variable count: signature=\"%s\", count=%" PRIu32,
+					binding.pSignature->data,
+					uint32_t(binding.pFunction->locals.Size())
+				);
+			}
+
+			// Write the function's local variable table.
+			for(auto& kv : binding.pFunction->locals)
+			{
+				XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing local variable: name=\"%s\"", kv.key->data);
+
+				// First, write the string key of the local.
+				if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
+				{
+					return false;
+				}
+
+				// Write the local's constant index.
+				result = XenonSerializerWriteUint32(hSerializer, kv.value);
+				if(result != XENON_SUCCESS)
+				{
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to serialize local variable value index: name=\"%s\", index=%" PRIu32,
+						kv.key->data,
+						kv.value
+					);
+
+					return false;
+				}
 			}
 		}
 	}

@@ -30,6 +30,7 @@ XenonDecoder XenonDecoder::Construct(XenonProgramHandle hProgram, uint32_t offse
 	XenonDecoder output;
 
 	output.ip = hProgram->code.pData + offset;
+	output.cachedIp = output.ip;
 	output.sameEndian = (hProgram->endianness == XenonGetPlatformEndianMode());
 
 	return output;

@@ -135,7 +135,17 @@ int main(int argc, char* argv[])
 				assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 				printf("\t%s\n", signature);
 
-				XenonFunctionDisassemble(hFunction, onDisasm, nullptr);
+				bool isNative = false;
+				XenonFunctionGetIsNative(hFunction, &isNative);
+
+				if(isNative)
+				{
+					printf("\t\t<native call>\n");
+				}
+				else
+				{
+					XenonFunctionDisassemble(hFunction, onDisasm, nullptr);
+				}
 
 				printf("\n");
 				return true;
@@ -159,18 +169,30 @@ int main(int argc, char* argv[])
 
 		const char* const entryPoint = "void Program.Main()";
 
-		XenonFunctionHandle hFunc = XENON_FUNCTION_HANDLE_NULL;
+		XenonFunctionHandle hEntryFunc = XENON_FUNCTION_HANDLE_NULL;
 		XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
 
-		XenonVmGetFunction(hVm, &hFunc, entryPoint);
+		XenonVmGetFunction(hVm, &hEntryFunc, entryPoint);
 
-		if(XenonExecutionCreate(&hExec, hVm, hFunc) == XENON_SUCCESS)
+		if(XenonExecutionCreate(&hExec, hVm, hEntryFunc) == XENON_SUCCESS)
 		{
+			XenonFunctionHandle hNativeFunc = XENON_FUNCTION_HANDLE_NULL;
+			XenonVmGetFunction(hVm, &hNativeFunc, "string Program.DoWorkNative(string, string)");
+
+			if(hNativeFunc != XENON_FUNCTION_HANDLE_NULL)
+			{
+				auto doWorkNative = [](XenonExecutionHandle, XenonFunctionHandle)
+				{
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_INFO, ">>> This is a native call made from script");
+				};
+
+				XenonFunctionSetNativeBinding(hNativeFunc, doWorkNative);
+			}
+
 			char msg[256];
 			snprintf(msg, sizeof(msg), "Executing script function: \"%s\"", entryPoint);
 			OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, msg);
 
-			int result;
 			bool status;
 
 			// Run the script until it has completed.
@@ -195,6 +217,50 @@ int main(int argc, char* argv[])
 				if(status)
 				{
 					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
+
+					auto iterateFrame = [](void* const pUserData, XenonFrameHandle hFrame) -> bool
+					{
+						bool& isTopFrame = *reinterpret_cast<bool*>(pUserData);
+
+						XenonFunctionHandle hFunction = XENON_FUNCTION_HANDLE_NULL;
+						XenonFrameGetFunction(hFrame, &hFunction);
+
+						const char* functionSignature = nullptr;
+						XenonFunctionGetSignature(hFunction, &functionSignature);
+
+						bool isNative = false;
+						XenonFunctionGetIsNative(hFunction, &isNative);
+
+						uint32_t offset = 0;
+						XenonFrameGetBytecodeOffset(hFrame, &offset);
+
+						XenonNativeFunction nativeBinding = nullptr;
+						XenonFunctionGetNativeBinding(hFunction, &nativeBinding);
+
+						char frameMsg[512];
+						snprintf(
+							frameMsg,
+							sizeof(frameMsg),
+							"%s%s [%s: 0x%" PRIXPTR "]",
+							isTopFrame ? "" : "... ",
+							functionSignature,
+							isNative ? "ptr" : "offset",
+							isNative ? reinterpret_cast<uintptr_t>(nativeBinding) : offset
+						);
+
+						printf("%s\n", frameMsg);
+
+						isTopFrame = false;
+
+						return true;
+					};
+
+					printf("\n<Callstack>\n");
+
+					bool isTopFrame = true;
+					XenonExecutionResolveFrameStack(hExec, iterateFrame, &isTopFrame);
+
+					printf("\n");
 					break;
 				}
 

@@ -53,7 +53,31 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 		XenonFunctionHandle hFunction = XenonVm::GetFunction(hExec->hVm, hValue->as.pString, &result);
 		if(hFunction)
 		{
+			// A new frame gets pushed for all functions, even native functions.
+			// But for native functions, it's just a dummy frame for the sake of
+			// any code that would wish to resolve the frame stack if a script
+			// exception were to occur within the native function.
 			XenonExecution::PushFrame(hExec, hFunction);
+
+			if(hFunction->isNative)
+			{
+				if(hFunction->nativeBinding)
+				{
+					hFunction->nativeBinding(hExec, hFunction);
+
+					if(!hExec->exception)
+					{
+						// If no script exception occurred within the native function,
+						// we can pop the dummy frame from the frame stack.
+						XenonExecution::PopFrame(hExec);
+					}
+				}
+				else
+				{
+					// TODO: Raise script exception
+					hExec->exception = true;
+				}
+			}
 		}
 		else
 		{

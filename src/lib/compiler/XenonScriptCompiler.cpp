@@ -242,6 +242,42 @@ int XenonProgramWriterAddFunction(
 	function.bytecode = std::move(bytecode);
 	function.numParameters = numParameters;
 	function.numReturnValues = numReturnValues;
+	function.isNative = false;
+
+	hProgramWriter->functions.Insert(pSignature, function);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddNativeFunction(
+	XenonProgramWriterHandle hProgramWriter,
+	const char* const functionSignature,
+	const uint16_t numParameters,
+	const uint16_t numReturnValues
+)
+{
+	if(!hProgramWriter
+		|| !functionSignature
+		|| functionSignature[0] == '\0'
+		|| numParameters > XENON_VM_IO_REGISTER_COUNT
+		|| numReturnValues > XENON_VM_IO_REGISTER_COUNT)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonString* pSignature = XenonString::Create(functionSignature);
+	if(!pSignature)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	XenonFunction function;
+
+	function.numParameters = numParameters;
+	function.numReturnValues = numReturnValues;
+	function.isNative = true;
 
 	hProgramWriter->functions.Insert(pSignature, function);
 
@@ -283,6 +319,12 @@ int XenonProgramWriterAddLocalVariable(
 
 	// The string object for the function signature is no longer needed.
 	XenonString::Dispose(pSignature);
+
+	// Script local variables cannot be added to native functions.
+	if(kv->value.isNative)
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
 
 	XenonString* const pVariableName = XenonString::Create(variableName);
 	if(!pVariableName)

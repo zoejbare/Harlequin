@@ -35,6 +35,7 @@ XenonFunctionHandle XenonFunction::Create(XenonProgramHandle hProgram)
 	pOutput->offset = 0;
 	pOutput->numParameters = 0;
 	pOutput->numReturnValues = 0;
+	pOutput->isNative = false;
 
 	return pOutput;
 }
@@ -46,6 +47,13 @@ void XenonFunction::Dispose(XenonFunctionHandle hFunction)
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	XenonString::Dispose(hFunction->pSignature);
+
+	// Dispose of the local variables.
+	for(auto& kv : hFunction->locals)
+	{
+		XenonString::Dispose(kv.key);
+		XenonValueDispose(kv.value);
+	}
 
 	delete hFunction;
 }
