@@ -74,21 +74,21 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 	// Clean up each loaded program.
 	for(auto& kv : hVm->programs)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 		XenonProgram::Dispose(kv.value);
 	}
 
 	// Clean up each loaded function.
 	for(auto& kv : hVm->functions)
 	{
-		// The signature key is cleaned up when the function is disposed.
+		XenonString::Release(kv.key);
 		XenonFunction::Dispose(kv.value);
 	}
 
 	// Clean up each loaded global.
 	for(auto& kv : hVm->globals)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 		XenonValue::Release(kv.value);
 	}
 

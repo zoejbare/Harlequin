@@ -73,8 +73,8 @@ struct XENON_BASE_API XenonValue
 	static XenonValueHandle CreateString(XenonString* const pString);
 	static XenonValueHandle Copy(XenonValueHandle hValue);
 
-	static int Acquire(XenonValueHandle hValue);
-	static int Release(XenonValueHandle hValue);
+	static int32_t AddRef(XenonValueHandle hValue);
+	static int32_t Release(XenonValueHandle hValue);
 
 	static std::string GetDebugString(XenonValueHandle hValue);
 

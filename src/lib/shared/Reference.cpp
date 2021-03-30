@@ -39,7 +39,7 @@ XenonReference XenonReference::Initialize(XenonReferenceDestructCallback onDestr
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonReference::Acquire(XenonReference* const pRef)
+int32_t XenonReference::AddRef(XenonReference* const pRef)
 {
 	return XenonAtomic::FetchAdd(&pRef->count, 1) + 1;
 }
@@ -52,8 +52,8 @@ int32_t XenonReference::Release(XenonReference* const pRef)
 
 	if(currentValue == 0)
 	{
-		pRef->onDestructFn(pRef->pObject);
 		// Don't do anything with the reference object after destructing because it has probably been freed.
+		pRef->onDestructFn(pRef->pObject);
 	}
 
 	return currentValue;

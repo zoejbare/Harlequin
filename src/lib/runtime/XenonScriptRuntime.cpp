@@ -110,7 +110,7 @@ int XenonVmGetProgram(XenonVmHandle hVm, XenonProgramHandle* phOutProgram, const
 	(*phOutProgram) = XenonVm::GetProgram(hVm, pName, &result);
 
 	// We no longer need the string object.
-	XenonString::Dispose(pName);
+	XenonString::Release(pName);
 
 	return result;
 }
@@ -174,7 +174,7 @@ int XenonVmGetFunction(XenonVmHandle hVm, XenonFunctionHandle* phOutFunction, co
 	(*phOutFunction) = XenonVm::GetFunction(hVm, pSig, &result);
 
 	// We no longer need the string object.
-	XenonString::Dispose(pSig);
+	XenonString::Release(pSig);
 
 	return result;
 }
@@ -233,7 +233,7 @@ int XenonVmSetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, const c
 	const int result = XenonVm::SetGlobalVariable(hVm, hValue, pVariableName);
 
 	// Dispose of the string object since we no longer need it.
-	XenonString::Dispose(pVariableName);
+	XenonString::Release(pVariableName);
 
 	return result;
 }
@@ -261,7 +261,7 @@ int XenonVmGetGlobalVariable(XenonVmHandle hVm, XenonValueHandle* phOutValue, co
 	int result;
 	(*phOutValue) = XenonVm::GetGlobalVariable(hVm, pGlobalName, &result);
 
-	XenonString::Dispose(pGlobalName);
+	XenonString::Release(pGlobalName);
 
 	return result;
 }
@@ -328,29 +328,29 @@ int XenonVmLoadProgram(
 	}
 
 	// Create a string to be the key in the program map.
-	XenonString* const pKey = XenonString::Create(programName);
-	if(!pKey)
+	XenonString* const pProgramName = XenonString::Create(programName);
+	if(!pProgramName)
 	{
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
 	// Check if a program with this name has already been loaded.
-	if(hVm->programs.Contains(pKey))
+	if(hVm->programs.Contains(pProgramName))
 	{
-		XenonString::Dispose(pKey);
+		XenonString::Release(pProgramName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
 	// Attempt to load the program file.
-	XenonProgramHandle hProgram = XenonProgram::Create(hVm, programName, pProgramFileData, programFileSize);
+	XenonProgramHandle hProgram = XenonProgram::Create(hVm, pProgramName, pProgramFileData, programFileSize);
 	if(!hProgram)
 	{
-		XenonString::Dispose(pKey);
+		XenonString::Release(pProgramName);
 		return XENON_ERROR_FAILED_TO_OPEN_FILE;
 	}
 
 	// Map the program inside the VM state.
-	hVm->programs.Insert(pKey, hProgram);
+	hVm->programs.Insert(pProgramName, hProgram);
 
 	// Report the program dependencies to the user code.
 	for(auto& kv : hProgram->dependencies)
@@ -375,29 +375,29 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 	}
 
 	// Create a string to be the key in the program map.
-	XenonString* const pKey = XenonString::Create(filePath);
-	if(!pKey)
+	XenonString* const pProgramName = XenonString::Create(filePath);
+	if(!pProgramName)
 	{
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
 	// Check if a program with this name has already been loaded.
-	if(hVm->programs.Contains(pKey))
+	if(hVm->programs.Contains(pProgramName))
 	{
-		XenonString::Dispose(pKey);
+		XenonString::Release(pProgramName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
 	// Attempt to load the program file.
-	XenonProgram* const hProgram = XenonProgram::Create(hVm, programName, filePath);
+	XenonProgram* const hProgram = XenonProgram::Create(hVm, pProgramName, filePath);
 	if(!hProgram)
 	{
-		XenonString::Dispose(pKey);
+		XenonString::Release(pProgramName);
 		return XENON_ERROR_FAILED_TO_OPEN_FILE;
 	}
 
 	// Map the program inside the VM state.
-	hVm->programs.Insert(pKey, hProgram);
+	hVm->programs.Insert(pProgramName, hProgram);
 
 	// Report the program dependencies to the user code.
 	for(auto& kv : hProgram->dependencies)
@@ -1068,7 +1068,7 @@ int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue,
 
 	const int result = XenonFrame::SetLocalVariable(hFrame, hValue, pVarName);
 
-	XenonString::Dispose(pVarName);
+	XenonString::Release(pVarName);
 
 	return result;
 }
@@ -1098,7 +1098,7 @@ int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutV
 	(*phOutValue) = XenonFrame::GetLocalVariable(hFrame, pVarName, &result);
 
 	// Dispose of the string object now that we no longer need it.
-	XenonString::Dispose(pVarName);
+	XenonString::Release(pVarName);
 
 	return result;
 }

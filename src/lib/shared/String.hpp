@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "Reference.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -51,14 +51,19 @@ struct XENON_BASE_API XenonString
 	};
 
 	static XenonString* Create(const char* const stringData);
-	static void Dispose(XenonString* const pString);
+	static int32_t AddRef(XenonString* const pString);
+	static int32_t Release(XenonString* const pString);
 	static bool Compare(const XenonString* const pLeft, const XenonString* const pRight);
 
 	static bool RawCompare(const char* const left, const char* right);
 	static size_t RawHash(const char* const string);
 
+	static void prv_onDestruct(void*);
+
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
+
+	XenonReference ref;
 
 	size_t length;
 	size_t hash;

@@ -319,26 +319,20 @@ XenonValueHandle XenonValue::Copy(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValue::Acquire(XenonValueHandle hValue)
+int32_t XenonValue::AddRef(XenonValueHandle hValue)
 {
-	if(hValue && hValue->type != XENON_VALUE_TYPE_NULL)
-	{
-		return XenonReference::Acquire(&hValue->ref);
-	}
-
-	return -1;
+	return (hValue && hValue->type != XENON_VALUE_TYPE_NULL)
+		? XenonReference::AddRef(&hValue->ref)
+		: -1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValue::Release(XenonValueHandle hValue)
+int32_t XenonValue::Release(XenonValueHandle hValue)
 {
-	if(hValue && hValue->type != XENON_VALUE_TYPE_NULL)
-	{
-		return XenonReference::Release(&hValue->ref);
-	}
-
-	return -1;
+	return (hValue && hValue->type != XENON_VALUE_TYPE_NULL)
+		? XenonReference::Release(&hValue->ref)
+		: -1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -454,7 +448,7 @@ void XenonValue::prv_onDestruct(void* const pOpaque)
 			return;
 
 		case XENON_VALUE_TYPE_STRING:
-			XenonString::Dispose(pValue->as.pString);
+			XenonString::Release(pValue->as.pString);
 			break;
 
 		case XENON_VALUE_TYPE_OBJECT:

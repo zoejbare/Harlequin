@@ -358,13 +358,13 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 	// Dispose of all dependency names.
 	for(auto& kv : hProgramWriter->dependencies)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 	}
 
 	// Dispose of all program globals.
 	for(auto& kv : hProgramWriter->globals)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 	}
 
 	// Dispose of all program constants.
@@ -376,11 +376,11 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 	// Dispose of all functions.
 	for(auto& funcKv : hProgramWriter->functions)
 	{
-		XenonString::Dispose(funcKv.key);
+		XenonString::Release(funcKv.key);
 
 		for(auto& valueKv : funcKv.value.locals)
 		{
-			XenonString::Dispose(valueKv.key);
+			XenonString::Release(valueKv.key);
 		}
 	}
 

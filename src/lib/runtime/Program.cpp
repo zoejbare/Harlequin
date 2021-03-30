@@ -189,16 +189,16 @@ static bool ProgramLoad(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const programName, const char* const filePath)
+XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pProgramName, const char* const filePath)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
-	assert(programName != nullptr);
+	assert(pProgramName != nullptr);
 	assert(filePath != nullptr);
 
 	XenonReportHandle hReport = &hVm->report;
 	XenonSerializerHandle hSerializer = XENON_SERIALIZER_HANDLE_NULL;
 
-	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from file: \"%s\"", programName, filePath);
+	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from file: \"%s\"", pProgramName->data, filePath);
 
 	int result;
 
@@ -236,12 +236,7 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const pro
 		return nullptr;
 	}
 
-	XenonString* const pProgramName = XenonString::Create(programName);
-	if(!pProgramName)
-	{
-		XenonString::Dispose(pProgramName);
-		return nullptr;
-	}
+	XenonString::AddRef(pProgramName);
 
 	XenonProgram* pOutput = new XenonProgram();
 
@@ -258,6 +253,7 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const pro
 	if(!ProgramLoad(pOutput, loadData, hVm, hSerializer))
 	{
 		// Failed to load the program from the file.
+		XenonString::Release(pProgramName);
 		XenonProgram::Dispose(pOutput);
 
 		pOutput = nullptr;
@@ -295,20 +291,20 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, const char* const pro
 
 XenonProgramHandle XenonProgram::Create(
 	XenonVmHandle hVm,
-	const char* const programName,
+	XenonString* const pProgramName,
 	const void* const pFileData,
 	const size_t fileLength
 )
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
-	assert(programName != nullptr);
+	assert(pProgramName != nullptr);
 	assert(pFileData != nullptr);
 	assert(fileLength > 0);
 
 	XenonReportHandle hReport = &hVm->report;
 	XenonSerializerHandle hSerializer = XENON_SERIALIZER_HANDLE_NULL;
 
-	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from data buffer", programName);
+	XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from data buffer", pProgramName->data);
 
 	int result;
 
@@ -346,12 +342,7 @@ XenonProgramHandle XenonProgram::Create(
 		return nullptr;
 	}
 
-	XenonString* const pProgramName = XenonString::Create(programName);
-	if(!pProgramName)
-	{
-		XenonString::Dispose(pProgramName);
-		return nullptr;
-	}
+	XenonString::AddRef(pProgramName);
 
 	XenonProgram* pOutput = new XenonProgram();
 
@@ -368,6 +359,7 @@ XenonProgramHandle XenonProgram::Create(
 	if(!ProgramLoad(pOutput, loadData, hVm, hSerializer))
 	{
 		// Failed to load the program from the file.
+		XenonString::Release(pProgramName);
 		XenonProgram::Dispose(pOutput);
 
 		pOutput = nullptr;
@@ -407,15 +399,24 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 {
 	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
 
-	// The globals and functions are just references to data in the VM.
-	// This means the VM will handle cleaning them up itself.
-
 	// Dispose of all program dependencies.
 	for(auto& kv : hProgram->dependencies)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 
 		// The mapped value doesn't contain anything, so it doesn't need to be released.
+	}
+
+	// Release the function signature keys.
+	for(auto& kv : hProgram->functions)
+	{
+		XenonString::Release(kv.key);
+	}
+
+	// Release the global variable name keys.
+	for(auto& kv : hProgram->globals)
+	{
+		XenonString::Release(kv.key);
 	}
 
 	// Dispose of all program constants.
@@ -428,7 +429,7 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 	XenonValue::HandleArray::Dispose(hProgram->constants);
 	XenonByteHelper::Array::Dispose(hProgram->code);
 
-	XenonString::Dispose(hProgram->pName);
+	XenonString::Release(hProgram->pName);
 
 	delete hProgram;
 }
@@ -479,14 +480,14 @@ void XenonProgram::prv_freeLoadData(XenonProgram::LoadData& loadData)
 	// Dispose of the loaded globals.
 	for(auto& kv : loadData.globals)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 		XenonValue::Release(kv.value);
 	}
 
 	// Dispose of the loaded functions.
 	for(auto& kv : loadData.functions)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 		XenonFunction::Dispose(kv.value);
 	}
 }

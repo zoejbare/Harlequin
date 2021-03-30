@@ -101,6 +101,7 @@ XenonString* XenonString::Create(const char* const stringData)
 
 	const size_t length = (stringData) ? strlen(stringData) : 0;
 
+	pOutput->ref = XenonReference::Initialize(prv_onDestruct, pOutput);
 	pOutput->length = length;
 	pOutput->hash = RawHash(stringData ? stringData : "");
 	pOutput->data = (length > 0) ? reinterpret_cast<char*>(XenonMemAlloc(length + 1)) : nullptr;
@@ -116,17 +117,20 @@ XenonString* XenonString::Create(const char* const stringData)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonString::Dispose(XenonString* const pString)
+int32_t XenonString::AddRef(XenonString* const pString)
 {
-	if(pString)
-	{
-		if(pString->data)
-		{
-			XenonMemFree(pString->data);
-		}
+	return (pString)
+		? XenonReference::AddRef(&pString->ref)
+		: -1;
+}
 
-		delete pString;
-	}
+//----------------------------------------------------------------------------------------------------------------------
+
+int32_t XenonString::Release(XenonString* const pString)
+{
+	return (pString)
+		? XenonReference::Release(&pString->ref)
+		: -1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -217,6 +221,20 @@ size_t XenonString::RawHash(const char* const string)
 #endif
 		(string, length, seed)
 	);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonString::prv_onDestruct(void* const pOpaque)
+{
+	XenonString* const pString = reinterpret_cast<XenonString*>(pOpaque);
+
+	if(pString->data)
+	{
+		XenonMemFree(pString->data);
+	}
+
+	delete pString;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

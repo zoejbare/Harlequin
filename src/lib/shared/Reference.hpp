@@ -34,7 +34,7 @@ struct XenonReference
 {
 	static XenonReference Initialize(XenonReferenceDestructCallback onDestructFn, void* const pObject);
 
-	static int32_t Acquire(XenonReference* const pRef);
+	static int32_t AddRef(XenonReference* const pRef);
 	static int32_t Release(XenonReference* const pRef);
 
 	void* pObject;

@@ -419,7 +419,7 @@ bool XenonProgramVersion0001::Load(
 					pVarName->data
 				);
 
-				XenonString::Dispose(pVarName);
+				XenonString::Release(pVarName);
 
 				return false;
 			}
@@ -440,7 +440,7 @@ bool XenonProgramVersion0001::Load(
 					errorString
 				);
 
-				XenonString::Dispose(pVarName);
+				XenonString::Release(pVarName);
 
 				return false;
 			}
@@ -464,6 +464,8 @@ bool XenonProgramVersion0001::Load(
 
 				hValue = XenonValueCreateNull();
 			}
+
+			XenonString::AddRef(pVarName);
 
 			// Map the global variable.
 			pOutProgram->globals.Insert(pVarName, false);
@@ -651,7 +653,7 @@ bool XenonProgramVersion0001::Load(
 								pVarName->data
 							);
 
-							XenonString::Dispose(pVarName);
+							XenonString::Release(pVarName);
 
 							return false;
 						}
@@ -673,7 +675,7 @@ bool XenonProgramVersion0001::Load(
 								errorString
 							);
 
-							XenonString::Dispose(pVarName);
+							XenonString::Release(pVarName);
 
 							return false;
 						}
@@ -707,6 +709,8 @@ bool XenonProgramVersion0001::Load(
 
 			if(!hVm->functions.Contains(hFunction->pSignature))
 			{
+				XenonString::AddRef(hFunction->pSignature);
+
 				// Map the function to the signature.
 				pOutProgram->functions.Insert(hFunction->pSignature, false);
 				outLoadData.functions.Insert(hFunction->pSignature, hFunction);

@@ -43,10 +43,10 @@ struct XenonProgram
 		XenonFunction::StringToHandleMap functions;
 	};
 
-	static XenonProgramHandle Create(XenonVmHandle hVm, const char* const programName, const char* const filePath);
+	static XenonProgramHandle Create(XenonVmHandle hVm, XenonString* const pProgramName, const char* const filePath);
 	static XenonProgramHandle Create(
 		XenonVmHandle hVm,
-		const char* const programName,
+		XenonString* const pProgramName,
 		const void* const pFileData,
 		const size_t fileLength
 	);

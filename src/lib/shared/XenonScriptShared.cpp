@@ -355,7 +355,7 @@ XenonValueHandle XenonValueReference(XenonValueHandle hValue)
 		return XENON_VALUE_HANDLE_NULL;
 	}
 
-	XenonValue::Acquire(hValue);
+	XenonValue::AddRef(hValue);
 
 	return hValue;
 }

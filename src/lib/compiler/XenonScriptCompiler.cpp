@@ -139,7 +139,7 @@ int XenonProgramWriterAddDependency(XenonProgramWriterHandle hProgramWriter, con
 
 	if(hProgramWriter->dependencies.Contains(pProgramName))
 	{
-		XenonString::Dispose(pProgramName);
+		XenonString::Release(pProgramName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
@@ -195,7 +195,7 @@ int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const c
 	// Verify a value mapped to the input name doesn't already exist.
 	if(hProgramWriter->globals.Contains(pKey))
 	{
-		XenonString::Dispose(pKey);
+		XenonString::Release(pKey);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
@@ -313,12 +313,12 @@ int XenonProgramWriterAddLocalVariable(
 	auto kv = hProgramWriter->functions.find(pSignature);
 	if(kv == hProgramWriter->functions.end())
 	{
-		XenonString::Dispose(pSignature);
+		XenonString::Release(pSignature);
 		return XENON_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
 	// The string object for the function signature is no longer needed.
-	XenonString::Dispose(pSignature);
+	XenonString::Release(pSignature);
 
 	// Script local variables cannot be added to native functions.
 	if(kv->value.isNative)

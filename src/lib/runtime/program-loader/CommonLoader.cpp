@@ -87,7 +87,7 @@ XenonString* XenonProgramCommonLoader::ReadString(
 	{
 		const char* const errorString = XenonGetErrorCodeString(result);
 
-		XenonString::Dispose(pString);
+		XenonString::Release(pString);
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,

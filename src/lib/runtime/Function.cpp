@@ -46,12 +46,12 @@ void XenonFunction::Dispose(XenonFunctionHandle hFunction)
 {
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
-	XenonString::Dispose(hFunction->pSignature);
+	XenonString::Release(hFunction->pSignature);
 
 	// Dispose of the local variables.
 	for(auto& kv : hFunction->locals)
 	{
-		XenonString::Dispose(kv.key);
+		XenonString::Release(kv.key);
 		XenonValueDispose(kv.value);
 	}
 
