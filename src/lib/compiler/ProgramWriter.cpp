@@ -85,17 +85,16 @@ static bool SerializeString(
 
 static bool SerializeValue(
 	XenonSerializerHandle hSerializer,
-	XenonValueHandle hValue,
+	XenonProgramWriter::ValueContainer& value,
 	XenonReportHandle hReport
 )
 {
 	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
-	assert(hValue != XENON_VALUE_HANDLE_NULL);
 	assert(hReport != XENON_REPORT_HANDLE_NULL);
 
 	int result = 0;
 
-	result = XenonSerializerWriteUint8(hSerializer, uint8_t(hValue->type));
+	result = XenonSerializerWriteUint8(hSerializer, uint8_t(value.type));
 	if(result != XENON_SUCCESS)
 	{
 		const char* const errorString = XenonGetErrorCodeString(result);
@@ -105,19 +104,19 @@ static bool SerializeValue(
 			XENON_MESSAGE_TYPE_ERROR,
 			"Failed to write value type: error=\"%s\", type=%" PRIu32,
 			errorString,
-			hValue->type
+			value.type
 		);
 
 		return false;
 	}
 
-	switch(hValue->type)
+	switch(value.type)
 	{
 		case XENON_VALUE_TYPE_NULL:
 			break;
 
 		case XENON_VALUE_TYPE_INT8:
-			result = XenonSerializerWriteInt8(hSerializer, hValue->as.int8);
+			result = XenonSerializerWriteInt8(hSerializer, value.as.int8);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -127,7 +126,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int8: error=\"%s\", data=%" PRId8,
 					errorString,
-					hValue->as.int8
+					value.as.int8
 				);
 
 				return false;
@@ -135,7 +134,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_INT16:
-			result = XenonSerializerWriteInt16(hSerializer, hValue->as.int16);
+			result = XenonSerializerWriteInt16(hSerializer, value.as.int16);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -145,7 +144,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int16: error=\"%s\", data=%" PRId16,
 					errorString,
-					hValue->as.int16
+					value.as.int16
 				);
 
 				return false;
@@ -153,7 +152,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_INT32:
-			result = XenonSerializerWriteInt32(hSerializer, hValue->as.int32);
+			result = XenonSerializerWriteInt32(hSerializer, value.as.int32);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -163,7 +162,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int32: error=\"%s\", data=%" PRId32,
 					errorString,
-					hValue->as.int32
+					value.as.int32
 				);
 
 				return false;
@@ -171,7 +170,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_INT64:
-			result = XenonSerializerWriteInt64(hSerializer, hValue->as.int64);
+			result = XenonSerializerWriteInt64(hSerializer, value.as.int64);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -181,7 +180,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int64: error=\"%s\", data=%" PRId64,
 					errorString,
-					hValue->as.int64
+					value.as.int64
 				);
 
 				return false;
@@ -189,7 +188,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_UINT8:
-			result = XenonSerializerWriteUint8(hSerializer, hValue->as.uint8);
+			result = XenonSerializerWriteUint8(hSerializer, value.as.uint8);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -199,7 +198,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint8: error=\"%s\", data=%" PRIu8,
 					errorString,
-					hValue->as.uint8
+					value.as.uint8
 				);
 
 				return false;
@@ -207,7 +206,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_UINT16:
-			result = XenonSerializerWriteUint16(hSerializer, hValue->as.uint16);
+			result = XenonSerializerWriteUint16(hSerializer, value.as.uint16);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -217,7 +216,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint16: error=\"%s\", data=%" PRIu16,
 					errorString,
-					hValue->as.uint16
+					value.as.uint16
 				);
 
 				return false;
@@ -225,7 +224,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_UINT32:
-			result = XenonSerializerWriteUint32(hSerializer, hValue->as.uint32);
+			result = XenonSerializerWriteUint32(hSerializer, value.as.uint32);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -235,7 +234,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint32: error=\"%s\", data=%" PRIu32,
 					errorString,
-					hValue->as.uint32
+					value.as.uint32
 				);
 
 				return false;
@@ -243,7 +242,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_UINT64:
-			result = XenonSerializerWriteUint64(hSerializer, hValue->as.uint64);
+			result = XenonSerializerWriteUint64(hSerializer, value.as.uint64);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -253,7 +252,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint64: error=\"%s\", data=%" PRIu64,
 					errorString,
-					hValue->as.uint64
+					value.as.uint64
 				);
 
 				return false;
@@ -261,7 +260,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_FLOAT32:
-			result = XenonSerializerWriteFloat32(hSerializer, hValue->as.float32);
+			result = XenonSerializerWriteFloat32(hSerializer, value.as.float32);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -271,7 +270,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as float: error=\"%s\", data=%f",
 					errorString,
-					hValue->as.float32
+					value.as.float32
 				);
 
 				return false;
@@ -279,7 +278,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_FLOAT64:
-			result = XenonSerializerWriteFloat64(hSerializer, hValue->as.float64);
+			result = XenonSerializerWriteFloat64(hSerializer, value.as.float64);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -289,7 +288,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as double: error=\"%s\", data=%f",
 					errorString,
-					hValue->as.float64
+					value.as.float64
 				);
 
 				return false;
@@ -297,7 +296,7 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_BOOL:
-			result = XenonSerializerWriteBool(hSerializer, hValue->as.boolean);
+			result = XenonSerializerWriteBool(hSerializer, value.as.boolean);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -307,7 +306,7 @@ static bool SerializeValue(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as bool: error=\"%s\", data=%s",
 					errorString,
-					hValue->as.boolean ? "true" : "false"
+					value.as.boolean ? "true" : "false"
 				);
 
 				return false;
@@ -316,7 +315,7 @@ static bool SerializeValue(
 
 		case XENON_VALUE_TYPE_STRING:
 			// Write out the string data.
-			if(!SerializeString(hSerializer, hReport, hValue->as.pString->data, hValue->as.pString->length))
+			if(!SerializeString(hSerializer, hReport, value.as.pString->data, value.as.pString->length))
 			{
 				return false;
 			}
@@ -332,7 +331,7 @@ static bool SerializeValue(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
 				"Cannot serialize unknown value type: type=%" PRId32,
-				hValue->type
+				value.type
 			);
 			break;
 	}
@@ -345,6 +344,25 @@ static bool SerializeValue(
 XenonProgramWriterHandle XenonProgramWriter::Create()
 {
 	XenonProgramWriter* const pOutput = new XenonProgramWriter();
+
+	ValueContainer value;
+
+	// Add the default null value constant.
+	value.type = XENON_VALUE_TYPE_NULL;
+	value.as.pString = nullptr;
+	pOutput->nullIndex = uint32_t(pOutput->constants.size());
+	pOutput->constants.push_back(value);
+
+	// Add the default boolean (false) constant.
+	value.type = XENON_VALUE_TYPE_BOOL;
+	value.as.boolean = false;
+	pOutput->boolFalseIndex = uint32_t(pOutput->constants.size());
+	pOutput->constants.push_back(value);
+
+	// Add the default boolean (true) constant.
+	value.as.boolean = true;
+	pOutput->boolTrueIndex = uint32_t(pOutput->constants.size());
+	pOutput->constants.push_back(value);
 
 	return pOutput;
 }
@@ -368,9 +386,12 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 	}
 
 	// Dispose of all program constants.
-	for(XenonValueHandle& value : hProgramWriter->constants)
+	for(ValueContainer& value : hProgramWriter->constants)
 	{
-		XenonValueDispose(value);
+		if(value.type == XENON_VALUE_TYPE_STRING)
+		{
+			XenonString::Release(value.as.pString);
+		}
 	}
 
 	// Dispose of all functions.
@@ -842,6 +863,289 @@ bool XenonProgramWriter::Serialize(
 	}
 
 	return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int8_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapInt8.find(value);
+	if(kv != hWriter->indexMapInt8.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_INT8;
+	container.as.int8 = value;
+
+	hWriter->indexMapInt8.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int16_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapInt16.find(value);
+	if(kv != hWriter->indexMapInt16.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_INT16;
+	container.as.int16 = value;
+
+	hWriter->indexMapInt16.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int32_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapInt32.find(value);
+	if(kv != hWriter->indexMapInt32.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_INT32;
+	container.as.int32 = value;
+
+	hWriter->indexMapInt32.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int64_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapInt64.find(value);
+	if(kv != hWriter->indexMapInt64.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_INT64;
+	container.as.int64 = value;
+
+	hWriter->indexMapInt64.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint8_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapUint8.find(value);
+	if(kv != hWriter->indexMapUint8.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_UINT8;
+	container.as.uint8 = value;
+
+	hWriter->indexMapUint8.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint16_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapUint16.find(value);
+	if(kv != hWriter->indexMapUint16.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_UINT16;
+	container.as.uint16 = value;
+
+	hWriter->indexMapUint16.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint32_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapUint32.find(value);
+	if(kv != hWriter->indexMapUint32.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_UINT32;
+	container.as.uint32 = value;
+
+	hWriter->indexMapUint32.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint64_t value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	auto kv = hWriter->indexMapUint64.find(value);
+	if(kv != hWriter->indexMapUint64.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_UINT64;
+	container.as.uint64 = value;
+
+	hWriter->indexMapUint64.Insert(value, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, float value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	union
+	{
+		float original;
+		uint32_t bits;
+	} temp;
+
+	temp.original = value;
+
+	auto kv = hWriter->indexMapFloat32.find(temp.bits);
+	if(kv != hWriter->indexMapFloat32.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_FLOAT32;
+	container.as.float32 = value;
+
+	hWriter->indexMapFloat32.Insert(temp.bits, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, double value)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+
+	union
+	{
+		double original;
+		uint64_t bits;
+	} temp;
+
+	temp.original = value;
+
+	auto kv = hWriter->indexMapFloat64.find(temp.bits);
+	if(kv != hWriter->indexMapFloat64.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_FLOAT64;
+	container.as.float64 = value;
+
+	hWriter->indexMapFloat64.Insert(temp.bits, output);
+	hWriter->constants.push_back(container);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, XenonString* const pValue)
+{
+	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(pValue != nullptr);
+
+	auto kv = hWriter->indexMapString.find(pValue);
+	if(kv != hWriter->indexMapString.end())
+	{
+		return kv->value;
+	}
+
+	const uint32_t output = uint32_t(hWriter->constants.size());
+
+	ValueContainer container;
+	container.type = XENON_VALUE_TYPE_STRING;
+	container.as.pString = pValue;
+
+	XenonString::AddRef(pValue);
+
+	hWriter->indexMapString.Insert(pValue, output);
+	hWriter->constants.push_back(container);
+
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

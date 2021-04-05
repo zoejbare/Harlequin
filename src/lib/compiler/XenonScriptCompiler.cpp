@@ -150,22 +150,190 @@ int XenonProgramWriterAddDependency(XenonProgramWriterHandle hProgramWriter, con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramWriterAddConstant(XenonProgramWriterHandle hProgramWriter, XenonValueHandle hValue, uint32_t* pOutConstantIndex)
+int XenonProgramWriterAddConstantNull(XenonProgramWriterHandle hProgramWriter, uint32_t* pOutputIndex)
 {
-	if(!hProgramWriter || !hValue || !pOutConstantIndex)
+	if(!hProgramWriter || !pOutputIndex)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	const uint32_t constIndex = uint32_t(hProgramWriter->constants.size());
+	(*pOutputIndex) = hProgramWriter->nullIndex;
 
-	XenonValueHandle hValueRef = XenonValueReference(hValue);
+	return XENON_SUCCESS;
+}
 
-	// Add the input constant.
-	hProgramWriter->constants.push_back(hValueRef);
+//----------------------------------------------------------------------------------------------------------------------
 
-	// Store the constant index.
-	(*pOutConstantIndex) = constIndex;
+int XenonProgramWriterAddConstantBool(XenonProgramWriterHandle hProgramWriter, bool value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = value ? hProgramWriter->boolTrueIndex : hProgramWriter->boolFalseIndex;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantInt8(XenonProgramWriterHandle hProgramWriter, int8_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantInt16(XenonProgramWriterHandle hProgramWriter, int16_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantInt32(XenonProgramWriterHandle hProgramWriter, int32_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantInt64(XenonProgramWriterHandle hProgramWriter, int64_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantUint8(XenonProgramWriterHandle hProgramWriter, uint8_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantUint16(XenonProgramWriterHandle hProgramWriter, uint16_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantUint32(XenonProgramWriterHandle hProgramWriter, uint32_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantUint64(XenonProgramWriterHandle hProgramWriter, uint64_t value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantFloat32(XenonProgramWriterHandle hProgramWriter, float value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantFloat64(XenonProgramWriterHandle hProgramWriter, double value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, value);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddConstantString(XenonProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutputIndex)
+{
+	if(!hProgramWriter || !value || !pOutputIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonString* const pString = XenonString::Create(value);
+	if(!pString)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	(*pOutputIndex) = XenonProgramWriter::AddConstant(hProgramWriter, pString);
+
+	XenonString::Release(pString);
 
 	return XENON_SUCCESS;
 }

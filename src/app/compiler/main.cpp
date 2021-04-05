@@ -204,52 +204,41 @@ int main(int argc, char* argv[])
 	const char* const mainFuncSignature = "void Program.Main()";
 	const char* const subFuncSignature = "int32 Program.DoWork(float64)";
 	const char* const nativeFuncSignature = "string Program.DoWorkNative(string, string)";
-	const char* const tempLocalName = "temp";
-
-	// Add the program constants.
-	XenonValueHandle hValue0_null = XenonValueCreateNull();
-	XenonValueHandle hValue1_int32 = XenonValueCreateInt32(123);
-	XenonValueHandle hValue2_float64 = XenonValueCreateFloat64(1.2345);
-	XenonValueHandle hValue3_float64 = XenonValueCreateFloat64(2.3456);
-	XenonValueHandle hValue4_string = XenonValueCreateString("this is ");
-	XenonValueHandle hValue5_string = XenonValueCreateString("a test string");
-	XenonValueHandle hValue6_string = XenonValueCreateString("globalTestVar");
-	XenonValueHandle hValue7_string = XenonValueCreateString(subFuncSignature);
-	XenonValueHandle hValue8_string = XenonValueCreateString(nativeFuncSignature);
-	XenonValueHandle hValue9_string = XenonValueCreateString(tempLocalName);
+	const char* const globalVariableName = "globalTestVar";
+	const char* const localVariableName = "localTestVar";
 
 	uint32_t constIndex0;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue0_null, &constIndex0);
+	XenonProgramWriterAddConstantNull(hProgramWriter, &constIndex0);
 
 	uint32_t constIndex1;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue1_int32, &constIndex1);
+	XenonProgramWriterAddConstantInt32(hProgramWriter, 123, &constIndex1);
 
 	uint32_t constIndex2;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue2_float64, &constIndex2);
+	XenonProgramWriterAddConstantFloat64(hProgramWriter, 1.2345, &constIndex2);
 
 	uint32_t constIndex3;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue3_float64, &constIndex3);
+	XenonProgramWriterAddConstantFloat64(hProgramWriter, 2.3456, &constIndex3);
 
 	uint32_t constIndex4;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue4_string, &constIndex4);
+	XenonProgramWriterAddConstantString(hProgramWriter, "this is ", &constIndex4);
 
 	uint32_t constIndex5;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue5_string, &constIndex5);
+	XenonProgramWriterAddConstantString(hProgramWriter, "a test string", &constIndex5);
 
 	uint32_t constIndex6;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue6_string, &constIndex6);
+	XenonProgramWriterAddConstantString(hProgramWriter, globalVariableName, &constIndex6);
 
 	uint32_t constIndex7;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue7_string, &constIndex7);
+	XenonProgramWriterAddConstantString(hProgramWriter, subFuncSignature, &constIndex7);
 
 	uint32_t constIndex8;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue8_string, &constIndex8);
+	XenonProgramWriterAddConstantString(hProgramWriter, nativeFuncSignature, &constIndex8);
 
 	uint32_t constIndex9;
-	XenonProgramWriterAddConstant(hProgramWriter, hValue9_string, &constIndex9);
+	XenonProgramWriterAddConstantString(hProgramWriter, localVariableName, &constIndex9);
 
 	// Add the program globals.
-	XenonProgramWriterAddGlobal(hProgramWriter, XenonValueGetString(hValue6_string), constIndex4);
+	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);
 
 	// void Program.Main()
 	{
@@ -307,7 +296,7 @@ int main(int argc, char* argv[])
 		const size_t subFuncLength = XenonSerializerGetStreamLength(hSubFuncSerializer);
 
 		XenonProgramWriterAddFunction(hProgramWriter, subFuncSignature, pSubFuncData, subFuncLength, 1, 1);
-		XenonProgramWriterAddLocalVariable(hProgramWriter, subFuncSignature, tempLocalName, constIndex2);
+		XenonProgramWriterAddLocalVariable(hProgramWriter, subFuncSignature, localVariableName, constIndex2);
 	}
 
 	// string Program.DoWorkNative(string, string)
@@ -331,20 +320,10 @@ int main(int argc, char* argv[])
 		fwrite(pFileData, fileLength, 1, pOutputFile);
 		fclose(pOutputFile);
 	}
+
 	XenonSerializerDispose(&hMainFuncSerializer);
 	XenonSerializerDispose(&hSubFuncSerializer);
 	XenonSerializerDispose(&hFileSerializer);
-
-	XenonValueDispose(hValue0_null);
-	XenonValueDispose(hValue1_int32);
-	XenonValueDispose(hValue2_float64);
-	XenonValueDispose(hValue3_float64);
-	XenonValueDispose(hValue4_string);
-	XenonValueDispose(hValue5_string);
-	XenonValueDispose(hValue6_string);
-	XenonValueDispose(hValue7_string);
-	XenonValueDispose(hValue8_string);
-	XenonValueDispose(hValue9_string);
 
 	// Dispose of the program writer.
 	result = XenonProgramWriterDispose(&hProgramWriter);

@@ -598,7 +598,31 @@ XENON_MAIN_API int XenonProgramWriterDispose(XenonProgramWriterHandle* phProgram
 
 XENON_MAIN_API int XenonProgramWriterAddDependency(XenonProgramWriterHandle hProgramWriter, const char* programName);
 
-XENON_MAIN_API int XenonProgramWriterAddConstant(XenonProgramWriterHandle hProgramWriter, XenonValueHandle hValue, uint32_t* pOutConstantIndex);
+XENON_MAIN_API int XenonProgramWriterAddConstantNull(XenonProgramWriterHandle hProgramWriter, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantBool(XenonProgramWriterHandle hProgramWriter, bool value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantInt8(XenonProgramWriterHandle hProgramWriter, int8_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantInt16(XenonProgramWriterHandle hProgramWriter, int16_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantInt32(XenonProgramWriterHandle hProgramWriter, int32_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantInt64(XenonProgramWriterHandle hProgramWriter, int64_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantUint8(XenonProgramWriterHandle hProgramWriter, uint8_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantUint16(XenonProgramWriterHandle hProgramWriter, uint16_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantUint32(XenonProgramWriterHandle hProgramWriter, uint32_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantUint64(XenonProgramWriterHandle hProgramWriter, uint64_t value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantFloat32(XenonProgramWriterHandle hProgramWriter, float value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantFloat64(XenonProgramWriterHandle hProgramWriter, double value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddConstantString(XenonProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutIndex);
 
 XENON_MAIN_API int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const char* variableName, uint32_t constantIndex);
 

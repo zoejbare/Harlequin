@@ -28,7 +28,6 @@
 #include <SkipProbe/SkipProbe.hpp>
 
 #include <deque>
-#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -42,6 +41,21 @@ struct XenonProgramWriter
 		XenonSerializerHandle hSerializer,
 		const int endianness
 	);
+
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int8_t value);
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int16_t value);
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int32_t value);
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int64_t value);
+
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint8_t value);
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint16_t value);
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint32_t value);
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint64_t value);
+
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const float value);
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const double value);
+
+	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, XenonString* const pString);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
@@ -60,11 +74,75 @@ struct XenonProgramWriter
 		XenonString::StlCompare
 	> GlobalValueMap;
 
+	typedef SkipProbe::HashMap<int8_t, uint32_t> IndexMapInt8;
+	typedef SkipProbe::HashMap<int16_t, uint32_t> IndexMapInt16;
+	typedef SkipProbe::HashMap<int32_t, uint32_t> IndexMapInt32;
+	typedef SkipProbe::HashMap<int64_t, uint32_t> IndexMapInt64;
+
+	typedef SkipProbe::HashMap<uint8_t, uint32_t> IndexMapUint8;
+	typedef SkipProbe::HashMap<uint16_t, uint32_t> IndexMapUint16;
+	typedef SkipProbe::HashMap<uint32_t, uint32_t> IndexMapUint32;
+	typedef SkipProbe::HashMap<uint64_t, uint32_t> IndexMapUint64;
+
+	typedef SkipProbe::HashMap<uint32_t, uint32_t> IndexMapFloat32;
+	typedef SkipProbe::HashMap<uint64_t, uint32_t> IndexMapFloat64;
+
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		uint32_t,
+		XenonString::StlHash,
+		XenonString::StlCompare
+	> IndexMapString;
+
+	struct ValueContainer
+	{
+		int type;
+
+		union
+		{
+			bool boolean;
+
+			int8_t int8;
+			int16_t int16;
+			int32_t int32;
+			int64_t int64;
+
+			uint8_t uint8;
+			uint16_t uint16;
+			uint32_t uint32;
+			uint64_t uint64;
+
+			float float32;
+			double float64;
+
+			XenonString* pString;
+		} as;
+	};
+
 	DependencySet dependencies;
 	GlobalValueMap globals;
 	XenonFunction::StringToFunctionMap functions;
 
-	std::deque<XenonValueHandle> constants;
+	IndexMapInt8 indexMapInt8;
+	IndexMapInt16 indexMapInt16;
+	IndexMapInt32 indexMapInt32;
+	IndexMapInt64 indexMapInt64;
+
+	IndexMapUint8 indexMapUint8;
+	IndexMapUint16 indexMapUint16;
+	IndexMapUint32 indexMapUint32;
+	IndexMapUint64 indexMapUint64;
+
+	IndexMapFloat32 indexMapFloat32;
+	IndexMapFloat64 indexMapFloat64;
+
+	IndexMapString indexMapString;
+
+	std::deque<ValueContainer> constants;
+
+	uint32_t nullIndex;
+	uint32_t boolTrueIndex;
+	uint32_t boolFalseIndex;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
