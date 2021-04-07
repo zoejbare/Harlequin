@@ -25,10 +25,10 @@
 #include "Function.hpp"
 #include "OpDecl.hpp"
 #include "Program.hpp"
+#include "Value.hpp"
 
-#include "../shared/Dependency.hpp"
-#include "../shared/Report.hpp"
-#include "../shared/Value.hpp"
+#include "../common/Dependency.hpp"
+#include "../common/Report.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

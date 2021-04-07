@@ -23,7 +23,7 @@
 #include "../Program.hpp"
 #include "../Vm.hpp"
 
-#include "../../shared/Value.hpp"
+#include "../Value.hpp"
 
 #include <assert.h>
 #include <inttypes.h>

@@ -21,8 +21,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "Frame.hpp"
-
-#include "../shared/Value.hpp"
+#include "Value.hpp"
 
 #include <SkipProbe/SkipProbe.hpp>
 

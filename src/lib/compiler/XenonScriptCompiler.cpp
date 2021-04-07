@@ -22,8 +22,7 @@
 #include "Function.hpp"
 #include "ProgramWriter.hpp"
 
-#include "../shared/String.hpp"
-#include "../shared/Value.hpp"
+#include "../base/String.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

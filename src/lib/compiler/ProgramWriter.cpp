@@ -19,10 +19,9 @@
 #include "ProgramWriter.hpp"
 #include "Compiler.hpp"
 
-#include "../shared/Value.hpp"
-
-#include "../shared/program-format/CommonHeader.hpp"
-#include "../shared/program-format/VersionHeader0001.hpp"
+#include "../common/ValueType.hpp"
+#include "../common/program-format/CommonHeader.hpp"
+#include "../common/program-format/VersionHeader0001.hpp"
 
 #include <assert.h>
 #include <inttypes.h>

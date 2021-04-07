@@ -22,8 +22,8 @@
 
 #include "../Program.hpp"
 
-#include "../../shared/program-format/CommonHeader.hpp"
-#include "../../shared/program-format/VersionHeader0001.hpp"
+#include "../../common/program-format/CommonHeader.hpp"
+#include "../../common/program-format/VersionHeader0001.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

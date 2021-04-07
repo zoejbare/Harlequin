@@ -20,56 +20,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "Value.hpp"
+#include "../XenonScript.h"
 
-#include "../base/String.hpp"
-
-#include <SkipProbe/SkipProbe.hpp>
+#include <functional>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgram;
+typedef std::function<void (void*)> XenonReferenceDestructCallback;
 
-struct XenonFunction
+//----------------------------------------------------------------------------------------------------------------------
+
+struct XENON_BASE_API XenonReference
 {
-	typedef SkipProbe::HashMap<
-		XenonString*,
-		XenonFunctionHandle,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> StringToHandleMap;
+	static XenonReference Initialize(XenonReferenceDestructCallback onDestructFn, void* const pObject);
 
-	typedef SkipProbe::HashMap<
-		XenonString*,
-		bool,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> StringToBoolMap;
+	static int32_t AddRef(XenonReference* const pRef);
+	static int32_t Release(XenonReference* const pRef);
 
-	static XenonFunctionHandle Create(XenonProgramHandle hProgram);
-	static void Dispose(XenonFunctionHandle hFunction);
+	void* pObject;
 
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
+	XenonReferenceDestructCallback onDestructFn;
 
-	XenonProgramHandle hProgram;
-
-	XenonString* pSignature;
-
-	XenonValue::StringToHandleMap locals;
-
-	union
-	{
-		XenonNativeFunction nativeBinding;
-
-		uint32_t offset;
-	};
-
-	uint16_t numParameters;
-	uint16_t numReturnValues;
-
-	bool isNative;
+	volatile int32_t count;
 };
-
 
 //----------------------------------------------------------------------------------------------------------------------

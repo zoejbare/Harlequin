@@ -21,10 +21,11 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "Function.hpp"
+#include "Value.hpp"
 
-#include "../shared/ByteHelper.hpp"
-#include "../shared/String.hpp"
-#include "../shared/Value.hpp"
+#include "../base/String.hpp"
+
+#include "../common/ByteHelper.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

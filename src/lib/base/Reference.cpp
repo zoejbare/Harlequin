@@ -17,7 +17,8 @@
 //
 
 #include "Reference.hpp"
-#include "Atomic.hpp"
+
+#include "../common/Atomic.hpp"
 
 #include <assert.h>
 

@@ -22,9 +22,9 @@
 
 #include "../../XenonScript.h"
 
-#include "../../shared/String.hpp"
+#include "../../base/String.hpp"
 
-#include "../../shared/program-format/CommonHeader.hpp"
+#include "../../common/program-format/CommonHeader.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

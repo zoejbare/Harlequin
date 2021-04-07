@@ -22,7 +22,7 @@
 
 #include "../XenonScript.h"
 
-#include "../shared/ByteHelper.hpp"
+#include "../common/ByteHelper.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

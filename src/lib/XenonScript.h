@@ -150,131 +150,6 @@ XENON_BASE_API int XenonReportGetLevel(XenonReportHandle hReport);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-enum XenonValueType
-{
-	XENON_VALUE_TYPE_NULL,
-
-	XENON_VALUE_TYPE_INT8,
-	XENON_VALUE_TYPE_INT16,
-	XENON_VALUE_TYPE_INT32,
-	XENON_VALUE_TYPE_INT64,
-
-	XENON_VALUE_TYPE_UINT8,
-	XENON_VALUE_TYPE_UINT16,
-	XENON_VALUE_TYPE_UINT32,
-	XENON_VALUE_TYPE_UINT64,
-
-	XENON_VALUE_TYPE_FLOAT32,
-	XENON_VALUE_TYPE_FLOAT64,
-
-	XENON_VALUE_TYPE_BOOL,
-
-	XENON_VALUE_TYPE_STRING,
-	XENON_VALUE_TYPE_OBJECT,
-
-	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_OBJECT,
-};
-
-typedef struct XenonValue* XenonValueHandle;
-
-#define XENON_VALUE_HANDLE_NULL ((XenonValueHandle)0)
-
-/*---------------------------------------------------------------------------------------------------------------------*/
-
-XENON_BASE_API XenonValueHandle XenonValueCreateBool(bool value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateInt8(int8_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateInt16(int16_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateInt32(int32_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateInt64(int64_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateUint8(uint8_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateUint16(uint16_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateUint32(uint32_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateUint64(uint64_t value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateFloat32(float value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateFloat64(double value);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateNull();
-
-XENON_BASE_API XenonValueHandle XenonValueCreateString(const char* const string);
-
-XENON_BASE_API XenonValueHandle XenonValueCreateObject(XenonValueHandle hObjectProfile);
-
-XENON_BASE_API XenonValueHandle XenonValueReference(XenonValueHandle hValue);
-
-XENON_BASE_API XenonValueHandle XenonValueCopy(XenonValueHandle hValue);
-
-XENON_BASE_API int XenonValueDispose(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsPrimitiveType(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsBool(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsInt8(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsInt16(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsInt32(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsInt64(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsUint8(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsUint16(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsUint32(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsUint64(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsFloat32(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsFloat64(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsNull(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsString(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueIsObject(XenonValueHandle hValue);
-
-XENON_BASE_API bool XenonValueGetBool(XenonValueHandle hValue);
-
-XENON_BASE_API int8_t XenonValueGetInt8(XenonValueHandle hValue);
-
-XENON_BASE_API int16_t XenonValueGetInt16(XenonValueHandle hValue);
-
-XENON_BASE_API int32_t XenonValueGetInt32(XenonValueHandle hValue);
-
-XENON_BASE_API int64_t XenonValueGetInt64(XenonValueHandle hValue);
-
-XENON_BASE_API uint8_t XenonValueGetUint8(XenonValueHandle hValue);
-
-XENON_BASE_API uint16_t XenonValueGetUint16(XenonValueHandle hValue);
-
-XENON_BASE_API uint32_t XenonValueGetUint32(XenonValueHandle hValue);
-
-XENON_BASE_API uint64_t XenonValueGetUint64(XenonValueHandle hValue);
-
-XENON_BASE_API float XenonValueGetFloat32(XenonValueHandle hValue);
-
-XENON_BASE_API double XenonValueGetFloat64(XenonValueHandle hValue);
-
-XENON_BASE_API const char* XenonValueGetString(XenonValueHandle hValue);
-
-XENON_BASE_API size_t XenonValueGetStringLength(XenonValueHandle hValue);
-
-XENON_BASE_API size_t XenonValueGetStringHash(XenonValueHandle hValue);
-
-/*---------------------------------------------------------------------------------------------------------------------*/
-
 enum XenonSerializerMode
 {
 	XENON_SERIALIZER_MODE_UNKNOWN,
@@ -405,6 +280,7 @@ typedef struct XenonProgram* XenonProgramHandle;
 typedef struct XenonFunction* XenonFunctionHandle;
 typedef struct XenonExecution* XenonExecutionHandle;
 typedef struct XenonFrame* XenonFrameHandle;
+typedef struct XenonValue* XenonValueHandle;
 
 typedef void (*XenonNativeFunction)(XenonExecutionHandle, XenonFunctionHandle);
 typedef void (*XenonCallbackProgramDependency)(void*, const char*);
@@ -433,6 +309,7 @@ typedef struct
 #define XENON_FUNCTION_HANDLE_NULL  ((XenonFunctionHandle)0)
 #define XENON_EXECUTION_HANDLE_NULL ((XenonExecutionHandle)0)
 #define XENON_FRAME_HANDLE_NULL     ((XenonFrameHandle)0)
+#define XENON_VALUE_HANDLE_NULL     ((XenonValueHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -560,6 +437,100 @@ XENON_MAIN_API int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValu
 XENON_MAIN_API int XenonFrameGetLocalVariableCount(XenonFrameHandle hFrame, size_t* pOutCount);
 
 XENON_MAIN_API int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVariable onIterateFn, void* pUserData);
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateBool(bool value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt8(int8_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt16(int16_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt32(int32_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt64(int64_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint8(uint8_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint16(uint16_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint32(uint32_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint64(uint64_t value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateFloat32(float value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateFloat64(double value);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateNull();
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateString(const char* const string);
+
+XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonValueHandle hObjectProfile);
+
+XENON_MAIN_API XenonValueHandle XenonValueReference(XenonValueHandle hValue);
+
+XENON_MAIN_API XenonValueHandle XenonValueCopy(XenonValueHandle hValue);
+
+XENON_MAIN_API int XenonValueDispose(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsPrimitiveType(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsBool(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsInt8(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsInt16(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsInt32(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsInt64(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsUint8(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsUint16(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsUint32(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsUint64(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsFloat32(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsFloat64(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsNull(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsString(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsObject(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueGetBool(XenonValueHandle hValue);
+
+XENON_MAIN_API int8_t XenonValueGetInt8(XenonValueHandle hValue);
+
+XENON_MAIN_API int16_t XenonValueGetInt16(XenonValueHandle hValue);
+
+XENON_MAIN_API int32_t XenonValueGetInt32(XenonValueHandle hValue);
+
+XENON_MAIN_API int64_t XenonValueGetInt64(XenonValueHandle hValue);
+
+XENON_MAIN_API uint8_t XenonValueGetUint8(XenonValueHandle hValue);
+
+XENON_MAIN_API uint16_t XenonValueGetUint16(XenonValueHandle hValue);
+
+XENON_MAIN_API uint32_t XenonValueGetUint32(XenonValueHandle hValue);
+
+XENON_MAIN_API uint64_t XenonValueGetUint64(XenonValueHandle hValue);
+
+XENON_MAIN_API float XenonValueGetFloat32(XenonValueHandle hValue);
+
+XENON_MAIN_API double XenonValueGetFloat64(XenonValueHandle hValue);
+
+XENON_MAIN_API const char* XenonValueGetString(XenonValueHandle hValue);
+
+XENON_MAIN_API size_t XenonValueGetStringLength(XenonValueHandle hValue);
+
+XENON_MAIN_API size_t XenonValueGetStringHash(XenonValueHandle hValue);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

@@ -22,10 +22,11 @@
 
 #include "../XenonScript.h"
 
-#include "Array.hpp"
-#include "Reference.hpp"
-#include "Stack.hpp"
-#include "String.hpp"
+#include "../base/String.hpp"
+#include "../base/Reference.hpp"
+
+#include "../common/Array.hpp"
+#include "../common/Stack.hpp"
 
 #include <SkipProbe/SkipProbe.hpp>
 

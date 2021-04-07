@@ -22,10 +22,10 @@
 
 #include "Decoder.hpp"
 #include "Function.hpp"
+#include "Value.hpp"
 
-#include "../shared/Array.hpp"
-#include "../shared/Stack.hpp"
-#include "../shared/Value.hpp"
+#include "../common/Array.hpp"
+#include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

@@ -18,7 +18,9 @@
 
 #include "CommonLoader.hpp"
 
-#include "../../shared/Value.hpp"
+#include "../Value.hpp"
+
+#include "../../common/ValueType.hpp"
 
 #include <assert.h>
 

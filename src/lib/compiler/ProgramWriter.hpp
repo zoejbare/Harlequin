@@ -22,8 +22,8 @@
 
 #include "Function.hpp"
 
-#include "../shared/Array.hpp"
-#include "../shared/String.hpp"
+#include "../base/String.hpp"
+#include "../common/Array.hpp"
 
 #include <SkipProbe/SkipProbe.hpp>
 

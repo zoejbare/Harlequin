@@ -18,11 +18,13 @@
 
 #include "../XenonScript.h"
 
-#include "../shared/String.hpp"
+#include "../base/String.hpp"
+#include "../common/ValueType.hpp"
 
 #include "Execution.hpp"
 #include "Program.hpp"
 #include "Vm.hpp"
+#include "Value.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -1145,6 +1147,434 @@ int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVa
 	}
 
 	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateBool(bool value)
+{
+	return XenonValue::CreateBool(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateInt8(int8_t value)
+{
+	return XenonValue::CreateInt8(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateInt16(int16_t value)
+{
+	return XenonValue::CreateInt16(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateInt32(int32_t value)
+{
+	return XenonValue::CreateInt32(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateInt64(int64_t value)
+{
+	return XenonValue::CreateInt64(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateUint8(uint8_t value)
+{
+	return XenonValue::CreateUint8(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateUint16(uint16_t value)
+{
+	return XenonValue::CreateUint16(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateUint32(uint32_t value)
+{
+	return XenonValue::CreateUint32(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateUint64(uint64_t value)
+{
+	return XenonValue::CreateUint64(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateFloat32(float value)
+{
+	return XenonValue::CreateFloat32(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateFloat64(double value)
+{
+	return XenonValue::CreateFloat64(value);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateNull()
+{
+	return XenonValue::CreateNull();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateString(const char* const string)
+{
+	return XenonValue::CreateString(string ? string : "");
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCreateObject(XenonValueHandle hObjectProfile)
+{
+	(void) hObjectProfile;
+	// TODO: Implement support for script objects.
+	assert(false);
+	return XenonValue::CreateNull();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueReference(XenonValueHandle hValue)
+{
+	if(!hValue)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	XenonValue::AddRef(hValue);
+
+	return hValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueCopy(XenonValueHandle hValue)
+{
+	return XenonValue::Copy(hValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonValueDispose(XenonValueHandle hValue)
+{
+	if(!hValue)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonValue::Release(hValue);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsPrimitiveType(XenonValueHandle hValue)
+{
+	switch(hValue->type)
+	{
+		case XENON_VALUE_TYPE_BOOL:
+		case XENON_VALUE_TYPE_INT8:
+		case XENON_VALUE_TYPE_INT16:
+		case XENON_VALUE_TYPE_INT32:
+		case XENON_VALUE_TYPE_INT64:
+		case XENON_VALUE_TYPE_UINT8:
+		case XENON_VALUE_TYPE_UINT16:
+		case XENON_VALUE_TYPE_UINT32:
+		case XENON_VALUE_TYPE_UINT64:
+		case XENON_VALUE_TYPE_FLOAT32:
+		case XENON_VALUE_TYPE_FLOAT64:
+			return true;
+
+		default:
+			break;
+	}
+
+	return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsBool(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_BOOL);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsInt8(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_INT8);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsInt16(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_INT16);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsInt32(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_INT32);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsInt64(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_INT64);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsUint8(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT8);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsUint16(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT16);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsUint32(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT32);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsUint64(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT64);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsFloat32(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_FLOAT32);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsFloat64(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_FLOAT64);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsNull(XenonValueHandle hValue)
+{
+	return !hValue || (hValue->type == XENON_VALUE_TYPE_NULL);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsString(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_STRING);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsObject(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_OBJECT);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueGetBool(XenonValueHandle hValue)
+{
+	if(XenonValueIsString(hValue))
+	{
+		return hValue->as.boolean;
+	}
+
+	return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int8_t XenonValueGetInt8(XenonValueHandle hValue)
+{
+	if(XenonValueIsInt8(hValue))
+	{
+		return hValue->as.int8;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int16_t XenonValueGetInt16(XenonValueHandle hValue)
+{
+	if(XenonValueIsInt16(hValue))
+	{
+		return hValue->as.int16;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int32_t XenonValueGetInt32(XenonValueHandle hValue)
+{
+	if(XenonValueIsInt32(hValue))
+	{
+		return hValue->as.int32;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int64_t XenonValueGetInt64(XenonValueHandle hValue)
+{
+	if(XenonValueIsInt64(hValue))
+	{
+		return hValue->as.int64;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint8_t XenonValueGetUint8(XenonValueHandle hValue)
+{
+	if(XenonValueIsUint8(hValue))
+	{
+		return hValue->as.uint8;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint16_t XenonValueGetUint16(XenonValueHandle hValue)
+{
+	if(XenonValueIsUint16(hValue))
+	{
+		return hValue->as.uint16;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t XenonValueGetUint32(XenonValueHandle hValue)
+{
+	if(XenonValueIsUint32(hValue))
+	{
+		return hValue->as.uint32;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint64_t XenonValueGetUint64(XenonValueHandle hValue)
+{
+	if(XenonValueIsUint64(hValue))
+	{
+		return hValue->as.uint64;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+float XenonValueGetFloat32(XenonValueHandle hValue)
+{
+	if(XenonValueIsFloat32(hValue))
+	{
+		return hValue->as.float32;
+	}
+
+	return 0.0f;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+double XenonValueGetFloat64(XenonValueHandle hValue)
+{
+	if(XenonValueIsFloat64(hValue))
+	{
+		return hValue->as.float64;
+	}
+
+	return 0.0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const char* XenonValueGetString(XenonValueHandle hValue)
+{
+	if(XenonValueIsString(hValue))
+	{
+		return hValue->as.pString->data ? hValue->as.pString->data : "";
+	}
+
+	return nullptr;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t XenonValueGetStringLength(XenonValueHandle hValue)
+{
+	if(XenonValueIsString(hValue))
+	{
+		return hValue->as.pString->length;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t XenonValueGetStringHash(XenonValueHandle hValue)
+{
+	if(XenonValueIsString(hValue))
+	{
+		return hValue->as.pString->hash;
+	}
+
+	return 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

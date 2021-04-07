@@ -241,10 +241,11 @@ class LibXenonBase(object):
 with csbuild.Project(LibXenonBase.projectName, XenonLib.rootPath, LibXenonBase.dependencies, autoDiscoverSourceFiles=False):
 	XenonLib.setCommonOptions(LibXenonBase.outputName)
 
-	csbuild.AddSourceDirectories(f"{XenonLib.rootPath}/shared")
+	csbuild.AddSourceDirectories(f"{XenonLib.rootPath}/base")
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
+			f"{XenonLib.rootPath}/common",
 			f"{XenonLib.rootPath}/compiler",
 			f"{XenonLib.rootPath}/runtime",
 		)
@@ -265,7 +266,10 @@ with csbuild.Project(LibXenonCompiler.projectName, XenonLib.rootPath, LibXenonCo
 	XenonLib.setCommonOptions(LibXenonCompiler.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
-	csbuild.AddSourceDirectories(f"{XenonLib.rootPath}/compiler")
+	csbuild.AddSourceDirectories(
+		f"{XenonLib.rootPath}/common",
+		f"{XenonLib.rootPath}/compiler",
+	)
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(f"{XenonLib.rootPath}/runtime")
@@ -288,10 +292,15 @@ class LibXenonRuntime(object):
 with csbuild.Project(LibXenonRuntime.projectName, XenonLib.rootPath, LibXenonRuntime.dependencies, autoDiscoverSourceFiles=False):
 	XenonLib.setCommonOptions(LibXenonRuntime.outputName)
 
-	csbuild.AddSourceDirectories(f"{XenonLib.rootPath}/runtime")
+	csbuild.AddSourceDirectories(
+		f"{XenonLib.rootPath}/common",
+		f"{XenonLib.rootPath}/runtime",
+	)
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-		csbuild.AddExcludeDirectories(f"{XenonLib.rootPath}/compiler")
+		csbuild.AddExcludeDirectories(
+			f"{XenonLib.rootPath}/compiler"
+		)
 
 	with csbuild.Scope(csbuild.ScopeDef.All):
 		csbuild.AddDefines("XENON_LIB_RUNTIME")

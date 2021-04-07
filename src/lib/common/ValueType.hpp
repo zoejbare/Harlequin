@@ -20,28 +20,29 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
-
-#include <functional>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-typedef std::function<void (void*)> XenonReferenceDestructCallback;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XenonReference
+enum XenonValueType
 {
-	static XenonReference Initialize(XenonReferenceDestructCallback onDestructFn, void* const pObject);
+	XENON_VALUE_TYPE_NULL,
 
-	static int32_t AddRef(XenonReference* const pRef);
-	static int32_t Release(XenonReference* const pRef);
+	XENON_VALUE_TYPE_INT8,
+	XENON_VALUE_TYPE_INT16,
+	XENON_VALUE_TYPE_INT32,
+	XENON_VALUE_TYPE_INT64,
 
-	void* pObject;
+	XENON_VALUE_TYPE_UINT8,
+	XENON_VALUE_TYPE_UINT16,
+	XENON_VALUE_TYPE_UINT32,
+	XENON_VALUE_TYPE_UINT64,
 
-	XenonReferenceDestructCallback onDestructFn;
+	XENON_VALUE_TYPE_FLOAT32,
+	XENON_VALUE_TYPE_FLOAT64,
 
-	volatile int32_t count;
+	XENON_VALUE_TYPE_BOOL,
+
+	XENON_VALUE_TYPE_STRING,
+	XENON_VALUE_TYPE_OBJECT,
+
+	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_OBJECT,
 };
 
 //----------------------------------------------------------------------------------------------------------------------
