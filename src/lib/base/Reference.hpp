@@ -22,11 +22,9 @@
 
 #include "../XenonScript.h"
 
-#include <functional>
-
 //----------------------------------------------------------------------------------------------------------------------
 
-typedef std::function<void (void*)> XenonReferenceDestructCallback;
+typedef void (*XenonReferenceDestructCallback)(void*);
 
 //----------------------------------------------------------------------------------------------------------------------
 

@@ -22,7 +22,7 @@
 
 #include "../../XenonScript.h"
 
-#include <Windows.h>
+#include <intrin.h>
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -40,7 +40,7 @@ struct XenonAtomic
 
 	static __forceinline int32_t FetchAdd(volatile int32_t* const ptr, const int32_t value)
 	{
-		return _InterlockedExchangeAdd((volatile LONG*) ptr, LONG(value));
+		return _InterlockedExchangeAdd((volatile long*) ptr, long(value));
 	}
 
 	static __forceinline int64_t FetchAdd(volatile int64_t* const ptr, const int64_t value)

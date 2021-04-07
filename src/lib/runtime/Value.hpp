@@ -37,7 +37,7 @@
 // TODO: Implement support for script objects.
 struct XenonObject;
 
-struct XENON_BASE_API XenonValue
+struct XenonValue
 {
 	typedef XenonArray<XenonValueHandle> HandleArray;
 	typedef XenonStack<XenonValueHandle> HandleStack;
