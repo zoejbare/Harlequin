@@ -24,6 +24,11 @@
 
 #include <intrin.h>
 
+#if defined(XENON_CPU_WIDTH_32_BIT)
+	#define WIN32_LEAN_AND_MEAN
+	#include <Windows.h>
+#endif
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 struct XenonAtomic
