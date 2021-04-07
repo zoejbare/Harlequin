@@ -1,0 +1,33 @@
+{
+    "version": 4,
+    "env": {
+        "defaultIncludePaths": [
+            "${workspaceFolder}/src/lib",
+            "${workspaceFolder}/external/googletest/googlemock/include",
+            "${workspaceFolder}/external/googletest/googletest/include",
+            "${workspaceFolder}/external/NCPSQueue/include",
+            "${workspaceFolder}/external/SkipProbe/include",
+            "${workspaceFolder}/external/xxHash"
+        ]
+    },
+    "configurations": [
+        {
+			"name": "macOS",
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "intelliSenseMode": "macos-clang-x64",
+            "compilerPath": "/usr/bin/clang",
+			"includePath": [
+				"${defaultIncludePaths}"
+			],
+			"defines": [
+				"XENON_LIB_COMPILER",
+				"XENON_LIB_RUNTIME"
+			],
+			"cStandard": "c89",
+			"cppStandard": "c++14"
+        }
+    ]
+}

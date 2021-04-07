@@ -1,0 +1,926 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Launch Xenon Runtime [clang/debug/x64]",
+			"program": "${config:clangOutPath}/x64/debug/xenon",
+			"cwd": "${config:clangOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [clang/fastdebug/x64]",
+			"program": "${config:clangOutPath}/x64/fastdebug/xenon",
+			"cwd": "${config:clangOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [clang/release/x64]",
+			"program": "${config:clangOutPath}/x64/release/xenon",
+			"cwd": "${config:clangOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [clang/debug/x86]",
+			"program": "${config:clangOutPath}/x86/debug/xenon",
+			"cwd": "${config:clangOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [clang/fastdebug/x86]",
+			"program": "${config:clangOutPath}/x86/fastdebug/xenon",
+			"cwd": "${config:clangOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [clang/release/x86]",
+			"program": "${config:clangOutPath}/x86/release/xenon",
+			"cwd": "${config:clangOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [gcc/debug/x64]",
+			"program": "${config:gccOutPath}/x64/debug/xenon",
+			"cwd": "${config:gccOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [gcc/fastdebug/x64]",
+			"program": "${config:gccOutPath}/x64/fastdebug/xenon",
+			"cwd": "${config:gccOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [gcc/release/x64]",
+			"program": "${config:gccOutPath}/x64/release/xenon",
+			"cwd": "${config:gccOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [gcc/debug/x86]",
+			"program": "${config:gccOutPath}/x86/debug/xenon",
+			"cwd": "${config:gccOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [gcc/fastdebug/x86]",
+			"program": "${config:gccOutPath}/x86/fastdebug/xenon",
+			"cwd": "${config:gccOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [gcc/release/x86]",
+			"program": "${config:gccOutPath}/x86/release/xenon",
+			"cwd": "${config:gccOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [msvc/debug/x64]",
+			"program": "${config:msvcOutPath}/x64/debug/xenon.exe",
+			"cwd": "${config:msvcOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [msvc/fastdebug/x64]",
+			"program": "${config:msvcOutPath}/x64/fastdebug/xenon.exe",
+			"cwd": "${config:msvcOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [msvc/release/x64]",
+			"program": "${config:msvcOutPath}/x64/release/xenon.exe",
+			"cwd": "${config:msvcOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [msvc/debug/x86]",
+			"program": "${config:msvcOutPath}/x86/debug/xenon.exe",
+			"cwd": "${config:msvcOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [msvc/fastdebug/x86]",
+			"program": "${config:msvcOutPath}/x86/fastdebug/xenon.exe",
+			"cwd": "${config:msvcOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Runtime [msvc/release/x86]",
+			"program": "${config:msvcOutPath}/x86/release/xenon.exe",
+			"cwd": "${config:msvcOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [clang/debug/x64]",
+			"program": "${config:clangOutPath}/x64/debug/xenonc",
+			"cwd": "${config:clangOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [clang/fastdebug/x64]",
+			"program": "${config:clangOutPath}/x64/fastdebug/xenonc",
+			"cwd": "${config:clangOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [clang/release/x64]",
+			"program": "${config:clangOutPath}/x64/release/xenonc",
+			"cwd": "${config:clangOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [clang/debug/x86]",
+			"program": "${config:clangOutPath}/x86/debug/xenonc",
+			"cwd": "${config:clangOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [clang/fastdebug/x86]",
+			"program": "${config:clangOutPath}/x86/fastdebug/xenonc",
+			"cwd": "${config:clangOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [clang/release/x86]",
+			"program": "${config:clangOutPath}/x86/release/xenonc",
+			"cwd": "${config:clangOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [gcc/debug/x64]",
+			"program": "${config:gccOutPath}/x64/debug/xenonc",
+			"cwd": "${config:gccOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [gcc/fastdebug/x64]",
+			"program": "${config:gccOutPath}/x64/fastdebug/xenonc",
+			"cwd": "${config:gccOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [gcc/release/x64]",
+			"program": "${config:gccOutPath}/x64/release/xenonc",
+			"cwd": "${config:gccOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [gcc/debug/x86]",
+			"program": "${config:gccOutPath}/x86/debug/xenonc",
+			"cwd": "${config:gccOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [gcc/fastdebug/x86]",
+			"program": "${config:gccOutPath}/x86/fastdebug/xenonc",
+			"cwd": "${config:gccOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [gcc/release/x86]",
+			"program": "${config:gccOutPath}/x86/release/xenonc",
+			"cwd": "${config:gccOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [msvc/debug/x64]",
+			"program": "${config:msvcOutPath}/x64/debug/xenonc.exe",
+			"cwd": "${config:msvcOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [msvc/fastdebug/x64]",
+			"program": "${config:msvcOutPath}/x64/fastdebug/xenonc.exe",
+			"cwd": "${config:msvcOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [msvc/release/x64]",
+			"program": "${config:msvcOutPath}/x64/release/xenonc.exe",
+			"cwd": "${config:msvcOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [msvc/debug/x86]",
+			"program": "${config:msvcOutPath}/x86/debug/xenonc.exe",
+			"cwd": "${config:msvcOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [msvc/fastdebug/x86]",
+			"program": "${config:msvcOutPath}/x86/fastdebug/xenonc.exe",
+			"cwd": "${config:msvcOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Compiler [msvc/release/x86]",
+			"program": "${config:msvcOutPath}/x86/release/xenonc.exe",
+			"cwd": "${config:msvcOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [clang/debug/x64]",
+			"program": "${config:clangOutPath}/x64/debug/xenonunittest",
+			"cwd": "${config:clangOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [clang/fastdebug/x64]",
+			"program": "${config:clangOutPath}/x64/fastdebug/xenonunittest",
+			"cwd": "${config:clangOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [clang/release/x64]",
+			"program": "${config:clangOutPath}/x64/release/xenonunittest",
+			"cwd": "${config:clangOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [clang/debug/x86]",
+			"program": "${config:clangOutPath}/x86/debug/xenonunittest",
+			"cwd": "${config:clangOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [clang/fastdebug/x86]",
+			"program": "${config:clangOutPath}/x86/fastdebug/xenonunittest",
+			"cwd": "${config:clangOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [clang/release/x86]",
+			"program": "${config:clangOutPath}/x86/release/xenonunittest",
+			"cwd": "${config:clangOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [gcc/debug/x64]",
+			"program": "${config:gccOutPath}/x64/debug/xenonunittest",
+			"cwd": "${config:gccOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [gcc/fastdebug/x64]",
+			"program": "${config:gccOutPath}/x64/fastdebug/xenonunittest",
+			"cwd": "${config:gccOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [gcc/release/x64]",
+			"program": "${config:gccOutPath}/x64/release/xenonunittest",
+			"cwd": "${config:gccOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [gcc/debug/x86]",
+			"program": "${config:gccOutPath}/x86/debug/xenonunittest",
+			"cwd": "${config:gccOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [gcc/fastdebug/x86]",
+			"program": "${config:gccOutPath}/x86/fastdebug/xenonunittest",
+			"cwd": "${config:gccOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [gcc/release/x86]",
+			"program": "${config:gccOutPath}/x86/release/xenonunittest",
+			"cwd": "${config:gccOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [msvc/debug/x64]",
+			"program": "${config:msvcOutPath}/x64/debug/xenonunittest.exe",
+			"cwd": "${config:msvcOutPath}/x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [msvc/fastdebug/x64]",
+			"program": "${config:msvcOutPath}/x64/fastdebug/xenonunittest.exe",
+			"cwd": "${config:msvcOutPath}/x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [msvc/release/x64]",
+			"program": "${config:msvcOutPath}/x64/release/xenonunittest.exe",
+			"cwd": "${config:msvcOutPath}/x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [msvc/debug/x86]",
+			"program": "${config:msvcOutPath}/x86/debug/xenonunittest.exe",
+			"cwd": "${config:msvcOutPath}/x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [msvc/fastdebug/x86]",
+			"program": "${config:msvcOutPath}/x86/fastdebug/xenonunittest.exe",
+			"cwd": "${config:msvcOutPath}/x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Xenon Unit Tests [msvc/release/x86]",
+			"program": "${config:msvcOutPath}/x86/release/xenonunittest.exe",
+			"cwd": "${config:msvcOutPath}/x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		}
+	]
+}

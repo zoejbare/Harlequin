@@ -1,0 +1,7 @@
+{
+	"C_Cpp.errorSquiggles": "Enabled",
+
+	"clangOutPath": "${workspaceFolder}/_out/clang",
+	"gccOutPath": "${workspaceFolder}/_out/gcc",
+	"msvcOutPath": "${workspaceFolder}/_out/msvc"
+}

@@ -1,0 +1,1231 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build [clang/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [clang/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [clang/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [clang/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [clang/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [clang/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [gcc/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [gcc/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [gcc/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [gcc/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [gcc/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [gcc/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [msvc/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [msvc/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [msvc/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Build [msvc/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [msvc/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [msvc/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [msvc/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [msvc/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [msvc/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [msvc/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [msvc/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [msvc/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [clang/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [clang/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [clang/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [clang/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [clang/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [clang/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [gcc/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [gcc/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [gcc/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [gcc/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [gcc/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [gcc/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
+			},
+			"windows":{
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [msvc/debug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [msvc/fastdebug/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [msvc/release/x64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Clean [msvc/debug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [msvc/fastdebug/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [msvc/release/x86]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python3",
+				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x86"]
+			}
+		}
+	]
+}
