@@ -245,7 +245,6 @@ with csbuild.Project(LibXenonBase.projectName, XenonLib.rootPath, LibXenonBase.d
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
-			f"{XenonLib.rootPath}/common",
 			f"{XenonLib.rootPath}/compiler",
 			f"{XenonLib.rootPath}/runtime",
 		)
@@ -272,7 +271,10 @@ with csbuild.Project(LibXenonCompiler.projectName, XenonLib.rootPath, LibXenonCo
 	)
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-		csbuild.AddExcludeDirectories(f"{XenonLib.rootPath}/runtime")
+		csbuild.AddExcludeDirectories(
+			f"{XenonLib.rootPath}/base",
+			f"{XenonLib.rootPath}/runtime",
+		)
 
 	with csbuild.Scope(csbuild.ScopeDef.All):
 		csbuild.AddDefines("XENON_LIB_COMPILER")
@@ -299,7 +301,8 @@ with csbuild.Project(LibXenonRuntime.projectName, XenonLib.rootPath, LibXenonRun
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
-			f"{XenonLib.rootPath}/compiler"
+			f"{XenonLib.rootPath}/base",
+			f"{XenonLib.rootPath}/compiler",
 		)
 
 	with csbuild.Scope(csbuild.ScopeDef.All):
