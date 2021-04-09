@@ -26,7 +26,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonSerializer
+struct XENON_BASE_API XenonSerializer
 {
 	static XenonSerializerHandle Create(int mode);
 	static void Dispose(XenonSerializerHandle hSerializer);
