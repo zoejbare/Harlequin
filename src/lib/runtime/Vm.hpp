@@ -23,6 +23,7 @@
 #include "Decoder.hpp"
 #include "Execution.hpp"
 #include "Function.hpp"
+#include "GarbageCollector.hpp"
 #include "OpDecl.hpp"
 #include "Program.hpp"
 #include "Value.hpp"
@@ -69,6 +70,7 @@ struct XenonVm
 
 	XenonReport report;
 	XenonDependency dependency;
+	XenonGarbageCollector gc;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

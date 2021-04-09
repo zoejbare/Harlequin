@@ -37,6 +37,10 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 	pOutput->dependency.onRequestFn = init.dependency.onRequestFn;
 	pOutput->dependency.pUserData = init.dependency.pUserData;
 
+	// Initialize the garbage collector.
+	XenonGarbageCollector::Initialize(pOutput->gc, pOutput);
+
+	// Initialize the opcode array.
 	OpCodeArray::Initialize(pOutput->opCodes);
 	OpCodeArray::Reserve(pOutput->opCodes, XENON_OP_CODE__TOTAL_COUNT);
 
@@ -98,6 +102,7 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 		XenonExecution::Dispose(kv.key);
 	}
 
+	XenonGarbageCollector::Dispose(hVm->gc);
 	OpCodeArray::Dispose(hVm->opCodes);
 
 	delete hVm;
