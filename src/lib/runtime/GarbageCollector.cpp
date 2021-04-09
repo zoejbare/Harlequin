@@ -32,9 +32,9 @@ enum XenonGcPhase
 	XENON_GC_PHASE_COLLECT,
 	XENON_GC_PHASE_DISPOSE,
 
-	__XENON_GC_PHASE_COUNT,
-	__XENON_GC_PHASE_START = XENON_GC_PHASE_LINK_PENDING,
-	__XENON_GC_PHASE_END = XENON_GC_PHASE_DISPOSE,
+	XENON_GC_PHASE__COUNT,
+	XENON_GC_PHASE__START = XENON_GC_PHASE_LINK_PENDING,
+	XENON_GC_PHASE__END = XENON_GC_PHASE_DISPOSE,
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 
 void XenonGarbageCollector::Reset(XenonGarbageCollector& gc)
 {
-	gc.phase = __XENON_GC_PHASE_START;
-	gc.lastPhase = __XENON_GC_PHASE_END;
+	gc.phase = XENON_GC_PHASE__START;
+	gc.lastPhase = XENON_GC_PHASE__END;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -288,9 +288,9 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 	if(endOfPhase)
 	{
 		gc.lastPhase = gc.phase;
-		gc.phase = (gc.phase + 1) % __XENON_GC_PHASE_COUNT;
+		gc.phase = (gc.phase + 1) % XENON_GC_PHASE__COUNT;
 
-		endOfAllPhases = (gc.phase == __XENON_GC_PHASE_START);
+		endOfAllPhases = (gc.phase == XENON_GC_PHASE__START);
 	}
 
 	return endOfAllPhases;
