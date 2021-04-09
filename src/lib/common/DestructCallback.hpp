@@ -20,21 +20,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XenonDecoder
-{
-	static void Initialize(XenonDecoder& output, XenonProgramHandle hProgram, uint32_t offset);
-
-	static uint8_t LoadUint8(XenonDecoder& decoder);
-	static uint32_t LoadUint32(XenonDecoder& decoder);
-
-	uint8_t* ip;
-	uint8_t* cachedIp;
-
-	bool sameEndian;
-};
+typedef void (*XenonDestructCallback)(void*);
 
 //----------------------------------------------------------------------------------------------------------------------

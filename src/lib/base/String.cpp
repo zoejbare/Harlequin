@@ -101,10 +101,11 @@ XenonString* XenonString::Create(const char* const stringData)
 
 	const size_t length = (stringData) ? strlen(stringData) : 0;
 
-	pOutput->ref = XenonReference::Initialize(prv_onDestruct, pOutput);
 	pOutput->length = length;
 	pOutput->hash = RawHash(stringData ? stringData : "");
 	pOutput->data = (length > 0) ? reinterpret_cast<char*>(XenonMemAlloc(length + 1)) : nullptr;
+
+	XenonReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
 	if(stringData && pOutput->data)
 	{
@@ -120,7 +121,7 @@ XenonString* XenonString::Create(const char* const stringData)
 int32_t XenonString::AddRef(XenonString* const pString)
 {
 	return (pString)
-		? XenonReference::AddRef(&pString->ref)
+		? XenonReference::AddRef(pString->ref)
 		: -1;
 }
 
@@ -129,7 +130,7 @@ int32_t XenonString::AddRef(XenonString* const pString)
 int32_t XenonString::Release(XenonString* const pString)
 {
 	return (pString)
-		? XenonReference::Release(&pString->ref)
+		? XenonReference::Release(pString->ref)
 		: -1;
 }
 

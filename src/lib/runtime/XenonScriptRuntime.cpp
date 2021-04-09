@@ -644,7 +644,8 @@ int XenonFunctionDisassemble(XenonFunctionHandle hFunction, XenonCallbackOpDisas
 	disasm.hProgram = hFunction->hProgram;
 	disasm.onDisasmFn = onDisasmFn;
 	disasm.pUserData = pUserData;
-	disasm.decoder = XenonDecoder::Construct(hFunction->hProgram, hFunction->offset);
+
+	XenonDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->offset);
 
 	// Iterate through each instruction.
 	for(;;)

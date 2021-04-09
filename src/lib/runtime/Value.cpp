@@ -324,7 +324,7 @@ XenonValueHandle XenonValue::Copy(XenonValueHandle hValue)
 int32_t XenonValue::AddRef(XenonValueHandle hValue)
 {
 	return (hValue && hValue->type != XENON_VALUE_TYPE_NULL)
-		? XenonReference::AddRef(&hValue->ref)
+		? XenonReference::AddRef(hValue->ref)
 		: -1;
 }
 
@@ -333,7 +333,7 @@ int32_t XenonValue::AddRef(XenonValueHandle hValue)
 int32_t XenonValue::Release(XenonValueHandle hValue)
 {
 	return (hValue && hValue->type != XENON_VALUE_TYPE_NULL)
-		? XenonReference::Release(&hValue->ref)
+		? XenonReference::Release(hValue->ref)
 		: -1;
 }
 
@@ -428,8 +428,9 @@ XenonValue* XenonValue::prv_onCreate(const int valueType)
 
 	XenonValue* const pOutput = new XenonValue();
 
-	pOutput->ref = XenonReference::Initialize(prv_onDestruct, pOutput);
 	pOutput->type = valueType;
+
+	XenonReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
 	return pOutput;
 }

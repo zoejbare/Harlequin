@@ -24,37 +24,38 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonReference XenonReference::Initialize(XenonReferenceDestructCallback onDestructFn, void* pObject)
+void XenonReference::Initialize(
+	XenonReference& output,
+	XenonDestructCallback onDestructFn,
+	void* pObject
+)
 {
 	assert(onDestructFn != nullptr);
 	assert(pObject != nullptr);
-
-	XenonReference output;
 
 	output.onDestructFn = onDestructFn;
 	output.pObject = pObject;
 	output.count = 1;
 
-	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonReference::AddRef(XenonReference* const pRef)
+int32_t XenonReference::AddRef(XenonReference& ref)
 {
-	return XenonAtomic::FetchAdd(&pRef->count, 1) + 1;
+	return XenonAtomic::FetchAdd(&ref.count, 1) + 1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonReference::Release(XenonReference* const pRef)
+int32_t XenonReference::Release(XenonReference& ref)
 {
-	const int32_t currentValue = XenonAtomic::FetchAdd(&pRef->count, -1) - 1;
+	const int32_t currentValue = XenonAtomic::FetchAdd(&ref.count, -1) - 1;
 
 	if(currentValue == 0)
 	{
 		// Don't do anything with the reference object after destructing because it has probably been freed.
-		pRef->onDestructFn(pRef->pObject);
+		ref.onDestructFn(ref.pObject);
 	}
 
 	return currentValue;

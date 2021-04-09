@@ -22,22 +22,24 @@
 
 #include "../XenonScript.h"
 
-//----------------------------------------------------------------------------------------------------------------------
-
-typedef void (*XenonReferenceDestructCallback)(void*);
+#include "../common/DestructCallback.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XENON_BASE_API XenonReference
 {
-	static XenonReference Initialize(XenonReferenceDestructCallback onDestructFn, void* const pObject);
+	static void Initialize(
+		XenonReference& output,
+		XenonDestructCallback onDestructFn,
+		void* const pObject
+	);
 
-	static int32_t AddRef(XenonReference* const pRef);
-	static int32_t Release(XenonReference* const pRef);
+	static int32_t AddRef(XenonReference& ref);
+	static int32_t Release(XenonReference& ref);
 
 	void* pObject;
 
-	XenonReferenceDestructCallback onDestructFn;
+	XenonDestructCallback onDestructFn;
 
 	volatile int32_t count;
 };
