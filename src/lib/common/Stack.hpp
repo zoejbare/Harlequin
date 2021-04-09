@@ -33,14 +33,14 @@ struct XenonStack
 
 	size_t nextIndex;
 
-	static void Initialize(XenonStack& stack, const size_t size)
+	static void Initialize(XenonStack& output, const size_t size)
 	{
 		// Initialize the stack's backing memory and reserve the desired size.
-		XenonArray<T>::Initialize(stack.memory);
-		XenonArray<T>::Reserve(stack.memory, size);
+		XenonArray<T>::Initialize(output.memory);
+		XenonArray<T>::Reserve(output.memory, size);
 
-		stack.memory.count = size;
-		stack.nextIndex = 0;
+		output.memory.count = size;
+		output.nextIndex = 0;
 	}
 
 	static void Dispose(XenonStack& stack)
@@ -118,9 +118,14 @@ struct XenonStack
 		return XENON_SUCCESS;
 	}
 
-	static size_t GetSize(XenonStack& stack)
+	static size_t GetTotalSize(XenonStack& stack)
 	{
 		return stack.memory.count;
+	}
+
+	static bool IsEmpty(XenonStack& stack)
+	{
+		return stack.nextIndex == 0;
 	}
 };
 

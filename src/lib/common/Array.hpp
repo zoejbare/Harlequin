@@ -32,11 +32,11 @@ struct XenonArray
 	size_t count;
 	size_t capacity;
 
-	static void Initialize(XenonArray& array)
+	static void Initialize(XenonArray& output)
 	{
-		array.pData = nullptr;
-		array.count = 0;
-		array.capacity = 0;
+		output.pData = nullptr;
+		output.count = 0;
+		output.capacity = 0;
 	}
 
 	static void Dispose(XenonArray& array)
