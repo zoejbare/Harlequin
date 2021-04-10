@@ -84,8 +84,11 @@ void OnDependencyRequested(void* const pUserData, const char* const programName)
 
 int main(int argc, char* argv[])
 {
-	(void) argc;
-	(void) argv;
+	if(argc < 2)
+	{
+		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_FATAL, "Missing required 'filepath' argument");
+		return 1;
+	}
 
 #if defined(XENON_PLATFORM_WINDOWS)
 	// This enables tracking of global heap allocations.  If any are leaked, they will show up in the
@@ -105,6 +108,8 @@ int main(int argc, char* argv[])
 	init.dependency.onRequestFn = OnDependencyRequested;
 	init.dependency.pUserData = &dependencies;
 
+	init.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
+
 	// Create the VM context.
 	int result = XenonVmCreate(&hVm, init);
 	if(result != XENON_SUCCESS)
@@ -116,7 +121,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Load the test program.
-	if(XenonVmLoadProgramFromFile(hVm, "test", "test.xc") == XENON_SUCCESS)
+	if(XenonVmLoadProgramFromFile(hVm, "test", argv[1]) == XENON_SUCCESS)
 	{
 		auto iterateProgram = [](void* const pUserData, XenonProgramHandle hProgram) -> bool
 		{
