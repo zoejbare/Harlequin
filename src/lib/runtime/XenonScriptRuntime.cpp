@@ -378,7 +378,7 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 	}
 
 	// Create a string to be the key in the program map.
-	XenonString* const pProgramName = XenonString::Create(filePath);
+	XenonString* const pProgramName = XenonString::Create(programName);
 	if(!pProgramName)
 	{
 		return XENON_ERROR_BAD_ALLOCATION;
