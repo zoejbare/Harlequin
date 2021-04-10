@@ -328,6 +328,11 @@ class XenonApp(object):
 				"pthread",
 			)
 
+		with csbuild.Toolchain("ps4"):
+			csbuild.AddLibraries(
+				"ScePosix_stub_weak",
+			)
+
 ###################################################################################################
 
 class XenonRuntime(object):

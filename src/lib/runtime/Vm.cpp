@@ -20,6 +20,7 @@
 #include "OpDecl.hpp"
 
 #include <assert.h>
+#include <inttypes.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -66,7 +67,7 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 
 	#undef XENON_BIND_OP_CODE
 
-	pOutput->gcThread = XenonThread::Create(prv_gcThreadMain, pOutput);
+	pOutput->gcThread = XenonThread::Create(prv_gcThreadMain, pOutput, init.gcThreadStackSize);
 
 	return pOutput;
 }
@@ -79,8 +80,20 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 
 	hVm->isShuttingDown = true;
 
+	int32_t threadReturnValue = 0;
+
 	// Wait for the GC thread to exit.
-	XenonThread::Join(hVm->gcThread);
+	XenonThread::Join(hVm->gcThread, &threadReturnValue);
+
+	if(threadReturnValue != XENON_SUCCESS)
+	{
+		XenonReportMessage(
+			&hVm->report,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Garbage collection thread exited abnormally: error=\"%s\"",
+			XenonGetErrorCodeString(threadReturnValue)
+		);
+	}
 
 	// Clean up each loaded program.
 	for(auto& kv : hVm->programs)
@@ -224,9 +237,10 @@ void XenonVm::DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonVm::prv_gcThreadMain(void* const pArg)
+int32_t XenonVm::prv_gcThreadMain(void* const pArg)
 {
 	XenonVmHandle hVm = reinterpret_cast<XenonVmHandle>(pArg);
+	assert(hVm != XENON_VM_HANDLE_NULL);
 
 	while(!hVm->isShuttingDown)
 	{
@@ -234,6 +248,8 @@ void XenonVm::prv_gcThreadMain(void* const pArg)
 		// TODO: Need a separate timing mechanism to keep the garbage collector from running too much while not forcing long sleep times.
 		XenonThread::Sleep(100);
 	}
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

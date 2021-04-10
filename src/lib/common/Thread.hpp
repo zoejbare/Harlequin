@@ -25,7 +25,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #if defined(XENON_PLATFORM_WINDOWS)
-	#include "thread-impl/ThreadWindows.hpp"
+	#include "thread-impl/ThreadWin32.hpp"
 
 #elif defined(XENON_PLATFORM_LINUX) \
 	|| defined(XENON_PLATFORM_MAC_OS) \

@@ -23,8 +23,10 @@
 #include "../ThreadMainCallback.hpp"
 
 #include <assert.h>
-#include <pthread.h>
-#include <unistd.h>
+#include <process.h>
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -41,7 +43,7 @@ struct XenonThread
 			void* pObject;
 		};
 
-		auto threadEntryPoint = [](void* pOpaqueArgs) -> void*
+		auto threadEntryPoint = [](void* pOpaqueArgs) -> uint32_t
 		{
 			Args args = *reinterpret_cast<Args*>(pOpaqueArgs);
 
@@ -51,12 +53,9 @@ struct XenonThread
 			// Call the read thread main function.
 			const int32_t result = args.callback(args.pObject);
 
-			// Use integer casting magic to make the return value look like an opaque pointer.
-			// No dynamic allocation required!
-			void* const pReturnValue = reinterpret_cast<void*>(result);
-			pthread_exit(pReturnValue);
-
-			return nullptr;
+			// Exit the thread with the value returned by the callback.
+			_endthreadex(uint32_t(result));
+			return 0;
 		};
 
 		Args* const pArgs = reinterpret_cast<Args*>(XenonMemAlloc(sizeof(Args)));
@@ -65,47 +64,39 @@ struct XenonThread
 		pArgs->pObject = pObject;
 
 		XenonThread output;
-		pthread_attr_t attr;
-
-		// Create a thread attributes object where the thread properties will be set.
-		const int attrInitResult = pthread_attr_init(&attr);
-		assert(attrInitResult == 0);
-
-		// Configure the thread stack size.
-		pthread_attr_setstacksize(&attr, size_t(stackSize));
 
 		// Create and start the thread.
-		const int threadCreateResult = pthread_create(&output.obj, &attr, threadEntryPoint, pArgs);
-		assert(threadCreateResult == 0);
-
-		// Destroy the thread attributes since they are no longer needed.
-		// This will not affect the thread since it creates its own copy.
-		const int attrDestroyResult = pthread_attr_destroy(&attr);
-		assert(attrDestroyResult == 0);
+		output.hObj = HANDLE(_beginthreadex(nullptr, stackSize, threadEntryPoint, pArgs, 0, &output.id));
+		assert(output.hObj != nullptr);
 
 		return output;
 	}
 
 	static void Join(XenonThread& thread, int32_t* const pOutReturnValue)
 	{
-		void* pThreadResult = nullptr;
+		// Wait for the thread to exit.
+		WaitForSingleObject(thread.hObj, INFINITE);
 
-		const int joinResult = pthread_join(thread.obj, &pThreadResult);
-		assert(joinResult == 0);
+		// Get the thread's return value.
+		DWORD result = 0;
+		GetExitCodeThread(thread.hObj, &result);
+
+		// Free the thread's internal resources.
+		CloseHandle(thread.hObj);
 
 		if(pOutReturnValue)
 		{
-			// Unpack the thread's return value.
-			(*pOutReturnValue) = int32_t(reinterpret_cast<intptr_t>(pThreadResult));
+			(*pOutReturnValue) = int32_t(result);
 		}
 	}
 
 	static void Sleep(uint32_t ms)
 	{
-		usleep(ms * 1000);
+		::Sleep(ms);
 	}
 
-	pthread_t obj;
+	HANDLE hObj;
+	uint32_t id;
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/

@@ -25,7 +25,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #if defined(XENON_PLATFORM_WINDOWS)
-	#include "atomic-impl/AtomicWindows.hpp"
+	#include "atomic-impl/AtomicWin32.hpp"
 
 #elif defined(XENON_PLATFORM_LINUX) \
 	|| defined(XENON_PLATFORM_MAC_OS) \
