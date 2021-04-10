@@ -38,6 +38,7 @@ XenonVmInit ConstructInitObject(void* const pUserData, const int reportLevel, Xe
 	output.common.report.reportLevel = reportLevel;
 	output.dependency.onRequestFn = onDependencyRequested;
 	output.dependency.pUserData = nullptr;
+	output.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
 
 	return output;
 }
