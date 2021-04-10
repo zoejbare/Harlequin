@@ -18,6 +18,7 @@
 
 #include "GarbageCollector.hpp"
 #include "GcProxy.hpp"
+#include "Vm.hpp"
 
 #include <assert.h>
 
@@ -28,6 +29,7 @@ enum XenonGcPhase
 	XENON_GC_PHASE_LINK_PENDING,
 	XENON_GC_PHASE_RESET_STATE,
 	XENON_GC_PHASE_MARK_CONSTANTS,
+	XENON_GC_PHASE_MARK_GLOBALS,
 	XENON_GC_PHASE_MARK_EXECUTIONS,
 	XENON_GC_PHASE_COLLECT,
 	XENON_GC_PHASE_DISPOSE,
@@ -43,6 +45,9 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 {
 	// TODO: Make these values configurable.
 	constexpr const uint32_t maxIterationCount = 32;
+	constexpr const uint64_t initialExecStackSize = 8;
+
+	XenonExecution::HandleStack::Initialize(output.execStack, initialExecStackSize);
 
 	output.hVm = hVm;
 	output.pActiveHead = nullptr;
@@ -61,13 +66,16 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 
 void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 {
+	// Clear out any reference counted data.
+	Reset(gc);
+
 	// Dispose of all proxies in the active list.
 	XenonGcProxy* pCurrent = gc.pActiveHead;
 	while(pCurrent)
 	{
 		XenonGcProxy* const pNext = pCurrent->pNext;
 
-		XenonGcProxy::Dispose(*pCurrent);
+		XenonGcProxy::prv_onDispose(*pCurrent);
 
 		pCurrent = pNext;
 	}
@@ -78,7 +86,7 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 	{
 		XenonGcProxy* const pNext = pCurrent->pNext;
 
-		XenonGcProxy::Dispose(*pCurrent);
+		XenonGcProxy::prv_onDispose(*pCurrent);
 
 		pCurrent = pNext;
 	}
@@ -89,10 +97,12 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 	{
 		XenonGcProxy* const pNext = pCurrent->pNext;
 
-		XenonGcProxy::Dispose(*pCurrent);
+		XenonGcProxy::prv_onDispose(*pCurrent);
 
 		pCurrent = pNext;
 	}
+
+	XenonExecution::HandleStack::Dispose(gc.execStack);
 
 	gc.hVm = XENON_VM_HANDLE_NULL;
 	gc.pActiveHead = nullptr;
@@ -108,6 +118,13 @@ void XenonGarbageCollector::Reset(XenonGarbageCollector& gc)
 {
 	gc.phase = XENON_GC_PHASE__START;
 	gc.lastPhase = XENON_GC_PHASE__END;
+
+	// Release any execution contexts still in the stack.
+	XenonExecutionHandle hExec;
+	while(XenonExecution::HandleStack::Pop(gc.execStack, &hExec) == XENON_SUCCESS)
+	{
+		XenonExecution::Release(hExec);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -185,10 +202,41 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 			endOfPhase = true;
 			break;
 
-		case XENON_GC_PHASE_MARK_EXECUTIONS:
-			// TODO: Mark all tracked data contained in the VM's execution contexts.
+		case XENON_GC_PHASE_MARK_GLOBALS:
+			// TODO: Mark all globals in the VM.
 			endOfPhase = true;
 			break;
+
+		case XENON_GC_PHASE_MARK_EXECUTIONS:
+		{
+			if(gc.lastPhase != gc.phase)
+			{
+				// At the start of the phase, we collect all the execution contexts saving
+				// a reference to them to keep them alive in case the user releases any of
+				// them before they're all processed here.
+				for(auto& kv : gc.hVm->executionContexts)
+				{
+					XenonExecution::AddRef(kv.key);
+					XenonExecution::HandleStack::Push(gc.execStack, kv.key);
+				}
+			}
+			else
+			{
+				// Pop the execution contexts one-by-one until none are left.
+				XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
+				XenonExecution::HandleStack::Pop(gc.execStack, &hExec);
+
+				// TODO: Mark gc data in the execution context here.
+				XenonExecution::Release(hExec);
+			}
+
+			if(XenonExecution::HandleStack::IsEmpty(gc.execStack))
+			{
+				// When the execution context stack is empty, we can move on to the next phase.
+				endOfPhase = true;
+			}
+			break;
+		}
 
 		case XENON_GC_PHASE_COLLECT:
 		{
@@ -206,7 +254,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 			{
 				if(!gc.pIterCurrent)
 				{
-					// We've reached the end of the list, no need to check anything else.
+					// The end of the list has been reached.
 					break;
 				}
 
@@ -258,6 +306,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 			{
 				if(!gc.pUnmarkedHead)
 				{
+					// The end of the list has been reached.
 					break;
 				}
 
@@ -265,7 +314,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 				XenonGcProxy* const pNext = gc.pUnmarkedHead->pNext;
 
 				// Dispose of the current proxy.
-				XenonGcProxy::Dispose(*gc.pUnmarkedHead);
+				XenonGcProxy::prv_onDispose(*gc.pUnmarkedHead);
 
 				// Update the head of the unmarked list.
 				gc.pUnmarkedHead = pNext;

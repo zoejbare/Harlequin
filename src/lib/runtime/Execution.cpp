@@ -52,6 +52,8 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	pOutput->finished = false;
 	pOutput->exception = false;
 
+	XenonReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+
 	XenonFrame::HandleStack::Initialize(pOutput->frameStack, XENON_VM_FRAME_STACK_SIZE);
 	XenonValue::HandleArray::Initialize(pOutput->registers);
 	XenonValue::HandleArray::Reserve(pOutput->registers, XENON_VM_IO_REGISTER_COUNT);
@@ -69,7 +71,7 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	if(result != XENON_SUCCESS)
 	{
 		XenonFrame::Dispose(pOutput->hCurrentFrame);
-		XenonExecution::Dispose(pOutput);
+		XenonExecution::Release(pOutput);
 
 		return XENON_EXECUTION_HANDLE_NULL;
 	}
@@ -79,26 +81,20 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::Dispose(XenonExecutionHandle hExec)
+void XenonExecution::AddRef(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
-	// Dispose of all active frames.
-	for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
-	{
-		XenonFrame::Dispose(hExec->frameStack.memory.pData[i]);
-	}
+	XenonReference::AddRef(hExec->ref);
+}
 
-	// Dispose of all I/O registers.
-	for(size_t i = 0; i < hExec->registers.count; ++i)
-	{
-		XenonValueDispose(hExec->registers.pData[i]);
-	}
+//----------------------------------------------------------------------------------------------------------------------
 
-	XenonFrame::HandleStack::Dispose(hExec->frameStack);
-	XenonValue::HandleArray::Dispose(hExec->registers);
+void XenonExecution::Release(XenonExecutionHandle hExec)
+{
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
-	delete hExec;
+	XenonReference::Release(hExec->ref);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -203,6 +199,31 @@ void XenonExecution::RunStep(XenonExecutionHandle hExec)
 
 	const uint8_t opCode = XenonDecoder::LoadUint8(hFrame->decoder);
 	XenonVm::ExecuteOpCode(hExec->hVm, hExec, opCode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonExecution::prv_onDestruct(void* pObject)
+{
+	XenonExecutionHandle hExec = reinterpret_cast<XenonExecutionHandle>(pObject);
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+
+	// Dispose of all active frames.
+	for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
+	{
+		XenonFrame::Dispose(hExec->frameStack.memory.pData[i]);
+	}
+
+	// Dispose of all I/O registers.
+	for(size_t i = 0; i < hExec->registers.count; ++i)
+	{
+		XenonValueDispose(hExec->registers.pData[i]);
+	}
+
+	XenonFrame::HandleStack::Dispose(hExec->frameStack);
+	XenonValue::HandleArray::Dispose(hExec->registers);
+
+	delete hExec;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

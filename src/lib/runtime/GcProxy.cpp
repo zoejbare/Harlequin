@@ -48,13 +48,6 @@ void XenonGcProxy::Initialize(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGcProxy::Dispose(XenonGcProxy& proxy)
-{
-	proxy.onDestructFn(proxy.pObject);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 void XenonGcProxy::Mark(XenonGcProxy& proxy)
 {
 	if(!proxy.marked)
@@ -63,6 +56,13 @@ void XenonGcProxy::Mark(XenonGcProxy& proxy)
 
 		proxy.onGcMarkFn(proxy.pObject);
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGcProxy::prv_onDispose(XenonGcProxy& proxy)
+{
+	proxy.onDestructFn(proxy.pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

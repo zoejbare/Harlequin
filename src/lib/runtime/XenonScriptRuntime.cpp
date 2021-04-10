@@ -709,7 +709,7 @@ int XenonExecutionDispose(XenonExecutionHandle* phExecution)
 	XenonExecutionHandle hExec = (*phExecution);
 
 	hExec->hVm->executionContexts.Delete(hExec);
-	XenonExecution::Dispose(hExec);
+	XenonExecution::Release(hExec);
 
 	(*phExecution) = XENON_EXECUTION_HANDLE_NULL;
 

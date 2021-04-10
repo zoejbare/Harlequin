@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "Execution.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +34,8 @@ struct XenonGarbageCollector
 
 	static void Reset(XenonGarbageCollector& gc);
 	static bool Run(XenonGarbageCollector& gc);
+
+	XenonExecution::HandleStack execStack;
 
 	XenonVmHandle hVm;
 

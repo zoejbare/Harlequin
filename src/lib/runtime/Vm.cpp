@@ -99,7 +99,7 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 	// Clean up each active execution context.
 	for(auto& kv : hVm->executionContexts)
 	{
-		XenonExecution::Dispose(kv.key);
+		XenonExecution::Release(kv.key);
 	}
 
 	XenonGarbageCollector::Dispose(hVm->gc);

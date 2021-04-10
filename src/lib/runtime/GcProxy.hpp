@@ -40,9 +40,10 @@ struct XenonGcProxy
 		XenonDestructCallback onDestructFn,
 		void* const pObject
 	);
-	static void Dispose(XenonGcProxy& proxy);
 
 	static void Mark(XenonGcProxy& proxy);
+
+	static void prv_onDispose(XenonGcProxy& proxy);
 
 	XenonGcMarkCallback onGcMarkFn;
 	XenonDestructCallback onDestructFn;

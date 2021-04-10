@@ -23,6 +23,9 @@
 #include "Frame.hpp"
 #include "Value.hpp"
 
+#include "../base/Reference.hpp"
+#include "../common/Stack.hpp"
+
 #include <SkipProbe/SkipProbe.hpp>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -31,10 +34,13 @@ struct XenonProgram;
 
 struct XenonExecution
 {
+	typedef XenonStack<XenonExecutionHandle> HandleStack;
 	typedef SkipProbe::HashMap<XenonExecutionHandle, bool> HandleToBoolMap;
 
 	static XenonExecutionHandle Create(XenonVmHandle hVm, XenonFunctionHandle hEntryPoint);
-	static void Dispose(XenonExecutionHandle hExec);
+
+	static void AddRef(XenonExecutionHandle hExec);
+	static void Release(XenonExecutionHandle hExec);
 
 	static int PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hFunction);
 	static int PopFrame(XenonExecutionHandle hExec);
@@ -45,8 +51,12 @@ struct XenonExecution
 
 	static void RunStep(XenonExecutionHandle hExec);
 
+	static void prv_onDestruct(void*);
+
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
+
+	XenonReference ref;
 
 	XenonVmHandle hVm;
 	XenonFrameHandle hCurrentFrame;
