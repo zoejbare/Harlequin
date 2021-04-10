@@ -44,6 +44,9 @@ extern "C" {
 #define XENON_VM_IO_REGISTER_COUNT 128
 #define XENON_VM_GP_REGISTER_COUNT 64
 
+#define XENON_VM_THREAD_MINIMUM_STACK_SIZE 262144
+#define XENON_VM_THREAD_DEFAULT_STACK_SIZE 1048576
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 enum XenonErrorCode
@@ -302,6 +305,8 @@ typedef struct
 {
 	XenonCommonInit common;
 	XenonDependencyInit dependency;
+
+	uint32_t gcThreadStackSize;
 } XenonVmInit;
 
 #define XENON_VM_HANDLE_NULL        ((XenonVmHandle)0)

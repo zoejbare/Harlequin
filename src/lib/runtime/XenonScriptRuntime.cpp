@@ -44,7 +44,8 @@ int XenonVmCreate(XenonVmHandle* phOutVm, XenonVmInit init)
 		|| (*phOutVm)
 		|| init.common.report.reportLevel < XENON_MESSAGE_TYPE_VERBOSE
 		|| init.common.report.reportLevel > XENON_MESSAGE_TYPE_FATAL
-		|| !init.dependency.onRequestFn)
+		|| !init.dependency.onRequestFn
+		|| init.gcThreadStackSize < XENON_VM_THREAD_MINIMUM_STACK_SIZE)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}

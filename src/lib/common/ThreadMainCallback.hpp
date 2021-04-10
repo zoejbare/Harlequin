@@ -20,22 +20,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include <stdint.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if defined(XENON_PLATFORM_WINDOWS)
-	#include "atomic-impl/AtomicWin32.hpp"
-
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4)
-	#include "atomic-impl/AtomicPosix.hpp"
-
-#else
-	#error "Atomic functions not implemented for this platform"
-
-#endif
+typedef int32_t (*XenonThreadMainCallback)(void*);
 
 //----------------------------------------------------------------------------------------------------------------------
