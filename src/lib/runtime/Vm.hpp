@@ -30,6 +30,7 @@
 
 #include "../common/Dependency.hpp"
 #include "../common/Report.hpp"
+#include "../common/Thread.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -58,6 +59,8 @@ struct XenonVm
 	static void ExecuteOpCode(XenonVmHandle hVm, XenonExecutionHandle hExec, const int opCode);
 	static void DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, const int opCode);
 
+	static void prv_gcThreadMain(void*);
+
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
@@ -71,6 +74,9 @@ struct XenonVm
 	XenonReport report;
 	XenonDependency dependency;
 	XenonGarbageCollector gc;
+	XenonThread gcThread;
+
+	bool isShuttingDown;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

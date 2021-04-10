@@ -66,6 +66,8 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 
 	#undef XENON_BIND_OP_CODE
 
+	pOutput->gcThread = XenonThread::Create(prv_gcThreadMain, pOutput);
+
 	return pOutput;
 }
 
@@ -74,6 +76,11 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 void XenonVm::Dispose(XenonVmHandle hVm)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
+
+	hVm->isShuttingDown = true;
+
+	// Wait for the GC thread to exit.
+	XenonThread::Join(hVm->gcThread);
 
 	// Clean up each loaded program.
 	for(auto& kv : hVm->programs)
@@ -213,6 +220,20 @@ void XenonVm::DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, con
 	const OpCode& opCodeData = hVm->opCodes.pData[opCode];
 
 	opCodeData.disasmFn(disasm);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonVm::prv_gcThreadMain(void* const pArg)
+{
+	XenonVmHandle hVm = reinterpret_cast<XenonVmHandle>(pArg);
+
+	while(!hVm->isShuttingDown)
+	{
+		// TODO: Run the garbage collector here.
+		// TODO: Need a separate timing mechanism to keep the garbage collector from running too much while not forcing long sleep times.
+		XenonThread::Sleep(100);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
