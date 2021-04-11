@@ -28,9 +28,9 @@
 #include "Program.hpp"
 #include "Value.hpp"
 
+#include "../base/Thread.hpp"
 #include "../common/Dependency.hpp"
 #include "../common/Report.hpp"
-#include "../common/Thread.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 

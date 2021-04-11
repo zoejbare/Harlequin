@@ -67,7 +67,13 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 
 	#undef XENON_BIND_OP_CODE
 
-	pOutput->gcThread = XenonThread::Create(prv_gcThreadMain, pOutput, init.gcThreadStackSize);
+	XenonThreadConfig threadConfig;
+	threadConfig.mainFn = prv_gcThreadMain;
+	threadConfig.pArg = pOutput;
+	threadConfig.stackSize = init.gcThreadStackSize;
+	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "XenonGarbageCollector");
+
+	pOutput->gcThread = XenonThread::Create(threadConfig);
 
 	return pOutput;
 }

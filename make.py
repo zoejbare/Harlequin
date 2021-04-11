@@ -248,9 +248,21 @@ with csbuild.Project(LibXenonBase.projectName, XenonLib.rootPath, LibXenonBase.d
 			f"{XenonLib.rootPath}/compiler",
 			f"{XenonLib.rootPath}/runtime",
 		)
+	else:
+		csbuild.AddExcludeDirectories(f"{XenonLib.rootPath}/base/thread-impl");
 
 	with csbuild.Toolchain("msvc", "gcc", "clang"):
 		csbuild.AddDefines("XENON_BUILD_BASE_LIB_EXPORT")
+		
+	with csbuild.Toolchain("msvc"):
+		csbuild.AddSourceFiles(
+			f"{XenonLib.rootPath}/base/thread-impl/ThreadWin32.cpp",
+		)
+		
+	with csbuild.Toolchain("gcc", "clang", "ps4"):
+		csbuild.AddSourceFiles(
+			f"{XenonLib.rootPath}/base/thread-impl/ThreadPosix.cpp",
+		)
 
 ###################################################################################################
 

@@ -20,22 +20,11 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if defined(XENON_PLATFORM_WINDOWS)
-	#include "thread-impl/ThreadWin32.hpp"
-
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4)
-	#include "thread-impl/ThreadPosix.hpp"
-
-#else
-	#error "Thread functions not implemented for this platform"
-
-#endif
+typedef HANDLE XenonInternalThread;
 
 //----------------------------------------------------------------------------------------------------------------------
