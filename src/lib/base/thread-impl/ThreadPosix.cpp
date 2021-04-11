@@ -55,7 +55,7 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 
 	(*pConfig) = threadConfig;
 
-	XenonThread thread;
+	XenonThread output;
 	pthread_attr_t attr;
 
 	// Create a thread attributes object where the thread properties will be set.
@@ -66,7 +66,7 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 	pthread_attr_setstacksize(&attr, size_t(threadConfig.stackSize));
 
 	// Create and start the thread.
-	const int threadCreateResult = pthread_create(&thread.obj.handle, &attr, threadEntryPoint, pConfig);
+	const int threadCreateResult = pthread_create(&output.obj.handle, &attr, threadEntryPoint, pConfig);
 	assert(threadCreateResult == 0);
 
 	// Destroy the thread attributes since they are no longer needed.
@@ -78,13 +78,13 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 #if defined(XENON_PLATFORM_LINUX) || defined(XENON_PLATFORM_ANDROID)
 	if(threadConfig.name[0] != '\0')
 	{
-		pthread_setname_np(thread.obj.handle, threadConfig.name);
+		pthread_setname_np(output.obj.handle, threadConfig.name);
 	}
 #endif
 
-	thread.obj.initialized = true;
+	output.obj.initialized = true;
 
-	return thread;
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ bool XenonThread::IsReal(const XenonThread& thread)
 
 void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
 {
-	assert(thread.obj.initialized == true);
+	assert(thread.obj.initialized);
 
 	void* pThreadResult = nullptr;
 

@@ -67,12 +67,14 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 
 	#undef XENON_BIND_OP_CODE
 
+
 	XenonThreadConfig threadConfig;
 	threadConfig.mainFn = prv_gcThreadMain;
 	threadConfig.pArg = pOutput;
 	threadConfig.stackSize = init.gcThreadStackSize;
 	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "XenonGarbageCollector");
 
+	pOutput->gcLock = XenonMutex::Create();
 	pOutput->gcThread = XenonThread::Create(threadConfig);
 
 	return pOutput;
@@ -100,6 +102,8 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 			XenonGetErrorCodeString(threadReturnValue)
 		);
 	}
+
+	XenonMutex::Dispose(hVm->gcLock);
 
 	// Clean up each loaded program.
 	for(auto& kv : hVm->programs)
@@ -250,7 +254,11 @@ int32_t XenonVm::prv_gcThreadMain(void* const pArg)
 
 	while(!hVm->isShuttingDown)
 	{
-		// TODO: Run the garbage collector here.
+		// Run a step of the garbage collector.
+		XenonMutex::Lock(hVm->gcLock);
+		XenonGarbageCollector::Run(hVm->gc);
+		XenonMutex::Unlock(hVm->gcLock);
+
 		// TODO: Need a separate timing mechanism to keep the garbage collector from running too much while not forcing long sleep times.
 		XenonThread::Sleep(100);
 	}

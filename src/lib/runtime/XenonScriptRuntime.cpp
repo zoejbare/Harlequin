@@ -18,7 +18,9 @@
 
 #include "../XenonScript.h"
 
+#include "../base/Mutex.hpp"
 #include "../base/String.hpp"
+
 #include "../common/ValueType.hpp"
 
 #include "Execution.hpp"
@@ -684,14 +686,20 @@ int XenonExecutionCreate(
 		return XENON_ERROR_INVALID_ARG;
 	}
 
+	XenonMutex::Lock(hVm->gcLock);
+
+	// Create a new execution context with the provided script function as the entry point.
 	XenonExecutionHandle hExec = XenonExecution::Create(hVm, hEntryPoint);
 	if(!hExec)
 	{
+		XenonMutex::Unlock(hVm->gcLock);
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
 	// Use the execution map as a set to keep track of all execution contexts that belong to the input VM.
 	hVm->executionContexts.Insert(hExec, false);
+
+	XenonMutex::Unlock(hVm->gcLock);
 
 	(*phOutExecution) = hExec;
 
@@ -708,9 +716,15 @@ int XenonExecutionDispose(XenonExecutionHandle* phExecution)
 	}
 
 	XenonExecutionHandle hExec = (*phExecution);
+	XenonVmHandle hVm = hExec->hVm;
 
-	hExec->hVm->executionContexts.Delete(hExec);
+	XenonMutex::Lock(hVm->gcLock);
+
+	// Unlink the execution context from the VM.
+	hVm->executionContexts.Delete(hExec);
 	XenonExecution::Release(hExec);
+
+	XenonMutex::Unlock(hVm->gcLock);
 
 	(*phExecution) = XENON_EXECUTION_HANDLE_NULL;
 
@@ -737,17 +751,27 @@ int XenonExecutionRun(XenonExecutionHandle hExec, int runMode)
 	hExec->started = true;
 	hExec->yield = false;
 
+	XenonVmHandle hVm = hExec->hVm;
+
 	switch(runMode)
 	{
 		case XENON_RUN_STEP:
+			XenonMutex::Lock(hVm->gcLock);
 			XenonExecution::RunStep(hExec);
+			XenonMutex::Unlock(hVm->gcLock);
 			break;
 
 		case XENON_RUN_LOOP:
+			XenonMutex::Lock(hVm->gcLock);
+
 			while(!hExec->finished && !hExec->exception && !hExec->yield)
 			{
+				// TODO: Adding a timer here to release, then immediately re-acquire the gc lock after a certain
+				//       amount of time to allow the garbage collector to have a chance to run during execution.
 				XenonExecution::RunStep(hExec);
 			}
+
+			XenonMutex::Unlock(hVm->gcLock);
 			break;
 
 		default:

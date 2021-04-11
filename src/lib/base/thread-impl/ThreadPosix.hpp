@@ -24,7 +24,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonInternalThread
+struct XENON_BASE_API XenonInternalThread
 {
 	XenonInternalThread() : handle(), initialized(false) {}
 

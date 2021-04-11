@@ -16,23 +16,56 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "../Mutex.hpp"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XENON_BASE_API XenonInternalThread
+XenonMutex XenonMutex::Create()
 {
-	XenonInternalThread() : handle(nullptr), id(0), real(false) {}
+	XenonMutex output;
+	InitializeSRWLock(&output.obj.lock);
 
-	HANDLE handle;
-	uint32_t id;
-	bool real;
-};
+	output.obj.initialized = true;
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonMutex::Dispose(XenonMutex& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	mutex.obj = XenonInternalMutex();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonMutex::TryLock(XenonMutex& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	return TryAcquireSRWLockExclusive(&mutex.obj.lock) == TRUE;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonMutex::Lock(XenonMutex& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	AcquireSRWLockExclusive(&mutex.obj.lock);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonMutex::Unlock(XenonMutex& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	ReleaseSRWLockExclusive(&mutex.obj.lock);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

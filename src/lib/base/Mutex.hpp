@@ -20,19 +20,36 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
+#include "../XenonScript.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalThread
-{
-	XenonInternalThread() : handle(nullptr), id(0), real(false) {}
+#if defined(XENON_PLATFORM_WINDOWS)
+	#include "mutex-impl/MutexWin32.hpp"
 
-	HANDLE handle;
-	uint32_t id;
-	bool real;
+#elif defined(XENON_PLATFORM_LINUX) \
+	|| defined(XENON_PLATFORM_MAC_OS) \
+	|| defined(XENON_PLATFORM_ANDROID) \
+	|| defined(XENON_PLATFORM_PS4)
+	#include "mutex-impl/MutexPosix.hpp"
+
+#else
+	#error "Mutexes not implemented for this platform"
+
+#endif
+
+//----------------------------------------------------------------------------------------------------------------------
+
+struct XENON_BASE_API XenonMutex
+{
+	static XenonMutex Create();
+	static void Dispose(XenonMutex& mutex);
+
+	static bool TryLock(XenonMutex& mutex);
+	static void Lock(XenonMutex& mutex);
+	static void Unlock(XenonMutex& mutex);
+
+	XenonInternalMutex obj;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

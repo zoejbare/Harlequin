@@ -26,13 +26,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalThread
+struct XENON_BASE_API XenonInternalMutex
 {
-	XenonInternalThread() : handle(nullptr), id(0), real(false) {}
+	XenonInternalMutex() : lock(SRWLOCK_INIT), initialized(false) {}
 
-	HANDLE handle;
-	uint32_t id;
-	bool real;
+	SRWLOCK lock;
+	bool initialized;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

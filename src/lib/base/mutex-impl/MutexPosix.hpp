@@ -20,19 +20,16 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
+#include <pthread.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalThread
+struct XENON_BASE_API XenonInternalMutex
 {
-	XenonInternalThread() : handle(nullptr), id(0), real(false) {}
+	XenonInternalMutex() : handle(), initialized(false) {}
 
-	HANDLE handle;
-	uint32_t id;
-	bool real;
+	pthread_mutex_t handle;
+	bool initialized;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

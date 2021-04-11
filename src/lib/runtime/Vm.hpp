@@ -28,7 +28,9 @@
 #include "Program.hpp"
 #include "Value.hpp"
 
+#include "../base/Mutex.hpp"
 #include "../base/Thread.hpp"
+
 #include "../common/Dependency.hpp"
 #include "../common/Report.hpp"
 
@@ -75,6 +77,7 @@ struct XenonVm
 	XenonDependency dependency;
 	XenonGarbageCollector gc;
 	XenonThread gcThread;
+	XenonMutex gcLock;
 
 	bool isShuttingDown;
 };

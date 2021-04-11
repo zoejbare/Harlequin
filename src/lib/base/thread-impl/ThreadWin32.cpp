@@ -81,15 +81,15 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 
 	(*pConfig) = threadConfig;
 
-	XenonThread thread;
+	XenonThread output;
 
 	// Create and start the thread.
-	thread.obj.handle = HANDLE(_beginthreadex(nullptr, threadConfig.stackSize, threadEntryPoint, pConfig, 0, &thread.obj.id));
-	assert(thread.obj.handle != nullptr);
+	output.obj.handle = HANDLE(_beginthreadex(nullptr, threadConfig.stackSize, threadEntryPoint, pConfig, 0, &output.obj.id));
+	assert(output.obj.handle != nullptr);
 
-	thread.obj.real = true;
+	output.obj.real = true;
 
-	return thread;
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ bool XenonThread::IsReal(const XenonThread& thread)
 void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
 {
 	assert(thread.obj.handle != nullptr);
-	assert(thread.obj.real == true);
+	assert(thread.obj.real);
 
 	// Wait for the thread to exit.
 	WaitForSingleObject(thread.obj.handle, INFINITE);
