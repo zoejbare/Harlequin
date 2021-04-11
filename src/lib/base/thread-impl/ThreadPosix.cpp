@@ -74,12 +74,11 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 	const int attrDestroyResult = pthread_attr_destroy(&attr);
 	assert(attrDestroyResult == 0);
 
-
 	// Setting the thread name through the pthread interface is only supported on a few platforms.
 #if defined(XENON_PLATFORM_LINUX) || defined(XENON_PLATFORM_ANDROID)
 	if(threadConfig.name[0] != '\0')
 	{
-		pthread_setname_np(thread.obj, threadConfig.name);
+		pthread_setname_np(thread.obj.handle, threadConfig.name);
 	}
 #endif
 
@@ -119,6 +118,8 @@ bool XenonThread::IsInitialized(const XenonThread& thread)
 
 bool XenonThread::IsReal(const XenonThread& thread)
 {
+	(void) thread;
+
 	// Pthreads are never psuedo handles.
 	return true;
 }
