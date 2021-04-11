@@ -73,7 +73,7 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 	assert(attrDestroyResult == 0);
 
 	// Setting the thread name through the pthread interface is only supported on a few platforms.
-#if defined(XENON_PLATFORM_LINUX) || defined(XENON_PLATFORM_MAC_OS)
+#if defined(XENON_PLATFORM_LINUX) || defined(XENON_PLATFORM_ANDROID)
 	if(threadConfig.name[0] != '\0')
 	{
 		pthread_setname_np(thread.obj, threadConfig.name);
