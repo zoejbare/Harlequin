@@ -24,6 +24,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-typedef pthread_t XenonInternalThread;
+struct XenonInternalThread
+{
+	XenonInternalThread() : handle(), initialized(false) {}
+
+	pthread_t handle;
+	bool initialized;
+};
 
 //----------------------------------------------------------------------------------------------------------------------

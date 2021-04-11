@@ -84,25 +84,72 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 	XenonThread thread;
 
 	// Create and start the thread.
-	thread.obj = HANDLE(_beginthreadex(nullptr, threadConfig.stackSize, threadEntryPoint, pConfig, 0, &thread.id));
-	assert(thread.obj != nullptr);
+	thread.obj.handle = HANDLE(_beginthreadex(nullptr, threadConfig.stackSize, threadEntryPoint, pConfig, 0, &thread.obj.id));
+	assert(thread.obj.handle != nullptr);
+
+	thread.obj.real = true;
 
 	return thread;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonThread XenonThread::GetCurrentThread()
+{
+	XenonThread thread;
+
+	// This will return a pseudo handle which will NOT equal the original handle value.
+	// This means the handle value itself is not portable between threads and it only
+	// valid on the thread where it is retrieved. However, the retrieved thread ID
+	// should be portable.
+	thread.obj.handle = ::GetCurrentThread();
+	thread.obj.id = ::GetCurrentThreadId();
+	thread.obj.real = false;
+
+	return thread;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::Equal(const XenonThread& left, const XenonThread& right)
+{
+	return left.obj.handle
+		&& right.obj.handle
+		&& left.obj.id == right.obj.id;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::IsInitialized(const XenonThread& thread)
+{
+	return thread.obj.handle != nullptr;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::IsReal(const XenonThread& thread)
+{
+	return thread.obj.real;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
 {
+	assert(thread.obj.handle != nullptr);
+	assert(thread.obj.real == true);
+
 	// Wait for the thread to exit.
-	WaitForSingleObject(thread.obj, INFINITE);
+	WaitForSingleObject(thread.obj.handle, INFINITE);
 
 	// Get the thread's return value.
 	DWORD result = 0;
-	GetExitCodeThread(thread.obj, &result);
+	GetExitCodeThread(thread.obj.handle, &result);
 
 	// Free the thread's internal resources.
-	CloseHandle(thread.obj);
+	CloseHandle(thread.obj.handle);
+
+	thread.obj = XenonInternalThread();
 
 	if(pOutReturnValue)
 	{

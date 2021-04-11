@@ -21,6 +21,8 @@
 #include <assert.h>
 #include <unistd.h>
 
+#include <sys/types.h>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
@@ -64,13 +66,14 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 	pthread_attr_setstacksize(&attr, size_t(threadConfig.stackSize));
 
 	// Create and start the thread.
-	const int threadCreateResult = pthread_create(&thread.obj, &attr, threadEntryPoint, pConfig);
+	const int threadCreateResult = pthread_create(&thread.obj.handle, &attr, threadEntryPoint, pConfig);
 	assert(threadCreateResult == 0);
 
 	// Destroy the thread attributes since they are no longer needed.
 	// This will not affect the thread since it creates its own copy.
 	const int attrDestroyResult = pthread_attr_destroy(&attr);
 	assert(attrDestroyResult == 0);
+
 
 	// Setting the thread name through the pthread interface is only supported on a few platforms.
 #if defined(XENON_PLATFORM_LINUX) || defined(XENON_PLATFORM_ANDROID)
@@ -80,17 +83,58 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 	}
 #endif
 
+	thread.obj.initialized = true;
+
 	return thread;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonThread XenonThread::GetCurrentThread()
+{
+	XenonThread thread;
+	thread.obj.handle = pthread_self();
+	thread.obj.initialized = true;
+
+	return thread;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::Equal(const XenonThread& left, const XenonThread& right)
+{
+	return left.obj.initialized
+		&& right.obj.initialized
+		&& pthread_equal(left.obj.handle, right.obj.handle) != 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::IsInitialized(const XenonThread& thread)
+{
+	return thread.obj.initialized;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::IsReal(const XenonThread& thread)
+{
+	// Pthreads are never psuedo handles.
+	return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
 {
+	assert(thread.obj.initialized == true);
+
 	void* pThreadResult = nullptr;
 
-	const int joinResult = pthread_join(thread.obj, &pThreadResult);
+	const int joinResult = pthread_join(thread.obj.handle, &pThreadResult);
 	assert(joinResult == 0);
+
+	thread.obj = XenonInternalThread();
 
 	if(pOutReturnValue)
 	{

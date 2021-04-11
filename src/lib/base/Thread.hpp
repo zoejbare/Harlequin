@@ -58,12 +58,34 @@ struct XenonThreadConfig
 struct XENON_BASE_API XenonThread
 {
 	static XenonThread Create(const XenonThreadConfig& threadConfig);
+	static XenonThread GetCurrentThread();
+
+	static bool Equal(const XenonThread& left, const XenonThread& right);
+	static bool IsInitialized(const XenonThread& thread);
+	static bool IsReal(const XenonThread& thread);
+
 	static void Join(XenonThread& thread, int32_t* const pOutReturnValue);
 	static void Sleep(uint32_t ms);
 	static void Yield();
 
+	inline bool operator==(const XenonThread& other) const;
+	inline bool operator!=(const XenonThread& other) const;
+
 	XenonInternalThread obj;
-	uint32_t id;
 };
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::operator==(const XenonThread& other) const
+{
+	return XenonThread::Equal(*this, other);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonThread::operator!=(const XenonThread& other) const
+{
+	return XenonThread::Equal(*this, other);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

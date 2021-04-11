@@ -25,6 +25,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-typedef HANDLE XenonInternalThread;
+struct XenonInternalThread
+{
+	XenonInternalThread() : handle(nullptr), id(0), real(false) {}
+
+	HANDLE handle;
+	uint32_t id;
+	bool real;
+};
 
 //----------------------------------------------------------------------------------------------------------------------
