@@ -48,14 +48,16 @@ void XenonGcProxy::Initialize(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGcProxy::Mark(XenonGcProxy& proxy)
+uint32_t XenonGcProxy::Mark(XenonGcProxy& proxy)
 {
 	if(!proxy.marked)
 	{
 		proxy.marked = true;
 
-		proxy.onGcMarkFn(proxy.pObject);
+		return proxy.onGcMarkFn(proxy.pObject);
 	}
+
+	return 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

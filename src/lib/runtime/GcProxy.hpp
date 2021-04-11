@@ -26,7 +26,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-typedef void (*XenonGcMarkCallback)(void*);
+typedef uint32_t (*XenonGcMarkCallback)(void*);
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ struct XenonGcProxy
 		void* const pObject
 	);
 
-	static void Mark(XenonGcProxy& proxy);
+	static uint32_t Mark(XenonGcProxy& proxy);
 
 	static void prv_onDispose(XenonGcProxy& proxy);
 
