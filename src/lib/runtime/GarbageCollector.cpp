@@ -205,19 +205,130 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 		}
 
 		case XENON_GC_PHASE_MARK_CONSTANTS:
-			// TODO: Mark all constants in all loaded programs in the VM.
-			endOfPhase = true;
+		{
+			if(gc.lastPhase != gc.phase)
+			{
+				// Start the phase by filling up the program stack.
+				for(auto& kv : gc.hVm->programs)
+				{
+					XenonProgram::HandleStack::Push(gc.programStack, kv.value);
+				}
+			}
+			else
+			{
+				// When there are no values left in the stack, pop a program and fill the value stack
+				// up with that program's constants.
+				if(XenonValue::HandleStack::IsEmpty(gc.valueStack))
+				{
+					XenonProgramHandle hProgram;
+					if(XenonProgram::HandleStack::Pop(gc.programStack, &hProgram) == XENON_ERROR_STACK_EMPTY)
+					{
+						// No more programs in the stack, time to move on to the next phase.
+						endOfPhase = true;
+						break;
+					}
+
+					// Cache the constant values from the program.
+					for(size_t i = 0; i < hProgram->constants.count; ++i)
+					{
+						XenonValue::HandleStack::Push(gc.valueStack, hProgram->constants.pData[i]);
+					}
+				}
+				else
+				{
+					// Iterate over as many values as we are allowed.
+					for(uint32_t i = 0; i < gc.maxIterationCount; ++i)
+					{
+						XenonValueHandle hValue;
+						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
+						{
+							// Stop iterating once the value stack is empty.
+							break;
+						}
+
+						// TODO: Mark the value.
+					}
+				}
+			}
 			break;
+		}
 
 		case XENON_GC_PHASE_MARK_GLOBALS:
-			// TODO: Mark all globals in the VM.
-			endOfPhase = true;
+		{
+			if(gc.lastPhase != gc.phase)
+			{
+				// Fill the value stack with all the globals in the VM.
+				for(auto& kv : gc.hVm->globals)
+				{
+					XenonValue::HandleStack::Push(gc.valueStack, kv.value);
+				}
+			}
+			else
+			{
+				for(uint32_t i = 0; i < gc.maxIterationCount; ++i)
+				{
+					XenonValueHandle hValue;
+					if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
+					{
+						// Stop iterating once the value stack is empty.
+						endOfPhase = true;
+						break;
+					}
+
+					// TODO: Mark the value;
+				}
+			}
 			break;
+		}
 
 		case XENON_GC_PHASE_MARK_FUNCTIONS:
-			// TODO: Mark all functions in the VM.
-			endOfPhase = true;
+		{
+			if(gc.lastPhase != gc.phase)
+			{
+				// Start the phase by filling the function stack.
+				for(auto& kv : gc.hVm->functions)
+				{
+					XenonFunction::HandleStack::Push(gc.functionStack, kv.value);
+				}
+			}
+			else
+			{
+				// When there are no values left in the stack, pop a function and fill the value stack
+				// up with that function's local variable values.
+				if(XenonValue::HandleStack::IsEmpty(gc.valueStack))
+				{
+					XenonFunctionHandle hFunction;
+					if(XenonFunction::HandleStack::Pop(gc.functionStack, &hFunction) == XENON_ERROR_STACK_EMPTY)
+					{
+						// No more functions in the stack, time to move on to the next phase.
+						endOfPhase = true;
+						break;
+					}
+
+					// Cache the locals from the function.
+					for(auto& kv : hFunction->locals)
+					{
+						XenonValue::HandleStack::Push(gc.valueStack, kv.value);
+					}
+				}
+				else
+				{
+					// Iterate over as many values as we are allowed.
+					for(uint32_t i = 0; i < gc.maxIterationCount; ++i)
+					{
+						XenonValueHandle hValue;
+						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
+						{
+							// Stop iterating once the value stack is empty.
+							break;
+						}
+
+						// TODO: Mark the value.
+					}
+				}
+			}
 			break;
+		}
 
 		case XENON_GC_PHASE_MARK_EXECUTIONS:
 		{
