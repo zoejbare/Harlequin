@@ -92,7 +92,7 @@ struct XenonStack
 			return XENON_ERROR_STACK_EMPTY;
 		}
 
-		stack.nextIndex = stack.nextIndex - 1;
+		--stack.nextIndex;
 
 		return XENON_SUCCESS;
 	}
