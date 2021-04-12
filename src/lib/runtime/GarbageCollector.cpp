@@ -30,6 +30,7 @@ enum XenonGcPhase
 	XENON_GC_PHASE_RESET_STATE,
 	XENON_GC_PHASE_MARK_CONSTANTS,
 	XENON_GC_PHASE_MARK_GLOBALS,
+	XENON_GC_PHASE_MARK_FUNCTIONS,
 	XENON_GC_PHASE_MARK_EXECUTIONS,
 	XENON_GC_PHASE_COLLECT,
 	XENON_GC_PHASE_DISPOSE,
@@ -46,8 +47,12 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 	// TODO: Make these values configurable.
 	constexpr const uint32_t maxIterationCount = 32;
 	constexpr const uint64_t initialExecStackSize = 8;
+	constexpr const uint64_t initialValueStackSize = 4096;
 
+	XenonProgram::HandleStack::Initialize(output.programStack, hVm->programs.Size());
+	XenonFunction::HandleStack::Initialize(output.functionStack, hVm->functions.Size());
 	XenonExecution::HandleStack::Initialize(output.execStack, initialExecStackSize);
+	XenonValue::HandleStack::Initialize(output.valueStack, initialValueStackSize);
 
 	output.hVm = hVm;
 	output.pActiveHead = nullptr;
@@ -102,7 +107,10 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 		pCurrent = pNext;
 	}
 
+	XenonValue::HandleStack::Dispose(gc.valueStack);
 	XenonExecution::HandleStack::Dispose(gc.execStack);
+	XenonFunction::HandleStack::Dispose(gc.functionStack);
+	XenonProgram::HandleStack::Dispose(gc.programStack);
 
 	gc.hVm = XENON_VM_HANDLE_NULL;
 	gc.pActiveHead = nullptr;
@@ -119,12 +127,7 @@ void XenonGarbageCollector::Reset(XenonGarbageCollector& gc)
 	gc.phase = XENON_GC_PHASE__START;
 	gc.lastPhase = XENON_GC_PHASE__END;
 
-	// Release any execution contexts still in the stack.
-	XenonExecutionHandle hExec;
-	while(XenonExecution::HandleStack::Pop(gc.execStack, &hExec) == XENON_SUCCESS)
-	{
-		XenonExecution::Release(hExec);
-	}
+	prv_clearStacks(gc);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -171,22 +174,26 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 			{
 				// For the start of the phase, set the current proxy pointer to the head of the active list.
 				gc.pIterCurrent = gc.pActiveHead;
+
+				prv_clearStacks(gc);
 			}
-
-			// Iterate over as many items in the list as we're allowed at one time.
-			for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
+			else
 			{
-				if(!gc.pIterCurrent)
+				// Iterate over as many items in the list as we're allowed at one time.
+				for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
 				{
-					// The end of the list has been reached.
-					break;
+					if(!gc.pIterCurrent)
+					{
+						// The end of the list has been reached.
+						break;
+					}
+
+					// Reset the proxy state.
+					gc.pIterCurrent->marked = false;
+
+					// Move to the next proxy in the list.
+					gc.pIterCurrent = gc.pIterCurrent->pNext;
 				}
-
-				// Reset the proxy state.
-				gc.pIterCurrent->marked = false;
-
-				// Move to the next proxy in the list.
-				gc.pIterCurrent = gc.pIterCurrent->pNext;
 			}
 
 			if(!gc.pIterCurrent)
@@ -204,6 +211,11 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 
 		case XENON_GC_PHASE_MARK_GLOBALS:
 			// TODO: Mark all globals in the VM.
+			endOfPhase = true;
+			break;
+
+		case XENON_GC_PHASE_MARK_FUNCTIONS:
+			// TODO: Mark all functions in the VM.
 			endOfPhase = true;
 			break;
 
@@ -356,6 +368,33 @@ void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy& 
 	proxy.pNext = gc.pPendingHead;
 
 	gc.pPendingHead = pProxy;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGarbageCollector::prv_clearStacks(XenonGarbageCollector& gc)
+{
+	// Release any held execution contexts.
+	XenonExecutionHandle hExec;
+	while(XenonExecution::HandleStack::Pop(gc.execStack, &hExec) == XENON_SUCCESS)
+	{
+		XenonExecution::Release(hExec);
+	}
+
+	// Clear the program stack.
+	while(XenonProgram::HandleStack::Pop(gc.programStack) == XENON_SUCCESS)
+	{
+	}
+
+	// Clear the function stack.
+	while(XenonFunction::HandleStack::Pop(gc.functionStack) == XENON_SUCCESS)
+	{
+	}
+
+	// Clear the value stack.
+	while(XenonValue::HandleStack::Pop(gc.valueStack) == XENON_SUCCESS)
+	{
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------

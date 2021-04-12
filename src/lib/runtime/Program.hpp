@@ -24,8 +24,8 @@
 #include "Value.hpp"
 
 #include "../base/String.hpp"
-
 #include "../common/ByteHelper.hpp"
+#include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,6 +37,8 @@ struct XenonProgram
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> StringToHandleMap;
+
+	typedef XenonStack<XenonProgramHandle> HandleStack;
 
 	struct LoadData
 	{

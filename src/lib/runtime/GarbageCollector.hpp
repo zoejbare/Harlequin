@@ -21,6 +21,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "Execution.hpp"
+#include "Program.hpp"
+#include "Value.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +37,12 @@ struct XenonGarbageCollector
 	static void Reset(XenonGarbageCollector& gc);
 	static bool Run(XenonGarbageCollector& gc);
 
+	static void prv_clearStacks(XenonGarbageCollector& gc);
+
+	XenonProgram::HandleStack programStack;
+	XenonFunction::HandleStack functionStack;
 	XenonExecution::HandleStack execStack;
+	XenonValue::HandleStack valueStack;
 
 	XenonVmHandle hVm;
 

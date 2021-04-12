@@ -23,6 +23,7 @@
 #include "Value.hpp"
 
 #include "../base/String.hpp"
+#include "../common/Stack.hpp"
 
 #include <SkipProbe/SkipProbe.hpp>
 
@@ -45,6 +46,8 @@ struct XenonFunction
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> StringToBoolMap;
+
+	typedef XenonStack<XenonFunctionHandle> HandleStack;
 
 	static XenonFunctionHandle Create(XenonProgramHandle hProgram);
 	static void Dispose(XenonFunctionHandle hFunction);
