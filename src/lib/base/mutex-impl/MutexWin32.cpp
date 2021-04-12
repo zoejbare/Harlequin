@@ -25,7 +25,9 @@
 XenonMutex XenonMutex::Create()
 {
 	XenonMutex output;
-	InitializeSRWLock(&output.obj.lock);
+
+	BOOL lockInitResult = InitializeCriticalSectionAndSpinCount(&output.obj.lock, 0x400);
+	assert(lockInitResult == TRUE);
 
 	output.obj.initialized = true;
 
@@ -38,6 +40,8 @@ void XenonMutex::Dispose(XenonMutex& mutex)
 {
 	assert(mutex.obj.initialized);
 
+	DeleteCriticalSection(&mutex.obj.lock);
+
 	mutex.obj = XenonInternalMutex();
 }
 
@@ -47,7 +51,7 @@ bool XenonMutex::TryLock(XenonMutex& mutex)
 {
 	assert(mutex.obj.initialized);
 
-	return TryAcquireSRWLockExclusive(&mutex.obj.lock) == TRUE;
+	return TryEnterCriticalSection(&mutex.obj.lock) == TRUE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -56,7 +60,7 @@ void XenonMutex::Lock(XenonMutex& mutex)
 {
 	assert(mutex.obj.initialized);
 
-	AcquireSRWLockExclusive(&mutex.obj.lock);
+	EnterCriticalSection(&mutex.obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -65,7 +69,7 @@ void XenonMutex::Unlock(XenonMutex& mutex)
 {
 	assert(mutex.obj.initialized);
 
-	ReleaseSRWLockExclusive(&mutex.obj.lock);
+	LeaveCriticalSection(&mutex.obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

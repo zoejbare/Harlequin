@@ -28,9 +28,9 @@
 
 struct XENON_BASE_API XenonInternalMutex
 {
-	XenonInternalMutex() : lock(SRWLOCK_INIT), initialized(false) {}
+	XenonInternalMutex() : lock(), initialized(false) {}
 
-	SRWLOCK lock;
+	CRITICAL_SECTION lock;
 	bool initialized;
 };
 
