@@ -106,10 +106,12 @@ XenonString* XenonProgramCommonLoader::ReadString(
 
 XenonValueHandle XenonProgramCommonLoader::ReadValue(
 	XenonSerializerHandle hSerializer,
+	XenonVmHandle hVm,
 	XenonReportHandle hReport
 )
 {
 	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(hReport != XENON_REPORT_HANDLE_NULL);
 
 	int result = 0;
@@ -148,7 +150,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateInt8(temp.as.int8);
+			return XenonValue::CreateInt8(hVm, temp.as.int8);
 		}
 
 		case XENON_VALUE_TYPE_INT16:
@@ -159,7 +161,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateInt16(temp.as.int16);
+			return XenonValue::CreateInt16(hVm, temp.as.int16);
 		}
 
 		case XENON_VALUE_TYPE_INT32:
@@ -170,7 +172,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateInt32(temp.as.int32);
+			return XenonValue::CreateInt32(hVm, temp.as.int32);
 		}
 
 		case XENON_VALUE_TYPE_INT64:
@@ -181,7 +183,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateInt64(temp.as.int64);
+			return XenonValue::CreateInt64(hVm, temp.as.int64);
 		}
 
 		case XENON_VALUE_TYPE_UINT8:
@@ -192,7 +194,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateUint8(temp.as.uint8);
+			return XenonValue::CreateUint8(hVm, temp.as.uint8);
 		}
 
 		case XENON_VALUE_TYPE_UINT16:
@@ -203,7 +205,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateUint16(temp.as.uint16);
+			return XenonValue::CreateUint16(hVm, temp.as.uint16);
 		}
 
 		case XENON_VALUE_TYPE_UINT32:
@@ -214,7 +216,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateUint32(temp.as.uint32);
+			return XenonValue::CreateUint32(hVm, temp.as.uint32);
 		}
 
 		case XENON_VALUE_TYPE_UINT64:
@@ -225,7 +227,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateUint64(temp.as.uint64);
+			return XenonValue::CreateUint64(hVm, temp.as.uint64);
 		}
 
 		case XENON_VALUE_TYPE_FLOAT32:
@@ -236,7 +238,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateFloat32(temp.as.float32);
+			return XenonValue::CreateFloat32(hVm, temp.as.float32);
 		}
 
 		case XENON_VALUE_TYPE_FLOAT64:
@@ -247,7 +249,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateFloat64(temp.as.float64);
+			return XenonValue::CreateFloat64(hVm, temp.as.float64);
 		}
 
 		case XENON_VALUE_TYPE_BOOL:
@@ -258,7 +260,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				break;
 			}
 
-			return XenonValue::CreateBool(temp.as.boolean);
+			return XenonValue::CreateBool(hVm, temp.as.boolean);
 		}
 
 		case XENON_VALUE_TYPE_STRING:
@@ -271,7 +273,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				return nullptr;
 			}
 
-			return XenonValue::CreateString(pString);
+			return XenonValue::CreateString(hVm, pString);
 		}
 
 		case XENON_VALUE_TYPE_OBJECT:

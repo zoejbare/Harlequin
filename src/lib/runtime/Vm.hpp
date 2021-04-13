@@ -50,7 +50,9 @@ struct XenonVm
 	typedef XenonArray<OpCode> OpCodeArray;
 
 	static XenonVmHandle Create(const XenonVmInit& init);
-	static void Dispose(XenonVmHandle hState);
+	static void Dispose(XenonVmHandle hVm);
+
+	static void RemoveExecutionContext(XenonExecutionHandle hExec);
 
 	static int SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, XenonString* const pVariableName);
 

@@ -56,7 +56,6 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 		if(hLocalVariable)
 		{
 			XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
-			XenonValueDispose(hLocalVariable);
 		}
 		else
 		{
@@ -69,8 +68,6 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 		// TODO: Raise script exception
 		hExec->exception = true;
 	}
-
-	XenonValueDispose(hNameValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -84,8 +81,6 @@ void OpCodeDisasm_LoadLocal(XenonDisassemble& disasm)
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hNameValue);
-
-	XenonValueDispose(hNameValue);
 
 	char str[256];
 	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());

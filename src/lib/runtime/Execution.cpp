@@ -21,6 +21,8 @@
 #include "Program.hpp"
 #include "Vm.hpp"
 
+#include "../base/Mutex.hpp"
+
 #include <assert.h>
 #include <inttypes.h>
 
@@ -63,7 +65,7 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	// Initialize each value in the I/O register set.
 	for(size_t i = 0; i < pOutput->registers.count; ++i)
 	{
-		pOutput->registers.pData[i] = XENON_VALUE_HANDLE_NULL;
+		pOutput->registers.pData[i] = XenonValue::CreateNull();
 	}
 
 	// Push the entry point frame to the frame stack.
@@ -76,7 +78,25 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 		return XENON_EXECUTION_HANDLE_NULL;
 	}
 
+	XenonScopedMutex lock(hVm->gcLock);
+
+	// Map the execution context to the VM used to create it.
+	hVm->executionContexts.Insert(pOutput, false);
+
 	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonExecution::DetachFromVm(XenonExecutionHandle hExec)
+{
+	XenonVmHandle hVm = hExec->hVm;
+
+	XenonScopedMutex lock(hVm->gcLock);
+
+	// Unlink the execution context from the VM.
+	hVm->executionContexts.Delete(hExec);
+	XenonExecution::Release(hExec);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -110,6 +130,8 @@ int XenonExecution::PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hF
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
+	XenonScopedMutex lock(hExec->hVm->gcLock);
+
 	int result = XenonFrame::HandleStack::Push(hExec->frameStack, hFrame);
 	if(result != XENON_SUCCESS)
 	{
@@ -128,6 +150,8 @@ int XenonExecution::PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hF
 int XenonExecution::PopFrame(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+
+	XenonScopedMutex lock(hExec->hVm->gcLock);
 
 	XenonFrameHandle hFrame = XENON_FRAME_HANDLE_NULL;
 	int result = hExec->frameStack.Pop(hExec->frameStack, &hFrame);
@@ -157,14 +181,9 @@ int XenonExecution::SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle h
 		return XENON_ERROR_INDEX_OUT_OF_RANGE;
 	}
 
-	// Get a reference to the input value first, just in case it
-	// happens to be the value already in this register slot.
-	XenonValueHandle hValueRef = XenonValueReference(hValue);
+	XenonScopedMutex lock(hExec->hVm->gcLock);
 
-	// Dispose of whatever might currently be in this register slot.
-	XenonValueDispose(hExec->registers.pData[index]);
-
-	hExec->registers.pData[index] = hValueRef;
+	hExec->registers.pData[index] = hValue;
 
 	return XENON_SUCCESS;
 }
@@ -183,12 +202,57 @@ XenonValueHandle XenonExecution::GetIoRegister(XenonExecutionHandle hExec, const
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return XenonValueReference(hExec->registers.pData[index]);
+	return hExec->registers.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::RunStep(XenonExecutionHandle hExec)
+void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
+{
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(runMode == XENON_RUN_STEP || runMode == XENON_RUN_CONTINUOUS);
+
+	// Set the 'started' flag to indicate that execution has started.
+	// We also reset the 'yield' flag here since it's only useful for
+	// pausing execution and we no longer need it paused until the
+	// next yield.
+	hExec->started = true;
+	hExec->yield = false;
+
+	XenonVmHandle hVm = hExec->hVm;
+
+	switch(runMode)
+	{
+		case XENON_RUN_STEP:
+		{
+			XenonScopedMutex lock(hVm->gcLock);
+
+			prv_runStep(hExec);
+			break;
+		}
+
+		case XENON_RUN_CONTINUOUS:
+		{
+			XenonScopedMutex lock(hVm->gcLock);
+
+			while(!hExec->finished && !hExec->exception && !hExec->yield)
+			{
+				// TODO: Adding a timer here to release, then immediately re-acquire the gc lock after a certain
+				//       amount of time to allow the garbage collector to have a chance to run during execution.
+				prv_runStep(hExec);
+			}
+			break;
+		}
+
+		default:
+			// This should never happen.
+			assert(false);
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonExecution::prv_runStep(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
@@ -212,12 +276,6 @@ void XenonExecution::prv_onDestruct(void* pObject)
 	for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
 	{
 		XenonFrame::Dispose(hExec->frameStack.memory.pData[i]);
-	}
-
-	// Dispose of all I/O registers.
-	for(size_t i = 0; i < hExec->registers.count; ++i)
-	{
-		XenonValueDispose(hExec->registers.pData[i]);
 	}
 
 	XenonFrame::HandleStack::Dispose(hExec->frameStack);

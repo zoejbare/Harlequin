@@ -22,8 +22,9 @@
 
 #include "../XenonScript.h"
 
+#include "GcProxy.hpp"
+
 #include "../base/String.hpp"
-#include "../base/Reference.hpp"
 
 #include "../common/Array.hpp"
 #include "../common/Stack.hpp"
@@ -58,34 +59,36 @@ struct XenonValue
 
 	static XenonValue NullValue;
 
-	static XenonValueHandle CreateBool(const bool value);
-	static XenonValueHandle CreateInt8(const int8_t value);
-	static XenonValueHandle CreateInt16(const int16_t value);
-	static XenonValueHandle CreateInt32(const int32_t value);
-	static XenonValueHandle CreateInt64(const int64_t value);
-	static XenonValueHandle CreateUint8(const uint8_t value);
-	static XenonValueHandle CreateUint16(const uint16_t value);
-	static XenonValueHandle CreateUint32(const uint32_t value);
-	static XenonValueHandle CreateUint64(const uint64_t value);
-	static XenonValueHandle CreateFloat32(const float value);
-	static XenonValueHandle CreateFloat64(const double value);
+	static XenonValueHandle CreateBool(XenonVmHandle hVm, const bool value);
+	static XenonValueHandle CreateInt8(XenonVmHandle hVm, const int8_t value);
+	static XenonValueHandle CreateInt16(XenonVmHandle hVm, const int16_t value);
+	static XenonValueHandle CreateInt32(XenonVmHandle hVm, const int32_t value);
+	static XenonValueHandle CreateInt64(XenonVmHandle hVm, const int64_t value);
+	static XenonValueHandle CreateUint8(XenonVmHandle hVm, const uint8_t value);
+	static XenonValueHandle CreateUint16(XenonVmHandle hVm, const uint16_t value);
+	static XenonValueHandle CreateUint32(XenonVmHandle hVm, const uint32_t value);
+	static XenonValueHandle CreateUint64(XenonVmHandle hVm, const uint64_t value);
+	static XenonValueHandle CreateFloat32(XenonVmHandle hVm, const float value);
+	static XenonValueHandle CreateFloat64(XenonVmHandle hVm, const double value);
 	static XenonValueHandle CreateNull();
-	static XenonValueHandle CreateString(const char* const string);
-	static XenonValueHandle CreateString(XenonString* const pString);
-	static XenonValueHandle Copy(XenonValueHandle hValue);
-
-	static int32_t AddRef(XenonValueHandle hValue);
-	static int32_t Release(XenonValueHandle hValue);
+	static XenonValueHandle CreateString(XenonVmHandle hVm, const char* const string);
+	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
+	static XenonValueHandle Copy(XenonVmHandle hVm, XenonValueHandle hValue);
 
 	static std::string GetDebugString(XenonValueHandle hValue);
 
-	static XenonValue* prv_onCreate(int);
+	static uint32_t Mark(XenonValueHandle hValue);
+
+	static XenonValue* prv_onCreate(int, XenonVmHandle);
+	static uint32_t prv_onMark(void*);
 	static void prv_onDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonReference ref;
+	XenonVmHandle hVm;
+
+	XenonGcProxy gcProxy;
 
 	union
 	{

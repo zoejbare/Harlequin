@@ -72,8 +72,6 @@ void OpCodeExec_LoadParam(XenonExecutionHandle hExec)
 		// TODO: Raise script exception
 		hExec->exception = true;
 	}
-
-	XenonValueDispose(hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -18,6 +18,7 @@
 
 #include "GarbageCollector.hpp"
 #include "GcProxy.hpp"
+#include "Value.hpp"
 #include "Vm.hpp"
 
 #include <assert.h>
@@ -64,7 +65,7 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 	output.maxIterationCount = maxIterationCount;
 
 	// Reset the phases so we're guaranteed to kick off the garbage collector in a good state.
-	Reset(output);
+	prv_reset(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -72,7 +73,7 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 {
 	// Clear out any reference counted data.
-	Reset(gc);
+	prv_reset(gc);
 
 	// Dispose of all proxies in the active list.
 	XenonGcProxy* pCurrent = gc.pActiveHead;
@@ -122,17 +123,7 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::Reset(XenonGarbageCollector& gc)
-{
-	gc.phase = XENON_GC_PHASE__START;
-	gc.lastPhase = XENON_GC_PHASE__END;
-
-	prv_clearStacks(gc);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
+bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 {
 	bool endOfAllPhases = false;
 	bool endOfPhase = false;
@@ -237,7 +228,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 				else
 				{
 					// Iterate over as many values as we are allowed.
-					for(uint32_t i = 0; i < gc.maxIterationCount; ++i)
+					for(uint32_t i = 0; i < gc.maxIterationCount;)
 					{
 						XenonValueHandle hValue;
 						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
@@ -246,7 +237,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 							break;
 						}
 
-						// TODO: Mark the value.
+						i += XenonValue::Mark(hValue);
 					}
 				}
 			}
@@ -265,7 +256,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 			}
 			else
 			{
-				for(uint32_t i = 0; i < gc.maxIterationCount; ++i)
+				for(uint32_t i = 0; i < gc.maxIterationCount;)
 				{
 					XenonValueHandle hValue;
 					if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
@@ -275,7 +266,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 						break;
 					}
 
-					// TODO: Mark the value;
+					i += XenonValue::Mark(hValue);
 				}
 			}
 			break;
@@ -314,7 +305,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 				else
 				{
 					// Iterate over as many values as we are allowed.
-					for(uint32_t i = 0; i < gc.maxIterationCount; ++i)
+					for(uint32_t i = 0; i < gc.maxIterationCount;)
 					{
 						XenonValueHandle hValue;
 						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
@@ -323,7 +314,7 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 							break;
 						}
 
-						// TODO: Mark the value.
+						i += XenonValue::Mark(hValue);
 					}
 				}
 			}
@@ -345,12 +336,72 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 			}
 			else
 			{
-				// Pop the execution contexts one-by-one until none are left.
-				XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
-				XenonExecution::HandleStack::Pop(gc.execStack, &hExec);
+				// When there are no values left in the stack, pop a function and fill the value stack
+				// up with that function's local variable values.
+				if(XenonValue::HandleStack::IsEmpty(gc.valueStack))
+				{
+					// Pop the execution contexts one-by-one until none are left.
+					XenonExecutionHandle hExec;
+					if(XenonExecution::HandleStack::Pop(gc.execStack, &hExec) == XENON_ERROR_STACK_EMPTY)
+					{
+						// No more functions in the stack, time to move on to the next phase.
+						endOfPhase = true;
+						break;
+					}
 
-				// TODO: Mark gc data in the execution context here.
-				XenonExecution::Release(hExec);
+					XenonExecution::Release(hExec);
+
+					// Push each of the I/O registers to the value stack.
+					for(size_t i = 0; i < XENON_VM_IO_REGISTER_COUNT; ++i)
+					{
+						XenonValueHandle hValue = hExec->registers.pData[i];
+
+						XenonValue::HandleStack::Push(gc.valueStack, hValue);
+					}
+
+					// Iterate over the entire frame stack in the execution context.
+					for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
+					{
+						XenonFrameHandle hFrame = hExec->frameStack.memory.pData[i];
+
+						// Push each of the frame's general purpose registers to the value stack.
+						for(size_t i = 0; i < XENON_VM_GP_REGISTER_COUNT; ++i)
+						{
+							XenonValueHandle hValue = hFrame->registers.pData[i];
+
+							XenonValue::HandleStack::Push(gc.valueStack, hValue);
+						}
+
+						// Push all values current in the frame's value stack to our value stack.
+						for(size_t i = 0; i < hFrame->stack.nextIndex; ++i)
+						{
+							XenonValueHandle hValue = hFrame->stack.memory.pData[i];
+
+							XenonValue::HandleStack::Push(gc.valueStack, hValue);
+						}
+
+						// Push each of the frame's local variables to the value stack.
+						for(auto& kv : hFrame->locals)
+						{
+							XenonValue::HandleStack::Push(gc.valueStack, kv.value);
+						}
+					}
+				}
+				else
+				{
+					// Iterate over as many values as we are allowed.
+					for(uint32_t i = 0; i < gc.maxIterationCount;)
+					{
+						XenonValueHandle hValue;
+						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
+						{
+							// Stop iterating once the value stack is empty.
+							break;
+						}
+
+						i += XenonValue::Mark(hValue);
+					}
+				}
 			}
 
 			if(XenonExecution::HandleStack::IsEmpty(gc.execStack))
@@ -470,6 +521,19 @@ bool XenonGarbageCollector::Run(XenonGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void XenonGarbageCollector::RunFull(XenonGarbageCollector& gc)
+{
+	// Reset the garbage collector state so that running it again starts at the beginning of the 1st phase.
+	prv_reset(gc);
+
+	while(!RunStep(gc))
+	{
+		// Run the garbage collector until all phases have been run.
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy& proxy)
 {
 	XenonGcProxy* const pProxy = &proxy;
@@ -479,6 +543,16 @@ void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy& 
 	proxy.pNext = gc.pPendingHead;
 
 	gc.pPendingHead = pProxy;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGarbageCollector::prv_reset(XenonGarbageCollector& gc)
+{
+	gc.phase = XENON_GC_PHASE__START;
+	gc.lastPhase = XENON_GC_PHASE__END;
+
+	prv_clearStacks(gc);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

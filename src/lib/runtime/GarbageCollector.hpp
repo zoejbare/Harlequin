@@ -32,12 +32,13 @@ struct XenonGarbageCollector
 	static void Initialize(XenonGarbageCollector& output, XenonVmHandle hVm);
 	static void Dispose(XenonGarbageCollector& gc);
 
+	static bool RunStep(XenonGarbageCollector& gc);
+	static void RunFull(XenonGarbageCollector& gc);
+
 	static void LinkObject(XenonGarbageCollector& gc, XenonGcProxy& proxy);
 
-	static void Reset(XenonGarbageCollector& gc);
-	static bool Run(XenonGarbageCollector& gc);
-
-	static void prv_clearStacks(XenonGarbageCollector& gc);
+	static void prv_reset(XenonGarbageCollector&);
+	static void prv_clearStacks(XenonGarbageCollector&);
 
 	XenonProgram::HandleStack programStack;
 	XenonFunction::HandleStack functionStack;

@@ -21,7 +21,7 @@
 #include <XenonScript.h>
 
 //----------------------------------------------------------------------------------------------------------------------
-
+#if 0
 TEST(TestValue, CreateStringValue)
 {
 	// Create native string value object.
@@ -91,5 +91,5 @@ TEST(TestValue, CreateNativeStringValueCopy)
 	const int disposeCopiedStringValue = XenonValueDispose(hCopiedStringValue);
 	EXPECT_EQ(disposeCopiedStringValue, XENON_SUCCESS);
 }
-
+#endif
 //----------------------------------------------------------------------------------------------------------------------

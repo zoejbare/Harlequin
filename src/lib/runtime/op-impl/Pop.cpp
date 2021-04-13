@@ -61,8 +61,6 @@ void OpCodeExec_Pop(XenonExecutionHandle hExec)
 		// TODO: Raise exception
 		hExec->exception = true;
 	}
-
-	XenonValueDispose(hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

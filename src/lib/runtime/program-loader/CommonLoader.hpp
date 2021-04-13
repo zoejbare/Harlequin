@@ -39,6 +39,7 @@ namespace XenonProgramCommonLoader
 
 	XenonValue* ReadValue(
 		XenonSerializerHandle hSerializer,
+		XenonVmHandle hVm,
 		XenonReportHandle hReport
 	);
 }

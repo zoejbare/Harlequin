@@ -67,17 +67,12 @@ void OpCodeExec_StoreGlobal(XenonExecutionHandle hExec)
 			// TODO: Raise script exception
 			hExec->exception = true;
 		}
-
-
-		XenonValueDispose(hRegisterValue);
 	}
 	else
 	{
 		// TODO: Raise script exception.
 		hExec->exception = true;
 	}
-
-	XenonValueDispose(hNameValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -91,8 +86,6 @@ void OpCodeDisasm_StoreGlobal(XenonDisassemble& disasm)
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hNameValue);
-
-	XenonValueDispose(hNameValue);
 
 	char str[256];
 	snprintf(str, sizeof(str), "STORE_GLOBAL c%" PRIu32 " %s, r%" PRIu32, constantIndex, valueData.c_str(), registerIndex);

@@ -63,8 +63,6 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 		// TODO: Raise script exception
 		hExec->exception = true;
 	}
-
-	XenonValueDispose(hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -78,8 +76,6 @@ void OpCodeDisasm_LoadConstant(XenonDisassemble& disasm)
 
 	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hValue);
-
-	XenonValueDispose(hValue);
 
 	char instr[512];
 	snprintf(instr, sizeof(instr), "LOAD_CONST r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());

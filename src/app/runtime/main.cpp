@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
 			// Run the script until it has completed.
 			for(;;)
 			{
-				result = XenonExecutionRun(hExec, XENON_RUN_LOOP);
+				result = XenonExecutionRun(hExec, XENON_RUN_CONTINUOUS);
 				if(result != XENON_SUCCESS)
 				{
 					snprintf(msg, sizeof(msg), "Error occurred while executing script: \"%s\"", XenonGetErrorCodeString(result));

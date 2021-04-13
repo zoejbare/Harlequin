@@ -53,3 +53,30 @@ struct XENON_BASE_API XenonMutex
 };
 
 //----------------------------------------------------------------------------------------------------------------------
+
+class XENON_BASE_API XenonScopedMutex
+{
+public:
+
+	XenonScopedMutex() = delete;
+	XenonScopedMutex(const XenonScopedMutex&) = delete;
+	XenonScopedMutex(XenonScopedMutex&&) = delete;
+
+	explicit XenonScopedMutex(XenonMutex& mutex)
+		: m_pMutex(&mutex)
+	{
+		XenonMutex::Lock(*m_pMutex);
+	}
+
+	~XenonScopedMutex()
+	{
+		XenonMutex::Unlock(*m_pMutex);
+	}
+
+
+private:
+
+	XenonMutex* m_pMutex;
+};
+
+//----------------------------------------------------------------------------------------------------------------------

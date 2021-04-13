@@ -56,7 +56,6 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 		if(hGlobalVariable)
 		{
 			XenonFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
-			XenonValueDispose(hGlobalVariable);
 		}
 		else
 		{
@@ -69,8 +68,6 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 		// TODO: Raise script exception.
 		hExec->exception = true;
 	}
-
-	XenonValueDispose(hNameValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -84,8 +81,6 @@ void OpCodeDisasm_LoadGlobal(XenonDisassemble& disasm)
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hNameValue);
-
-	XenonValueDispose(hNameValue);
 
 	char str[256];
 	snprintf(str, sizeof(str), "LOAD_GLOBAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());

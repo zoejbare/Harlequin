@@ -228,6 +228,16 @@ int XenonVmSetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, const c
 		return XENON_ERROR_INVALID_ARG;
 	}
 
+	if(!hValue)
+	{
+		hValue = XenonValue::CreateNull();
+	}
+
+	if(hValue->type != XENON_VALUE_TYPE_NULL && hVm != hValue->hVm)
+	{
+		return XENON_ERROR_MISMATCH;
+	}
+
 	// Create a string object to lookup into the map.
 	XenonString* const pVariableName = XenonString::Create(variableName);
 	if(!pVariableName)
@@ -400,9 +410,6 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 		XenonString::Release(pProgramName);
 		return XENON_ERROR_FAILED_TO_OPEN_FILE;
 	}
-
-	// Map the program inside the VM state.
-	hVm->programs.Insert(pProgramName, hProgram);
 
 	// Report the program dependencies to the user code.
 	for(auto& kv : hProgram->dependencies)
@@ -686,20 +693,12 @@ int XenonExecutionCreate(
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	XenonMutex::Lock(hVm->gcLock);
-
 	// Create a new execution context with the provided script function as the entry point.
 	XenonExecutionHandle hExec = XenonExecution::Create(hVm, hEntryPoint);
 	if(!hExec)
 	{
-		XenonMutex::Unlock(hVm->gcLock);
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
-
-	// Use the execution map as a set to keep track of all execution contexts that belong to the input VM.
-	hVm->executionContexts.Insert(hExec, false);
-
-	XenonMutex::Unlock(hVm->gcLock);
 
 	(*phOutExecution) = hExec;
 
@@ -716,15 +715,8 @@ int XenonExecutionDispose(XenonExecutionHandle* phExecution)
 	}
 
 	XenonExecutionHandle hExec = (*phExecution);
-	XenonVmHandle hVm = hExec->hVm;
 
-	XenonMutex::Lock(hVm->gcLock);
-
-	// Unlink the execution context from the VM.
-	hVm->executionContexts.Delete(hExec);
-	XenonExecution::Release(hExec);
-
-	XenonMutex::Unlock(hVm->gcLock);
+	XenonExecution::DetachFromVm(hExec);
 
 	(*phExecution) = XENON_EXECUTION_HANDLE_NULL;
 
@@ -735,7 +727,7 @@ int XenonExecutionDispose(XenonExecutionHandle* phExecution)
 
 int XenonExecutionRun(XenonExecutionHandle hExec, int runMode)
 {
-	if(!hExec || runMode < XENON_RUN_STEP || runMode > XENON_RUN_LOOP)
+	if(!hExec || runMode < XENON_RUN_STEP || runMode > XENON_RUN_CONTINUOUS)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
@@ -744,41 +736,7 @@ int XenonExecutionRun(XenonExecutionHandle hExec, int runMode)
 		return XENON_ERROR_SCRIPT_NO_FUNCTION;
 	}
 
-	// Set the 'started' flag to indicate that execution has started.
-	// We also reset the 'yield' flag here since it's only useful for
-	// pausing execution and we no longer need it paused until the
-	// next yield.
-	hExec->started = true;
-	hExec->yield = false;
-
-	XenonVmHandle hVm = hExec->hVm;
-
-	switch(runMode)
-	{
-		case XENON_RUN_STEP:
-			XenonMutex::Lock(hVm->gcLock);
-			XenonExecution::RunStep(hExec);
-			XenonMutex::Unlock(hVm->gcLock);
-			break;
-
-		case XENON_RUN_LOOP:
-			XenonMutex::Lock(hVm->gcLock);
-
-			while(!hExec->finished && !hExec->exception && !hExec->yield)
-			{
-				// TODO: Adding a timer here to release, then immediately re-acquire the gc lock after a certain
-				//       amount of time to allow the garbage collector to have a chance to run during execution.
-				XenonExecution::RunStep(hExec);
-			}
-
-			XenonMutex::Unlock(hVm->gcLock);
-			break;
-
-		default:
-			// This should never happen.
-			assert(false);
-			return XENON_ERROR_INVALID_ARG;
-	}
+	XenonExecution::Run(hExec, runMode);
 
 	return XENON_SUCCESS;
 }
@@ -905,11 +863,21 @@ int XenonExecutionGetCurrentFrame(XenonExecutionHandle hExec, XenonFrameHandle* 
 int XenonExecutionSetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, int registerIndex)
 {
 	if(!hExec
-		|| !hValue
 		|| registerIndex < 0
 		|| registerIndex >= XENON_VM_IO_REGISTER_COUNT)
 	{
 		return XENON_ERROR_INVALID_ARG;
+	}
+
+	if(!hValue)
+	{
+		hValue = XenonValue::CreateNull();
+	}
+
+	if(hValue->type != XENON_VALUE_TYPE_NULL
+		&& hExec->hVm != hValue->hVm)
+	{
+		return XENON_ERROR_MISMATCH;
 	}
 
 	return XenonExecution::SetIoRegister(hExec, hValue, registerIndex);
@@ -981,6 +949,17 @@ int XenonFramePushValue(XenonFrameHandle hFrame, XenonValueHandle hValue)
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
+	if(!hValue)
+	{
+		hValue = XenonValue::CreateNull();
+	}
+
+	if(hValue->type != XENON_VALUE_TYPE_NULL
+		&& hFrame->hFunction->hProgram->hVm != hValue->hVm)
+	{
+		return XENON_ERROR_MISMATCH;
+	}
+
 	return XenonFrame::PushValue(hFrame, hValue);
 }
 
@@ -1003,15 +982,8 @@ int XenonFramePopValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue)
 
 	if(phOutValue)
 	{
-		if(*phOutValue)
-		{
-			XenonValueDispose(*phOutValue);
-		}
-
-		(*phOutValue) = XenonValueReference(hValue);
+		(*phOutValue) = hValue;
 	}
-
-	XenonValueDispose(hValue);
 
 	return result;
 }
@@ -1045,6 +1017,17 @@ int XenonFrameSetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, in
 	if(hFrame->hFunction->isNative)
 	{
 		return XENON_ERROR_INVALID_TYPE;
+	}
+
+	if(!hValue)
+	{
+		hValue = XenonValue::CreateNull();
+	}
+
+	if(hValue->type != XENON_VALUE_TYPE_NULL
+		&& hFrame->hFunction->hProgram->hVm != hValue->hVm)
+	{
+		return XENON_ERROR_MISMATCH;
 	}
 
 	return XenonFrame::SetGpRegister(hFrame, hValue, registerIndex);
@@ -1086,6 +1069,17 @@ int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue,
 	if(hFrame->hFunction->isNative)
 	{
 		return XENON_ERROR_INVALID_TYPE;
+	}
+
+	if(!hValue)
+	{
+		hValue = XenonValue::CreateNull();
+	}
+
+	if(hValue->type != XENON_VALUE_TYPE_NULL
+		&& hFrame->hFunction->hProgram->hVm != hValue->hVm)
+	{
+		return XENON_ERROR_MISMATCH;
 	}
 
 	XenonString* const pVarName = XenonString::Create(variableName);
@@ -1177,79 +1171,80 @@ int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVa
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateBool(bool value)
+XenonValueHandle XenonValueCreateBool(XenonVmHandle hVm, bool value)
 {
-	return XenonValue::CreateBool(value);
+	return XenonValue::CreateBool(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt8(int8_t value)
+XenonValueHandle XenonValueCreateInt8(XenonVmHandle hVm, int8_t value)
 {
-	return XenonValue::CreateInt8(value);
+	return XenonValue::CreateInt8(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt16(int16_t value)
+XenonValueHandle XenonValueCreateInt16(XenonVmHandle hVm, int16_t value)
 {
-	return XenonValue::CreateInt16(value);
+	return XenonValue::CreateInt16(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt32(int32_t value)
+XenonValueHandle XenonValueCreateInt32(XenonVmHandle hVm, int32_t value)
 {
-	return XenonValue::CreateInt32(value);
+
+	return XenonValue::CreateInt32(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt64(int64_t value)
+XenonValueHandle XenonValueCreateInt64(XenonVmHandle hVm, int64_t value)
 {
-	return XenonValue::CreateInt64(value);
+	return XenonValue::CreateInt64(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint8(uint8_t value)
+XenonValueHandle XenonValueCreateUint8(XenonVmHandle hVm, uint8_t value)
 {
-	return XenonValue::CreateUint8(value);
+	return XenonValue::CreateUint8(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint16(uint16_t value)
+XenonValueHandle XenonValueCreateUint16(XenonVmHandle hVm, uint16_t value)
 {
-	return XenonValue::CreateUint16(value);
+	return XenonValue::CreateUint16(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint32(uint32_t value)
+XenonValueHandle XenonValueCreateUint32(XenonVmHandle hVm, uint32_t value)
 {
-	return XenonValue::CreateUint32(value);
+	return XenonValue::CreateUint32(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint64(uint64_t value)
+XenonValueHandle XenonValueCreateUint64(XenonVmHandle hVm, uint64_t value)
 {
-	return XenonValue::CreateUint64(value);
+	return XenonValue::CreateUint64(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateFloat32(float value)
+XenonValueHandle XenonValueCreateFloat32(XenonVmHandle hVm, float value)
 {
-	return XenonValue::CreateFloat32(value);
+	return XenonValue::CreateFloat32(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateFloat64(double value)
+XenonValueHandle XenonValueCreateFloat64(XenonVmHandle hVm, double value)
 {
-	return XenonValue::CreateFloat64(value);
+	return XenonValue::CreateFloat64(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1261,15 +1256,16 @@ XenonValueHandle XenonValueCreateNull()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateString(const char* const string)
+XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const char* const string)
 {
-	return XenonValue::CreateString(string ? string : "");
+	return XenonValue::CreateString(hVm, string ? string : "");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateObject(XenonValueHandle hObjectProfile)
+XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, XenonValueHandle hObjectProfile)
 {
+	(void) hVm;
 	(void) hObjectProfile;
 	// TODO: Implement support for script objects.
 	assert(false);
@@ -1278,37 +1274,9 @@ XenonValueHandle XenonValueCreateObject(XenonValueHandle hObjectProfile)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueReference(XenonValueHandle hValue)
+XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue)
 {
-	if(!hValue)
-	{
-		return XENON_VALUE_HANDLE_NULL;
-	}
-
-	XenonValue::AddRef(hValue);
-
-	return hValue;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-XenonValueHandle XenonValueCopy(XenonValueHandle hValue)
-{
-	return XenonValue::Copy(hValue);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int XenonValueDispose(XenonValueHandle hValue)
-{
-	if(!hValue)
-	{
-		return XENON_ERROR_INVALID_ARG;
-	}
-
-	XenonValue::Release(hValue);
-
-	return XENON_SUCCESS;
+	return XenonValue::Copy(hVm, hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

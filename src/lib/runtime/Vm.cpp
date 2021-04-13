@@ -123,7 +123,6 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 	for(auto& kv : hVm->globals)
 	{
 		XenonString::Release(kv.key);
-		XenonValue::Release(kv.value);
 	}
 
 	// Clean up each active execution context.
@@ -152,12 +151,9 @@ int XenonVm::SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, Xenon
 		return XENON_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
-	XenonValueHandle hValueRef = XenonValueReference(hValue);
-	XenonValueHandle hOldValue = kv->value;
+	XenonScopedMutex lock(hVm->gcLock);
 
-	XenonValueDispose(hOldValue);
-
-	kv->value = hValueRef;
+	kv->value = hValue;
 
 	return XENON_SUCCESS;
 }
@@ -213,7 +209,7 @@ XenonValueHandle XenonVm::GetGlobalVariable(XenonVmHandle hVm, XenonString* cons
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return XenonValueReference(hVm->globals.Get(pVariableName));
+	return hVm->globals.Get(pVariableName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -255,9 +251,11 @@ int32_t XenonVm::prv_gcThreadMain(void* const pArg)
 	while(!hVm->isShuttingDown)
 	{
 		// Run a step of the garbage collector.
-		XenonMutex::Lock(hVm->gcLock);
-		XenonGarbageCollector::Run(hVm->gc);
-		XenonMutex::Unlock(hVm->gcLock);
+		{
+			XenonScopedMutex lock(hVm->gcLock);
+
+			XenonGarbageCollector::RunStep(hVm->gc);
+		}
 
 		// TODO: Need a separate timing mechanism to keep the garbage collector from running too much while not forcing long sleep times.
 		XenonThread::Sleep(100);

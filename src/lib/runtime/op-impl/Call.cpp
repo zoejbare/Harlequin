@@ -90,8 +90,6 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 		// TODO: Raise script exception
 		hExec->exception = true;
 	}
-
-	XenonValueDispose(hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -104,8 +102,6 @@ void OpCodeDisasm_Call(XenonDisassemble& disasm)
 
 	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hValue);
-
-	XenonValueDispose(hValue);
 
 	char str[64];
 	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", constIndex, valueData.c_str());

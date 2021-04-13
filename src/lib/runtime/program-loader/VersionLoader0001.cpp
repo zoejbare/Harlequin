@@ -366,7 +366,7 @@ bool XenonProgramVersion0001::Load(
 		// Iterate for each constant.
 		for(uint32_t index = 0; index < header.constantTableLength; ++index)
 		{
-			XenonValueHandle hValue = XenonProgramCommonLoader::ReadValue(hSerializer, hReport);
+			XenonValueHandle hValue = XenonProgramCommonLoader::ReadValue(hSerializer, hVm, hReport);
 			if(!hValue)
 			{
 				return false;
@@ -449,7 +449,7 @@ bool XenonProgramVersion0001::Load(
 			XenonValueHandle hValue;
 			if(size_t(constantIndex) < pOutProgram->constants.count)
 			{
-				hValue = XenonValueReference(pOutProgram->constants.pData[constantIndex]);
+				hValue = pOutProgram->constants.pData[constantIndex];
 			}
 			else
 			{
@@ -684,7 +684,7 @@ bool XenonProgramVersion0001::Load(
 						XenonValueHandle hValue;
 						if(size_t(constantIndex) < pOutProgram->constants.count)
 						{
-							hValue = XenonValueReference(pOutProgram->constants.pData[constantIndex]);
+							hValue = pOutProgram->constants.pData[constantIndex];
 						}
 						else
 						{

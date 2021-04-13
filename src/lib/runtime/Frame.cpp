@@ -18,6 +18,9 @@
 
 #include "Frame.hpp"
 #include "Program.hpp"
+#include "Vm.hpp"
+
+#include "../base/Mutex.hpp"
 
 #include <assert.h>
 
@@ -51,14 +54,14 @@ XenonFrameHandle XenonFrame::Create(XenonFunctionHandle hFunction)
 		// Initialize each register value.
 		for(size_t i = 0; i < pOutput->registers.count; ++i)
 		{
-			pOutput->registers.pData[i] = XENON_VALUE_HANDLE_NULL;
+			pOutput->registers.pData[i] = XenonValue::CreateNull();
 		}
 
 		// Build the local table for the new frame. This will intentionally copy each value from the function's local table
 		// so any changes made the variables in the frame will not affect the prototypes in the function.
 		for(auto& kv : hFunction->locals)
 		{
-			pOutput->locals.Insert(kv.key, XenonValueCopy(kv.value));
+			pOutput->locals.Insert(kv.key, XenonValueCopy(hFunction->hProgram->hVm, kv.value));
 		}
 
 		XenonDecoder::Initialize(pOutput->decoder, hFunction->hProgram, hFunction->offset);
@@ -73,24 +76,6 @@ void XenonFrame::Dispose(XenonFrameHandle hFrame)
 {
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 
-	// Dispose of any values left over in the stack.
-	for(size_t i = 0; i < hFrame->stack.nextIndex; ++i)
-	{
-		XenonValueDispose(hFrame->stack.memory.pData[i]);
-	}
-
-	// Dispose of the values in the registers.
-	for(size_t i = 0; i < hFrame->registers.count; ++i)
-	{
-		XenonValueDispose(hFrame->registers.pData[i]);
-	}
-
-	// Dispose of the values used to back the locals.
-	for(auto& kv : hFrame->locals)
-	{
-		XenonValueDispose(kv.value);
-	}
-
 	XenonValue::HandleStack::Dispose(hFrame->stack);
 	XenonValue::HandleArray::Dispose(hFrame->registers);
 
@@ -104,17 +89,7 @@ int XenonFrame::PushValue(XenonFrameHandle hFrame, XenonValueHandle hValue)
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 
-	// Track the value by adding a reference.
-	XenonValueHandle hValueRef = XenonValueReference(hValue);
-
-	int result = XenonValue::HandleStack::Push(hFrame->stack, hValueRef);
-	if(result != XENON_SUCCESS)
-	{
-		// If the value could not be pushed, dispose of the reference to avoid leaking memory.
-		XenonValueDispose(hValueRef);
-	}
-
-	return result;
+	return XenonValue::HandleStack::Push(hFrame->stack, hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -141,16 +116,15 @@ int XenonFrame::PeekValue(
 	assert(phOutValue != nullptr);
 	assert(*phOutValue == XENON_VALUE_HANDLE_NULL);
 
-	XenonValueHandle hValueRef;
+	XenonValueHandle hValue;
 
-	int result = XenonValue::HandleStack::Peek(hFrame->stack, &hValueRef, index);
+	int result = XenonValue::HandleStack::Peek(hFrame->stack, &hValue, index);
 	if(result != XENON_SUCCESS)
 	{
 		return result;
 	}
 
-	// Take a reference to the peeked value to make sure it stays alive if it gets popped from the stack.
-	(*phOutValue) = XenonValueReference(hValueRef);
+	(*phOutValue) = hValue;
 
 	return result;
 }
@@ -160,16 +134,10 @@ int XenonFrame::PeekValue(
 int XenonFrame::SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, const uint32_t index)
 {
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
+	assert(hValue != XENON_VALUE_HANDLE_NULL);
 	assert(index < XENON_VM_GP_REGISTER_COUNT);
 
-	// Get a reference to the input value first, just in case it
-	// happens to be the value already in this register slot.
-	XenonValueHandle hValueRef = XenonValueReference(hValue);
-
-	// Dispose of whatever might currently be in this register slot.
-	XenonValueDispose(hFrame->registers.pData[index]);
-
-	hFrame->registers.pData[index] = hValueRef;
+	hFrame->registers.pData[index] = hValue;
 
 	return XENON_SUCCESS;
 }
@@ -179,6 +147,7 @@ int XenonFrame::SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, 
 int XenonFrame::SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, XenonString* const pVariableName)
 {
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
+	assert(hValue != XENON_VALUE_HANDLE_NULL);
 	assert(pVariableName != nullptr);
 
 	auto kv = hFrame->locals.find(pVariableName);
@@ -187,12 +156,9 @@ int XenonFrame::SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValu
 		return XENON_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
-	XenonValueHandle hValueRef = XenonValueReference(hValue);
-	XenonValueHandle hOldValue = kv->value;
+	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
 
-	XenonValueDispose(hOldValue);
-
-	kv->value = hValueRef;
+	kv->value = hValue;
 
 	return XENON_SUCCESS;
 }
@@ -211,7 +177,7 @@ XenonValueHandle XenonFrame::GetGpRegister(XenonFrameHandle hFrame, const uint32
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return XenonValueReference(hFrame->registers.pData[index]);
+	return hFrame->registers.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -229,7 +195,7 @@ XenonValueHandle XenonFrame::GetLocalVariable(XenonFrameHandle hFrame, XenonStri
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return XenonValueReference(hFrame->locals.Get(pVariableName));
+	return hFrame->locals.Get(pVariableName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

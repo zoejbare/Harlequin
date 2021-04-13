@@ -65,6 +65,7 @@ enum XenonErrorCode
 	XENON_ERROR_STACK_FULL = -10,
 	XENON_ERROR_INDEX_OUT_OF_RANGE = -11,
 	XENON_ERROR_SCRIPT_NO_FUNCTION = -12,
+	XENON_ERROR_MISMATCH = -13,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/
@@ -267,7 +268,7 @@ XENON_BASE_API double XenonEndianSwapFloat64(double value);
 enum XenoRunMode
 {
 	XENON_RUN_STEP,
-	XENON_RUN_LOOP,
+	XENON_RUN_CONTINUOUS,
 };
 
 enum XenonExecutionStatusFlag
@@ -445,39 +446,35 @@ XENON_MAIN_API int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCa
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateBool(bool value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateBool(XenonVmHandle hVm, bool value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateInt8(int8_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt8(XenonVmHandle hVm, int8_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateInt16(int16_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt16(XenonVmHandle hVm, int16_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateInt32(int32_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt32(XenonVmHandle hVm, int32_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateInt64(int64_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateInt64(XenonVmHandle hVm, int64_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateUint8(uint8_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint8(XenonVmHandle hVm, uint8_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateUint16(uint16_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint16(XenonVmHandle hVm, uint16_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateUint32(uint32_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint32(XenonVmHandle hVm, uint32_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateUint64(uint64_t value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateUint64(XenonVmHandle hVm, uint64_t value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateFloat32(float value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateFloat32(XenonVmHandle hVm, float value);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateFloat64(double value);
+XENON_MAIN_API XenonValueHandle XenonValueCreateFloat64(XenonVmHandle hVm, double value);
 
 XENON_MAIN_API XenonValueHandle XenonValueCreateNull();
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateString(const char* const string);
+XENON_MAIN_API XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const char* const string);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonValueHandle hObjectProfile);
+XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, XenonValueHandle hObjectProfile);
 
-XENON_MAIN_API XenonValueHandle XenonValueReference(XenonValueHandle hValue);
-
-XENON_MAIN_API XenonValueHandle XenonValueCopy(XenonValueHandle hValue);
-
-XENON_MAIN_API int XenonValueDispose(XenonValueHandle hValue);
+XENON_MAIN_API XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsPrimitiveType(XenonValueHandle hValue);
 

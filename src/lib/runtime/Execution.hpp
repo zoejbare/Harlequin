@@ -38,6 +38,7 @@ struct XenonExecution
 	typedef SkipProbe::HashMap<XenonExecutionHandle, bool> HandleToBoolMap;
 
 	static XenonExecutionHandle Create(XenonVmHandle hVm, XenonFunctionHandle hEntryPoint);
+	static void DetachFromVm(XenonExecutionHandle hExec);
 
 	static void AddRef(XenonExecutionHandle hExec);
 	static void Release(XenonExecutionHandle hExec);
@@ -49,8 +50,9 @@ struct XenonExecution
 
 	static XenonValueHandle GetIoRegister(XenonExecutionHandle hExec, const size_t index, int* const pOutResult);
 
-	static void RunStep(XenonExecutionHandle hExec);
+	static void Run(XenonExecutionHandle hExec, const int runMode);
 
+	static void prv_runStep(XenonExecutionHandle hExec);
 	static void prv_onDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);

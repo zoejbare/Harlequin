@@ -52,7 +52,6 @@ void XenonFunction::Dispose(XenonFunctionHandle hFunction)
 	for(auto& kv : hFunction->locals)
 	{
 		XenonString::Release(kv.key);
-		XenonValueDispose(kv.value);
 	}
 
 	delete hFunction;

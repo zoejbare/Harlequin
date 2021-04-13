@@ -22,6 +22,8 @@
 #include "program-loader/CommonLoader.hpp"
 #include "program-loader/VersionLoader0001.hpp"
 
+#include "../base/Mutex.hpp"
+
 #include <assert.h>
 #include <stdio.h>
 
@@ -275,8 +277,13 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 
 	if(pOutput)
 	{
+		XenonScopedMutex lock(hVm->gcLock);
+
 		// Copy the necessary data to the VM.
 		prv_copyDataToVm(loadData, hVm);
+
+		// Map the program to the VM.
+		hVm->programs.Insert(pProgramName, pOutput);
 	}
 	else
 	{
@@ -381,8 +388,13 @@ XenonProgramHandle XenonProgram::Create(
 
 	if(pOutput)
 	{
+		XenonScopedMutex lock(hVm->gcLock);
+
 		// Copy the necessary data to the VM.
 		prv_copyDataToVm(loadData, hVm);
+
+		// Map the program to the VM.
+		hVm->programs.Insert(pProgramName, pOutput);
 	}
 	else
 	{
@@ -419,12 +431,6 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 		XenonString::Release(kv.key);
 	}
 
-	// Dispose of all program constants.
-	for(size_t i = 0; i < hProgram->constants.count; ++i)
-	{
-		XenonValueDispose(hProgram->constants.pData[i]);
-	}
-
 	// Clean up the data structures.
 	XenonValue::HandleArray::Dispose(hProgram->constants);
 	XenonByteHelper::Array::Dispose(hProgram->code);
@@ -449,7 +455,7 @@ XenonValueHandle XenonProgram::GetConstant(XenonProgramHandle hProgram, const ui
 
 	(*pOutResult) = XENON_SUCCESS;
 
-	return XenonValueReference(hProgram->constants.pData[index]);
+	return hProgram->constants.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -481,7 +487,6 @@ void XenonProgram::prv_freeLoadData(XenonProgram::LoadData& loadData)
 	for(auto& kv : loadData.globals)
 	{
 		XenonString::Release(kv.key);
-		XenonValue::Release(kv.value);
 	}
 
 	// Dispose of the loaded functions.

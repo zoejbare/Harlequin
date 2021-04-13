@@ -67,11 +67,7 @@ void OpCodeExec_StoreLocal(XenonExecutionHandle hExec)
 			// TODO: Raise script exception
 			hExec->exception = true;
 		}
-
-		XenonValueDispose(hRegisterValue);
 	}
-
-	XenonValueDispose(hNameValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -85,8 +81,6 @@ void OpCodeDisasm_StoreLocal(XenonDisassemble& disasm)
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
 	std::string valueData = XenonValue::GetDebugString(hNameValue);
-
-	XenonValueDispose(hNameValue);
 
 	char str[256];
 	snprintf(str, sizeof(str), "STORE_LOCAL r%" PRIu32 " %s, c%" PRIu32, constantIndex, valueData.c_str(), registerIndex);
