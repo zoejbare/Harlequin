@@ -416,6 +416,18 @@ uint32_t XenonValue::Mark(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void XenonValue::SetAutoMark(XenonValueHandle hValue, const bool autoMark)
+{
+	if(hValue && hValue->type != XENON_VALUE_TYPE_NULL)
+	{
+		XenonScopedMutex lock(hValue->hVm->gcLock);
+
+		hValue->gcProxy.autoMark = autoMark;
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValue* XenonValue::prv_onCreate(const int valueType, XenonVmHandle hVm)
 {
 	assert(valueType >= 0);
@@ -429,6 +441,10 @@ XenonValue* XenonValue::prv_onCreate(const int valueType, XenonVmHandle hVm)
 	XenonScopedMutex lock(hVm->gcLock);
 
 	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onMark, prv_onDestruct, pOutput);
+
+	// All values will auto-mark initially, until they are 'disposed' of.
+	// This will allow values to be kept alive outside of script execution.
+	pOutput->gcProxy.autoMark = true;
 
 	return pOutput;
 }

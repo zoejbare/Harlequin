@@ -476,6 +476,8 @@ XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, XenonV
 
 XENON_MAIN_API XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue);
 
+XENON_MAIN_API void XenonValueDispose(XenonValueHandle hValue);
+
 XENON_MAIN_API bool XenonValueIsPrimitiveType(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsBool(XenonValueHandle hValue);

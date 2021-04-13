@@ -180,7 +180,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 					}
 
 					// Reset the proxy state.
-					gc.pIterCurrent->marked = false;
+					gc.pIterCurrent->marked = gc.pIterCurrent->autoMark;
 
 					// Move to the next proxy in the list.
 					gc.pIterCurrent = gc.pIterCurrent->pNext;

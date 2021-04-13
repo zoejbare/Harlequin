@@ -42,6 +42,7 @@ void XenonGcProxy::Initialize(
 	output.pGc = &gc;
 	output.pObject = pObject;
 	output.marked = false;
+	output.autoMark = false;
 
 	XenonGarbageCollector::LinkObject(gc, output);
 }

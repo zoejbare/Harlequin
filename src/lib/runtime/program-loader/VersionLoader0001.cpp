@@ -372,6 +372,10 @@ bool XenonProgramVersion0001::Load(
 				return false;
 			}
 
+			// Disable the auto-mark for loaded values since that is only needed for values created externally.
+			// Values in loaded programs will be marked accordingly during garbage collection.
+			XenonValue::SetAutoMark(hValue, false);
+
 			pOutProgram->constants.pData[index] = hValue;
 		}
 	}

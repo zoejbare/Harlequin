@@ -79,6 +79,8 @@ struct XenonValue
 
 	static uint32_t Mark(XenonValueHandle hValue);
 
+	static void SetAutoMark(XenonValueHandle hValue, const bool autoMark);
+
 	static XenonValue* prv_onCreate(int, XenonVmHandle);
 	static uint32_t prv_onMark(void*);
 	static void prv_onDestruct(void*);

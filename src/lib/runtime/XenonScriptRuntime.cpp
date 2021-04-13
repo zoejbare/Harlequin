@@ -896,8 +896,15 @@ int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, XenonValueHandle* ph
 		return XENON_ERROR_INVALID_ARG;
 	}
 
+	XenonScopedMutex lock(hExec->hVm->gcLock);
+
 	int result;
-	(*phOutValue) = XenonExecution::GetIoRegister(hExec, registerIndex, &result);
+	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, registerIndex, &result);
+
+	// Guard the value against being garbage collected.
+	XenonValue::SetAutoMark(hValue, true);
+
+	(*phOutValue) = hValue;
 
 	return result;
 }
@@ -977,11 +984,16 @@ int XenonFramePopValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue)
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
+	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
+
 	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
 	int result = XenonFrame::PopValue(hFrame, &hValue);
 
 	if(phOutValue)
 	{
+		// Guard the value against being garbage collected.
+		XenonValue::SetAutoMark(hValue, true);
+
 		(*phOutValue) = hValue;
 	}
 
@@ -1002,7 +1014,13 @@ int XenonFramePeekValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, i
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
-	return XenonFrame::PeekValue(hFrame, phOutValue, stackIndex);
+	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
+
+	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
+	XenonFrame::PeekValue(hFrame, &hValue, stackIndex);
+
+	// Guard the value against being garbage collected.
+	XenonValue::SetAutoMark(hValue, true);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1051,8 +1069,15 @@ int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValu
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
+	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
+
 	int result;
-	(*phOutValue) = XenonFrame::GetGpRegister(hFrame, registerIndex, &result);
+	XenonValueHandle hValue = XenonFrame::GetGpRegister(hFrame, registerIndex, &result);
+
+	// Guard the value against being garbage collected.
+	XenonValue::SetAutoMark(hValue, true);
+
+	(*phOutValue) = hValue;
 
 	return result;
 }
@@ -1116,11 +1141,18 @@ int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutV
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
+	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
+
 	int result;
-	(*phOutValue) = XenonFrame::GetLocalVariable(hFrame, pVarName, &result);
+	XenonValueHandle hValue = XenonFrame::GetLocalVariable(hFrame, pVarName, &result);
 
 	// Dispose of the string object now that we no longer need it.
 	XenonString::Release(pVarName);
+
+	// Guard the value against being garbage collected.
+	XenonValue::SetAutoMark(hValue, true);
+
+	(*phOutValue) = hValue;
 
 	return result;
 }
@@ -1277,6 +1309,13 @@ XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, XenonValueHandle hObj
 XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue)
 {
 	return XenonValue::Copy(hVm, hValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonValueDispose(XenonValueHandle hValue)
+{
+	XenonValue::SetAutoMark(hValue, false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
