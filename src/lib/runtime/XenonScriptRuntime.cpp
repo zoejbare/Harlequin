@@ -1021,6 +1021,8 @@ int XenonFramePeekValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, i
 
 	// Guard the value against being garbage collected.
 	XenonValue::SetAutoMark(hValue, true);
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
