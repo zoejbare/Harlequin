@@ -47,11 +47,14 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 {
 	// TODO: Make these values configurable.
 	constexpr const uint32_t maxIterationCount = 32;
-	constexpr const uint64_t initialExecStackSize = 8;
-	constexpr const uint64_t initialValueStackSize = 4096;
 
-	XenonProgram::HandleStack::Initialize(output.programStack, hVm->programs.Size());
-	XenonFunction::HandleStack::Initialize(output.functionStack, hVm->functions.Size());
+	constexpr const size_t initialProgramStackSize = 256;
+	constexpr const size_t initialFunctionStackSize = 2048;
+	constexpr const size_t initialExecStackSize = 64;
+	constexpr const size_t initialValueStackSize = 4096;
+
+	XenonProgram::HandleStack::Initialize(output.programStack, initialProgramStackSize);
+	XenonFunction::HandleStack::Initialize(output.functionStack, initialFunctionStackSize);
 	XenonExecution::HandleStack::Initialize(output.execStack, initialExecStackSize);
 	XenonValue::HandleStack::Initialize(output.valueStack, initialValueStackSize);
 
@@ -199,6 +202,16 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		{
 			if(gc.lastPhase != gc.phase)
 			{
+				const size_t requiredStackSize = gc.hVm->programs.Size();
+				const size_t currentStackSize = gc.programStack.memory.count;
+
+				// Resize the stack if it's too small.
+				if(requiredStackSize > currentStackSize)
+				{
+					XenonProgram::HandleStack::Dispose(gc.programStack);
+					XenonProgram::HandleStack::Initialize(gc.programStack, requiredStackSize * 3 / 2);
+				}
+
 				// Start the phase by filling up the program stack.
 				for(auto& kv : gc.hVm->programs)
 				{
@@ -217,6 +230,16 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 						// No more programs in the stack, time to move on to the next phase.
 						endOfPhase = true;
 						break;
+					}
+
+					const size_t requiredStackSize = hProgram->constants.count;
+					const size_t currentStackSize = gc.valueStack.memory.count;
+
+					// Resize the stack if it's too small.
+					if(requiredStackSize > currentStackSize)
+					{
+						XenonValue::HandleStack::Dispose(gc.valueStack);
+						XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
 					}
 
 					// Cache the constant values from the program.
@@ -248,6 +271,16 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		{
 			if(gc.lastPhase != gc.phase)
 			{
+				const size_t requiredStackSize = gc.hVm->globals.Size();
+				const size_t currentStackSize = gc.valueStack.memory.count;
+
+				// Resize the stack if it's too small.
+				if(requiredStackSize > currentStackSize)
+				{
+					XenonValue::HandleStack::Dispose(gc.valueStack);
+					XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
+				}
+
 				// Fill the value stack with all the globals in the VM.
 				for(auto& kv : gc.hVm->globals)
 				{
@@ -276,6 +309,16 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		{
 			if(gc.lastPhase != gc.phase)
 			{
+				const size_t requiredStackSize = gc.hVm->functions.Size();
+				const size_t currentStackSize = gc.functionStack.memory.count;
+
+				// Resize the stack if it's too small.
+				if(requiredStackSize > currentStackSize)
+				{
+					XenonFunction::HandleStack::Dispose(gc.functionStack);
+					XenonFunction::HandleStack::Initialize(gc.functionStack, requiredStackSize * 3 / 2);
+				}
+
 				// Start the phase by filling the function stack.
 				for(auto& kv : gc.hVm->functions)
 				{
@@ -294,6 +337,16 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 						// No more functions in the stack, time to move on to the next phase.
 						endOfPhase = true;
 						break;
+					}
+
+					const size_t requiredStackSize = hFunction->locals.Size();
+					const size_t currentStackSize = gc.valueStack.memory.count;
+
+					// Resize the stack if it's too small.
+					if(requiredStackSize > currentStackSize)
+					{
+						XenonValue::HandleStack::Dispose(gc.valueStack);
+						XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
 					}
 
 					// Cache the locals from the function.
@@ -325,6 +378,16 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		{
 			if(gc.lastPhase != gc.phase)
 			{
+				const size_t requiredStackSize = gc.hVm->executionContexts.Size();
+				const size_t currentStackSize = gc.valueStack.memory.count;
+
+				// Resize the stack if it's too small.
+				if(requiredStackSize > currentStackSize)
+				{
+					XenonValue::HandleStack::Dispose(gc.valueStack);
+					XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
+				}
+
 				// At the start of the phase, we collect all the execution contexts saving
 				// a reference to them to keep them alive in case the user releases any of
 				// them before they're all processed here.
@@ -351,6 +414,26 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 
 					XenonExecution::Release(hExec);
 
+					// Calculate the total size we need in the value stack.
+					size_t requiredStackSize = XENON_VM_IO_REGISTER_COUNT;
+					for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
+					{
+						XenonFrameHandle hFrame = hExec->frameStack.memory.pData[i];
+
+						requiredStackSize += XENON_VM_GP_REGISTER_COUNT
+							+ hFrame->stack.nextIndex
+							+ hFrame->locals.Size();
+					}
+
+					const size_t currenStackSize = gc.valueStack.memory.count;
+
+					// Resize the stack if it's too small.
+					if(requiredStackSize > currenStackSize)
+					{
+						XenonValue::HandleStack::Dispose(gc.valueStack);
+						XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
+					}
+
 					// Push each of the I/O registers to the value stack.
 					for(size_t i = 0; i < XENON_VM_IO_REGISTER_COUNT; ++i)
 					{
@@ -360,22 +443,22 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 					}
 
 					// Iterate over the entire frame stack in the execution context.
-					for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
+					for(size_t frameIndex = 0; frameIndex < hExec->frameStack.nextIndex; ++frameIndex)
 					{
-						XenonFrameHandle hFrame = hExec->frameStack.memory.pData[i];
+						XenonFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
 
 						// Push each of the frame's general purpose registers to the value stack.
-						for(size_t i = 0; i < XENON_VM_GP_REGISTER_COUNT; ++i)
+						for(size_t registerIndex = 0; registerIndex < XENON_VM_GP_REGISTER_COUNT; ++registerIndex)
 						{
-							XenonValueHandle hValue = hFrame->registers.pData[i];
+							XenonValueHandle hValue = hFrame->registers.pData[registerIndex];
 
 							XenonValue::HandleStack::Push(gc.valueStack, hValue);
 						}
 
 						// Push all values current in the frame's value stack to our value stack.
-						for(size_t i = 0; i < hFrame->stack.nextIndex; ++i)
+						for(size_t stackIndex = 0; stackIndex < hFrame->stack.nextIndex; ++stackIndex)
 						{
-							XenonValueHandle hValue = hFrame->stack.memory.pData[i];
+							XenonValueHandle hValue = hFrame->stack.memory.pData[stackIndex];
 
 							XenonValue::HandleStack::Push(gc.valueStack, hValue);
 						}
@@ -508,9 +591,10 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			break;
 	}
 
+	gc.lastPhase = gc.phase;
+
 	if(endOfPhase)
 	{
-		gc.lastPhase = gc.phase;
 		gc.phase = (gc.phase + 1) % XENON_GC_PHASE__COUNT;
 
 		endOfAllPhases = (gc.phase == XENON_GC_PHASE__START);
