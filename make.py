@@ -149,6 +149,9 @@ with csbuild.Toolchain("msvc"):
 		"/EHsc",
 		"/W4",
 	)
+	csbuild.AddCompilerFlags(
+		"/wd4804", # 'operation' : unsafe use of type 'bool' in operation
+	)
 
 
 ###################################################################################################

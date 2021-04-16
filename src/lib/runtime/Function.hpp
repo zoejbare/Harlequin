@@ -77,20 +77,14 @@ struct XenonFunction
 	void operator delete(void* const pObject);
 
 	XenonProgramHandle hProgram;
+	XenonNativeFunction nativeFn;
+
 	XenonString* pSignature;
+	void* pNativeUserData;
 
 	XenonValue::StringToHandleMap locals;
 
-	union
-	{
-		struct
-		{
-			XenonNativeFunction nativeFn;
-			void* pNativeUserData;
-		};
-
-		uint32_t bytecodeOffset;
-	};
+	uint32_t bytecodeOffset;
 
 	uint16_t numParameters;
 	uint16_t numReturnValues;
