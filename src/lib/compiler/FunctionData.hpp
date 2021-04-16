@@ -28,11 +28,11 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonFunction
+struct XenonFunctionData
 {
 	typedef SkipProbe::HashMap<
 		XenonString*,
-		XenonFunction,
+		XenonFunctionData,
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> StringToFunctionMap;

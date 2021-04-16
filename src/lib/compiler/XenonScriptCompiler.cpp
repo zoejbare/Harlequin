@@ -19,7 +19,7 @@
 #include "../XenonScript.h"
 
 #include "Compiler.hpp"
-#include "Function.hpp"
+#include "FunctionData.hpp"
 #include "ProgramWriter.hpp"
 
 #include "../base/String.hpp"
@@ -404,7 +404,7 @@ int XenonProgramWriterAddFunction(
 	std::vector<uint8_t> bytecode(functionBytecodeLength);
 	memcpy(bytecode.data(), pFunctionBytecode, bytecode.size());
 
-	XenonFunction function;
+	XenonFunctionData function;
 
 	function.bytecode = std::move(bytecode);
 	function.numParameters = numParameters;
@@ -440,7 +440,7 @@ int XenonProgramWriterAddNativeFunction(
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonFunction function;
+	XenonFunctionData function;
 
 	function.numParameters = numParameters;
 	function.numReturnValues = numReturnValues;

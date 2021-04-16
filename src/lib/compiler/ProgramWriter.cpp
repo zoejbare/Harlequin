@@ -460,7 +460,7 @@ bool XenonProgramWriter::Serialize(
 
 	struct FunctionBinding
 	{
-		XenonFunction* pFunction;
+		XenonFunctionData* pFunction;
 		XenonString* pSignature;
 
 		uint32_t finalOffset;

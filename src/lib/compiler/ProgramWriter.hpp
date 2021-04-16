@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "Function.hpp"
+#include "FunctionData.hpp"
 
 #include "../base/String.hpp"
 #include "../common/Array.hpp"
@@ -121,7 +121,7 @@ struct XenonProgramWriter
 
 	DependencySet dependencies;
 	GlobalValueMap globals;
-	XenonFunction::StringToFunctionMap functions;
+	XenonFunctionData::StringToFunctionMap functions;
 
 	IndexMapInt8 indexMapInt8;
 	IndexMapInt16 indexMapInt16;

@@ -255,7 +255,7 @@ with csbuild.Project(LibXenonBase.projectName, XenonLib.rootPath, LibXenonBase.d
 		csbuild.AddExcludeDirectories(
 			f"{XenonLib.rootPath}/base/mutex-impl",
 			f"{XenonLib.rootPath}/base/thread-impl",
-			);
+		)
 
 	with csbuild.Toolchain("msvc", "gcc", "clang"):
 		csbuild.AddDefines("XENON_BUILD_BASE_LIB_EXPORT")
