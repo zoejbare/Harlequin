@@ -497,25 +497,20 @@ bool XenonProgramVersion0001::Load(
 			return false;
 		}
 
+		auto disposeLocalVariables = [](XenonValue::StringToHandleMap& map)
+		{
+			for(auto& kv : map)
+			{
+				XenonString::Release(kv.key);
+			}
+		};
+
 		// Iterate for each function.
 		for(uint32_t funcIndex = 0; funcIndex < header.functionTableLength; ++funcIndex)
 		{
-			XenonFunctionHandle hFunction = XenonFunction::Create(pOutProgram);
-			if(!hFunction)
-			{
-				XenonReportMessage(
-					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to create function handle: program=\"%s\"",
-					pOutProgram->pName->data
-				);
-
-				return false;
-			}
-
 			// Read the function signature.
-			hFunction->pSignature = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
-			if(!hFunction->pSignature)
+			XenonString* const pSignature = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
+			if(!pSignature)
 			{
 				XenonReportMessage(
 					hReport,
@@ -523,14 +518,12 @@ bool XenonProgramVersion0001::Load(
 					"Failed to read function signature: program=\"%s\"",
 					pOutProgram->pName->data
 				);
-
-				XenonFunction::Dispose(hFunction);
-
 				return false;
 			}
 
-			// Read the function offset.
-			result = XenonSerializerReadBool(hSerializer, &hFunction->isNative);
+			// Read the flag indicating whether or not the function uses a native binding.
+			bool isNativeFunction = false;
+			result = XenonSerializerReadBool(hSerializer, &isNativeFunction);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -540,17 +533,18 @@ bool XenonProgramVersion0001::Load(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to read function 'isNative' flag: program=\"%s\", function=\"%s\", error=\"%s\"",
 					pOutProgram->pName->data,
-					hFunction->pSignature->data,
+					pSignature->data,
 					errorString
 				);
 
-				XenonFunction::Dispose(hFunction);
+				XenonString::Release(pSignature);
 
 				return false;
 			}
 
 			// Read the function parameter count.
-			result = XenonSerializerReadUint16(hSerializer, &hFunction->numParameters);
+			uint16_t numParameters = 0;
+			result = XenonSerializerReadUint16(hSerializer, &numParameters);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -560,17 +554,18 @@ bool XenonProgramVersion0001::Load(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to read function parameter count: program=\"%s\", function=\"%s\", error=\"%s\"",
 					pOutProgram->pName->data,
-					hFunction->pSignature->data,
+					pSignature->data,
 					errorString
 				);
 
-				XenonFunction::Dispose(hFunction);
+				XenonString::Release(pSignature);
 
 				return false;
 			}
 
 			// Read the function return value count.
-			result = XenonSerializerReadUint16(hSerializer, &hFunction->numReturnValues);
+			uint16_t numReturnValues = 0;
+			result = XenonSerializerReadUint16(hSerializer, &numReturnValues);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -580,19 +575,22 @@ bool XenonProgramVersion0001::Load(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to read function return value count: program=\"%s\", function=\"%s\", error=\"%s\"",
 					pOutProgram->pName->data,
-					hFunction->pSignature->data,
+					pSignature->data,
 					errorString
 				);
 
-				XenonFunction::Dispose(hFunction);
+				XenonString::Release(pSignature);
 
 				return false;
 			}
 
-			if(!hFunction->isNative)
+			XenonValue::StringToHandleMap locals;
+			uint32_t bytecodeOffset = 0;
+
+			if(!isNativeFunction)
 			{
-				// Read the function offset.
-				result = XenonSerializerReadUint32(hSerializer, &hFunction->offset);
+				// Read the function's bytecode offset.
+				result = XenonSerializerReadUint32(hSerializer, &bytecodeOffset);
 				if(result != XENON_SUCCESS)
 				{
 					const char* const errorString = XenonGetErrorCodeString(result);
@@ -602,11 +600,11 @@ bool XenonProgramVersion0001::Load(
 						XENON_MESSAGE_TYPE_ERROR,
 						"Failed to read function bytecode offset: program=\"%s\", function=\"%s\", error=\"%s\"",
 						pOutProgram->pName->data,
-						hFunction->pSignature->data,
+						pSignature->data,
 						errorString
 					);
 
-					XenonFunction::Dispose(hFunction);
+					XenonString::Release(pSignature);
 
 					return false;
 				}
@@ -623,18 +621,20 @@ bool XenonProgramVersion0001::Load(
 						XENON_MESSAGE_TYPE_ERROR,
 						"Failed to read function local variable count: program=\"%s\", function=\"%s\", error=\"%s\"",
 						pOutProgram->pName->data,
-						hFunction->pSignature->data,
+						pSignature->data,
 						errorString
 					);
 
-					XenonFunction::Dispose(hFunction);
+					XenonString::Release(pSignature);
 
 					return false;
 				}
 
 				if(numLocalVariables > 0)
 				{
-					hFunction->locals.Reserve(numLocalVariables);
+					locals.Reserve(numLocalVariables);
+
+					bool localVarError = false;
 
 					// Iterate for each local variable.
 					for(uint32_t localIndex = 0; localIndex < numLocalVariables; ++localIndex)
@@ -646,20 +646,21 @@ bool XenonProgramVersion0001::Load(
 							return false;
 						}
 
-						if(hFunction->locals.Contains(pVarName))
+						if(locals.Contains(pVarName))
 						{
 							XenonReportMessage(
 								hReport,
 								XENON_MESSAGE_TYPE_ERROR,
 								"Local variable conflict: program=\"%s\", function=\"%s\", variableName=\"%s\"",
 								pOutProgram->pName->data,
-								hFunction->pSignature->data,
+								pSignature->data,
 								pVarName->data
 							);
 
 							XenonString::Release(pVarName);
 
-							return false;
+							localVarError = true;
+							continue;
 						}
 
 						// Read the local variable value index.
@@ -674,14 +675,16 @@ bool XenonProgramVersion0001::Load(
 								XENON_MESSAGE_TYPE_ERROR,
 								"Failed to read local variable value index: program=\"%s\", function=\"%s\", variableName=\"%s\", error=\"%s\"",
 								pOutProgram->pName->data,
-								hFunction->pSignature->data,
+								pSignature->data,
 								pVarName->data,
 								errorString
 							);
 
 							XenonString::Release(pVarName);
 
-							return false;
+							localVarError = true;
+
+							continue;
 						}
 
 						// Get the value from the constant table.
@@ -697,7 +700,7 @@ bool XenonProgramVersion0001::Load(
 								XENON_MESSAGE_TYPE_WARNING,
 								"Local variable points to invalid constant index: program=\"%s\", function=\"%s\", variableName=\"%s\", index=%" PRIu32,
 								pOutProgram->pName->data,
-								hFunction->pSignature->data,
+								pSignature->data,
 								pVarName->data,
 								constantIndex
 							);
@@ -706,18 +709,62 @@ bool XenonProgramVersion0001::Load(
 						}
 
 						// Map the local variable to the function.
-						hFunction->locals.Insert(pVarName, hValue);
+						locals.Insert(pVarName, hValue);
+					}
+
+					if(localVarError)
+					{
+						XenonString::Release(pSignature);
+						disposeLocalVariables(locals);
+						return false;
 					}
 				}
 			}
 
-			if(!hVm->functions.Contains(hFunction->pSignature))
+			if(!hVm->functions.Contains(pSignature))
 			{
-				XenonString::AddRef(hFunction->pSignature);
+				XenonFunctionHandle hFunction;
+				if(isNativeFunction)
+				{
+					hFunction = XenonFunction::CreateNative(
+						pOutProgram,
+						pSignature,
+						numParameters,
+						numReturnValues
+					);
+				}
+				else
+				{
+					hFunction = XenonFunction::CreateScript(
+						pOutProgram,
+						pSignature,
+						locals,
+						bytecodeOffset,
+						numParameters,
+						numReturnValues
+					);
+				}
 
-				// Map the function to the signature.
-				pOutProgram->functions.Insert(hFunction->pSignature, false);
-				outLoadData.functions.Insert(hFunction->pSignature, hFunction);
+				if(!hFunction)
+				{
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to create function handle: program=\"%s\"",
+						pOutProgram->pName->data
+					);
+
+					return false;
+				}
+
+				// Map the function signature to output program.
+				// Only the name is mapped since the function itself will live in the VM.
+				XenonString::AddRef(pSignature);
+				pOutProgram->functions.Insert(pSignature, false);
+
+				// Map the function in the load data map which will be transferred to the VM.
+				XenonString::AddRef(pSignature);
+				outLoadData.functions.Insert(pSignature, hFunction);
 			}
 			else
 			{
@@ -726,11 +773,12 @@ bool XenonProgramVersion0001::Load(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Function signature conflict: program=\"%s\", function=\"%s\"",
 					pOutProgram->pName->data,
-					hFunction->pSignature->data
+					pSignature->data
 				);
-
-				XenonFunction::Dispose(hFunction);
 			}
+
+			// The original reference to the function signature is no longer needed.
+			XenonString::Release(pSignature);
 		}
 	}
 

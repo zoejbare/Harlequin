@@ -17,6 +17,7 @@
 //
 
 #include "Vm.hpp"
+#include "BuiltIn.hpp"
 #include "OpDecl.hpp"
 
 #include <assert.h>
@@ -39,7 +40,7 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 	pOutput->dependency.pUserData = init.dependency.pUserData;
 
 	// Initialize the garbage collector.
-	XenonGarbageCollector::Initialize(pOutput->gc, pOutput);
+	XenonGarbageCollector::Initialize(pOutput->gc, pOutput, init.gcMaxIterationCount);
 
 	// Initialize the opcode array.
 	OpCodeArray::Initialize(pOutput->opCodes);
@@ -67,6 +68,64 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 
 	#undef XENON_BIND_OP_CODE
 
+	#define XENON_BUILT_IN(id, func, numParams, numRetVals) \
+		{ \
+			const char* const signature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_ ## id); \
+			XenonString* const pSignature = XenonString::Create(signature); \
+			XenonFunctionHandle hFunction = XenonFunction::CreateBuiltIn(pSignature, XenonBuiltIn::func, numParams, numRetVals); \
+			pOutput->functions.Insert(pSignature, hFunction); \
+		}
+
+	XENON_BUILT_IN(OP_ADD_BOOL, OpAddBool, 2, 1);
+	XENON_BUILT_IN(OP_ADD_INT8, OpAddInt8, 2, 1);
+	XENON_BUILT_IN(OP_ADD_INT16, OpAddInt16, 2, 1);
+	XENON_BUILT_IN(OP_ADD_INT32, OpAddInt32, 2, 1);
+	XENON_BUILT_IN(OP_ADD_INT64, OpAddInt64, 2, 1);
+	XENON_BUILT_IN(OP_ADD_UINT8, OpAddUint8, 2, 1);
+	XENON_BUILT_IN(OP_ADD_UINT16, OpAddUint16, 2, 1);
+	XENON_BUILT_IN(OP_ADD_UINT32, OpAddUint32, 2, 1);
+	XENON_BUILT_IN(OP_ADD_UINT64, OpAddUint64, 2, 1);
+	XENON_BUILT_IN(OP_ADD_FLOAT32, OpAddFloat32, 2, 1);
+	XENON_BUILT_IN(OP_ADD_FLOAT64, OpAddFloat64, 2, 1);
+	XENON_BUILT_IN(OP_ADD_STRING, OpAddString, 2, 1);
+
+	XENON_BUILT_IN(OP_SUB_BOOL, OpSubBool, 2, 1);
+	XENON_BUILT_IN(OP_SUB_INT8, OpSubInt8, 2, 1);
+	XENON_BUILT_IN(OP_SUB_INT16, OpSubInt16, 2, 1);
+	XENON_BUILT_IN(OP_SUB_INT32, OpSubInt32, 2, 1);
+	XENON_BUILT_IN(OP_SUB_INT64, OpSubInt64, 2, 1);
+	XENON_BUILT_IN(OP_SUB_UINT8, OpSubUint8, 2, 1);
+	XENON_BUILT_IN(OP_SUB_UINT16, OpSubUint16, 2, 1);
+	XENON_BUILT_IN(OP_SUB_UINT32, OpSubUint32, 2, 1);
+	XENON_BUILT_IN(OP_SUB_UINT64, OpSubUint64, 2, 1);
+	XENON_BUILT_IN(OP_SUB_FLOAT32, OpSubFloat32, 2, 1);
+	XENON_BUILT_IN(OP_SUB_FLOAT64, OpSubFloat64, 2, 1);
+
+	XENON_BUILT_IN(OP_MUL_BOOL, OpMulBool, 2, 1);
+	XENON_BUILT_IN(OP_MUL_INT8, OpMulInt8, 2, 1);
+	XENON_BUILT_IN(OP_MUL_INT16, OpMulInt16, 2, 1);
+	XENON_BUILT_IN(OP_MUL_INT32, OpMulInt32, 2, 1);
+	XENON_BUILT_IN(OP_MUL_INT64, OpMulInt64, 2, 1);
+	XENON_BUILT_IN(OP_MUL_UINT8, OpMulUint8, 2, 1);
+	XENON_BUILT_IN(OP_MUL_UINT16, OpMulUint16, 2, 1);
+	XENON_BUILT_IN(OP_MUL_UINT32, OpMulUint32, 2, 1);
+	XENON_BUILT_IN(OP_MUL_UINT64, OpMulUint64, 2, 1);
+	XENON_BUILT_IN(OP_MUL_FLOAT32, OpMulFloat32, 2, 1);
+	XENON_BUILT_IN(OP_MUL_FLOAT64, OpMulFloat64, 2, 1);
+
+	XENON_BUILT_IN(OP_DIV_BOOL, OpDivBool, 2, 1);
+	XENON_BUILT_IN(OP_DIV_INT8, OpDivInt8, 2, 1);
+	XENON_BUILT_IN(OP_DIV_INT16, OpDivInt16, 2, 1);
+	XENON_BUILT_IN(OP_DIV_INT32, OpDivInt32, 2, 1);
+	XENON_BUILT_IN(OP_DIV_INT64, OpDivInt64, 2, 1);
+	XENON_BUILT_IN(OP_DIV_UINT8, OpDivUint8, 2, 1);
+	XENON_BUILT_IN(OP_DIV_UINT16, OpDivUint16, 2, 1);
+	XENON_BUILT_IN(OP_DIV_UINT32, OpDivUint32, 2, 1);
+	XENON_BUILT_IN(OP_DIV_UINT64, OpDivUint64, 2, 1);
+	XENON_BUILT_IN(OP_DIV_FLOAT32, OpDivFloat32, 2, 1);
+	XENON_BUILT_IN(OP_DIV_FLOAT64, OpDivFloat64, 2, 1);
+
+	#undef XENON_BUILT_IN
 
 	XenonThreadConfig threadConfig;
 	threadConfig.mainFn = prv_gcThreadMain;

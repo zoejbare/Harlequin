@@ -49,23 +49,47 @@ struct XenonFunction
 
 	typedef XenonStack<XenonFunctionHandle> HandleStack;
 
-	static XenonFunctionHandle Create(XenonProgramHandle hProgram);
+	static XenonFunctionHandle CreateScript(
+		XenonProgramHandle hProgram,
+		XenonString* const pSignature,
+		XenonValue::StringToHandleMap& locals,
+		const uint32_t bytecodeOffset,
+		const uint16_t numParameters,
+		const uint16_t numReturnValues
+	);
+	static XenonFunctionHandle CreateNative(
+		XenonProgramHandle hProgram,
+		XenonString* const pSignature,
+		const uint16_t numParameters,
+		const uint16_t numReturnValues
+	);
+	static XenonFunctionHandle CreateBuiltIn(
+		XenonString* const pSignature,
+		XenonNativeFunction nativeFn,
+		const uint16_t numParameters,
+		const uint16_t numReturnValues
+	);
 	static void Dispose(XenonFunctionHandle hFunction);
+
+	static XenonVmHandle GetVm(XenonFunctionHandle hFunction);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	XenonProgramHandle hProgram;
-
 	XenonString* pSignature;
 
 	XenonValue::StringToHandleMap locals;
 
 	union
 	{
-		XenonNativeFunction nativeBinding;
+		struct
+		{
+			XenonNativeFunction nativeFn;
+			void* pNativeUserData;
+		};
 
-		uint32_t offset;
+		uint32_t bytecodeOffset;
 	};
 
 	uint16_t numParameters;

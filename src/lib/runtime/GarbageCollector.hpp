@@ -29,7 +29,7 @@
 struct XenonGcProxy;
 struct XenonGarbageCollector
 {
-	static void Initialize(XenonGarbageCollector& output, XenonVmHandle hVm);
+	static void Initialize(XenonGarbageCollector& output, XenonVmHandle hVm, const uint32_t maxIterationCount);
 	static void Dispose(XenonGarbageCollector& gc);
 
 	static bool RunStep(XenonGarbageCollector& gc);

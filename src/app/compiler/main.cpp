@@ -17,6 +17,7 @@
 //
 
 #include "XenonScript.h"
+#include "XenonBuiltIn.h"
 #include "XenonOpCode.h"
 
 #if defined(XENON_PLATFORM_WINDOWS)
@@ -203,7 +204,8 @@ int main(int argc, char* argv[])
 
 	const char* const mainFuncSignature = "void Program.Main()";
 	const char* const subFuncSignature = "int32 Program.DoWork(float64)";
-	const char* const nativeFuncSignature = "string Program.DoWorkNative(string, string)";
+	const char* const nativeFuncSignature = "void Program.PrintString(string)";
+	const char* const builtInFuncSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_ADD_STRING);
 	const char* const globalVariableName = "globalTestVar";
 	const char* const localVariableName = "localTestVar";
 
@@ -236,6 +238,9 @@ int main(int argc, char* argv[])
 
 	uint32_t constIndex9;
 	XenonProgramWriterAddConstantString(hProgramWriter, localVariableName, &constIndex9);
+
+	uint32_t constIndex10;
+	XenonProgramWriterAddConstantString(hProgramWriter, builtInFuncSignature, &constIndex10);
 
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);
@@ -282,11 +287,13 @@ int main(int argc, char* argv[])
 		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex5);
 		writeOpStoreParam(hSubFuncSerializer, 1, 1);
 
+		writeOpCall(hSubFuncSerializer, constIndex10);
 		writeOpCall(hSubFuncSerializer, constIndex8);
 		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex0);
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
+		writeOpStoreParam(hSubFuncSerializer, 1, 0);
 
-		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex1);
+		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex1);
 		writeOpStoreParam(hSubFuncSerializer, 0, 1);
 
 		writeOpNop(hSubFuncSerializer);
@@ -299,9 +306,9 @@ int main(int argc, char* argv[])
 		XenonProgramWriterAddLocalVariable(hProgramWriter, subFuncSignature, localVariableName, constIndex2);
 	}
 
-	// string Program.DoWorkNative(string, string)
+	// void Program.PrintString(string)
 	{
-		XenonProgramWriterAddNativeFunction(hProgramWriter, nativeFuncSignature, 2, 1);
+		XenonProgramWriterAddNativeFunction(hProgramWriter, nativeFuncSignature, 1, 0);
 	}
 
 	result = XenonProgramWriterSerialize(hProgramWriter, hCompiler, hFileSerializer, XENON_ENDIAN_MODE_NATIVE);

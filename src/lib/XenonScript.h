@@ -47,6 +47,8 @@ extern "C" {
 #define XENON_VM_THREAD_MINIMUM_STACK_SIZE 262144
 #define XENON_VM_THREAD_DEFAULT_STACK_SIZE 1048576
 
+#define XENON_VM_GC_DEFAULT_ITERATION_COUNT 32
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 enum XenonErrorCode
@@ -85,6 +87,8 @@ XENON_BASE_API const char* XenonGetErrorCodeString(int errorCode);
 XENON_BASE_API const char* XenonGetEndianModeString(int endianness);
 
 XENON_BASE_API int XenonGetPlatformEndianMode();
+
+XENON_BASE_API const char* XenonGetBuiltInFunctionSignature(int builtInFunctionId);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -286,7 +290,7 @@ typedef struct XenonExecution* XenonExecutionHandle;
 typedef struct XenonFrame* XenonFrameHandle;
 typedef struct XenonValue* XenonValueHandle;
 
-typedef void (*XenonNativeFunction)(XenonExecutionHandle, XenonFunctionHandle);
+typedef void (*XenonNativeFunction)(XenonExecutionHandle, XenonFunctionHandle, void*);
 typedef void (*XenonCallbackProgramDependency)(void*, const char*);
 typedef void (*XenonCallbackOpDisasm)(void*, const char*, uintptr_t);
 
@@ -308,6 +312,7 @@ typedef struct
 	XenonDependencyInit dependency;
 
 	uint32_t gcThreadStackSize;
+	uint32_t gcMaxIterationCount;
 } XenonVmInit;
 
 #define XENON_VM_HANDLE_NULL        ((XenonVmHandle)0)
@@ -382,11 +387,21 @@ XENON_MAIN_API int XenonFunctionGetReturnValueCount(XenonFunctionHandle hFunctio
 
 XENON_MAIN_API int XenonFunctionGetBytecodeOffset(XenonFunctionHandle hFunction, uint32_t* pOutOffset);
 
-XENON_MAIN_API int XenonFunctionGetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction* pOutBinding);
+XENON_MAIN_API int XenonFunctionGetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction* pOutNativeFn);
 
-XENON_MAIN_API int XenonFunctionSetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction bindingFn);
+XENON_MAIN_API int XenonFunctionGetNativeUserData(XenonFunctionHandle hFunction, void** ppOutUerData);
 
-XENON_MAIN_API int XenonFunctionDisassemble(XenonFunctionHandle hFunction, XenonCallbackOpDisasm onDisasmFn, void* pUserData);
+XENON_MAIN_API int XenonFunctionSetNativeBinding(
+	XenonFunctionHandle hFunction,
+	XenonNativeFunction nativeFn,
+	void* pUserData
+);
+
+XENON_MAIN_API int XenonFunctionDisassemble(
+	XenonFunctionHandle hFunction,
+	XenonCallbackOpDisasm onDisasmFn,
+	void* pUserData
+);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -401,6 +416,10 @@ XENON_MAIN_API int XenonExecutionDispose(XenonExecutionHandle* phExecution);
 XENON_MAIN_API int XenonExecutionRun(XenonExecutionHandle hExec, int runMode);
 
 XENON_MAIN_API int XenonExecutionYield(XenonExecutionHandle hExec);
+
+XENON_MAIN_API int XenonExecutionRaiseException(XenonExecutionHandle hExec);
+
+XENON_MAIN_API int XenonExecutionGetVm(XenonExecutionHandle hExec, XenonVmHandle* phOutVm);
 
 XENON_MAIN_API int XenonExecutionGetStatus(XenonExecutionHandle hExec, bool* pOutStatus, int statusType);
 
@@ -552,7 +571,10 @@ typedef struct XenonProgramWriter* XenonProgramWriterHandle;
 typedef struct
 {
 	XenonCommonInit common;
+
 } XenonCompilerInit;
+
+typedef bool (*XenonCallbackIterateBuiltInFunction)(void*, int, const char*);
 
 #define XENON_COMPILER_HANDLE_NULL       ((XenonCompilerHandle)0)
 #define XENON_PROGRAM_WRITER_HANDLE_NULL ((XenonProgramWriterHandle)0)

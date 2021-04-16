@@ -29,6 +29,7 @@ enum XenonGcPhase
 {
 	XENON_GC_PHASE_LINK_PENDING,
 	XENON_GC_PHASE_RESET_STATE,
+	XENON_GC_PHASE_MARK_AUTO,
 	XENON_GC_PHASE_MARK_CONSTANTS,
 	XENON_GC_PHASE_MARK_GLOBALS,
 	XENON_GC_PHASE_MARK_FUNCTIONS,
@@ -43,11 +44,8 @@ enum XenonGcPhase
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHandle hVm)
+void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHandle hVm, const uint32_t maxIterationCount)
 {
-	// TODO: Make these values configurable.
-	constexpr const uint32_t maxIterationCount = 32;
-
 	constexpr const size_t initialProgramStackSize = 256;
 	constexpr const size_t initialFunctionStackSize = 2048;
 	constexpr const size_t initialExecStackSize = 64;
@@ -135,23 +133,31 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 	{
 		case XENON_GC_PHASE_LINK_PENDING:
 		{
-			for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
+			if(gc.lastPhase != gc.phase)
 			{
-				if(!gc.pPendingHead)
+				// The very first thing to be done is to clear any existing data held in the stacks.
+				prv_clearStacks(gc);
+			}
+			else
+			{
+				for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
 				{
-					// The end of the list has been reached.
-					break;
+					if(!gc.pPendingHead)
+					{
+						// The end of the list has been reached.
+						break;
+					}
+
+					XenonGcProxy* const pCurrent = gc.pPendingHead;
+					XenonGcProxy* const pNext = pCurrent->pNext;
+
+					// Link the proxy at the head of the pending list to the head of the active list.
+					pCurrent->pNext = gc.pActiveHead;
+
+					// Update the heads of the active and pending lists.
+					gc.pActiveHead = pCurrent;
+					gc.pPendingHead = pNext;
 				}
-
-				XenonGcProxy* const pCurrent = gc.pPendingHead;
-				XenonGcProxy* const pNext = pCurrent->pNext;
-
-				// Link the proxy at the head of the pending list to the head of the active list.
-				pCurrent->pNext = gc.pActiveHead;
-
-				// Update the heads of the active and pending lists.
-				gc.pActiveHead = pCurrent;
-				gc.pPendingHead = pNext;
 			}
 
 			if(!gc.pPendingHead)
@@ -168,8 +174,6 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			{
 				// For the start of the phase, set the current proxy pointer to the head of the active list.
 				gc.pIterCurrent = gc.pActiveHead;
-
-				prv_clearStacks(gc);
 			}
 			else
 			{
@@ -183,7 +187,44 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 					}
 
 					// Reset the proxy state.
-					gc.pIterCurrent->marked = gc.pIterCurrent->autoMark;
+					gc.pIterCurrent->marked = false;
+
+					// Move to the next proxy in the list.
+					gc.pIterCurrent = gc.pIterCurrent->pNext;
+				}
+			}
+
+			if(!gc.pIterCurrent)
+			{
+				// We have reached the end of the phase once all proxies in the list have been checked.
+				endOfPhase = true;
+			}
+			break;
+		}
+
+		case XENON_GC_PHASE_MARK_AUTO:
+		{
+			if(gc.lastPhase != gc.phase)
+			{
+				// For the start of the phase, set the current proxy pointer to the head of the active list.
+				gc.pIterCurrent = gc.pActiveHead;
+			}
+			else
+			{
+				// Iterate over as many items in the list as we're allowed at one time.
+				for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
+				{
+					if(!gc.pIterCurrent)
+					{
+						// The end of the list has been reached.
+						break;
+					}
+
+					// Any proxies set to auto-mark will be marked here.
+					if(gc.pIterCurrent->autoMark)
+					{
+						index += XenonGcProxy::Mark(*gc.pIterCurrent);
+					}
 
 					// Move to the next proxy in the list.
 					gc.pIterCurrent = gc.pIterCurrent->pNext;

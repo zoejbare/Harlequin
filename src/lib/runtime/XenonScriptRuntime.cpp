@@ -47,7 +47,8 @@ int XenonVmCreate(XenonVmHandle* phOutVm, XenonVmInit init)
 		|| init.common.report.reportLevel < XENON_MESSAGE_TYPE_VERBOSE
 		|| init.common.report.reportLevel > XENON_MESSAGE_TYPE_FATAL
 		|| !init.dependency.onRequestFn
-		|| init.gcThreadStackSize < XENON_VM_THREAD_MINIMUM_STACK_SIZE)
+		|| init.gcThreadStackSize < XENON_VM_THREAD_MINIMUM_STACK_SIZE
+		|| init.gcMaxIterationCount == 0)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
@@ -592,16 +593,16 @@ int XenonFunctionGetBytecodeOffset(XenonFunctionHandle hFunction, uint32_t* pOut
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
-	(*pOutOffset) = hFunction->offset;
+	(*pOutOffset) = hFunction->bytecodeOffset;
 
 	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction* pOutBinding)
+int XenonFunctionGetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction* pOutNativeFn)
 {
-	if(!hFunction || !pOutBinding)
+	if(!hFunction || !pOutNativeFn)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
@@ -611,16 +612,16 @@ int XenonFunctionGetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunc
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
-	(*pOutBinding) = hFunction->nativeBinding;
+	(*pOutNativeFn) = hFunction->nativeFn;
 
 	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionSetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction bindingFn)
+int XenonFunctionGetNativeUserData(XenonFunctionHandle hFunction, void** ppOutUserData)
 {
-	if(!hFunction || !bindingFn)
+	if(!hFunction || !ppOutUserData)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
@@ -630,7 +631,27 @@ int XenonFunctionSetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunc
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
-	hFunction->nativeBinding = bindingFn;
+	(*ppOutUserData) = hFunction->pNativeUserData;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFunctionSetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction nativeFn, void* pUserData)
+{
+	if(!hFunction || !nativeFn)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	if(!hFunction->isNative)
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
+
+	hFunction->nativeFn = nativeFn;
+	hFunction->pNativeUserData = pUserData;
 
 	return XENON_SUCCESS;
 }
@@ -655,7 +676,7 @@ int XenonFunctionDisassemble(XenonFunctionHandle hFunction, XenonCallbackOpDisas
 	disasm.onDisasmFn = onDisasmFn;
 	disasm.pUserData = pUserData;
 
-	XenonDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->offset);
+	XenonDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->bytecodeOffset);
 
 	// Iterate through each instruction.
 	for(;;)
@@ -751,6 +772,34 @@ int XenonExecutionYield(XenonExecutionHandle hExec)
 	}
 
 	hExec->yield = true;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonExecutionRaiseException(XenonExecutionHandle hExec)
+{
+	if(!hExec)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	hExec->exception = true;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonExecutionGetVm(XenonExecutionHandle hExec, XenonVmHandle* phOutVm)
+{
+	if(!hExec || !phOutVm)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*phOutVm) = hExec->hVm;
 
 	return XENON_SUCCESS;
 }
@@ -962,7 +1011,7 @@ int XenonFramePushValue(XenonFrameHandle hFrame, XenonValueHandle hValue)
 	}
 
 	if(hValue->type != XENON_VALUE_TYPE_NULL
-		&& hFrame->hFunction->hProgram->hVm != hValue->hVm)
+		&& XenonFunction::GetVm(hFrame->hFunction) != hValue->hVm)
 	{
 		return XENON_ERROR_MISMATCH;
 	}
@@ -983,8 +1032,6 @@ int XenonFramePopValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue)
 	{
 		return XENON_ERROR_INVALID_TYPE;
 	}
-
-	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
 
 	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
 	int result = XenonFrame::PopValue(hFrame, &hValue);
@@ -1013,8 +1060,6 @@ int XenonFramePeekValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, i
 	{
 		return XENON_ERROR_INVALID_TYPE;
 	}
-
-	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
 
 	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
 	XenonFrame::PeekValue(hFrame, &hValue, stackIndex);
@@ -1045,7 +1090,7 @@ int XenonFrameSetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, in
 	}
 
 	if(hValue->type != XENON_VALUE_TYPE_NULL
-		&& hFrame->hFunction->hProgram->hVm != hValue->hVm)
+		&& XenonFunction::GetVm(hFrame->hFunction) != hValue->hVm)
 	{
 		return XENON_ERROR_MISMATCH;
 	}
@@ -1070,8 +1115,6 @@ int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValu
 	{
 		return XENON_ERROR_INVALID_TYPE;
 	}
-
-	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
 
 	int result;
 	XenonValueHandle hValue = XenonFrame::GetGpRegister(hFrame, registerIndex, &result);
@@ -1104,7 +1147,7 @@ int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue,
 	}
 
 	if(hValue->type != XENON_VALUE_TYPE_NULL
-		&& hFrame->hFunction->hProgram->hVm != hValue->hVm)
+		&& XenonFunction::GetVm(hFrame->hFunction) != hValue->hVm)
 	{
 		return XENON_ERROR_MISMATCH;
 	}
@@ -1142,8 +1185,6 @@ int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutV
 	{
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
-
-	XenonScopedMutex lock(hFrame->hFunction->hProgram->hVm->gcLock);
 
 	int result;
 	XenonValueHandle hValue = XenonFrame::GetLocalVariable(hFrame, pVarName, &result);

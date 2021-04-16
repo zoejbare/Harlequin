@@ -61,9 +61,10 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 
 			if(hFunction->isNative)
 			{
-				if(hFunction->nativeBinding)
+				// Native functions are called immediately.
+				if(hFunction->nativeFn)
 				{
-					hFunction->nativeBinding(hExec, hFunction);
+					hFunction->nativeFn(hExec, hFunction, hFunction->pNativeUserData);
 
 					if(!hExec->exception)
 					{

@@ -17,6 +17,7 @@
 //
 
 #include "Program.hpp"
+#include "BuiltIn.hpp"
 #include "Vm.hpp"
 
 #include "program-loader/CommonLoader.hpp"
@@ -468,14 +469,12 @@ void XenonProgram::prv_copyDataToVm(const XenonProgram::LoadData& loadData, Xeno
 	for(auto& kv : loadData.globals)
 	{
 		hVm->globals.Insert(kv.key, kv.value);
-		kv.value = XENON_VALUE_HANDLE_NULL;
 	}
 
 	// Transfer the functions to the VM.
 	for(auto& kv : loadData.functions)
 	{
 		hVm->functions.Insert(kv.key, kv.value);
-		kv.value = XENON_FUNCTION_HANDLE_NULL;
 	}
 }
 

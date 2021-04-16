@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
 	init.dependency.pUserData = &dependencies;
 
 	init.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
+	init.gcMaxIterationCount = XENON_VM_GC_DEFAULT_ITERATION_COUNT;
 
 	// Create the VM context.
 	int result = XenonVmCreate(&hVm, init);
@@ -182,16 +183,22 @@ int main(int argc, char* argv[])
 		if(XenonExecutionCreate(&hExec, hVm, hEntryFunc) == XENON_SUCCESS)
 		{
 			XenonFunctionHandle hNativeFunc = XENON_FUNCTION_HANDLE_NULL;
-			XenonVmGetFunction(hVm, &hNativeFunc, "string Program.DoWorkNative(string, string)");
+			XenonVmGetFunction(hVm, &hNativeFunc, "void Program.PrintString(string)");
 
 			if(hNativeFunc != XENON_FUNCTION_HANDLE_NULL)
 			{
-				auto doWorkNative = [](XenonExecutionHandle, XenonFunctionHandle)
+				auto printString = [](XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 				{
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_INFO, ">>> This is a native call made from script");
+					XenonValueHandle hParam = XENON_VALUE_HANDLE_NULL;
+					XenonExecutionGetIoRegister(hExec, &hParam, 0);
+
+					const char* const param = XenonValueGetString(hParam);
+
+					printf("> \"%s\"\n", param);
+					XenonValueDispose(hParam);
 				};
 
-				XenonFunctionSetNativeBinding(hNativeFunc, doWorkNative);
+				XenonFunctionSetNativeBinding(hNativeFunc, printString, nullptr);
 			}
 
 			char msg[256];

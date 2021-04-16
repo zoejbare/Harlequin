@@ -16,6 +16,7 @@
 // IN THE SOFTWARE.
 //
 
+#include "../XenonBuiltIn.h"
 #include "../XenonScript.h"
 
 #include "../common/Report.hpp"
@@ -112,6 +113,65 @@ int XenonGetPlatformEndianMode()
 	return XENON_ENDIAN_MODE_BIG;
 
 #endif
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const char* XenonGetBuiltInFunctionSignature(int builtInFunctionId)
+{
+	switch(builtInFunctionId)
+	{
+		case XENON_BUILT_IN_OP_ADD_BOOL:    return "bool `builtin.OpAdd(bool, bool)";
+		case XENON_BUILT_IN_OP_ADD_INT8:    return "int8 `builtin.OpAdd(int8, int8)";
+		case XENON_BUILT_IN_OP_ADD_INT16:   return "int16 `builtin.OpAdd(int16, int16)";
+		case XENON_BUILT_IN_OP_ADD_INT32:   return "int32 `builtin.OpAdd(int32, int32)";
+		case XENON_BUILT_IN_OP_ADD_INT64:   return "int64 `builtin.OpAdd(int64, int64)";
+		case XENON_BUILT_IN_OP_ADD_UINT8:   return "uint8 `builtin.OpAdd(uint8, uint8)";
+		case XENON_BUILT_IN_OP_ADD_UINT16:  return "uint16 `builtin.OpAdd(uint16, uint16)";
+		case XENON_BUILT_IN_OP_ADD_UINT32:  return "uint32 `builtin.OpAdd(uint32, uint32)";
+		case XENON_BUILT_IN_OP_ADD_UINT64:  return "uint64 `builtin.OpAdd(uint64, uint64)";
+		case XENON_BUILT_IN_OP_ADD_FLOAT32: return "float32 `builtin.OpAdd(float32, float32)";
+		case XENON_BUILT_IN_OP_ADD_FLOAT64: return "float64 `builtin.OpAdd(float64, float64)";
+		case XENON_BUILT_IN_OP_ADD_STRING:  return "string `builtin.OpAdd(string, string)";
+
+		case XENON_BUILT_IN_OP_SUB_BOOL:    return "bool `builtin.OpSub(bool, bool)";
+		case XENON_BUILT_IN_OP_SUB_INT8:    return "int8 `builtin.OpSub(int8, int8)";
+		case XENON_BUILT_IN_OP_SUB_INT16:   return "int16 `builtin.OpSub(int16, int16)";
+		case XENON_BUILT_IN_OP_SUB_INT32:   return "int32 `builtin.OpSub(int32, int32)";
+		case XENON_BUILT_IN_OP_SUB_INT64:   return "int64 `builtin.OpSub(int64, int64)";
+		case XENON_BUILT_IN_OP_SUB_UINT8:   return "uint8 `builtin.OpSub(uint8, uint8)";
+		case XENON_BUILT_IN_OP_SUB_UINT16:  return "uint16 `builtin.OpSub(uint16, uint16)";
+		case XENON_BUILT_IN_OP_SUB_UINT32:  return "uint32 `builtin.OpSub(uint32, uint32)";
+		case XENON_BUILT_IN_OP_SUB_UINT64:  return "uint64 `builtin.OpSub(uint64, uint64)";
+		case XENON_BUILT_IN_OP_SUB_FLOAT32: return "float32 `builtin.OpSub(float32, float32)";
+		case XENON_BUILT_IN_OP_SUB_FLOAT64: return "float64 `builtin.OpSub(float64, float64)";
+
+		case XENON_BUILT_IN_OP_MUL_BOOL:    return "bool `builtin.OpMul(bool, bool)";
+		case XENON_BUILT_IN_OP_MUL_INT8:    return "int8 `builtin.OpMul(int8, int8)";
+		case XENON_BUILT_IN_OP_MUL_INT16:   return "int16 `builtin.OpMul(int16, int16)";
+		case XENON_BUILT_IN_OP_MUL_INT32:   return "int32 `builtin.OpMul(int32, int32)";
+		case XENON_BUILT_IN_OP_MUL_INT64:   return "int64 `builtin.OpMul(int64, int64)";
+		case XENON_BUILT_IN_OP_MUL_UINT8:   return "uint8 `builtin.OpMul(uint8, uint8)";
+		case XENON_BUILT_IN_OP_MUL_UINT16:  return "uint16 `builtin.OpMul(uint16, uint16)";
+		case XENON_BUILT_IN_OP_MUL_UINT32:  return "uint32 `builtin.OpMul(uint32, uint32)";
+		case XENON_BUILT_IN_OP_MUL_UINT64:  return "uint64 `builtin.OpMul(uint64, uint64)";
+		case XENON_BUILT_IN_OP_MUL_FLOAT32: return "float32 `builtin.OpMul(float32, float32)";
+		case XENON_BUILT_IN_OP_MUL_FLOAT64: return "float64 `builtin.OpMul(float64, float64)";
+
+		case XENON_BUILT_IN_OP_DIV_BOOL:    return "bool `builtin.OpDiv(bool, bool)";
+		case XENON_BUILT_IN_OP_DIV_INT8:    return "int8 `builtin.OpDiv(int8, int8)";
+		case XENON_BUILT_IN_OP_DIV_INT16:   return "int16 `builtin.OpDiv(int16, int16)";
+		case XENON_BUILT_IN_OP_DIV_INT32:   return "int32 `builtin.OpDiv(int32, int32)";
+		case XENON_BUILT_IN_OP_DIV_INT64:   return "int64 `builtin.OpDiv(int64, int64)";
+		case XENON_BUILT_IN_OP_DIV_UINT8:   return "uint8 `builtin.OpDiv(uint8, uint8)";
+		case XENON_BUILT_IN_OP_DIV_UINT16:  return "uint16 `builtin.OpDiv(uint16, uint16)";
+		case XENON_BUILT_IN_OP_DIV_UINT32:  return "uint32 `builtin.OpDiv(uint32, uint32)";
+		case XENON_BUILT_IN_OP_DIV_UINT64:  return "uint64 `builtin.OpDiv(uint64, uint64)";
+		case XENON_BUILT_IN_OP_DIV_FLOAT32: return "float32 `builtin.OpDiv(float32, float32)";
+		case XENON_BUILT_IN_OP_DIV_FLOAT64: return "float64 `builtin.OpDiv(float64, float64)";
+	};
+
+	return nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

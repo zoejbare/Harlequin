@@ -384,7 +384,7 @@ std::string XenonValue::GetDebugString(XenonValueHandle hValue)
 
 			case XENON_VALUE_TYPE_STRING:
 				// The input value is already a string, so we can use it as-is.
-				snprintf(str, sizeof(str), "<string: \"%.32s\"%s>", hValue->as.pString->data, (hValue->as.pString->length > 32) ? "..." : "");
+				snprintf(str, sizeof(str), "<string: \"%.48s\"%s>", hValue->as.pString->data, (hValue->as.pString->length > 48) ? "..." : "");
 				return std::string(str);
 
 			case XENON_VALUE_TYPE_OBJECT:
