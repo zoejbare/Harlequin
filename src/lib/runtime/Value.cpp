@@ -330,7 +330,7 @@ std::string XenonValue::GetDebugString(XenonValueHandle hValue)
 		// Temporary buffer used by the numerical primitive types. We know the exact maximum size for the non-float types,
 		// but the float types are a little more nebulous. It's easier to just pre-allocate a buffer that we know will
 		// definitely be large enough for all of those types (as well as the object type) and call it a day.
-		char str[128];
+		char str[256];
 
 		switch(hValue->type)
 		{
