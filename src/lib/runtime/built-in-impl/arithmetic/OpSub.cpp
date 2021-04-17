@@ -16,14 +16,14 @@
 // IN THE SOFTWARE.
 //
 
-#include "../BuiltIn.hpp"
+#include "../../BuiltIn.hpp"
 
 #include <assert.h>
 #include <stdio.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddBool(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubBool(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -49,13 +49,13 @@ void XenonBuiltIn::OpAddBool(XenonExecutionHandle hExec, XenonFunctionHandle hFu
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateBool(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateBool(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt8(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubInt8(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -81,13 +81,13 @@ void XenonBuiltIn::OpAddInt8(XenonExecutionHandle hExec, XenonFunctionHandle hFu
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt8(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateInt8(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt16(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubInt16(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -113,13 +113,13 @@ void XenonBuiltIn::OpAddInt16(XenonExecutionHandle hExec, XenonFunctionHandle hF
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt16(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateInt16(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubInt32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -145,13 +145,13 @@ void XenonBuiltIn::OpAddInt32(XenonExecutionHandle hExec, XenonFunctionHandle hF
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt32(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateInt32(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubInt64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -177,13 +177,13 @@ void XenonBuiltIn::OpAddInt64(XenonExecutionHandle hExec, XenonFunctionHandle hF
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt64(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateInt64(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint8(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubUint8(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -209,13 +209,13 @@ void XenonBuiltIn::OpAddUint8(XenonExecutionHandle hExec, XenonFunctionHandle hF
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint8(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateUint8(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint16(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubUint16(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -241,13 +241,13 @@ void XenonBuiltIn::OpAddUint16(XenonExecutionHandle hExec, XenonFunctionHandle h
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint16(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateUint16(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubUint32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -273,13 +273,13 @@ void XenonBuiltIn::OpAddUint32(XenonExecutionHandle hExec, XenonFunctionHandle h
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint32(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateUint32(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubUint64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -305,13 +305,13 @@ void XenonBuiltIn::OpAddUint64(XenonExecutionHandle hExec, XenonFunctionHandle h
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint64(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateUint64(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddFloat32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubFloat32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -337,13 +337,13 @@ void XenonBuiltIn::OpAddFloat32(XenonExecutionHandle hExec, XenonFunctionHandle 
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateFloat32(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateFloat32(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddFloat64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpSubFloat64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
@@ -369,53 +369,8 @@ void XenonBuiltIn::OpAddFloat64(XenonExecutionHandle hExec, XenonFunctionHandle 
 	XenonValueDispose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateFloat64(hVm, left + right);
+	XenonValueHandle hOutput = XenonValueCreateFloat64(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonBuiltIn::OpAddString(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
-{
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
-
-	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
-
-	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
-
-	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
-
-	// Extract the value data needed for the operation.
-	const char* const left = XenonValueGetString(hLeft);
-	const char* const right = XenonValueGetString(hRight);
-
-	const size_t leftLength = XenonValueGetStringLength(hLeft);
-	const size_t rightLength = XenonValueGetStringLength(hRight);
-	const size_t totalStringSize = leftLength + rightLength + 1;
-
-	// Allocate a temporary string to contain the result of the concatenation.
-	char* const out = reinterpret_cast<char*>(XenonMemAlloc(sizeof(char) * totalStringSize));
-
-	// Concatenate the operand strings.
-	snprintf(out, totalStringSize, "%s%s", left, right);
-
-	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateString(hVm, out);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-
-	// Free the temporary output string.
-	XenonMemFree(out);
-
-	// Release the input parameter values.
-	XenonValueDispose(hLeft);
-	XenonValueDispose(hRight);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
