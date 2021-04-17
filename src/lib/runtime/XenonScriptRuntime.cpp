@@ -260,7 +260,6 @@ int XenonVmGetGlobalVariable(XenonVmHandle hVm, XenonValueHandle* phOutValue, co
 {
 	if(!hVm
 		|| !phOutValue
-		|| *phOutValue
 		|| !variableName
 		|| variableName[0] == '\0')
 	{
@@ -938,7 +937,6 @@ int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, XenonValueHandle* ph
 {
 	if(!hExec
 		|| !phOutValue
-		|| *phOutValue
 		|| registerIndex < 0
 		|| registerIndex >= XENON_VM_IO_REGISTER_COUNT)
 	{
@@ -1104,7 +1102,6 @@ int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValu
 {
 	if(!hFrame
 		|| !phOutValue
-		|| *phOutValue
 		|| registerIndex < 0
 		|| registerIndex >= XENON_VM_GP_REGISTER_COUNT)
 	{
@@ -1169,7 +1166,7 @@ int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue,
 
 int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, const char* variableName)
 {
-	if(!hFrame || !phOutValue || *phOutValue || !variableName || variableName[0] == '\0')
+	if(!hFrame || !phOutValue || !variableName || variableName[0] == '\0')
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
