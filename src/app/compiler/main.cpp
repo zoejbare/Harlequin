@@ -17,8 +17,6 @@
 //
 
 #include "XenonScript.h"
-#include "XenonBuiltIn.h"
-#include "XenonOpCode.h"
 
 #if defined(XENON_PLATFORM_WINDOWS)
 	#include <crtdbg.h>
