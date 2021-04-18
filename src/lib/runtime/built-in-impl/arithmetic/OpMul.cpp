@@ -23,10 +23,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulBool(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulBool(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -55,10 +54,9 @@ void XenonBuiltIn::OpMulBool(XenonExecutionHandle hExec, XenonFunctionHandle hFu
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulInt8(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulInt8(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -87,10 +85,9 @@ void XenonBuiltIn::OpMulInt8(XenonExecutionHandle hExec, XenonFunctionHandle hFu
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulInt16(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulInt16(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -119,10 +116,9 @@ void XenonBuiltIn::OpMulInt16(XenonExecutionHandle hExec, XenonFunctionHandle hF
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulInt32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulInt32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -151,10 +147,9 @@ void XenonBuiltIn::OpMulInt32(XenonExecutionHandle hExec, XenonFunctionHandle hF
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulInt64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulInt64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -183,10 +178,9 @@ void XenonBuiltIn::OpMulInt64(XenonExecutionHandle hExec, XenonFunctionHandle hF
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulUint8(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulUint8(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -215,10 +209,9 @@ void XenonBuiltIn::OpMulUint8(XenonExecutionHandle hExec, XenonFunctionHandle hF
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulUint16(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulUint16(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -247,10 +240,9 @@ void XenonBuiltIn::OpMulUint16(XenonExecutionHandle hExec, XenonFunctionHandle h
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulUint32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulUint32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -279,10 +271,9 @@ void XenonBuiltIn::OpMulUint32(XenonExecutionHandle hExec, XenonFunctionHandle h
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulUint64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulUint64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -311,10 +302,9 @@ void XenonBuiltIn::OpMulUint64(XenonExecutionHandle hExec, XenonFunctionHandle h
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulFloat32(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulFloat32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
@@ -343,10 +333,9 @@ void XenonBuiltIn::OpMulFloat32(XenonExecutionHandle hExec, XenonFunctionHandle 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpMulFloat64(XenonExecutionHandle hExec, XenonFunctionHandle hFunction, void*)
+void XenonBuiltIn::OpMulFloat64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
