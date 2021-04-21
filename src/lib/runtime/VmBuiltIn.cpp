@@ -31,6 +31,7 @@ void XenonVm::prv_setupBuiltIns(XenonVmHandle hVm)
 			assert(signature != nullptr); \
 			XenonString* const pSignature = XenonString::Create(signature); \
 			assert(pSignature != nullptr); \
+			assert(!hVm->functions.Contains(pSignature)); \
 			XenonFunctionHandle hFunction = XenonFunction::CreateBuiltIn(pSignature, XenonBuiltIn::func, numParams, numRetVals); \
 			hVm->functions.Insert(pSignature, hFunction); \
 		}
@@ -83,18 +84,6 @@ void XenonVm::prv_setupBuiltIns(XenonVmHandle hVm)
 	XENON_BUILT_IN(OP_DIV_UINT64,  OpDivUint64,  2, 1);
 	XENON_BUILT_IN(OP_DIV_FLOAT32, OpDivFloat32, 2, 1);
 	XENON_BUILT_IN(OP_DIV_FLOAT64, OpDivFloat64, 2, 1);
-
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_INT8,    OpCastBoolToInt8,    1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_INT16,   OpCastBoolToInt16,   1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_INT32,   OpCastBoolToInt32,   1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_INT64,   OpCastBoolToInt64,   1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_UINT8,   OpCastBoolToUint8,   1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_UINT16,  OpCastBoolToUint16,  1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_UINT32,  OpCastBoolToUint32,  1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_UINT64,  OpCastBoolToUint64,  1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_FLOAT32, OpCastBoolToFloat32, 1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_FLOAT64, OpCastBoolToFloat64, 1, 1);
-	XENON_BUILT_IN(OP_CAST_BOOL_TO_STRING,  OpCastBoolToString,  1, 1);
 
 	XENON_BUILT_IN(OP_CAST_BOOL_TO_INT8,    OpCastBoolToInt8,    1, 1);
 	XENON_BUILT_IN(OP_CAST_BOOL_TO_INT16,   OpCastBoolToInt16,   1, 1);
