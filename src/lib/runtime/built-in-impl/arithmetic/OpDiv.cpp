@@ -52,6 +52,7 @@ void XenonBuiltIn::OpDivBool(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateBool(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -91,6 +92,7 @@ void XenonBuiltIn::OpDivInt8(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt8(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -130,6 +132,7 @@ void XenonBuiltIn::OpDivInt16(XenonExecutionHandle hExec, XenonFunctionHandle, v
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt16(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -169,6 +172,7 @@ void XenonBuiltIn::OpDivInt32(XenonExecutionHandle hExec, XenonFunctionHandle, v
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt32(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -208,6 +212,7 @@ void XenonBuiltIn::OpDivInt64(XenonExecutionHandle hExec, XenonFunctionHandle, v
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt64(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -247,6 +252,7 @@ void XenonBuiltIn::OpDivUint8(XenonExecutionHandle hExec, XenonFunctionHandle, v
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateUint8(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -286,6 +292,7 @@ void XenonBuiltIn::OpDivUint16(XenonExecutionHandle hExec, XenonFunctionHandle, 
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateUint16(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -325,6 +332,7 @@ void XenonBuiltIn::OpDivUint32(XenonExecutionHandle hExec, XenonFunctionHandle, 
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateUint32(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -364,6 +372,7 @@ void XenonBuiltIn::OpDivUint64(XenonExecutionHandle hExec, XenonFunctionHandle, 
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateUint64(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -403,6 +412,7 @@ void XenonBuiltIn::OpDivFloat32(XenonExecutionHandle hExec, XenonFunctionHandle,
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateFloat32(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{
@@ -442,6 +452,7 @@ void XenonBuiltIn::OpDivFloat64(XenonExecutionHandle hExec, XenonFunctionHandle,
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateFloat64(hVm, left / right);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueDispose(hOutput);
 	}
 	else
 	{

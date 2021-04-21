@@ -55,6 +55,7 @@ void XenonBuiltIn::OpCastFloat64ToBool(XenonExecutionHandle hExec, XenonFunction
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateBool(hVm, (param == 0) ? false : true);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -73,6 +74,7 @@ void XenonBuiltIn::OpCastFloat64ToInt8(XenonExecutionHandle hExec, XenonFunction
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt8(hVm, int8_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -91,6 +93,7 @@ void XenonBuiltIn::OpCastFloat64ToInt16(XenonExecutionHandle hExec, XenonFunctio
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt16(hVm, int16_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -109,6 +112,7 @@ void XenonBuiltIn::OpCastFloat64ToInt32(XenonExecutionHandle hExec, XenonFunctio
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt32(hVm, int32_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -127,6 +131,7 @@ void XenonBuiltIn::OpCastFloat64ToInt64(XenonExecutionHandle hExec, XenonFunctio
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt64(hVm, int64_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -145,6 +150,7 @@ void XenonBuiltIn::OpCastFloat64ToUint8(XenonExecutionHandle hExec, XenonFunctio
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint8(hVm, uint8_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -163,6 +169,7 @@ void XenonBuiltIn::OpCastFloat64ToUint16(XenonExecutionHandle hExec, XenonFuncti
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint16(hVm, uint16_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -181,6 +188,7 @@ void XenonBuiltIn::OpCastFloat64ToUint32(XenonExecutionHandle hExec, XenonFuncti
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint32(hVm, uint32_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -199,6 +207,7 @@ void XenonBuiltIn::OpCastFloat64ToUint64(XenonExecutionHandle hExec, XenonFuncti
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint64(hVm, uint64_t(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -217,6 +226,7 @@ void XenonBuiltIn::OpCastFloat64ToFloat32(XenonExecutionHandle hExec, XenonFunct
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateFloat32(hVm, float(param));
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -238,6 +248,7 @@ void XenonBuiltIn::OpCastFloat64ToString(XenonExecutionHandle hExec, XenonFuncti
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateString(hVm, str);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	XenonValueDispose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
