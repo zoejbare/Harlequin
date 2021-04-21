@@ -30,7 +30,6 @@ enum XenonGcPhase
 	XENON_GC_PHASE_LINK_PENDING,
 	XENON_GC_PHASE_RESET_STATE,
 	XENON_GC_PHASE_MARK_AUTO,
-	XENON_GC_PHASE_MARK_CONSTANTS,
 	XENON_GC_PHASE_MARK_GLOBALS,
 	XENON_GC_PHASE_MARK_FUNCTIONS,
 	XENON_GC_PHASE_MARK_EXECUTIONS,
@@ -235,75 +234,6 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			{
 				// We have reached the end of the phase once all proxies in the list have been checked.
 				endOfPhase = true;
-			}
-			break;
-		}
-
-		case XENON_GC_PHASE_MARK_CONSTANTS:
-		{
-			if(gc.lastPhase != gc.phase)
-			{
-				const size_t requiredStackSize = gc.hVm->programs.Size();
-				const size_t currentStackSize = gc.programStack.memory.count;
-
-				// Resize the stack if it's too small.
-				if(requiredStackSize > currentStackSize)
-				{
-					XenonProgram::HandleStack::Dispose(gc.programStack);
-					XenonProgram::HandleStack::Initialize(gc.programStack, requiredStackSize * 3 / 2);
-				}
-
-				// Start the phase by filling up the program stack.
-				for(auto& kv : gc.hVm->programs)
-				{
-					XenonProgram::HandleStack::Push(gc.programStack, kv.value);
-				}
-			}
-			else
-			{
-				// When there are no values left in the stack, pop a program and fill the value stack
-				// up with that program's constants.
-				if(XenonValue::HandleStack::IsEmpty(gc.valueStack))
-				{
-					XenonProgramHandle hProgram;
-					if(XenonProgram::HandleStack::Pop(gc.programStack, &hProgram) == XENON_ERROR_STACK_EMPTY)
-					{
-						// No more programs in the stack, time to move on to the next phase.
-						endOfPhase = true;
-						break;
-					}
-
-					const size_t requiredStackSize = hProgram->constants.count;
-					const size_t currentStackSize = gc.valueStack.memory.count;
-
-					// Resize the stack if it's too small.
-					if(requiredStackSize > currentStackSize)
-					{
-						XenonValue::HandleStack::Dispose(gc.valueStack);
-						XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
-					}
-
-					// Cache the constant values from the program.
-					for(size_t i = 0; i < hProgram->constants.count; ++i)
-					{
-						XenonValue::HandleStack::Push(gc.valueStack, hProgram->constants.pData[i]);
-					}
-				}
-				else
-				{
-					// Iterate over as many values as we are allowed.
-					for(uint32_t i = 0; i < gc.maxIterationCount;)
-					{
-						XenonValueHandle hValue;
-						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
-						{
-							// Stop iterating once the value stack is empty.
-							break;
-						}
-
-						i += XenonValue::Mark(hValue);
-					}
-				}
 			}
 			break;
 		}
@@ -526,12 +456,6 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 						i += XenonValue::Mark(hValue);
 					}
 				}
-			}
-
-			if(XenonExecution::HandleStack::IsEmpty(gc.execStack))
-			{
-				// When the execution context stack is empty, we can move on to the next phase.
-				endOfPhase = true;
 			}
 			break;
 		}
