@@ -249,7 +249,7 @@ XenonValueHandle XenonValue::CreateString(XenonVmHandle hVm, XenonString* const 
 
 XenonValueHandle XenonValue::Copy(XenonVmHandle hVm, XenonValueHandle hValue)
 {
-	if(!hValue)
+	if(!hValue || hValue->type == XENON_VALUE_TYPE_NULL)
 	{
 		return &NullValue;
 	}
@@ -262,6 +262,10 @@ XenonValueHandle XenonValue::Copy(XenonVmHandle hVm, XenonValueHandle hValue)
 
 	switch(pOutput->type)
 	{
+		case XENON_VALUE_TYPE_BOOL:
+			pOutput->as.boolean = hValue->as.boolean;
+			break;
+
 		case XENON_VALUE_TYPE_INT8:
 			pOutput->as.int8 = hValue->as.int8;
 			break;
