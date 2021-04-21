@@ -203,7 +203,8 @@ int main(int argc, char* argv[])
 	const char* const mainFuncSignature = "void Program.Main()";
 	const char* const subFuncSignature = "int32 Program.DoWork(float64)";
 	const char* const nativeFuncSignature = "void Program.PrintString(string)";
-	const char* const builtInFuncSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_ADD_STRING);
+	const char* const opAddStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_ADD_STRING);
+	const char* const opCastStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT32_TO_STRING);
 	const char* const globalVariableName = "globalTestVar";
 	const char* const localVariableName = "localTestVar";
 
@@ -238,7 +239,10 @@ int main(int argc, char* argv[])
 	XenonProgramWriterAddConstantString(hProgramWriter, localVariableName, &constIndex9);
 
 	uint32_t constIndex10;
-	XenonProgramWriterAddConstantString(hProgramWriter, builtInFuncSignature, &constIndex10);
+	XenonProgramWriterAddConstantString(hProgramWriter, opAddStringSignature, &constIndex10);
+
+	uint32_t constIndex11;
+	XenonProgramWriterAddConstantString(hProgramWriter, opCastStringSignature, &constIndex11);
 
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);
@@ -292,7 +296,11 @@ int main(int argc, char* argv[])
 		writeOpStoreParam(hSubFuncSerializer, 1, 0);
 
 		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex1);
-		writeOpStoreParam(hSubFuncSerializer, 0, 1);
+		writeOpStoreParam(hSubFuncSerializer, 0, 0);
+
+		writeOpCall(hSubFuncSerializer, constIndex11);
+		writeOpCall(hSubFuncSerializer, constIndex8);
+		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 
 		writeOpNop(hSubFuncSerializer);
 		writeOpReturn(hSubFuncSerializer);
