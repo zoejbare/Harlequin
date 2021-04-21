@@ -51,7 +51,11 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
 	if(result == XENON_SUCCESS)
 	{
-		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+		// Make a copy of the constant value to protect its underlying memory.
+		XenonValueHandle hValueCopy = XenonValue::Copy(hExec->hVm, hValue);
+		XenonValue::SetAutoMark(hValueCopy, false);
+
+		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValueCopy, registerIndex);
 		if(result != XENON_SUCCESS)
 		{
 			// TODO: Raise script exception
