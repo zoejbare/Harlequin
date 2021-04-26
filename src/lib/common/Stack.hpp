@@ -118,7 +118,12 @@ struct XenonStack
 		return XENON_SUCCESS;
 	}
 
-	static size_t GetTotalSize(XenonStack& stack)
+	static size_t GetCurrentSize(XenonStack& stack)
+	{
+		return stack.nextIndex;
+	}
+
+	static size_t GetMaximumSize(XenonStack& stack)
 	{
 		return stack.memory.count;
 	}

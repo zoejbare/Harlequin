@@ -28,44 +28,24 @@
 void XenonGcProxy::Initialize(
 	XenonGcProxy& output,
 	XenonGarbageCollector& gc,
-	XenonGcMarkCallback onGcMarkFn,
-	XenonDestructCallback onDestructFn,
+	XenonGcDiscoveryCallback onGcDiscoveryFn,
+	XenonDestructCallback onGcDestructFn,
 	void* pObject
 )
 {
-	assert(onGcMarkFn != nullptr);
-	assert(onDestructFn != nullptr);
+	assert(onGcDiscoveryFn != nullptr);
+	assert(onGcDestructFn != nullptr);
 	assert(pObject != nullptr);
 
-	output.onGcMarkFn = onGcMarkFn;
-	output.onDestructFn = onDestructFn;
+	output.onGcDiscoveryFn = onGcDiscoveryFn;
+	output.onGcDestructFn = onGcDestructFn;
 	output.pGc = &gc;
 	output.pObject = pObject;
+	output.pending = true;
 	output.marked = false;
 	output.autoMark = false;
 
 	XenonGarbageCollector::LinkObject(gc, output);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-uint32_t XenonGcProxy::Mark(XenonGcProxy& proxy)
-{
-	if(!proxy.marked)
-	{
-		proxy.marked = true;
-
-		return proxy.onGcMarkFn(proxy.pObject);
-	}
-
-	return 0;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonGcProxy::prv_onDispose(XenonGcProxy& proxy)
-{
-	proxy.onDestructFn(proxy.pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

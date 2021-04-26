@@ -28,7 +28,9 @@
 
 #include "../common/Array.hpp"
 #include "../common/Stack.hpp"
+#include "../common/StlAllocator.hpp"
 
+#include <NCPS/ConcurrentQueue.hpp>
 #include <SkipProbe/SkipProbe.hpp>
 
 #include <string>
@@ -47,14 +49,16 @@ struct XenonValue
 		XenonString*,
 		XenonValueHandle,
 		XenonString::StlHash,
-		XenonString::StlCompare
+		XenonString::StlCompare,
+		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, XenonValueHandle>>
 	> StringToHandleMap;
 
 	typedef SkipProbe::HashMap<
 		XenonString*,
 		bool,
 		XenonString::StlHash,
-		XenonString::StlCompare
+		XenonString::StlCompare,
+		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, bool>>
 	> StringToBoolMap;
 
 	static XenonValue NullValue;
@@ -77,13 +81,12 @@ struct XenonValue
 
 	static std::string GetDebugString(XenonValueHandle hValue);
 
-	static uint32_t Mark(XenonValueHandle hValue);
-
+	static bool CanBeMarked(XenonValueHandle hValue);
 	static void SetAutoMark(XenonValueHandle hValue, const bool autoMark);
 
 	static XenonValue* prv_onCreate(int, XenonVmHandle);
-	static uint32_t prv_onMark(void*);
-	static void prv_onDestruct(void*);
+	static void prv_onGcDiscovery(XenonGarbageCollector&, void*);
+	static void prv_onGcDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

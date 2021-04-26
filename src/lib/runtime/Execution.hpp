@@ -21,10 +21,11 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "Frame.hpp"
+#include "GcProxy.hpp"
 #include "Value.hpp"
 
-#include "../base/Reference.hpp"
 #include "../common/Stack.hpp"
+#include "../common/StlAllocator.hpp"
 
 #include <SkipProbe/SkipProbe.hpp>
 
@@ -35,13 +36,18 @@ struct XenonProgram;
 struct XenonExecution
 {
 	typedef XenonStack<XenonExecutionHandle> HandleStack;
-	typedef SkipProbe::HashMap<XenonExecutionHandle, bool> HandleToBoolMap;
+
+	typedef SkipProbe::HashMap<
+		XenonExecutionHandle,
+		bool,
+		SkipProbe::Hash<XenonExecutionHandle>,
+		std::equal_to<XenonExecutionHandle>,
+		XenonStlAllocator<SkipProbe::LinkedNode<XenonExecutionHandle, bool>>
+	> HandleToBoolMap;
 
 	static XenonExecutionHandle Create(XenonVmHandle hVm, XenonFunctionHandle hEntryPoint);
+	static void ReleaseWithNoDetach(XenonExecutionHandle hExec);
 	static void DetachFromVm(XenonExecutionHandle hExec);
-
-	static void AddRef(XenonExecutionHandle hExec);
-	static void Release(XenonExecutionHandle hExec);
 
 	static int PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hFunction);
 	static int PopFrame(XenonExecutionHandle hExec);
@@ -52,13 +58,14 @@ struct XenonExecution
 
 	static void Run(XenonExecutionHandle hExec, const int runMode);
 
-	static void prv_runStep(XenonExecutionHandle hExec);
-	static void prv_onDestruct(void*);
+	static void prv_runStep(XenonExecutionHandle);
+	static void prv_onGcDiscovery(XenonGarbageCollector&, void*);
+	static void prv_onGcDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonReference ref;
+	XenonGcProxy gcProxy;
 
 	XenonVmHandle hVm;
 	XenonFrameHandle hCurrentFrame;

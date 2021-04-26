@@ -408,14 +408,10 @@ std::string XenonValue::GetDebugString(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonValue::Mark(XenonValueHandle hValue)
+bool XenonValue::CanBeMarked(XenonValueHandle hValue)
 {
-	if(hValue && hValue->type != XENON_VALUE_TYPE_NULL)
-	{
-		return XenonGcProxy::Mark(hValue->gcProxy);
-	}
-
-	return 0;
+	return hValue
+		&& hValue->type != XENON_VALUE_TYPE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -444,7 +440,7 @@ XenonValue* XenonValue::prv_onCreate(const int valueType, XenonVmHandle hVm)
 
 	XenonScopedMutex lock(hVm->gcLock);
 
-	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onMark, prv_onDestruct, pOutput);
+	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput);
 
 	// All values will auto-mark initially, until they are 'disposed' of.
 	// This will allow values to be kept alive outside of script execution.
@@ -455,21 +451,19 @@ XenonValue* XenonValue::prv_onCreate(const int valueType, XenonVmHandle hVm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonValue::prv_onMark(void* const pOpaqueValue)
+void XenonValue::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaque)
 {
-	assert(pOpaqueValue != nullptr);
+	(void) gc;
 
-	XenonValueHandle hValue = reinterpret_cast<XenonValueHandle>(pOpaqueValue);
+	XenonValueHandle hValue = reinterpret_cast<XenonValueHandle>(pOpaque);
+	assert(hValue != XENON_VALUE_HANDLE_NULL);
 
 	// TODO: Add special handling for script objects which can mark values recursively.
-	hValue->gcProxy.marked = true;
-
-	return 1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonValue::prv_onDestruct(void* const pOpaqueValue)
+void XenonValue::prv_onGcDestruct(void* const pOpaqueValue)
 {
 	assert(pOpaqueValue != nullptr);
 
@@ -487,7 +481,7 @@ void XenonValue::prv_onDestruct(void* const pOpaqueValue)
 			break;
 
 		case XENON_VALUE_TYPE_OBJECT:
-			// Destruct object.
+			// TODO: Implement support for script objects.
 			break;
 
 		default:

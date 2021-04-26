@@ -36,14 +36,14 @@ struct XenonGarbageCollector
 	static void RunFull(XenonGarbageCollector& gc);
 
 	static void LinkObject(XenonGarbageCollector& gc, XenonGcProxy& proxy);
+	static void DiscoverProxy(XenonGarbageCollector& gc, XenonGcProxy& proxy);
 
 	static void prv_reset(XenonGarbageCollector&);
-	static void prv_clearStacks(XenonGarbageCollector&);
+	static void prv_clearQueue(XenonGarbageCollector&);
+	static void prv_onDisposeProxy(XenonGcProxy*);
 
-	XenonProgram::HandleStack programStack;
-	XenonFunction::HandleStack functionStack;
-	XenonExecution::HandleStack execStack;
-	XenonValue::HandleStack valueStack;
+	XenonGcProxy::BatchedPtrQueue proxyQueue;
+	XenonGcProxy::BatchedPtrQueue::ReadReservationTicket proxyReadTicket;
 
 	XenonVmHandle hVm;
 

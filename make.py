@@ -66,7 +66,7 @@ with csbuild.Target("release"):
 ###################################################################################################
 
 csbuild.SetCcLanguageStandard("c99")
-csbuild.SetCxxLanguageStandard("c++14")
+csbuild.SetCxxLanguageStandard("c++17")
 
 with csbuild.Platform("Windows"):
 	with csbuild.Toolchain("gcc", "clang", "ps4", "android-gcc", "android-clang"):
@@ -179,13 +179,13 @@ with csbuild.Project(ExtGoogleTest.projectName, ExtGoogleTest.path, autoDiscover
 
 class ExtNcps(object):
 	projectName = "external_ncps"
-	path = "external/NCPS"
+	path = "external/NCPSQueue"
 
 with csbuild.Project(ExtNcps.projectName, ExtNcps.path, autoDiscoverSourceFiles=False):
 	csbuild.SetOutput("{name}", csbuild.ProjectType.Stub)
 
 	with csbuild.Scope(csbuild.ScopeDef.Children):
-		csbuild.AddIncludeDirectories(ExtNcps.path)
+		csbuild.AddIncludeDirectories(f"{ExtNcps.path}/include")
 
 ###################################################################################################
 

@@ -29,10 +29,9 @@ enum XenonGcPhase
 {
 	XENON_GC_PHASE_LINK_PENDING,
 	XENON_GC_PHASE_RESET_STATE,
-	XENON_GC_PHASE_MARK_AUTO,
-	XENON_GC_PHASE_MARK_GLOBALS,
-	XENON_GC_PHASE_MARK_FUNCTIONS,
-	XENON_GC_PHASE_MARK_EXECUTIONS,
+	XENON_GC_PHASE_AUTO_MARK_DISCOVERY,
+	XENON_GC_PHASE_GLOBAL_DISCOVERY,
+	XENON_GC_PHASE_MARK_ACTIVE,
 	XENON_GC_PHASE_COLLECT,
 	XENON_GC_PHASE_DISPOSE,
 
@@ -45,16 +44,6 @@ enum XenonGcPhase
 
 void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHandle hVm, const uint32_t maxIterationCount)
 {
-	constexpr const size_t initialProgramStackSize = 256;
-	constexpr const size_t initialFunctionStackSize = 2048;
-	constexpr const size_t initialExecStackSize = 64;
-	constexpr const size_t initialValueStackSize = 4096;
-
-	XenonProgram::HandleStack::Initialize(output.programStack, initialProgramStackSize);
-	XenonFunction::HandleStack::Initialize(output.functionStack, initialFunctionStackSize);
-	XenonExecution::HandleStack::Initialize(output.execStack, initialExecStackSize);
-	XenonValue::HandleStack::Initialize(output.valueStack, initialValueStackSize);
-
 	output.hVm = hVm;
 	output.pActiveHead = nullptr;
 	output.pPendingHead = nullptr;
@@ -64,6 +53,9 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 	output.lastPhase = 0;
 	output.maxIterationCount = maxIterationCount;
 
+	// Initialize the queue read ticket, which will improve performance when dequeuing.
+	output.proxyQueue.InitializeReservationTicket(output.proxyReadTicket);
+
 	// Reset the phases so we're guaranteed to kick off the garbage collector in a good state.
 	prv_reset(output);
 }
@@ -72,7 +64,7 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 
 void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 {
-	// Clear out any reference counted data.
+	// Reset the GC state to release any held data.
 	prv_reset(gc);
 
 	// Dispose of all proxies in the active list.
@@ -81,7 +73,7 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 	{
 		XenonGcProxy* const pNext = pCurrent->pNext;
 
-		XenonGcProxy::prv_onDispose(*pCurrent);
+		prv_onDisposeProxy(pCurrent);
 
 		pCurrent = pNext;
 	}
@@ -92,7 +84,7 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 	{
 		XenonGcProxy* const pNext = pCurrent->pNext;
 
-		XenonGcProxy::prv_onDispose(*pCurrent);
+		prv_onDisposeProxy(pCurrent);
 
 		pCurrent = pNext;
 	}
@@ -103,15 +95,10 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 	{
 		XenonGcProxy* const pNext = pCurrent->pNext;
 
-		XenonGcProxy::prv_onDispose(*pCurrent);
+		prv_onDisposeProxy(pCurrent);
 
 		pCurrent = pNext;
 	}
-
-	XenonValue::HandleStack::Dispose(gc.valueStack);
-	XenonExecution::HandleStack::Dispose(gc.execStack);
-	XenonFunction::HandleStack::Dispose(gc.functionStack);
-	XenonProgram::HandleStack::Dispose(gc.programStack);
 
 	gc.hVm = XENON_VM_HANDLE_NULL;
 	gc.pActiveHead = nullptr;
@@ -130,12 +117,13 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 
 	switch(gc.phase)
 	{
+		// Transfer all pending proxies to the active list.
 		case XENON_GC_PHASE_LINK_PENDING:
 		{
 			if(gc.lastPhase != gc.phase)
 			{
-				// The very first thing to be done is to clear any existing data held in the stacks.
-				prv_clearStacks(gc);
+				// The very first thing to be done is to clear any existing data held in the proxy queue.
+				prv_clearQueue(gc);
 			}
 			else
 			{
@@ -153,6 +141,9 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 					// Link the proxy at the head of the pending list to the head of the active list.
 					pCurrent->pNext = gc.pActiveHead;
 
+					// Update the proxy to clear its 'pending' state.
+					pCurrent->pending = false;
+
 					// Update the heads of the active and pending lists.
 					gc.pActiveHead = pCurrent;
 					gc.pPendingHead = pNext;
@@ -167,6 +158,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			break;
 		}
 
+		// Reset the 'marked' state for each active proxy.
 		case XENON_GC_PHASE_RESET_STATE:
 		{
 			if(gc.lastPhase != gc.phase)
@@ -201,7 +193,8 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			break;
 		}
 
-		case XENON_GC_PHASE_MARK_AUTO:
+		// Discover anything that is set to auto-mark.
+		case XENON_GC_PHASE_AUTO_MARK_DISCOVERY:
 		{
 			if(gc.lastPhase != gc.phase)
 			{
@@ -219,10 +212,11 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 						break;
 					}
 
-					// Any proxies set to auto-mark will be marked here.
+					// Add any auto-mark proxies to the queue so they and their sub-proxies
+					// will be marked prior to the collection phase.
 					if(gc.pIterCurrent->autoMark)
 					{
-						index += XenonGcProxy::Mark(*gc.pIterCurrent);
+						gc.proxyQueue.Enqueue(gc.pIterCurrent);
 					}
 
 					// Move to the next proxy in the list.
@@ -238,228 +232,94 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			break;
 		}
 
-		case XENON_GC_PHASE_MARK_GLOBALS:
+		// Discover all global variables.
+		case XENON_GC_PHASE_GLOBAL_DISCOVERY:
 		{
-			if(gc.lastPhase != gc.phase)
+			// There's no good way to go over the globals incrementally since the map can hypothetically
+			// change between steps of the garbage collector. We also can't rely on auto-marking because
+			// globals can change what values they point to. Since we're just enqueuing proxies, it shouldn't
+			// be too bad to loop over all the globals at once. This may only become problematic if a script
+			// program contains many hundreds of globals or more. We'll cross that bridge when we come to it.
+			for(auto& kv : gc.hVm->globals)
 			{
-				const size_t requiredStackSize = gc.hVm->globals.Size();
-				const size_t currentStackSize = gc.valueStack.memory.count;
-
-				// Resize the stack if it's too small.
-				if(requiredStackSize > currentStackSize)
+				if(XenonValue::CanBeMarked(kv.value))
 				{
-					XenonValue::HandleStack::Dispose(gc.valueStack);
-					XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
-				}
-
-				// Fill the value stack with all the globals in the VM.
-				for(auto& kv : gc.hVm->globals)
-				{
-					XenonValue::HandleStack::Push(gc.valueStack, kv.value);
+					gc.proxyQueue.Enqueue(&kv.value->gcProxy);
 				}
 			}
-			else
-			{
-				for(uint32_t i = 0; i < gc.maxIterationCount;)
-				{
-					XenonValueHandle hValue;
-					if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
-					{
-						// Stop iterating once the value stack is empty.
-						endOfPhase = true;
-						break;
-					}
 
-					i += XenonValue::Mark(hValue);
-				}
-			}
+			endOfPhase = true;
 			break;
 		}
 
-		case XENON_GC_PHASE_MARK_FUNCTIONS:
+		// Mark all active proxies.
+		case XENON_GC_PHASE_MARK_ACTIVE:
 		{
-			if(gc.lastPhase != gc.phase)
-			{
-				const size_t requiredStackSize = gc.hVm->functions.Size();
-				const size_t currentStackSize = gc.functionStack.memory.count;
+			uint32_t remainingIterations = gc.maxIterationCount;
 
-				// Resize the stack if it's too small.
-				if(requiredStackSize > currentStackSize)
+#if 1
+			XenonGcProxy::BatchedPtrQueue::BatchDequeueList proxyBatch;
+
+			// Process as proxies up to the maximum number we're allowed.
+			while(remainingIterations > 0)
+			{
+				// Pull out as many items from the queue as we can.
+				gc.proxyQueue.DequeueBatch(proxyBatch, remainingIterations);
+
+				uint32_t numProcessed = 0;
+
+				// Process each dequeued proxy in the batch.
+				while(proxyBatch.More())
 				{
-					XenonFunction::HandleStack::Dispose(gc.functionStack);
-					XenonFunction::HandleStack::Initialize(gc.functionStack, requiredStackSize * 3 / 2);
+					XenonGcProxy* const pGcProxy = proxyBatch.Next();
+
+					// Only mark and discover for proxies that have not already been marked.
+					if(!pGcProxy->marked)
+					{
+						pGcProxy->marked = true;
+
+						// Discover any sub-proxies that would be owned by the current proxy.
+						pGcProxy->onGcDiscoveryFn(gc, pGcProxy->pObject);
+
+						++numProcessed;
+					}
 				}
 
-				// Start the phase by filling the function stack.
-				for(auto& kv : gc.hVm->functions)
+				if(numProcessed == 0)
 				{
-					XenonFunction::HandleStack::Push(gc.functionStack, kv.value);
+					// When there are no items left in the queue, we end the phase.
+					endOfPhase = true;
+					break;
+				}
+
+				remainingIterations -= numProcessed;
+			}
+
+#else
+			while(remainingIterations > 0)
+			{
+				XenonGcProxy* pGcProxy;
+				if(!gc.proxyQueue.Dequeue(pGcProxy, gc.proxyReadTicket))
+				{
+					endOfPhase = true;
+					break;
+				}
+
+				if(!pGcProxy->marked)
+				{
+					pGcProxy->marked = true;
+
+					pGcProxy->onGcDiscoveryFn(gc, pGcProxy->pObject);
+
+					--remainingIterations;
 				}
 			}
-			else
-			{
-				// When there are no values left in the stack, pop a function and fill the value stack
-				// up with that function's local variable values.
-				if(XenonValue::HandleStack::IsEmpty(gc.valueStack))
-				{
-					XenonFunctionHandle hFunction;
-					if(XenonFunction::HandleStack::Pop(gc.functionStack, &hFunction) == XENON_ERROR_STACK_EMPTY)
-					{
-						// No more functions in the stack, time to move on to the next phase.
-						endOfPhase = true;
-						break;
-					}
 
-					const size_t requiredStackSize = hFunction->locals.Size();
-					const size_t currentStackSize = gc.valueStack.memory.count;
-
-					// Resize the stack if it's too small.
-					if(requiredStackSize > currentStackSize)
-					{
-						XenonValue::HandleStack::Dispose(gc.valueStack);
-						XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
-					}
-
-					// Cache the locals from the function.
-					for(auto& kv : hFunction->locals)
-					{
-						XenonValue::HandleStack::Push(gc.valueStack, kv.value);
-					}
-				}
-				else
-				{
-					// Iterate over as many values as we are allowed.
-					for(uint32_t i = 0; i < gc.maxIterationCount;)
-					{
-						XenonValueHandle hValue;
-						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
-						{
-							// Stop iterating once the value stack is empty.
-							break;
-						}
-
-						i += XenonValue::Mark(hValue);
-					}
-				}
-			}
+#endif
 			break;
 		}
 
-		case XENON_GC_PHASE_MARK_EXECUTIONS:
-		{
-			if(gc.lastPhase != gc.phase)
-			{
-				const size_t requiredStackSize = gc.hVm->executionContexts.Size();
-				const size_t currentStackSize = gc.valueStack.memory.count;
-
-				// Resize the stack if it's too small.
-				if(requiredStackSize > currentStackSize)
-				{
-					XenonValue::HandleStack::Dispose(gc.valueStack);
-					XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
-				}
-
-				// At the start of the phase, we collect all the execution contexts saving
-				// a reference to them to keep them alive in case the user releases any of
-				// them before they're all processed here.
-				for(auto& kv : gc.hVm->executionContexts)
-				{
-					XenonExecution::AddRef(kv.key);
-					XenonExecution::HandleStack::Push(gc.execStack, kv.key);
-				}
-			}
-			else
-			{
-				// When there are no values left in the stack, pop a function and fill the value stack
-				// up with that function's local variable values.
-				if(XenonValue::HandleStack::IsEmpty(gc.valueStack))
-				{
-					// Pop the execution contexts one-by-one until none are left.
-					XenonExecutionHandle hExec;
-					if(XenonExecution::HandleStack::Pop(gc.execStack, &hExec) == XENON_ERROR_STACK_EMPTY)
-					{
-						// No more functions in the stack, time to move on to the next phase.
-						endOfPhase = true;
-						break;
-					}
-
-					XenonExecution::Release(hExec);
-
-					// Calculate the total size we need in the value stack.
-					size_t requiredStackSize = XENON_VM_IO_REGISTER_COUNT;
-					for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
-					{
-						XenonFrameHandle hFrame = hExec->frameStack.memory.pData[i];
-
-						requiredStackSize += XENON_VM_GP_REGISTER_COUNT
-							+ hFrame->stack.nextIndex
-							+ hFrame->locals.Size();
-					}
-
-					const size_t currenStackSize = gc.valueStack.memory.count;
-
-					// Resize the stack if it's too small.
-					if(requiredStackSize > currenStackSize)
-					{
-						XenonValue::HandleStack::Dispose(gc.valueStack);
-						XenonValue::HandleStack::Initialize(gc.valueStack, requiredStackSize * 3 / 2);
-					}
-
-					// Push each of the I/O registers to the value stack.
-					for(size_t i = 0; i < XENON_VM_IO_REGISTER_COUNT; ++i)
-					{
-						XenonValueHandle hValue = hExec->registers.pData[i];
-
-						XenonValue::HandleStack::Push(gc.valueStack, hValue);
-					}
-
-					// Iterate over the entire frame stack in the execution context.
-					for(size_t frameIndex = 0; frameIndex < hExec->frameStack.nextIndex; ++frameIndex)
-					{
-						XenonFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
-
-						// Push each of the frame's general purpose registers to the value stack.
-						for(size_t registerIndex = 0; registerIndex < XENON_VM_GP_REGISTER_COUNT; ++registerIndex)
-						{
-							XenonValueHandle hValue = hFrame->registers.pData[registerIndex];
-
-							XenonValue::HandleStack::Push(gc.valueStack, hValue);
-						}
-
-						// Push all values current in the frame's value stack to our value stack.
-						for(size_t stackIndex = 0; stackIndex < hFrame->stack.nextIndex; ++stackIndex)
-						{
-							XenonValueHandle hValue = hFrame->stack.memory.pData[stackIndex];
-
-							XenonValue::HandleStack::Push(gc.valueStack, hValue);
-						}
-
-						// Push each of the frame's local variables to the value stack.
-						for(auto& kv : hFrame->locals)
-						{
-							XenonValue::HandleStack::Push(gc.valueStack, kv.value);
-						}
-					}
-				}
-				else
-				{
-					// Iterate over as many values as we are allowed.
-					for(uint32_t i = 0; i < gc.maxIterationCount;)
-					{
-						XenonValueHandle hValue;
-						if(XenonValue::HandleStack::Pop(gc.valueStack, &hValue) == XENON_ERROR_STACK_EMPTY)
-						{
-							// Stop iterating once the value stack is empty.
-							break;
-						}
-
-						i += XenonValue::Mark(hValue);
-					}
-				}
-			}
-			break;
-		}
-
+		// Look for anything in the active list that is not marked and thus needs to be collected.
 		case XENON_GC_PHASE_COLLECT:
 		{
 			if(gc.lastPhase != gc.phase)
@@ -521,6 +381,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			break;
 		}
 
+		// Dispose of any objects that are no longer in use.
 		case XENON_GC_PHASE_DISPOSE:
 		{
 			// Iterate over the unmarked items to free, up to as many as we're allowed in one run.
@@ -536,7 +397,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 				XenonGcProxy* const pNext = gc.pUnmarkedHead->pNext;
 
 				// Dispose of the current proxy.
-				XenonGcProxy::prv_onDispose(*gc.pUnmarkedHead);
+				prv_onDisposeProxy(gc.pUnmarkedHead);
 
 				// Update the head of the unmarked list.
 				gc.pUnmarkedHead = pNext;
@@ -556,12 +417,16 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			break;
 	}
 
+	// Cache the current phase so we know if the last step was running a different phase.
+	// This effectively lets us detect the start of a phase.
 	gc.lastPhase = gc.phase;
 
 	if(endOfPhase)
 	{
+		// Move to the next phase.
 		gc.phase = (gc.phase + 1) % XENON_GC_PHASE__COUNT;
 
+		// The end of all phases is triggered when we have looped back to the first phase.
 		endOfAllPhases = (gc.phase == XENON_GC_PHASE__START);
 	}
 
@@ -596,39 +461,42 @@ void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy& 
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void XenonGarbageCollector::DiscoverProxy(XenonGarbageCollector& gc, XenonGcProxy& proxy)
+{
+	if(!proxy.marked && !proxy.pending)
+	{
+		gc.proxyQueue.Enqueue(&proxy);
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void XenonGarbageCollector::prv_reset(XenonGarbageCollector& gc)
 {
 	gc.phase = XENON_GC_PHASE__START;
 	gc.lastPhase = XENON_GC_PHASE__END;
 
-	prv_clearStacks(gc);
+	prv_clearQueue(gc);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::prv_clearStacks(XenonGarbageCollector& gc)
+void XenonGarbageCollector::prv_clearQueue(XenonGarbageCollector& gc)
 {
-	// Release any held execution contexts.
-	XenonExecutionHandle hExec;
-	while(XenonExecution::HandleStack::Pop(gc.execStack, &hExec) == XENON_SUCCESS)
+	// Clear the proxy queue.
+	XenonGcProxy* pProxy;
+	while(gc.proxyQueue.Dequeue(pProxy, gc.proxyReadTicket))
 	{
-		XenonExecution::Release(hExec);
 	}
+}
 
-	// Clear the program stack.
-	while(XenonProgram::HandleStack::Pop(gc.programStack) == XENON_SUCCESS)
-	{
-	}
+//----------------------------------------------------------------------------------------------------------------------
 
-	// Clear the function stack.
-	while(XenonFunction::HandleStack::Pop(gc.functionStack) == XENON_SUCCESS)
-	{
-	}
+void XenonGarbageCollector::prv_onDisposeProxy(XenonGcProxy* const pGcProxy)
+{
+	assert(pGcProxy != nullptr);
 
-	// Clear the value stack.
-	while(XenonValue::HandleStack::Pop(gc.valueStack) == XENON_SUCCESS)
-	{
-	}
+	pGcProxy->onGcDestructFn(pGcProxy->pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

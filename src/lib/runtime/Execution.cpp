@@ -33,17 +33,11 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(hEntryPoint != XENON_FUNCTION_HANDLE_NULL);
 
+	XenonScopedMutex lock(hVm->gcLock);
+
 	XenonExecution* const pOutput = new XenonExecution();
 	if(!pOutput)
 	{
-		return XENON_EXECUTION_HANDLE_NULL;
-	}
-
-	// Create the first frame using the entry point function.
-	pOutput->hCurrentFrame = XenonFrame::Create(hEntryPoint);
-	if(!pOutput->hCurrentFrame)
-	{
-		delete pOutput;
 		return XENON_EXECUTION_HANDLE_NULL;
 	}
 
@@ -54,7 +48,8 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	pOutput->finished = false;
 	pOutput->exception = false;
 
-	XenonReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+	// Initialize the GC proxy to make this object visible to the garbage collector.
+	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput);
 
 	XenonFrame::HandleStack::Initialize(pOutput->frameStack, XENON_VM_FRAME_STACK_SIZE);
 	XenonValue::HandleArray::Initialize(pOutput->registers);
@@ -68,53 +63,54 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 		pOutput->registers.pData[i] = XenonValue::CreateNull();
 	}
 
+	// Create the first frame using the entry point function.
+	pOutput->hCurrentFrame = XenonFrame::Create(pOutput, hEntryPoint);
+	if(!pOutput->hCurrentFrame)
+	{
+		return XENON_EXECUTION_HANDLE_NULL;
+	}
+
 	// Push the entry point frame to the frame stack.
 	int result = XenonFrame::HandleStack::Push(pOutput->frameStack, pOutput->hCurrentFrame);
 	if(result != XENON_SUCCESS)
 	{
-		XenonFrame::Dispose(pOutput->hCurrentFrame);
-		XenonExecution::Release(pOutput);
-
 		return XENON_EXECUTION_HANDLE_NULL;
 	}
 
-	XenonScopedMutex lock(hVm->gcLock);
-
 	// Map the execution context to the VM used to create it.
 	hVm->executionContexts.Insert(pOutput, false);
+
+	// Keep the execution context alive indefinitely until we're ready to dispose of it.
+	pOutput->gcProxy.autoMark = true;
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void XenonExecution::ReleaseWithNoDetach(XenonExecutionHandle hExec)
+{
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+
+	// Clearing the 'auto-mark' flag will allow the garbage
+	// collector to destruct the execution context.
+	hExec->gcProxy.autoMark = false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void XenonExecution::DetachFromVm(XenonExecutionHandle hExec)
 {
-	XenonVmHandle hVm = hExec->hVm;
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
+	ReleaseWithNoDetach(hExec);
+
+	XenonVmHandle hVm = hExec->hVm;
 	XenonScopedMutex lock(hVm->gcLock);
 
 	// Unlink the execution context from the VM.
 	hVm->executionContexts.Delete(hExec);
-	XenonExecution::Release(hExec);
-}
 
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonExecution::AddRef(XenonExecutionHandle hExec)
-{
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-
-	XenonReference::AddRef(hExec->ref);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonExecution::Release(XenonExecutionHandle hExec)
-{
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-
-	XenonReference::Release(hExec->ref);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -124,20 +120,16 @@ int XenonExecution::PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hF
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
-	XenonFrameHandle hFrame = XenonFrame::Create(hFunction);
+	XenonScopedMutex lock(hExec->hVm->gcLock);
+
+	XenonFrameHandle hFrame = XenonFrame::Create(hExec, hFunction);
 	if(!hFrame)
 	{
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonScopedMutex lock(hExec->hVm->gcLock);
-
 	int result = XenonFrame::HandleStack::Push(hExec->frameStack, hFrame);
-	if(result != XENON_SUCCESS)
-	{
-		XenonFrame::Dispose(hFrame);
-	}
-	else
+	if(result == XENON_SUCCESS)
 	{
 		hExec->hCurrentFrame = hFrame;
 	}
@@ -155,12 +147,6 @@ int XenonExecution::PopFrame(XenonExecutionHandle hExec)
 
 	XenonFrameHandle hFrame = XENON_FRAME_HANDLE_NULL;
 	int result = hExec->frameStack.Pop(hExec->frameStack, &hFrame);
-
-	if(hFrame)
-	{
-		// We don't need to do anything with the frame we popped, but it still needs to be cleaned up.
-		XenonFrame::Dispose(hFrame);
-	}
 
 	hExec->hCurrentFrame = (hExec->frameStack.nextIndex > 0)
 		? hExec->frameStack.memory.pData[hExec->frameStack.nextIndex - 1]
@@ -212,6 +198,12 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(runMode == XENON_RUN_STEP || runMode == XENON_RUN_CONTINUOUS);
 
+	if(hExec->finished || hExec->exception)
+	{
+		// Do nothing if the execution has finished or an unhandled exception was thrown.
+		return;
+	}
+
 	// Set the 'started' flag to indicate that execution has started.
 	// We also reset the 'yield' flag here since it's only useful for
 	// pausing execution and we no longer need it paused until the
@@ -219,26 +211,21 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 	hExec->started = true;
 	hExec->yield = false;
 
-	XenonVmHandle hVm = hExec->hVm;
-
 	switch(runMode)
 	{
 		case XENON_RUN_STEP:
 		{
-			XenonScopedMutex lock(hVm->gcLock);
-
 			prv_runStep(hExec);
 			break;
 		}
 
 		case XENON_RUN_CONTINUOUS:
 		{
-			XenonScopedMutex lock(hVm->gcLock);
-
 			while(!hExec->finished && !hExec->exception && !hExec->yield)
 			{
-				// TODO: Adding a timer here to release, then immediately re-acquire the gc lock after a certain
-				//       amount of time to allow the garbage collector to have a chance to run during execution.
+				// TODO: This sleep is just for testing the garbage collector.
+				XenonThread::Sleep(300);
+
 				prv_runStep(hExec);
 			}
 			break;
@@ -256,6 +243,8 @@ void XenonExecution::prv_runStep(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
+	XenonScopedMutex gcLock(hExec->hVm->gcLock);
+
 	XenonFrameHandle hFrame = hExec->hCurrentFrame;
 
 	// Save the current instruction pointer position at the start of the opcode that will now be executed.
@@ -267,16 +256,38 @@ void XenonExecution::prv_runStep(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::prv_onDestruct(void* pObject)
+void XenonExecution::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaque)
+{
+	XenonExecutionHandle hExec = reinterpret_cast<XenonExecutionHandle>(pOpaque);
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+
+	// Discover all active frames in the frame stack.
+	const size_t stackSize = XenonFrame::HandleStack::GetCurrentSize(hExec->frameStack);
+	for(size_t i = 0; i < stackSize; ++i)
+	{
+		XenonFrameHandle hFrame = hExec->frameStack.memory.pData[i];
+
+		XenonGarbageCollector::DiscoverProxy(gc, hFrame->gcProxy);
+	}
+
+	// Discover values held in the I/O registers.
+	for(size_t i = 0; i < hExec->registers.count; ++i)
+	{
+		XenonValueHandle hValue = hExec->registers.pData[i];
+
+		if(XenonValue::CanBeMarked(hValue))
+		{
+			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonExecution::prv_onGcDestruct(void* pObject)
 {
 	XenonExecutionHandle hExec = reinterpret_cast<XenonExecutionHandle>(pObject);
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-
-	// Dispose of all active frames.
-	for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
-	{
-		XenonFrame::Dispose(hExec->frameStack.memory.pData[i]);
-	}
 
 	XenonFrame::HandleStack::Dispose(hExec->frameStack);
 	XenonValue::HandleArray::Dispose(hExec->registers);

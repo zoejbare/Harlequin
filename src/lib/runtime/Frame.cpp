@@ -26,12 +26,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFrameHandle XenonFrame::Create(XenonFunctionHandle hFunction)
+XenonFrameHandle XenonFrame::Create(XenonExecutionHandle hExec, XenonFunctionHandle hFunction)
 {
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	XenonFrame* const pOutput = new XenonFrame();
 
+	// No need to lock the garbage collector here since only the execution context is allowed to create frames
+	// and it will be handling the lock for us.
+	XenonGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput);
+
+	pOutput->hExec = hExec;
 	pOutput->hFunction = hFunction;
 
 	if(hFunction->isNative)
@@ -57,32 +63,17 @@ XenonFrameHandle XenonFrame::Create(XenonFunctionHandle hFunction)
 			pOutput->registers.pData[i] = XenonValue::CreateNull();
 		}
 
-		XenonVmHandle hVm = XenonFunction::GetVm(hFunction);
-		assert(hVm != XENON_VM_HANDLE_NULL);
-
 		// Build the local table for the new frame. This will intentionally copy each value from the function's local table
 		// so any changes made the variables in the frame will not affect the prototypes in the function.
 		for(auto& kv : hFunction->locals)
 		{
-			pOutput->locals.Insert(kv.key, XenonValueCopy(hVm, kv.value));
+			pOutput->locals.Insert(kv.key, XenonValueCopy(hExec->hVm, kv.value));
 		}
 
 		XenonDecoder::Initialize(pOutput->decoder, hFunction->hProgram, hFunction->bytecodeOffset);
 	}
 
 	return pOutput;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonFrame::Dispose(XenonFrameHandle hFrame)
-{
-	assert(hFrame != XENON_FRAME_HANDLE_NULL);
-
-	XenonValue::HandleStack::Dispose(hFrame->stack);
-	XenonValue::HandleArray::Dispose(hFrame->registers);
-
-	delete hFrame;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -232,6 +223,61 @@ XenonValueHandle XenonFrame::GetLocalVariable(XenonFrameHandle hFrame, XenonStri
 
 	(*pOutResult) = XENON_SUCCESS;
 	return hFrame->locals.Get(pVariableName);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonFrame::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaque)
+{
+	XenonFrameHandle hFrame = reinterpret_cast<XenonFrameHandle>(pOpaque);
+	assert(hFrame != XENON_FRAME_HANDLE_NULL);
+
+	// Discover values in the stack.
+	size_t stackSize = XenonValue::HandleStack::GetCurrentSize(hFrame->stack);
+	for(size_t i = 0; i < stackSize; ++i)
+	{
+		XenonValueHandle hValue = hFrame->stack.memory.pData[i];
+
+		if(XenonValue::CanBeMarked(hValue))
+		{
+			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+		}
+	}
+
+	// Discover values held in the general purpose registers.
+	for(size_t i = 0; i < hFrame->registers.count; ++i)
+	{
+		XenonValueHandle hValue = hFrame->registers.pData[i];
+
+		if(XenonValue::CanBeMarked(hValue))
+		{
+			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+		}
+	}
+
+	// Discover the local variable values.
+	for(auto& kv : hFrame->locals)
+	{
+		XenonValueHandle hValue = kv.value;
+
+		if(XenonValue::CanBeMarked(hValue))
+		{
+			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonFrame::prv_onGcDestruct(void* const pOpaque)
+{
+	XenonFrameHandle hFrame = reinterpret_cast<XenonFrameHandle>(pOpaque);
+	assert(hFrame != XENON_FRAME_HANDLE_NULL);
+
+	XenonValue::HandleStack::Dispose(hFrame->stack);
+	XenonValue::HandleArray::Dispose(hFrame->registers);
+
+	delete hFrame;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

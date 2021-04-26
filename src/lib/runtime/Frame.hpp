@@ -22,6 +22,7 @@
 
 #include "Decoder.hpp"
 #include "Function.hpp"
+#include "GcProxy.hpp"
 #include "Value.hpp"
 
 #include "../common/Array.hpp"
@@ -34,8 +35,7 @@ struct XenonFrame
 	typedef XenonArray<XenonFrameHandle> HandleArray;
 	typedef XenonStack<XenonFrameHandle> HandleStack;
 
-	static XenonFrameHandle Create(XenonFunctionHandle hFunction);
-	static void Dispose(XenonFrameHandle hFrame);
+	static XenonFrameHandle Create(XenonExecutionHandle hExec, XenonFunctionHandle hFunction);
 
 	static int PushValue(XenonFrameHandle hFrame, XenonValueHandle hValue);
 	static int PopValue(XenonFrameHandle hFrame, XenonValueHandle* const phOutValue);
@@ -47,13 +47,19 @@ struct XenonFrame
 	static XenonValueHandle GetGpRegister(XenonFrameHandle hFrame, const uint32_t index, int* const pOutResult);
 	static XenonValueHandle GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName, int* const pOutResult);
 
+	static void prv_onGcDiscovery(XenonGarbageCollector&, void*);
+	static void prv_onGcDestruct(void*);
+
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
+
+	XenonGcProxy gcProxy;
 
 	XenonValue::HandleStack stack;
 	XenonValue::HandleArray registers;
 	XenonValue::StringToHandleMap locals;
 
+	XenonExecutionHandle hExec;
 	XenonFunctionHandle hFunction;
 
 	XenonDecoder decoder;

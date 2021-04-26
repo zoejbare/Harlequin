@@ -23,36 +23,44 @@
 #include "../XenonScript.h"
 
 #include "../common/DestructCallback.hpp"
+#include "../common/StlAllocator.hpp"
 
-//----------------------------------------------------------------------------------------------------------------------
-
-typedef uint32_t (*XenonGcMarkCallback)(void*);
+#include <NCPS/ConcurrentQueue.hpp>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XenonGarbageCollector;
+
+typedef void (*XenonGcDiscoveryCallback)(XenonGarbageCollector&, void*);
+
+//----------------------------------------------------------------------------------------------------------------------
+
 struct XenonGcProxy
 {
+	typedef NCPS::ConcurrentQueue<
+		XenonGcProxy*,
+		4096,
+		true,
+		XenonStlAllocator<XenonGcProxy*>
+	> BatchedPtrQueue;
+
 	static void Initialize(
 		XenonGcProxy& output,
 		XenonGarbageCollector& gc,
-		XenonGcMarkCallback onGcMarkFn,
-		XenonDestructCallback onDestructFn,
+		XenonGcDiscoveryCallback onGcDiscoveryFn,
+		XenonDestructCallback onGcDestructFn,
 		void* const pObject
 	);
 
-	static uint32_t Mark(XenonGcProxy& proxy);
-
-	static void prv_onDispose(XenonGcProxy& proxy);
-
-	XenonGcMarkCallback onGcMarkFn;
-	XenonDestructCallback onDestructFn;
+	XenonGcDiscoveryCallback onGcDiscoveryFn;
+	XenonDestructCallback onGcDestructFn;
 
 	XenonGarbageCollector* pGc;
 	XenonGcProxy* pNext;
 
 	void* pObject;
 
+	bool pending;
 	bool marked;
 	bool autoMark;
 };
