@@ -48,6 +48,16 @@ struct XenonStack
 		XenonArray<T>::Dispose(stack.memory);
 	}
 
+	static void Expand(XenonStack& output, const size_t newSize)
+	{
+		if(output.memory.count < newSize)
+		{
+			XenonArray<T>::Reserve(output.memory, newSize);
+
+			output.memory.count = newSize;
+		}
+	}
+
 	static int Push(XenonStack& stack, T& data)
 	{
 		const size_t stackNextIndex = stack.nextIndex;
