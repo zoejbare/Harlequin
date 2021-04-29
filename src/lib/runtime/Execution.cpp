@@ -223,9 +223,6 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 		{
 			while(!hExec->finished && !hExec->exception && !hExec->yield)
 			{
-				// TODO: This sleep is just for testing the garbage collector.
-				XenonThread::Sleep(300);
-
 				prv_runStep(hExec);
 			}
 			break;
@@ -267,7 +264,7 @@ void XenonExecution::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pO
 	{
 		XenonFrameHandle hFrame = hExec->frameStack.memory.pData[i];
 
-		XenonGarbageCollector::DiscoverProxy(gc, hFrame->gcProxy);
+		XenonGarbageCollector::MarkObject(gc, &hFrame->gcProxy);
 	}
 
 	// Discover values held in the I/O registers.
@@ -277,7 +274,7 @@ void XenonExecution::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pO
 
 		if(XenonValue::CanBeMarked(hValue))
 		{
-			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+			XenonGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}
 	}
 }

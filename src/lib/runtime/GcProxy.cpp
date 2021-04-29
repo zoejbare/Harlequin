@@ -40,12 +40,77 @@ void XenonGcProxy::Initialize(
 	output.onGcDiscoveryFn = onGcDiscoveryFn;
 	output.onGcDestructFn = onGcDestructFn;
 	output.pGc = &gc;
+	output.pPrev = nullptr;
+	output.pNext = nullptr;
 	output.pObject = pObject;
-	output.pending = true;
+	output.pending = false;
 	output.marked = false;
 	output.autoMark = false;
 
-	XenonGarbageCollector::LinkObject(gc, output);
+	XenonGarbageCollector::LinkObject(gc, &output);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGcProxy::InsertBefore(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
+{
+	assert(pGcListProxy != nullptr);
+	assert(pGcInsertProxy != nullptr);
+
+	XenonGcProxy* const pListPrev = pGcListProxy->pPrev;
+
+	if(pListPrev)
+	{
+		pListPrev->pNext = pGcInsertProxy;
+	}
+
+	pGcListProxy->pPrev = pGcInsertProxy;
+
+	pGcInsertProxy->pPrev = pListPrev;
+	pGcInsertProxy->pNext = pGcListProxy;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGcProxy::InsertAfter(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
+{
+	assert(pGcListProxy != nullptr);
+	assert(pGcInsertProxy != nullptr);
+
+	XenonGcProxy* const pListNext = pGcListProxy->pNext;
+
+	if(pListNext)
+	{
+		pListNext->pPrev = pGcInsertProxy;
+	}
+
+	pGcListProxy->pNext = pGcInsertProxy;
+
+	pGcInsertProxy->pPrev = pGcListProxy;
+	pGcInsertProxy->pNext = pListNext;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGcProxy::Unlink(XenonGcProxy* const pGcProxy)
+{
+	assert(pGcProxy != nullptr);
+
+	XenonGcProxy* const pPrev = pGcProxy->pPrev;
+	XenonGcProxy* const pNext = pGcProxy->pNext;
+
+	if(pPrev)
+	{
+		pPrev->pNext = pNext;
+	}
+
+	if(pNext)
+	{
+		pNext->pPrev = pPrev;
+	}
+
+	pGcProxy->pPrev = nullptr;
+	pGcProxy->pNext = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

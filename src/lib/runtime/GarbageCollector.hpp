@@ -35,21 +35,18 @@ struct XenonGarbageCollector
 	static bool RunStep(XenonGarbageCollector& gc);
 	static void RunFull(XenonGarbageCollector& gc);
 
-	static void LinkObject(XenonGarbageCollector& gc, XenonGcProxy& proxy);
-	static void DiscoverProxy(XenonGarbageCollector& gc, XenonGcProxy& proxy);
+	static void LinkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy);
+	static void MarkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy);
 
 	static void prv_reset(XenonGarbageCollector&);
-	static void prv_clearQueue(XenonGarbageCollector&);
-	static void prv_onDisposeProxy(XenonGcProxy*);
-
-	XenonGcProxy::BatchedPtrQueue proxyQueue;
-	XenonGcProxy::BatchedPtrQueue::ReadReservationTicket proxyReadTicket;
+	static void prv_onDisposeObject(XenonGcProxy*);
 
 	XenonVmHandle hVm;
 
-	XenonGcProxy* pActiveHead;
 	XenonGcProxy* pPendingHead;
 	XenonGcProxy* pUnmarkedHead;
+	XenonGcProxy* pMarkedHead;
+	XenonGcProxy* pMarkedTail;
 
 	XenonGcProxy* pIterCurrent;
 	XenonGcProxy* pIterPrev;

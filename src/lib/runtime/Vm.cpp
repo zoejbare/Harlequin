@@ -238,7 +238,7 @@ int32_t XenonVm::prv_gcThreadMain(void* const pArg)
 		}
 
 		// TODO: Need a separate timing mechanism to keep the garbage collector from running too much while not forcing long sleep times.
-		//XenonThread::Sleep(100);
+		XenonThread::Sleep(50);
 	}
 
 	return XENON_SUCCESS;

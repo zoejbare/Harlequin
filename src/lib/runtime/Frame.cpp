@@ -240,7 +240,7 @@ void XenonFrame::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 
 		if(XenonValue::CanBeMarked(hValue))
 		{
-			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+			XenonGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}
 	}
 
@@ -251,7 +251,7 @@ void XenonFrame::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 
 		if(XenonValue::CanBeMarked(hValue))
 		{
-			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+			XenonGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}
 	}
 
@@ -262,7 +262,7 @@ void XenonFrame::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 
 		if(XenonValue::CanBeMarked(hValue))
 		{
-			XenonGarbageCollector::DiscoverProxy(gc, hValue->gcProxy);
+			XenonGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}
 	}
 }

@@ -30,7 +30,6 @@
 #include "../common/Stack.hpp"
 #include "../common/StlAllocator.hpp"
 
-#include <NCPS/ConcurrentQueue.hpp>
 #include <SkipProbe/SkipProbe.hpp>
 
 #include <string>

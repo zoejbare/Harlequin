@@ -23,9 +23,6 @@
 #include "../XenonScript.h"
 
 #include "../common/DestructCallback.hpp"
-#include "../common/StlAllocator.hpp"
-
-#include <NCPS/ConcurrentQueue.hpp>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,13 +34,6 @@ typedef void (*XenonGcDiscoveryCallback)(XenonGarbageCollector&, void*);
 
 struct XenonGcProxy
 {
-	typedef NCPS::ConcurrentQueue<
-		XenonGcProxy*,
-		4096,
-		true,
-		XenonStlAllocator<XenonGcProxy*>
-	> BatchedPtrQueue;
-
 	static void Initialize(
 		XenonGcProxy& output,
 		XenonGarbageCollector& gc,
@@ -52,10 +42,16 @@ struct XenonGcProxy
 		void* const pObject
 	);
 
+	static void InsertBefore(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy);
+	static void InsertAfter(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy);
+	static void Unlink(XenonGcProxy* const pGcProxy);
+
 	XenonGcDiscoveryCallback onGcDiscoveryFn;
 	XenonDestructCallback onGcDestructFn;
 
 	XenonGarbageCollector* pGc;
+
+	XenonGcProxy* pPrev;
 	XenonGcProxy* pNext;
 
 	void* pObject;

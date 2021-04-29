@@ -31,8 +31,7 @@ enum XenonGcPhase
 	XENON_GC_PHASE_RESET_STATE,
 	XENON_GC_PHASE_AUTO_MARK_DISCOVERY,
 	XENON_GC_PHASE_GLOBAL_DISCOVERY,
-	XENON_GC_PHASE_MARK_ACTIVE,
-	XENON_GC_PHASE_COLLECT,
+	XENON_GC_PHASE_MARK_RECURSIVE,
 	XENON_GC_PHASE_DISPOSE,
 
 	XENON_GC_PHASE__COUNT,
@@ -45,18 +44,17 @@ enum XenonGcPhase
 void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHandle hVm, const uint32_t maxIterationCount)
 {
 	output.hVm = hVm;
-	output.pActiveHead = nullptr;
 	output.pPendingHead = nullptr;
+	output.pUnmarkedHead = nullptr;
+	output.pMarkedHead = nullptr;
+	output.pMarkedTail = nullptr;
 	output.pIterCurrent = nullptr;
 	output.pIterPrev = nullptr;
 	output.phase = 0;
 	output.lastPhase = 0;
 	output.maxIterationCount = maxIterationCount;
 
-	// Initialize the queue read ticket, which will improve performance when dequeuing.
-	output.proxyQueue.InitializeReservationTicket(output.proxyReadTicket);
-
-	// Reset the phases so we're guaranteed to kick off the garbage collector in a good state.
+	// Reset the garbage collector so we're guaranteed to kick things off in a good state.
 	prv_reset(output);
 }
 
@@ -64,48 +62,39 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 
 void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 {
-	// Reset the GC state to release any held data.
-	prv_reset(gc);
-
-	// Dispose of all proxies in the active list.
-	XenonGcProxy* pCurrent = gc.pActiveHead;
-	while(pCurrent)
+	auto clearList = [](XenonGcProxy* const pListHead)
 	{
-		XenonGcProxy* const pNext = pCurrent->pNext;
+		if(pListHead)
+		{
+			XenonGcProxy* pCurrent = pListHead;
+			XenonGcProxy* pNext;
 
-		prv_onDisposeProxy(pCurrent);
+			// Dispose of all objects in the list.
+			while(pCurrent)
+			{
+				pNext = pCurrent->pNext;
 
-		pCurrent = pNext;
-	}
+				prv_onDisposeObject(pCurrent);
 
-	// Dispose of all proxies in the pending list.
-	pCurrent = gc.pPendingHead;
-	while(pCurrent)
-	{
-		XenonGcProxy* const pNext = pCurrent->pNext;
+				pCurrent = pNext;
+			}
+		}
+	};
 
-		prv_onDisposeProxy(pCurrent);
-
-		pCurrent = pNext;
-	}
-
-	// Dispose of all proxies in the unmarked list;
-	pCurrent = gc.pUnmarkedHead;
-	while(pCurrent)
-	{
-		XenonGcProxy* const pNext = pCurrent->pNext;
-
-		prv_onDisposeProxy(pCurrent);
-
-		pCurrent = pNext;
-	}
+	clearList(gc.pPendingHead);
+	clearList(gc.pUnmarkedHead);
+	clearList(gc.pMarkedHead);
 
 	gc.hVm = XENON_VM_HANDLE_NULL;
-	gc.pActiveHead = nullptr;
 	gc.pPendingHead = nullptr;
 	gc.pUnmarkedHead = nullptr;
+	gc.pMarkedHead = nullptr;
+	gc.pMarkedTail = nullptr;
 	gc.pIterCurrent = nullptr;
 	gc.pIterPrev = nullptr;
+	gc.phase = 0;
+	gc.lastPhase = 0;
+	gc.maxIterationCount = 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -120,34 +109,31 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		// Transfer all pending proxies to the active list.
 		case XENON_GC_PHASE_LINK_PENDING:
 		{
-			if(gc.lastPhase != gc.phase)
+			for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
 			{
-				// The very first thing to be done is to clear any existing data held in the proxy queue.
-				prv_clearQueue(gc);
-			}
-			else
-			{
-				for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
+				if(!gc.pPendingHead)
 				{
-					if(!gc.pPendingHead)
-					{
-						// The end of the list has been reached.
-						break;
-					}
-
-					XenonGcProxy* const pCurrent = gc.pPendingHead;
-					XenonGcProxy* const pNext = pCurrent->pNext;
-
-					// Link the proxy at the head of the pending list to the head of the active list.
-					pCurrent->pNext = gc.pActiveHead;
-
-					// Update the proxy to clear its 'pending' state.
-					pCurrent->pending = false;
-
-					// Update the heads of the active and pending lists.
-					gc.pActiveHead = pCurrent;
-					gc.pPendingHead = pNext;
+					// The end of the list has been reached.
+					break;
 				}
+
+				XenonGcProxy* const pCurrent = gc.pPendingHead;
+				XenonGcProxy* const pNext = pCurrent->pNext;
+
+				XenonGcProxy::Unlink(pCurrent);
+
+				// Link the object at the head of the pending list to the head of the active unmarked list.
+				if(gc.pUnmarkedHead)
+				{
+					XenonGcProxy::InsertBefore(gc.pUnmarkedHead, pCurrent);
+				}
+
+				// Clear the proxy's 'pending' state.
+				pCurrent->pending = false;
+
+				// Update the heads of the unmarked and pending lists.
+				gc.pUnmarkedHead = pCurrent;
+				gc.pPendingHead = pNext;
 			}
 
 			if(!gc.pPendingHead)
@@ -164,7 +150,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			if(gc.lastPhase != gc.phase)
 			{
 				// For the start of the phase, set the current proxy pointer to the head of the active list.
-				gc.pIterCurrent = gc.pActiveHead;
+				gc.pIterCurrent = gc.pUnmarkedHead;
 			}
 			else
 			{
@@ -199,7 +185,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			if(gc.lastPhase != gc.phase)
 			{
 				// For the start of the phase, set the current proxy pointer to the head of the active list.
-				gc.pIterCurrent = gc.pActiveHead;
+				gc.pIterCurrent = gc.pUnmarkedHead;
 			}
 			else
 			{
@@ -212,21 +198,23 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 						break;
 					}
 
-					// Add any auto-mark proxies to the queue so they and their sub-proxies
-					// will be marked prior to the collection phase.
+					XenonGcProxy* const pNext = gc.pIterCurrent->pNext;
+
+					// Add any auto-mark objects to the active marked list so they and
+					// their sub-objects will be marked prior to the collection phase.
 					if(gc.pIterCurrent->autoMark)
 					{
-						gc.proxyQueue.Enqueue(gc.pIterCurrent);
+						MarkObject(gc, gc.pIterCurrent);
 					}
 
 					// Move to the next proxy in the list.
-					gc.pIterCurrent = gc.pIterCurrent->pNext;
+					gc.pIterCurrent = pNext;
 				}
 			}
 
 			if(!gc.pIterCurrent)
 			{
-				// We have reached the end of the phase once all proxies in the list have been checked.
+				// We have reached the end of the phase once all objects in the list have been checked.
 				endOfPhase = true;
 			}
 			break;
@@ -244,7 +232,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			{
 				if(XenonValue::CanBeMarked(kv.value))
 				{
-					gc.proxyQueue.Enqueue(&kv.value->gcProxy);
+					MarkObject(gc, &kv.value->gcProxy);
 				}
 			}
 
@@ -252,132 +240,40 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			break;
 		}
 
-		// Mark all active proxies.
-		case XENON_GC_PHASE_MARK_ACTIVE:
-		{
-			uint32_t remainingIterations = gc.maxIterationCount;
-
-#if 1
-			XenonGcProxy::BatchedPtrQueue::BatchDequeueList proxyBatch;
-
-			// Process as proxies up to the maximum number we're allowed.
-			while(remainingIterations > 0)
-			{
-				// Pull out as many items from the queue as we can.
-				gc.proxyQueue.DequeueBatch(proxyBatch, remainingIterations);
-
-				uint32_t numProcessed = 0;
-
-				// Process each dequeued proxy in the batch.
-				while(proxyBatch.More())
-				{
-					XenonGcProxy* const pGcProxy = proxyBatch.Next();
-
-					// Only mark and discover for proxies that have not already been marked.
-					if(!pGcProxy->marked)
-					{
-						pGcProxy->marked = true;
-
-						// Discover any sub-proxies that would be owned by the current proxy.
-						pGcProxy->onGcDiscoveryFn(gc, pGcProxy->pObject);
-
-						++numProcessed;
-					}
-				}
-
-				if(numProcessed == 0)
-				{
-					// When there are no items left in the queue, we end the phase.
-					endOfPhase = true;
-					break;
-				}
-
-				remainingIterations -= numProcessed;
-			}
-
-#else
-			while(remainingIterations > 0)
-			{
-				XenonGcProxy* pGcProxy;
-				if(!gc.proxyQueue.Dequeue(pGcProxy, gc.proxyReadTicket))
-				{
-					endOfPhase = true;
-					break;
-				}
-
-				if(!pGcProxy->marked)
-				{
-					pGcProxy->marked = true;
-
-					pGcProxy->onGcDiscoveryFn(gc, pGcProxy->pObject);
-
-					--remainingIterations;
-				}
-			}
-
-#endif
-			break;
-		}
-
-		// Look for anything in the active list that is not marked and thus needs to be collected.
-		case XENON_GC_PHASE_COLLECT:
+		// Recursively mark all active objects.
+		case XENON_GC_PHASE_MARK_RECURSIVE:
 		{
 			if(gc.lastPhase != gc.phase)
 			{
-				// For the start of the phase, setup the current and previous iteration proxy
-				// pointers for traversing the active list. The previous proxy is needed in
-				// case any nodes need to be unlinked from the list.
-				gc.pIterCurrent = gc.pActiveHead;
-				gc.pIterPrev = nullptr;
+				// For the start of the phase, set the current proxy pointer to the head of the marked active list.
+				// This will go through all marked objects and mark their dependencies.
+				gc.pIterCurrent = gc.pMarkedHead;
 			}
-
-			// Iterate over as many items in the list as we're allowed at one time.
-			for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
+			else
 			{
-				if(!gc.pIterCurrent)
+				// Iterate over as many items in the list as we're allowed at one time.
+				for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
 				{
-					// The end of the list has been reached.
-					break;
-				}
-
-				XenonGcProxy* const pCurrent = gc.pIterCurrent;
-				XenonGcProxy* const pNext = pCurrent->pNext;
-
-				if(!pCurrent->marked)
-				{
-					// The current proxy is unmarked, so we need to unlink it from the active list
-					// and move it to the unmarked list.
-					if(pCurrent == gc.pActiveHead)
+					if(!gc.pIterCurrent)
 					{
-						// Move the head pointer to its next node.
-						gc.pActiveHead = gc.pActiveHead->pNext;
+						// The end of the list has been reached.
+						break;
 					}
 
-					pCurrent->pNext = gc.pUnmarkedHead;
+					// Discover any garbage collected objects that need to be marked contained within the current object.
+					gc.pIterCurrent->onGcDiscoveryFn(gc, gc.pIterCurrent->pObject);
 
-					gc.pUnmarkedHead = pCurrent;
-
-					// The previous proxy will stay where it is, but it's next pointer needs to be updated.
-					if(gc.pIterPrev)
-					{
-						gc.pIterPrev->pNext = pNext;
-					}
+					// Move to the next proxy in the list.
+					gc.pIterCurrent = gc.pIterCurrent->pNext;
 				}
-				else
-				{
-					// The current proxy will stay in the active list, so we can update the previous proxy as normal.
-					gc.pIterPrev = gc.pIterCurrent;
-				}
-
-				// Move to the next proxy in the list.
-				gc.pIterCurrent = pNext;
 			}
 
 			if(!gc.pIterCurrent)
 			{
-				// We have reached the end of the phase once all proxies in the list have been checked.
+				// We have reached the end of the phase once all objects in the list have been checked.
 				endOfPhase = true;
 			}
+
 			break;
 		}
 
@@ -397,7 +293,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 				XenonGcProxy* const pNext = gc.pUnmarkedHead->pNext;
 
 				// Dispose of the current proxy.
-				prv_onDisposeProxy(gc.pUnmarkedHead);
+				prv_onDisposeObject(gc.pUnmarkedHead);
 
 				// Update the head of the unmarked list.
 				gc.pUnmarkedHead = pNext;
@@ -448,24 +344,50 @@ void XenonGarbageCollector::RunFull(XenonGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy& proxy)
+void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy)
 {
-	XenonGcProxy* const pProxy = &proxy;
+	assert(pGcProxy != nullptr);
 
-	// Link the proxy the head of the pending list. All nodes in the pending list
-	// will be transferred to the active list as the garbage collector is run.
-	proxy.pNext = gc.pPendingHead;
+	// Link the proxy the head of the pending list.
+	pGcProxy->pending = true;
 
-	gc.pPendingHead = pProxy;
+	if(gc.pPendingHead)
+	{
+		XenonGcProxy::InsertBefore(gc.pPendingHead, pGcProxy);
+	}
+
+	gc.pPendingHead = pGcProxy;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::DiscoverProxy(XenonGarbageCollector& gc, XenonGcProxy& proxy)
+void XenonGarbageCollector::MarkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy)
 {
-	if(!proxy.marked && !proxy.pending)
+	assert(pGcProxy != nullptr);
+
+	if(!pGcProxy->marked && !pGcProxy->pending)
 	{
-		gc.proxyQueue.Enqueue(&proxy);
+		pGcProxy->marked = true;
+
+		if(gc.pUnmarkedHead == pGcProxy)
+		{
+			gc.pUnmarkedHead = pGcProxy->pNext;
+		}
+
+		XenonGcProxy::Unlink(pGcProxy);
+
+		if(!gc.pMarkedHead)
+		{
+			// Nothing in the marked list current, so the input proxy becomes the new marked list.
+			gc.pMarkedHead = pGcProxy;
+			gc.pMarkedTail = pGcProxy;
+		}
+		else
+		{
+			XenonGcProxy::InsertAfter(gc.pMarkedTail, pGcProxy);
+
+			gc.pMarkedTail = pGcProxy;
+		}
 	}
 }
 
@@ -473,26 +395,28 @@ void XenonGarbageCollector::DiscoverProxy(XenonGarbageCollector& gc, XenonGcProx
 
 void XenonGarbageCollector::prv_reset(XenonGarbageCollector& gc)
 {
+	if(gc.pMarkedTail && gc.pUnmarkedHead)
+	{
+		// Link the head of the unmarked objects to the end of the marked list.
+		XenonGcProxy::InsertAfter(gc.pMarkedTail, gc.pUnmarkedHead);
+	}
+
+	if(gc.pMarkedHead)
+	{
+		// The marked list now becomes the unmarked list.
+		gc.pUnmarkedHead = gc.pMarkedHead;
+	}
+
+	gc.pMarkedHead = nullptr;
+	gc.pMarkedTail = nullptr;
+
 	gc.phase = XENON_GC_PHASE__START;
 	gc.lastPhase = XENON_GC_PHASE__END;
-
-	prv_clearQueue(gc);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::prv_clearQueue(XenonGarbageCollector& gc)
-{
-	// Clear the proxy queue.
-	XenonGcProxy* pProxy;
-	while(gc.proxyQueue.Dequeue(pProxy, gc.proxyReadTicket))
-	{
-	}
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonGarbageCollector::prv_onDisposeProxy(XenonGcProxy* const pGcProxy)
+void XenonGarbageCollector::prv_onDisposeObject(XenonGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 
