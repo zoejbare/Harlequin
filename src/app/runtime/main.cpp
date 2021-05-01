@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #include <deque>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -96,6 +97,74 @@ int main(int argc, char* argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+	static std::unordered_map<void*, size_t> allocations;
+
+	static size_t maxAllocSize = 0;
+	static size_t minAllocSize = SIZE_MAX;
+	static size_t peakMemUsage = 0;
+	static size_t allocationCount = 0;
+	static size_t mallocCount = 0;
+	static size_t reallocCount = 0;
+
+	static size_t currentTotalSize = 0;
+
+	static auto onAlloc = [](const size_t size)
+	{
+		if(size > maxAllocSize)
+		{
+			maxAllocSize = size;
+		}
+
+		if(size < minAllocSize)
+		{
+			minAllocSize = size;
+		}
+
+		currentTotalSize += size;
+
+		if(currentTotalSize >= peakMemUsage)
+		{
+			peakMemUsage = currentTotalSize;
+		}
+
+		++allocationCount;
+	};
+
+	auto trackedAlloc = [](const size_t size) -> void*
+	{
+		void* const pMem = malloc(size);
+
+		allocations.emplace(pMem, size);
+		onAlloc(size);
+
+		++mallocCount;
+
+		return pMem;
+	};
+
+	auto trackedRealloc = [](void* const pOldMem, const size_t newSize) -> void*
+	{
+		void* const pNewMem = realloc(pOldMem, newSize);
+
+		currentTotalSize -= allocations[pOldMem];
+
+		allocations.erase(pOldMem);
+		allocations.emplace(pNewMem, newSize);
+		onAlloc(newSize);
+
+		++reallocCount;
+
+		return pNewMem;
+	};
+
+	auto trackedFree = [](void* const pMem)
+	{
+		currentTotalSize -= allocations[pMem];
+
+		allocations.erase(pMem);
+		free(pMem);
+	};
+
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
 	XenonVmInit init;
 
@@ -111,6 +180,14 @@ int main(int argc, char* argv[])
 	init.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
 	init.gcMaxIterationCount = XENON_VM_GC_DEFAULT_ITERATION_COUNT;
 
+	XenonMemAllocator allocator;
+	allocator.allocFn = trackedAlloc;
+	allocator.reallocFn = trackedRealloc;
+	allocator.freeFn = trackedFree;
+
+	XenonMemSetAllocator(allocator);
+
+#if 1
 	// Create the VM context.
 	int result = XenonVmCreate(&hVm, init);
 	if(result != XENON_SUCCESS)
@@ -300,8 +377,39 @@ int main(int argc, char* argv[])
 	if(result != XENON_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg), "Failed to dispose of Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(result));
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_WARNING, msg);
+	}
+#endif
+
+	if(!allocations.empty())
+	{
+		char msg[128];
+		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", allocations.size());
+		OnMessageReported(NULL, XENON_MESSAGE_TYPE_ERROR, msg);
+	}
+
+	// Output memory allocation stats.
+	{
+		char msg[256];
+		snprintf(
+			msg,
+			sizeof(msg),
+			"Memory Stats:\n"
+			"\tMin allocation size: %zu\n"
+			"\tMax allocation size: %zu\n"
+			"\tPeak memory usage: %zu\n"
+			"\tTotal allocation count: %zu\n"
+			"\tMalloc() call count: %zu\n"
+			"\tRealloc() call count: %zu",
+			minAllocSize,
+			maxAllocSize,
+			peakMemUsage,
+			allocationCount,
+			mallocCount,
+			reallocCount
+		);
+		OnMessageReported(NULL, XENON_MESSAGE_TYPE_INFO, msg);
 	}
 
 	return 0;
