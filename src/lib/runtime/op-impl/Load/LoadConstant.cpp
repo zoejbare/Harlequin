@@ -51,11 +51,9 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
 	if(result == XENON_SUCCESS)
 	{
-		// Make a copy of the constant value to protect its underlying memory.
-		XenonValueHandle hValueCopy = XenonValue::Copy(hExec->hVm, hValue);
-		XenonValue::SetAutoMark(hValueCopy, false);
-
-		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValueCopy, registerIndex);
+		// Upload the constant directly. This is a little risky since any native, built-in functions could potentially
+		// change the underlying data, but the alternative is forcing a new allocation every time a constant is loaded.
+		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
 		if(result != XENON_SUCCESS)
 		{
 			// TODO: Raise script exception
@@ -79,11 +77,13 @@ void OpCodeDisasm_LoadConstant(XenonDisassemble& disasm)
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	std::string valueData = XenonValue::GetDebugString(hValue);
+	XenonString* const pValueData = XenonValue::GetDebugString(hValue);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_CONST r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());
+	snprintf(instr, sizeof(instr), "LOAD_CONST r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
+
+	XenonString::Release(pValueData);
 }
 
 #ifdef __cplusplus

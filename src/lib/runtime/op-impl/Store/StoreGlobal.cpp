@@ -85,11 +85,13 @@ void OpCodeDisasm_StoreGlobal(XenonDisassemble& disasm)
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	std::string valueData = XenonValue::GetDebugString(hNameValue);
+	XenonString* const pValueData = XenonValue::GetDebugString(hNameValue);
 
 	char str[256];
-	snprintf(str, sizeof(str), "STORE_GLOBAL c%" PRIu32 " %s, r%" PRIu32, constantIndex, valueData.c_str(), registerIndex);
+	snprintf(str, sizeof(str), "STORE_GLOBAL c%" PRIu32 " %s, r%" PRIu32, constantIndex, pValueData->data, registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
+
+	XenonString::Release(pValueData);
 }
 
 #ifdef __cplusplus

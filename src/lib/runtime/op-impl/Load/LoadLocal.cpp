@@ -80,11 +80,13 @@ void OpCodeDisasm_LoadLocal(XenonDisassemble& disasm)
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	std::string valueData = XenonValue::GetDebugString(hNameValue);
+	XenonString* const pValueData = XenonValue::GetDebugString(hNameValue);
 
 	char str[256];
-	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, valueData.c_str());
+	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
+
+	XenonString::Release(pValueData);
 }
 
 #ifdef __cplusplus

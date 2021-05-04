@@ -102,11 +102,13 @@ void OpCodeDisasm_Call(XenonDisassemble& disasm)
 	const uint32_t constIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constIndex, &result);
-	std::string valueData = XenonValue::GetDebugString(hValue);
+	XenonString* const pValueData = XenonValue::GetDebugString(hValue);
 
 	char str[256];
-	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", constIndex, valueData.c_str());
+	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", constIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
+
+	XenonString::Release(pValueData);
 }
 
 #ifdef __cplusplus

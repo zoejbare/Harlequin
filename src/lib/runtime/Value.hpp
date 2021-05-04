@@ -32,8 +32,6 @@
 
 #include <SkipProbe/SkipProbe.hpp>
 
-#include <string>
-
 //----------------------------------------------------------------------------------------------------------------------
 
 // TODO: Implement support for script objects.
@@ -78,7 +76,7 @@ struct XenonValue
 	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
 	static XenonValueHandle Copy(XenonVmHandle hVm, XenonValueHandle hValue);
 
-	static std::string GetDebugString(XenonValueHandle hValue);
+	static XenonString* GetDebugString(XenonValueHandle hValue);
 
 	static bool CanBeMarked(XenonValueHandle hValue);
 	static void SetAutoMark(XenonValueHandle hValue, const bool autoMark);
