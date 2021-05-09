@@ -254,6 +254,7 @@ with csbuild.Project(LibXenonBase.projectName, XenonLib.rootPath, LibXenonBase.d
 	else:
 		csbuild.AddExcludeDirectories(
 			f"{XenonLib.rootPath}/base/mutex-impl",
+			f"{XenonLib.rootPath}/base/rwlock-impl",
 			f"{XenonLib.rootPath}/base/thread-impl",
 		)
 

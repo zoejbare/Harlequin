@@ -20,63 +20,16 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include <pthread.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if defined(XENON_PLATFORM_WINDOWS)
-	#include "mutex-impl/MutexWin32.hpp"
-
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4)
-	#include "mutex-impl/MutexPosix.hpp"
-
-#else
-	#error "XenonMutex not implemented for this platform"
-
-#endif
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XENON_BASE_API XenonMutex
+struct XENON_BASE_API XenonInternalRwLock
 {
-	static XenonMutex Create();
-	static void Dispose(XenonMutex& mutex);
+	XenonInternalRwLock() : handle(), initialized(false) {}
 
-	static bool TryLock(XenonMutex& mutex);
-	static void Lock(XenonMutex& mutex);
-	static void Unlock(XenonMutex& mutex);
-
-	XenonInternalMutex obj;
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-class XENON_BASE_API XenonScopedMutex
-{
-public:
-
-	XenonScopedMutex() = delete;
-	XenonScopedMutex(const XenonScopedMutex&) = delete;
-	XenonScopedMutex(XenonScopedMutex&&) = delete;
-
-	explicit XenonScopedMutex(XenonMutex& mutex)
-		: m_pMutex(&mutex)
-	{
-		XenonMutex::Lock(*m_pMutex);
-	}
-
-	~XenonScopedMutex()
-	{
-		XenonMutex::Unlock(*m_pMutex);
-	}
-
-
-private:
-
-	XenonMutex* m_pMutex;
+	pthread_rwlock_t handle;
+	bool initialized;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

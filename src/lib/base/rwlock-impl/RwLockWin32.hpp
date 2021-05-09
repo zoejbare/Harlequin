@@ -20,63 +20,24 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-#if defined(XENON_PLATFORM_WINDOWS)
-	#include "mutex-impl/MutexWin32.hpp"
-
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4)
-	#include "mutex-impl/MutexPosix.hpp"
-
-#else
-	#error "XenonMutex not implemented for this platform"
-
+#ifndef WIN32_LEAN_AND_MEAN
+	#define WIN32_LEAN_AND_MEAN
 #endif
 
-//----------------------------------------------------------------------------------------------------------------------
+#ifndef NOMINMAX
+	#define NOMINMAX
+#endif
 
-struct XENON_BASE_API XenonMutex
-{
-	static XenonMutex Create();
-	static void Dispose(XenonMutex& mutex);
-
-	static bool TryLock(XenonMutex& mutex);
-	static void Lock(XenonMutex& mutex);
-	static void Unlock(XenonMutex& mutex);
-
-	XenonInternalMutex obj;
-};
+#include <Windows.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class XENON_BASE_API XenonScopedMutex
+struct XENON_BASE_API XenonInternalRwLock
 {
-public:
+	XenonInternalRwLock() : lock(SRWLOCK_INIT), initialized(false) {}
 
-	XenonScopedMutex() = delete;
-	XenonScopedMutex(const XenonScopedMutex&) = delete;
-	XenonScopedMutex(XenonScopedMutex&&) = delete;
-
-	explicit XenonScopedMutex(XenonMutex& mutex)
-		: m_pMutex(&mutex)
-	{
-		XenonMutex::Lock(*m_pMutex);
-	}
-
-	~XenonScopedMutex()
-	{
-		XenonMutex::Unlock(*m_pMutex);
-	}
-
-
-private:
-
-	XenonMutex* m_pMutex;
+	SRWLOCK lock;
+	bool initialized;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

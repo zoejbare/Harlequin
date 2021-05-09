@@ -25,58 +25,89 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #if defined(XENON_PLATFORM_WINDOWS)
-	#include "mutex-impl/MutexWin32.hpp"
+	#include "rwlock-impl/RwLockWin32.hpp"
 
 #elif defined(XENON_PLATFORM_LINUX) \
 	|| defined(XENON_PLATFORM_MAC_OS) \
 	|| defined(XENON_PLATFORM_ANDROID) \
 	|| defined(XENON_PLATFORM_PS4)
-	#include "mutex-impl/MutexPosix.hpp"
+	#include "rwlock-impl/RwLockPosix.hpp"
 
 #else
-	#error "XenonMutex not implemented for this platform"
+	#error "XenonRwLock not implemented for this platform"
 
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonMutex
+struct XENON_BASE_API XenonRwLock
 {
-	static XenonMutex Create();
-	static void Dispose(XenonMutex& mutex);
+	static XenonRwLock Create();
+	static void Dispose(XenonRwLock& rwlock);
 
-	static bool TryLock(XenonMutex& mutex);
-	static void Lock(XenonMutex& mutex);
-	static void Unlock(XenonMutex& mutex);
+	static bool TryReadLock(XenonRwLock& rwlock);
+	static void ReadLock(XenonRwLock& rwlock);
+	static void ReadUnlock(XenonRwLock& rwlock);
 
-	XenonInternalMutex obj;
+	static bool TryWriteLock(XenonRwLock& rwlock);
+	static void WriteLock(XenonRwLock& rwlock);
+	static void WriteUnlock(XenonRwLock& rwlock);
+
+	XenonInternalRwLock obj;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class XENON_BASE_API XenonScopedMutex
+class XENON_BASE_API XenonScopedReadLock
 {
 public:
 
-	XenonScopedMutex() = delete;
-	XenonScopedMutex(const XenonScopedMutex&) = delete;
-	XenonScopedMutex(XenonScopedMutex&&) = delete;
+	XenonScopedReadLock() = delete;
+	XenonScopedReadLock(const XenonScopedReadLock&) = delete;
+	XenonScopedReadLock(XenonScopedReadLock&&) = delete;
 
-	explicit XenonScopedMutex(XenonMutex& mutex)
-		: m_pMutex(&mutex)
+	explicit XenonScopedReadLock(XenonRwLock& rwlock)
+		: m_pRwLock(&rwlock)
 	{
-		XenonMutex::Lock(*m_pMutex);
+		XenonRwLock::ReadLock(*m_pRwLock);
 	}
 
-	~XenonScopedMutex()
+	~XenonScopedReadLock()
 	{
-		XenonMutex::Unlock(*m_pMutex);
+		XenonRwLock::ReadUnlock(*m_pRwLock);
 	}
 
 
 private:
 
-	XenonMutex* m_pMutex;
+	XenonRwLock* m_pRwLock;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class XENON_BASE_API XenonScopedWriteLock
+{
+public:
+
+	XenonScopedWriteLock() = delete;
+	XenonScopedWriteLock(const XenonScopedWriteLock&) = delete;
+	XenonScopedWriteLock(XenonScopedWriteLock&&) = delete;
+
+	explicit XenonScopedWriteLock(XenonRwLock& rwlock)
+		: m_pRwLock(&rwlock)
+	{
+		XenonRwLock::WriteLock(*m_pRwLock);
+	}
+
+	~XenonScopedWriteLock()
+	{
+		XenonRwLock::WriteUnlock(*m_pRwLock);
+	}
+
+
+private:
+
+	XenonRwLock* m_pRwLock;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

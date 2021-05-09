@@ -16,32 +16,28 @@
 // IN THE SOFTWARE.
 //
 
-#include "../Mutex.hpp"
+#include "../RwLock.hpp"
 
 #include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonMutex XenonMutex::Create()
+XenonRwLock XenonRwLock::Create()
 {
-	pthread_mutexattr_t attr;
+	pthread_rwlockattr_t attr;
 
-	// Create an attributes object for configuring the mutex.
-	const int attrInitResult = pthread_mutexattr_init(&attr);
+	// Create an attributes object for configuring the rwlock.
+	const int attrInitResult = pthread_rwlockattr_init(&attr);
 	assert(attrInitResult == 0);
 
-	// Set the mutex type to be recursive.
-	const int attrSetTypeResult = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	assert(attrSetTypeResult == 0);
+	XenonRwLock output;
 
-	XenonMutex output;
-
-	// Create the mutex.
-	const int mutexInitResult = pthread_mutex_init(&output.obj.handle, &attr);
-	assert(mutexInitResult == 0);
+	// Create the rwlock.
+	const int rwlockInitResult = pthread_rwlock_init(&output.obj.handle, &attr);
+	assert(rwlockInitResult == 0);
 
 	// Destroy the attributes since they are no longer needed.
-	const int attrDestroyResult = pthread_mutexattr_destroy(&attr);
+	const int attrDestroyResult = pthread_rwlockattr_destroy(&attr);
 	assert(attrDestroyResult == 0);
 
 	output.obj.initialized = true;
@@ -51,41 +47,68 @@ XenonMutex XenonMutex::Create()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Dispose(XenonMutex& mutex)
+void XenonRwLock::Dispose(XenonRwLock& rwlock)
 {
-	assert(mutex.obj.initialized);
+	assert(rwlock.obj.initialized);
 
-	const int mutexDestroyResult = pthread_mutex_destroy(&mutex.obj.handle);
-	assert(mutexDestroyResult == 0);
+	const int rwlockDestroyResult = pthread_rwlock_destroy(&rwlock.obj.handle);
+	assert(rwlockDestroyResult == 0);
 
-	mutex.obj.initialized = false;
+	rwlock.obj.initialized = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonMutex::TryLock(XenonMutex& mutex)
+bool XenonRwLock::TryReadLock(XenonRwLock& rwlock)
 {
-	assert(mutex.obj.initialized);
+	assert(rwlock.obj.initialized);
 
-	return pthread_mutex_trylock(&mutex.obj.handle) == 0;
+	return pthread_rwlock_tryrdlock(&rwlock.obj.handle) == 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Lock(XenonMutex& mutex)
+void XenonRwLock::ReadLock(XenonRwLock& rwlock)
 {
-	assert(mutex.obj.initialized);
+	assert(rwlock.obj.initialized);
 
-	pthread_mutex_lock(&mutex.obj.handle);
+	pthread_rwlock_rdlock(&rwlock.obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Unlock(XenonMutex& mutex)
+void XenonRwLock::ReadUnlock(XenonRwLock& rwlock)
 {
-	assert(mutex.obj.initialized);
+	assert(rwlock.obj.initialized);
 
-	pthread_mutex_unlock(&mutex.obj.handle);
+	pthread_rwlock_unlock(&rwlock.obj.handle);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonRwLock::TryWriteLock(XenonRwLock& rwlock)
+{
+	assert(rwlock.obj.initialized);
+
+	return pthread_rwlock_trywrlock(&rwlock.obj.handle) == 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonRwLock::WriteLock(XenonRwLock& rwlock)
+{
+	assert(rwlock.obj.initialized);
+
+	pthread_rwlock_wrlock(&rwlock.obj.handle);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonRwLock::WriteUnlock(XenonRwLock& rwlock)
+{
+	assert(rwlock.obj.initialized);
+
+	pthread_rwlock_unlock(&rwlock.obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

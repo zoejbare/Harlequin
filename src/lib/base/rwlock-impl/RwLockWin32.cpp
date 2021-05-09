@@ -16,67 +16,84 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "../RwLock.hpp"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-#if defined(XENON_PLATFORM_WINDOWS)
-	#include "mutex-impl/MutexWin32.hpp"
-
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4)
-	#include "mutex-impl/MutexPosix.hpp"
-
-#else
-	#error "XenonMutex not implemented for this platform"
-
-#endif
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XENON_BASE_API XenonMutex
+XenonRwLock XenonRwLock::Create()
 {
-	static XenonMutex Create();
-	static void Dispose(XenonMutex& mutex);
+	XenonRwLock output;
 
-	static bool TryLock(XenonMutex& mutex);
-	static void Lock(XenonMutex& mutex);
-	static void Unlock(XenonMutex& mutex);
+	InitializeSRWLock(&output.obj.lock);
+	output.obj.initialized = true;
 
-	XenonInternalMutex obj;
-};
+	return output;
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class XENON_BASE_API XenonScopedMutex
+void XenonRwLock::Dispose(XenonRwLock& rwlock)
 {
-public:
+	assert(rwlock.obj.initialized);
 
-	XenonScopedMutex() = delete;
-	XenonScopedMutex(const XenonScopedMutex&) = delete;
-	XenonScopedMutex(XenonScopedMutex&&) = delete;
+	// SRWLOCK has no explicit destruction.
+	rwlock.obj = XenonInternalRwLock();
+}
 
-	explicit XenonScopedMutex(XenonMutex& mutex)
-		: m_pMutex(&mutex)
-	{
-		XenonMutex::Lock(*m_pMutex);
-	}
+//----------------------------------------------------------------------------------------------------------------------
 
-	~XenonScopedMutex()
-	{
-		XenonMutex::Unlock(*m_pMutex);
-	}
+bool XenonRwLock::TryReadLock(XenonRwLock& mutex)
+{
+	assert(mutex.obj.initialized);
 
+	return TryAcquireSRWLockShared(&mutex.obj.lock) == TRUE;
+}
 
-private:
+//----------------------------------------------------------------------------------------------------------------------
 
-	XenonMutex* m_pMutex;
-};
+void XenonRwLock::ReadLock(XenonRwLock& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	AcquireSRWLockShared(&mutex.obj.lock);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonRwLock::ReadUnlock(XenonRwLock& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	ReleaseSRWLockShared(&mutex.obj.lock);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonRwLock::TryWriteLock(XenonRwLock& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	return TryAcquireSRWLockExclusive(&mutex.obj.lock) == TRUE;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonRwLock::WriteLock(XenonRwLock& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	AcquireSRWLockExclusive(&mutex.obj.lock);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonRwLock::WriteUnlock(XenonRwLock& mutex)
+{
+	assert(mutex.obj.initialized);
+
+	ReleaseSRWLockExclusive(&mutex.obj.lock);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
