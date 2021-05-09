@@ -39,7 +39,8 @@ struct XenonGcProxy
 		XenonGarbageCollector& gc,
 		XenonGcDiscoveryCallback onGcDiscoveryFn,
 		XenonDestructCallback onGcDestructFn,
-		void* const pObject
+		void* const pObject,
+		const bool autoMark
 	);
 
 	static void InsertBefore(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy);

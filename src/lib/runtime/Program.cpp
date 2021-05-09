@@ -278,7 +278,7 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 
 	if(pOutput)
 	{
-		XenonScopedMutex lock(hVm->gcLock);
+		XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
 		// Copy the necessary data to the VM.
 		prv_copyDataToVm(loadData, hVm);
@@ -389,7 +389,7 @@ XenonProgramHandle XenonProgram::Create(
 
 	if(pOutput)
 	{
-		XenonScopedMutex lock(hVm->gcLock);
+		XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
 		// Copy the necessary data to the VM.
 		prv_copyDataToVm(loadData, hVm);

@@ -24,6 +24,8 @@
 #include "Program.hpp"
 #include "Value.hpp"
 
+#include "../base/Mutex.hpp"
+
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XenonGcProxy;
@@ -40,6 +42,8 @@ struct XenonGarbageCollector
 
 	static void prv_reset(XenonGarbageCollector&);
 	static void prv_onDisposeObject(XenonGcProxy*);
+
+	XenonMutex pendingLock;
 
 	XenonVmHandle hVm;
 

@@ -30,7 +30,8 @@ void XenonGcProxy::Initialize(
 	XenonGarbageCollector& gc,
 	XenonGcDiscoveryCallback onGcDiscoveryFn,
 	XenonDestructCallback onGcDestructFn,
-	void* pObject
+	void* const pObject,
+	const bool autoMark
 )
 {
 	assert(onGcDiscoveryFn != nullptr);
@@ -45,7 +46,7 @@ void XenonGcProxy::Initialize(
 	output.pObject = pObject;
 	output.pending = false;
 	output.marked = false;
-	output.autoMark = false;
+	output.autoMark = autoMark;
 
 	XenonGarbageCollector::LinkObject(gc, &output);
 }

@@ -246,6 +246,8 @@ int XenonVmSetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, const c
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
+	XenonScopedReadLock gcLock(hVm->gcRwLock);
+
 	const int result = XenonVm::SetGlobalVariable(hVm, hValue, pVariableName);
 
 	// Dispose of the string object since we no longer need it.
@@ -943,7 +945,7 @@ int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, XenonValueHandle* ph
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	XenonScopedMutex lock(hExec->hVm->gcLock);
+	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
 	int result;
 	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, registerIndex, &result);
@@ -1087,11 +1089,19 @@ int XenonFrameSetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, in
 		hValue = XenonValue::CreateNull();
 	}
 
+	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	if(!hVm)
+	{
+		return XENON_ERROR_INVALID_DATA;
+	}
+
 	if(hValue->type != XENON_VALUE_TYPE_NULL
-		&& XenonFunction::GetVm(hFrame->hFunction) != hValue->hVm)
+		&& hVm != hValue->hVm)
 	{
 		return XENON_ERROR_MISMATCH;
 	}
+
+	XenonScopedReadLock gcLock(hVm->gcRwLock);
 
 	return XenonFrame::SetGpRegister(hFrame, hValue, registerIndex);
 }
@@ -1112,6 +1122,14 @@ int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValu
 	{
 		return XENON_ERROR_INVALID_TYPE;
 	}
+
+	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	if(!hVm)
+	{
+		return XENON_ERROR_INVALID_DATA;
+	}
+
+	XenonScopedReadLock gcLock(hVm->gcRwLock);
 
 	int result;
 	XenonValueHandle hValue = XenonFrame::GetGpRegister(hFrame, registerIndex, &result);
@@ -1143,8 +1161,14 @@ int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue,
 		hValue = XenonValue::CreateNull();
 	}
 
+	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	if(!hVm)
+	{
+		return XENON_ERROR_INVALID_DATA;
+	}
+
 	if(hValue->type != XENON_VALUE_TYPE_NULL
-		&& XenonFunction::GetVm(hFrame->hFunction) != hValue->hVm)
+		&& hVm != hValue->hVm)
 	{
 		return XENON_ERROR_MISMATCH;
 	}
@@ -1154,6 +1178,8 @@ int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue,
 	{
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
+
+	XenonScopedReadLock gcLock(hVm->gcRwLock);
 
 	const int result = XenonFrame::SetLocalVariable(hFrame, hValue, pVarName);
 
@@ -1182,6 +1208,14 @@ int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutV
 	{
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
+
+	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	if(!hVm)
+	{
+		return XENON_ERROR_INVALID_DATA;
+	}
+
+	XenonScopedReadLock gcLock(hVm->gcRwLock);
 
 	int result;
 	XenonValueHandle hValue = XenonFrame::GetLocalVariable(hFrame, pVarName, &result);

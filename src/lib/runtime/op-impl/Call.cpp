@@ -64,7 +64,13 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 				// Native functions are called immediately.
 				if(hFunction->nativeFn)
 				{
+					// We can't predict what native calls are going to do and since recursive locks on RwLocks
+					// are not allowed, we unlock the GC RwLock here to prevent possible deadlocks. We'll put
+					// a lock back on it immediately after it's finished, but during this time, the garbage
+					// collector will likely be running.
+					XenonRwLock::ReadUnlock(hExec->hVm->gcRwLock);
 					hFunction->nativeFn(hExec, hFunction, hFunction->pNativeUserData);
+					XenonRwLock::ReadLock(hExec->hVm->gcRwLock);
 
 					if(!hExec->exception)
 					{

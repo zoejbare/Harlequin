@@ -43,6 +43,10 @@ enum XenonGcPhase
 
 void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHandle hVm, const uint32_t maxIterationCount)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(maxIterationCount > 0);
+
+	output.pendingLock = XenonMutex::Create();
 	output.hVm = hVm;
 	output.pPendingHead = nullptr;
 	output.pUnmarkedHead = nullptr;
@@ -85,6 +89,8 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 	clearList(gc.pUnmarkedHead);
 	clearList(gc.pMarkedHead);
 
+	XenonMutex::Dispose(gc.pendingLock);
+
 	gc.hVm = XENON_VM_HANDLE_NULL;
 	gc.pPendingHead = nullptr;
 	gc.pUnmarkedHead = nullptr;
@@ -109,6 +115,8 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		// Transfer all pending proxies to the active list.
 		case XENON_GC_PHASE_LINK_PENDING:
 		{
+			XenonScopedMutex lock(gc.pendingLock);
+
 			for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
 			{
 				if(!gc.pPendingHead)
@@ -347,6 +355,8 @@ void XenonGarbageCollector::RunFull(XenonGarbageCollector& gc)
 void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
+
+	XenonScopedMutex lock(gc.pendingLock);
 
 	// Link the proxy the head of the pending list.
 	pGcProxy->pending = true;

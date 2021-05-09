@@ -35,7 +35,7 @@ XenonFrameHandle XenonFrame::Create(XenonExecutionHandle hExec, XenonFunctionHan
 
 	// No need to lock the garbage collector here since only the execution context is allowed to create frames
 	// and it will be handling the lock for us.
-	XenonGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput);
+	XenonGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
 
 	pOutput->hExec = hExec;
 	pOutput->hFunction = hFunction;
@@ -83,11 +83,6 @@ int XenonFrame::PushValue(XenonFrameHandle hFrame, XenonValueHandle hValue)
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	XenonScopedMutex lock(hVm->gcLock);
-
 	return XenonValue::HandleStack::Push(hFrame->stack, hValue);
 }
 
@@ -98,11 +93,6 @@ int XenonFrame::PopValue(XenonFrameHandle hFrame, XenonValueHandle* const phOutV
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(phOutValue != nullptr);
 	assert(*phOutValue == XENON_VALUE_HANDLE_NULL);
-
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	XenonScopedMutex lock(hVm->gcLock);
 
 	// Pop the stack, returning the value that was popped. The calling code will be responsible for releasing it.
 	return XenonValue::HandleStack::Pop(hFrame->stack, phOutValue);
@@ -119,11 +109,6 @@ int XenonFrame::PeekValue(
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(phOutValue != nullptr);
 	assert(*phOutValue == XENON_VALUE_HANDLE_NULL);
-
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	XenonScopedMutex lock(hVm->gcLock);
 
 	XenonValueHandle hValue;
 
@@ -146,11 +131,6 @@ int XenonFrame::SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, 
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 	assert(index < XENON_VM_GP_REGISTER_COUNT);
 
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	XenonScopedMutex lock(hVm->gcLock);
-
 	hFrame->registers.pData[index] = hValue;
 
 	return XENON_SUCCESS;
@@ -163,11 +143,6 @@ int XenonFrame::SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValu
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 	assert(pVariableName != nullptr);
-
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	XenonScopedMutex lock(hVm->gcLock);
 
 	auto kv = hFrame->locals.find(pVariableName);
 	if(kv == hFrame->locals.end())
@@ -193,11 +168,6 @@ XenonValueHandle XenonFrame::GetGpRegister(XenonFrameHandle hFrame, const uint32
 		return XENON_VALUE_HANDLE_NULL;
 	}
 
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	XenonScopedMutex lock(hVm->gcLock);
-
 	(*pOutResult) = XENON_SUCCESS;
 	return hFrame->registers.pData[index];
 }
@@ -209,11 +179,6 @@ XenonValueHandle XenonFrame::GetLocalVariable(XenonFrameHandle hFrame, XenonStri
 	assert(hFrame != XENON_FRAME_HANDLE_NULL);
 	assert(pVariableName != nullptr);
 	assert(pOutResult != nullptr);
-
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	XenonScopedMutex lock(hVm->gcLock);
 
 	if(!hFrame->locals.Contains(pVariableName))
 	{

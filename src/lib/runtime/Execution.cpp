@@ -33,7 +33,7 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(hEntryPoint != XENON_FUNCTION_HANDLE_NULL);
 
-	XenonScopedMutex lock(hVm->gcLock);
+	XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
 	XenonExecution* const pOutput = new XenonExecution();
 	if(!pOutput)
@@ -49,7 +49,7 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	pOutput->exception = false;
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
-	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput);
+	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
 
 	XenonFrame::HandleStack::Initialize(pOutput->frameStack, XENON_VM_FRAME_STACK_SIZE);
 	XenonValue::HandleArray::Initialize(pOutput->registers);
@@ -106,7 +106,7 @@ void XenonExecution::DetachFromVm(XenonExecutionHandle hExec)
 	ReleaseWithNoDetach(hExec);
 
 	XenonVmHandle hVm = hExec->hVm;
-	XenonScopedMutex lock(hVm->gcLock);
+	XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
 	// Unlink the execution context from the VM.
 	hVm->executionContexts.Delete(hExec);
@@ -119,8 +119,6 @@ int XenonExecution::PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hF
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
-
-	XenonScopedMutex lock(hExec->hVm->gcLock);
 
 	XenonFrameHandle hFrame = XenonFrame::Create(hExec, hFunction);
 	if(!hFrame)
@@ -143,8 +141,6 @@ int XenonExecution::PopFrame(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
-	XenonScopedMutex lock(hExec->hVm->gcLock);
-
 	XenonFrameHandle hFrame = XENON_FRAME_HANDLE_NULL;
 	int result = hExec->frameStack.Pop(hExec->frameStack, &hFrame);
 
@@ -166,8 +162,6 @@ int XenonExecution::SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle h
 	{
 		return XENON_ERROR_INDEX_OUT_OF_RANGE;
 	}
-
-	XenonScopedMutex lock(hExec->hVm->gcLock);
 
 	hExec->registers.pData[index] = hValue;
 
@@ -240,7 +234,7 @@ void XenonExecution::prv_runStep(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
-	XenonScopedMutex gcLock(hExec->hVm->gcLock);
+	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
 	XenonFrameHandle hFrame = hExec->hCurrentFrame;
 

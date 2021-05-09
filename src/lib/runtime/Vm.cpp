@@ -54,7 +54,7 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 	threadConfig.stackSize = init.gcThreadStackSize;
 	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "XenonGarbageCollector");
 
-	pOutput->gcLock = XenonMutex::Create();
+	pOutput->gcRwLock = XenonRwLock::Create();
 	pOutput->gcThread = XenonThread::Create(threadConfig);
 
 	return pOutput;
@@ -83,7 +83,7 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 		);
 	}
 
-	XenonMutex::Dispose(hVm->gcLock);
+	XenonRwLock::Dispose(hVm->gcRwLock);
 
 	// Clean up each loaded program.
 	for(auto& kv : hVm->programs)
@@ -130,8 +130,6 @@ int XenonVm::SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, Xenon
 	{
 		return XENON_ERROR_KEY_DOES_NOT_EXIST;
 	}
-
-	XenonScopedMutex lock(hVm->gcLock);
 
 	kv->value = hValue;
 
@@ -232,7 +230,7 @@ int32_t XenonVm::prv_gcThreadMain(void* const pArg)
 	{
 		// Run a step of the garbage collector.
 		{
-			XenonScopedMutex lock(hVm->gcLock);
+			XenonScopedWriteLock writeLock(hVm->gcRwLock);
 
 			XenonGarbageCollector::RunStep(hVm->gc);
 		}
