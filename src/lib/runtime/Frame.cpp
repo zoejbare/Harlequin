@@ -32,6 +32,7 @@ XenonFrameHandle XenonFrame::Create(XenonExecutionHandle hExec, XenonFunctionHan
 	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
 
 	XenonFrame* const pOutput = new XenonFrame();
+	assert(pOutput != XENON_FRAME_HANDLE_NULL);
 
 	// No need to lock the garbage collector here since only the execution context is allowed to create frames
 	// and it will be handling the lock for us.

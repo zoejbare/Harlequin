@@ -36,10 +36,7 @@ XenonFunctionHandle XenonFunction::CreateScript(
 	assert(pSignature != nullptr);
 
 	XenonFunction* const pOutput = new XenonFunction();
-	if(!pOutput)
-	{
-		return XENON_FUNCTION_HANDLE_NULL;
-	}
+	assert(pOutput != XENON_FUNCTION_HANDLE_NULL);
 
 	pOutput->hProgram = hProgram;
 	pOutput->pSignature = pSignature;

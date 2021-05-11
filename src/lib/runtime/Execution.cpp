@@ -33,13 +33,8 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(hEntryPoint != XENON_FUNCTION_HANDLE_NULL);
 
-	XenonScopedWriteLock gcLock(hVm->gcRwLock);
-
 	XenonExecution* const pOutput = new XenonExecution();
-	if(!pOutput)
-	{
-		return XENON_EXECUTION_HANDLE_NULL;
-	}
+	assert(pOutput != XENON_EXECUTION_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
 	pOutput->endianness = XenonGetPlatformEndianMode();
@@ -47,6 +42,8 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	pOutput->started = false;
 	pOutput->finished = false;
 	pOutput->exception = false;
+
+	XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
 	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);

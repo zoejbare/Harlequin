@@ -94,10 +94,7 @@ XenonString* XenonString::Create(const char* const stringData)
 	// TODO: Implement string pooling.
 
 	XenonString* const pOutput = new XenonString();
-	if(!pOutput)
-	{
-		return nullptr;
-	}
+	assert(pOutput != nullptr);
 
 	const size_t length = (stringData) ? strlen(stringData) : 0;
 

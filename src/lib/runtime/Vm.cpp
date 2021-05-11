@@ -25,10 +25,7 @@
 XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 {
 	XenonVm* const pOutput = new XenonVm();
-	if(!pOutput)
-	{
-		return XENON_VM_HANDLE_NULL;
-	}
+	assert(pOutput != XENON_VM_HANDLE_NULL);
 
 	pOutput->report.onMessageFn = init.common.report.onMessageFn;
 	pOutput->report.pUserData = init.common.report.pUserData;

@@ -242,6 +242,7 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 	XenonString::AddRef(pProgramName);
 
 	XenonProgram* pOutput = new XenonProgram();
+	assert(pOutput != XENON_PROGRAM_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
 	pOutput->pName = pProgramName;
@@ -353,6 +354,7 @@ XenonProgramHandle XenonProgram::Create(
 	XenonString::AddRef(pProgramName);
 
 	XenonProgram* pOutput = new XenonProgram();
+	assert(pOutput != XENON_PROGRAM_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
 	pOutput->pName = pProgramName;

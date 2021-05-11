@@ -432,6 +432,7 @@ XenonValue* XenonValue::prv_onCreate(const int valueType, XenonVmHandle hVm)
 	assert(valueType <= XENON_VALUE_TYPE__MAX_VALUE);
 
 	XenonValue* const pOutput = new XenonValue();
+	assert(pOutput != XENON_VALUE_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
 	pOutput->type = valueType;
