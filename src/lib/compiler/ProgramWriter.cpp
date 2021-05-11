@@ -19,7 +19,6 @@
 #include "ProgramWriter.hpp"
 #include "Compiler.hpp"
 
-#include "../common/ValueType.hpp"
 #include "../common/program-format/CommonHeader.hpp"
 #include "../common/program-format/VersionHeader0001.hpp"
 

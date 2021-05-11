@@ -19,8 +19,6 @@
 #include "Value.hpp"
 #include "Vm.hpp"
 
-#include "../common/ValueType.hpp"
-
 #include <assert.h>
 #include <inttypes.h>
 

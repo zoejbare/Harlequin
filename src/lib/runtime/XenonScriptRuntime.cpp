@@ -21,8 +21,6 @@
 #include "../base/Mutex.hpp"
 #include "../base/String.hpp"
 
-#include "../common/ValueType.hpp"
-
 #include "Execution.hpp"
 #include "Program.hpp"
 #include "Vm.hpp"

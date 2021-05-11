@@ -658,6 +658,33 @@ XENON_MAIN_API int XenonProgramWriterSerialize(
 
 #endif /* XENON_LIB_COMPILER */
 
+//----------------------------------------------------------------------------------------------------------------------
+
+enum XenonValueType
+{
+	XENON_VALUE_TYPE_NULL,
+
+	XENON_VALUE_TYPE_INT8,
+	XENON_VALUE_TYPE_INT16,
+	XENON_VALUE_TYPE_INT32,
+	XENON_VALUE_TYPE_INT64,
+
+	XENON_VALUE_TYPE_UINT8,
+	XENON_VALUE_TYPE_UINT16,
+	XENON_VALUE_TYPE_UINT32,
+	XENON_VALUE_TYPE_UINT64,
+
+	XENON_VALUE_TYPE_FLOAT32,
+	XENON_VALUE_TYPE_FLOAT64,
+
+	XENON_VALUE_TYPE_BOOL,
+
+	XENON_VALUE_TYPE_STRING,
+	XENON_VALUE_TYPE_OBJECT,
+
+	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_OBJECT,
+};
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 enum XenonOpCodeEnum
