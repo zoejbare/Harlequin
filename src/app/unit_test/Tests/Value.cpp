@@ -42,7 +42,7 @@ TEST(TestValue, CreateStringValue)
 #endif
 
 	// Dispose of the value object.
-	const int disposeValueResult = XenonValueDispose(hValue);
+	const int disposeValueResult = XenonValueAbandon(hValue);
 	EXPECT_EQ(disposeValueResult, XENON_SUCCESS);
 }
 
@@ -61,11 +61,11 @@ TEST(TestValue, CreatePrimitiveValueCopy)
 	EXPECT_EQ(XenonValueGetInt64(hCopiedIntValue), 12345);
 
 	// Dispose of the original value object.
-	const int disposeOriginalIntValueResult = XenonValueDispose(hOriginalIntValue);
+	const int disposeOriginalIntValueResult = XenonValueAbandon(hOriginalIntValue);
 	EXPECT_EQ(disposeOriginalIntValueResult, XENON_SUCCESS);
 
 	// Dispose of the copied value object.
-	const int disposeCopiedIntValueResult = XenonValueDispose(hCopiedIntValue);
+	const int disposeCopiedIntValueResult = XenonValueAbandon(hCopiedIntValue);
 	EXPECT_EQ(disposeCopiedIntValueResult, XENON_SUCCESS);
 }
 
@@ -84,11 +84,11 @@ TEST(TestValue, CreateNativeStringValueCopy)
 	EXPECT_STREQ(XenonValueGetString(hCopiedStringValue), "Test string");
 
 	// Dispose of the original value object.
-	const int disposeOriginalStringValue = XenonValueDispose(hOriginalStringValue);
+	const int disposeOriginalStringValue = XenonValueAbandon(hOriginalStringValue);
 	EXPECT_EQ(disposeOriginalStringValue, XENON_SUCCESS);
 
 	// Dispose of the copied value object.
-	const int disposeCopiedStringValue = XenonValueDispose(hCopiedStringValue);
+	const int disposeCopiedStringValue = XenonValueAbandon(hCopiedStringValue);
 	EXPECT_EQ(disposeCopiedStringValue, XENON_SUCCESS);
 }
 #endif

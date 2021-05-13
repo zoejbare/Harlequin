@@ -24,6 +24,7 @@
 #include "Execution.hpp"
 #include "Function.hpp"
 #include "GarbageCollector.hpp"
+#include "Object.hpp"
 #include "OpDecl.hpp"
 #include "Program.hpp"
 #include "Value.hpp"
@@ -52,13 +53,12 @@ struct XenonVm
 	static XenonVmHandle Create(const XenonVmInit& init);
 	static void Dispose(XenonVmHandle hVm);
 
-	static void RemoveExecutionContext(XenonExecutionHandle hExec);
-
 	static int SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, XenonString* const pVariableName);
 
 	static XenonProgramHandle GetProgram(XenonVmHandle hVm, XenonString* const pProgramName, int* const pOutResult);
 	static XenonFunctionHandle GetFunction(XenonVmHandle hVm, XenonString* const pFunctionSignature, int* const pOutResult);
 	static XenonValueHandle GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName, int* const pOutResult);
+	static XenonObject* GetObjectSchema(XenonVmHandle hVm, XenonString* const pTypeName, int* const pOutResult);
 
 	static void ExecuteOpCode(XenonVmHandle hVm, XenonExecutionHandle hExec, const int opCode);
 	static void DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, const int opCode);
@@ -76,6 +76,7 @@ struct XenonVm
 	XenonProgram::StringToHandleMap programs;
 	XenonFunction::StringToHandleMap functions;
 	XenonValue::StringToHandleMap globals;
+	XenonObject::StringToPtrMap objectSchemas;
 	XenonExecution::HandleToBoolMap executionContexts;
 
 	XenonReport report;

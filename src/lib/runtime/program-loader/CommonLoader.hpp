@@ -28,20 +28,20 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace XenonProgramCommonLoader
+struct XenonProgramCommonLoader
 {
-	bool CheckMagicNumber(const XenonProgramCommonHeader& commonHeader);
+	static bool CheckMagicNumber(const XenonProgramCommonHeader& commonHeader);
 
-	XenonString* ReadString(
+	static XenonString* ReadString(
 		XenonSerializerHandle hSerializer,
 		XenonReportHandle hReport
 	);
 
-	XenonValue* ReadValue(
+	static XenonValue* ReadValue(
 		XenonSerializerHandle hSerializer,
 		XenonVmHandle hVm,
 		XenonReportHandle hReport
 	);
-}
+};
 
 //----------------------------------------------------------------------------------------------------------------------

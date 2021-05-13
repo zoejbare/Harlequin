@@ -20,20 +20,35 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../Program.hpp"
+#include "../base/String.hpp"
 
-#include "../../common/program-format/CommonHeader.hpp"
-#include "../../common/program-format/VersionHeader0001.hpp"
+#include <SkipProbe/SkipProbe.hpp>
+
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgramVersion0001
+struct XenonObjectData
 {
-	static bool Load(
-		XenonProgram* const pOutProgram,
-		XenonVmHandle hVm,
-		XenonSerializerHandle hSerializer
-	);
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		XenonObjectData,
+		XenonString::StlHash,
+		XenonString::StlCompare
+	> StringToObjectMap;
+
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		int,
+		XenonString::StlHash,
+		XenonString::StlCompare
+	> MemberDefinitionMap;
+
+	XenonString* pTypeName;
+
+	MemberDefinitionMap members;
+
+	std::vector<XenonString*> orderedMemberNames;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

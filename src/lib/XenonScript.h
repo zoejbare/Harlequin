@@ -300,6 +300,7 @@ typedef bool (*XenonCallbackIterateProgram)(void*, XenonProgramHandle);
 typedef bool (*XenonCallbackIterateFunction)(void*, XenonFunctionHandle);
 typedef bool (*XenonCallbackIterateVariable)(void*, const char*, XenonValueHandle);
 typedef bool (*XenonCallbackIterateString)(void*, const char*);
+typedef bool (*XenonCallbackIterateObjectMember)(void*, const char*, int);
 
 typedef struct
 {
@@ -492,11 +493,11 @@ XENON_MAIN_API XenonValueHandle XenonValueCreateNull();
 
 XENON_MAIN_API XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const char* const string);
 
-XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, XenonValueHandle hObjectProfile);
+XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typeName);
 
 XENON_MAIN_API XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue);
 
-XENON_MAIN_API void XenonValueDispose(XenonValueHandle hValue);
+XENON_MAIN_API void XenonValueAbandon(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsPrimitiveType(XenonValueHandle hValue);
 
@@ -555,6 +556,18 @@ XENON_MAIN_API const char* XenonValueGetString(XenonValueHandle hValue);
 XENON_MAIN_API size_t XenonValueGetStringLength(XenonValueHandle hValue);
 
 XENON_MAIN_API size_t XenonValueGetStringHash(XenonValueHandle hValue);
+
+XENON_MAIN_API const char* XenonValueGetObjectTypeName(XenonValueHandle hValue);
+
+XENON_MAIN_API size_t XenonValueGetObjectMemberCount(XenonValueHandle hValue);
+
+XENON_MAIN_API XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const char* memberName);
+
+XENON_MAIN_API int XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* memberName);
+
+XENON_MAIN_API int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberName, XenonValueHandle hMemberValue);
+
+XENON_MAIN_API int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember, void* pUserData);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -621,6 +634,15 @@ XENON_MAIN_API int XenonProgramWriterAddConstantFloat32(XenonProgramWriterHandle
 XENON_MAIN_API int XenonProgramWriterAddConstantFloat64(XenonProgramWriterHandle hProgramWriter, double value, uint32_t* pOutIndex);
 
 XENON_MAIN_API int XenonProgramWriterAddConstantString(XenonProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutIndex);
+
+XENON_MAIN_API int XenonProgramWriterAddObjectType(XenonProgramWriterHandle hProgramWriter, const char* objectTypeName);
+
+XENON_MAIN_API int XenonProgramWriterAddObjectMember(
+	XenonProgramWriterHandle hProgramWriter,
+	const char* objectTypeName,
+	const char* memberName,
+	int memberValueType
+);
 
 XENON_MAIN_API int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const char* variableName, uint32_t constantIndex);
 

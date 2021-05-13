@@ -20,20 +20,60 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../Program.hpp"
+#include "Value.hpp"
 
-#include "../../common/program-format/CommonHeader.hpp"
-#include "../../common/program-format/VersionHeader0001.hpp"
+#include "../base/String.hpp"
+#include "../common/StlAllocator.hpp"
+
+#include <SkipProbe/SkipProbe.hpp>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgramVersion0001
+struct XenonObject
 {
-	static bool Load(
-		XenonProgram* const pOutProgram,
-		XenonVmHandle hVm,
-		XenonSerializerHandle hSerializer
-	);
+	struct MemberDefinition
+	{
+		int valueType;
+		int bindingIndex;
+	};
+
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		MemberDefinition,
+		XenonString::StlHash,
+		XenonString::StlCompare,
+		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, MemberDefinition>>
+	> MemberDefinitionMap;
+
+	typedef SkipProbe::HashMap<
+		XenonString*,
+		XenonObject*,
+		XenonString::StlHash,
+		XenonString::StlCompare,
+		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, XenonObject*>>
+	> StringToPtrMap;
+
+	static XenonObject* CreateTemplate(XenonString* pTypeName, const MemberDefinitionMap& definitions);
+	static XenonObject* CreateInstance(XenonObject* const pSchema);
+	static XenonObject* CreateCopy(XenonObject* const pObject);
+	static void Dispose(XenonObject* const pObject);
+
+	static XenonValueHandle GetMemberValue(XenonObject* const pObject, const int memberIndex);
+	static MemberDefinition GetMemberDefinition(XenonObject* const pObject, XenonString* const pMemberName);
+
+	static void SetMemberValue(XenonObject* const pObject, const int memberIndex, XenonValueHandle hValue);
+
+	static XenonObject* prv_createObject(XenonObject*);
+
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
+
+	XenonString* pTypeName;
+	XenonObject* pSchema;
+
+	MemberDefinitionMap definitions;
+
+	XenonValue::HandleArray members;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

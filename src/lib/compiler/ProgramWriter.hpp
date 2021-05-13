@@ -21,6 +21,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "FunctionData.hpp"
+#include "ObjectData.hpp"
 
 #include "../base/String.hpp"
 #include "../common/Array.hpp"
@@ -116,12 +117,14 @@ struct XenonProgramWriter
 			double float64;
 
 			XenonString* pString;
+			XenonString* pObjectType;
 		} as;
 	};
 
 	DependencySet dependencies;
 	GlobalValueMap globals;
 	XenonFunctionData::StringToFunctionMap functions;
+	XenonObjectData::StringToObjectMap objectTypes;
 
 	IndexMapInt8 indexMapInt8;
 	IndexMapInt16 indexMapInt16;

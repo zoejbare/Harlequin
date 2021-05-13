@@ -21,6 +21,7 @@
 
 #include "../Function.hpp"
 #include "../Program.hpp"
+#include "../Object.hpp"
 #include "../Vm.hpp"
 
 #include "../Value.hpp"
@@ -66,6 +67,40 @@ static bool ReadHeader(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Error reading program file dependency table length: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
+			errorString
+		);
+
+		return false;
+	}
+
+	// Read the object table offset.
+	result = XenonSerializerReadUint32(hSerializer, &outHeader.objectTableOffset);
+	if(result != XENON_SUCCESS)
+	{
+		const char* const errorString = XenonGetErrorCodeString(result);
+
+		XenonReportMessage(
+			hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Error reading program file object table offset: program=\"%s\", error=\"%s\"",
+			pProgramName->data,
+			errorString
+		);
+
+		return false;
+	}
+
+	// Read the object table length.
+	result = XenonSerializerReadUint32(hSerializer, &outHeader.objectTableLength);
+	if(result != XENON_SUCCESS)
+	{
+		const char* const errorString = XenonGetErrorCodeString(result);
+
+		XenonReportMessage(
+			hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Error reading program file object table length: program=\"%s\", error=\"%s\"",
 			pProgramName->data,
 			errorString
 		);
@@ -221,13 +256,41 @@ static bool ValidateHeader(
 	const uint32_t headerEndPosition
 )
 {
+	// Verify the dependency table does not start before the end of the header data.
+	if(header.dependencyTableOffset < headerEndPosition)
+	{
+		XenonReportMessage(
+			hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Invalid program file dependency table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			pProgramName->data,
+			header.dependencyTableOffset,
+			headerEndPosition
+		);
+		return false;
+	}
+
+	// Verify the dependency table does not start before the end of the header data.
+	if(header.objectTableOffset < headerEndPosition)
+	{
+		XenonReportMessage(
+			hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Invalid program file object table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			pProgramName->data,
+			header.objectTableOffset,
+			headerEndPosition
+		);
+		return false;
+	}
+
 	// Verify the constant table does not start before the end of the header data.
 	if(header.constantTableOffset < headerEndPosition)
 	{
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Invalid program file constant table offset: program=\"%s\", offset=%" PRIu32 ", expected=%" PRIu32,
+			"Invalid program file constant table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			pProgramName->data,
 			header.constantTableOffset,
 			headerEndPosition
@@ -241,7 +304,7 @@ static bool ValidateHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Invalid program file global table offset: program=\"%s\", offset=%" PRIu32 ", expected=%" PRIu32,
+			"Invalid program file global table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			pProgramName->data,
 			header.globalTableOffset,
 			headerEndPosition
@@ -255,7 +318,7 @@ static bool ValidateHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Invalid program file bytecode offset: program=\"%s\", offset=%" PRIu32 ", expected=%" PRIu32,
+			"Invalid program file bytecode offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			pProgramName->data,
 			header.bytecodeOffset,
 			headerEndPosition
@@ -272,7 +335,6 @@ static bool ValidateHeader(
 
 bool XenonProgramVersion0001::Load(
 	XenonProgram* const pOutProgram,
-	XenonProgram::LoadData& outLoadData,
 	XenonVmHandle hVm,
 	XenonSerializerHandle hSerializer
 )
@@ -302,7 +364,7 @@ bool XenonProgramVersion0001::Load(
 
 	if(header.dependencyTableLength > 0)
 	{
-		// Move the stream position to the start of the constant table.
+		// Move the stream position to the start of the dependency table.
 		result = XenonSerializerSetStreamPosition(hSerializer, header.dependencyTableOffset);
 		if(result != XENON_SUCCESS)
 		{
@@ -336,6 +398,117 @@ bool XenonProgramVersion0001::Load(
 			// We stuff the dependency name into a map, but that's just for convenience of storing it.
 			// The value it's mapped to isn't used for anything, so it can be null.
 			pOutProgram->dependencies.Insert(pDependencyName, XENON_VALUE_HANDLE_NULL);
+		}
+	}
+
+	if(header.objectTableLength > 0)
+	{
+		// Move the stream position to the start of the constant table.
+		result = XenonSerializerSetStreamPosition(hSerializer, header.objectTableOffset);
+		if(result != XENON_SUCCESS)
+		{
+			const char* const errorString = XenonGetErrorCodeString(result);
+
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_ERROR,
+				"Error setting program file stream position to the offset of the object table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
+				pOutProgram->pName->data,
+				errorString,
+				header.objectTableOffset
+			);
+
+			return false;
+		}
+
+		// Initialize the object schema table.
+		pOutProgram->objectSchemas.Reserve(header.objectTableLength);
+
+		// Iterate for each object type.
+		for(uint32_t objectIndex = 0; objectIndex < header.objectTableLength; ++objectIndex)
+		{
+			// Read the name of the global variable.
+			XenonString* const pTypeName = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
+			if(!pTypeName)
+			{
+				return false;
+			}
+
+			uint32_t memberCount;
+			result = XenonSerializerReadUint32(hSerializer, &memberCount);
+			if(result != XENON_SUCCESS)
+			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Error setting program file stream position to the offset of the constant table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
+					pOutProgram->pName->data,
+					errorString,
+					header.constantTableOffset
+				);
+
+				XenonString::Release(pTypeName);
+				return false;
+			}
+
+			XenonObject::MemberDefinitionMap memberDefinitions;
+
+			bool memberReadError = false;
+
+			// Read the member definitions for this object type.
+			for(uint32_t memberIndex = 0; memberIndex < memberCount; ++memberIndex)
+			{
+				XenonString* const pMemberName = XenonProgramCommonLoader::ReadString(hSerializer, hReport);
+				if(!pMemberName)
+				{
+					memberReadError = true;
+					break;
+				}
+
+				uint8_t memberType;
+				result = XenonSerializerReadUint8(hSerializer, &memberType);
+				if(result != XENON_SUCCESS)
+				{
+					const char* const errorString = XenonGetErrorCodeString(result);
+
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Error reading object member type: program=\"%s\", error=\"%s\", objectType=\"%s\", memberName=\"%s\"",
+						pOutProgram->pName->data,
+						errorString,
+						pTypeName->data,
+						pMemberName->data
+					);
+
+					XenonString::Release(pMemberName);
+
+					memberReadError = true;
+					break;
+				}
+
+				XenonObject::MemberDefinition def;
+
+				def.valueType = memberType;
+				def.bindingIndex = memberIndex;
+
+				memberDefinitions.Insert(pMemberName, def);
+			}
+
+			if(memberReadError)
+			{
+				XenonString::Release(pTypeName);
+
+				// Release all member names currently loaded for the current object type.
+				for(auto& kv : memberDefinitions)
+				{
+					XenonString::Release(kv.key);
+				}
+
+				return false;
+			}
 		}
 	}
 
@@ -472,7 +645,7 @@ bool XenonProgramVersion0001::Load(
 
 			// Map the global variable.
 			pOutProgram->globals.Insert(pVarName, false);
-			outLoadData.globals.Insert(pVarName, hValue);
+			hVm->globals.Insert(pVarName, hValue);
 		}
 	}
 
@@ -763,7 +936,7 @@ bool XenonProgramVersion0001::Load(
 
 				// Map the function in the load data map which will be transferred to the VM.
 				XenonString::AddRef(pSignature);
-				outLoadData.functions.Insert(pSignature, hFunction);
+				hVm->functions.Insert(pSignature, hFunction);
 			}
 			else
 			{

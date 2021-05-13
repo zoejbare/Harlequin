@@ -320,9 +320,12 @@ static bool SerializeValue(
 			break;
 
 		case XENON_VALUE_TYPE_OBJECT:
-			// TODO: Implement support for script objects.
-			assert(false);
-			break;
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_ERROR,
+				"Cannot serializer object value type"
+			);
+			return false;
 
 		default:
 			XenonReportMessage(
@@ -331,7 +334,7 @@ static bool SerializeValue(
 				"Cannot serialize unknown value type: type=%" PRId32,
 				value.type
 			);
-			break;
+			return false;
 	}
 
 	return true;
@@ -400,6 +403,18 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 		for(auto& valueKv : funcKv.value.locals)
 		{
 			XenonString::Release(valueKv.key);
+		}
+	}
+
+	// Dispose of all object types.
+	for(auto& typeKv : hProgramWriter->objectTypes)
+	{
+		XenonString::Release(typeKv.value.pTypeName);
+
+		// Dispose of all members belonging to the current object type.
+		for(auto& memberKv : typeKv.value.members)
+		{
+			XenonString::Release(memberKv.key);
 		}
 	}
 
@@ -507,6 +522,7 @@ bool XenonProgramWriter::Serialize(
 	}
 
 	versionHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.Size());
+	versionHeader.objectTableLength = uint32_t(hProgramWriter->objectTypes.Size());
 	versionHeader.constantTableLength = uint32_t(hProgramWriter->constants.size());
 	versionHeader.globalTableLength = uint32_t(hProgramWriter->globals.Size());
 	versionHeader.functionTableLength = uint32_t(functionBindings.size());
@@ -559,6 +575,8 @@ bool XenonProgramWriter::Serialize(
 
 		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableOffset);
 		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableLength);
+		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableOffset);
+		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableLength);
 		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableOffset);
 		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableLength);
 		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.globalTableOffset);
@@ -597,6 +615,49 @@ bool XenonProgramWriter::Serialize(
 		if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
 		{
 			return false;
+		}
+	}
+
+	versionHeader.objectTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+
+	// Write the object type schemas.
+	for(auto& typeKv : hProgramWriter->objectTypes)
+	{
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing object type: name=\"%s\"", typeKv.key->data);
+
+		if(!SerializeString(hSerializer, hReport, typeKv.key->data, typeKv.key->length))
+		{
+			return false;
+		}
+
+		for(size_t memberIndex = 0; memberIndex < typeKv.value.orderedMemberNames.size(); ++memberIndex)
+		{
+			XenonString* const pMemberName = typeKv.value.orderedMemberNames[memberIndex];
+			const uint8_t memberValueType = uint8_t(typeKv.value.members.Get(pMemberName));
+
+			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing object member: name=\"%s\", type=%" PRIu8, pMemberName->data, memberValueType);
+
+			// Write the member name string.
+			if(!SerializeString(hSerializer, hReport, pMemberName->data, pMemberName->length))
+			{
+				return false;
+			}
+
+			// Write the member value type.
+			result = XenonSerializerWriteUint8(hSerializer, uint8_t(memberValueType));
+			if(result != XENON_SUCCESS)
+			{
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to serialize object member type: objectType=\"%s\", memberName=\"%s\", memberType=%" PRIu8,
+					typeKv.key->data,
+					pMemberName->data,
+					memberValueType
+				);
+
+				return false;
+			}
 		}
 	}
 
@@ -747,7 +808,7 @@ bool XenonProgramWriter::Serialize(
 			// Write the function's local variable table.
 			for(auto& kv : binding.pFunction->locals)
 			{
-				XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing local variable: name=\"%s\"", kv.key->data);
+				XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing local variable: name=\"%s\"", kv.key->data);
 
 				// First, write the string key of the local.
 				if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))

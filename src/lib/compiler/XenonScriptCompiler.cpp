@@ -339,6 +339,94 @@ int XenonProgramWriterAddConstantString(XenonProgramWriterHandle hProgramWriter,
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonProgramWriterAddObjectType(XenonProgramWriterHandle hProgramWriter, const char* objectTypeName)
+{
+	if(!hProgramWriter || !objectTypeName || objectTypeName[0] == '\0')
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonString* const pTypeName = XenonString::Create(objectTypeName);
+	if(!pTypeName)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	// Verify a object type mapped to the input name doesn't already exist.
+	if(hProgramWriter->objectTypes.Contains(pTypeName))
+	{
+		XenonString::Release(pTypeName);
+		return XENON_ERROR_KEY_ALREADY_EXISTS;
+	}
+
+	XenonObjectData objectData;
+	objectData.pTypeName = pTypeName;
+
+	hProgramWriter->objectTypes.Insert(pTypeName, objectData);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriterAddObjectMember(
+	XenonProgramWriterHandle hProgramWriter,
+	const char* objectTypeName,
+	const char* memberName,
+	int memberValueType
+)
+{
+	if(!hProgramWriter
+		|| !objectTypeName
+		|| objectTypeName[0] == '\0'
+		|| !memberName
+		|| memberName[0] == '\0'
+		|| memberValueType < 0
+		|| memberValueType > XENON_VALUE_TYPE__MAX_VALUE)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonString* const pTypeName = XenonString::Create(objectTypeName);
+	if(!pTypeName)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	auto typeKv = hProgramWriter->objectTypes.find(pTypeName);
+
+	// Release the object type name string now that we're done with it.
+	XenonString::Release(pTypeName);
+
+	if(typeKv == hProgramWriter->objectTypes.end())
+	{
+		// Cannot add member to an object type that does not exist.
+		return XENON_ERROR_KEY_DOES_NOT_EXIST;
+	}
+
+	XenonString* const pMemberName = XenonString::Create(memberName);
+	if(!pMemberName)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	// Find the member in the object type.
+	auto memberKv = typeKv->value.members.find(pMemberName);
+	if(memberKv != typeKv->value.members.end())
+	{
+		XenonString::Release(pMemberName);
+		return XENON_ERROR_KEY_ALREADY_EXISTS;
+	}
+
+	// Add the member to the object type.
+	typeKv->value.members.Insert(pMemberName, memberValueType);
+	typeKv->value.orderedMemberNames.push_back(pMemberName);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const char* variableName, uint32_t constantIndex)
 {
 	if(!hProgramWriter || !variableName || variableName[0] == '\0')

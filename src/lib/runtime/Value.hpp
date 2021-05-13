@@ -34,7 +34,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// TODO: Implement support for script objects.
 struct XenonObject;
 
 struct XenonValue
@@ -74,6 +73,7 @@ struct XenonValue
 	static XenonValueHandle CreateNull();
 	static XenonValueHandle CreateString(XenonVmHandle hVm, const char* const string);
 	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
+	static XenonValueHandle CreateObject(XenonVmHandle hVm, XenonObject* const pObjectTemplate);
 	static XenonValueHandle Copy(XenonVmHandle hVm, XenonValueHandle hValue);
 
 	static XenonString* GetDebugString(XenonValueHandle hValue);

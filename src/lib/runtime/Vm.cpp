@@ -102,6 +102,13 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 		XenonString::Release(kv.key);
 	}
 
+	// Clean up each loaded object schema.
+	for(auto& kv : hVm->objectSchemas)
+	{
+		XenonString::Release(kv.key);
+		XenonObject::Dispose(kv.value);
+	}
+
 	// Clean up each active execution context.
 	for(auto& kv : hVm->executionContexts)
 	{
@@ -185,6 +192,24 @@ XenonValueHandle XenonVm::GetGlobalVariable(XenonVmHandle hVm, XenonString* cons
 
 	(*pOutResult) = XENON_SUCCESS;
 	return hVm->globals.Get(pVariableName);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonObject* XenonVm::GetObjectSchema(XenonVmHandle hVm, XenonString* const pTypeName, int* const pOutResult)
+{
+	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(pTypeName != nullptr);
+	assert(pOutResult != nullptr);
+
+	if(!hVm->objectSchemas.Contains(pTypeName))
+	{
+		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
+		return nullptr;
+	}
+
+	(*pOutResult) = XENON_SUCCESS;
+	return hVm->objectSchemas.Get(pTypeName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

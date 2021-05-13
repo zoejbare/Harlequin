@@ -19,6 +19,7 @@
 #include "CommonLoader.hpp"
 
 #include "../Value.hpp"
+#include "../Vm.hpp"
 
 #include <assert.h>
 
@@ -127,7 +128,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 			"ReadValue error: Failed to read value type: error=\"%s\"",
 			errorString
 		);
-		return nullptr;
+		return XENON_VALUE_HANDLE_NULL;
 	}
 
 	XenonValue temp;
@@ -263,21 +264,23 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 
 		case XENON_VALUE_TYPE_STRING:
 		{
-			XenonString* const pString = ReadString(hSerializer, hReport);
-
 			// Read the string from the serializer.
+			XenonString* const pString = ReadString(hSerializer, hReport);
 			if(!pString)
 			{
-				return nullptr;
+				return XENON_VALUE_HANDLE_NULL;
 			}
 
 			return XenonValue::CreateString(hVm, pString);
 		}
 
 		case XENON_VALUE_TYPE_OBJECT:
-			// TODO: Implement support for script objects.
-			assert(false);
-			return nullptr;
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_ERROR,
+				"ReadValue error: Found object value type, but they are currently unsupported"
+			);
+			return XENON_VALUE_HANDLE_NULL;
 
 		default:
 			// Unknown (or currently unhandled) value type.
@@ -287,7 +290,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 				"ReadValue error: Unknown value type: type=%d",
 				valueType
 			);
-			return nullptr;
+			return XENON_VALUE_HANDLE_NULL;
 	}
 
 	const char* const errorString = XenonGetErrorCodeString(result);
@@ -299,7 +302,7 @@ XenonValueHandle XenonProgramCommonLoader::ReadValue(
 		errorString
 	);
 
-	return nullptr;
+	return XENON_VALUE_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -17,6 +17,8 @@
 //
 
 #include "Value.hpp"
+
+#include "Object.hpp"
 #include "Vm.hpp"
 
 #include <assert.h>
@@ -36,6 +38,8 @@ XenonValue XenonValue::NullValue =
 
 XenonValueHandle XenonValue::CreateBool(XenonVmHandle hVm, const bool value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_BOOL, hVm);
 	if(!pOutput)
 	{
@@ -51,6 +55,8 @@ XenonValueHandle XenonValue::CreateBool(XenonVmHandle hVm, const bool value)
 
 XenonValueHandle XenonValue::CreateInt8(XenonVmHandle hVm, const int8_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_INT8, hVm);
 	if(!pOutput)
 	{
@@ -66,6 +72,8 @@ XenonValueHandle XenonValue::CreateInt8(XenonVmHandle hVm, const int8_t value)
 
 XenonValueHandle XenonValue::CreateInt16(XenonVmHandle hVm, const int16_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_INT16, hVm);
 	if(!pOutput)
 	{
@@ -81,6 +89,8 @@ XenonValueHandle XenonValue::CreateInt16(XenonVmHandle hVm, const int16_t value)
 
 XenonValueHandle XenonValue::CreateInt32(XenonVmHandle hVm, const int32_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_INT32, hVm);
 	if(!pOutput)
 	{
@@ -96,6 +106,8 @@ XenonValueHandle XenonValue::CreateInt32(XenonVmHandle hVm, const int32_t value)
 
 XenonValueHandle XenonValue::CreateInt64(XenonVmHandle hVm, const int64_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_INT64, hVm);
 	if(!pOutput)
 	{
@@ -111,6 +123,8 @@ XenonValueHandle XenonValue::CreateInt64(XenonVmHandle hVm, const int64_t value)
 
 XenonValueHandle XenonValue::CreateUint8(XenonVmHandle hVm, const uint8_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_UINT8, hVm);
 	if(!pOutput)
 	{
@@ -126,6 +140,8 @@ XenonValueHandle XenonValue::CreateUint8(XenonVmHandle hVm, const uint8_t value)
 
 XenonValueHandle XenonValue::CreateUint16(XenonVmHandle hVm, const uint16_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_UINT16, hVm);
 	if(!pOutput)
 	{
@@ -141,6 +157,8 @@ XenonValueHandle XenonValue::CreateUint16(XenonVmHandle hVm, const uint16_t valu
 
 XenonValueHandle XenonValue::CreateUint32(XenonVmHandle hVm, const uint32_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_UINT32, hVm);
 	if(!pOutput)
 	{
@@ -156,6 +174,8 @@ XenonValueHandle XenonValue::CreateUint32(XenonVmHandle hVm, const uint32_t valu
 
 XenonValueHandle XenonValue::CreateUint64(XenonVmHandle hVm, const uint64_t value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_UINT64, hVm);
 	if(!pOutput)
 	{
@@ -171,6 +191,7 @@ XenonValueHandle XenonValue::CreateUint64(XenonVmHandle hVm, const uint64_t valu
 
 XenonValueHandle XenonValue::CreateFloat32(XenonVmHandle hVm, const float value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_FLOAT32, hVm);
 	if(!pOutput)
 	{
@@ -186,6 +207,8 @@ XenonValueHandle XenonValue::CreateFloat32(XenonVmHandle hVm, const float value)
 
 XenonValueHandle XenonValue::CreateFloat64(XenonVmHandle hVm, const double value)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_FLOAT64, hVm);
 	if(!pOutput)
 	{
@@ -208,6 +231,7 @@ XenonValueHandle XenonValue::CreateNull()
 
 XenonValueHandle XenonValue::CreateString(XenonVmHandle hVm, const char* const string)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(string != nullptr);
 
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_STRING, hVm);
@@ -230,6 +254,7 @@ XenonValueHandle XenonValue::CreateString(XenonVmHandle hVm, const char* const s
 
 XenonValueHandle XenonValue::CreateString(XenonVmHandle hVm, XenonString* const pString)
 {
+	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(pString != nullptr);
 
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_STRING, hVm);
@@ -239,6 +264,25 @@ XenonValueHandle XenonValue::CreateString(XenonVmHandle hVm, XenonString* const 
 	}
 
 	pOutput->as.pString = pString;
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonObject* const pObjectTemplate)
+{
+	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(pObjectTemplate != nullptr);
+
+	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_OBJECT, hVm);
+	if(!pOutput)
+	{
+		return &NullValue;
+	}
+
+	// Make a copy of the input object template for this value.
+	pOutput->as.pObject = XenonObject::CreateInstance(pObjectTemplate);
 
 	return pOutput;
 }
@@ -309,8 +353,7 @@ XenonValueHandle XenonValue::Copy(XenonVmHandle hVm, XenonValueHandle hValue)
 			break;
 
 		case XENON_VALUE_TYPE_OBJECT:
-			// TODO: Implement support for script objects.
-			assert(false);
+			pOutput->as.pObject = XenonObject::CreateCopy(hValue->as.pObject->pSchema);
 			break;
 
 		default:
@@ -386,12 +429,24 @@ XenonString* XenonValue::GetDebugString(XenonValueHandle hValue)
 
 			case XENON_VALUE_TYPE_STRING:
 				// The input value is already a string, so we can use it as-is.
-				snprintf(str, sizeof(str), "<string: \"%.48s\"%s>", hValue->as.pString->data, (hValue->as.pString->length > 48) ? "..." : "");
+				snprintf(
+					str,
+					sizeof(str),
+					"<string: \"%.48s\"%s>",
+					hValue->as.pString->data,
+					(hValue->as.pString->length > 48) ? "..." : ""
+				);
 				break;
 
 			case XENON_VALUE_TYPE_OBJECT:
-				// TODO: Implement support for script objects.
-				snprintf(str, sizeof(str), "<object: 0x%" PRIXPTR ">", reinterpret_cast<uintptr_t>(hValue));
+				snprintf(
+					str,
+					sizeof(str),
+					"<object: 0x%" PRIXPTR ", \"%.48s\"%s>",
+					reinterpret_cast<uintptr_t>(hValue),
+					hValue->as.pObject->pTypeName->data,
+					(hValue->as.pObject->pTypeName->length > 48) ? "..." : ""
+				);
 				break;
 
 			default:
@@ -451,7 +506,16 @@ void XenonValue::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 	XenonValueHandle hValue = reinterpret_cast<XenonValueHandle>(pOpaque);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 
-	// TODO: Add special handling for script objects which can mark values recursively.
+	if(hValue->type == XENON_VALUE_TYPE_OBJECT)
+	{
+		XenonObject* const pScriptObject = hValue->as.pObject;
+
+		// Mark each member inside the object.
+		for(size_t i = 0; i < pScriptObject->members.count; ++i)
+		{
+			XenonGarbageCollector::MarkObject(gc, &pScriptObject->members.pData[i]->gcProxy);
+		}
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -474,7 +538,7 @@ void XenonValue::prv_onGcDestruct(void* const pOpaqueValue)
 			break;
 
 		case XENON_VALUE_TYPE_OBJECT:
-			// TODO: Implement support for script objects.
+			XenonObject::Dispose(hValue->as.pObject);
 			break;
 
 		default:

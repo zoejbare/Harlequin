@@ -22,6 +22,7 @@
 #include "../base/String.hpp"
 
 #include "Execution.hpp"
+#include "Object.hpp"
 #include "Program.hpp"
 #include "Vm.hpp"
 #include "Value.hpp"
@@ -1277,6 +1278,11 @@ int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVa
 
 XenonValueHandle XenonValueCreateBool(XenonVmHandle hVm, bool value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateBool(hVm, value);
 }
 
@@ -1284,6 +1290,11 @@ XenonValueHandle XenonValueCreateBool(XenonVmHandle hVm, bool value)
 
 XenonValueHandle XenonValueCreateInt8(XenonVmHandle hVm, int8_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateInt8(hVm, value);
 }
 
@@ -1291,6 +1302,11 @@ XenonValueHandle XenonValueCreateInt8(XenonVmHandle hVm, int8_t value)
 
 XenonValueHandle XenonValueCreateInt16(XenonVmHandle hVm, int16_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateInt16(hVm, value);
 }
 
@@ -1298,6 +1314,10 @@ XenonValueHandle XenonValueCreateInt16(XenonVmHandle hVm, int16_t value)
 
 XenonValueHandle XenonValueCreateInt32(XenonVmHandle hVm, int32_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
 
 	return XenonValue::CreateInt32(hVm, value);
 }
@@ -1306,6 +1326,11 @@ XenonValueHandle XenonValueCreateInt32(XenonVmHandle hVm, int32_t value)
 
 XenonValueHandle XenonValueCreateInt64(XenonVmHandle hVm, int64_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateInt64(hVm, value);
 }
 
@@ -1313,6 +1338,11 @@ XenonValueHandle XenonValueCreateInt64(XenonVmHandle hVm, int64_t value)
 
 XenonValueHandle XenonValueCreateUint8(XenonVmHandle hVm, uint8_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateUint8(hVm, value);
 }
 
@@ -1320,6 +1350,11 @@ XenonValueHandle XenonValueCreateUint8(XenonVmHandle hVm, uint8_t value)
 
 XenonValueHandle XenonValueCreateUint16(XenonVmHandle hVm, uint16_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateUint16(hVm, value);
 }
 
@@ -1327,6 +1362,11 @@ XenonValueHandle XenonValueCreateUint16(XenonVmHandle hVm, uint16_t value)
 
 XenonValueHandle XenonValueCreateUint32(XenonVmHandle hVm, uint32_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateUint32(hVm, value);
 }
 
@@ -1334,6 +1374,11 @@ XenonValueHandle XenonValueCreateUint32(XenonVmHandle hVm, uint32_t value)
 
 XenonValueHandle XenonValueCreateUint64(XenonVmHandle hVm, uint64_t value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateUint64(hVm, value);
 }
 
@@ -1341,6 +1386,11 @@ XenonValueHandle XenonValueCreateUint64(XenonVmHandle hVm, uint64_t value)
 
 XenonValueHandle XenonValueCreateFloat32(XenonVmHandle hVm, float value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateFloat32(hVm, value);
 }
 
@@ -1348,6 +1398,11 @@ XenonValueHandle XenonValueCreateFloat32(XenonVmHandle hVm, float value)
 
 XenonValueHandle XenonValueCreateFloat64(XenonVmHandle hVm, double value)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateFloat64(hVm, value);
 }
 
@@ -1362,18 +1417,38 @@ XenonValueHandle XenonValueCreateNull()
 
 XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const char* const string)
 {
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
 	return XenonValue::CreateString(hVm, string ? string : "");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, XenonValueHandle hObjectProfile)
+XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typeName)
 {
-	(void) hVm;
-	(void) hObjectProfile;
-	// TODO: Implement support for script objects.
-	assert(false);
-	return XenonValue::CreateNull();
+	if(!hVm || !typeName || typeName[0] == '\0')
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	XenonString* const pTypeName = XenonString::Create(typeName);
+
+	int result;
+	XenonObject* const pSchema = XenonVm::GetObjectSchema(hVm, pTypeName, &result);
+
+	// Release the type name string now that we're done with it.
+	XenonString::Release(pTypeName);
+
+	// Make sure we were able to successfully retrieved the object template.
+	if(result != XENON_SUCCESS)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	return XenonValue::CreateObject(hVm, pSchema);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1385,7 +1460,14 @@ XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonValueDispose(XenonValueHandle hValue)
+void XenonValuePreserve(XenonValueHandle hValue)
+{
+	XenonValue::SetAutoMark(hValue, true);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonValueAbandon(XenonValueHandle hValue)
 {
 	XenonValue::SetAutoMark(hValue, false);
 }
@@ -1680,6 +1762,115 @@ size_t XenonValueGetStringHash(XenonValueHandle hValue)
 	}
 
 	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const char* XenonValueGetObjectTypeName(XenonValueHandle hValue)
+{
+	if(XenonValueIsObject(hValue))
+	{
+		return hValue->as.pObject->pTypeName->data;
+	}
+
+	return nullptr;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t XenonValueGetObjectMemberCount(XenonValueHandle hValue)
+{
+	if(XenonValueIsObject(hValue))
+	{
+		return hValue->as.pObject->members.count;
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const char* memberName)
+{
+	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	{
+		XenonObject* const pScriptObject = hValue->as.pObject;
+		XenonString* const pMemberName = XenonString::Create(memberName);
+
+		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName);
+
+		// Release the member name string now that we don't need it anymore.
+		XenonString::Release(pMemberName);
+
+		XenonValueHandle hMemberValue = XenonObject::GetMemberValue(pScriptObject, memberDef.bindingIndex);
+
+		// Guard the value against being garbage collected.
+		XenonValue::SetAutoMark(hMemberValue, true);
+
+		return hMemberValue;
+	}
+
+	return XENON_VALUE_HANDLE_NULL;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* memberName)
+{
+	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	{
+		XenonObject* const pScriptObject = hValue->as.pObject;
+		XenonString* const pMemberName = XenonString::Create(memberName);
+
+		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName);
+
+		// Release the member name string now that we don't need it anymore.
+		XenonString::Release(pMemberName);
+
+		return memberDef.valueType;
+	}
+
+	return XENON_VALUE_TYPE_NULL;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberName, XenonValueHandle hMemberValue)
+{
+	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	{
+		XenonObject* const pScriptObject = hValue->as.pObject;
+		XenonString* const pMemberName = XenonString::Create(memberName);
+
+		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName);
+
+		// Release the member name string now that we don't need it anymore.
+		XenonString::Release(pMemberName);
+
+		XenonObject::SetMemberValue(pScriptObject, memberDef.bindingIndex, hMemberValue);
+
+		return XENON_SUCCESS;
+	}
+
+	return XENON_ERROR_INVALID_TYPE;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember iterateFn, void* pUserData)
+{
+	if(XenonValueIsObject(hValue))
+	{
+		// Iterate through each member definition on the object.
+		for(auto& kv : hValue->as.pObject->definitions)
+		{
+			iterateFn(pUserData, kv.key->data, kv.value.valueType);
+		}
+
+		return XENON_SUCCESS;
+	}
+
+	return XENON_ERROR_INVALID_TYPE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

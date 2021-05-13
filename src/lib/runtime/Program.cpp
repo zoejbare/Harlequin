@@ -32,7 +32,6 @@
 
 static bool ProgramLoad(
 	XenonProgram* const pOutProgram,
-	XenonProgram::LoadData& outLoadData,
 	XenonVmHandle hVm,
 	XenonSerializerHandle hSerializer
 )
@@ -173,7 +172,7 @@ static bool ProgramLoad(
 	switch(commonHeader.fileVersion)
 	{
 		case XENON_PROGRAM_VERSION_0001:
-			return XenonProgramVersion0001::Load(pOutProgram, outLoadData, hVm, hSerializer);
+			return XenonProgramVersion0001::Load(pOutProgram, hVm, hSerializer);
 
 		default:
 			break;
@@ -251,16 +250,27 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 	XenonValue::HandleArray::Initialize(pOutput->constants);
 	XenonByteHelper::Array::Initialize(pOutput->code);
 
-	LoadData loadData;
-
-	// Attempt to load the program.
-	if(!ProgramLoad(pOutput, loadData, hVm, hSerializer))
+	// This load block needs to lock the garbage collector since we'll be manipulating
+	// the VM and adding garbage collected resources.
 	{
-		// Failed to load the program from the file.
-		XenonString::Release(pProgramName);
-		XenonProgram::Dispose(pOutput);
+		XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
-		pOutput = nullptr;
+		// Attempt to load the program.
+		if(ProgramLoad(pOutput, hVm, hSerializer))
+		{
+			// Map the program to the VM.
+			hVm->programs.Insert(pProgramName, pOutput);
+		}
+		else
+		{
+			// The program failed to load, so any stale load data needs to be freed.
+			prv_freeLoadedData(pOutput, hVm);
+
+			XenonString::Release(pProgramName);
+			XenonProgram::Dispose(pOutput);
+
+			pOutput = nullptr;
+		}
 	}
 
 	result = XenonSerializerDispose(&hSerializer);
@@ -275,22 +285,6 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 			"Failed to dispose of program serializer: error=\"%s\"",
 			errorString
 		);
-	}
-
-	if(pOutput)
-	{
-		XenonScopedWriteLock gcLock(hVm->gcRwLock);
-
-		// Copy the necessary data to the VM.
-		prv_copyDataToVm(loadData, hVm);
-
-		// Map the program to the VM.
-		hVm->programs.Insert(pProgramName, pOutput);
-	}
-	else
-	{
-		// The program failed to load, so any stale load data needs to be freed.
-		prv_freeLoadData(loadData);
 	}
 
 	return pOutput;
@@ -363,16 +357,27 @@ XenonProgramHandle XenonProgram::Create(
 	XenonValue::HandleArray::Initialize(pOutput->constants);
 	XenonByteHelper::Array::Initialize(pOutput->code);
 
-	LoadData loadData;
-
-	// Attempt to load the program.
-	if(!ProgramLoad(pOutput, loadData, hVm, hSerializer))
+	// This load block needs to lock the garbage collector since we'll be manipulating
+	// the VM and adding garbage collected resources.
 	{
-		// Failed to load the program from the file.
-		XenonString::Release(pProgramName);
-		XenonProgram::Dispose(pOutput);
+		XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
-		pOutput = nullptr;
+		// Attempt to load the program.
+		if(ProgramLoad(pOutput, hVm, hSerializer))
+		{
+			// Map the program to the VM.
+			hVm->programs.Insert(pProgramName, pOutput);
+		}
+		else
+		{
+			// The program failed to load, so any stale load data needs to be freed.
+			prv_freeLoadedData(pOutput, hVm);
+
+			XenonString::Release(pProgramName);
+			XenonProgram::Dispose(pOutput);
+
+			pOutput = nullptr;
+		}
 	}
 
 	result = XenonSerializerDispose(&hSerializer);
@@ -389,22 +394,6 @@ XenonProgramHandle XenonProgram::Create(
 		);
 	}
 
-	if(pOutput)
-	{
-		XenonScopedWriteLock gcLock(hVm->gcRwLock);
-
-		// Copy the necessary data to the VM.
-		prv_copyDataToVm(loadData, hVm);
-
-		// Map the program to the VM.
-		hVm->programs.Insert(pProgramName, pOutput);
-	}
-	else
-	{
-		// The program failed to load, so any stale load data needs to be freed.
-		prv_freeLoadData(loadData);
-	}
-
 	return pOutput;
 }
 
@@ -418,8 +407,6 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 	for(auto& kv : hProgram->dependencies)
 	{
 		XenonString::Release(kv.key);
-
-		// The mapped value doesn't contain anything, so it doesn't need to be released.
 	}
 
 	// Release the function signature keys.
@@ -463,38 +450,28 @@ XenonValueHandle XenonProgram::GetConstant(XenonProgramHandle hProgram, const ui
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonProgram::prv_copyDataToVm(const XenonProgram::LoadData& loadData, XenonVmHandle hVm)
+void XenonProgram::prv_freeLoadedData(XenonProgramHandle hProgram, XenonVmHandle hVm)
 {
+	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
 	assert(hVm != XENON_VM_HANDLE_NULL);
 
-	// Transfer the globals to the VM.
-	for(auto& kv : loadData.globals)
+	// Remove the loaded globals from the VM.
+	for(auto& kv : hProgram->globals)
 	{
-		hVm->globals.Insert(kv.key, kv.value);
-	}
+		hVm->globals.Delete(kv.key);
 
-	// Transfer the functions to the VM.
-	for(auto& kv : loadData.functions)
-	{
-		hVm->functions.Insert(kv.key, kv.value);
-	}
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonProgram::prv_freeLoadData(XenonProgram::LoadData& loadData)
-{
-	// Dispose of the loaded globals.
-	for(auto& kv : loadData.globals)
-	{
 		XenonString::Release(kv.key);
 	}
 
-	// Dispose of the loaded functions.
-	for(auto& kv : loadData.functions)
+	// Remove the loaded functions from the VM.
+	for(auto& kv : hProgram->functions)
 	{
+		XenonFunctionHandle hFunction = hVm->functions.Get(kv.key);
+
+		hVm->functions.Delete(kv.key);
+
 		XenonString::Release(kv.key);
-		XenonFunction::Dispose(kv.value);
+		XenonFunction::Dispose(hFunction);
 	}
 }
 

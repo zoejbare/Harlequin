@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 					const char* const param = XenonValueGetString(hParam);
 
 					printf("> \"%s\"\n", param);
-					XenonValueDispose(hParam);
+					XenonValueAbandon(hParam);
 				};
 
 				XenonFunctionSetNativeBinding(hNativeFunc, printString, nullptr);

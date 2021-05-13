@@ -33,6 +33,9 @@ struct XenonProgramHeader0001
 	uint32_t dependencyTableOffset;
 	uint32_t dependencyTableLength;
 
+	uint32_t objectTableOffset;
+	uint32_t objectTableLength;
+
 	uint32_t constantTableOffset;
 	uint32_t constantTableLength;
 

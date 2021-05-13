@@ -40,12 +40,6 @@ struct XenonProgram
 
 	typedef XenonStack<XenonProgramHandle> HandleStack;
 
-	struct LoadData
-	{
-		XenonValue::StringToHandleMap globals;
-		XenonFunction::StringToHandleMap functions;
-	};
-
 	static XenonProgramHandle Create(XenonVmHandle hVm, XenonString* const pProgramName, const char* const filePath);
 	static XenonProgramHandle Create(
 		XenonVmHandle hVm,
@@ -57,14 +51,14 @@ struct XenonProgram
 
 	static XenonValueHandle GetConstant(XenonProgramHandle hProgram, const uint32_t index, int* const pOutResult);
 
-	static void prv_copyDataToVm(const LoadData& loadData, XenonVmHandle);
-	static void prv_freeLoadData(LoadData& loadData);
+	static void prv_freeLoadedData(XenonProgramHandle, XenonVmHandle);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	XenonValue::StringToHandleMap dependencies;
 	XenonFunction::StringToBoolMap functions;
+	XenonValue::StringToBoolMap objectSchemas;
 	XenonValue::StringToBoolMap globals;
 	XenonValue::HandleArray constants;
 	XenonByteHelper::Array code;
