@@ -21,20 +21,36 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#if defined(_WIN32)
-	#define XENON_PLATFORM_WINDOWS
-
-#elif defined(__ANDROID__)
+#if defined(__ANDROID__)
 	#define XENON_PLATFORM_ANDROID
 
 #elif defined(__ORBIS__)
 	#define XENON_PLATFORM_PS4
+
+#elif defined(__PS3__)
+	#define XENON_PLATFORM_PS3
+
+#elif defined(__psp2__)
+	#define XENON_PLATFORM_PSVITA
+
+#elif defined(_XBOX)
+	#include <xtl.h>
+	#if _XBOX_VER >= 200 && _XBOX_VER < 300
+		#define XENON_PLATFORM_XBOX_360
+
+	#else
+		#error "Unrecognized Xbox platform!"
+
+	#endif
 
 #elif defined(__APPLE__)
 	#define XENON_PLATFORM_MAC_OS
 
 #elif defined(__linux__)
 	#define XENON_PLATFORM_LINUX
+
+#elif defined(_WIN32)
+	#define XENON_PLATFORM_WINDOWS
 
 #else
 	#define XENON_PLATFORM_UNKNOWN
@@ -43,7 +59,7 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#if defined(__powerpc__) || defined(__powerpc64__)
+#if defined(__powerpc__) || defined(__powerpc64__) || defined(__PPC__) || defined(__PPC64__)
 	#define XENON_CPU_TYPE_PPC
 
 #elif defined(__i386__) || defined(__x86_64__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_X64) || defined(_M_AMD64)
@@ -59,10 +75,10 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__) || defined(__powerpc64__) || defined(__aarch64__)
+#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__) || defined(__powerpc64__) || defined(__PPC64__) || defined(__aarch64__)
 	#define XENON_CPU_WIDTH_64_BIT
 
-#elif defined(__i386__) || defined(__powerpc__) || defined(__arm__) || defined(_M_IX86)
+#elif defined(__i386__) || defined(__powerpc__) || defined(__PPC__) || defined(__arm__) || defined(_M_IX86)
 	#define XENON_CPU_WIDTH_32_BIT
 
 #else

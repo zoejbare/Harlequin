@@ -307,7 +307,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -327,7 +327,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -347,7 +347,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -367,7 +367,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -387,7 +387,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -407,8 +407,188 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [psvita/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "debug", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Build [psvita/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "fastdebug", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Build [psvita/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "release", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Build [ps3/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "debug", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Build [ps3/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "fastdebug", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Build [ps3/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "release", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Build [ps4/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "debug", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Build [ps4/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "fastdebug", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Build [ps4/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-t", "release", "-o", "ps4"]
 			}
 		},
 		{
@@ -715,7 +895,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -735,7 +915,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -755,7 +935,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -775,7 +955,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -795,7 +975,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -815,8 +995,188 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [psvita/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "psvita", "-j1", "--show-commands"]
+			}
+		},
+		{
+			"label": "Rebuild [psvita/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Rebuild [psvita/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "release", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Rebuild [ps3/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Rebuild [ps3/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Rebuild [ps3/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "release", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Rebuild [ps4/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Rebuild [ps4/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Rebuild [ps4/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-r", "-t", "release", "-o", "ps4"]
 			}
 		},
 		{
@@ -1123,7 +1483,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1143,7 +1503,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1163,7 +1523,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1183,7 +1543,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1203,7 +1563,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1223,8 +1583,188 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python3",
+				"command": "python",
 				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [psvita/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Clean [psvita/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Clean [psvita/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "release", "-o", "psvita"]
+			}
+		},
+		{
+			"label": "Clean [ps3/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Clean [ps3/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Clean [ps3/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "release", "-o", "ps3"]
+			}
+		},
+		{
+			"label": "Clean [ps4/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Clean [ps4/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Clean [ps4/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "python",
+				"args": ["make.py", "-c", "-t", "release", "-o", "ps4"]
 			}
 		}
 	]

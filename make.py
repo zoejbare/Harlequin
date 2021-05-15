@@ -68,6 +68,18 @@ with csbuild.Target("release"):
 csbuild.SetCcLanguageStandard("c99")
 csbuild.SetCxxLanguageStandard("c++17")
 
+with csbuild.Toolchain("ps3", "psvita"):
+	csbuild.AddCompilerFlags(
+		"-Xdiag=1",
+		"-Xmserrors",
+	)
+
+with csbuild.Toolchain("ps3"):
+	csbuild.SetCxxLanguageStandard("c++11")
+
+with csbuild.Toolchain("psvita"):
+	csbuild.SetCxxLanguageStandard("cpp11")
+
 with csbuild.Platform("Windows"):
 	with csbuild.Toolchain("gcc", "clang", "ps4", "android-gcc", "android-clang"):
 		csbuild.AddCompilerFlags("-fdiagnostics-format=msvc")

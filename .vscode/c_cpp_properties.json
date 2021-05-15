@@ -12,22 +12,90 @@
     },
     "configurations": [
         {
-			"name": "macOS",
+            "name": "macOS",
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
                 "/Library/Frameworks"
             ],
             "intelliSenseMode": "macos-clang-x64",
             "compilerPath": "/usr/bin/clang",
-			"includePath": [
-				"${defaultIncludePaths}"
-			],
-			"defines": [
-				"XENON_LIB_COMPILER",
-				"XENON_LIB_RUNTIME"
-			],
-			"cStandard": "c89",
-			"cppStandard": "c++14"
+            "includePath": [
+                "${defaultIncludePaths}"
+            ],
+            "defines": [
+                "XENON_LIB_COMPILER",
+                "XENON_LIB_RUNTIME"
+            ],
+            "cStandard": "c89",
+            "cppStandard": "c++14"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${defaultIncludePaths}"
+            ],
+            "defines": [
+                "_WIN32=1",
+                "XENON_LIB_COMPILER",
+                "XENON_LIB_RUNTIME"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Professional/VC/Tools/MSVC/14.28.29910/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c89",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "windows-msvc-x64"
+        },
+        {
+            "name": "PSVita",
+            "includePath": [
+                "${defaultIncludePaths}",
+                "C:/Program Files (x86)/SCE/PSP2 SDKs/3.570/target/include_common",
+                "C:/Program Files (x86)/SCE/PSP2 SDKs/3.570/target/include",
+                "C:/Program Files (x86)/SCE/PSP2 SDKs/3.570/host_tools/build/include"
+            ],
+            "forcedInclude": [
+                "C:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/V140/Platforms/PSVita/PlatformToolsets/SNC/psvita_intellisense.h"
+            ],
+            "defines": [
+                "XENON_LIB_RUNTIME"
+            ],
+            "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
+            "cStandard": "c89",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "${default}"
+        },
+        {
+            "name": "PS3",
+            "includePath": [
+                "${defaultIncludePaths}"
+            ],
+            "forcedInclude": [
+                "C:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/Platforms/PS3/PlatformToolsets/SNC/ps3snc_intellisense.h"
+            ],
+            "defines": [
+                "XENON_LIB_RUNTIME"
+            ],
+            "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
+            "cStandard": "c89",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "${default}"
+        },
+        {
+            "name": "PS4",
+            "includePath": [
+                "${defaultIncludePaths}"
+            ],
+            "forcedInclude": [
+                "C:/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSBuild/Microsoft/VC/v160/Platforms/ORBIS/PlatformToolsets/Clang/orbisclang_intellisense.h"
+            ],
+            "defines": [
+                "__ORBIS__=1",
+                "XENON_LIB_RUNTIME"
+            ],
+            "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
+            "cStandard": "c89",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "${default}"
         }
     ]
 }
