@@ -108,7 +108,7 @@ XenonValueHandle XenonObject::GetMemberValue(XenonObject* const pObject, const i
 {
 	assert(pObject != nullptr);
 
-	if(memberIndex < pObject->members.count)
+	if(memberIndex < int(pObject->members.count))
 	{
 		return pObject->members.pData[memberIndex];
 	}
@@ -140,7 +140,7 @@ void XenonObject::SetMemberValue(XenonObject* const pObject, const int memberInd
 	assert(pObject != nullptr);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 
-	if(memberIndex < pObject->members.count)
+	if(memberIndex < int(pObject->members.count))
 	{
 		pObject->members.pData[memberIndex] = hValue;
 	}
