@@ -25,8 +25,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-#include <sys/types.h>
+#include <stdlib.h>
 
 #include "XenonBuildEnv.h"
 
