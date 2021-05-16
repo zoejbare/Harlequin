@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
 		// Iterate all the programs to disassemble them.
 		XenonVmListPrograms(hVm, iterateProgram, hVm);
 
-		const char* const entryPoint = "void Program.Main()";
+		const char* const entryPoint = "void App.Program.Main()";
 
 		XenonFunctionHandle hEntryFunc = XENON_FUNCTION_HANDLE_NULL;
 		XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
 		if(XenonExecutionCreate(&hExec, hVm, hEntryFunc) == XENON_SUCCESS)
 		{
 			XenonFunctionHandle hNativeFunc = XENON_FUNCTION_HANDLE_NULL;
-			XenonVmGetFunction(hVm, &hNativeFunc, "void Program.PrintString(string)");
+			XenonVmGetFunction(hVm, &hNativeFunc, "void App.Program.PrintString(string)");
 
 			if(hNativeFunc != XENON_FUNCTION_HANDLE_NULL)
 			{
@@ -284,6 +284,10 @@ int main(int argc, char* argv[])
 			OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, msg);
 
 			bool status;
+
+			//allocationCount = 0;
+			//mallocCount = 0;
+			//reallocCount= 0;
 
 			// Run the script until it has completed.
 			for(;;)

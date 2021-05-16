@@ -86,6 +86,8 @@ XENON_BASE_API const char* XenonGetErrorCodeString(int errorCode);
 
 XENON_BASE_API const char* XenonGetEndianModeString(int endianness);
 
+XENON_BASE_API const char* XenonGetValueTypeString(int valueType);
+
 XENON_BASE_API int XenonGetPlatformEndianMode();
 
 XENON_BASE_API const char* XenonGetBuiltInFunctionSignature(int builtInFunctionId);
@@ -351,7 +353,7 @@ XENON_MAIN_API int XenonVmGetGlobalVariableCount(XenonVmHandle hVm, size_t* pOut
 
 XENON_MAIN_API int XenonVmListGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable onIterateFn, void* pUserData);
 
-XENON_MAIN_API int XenonVmGetObjectProfile(XenonVmHandle hVm, XenonValueHandle* phOutObjectProfile, const char* objectTypeName);
+XENON_MAIN_API int XenonVmListObjectSchemas(XenonVmHandle hVm, XenonCallbackIterateString onIterateFn, void* pUserData);
 
 XENON_MAIN_API int XenonVmLoadProgram(
 	XenonVmHandle hVm,
@@ -566,7 +568,7 @@ XENON_MAIN_API uint8_t XenonValueGetObjectMemberType(XenonValueHandle hValue, co
 
 XENON_MAIN_API int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberName, XenonValueHandle hMemberValue);
 
-XENON_MAIN_API int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember, void* pUserData);
+XENON_MAIN_API int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember onIterateFn, void* pUserData);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -729,6 +731,8 @@ enum XenonOpCodeEnum
 
 	XENON_OP_CODE_PUSH,
 	XENON_OP_CODE_POP,
+
+	XENON_OP_CODE_INIT_OBJECT,
 
 	XENON_OP_CODE__TOTAL_COUNT,
 	XENON_OP_CODE__FOCE_DWORD = 0x7FFFFFFFul,

@@ -131,6 +131,21 @@ int main(int argc, char* argv[])
 		XenonSerializerWriteUint32(hSerializer, constantIndex);
 	};
 
+	auto writeOpLoadParam = [](XenonSerializerHandle hSerializer, const uint32_t gpRegIndex, const uint32_t ioRegIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_LOAD_PARAM);
+		XenonSerializerWriteUint32(hSerializer, gpRegIndex);
+		XenonSerializerWriteUint32(hSerializer, ioRegIndex);
+	};
+
+	auto writeOpLoadMember = [](XenonSerializerHandle hSerializer, const uint32_t gpDstRegIndex, const uint32_t gpSrcRegIndex, const uint32_t memberIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_LOAD_MEMBER);
+		XenonSerializerWriteUint32(hSerializer, gpDstRegIndex);
+		XenonSerializerWriteUint32(hSerializer, gpSrcRegIndex);
+		XenonSerializerWriteUint32(hSerializer, memberIndex);
+	};
+
 	auto writeOpStoreGlobal = [](XenonSerializerHandle hSerializer, const uint32_t constantIndex, const uint32_t registerIndex)
 	{
 		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_STORE_GLOBAL);
@@ -145,18 +160,19 @@ int main(int argc, char* argv[])
 		XenonSerializerWriteUint32(hSerializer, registerIndex);
 	};
 
-	auto writeOpLoadParam = [](XenonSerializerHandle hSerializer, const uint32_t gpRegIndex, const uint32_t ioRegIndex)
-	{
-		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_LOAD_PARAM);
-		XenonSerializerWriteUint32(hSerializer, gpRegIndex);
-		XenonSerializerWriteUint32(hSerializer, ioRegIndex);
-	};
-
 	auto writeOpStoreParam = [](XenonSerializerHandle hSerializer, const uint32_t ioRegIndex, const uint32_t gpRegIndex)
 	{
 		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_STORE_PARAM);
 		XenonSerializerWriteUint32(hSerializer, ioRegIndex);
 		XenonSerializerWriteUint32(hSerializer, gpRegIndex);
+	};
+
+	auto writeOpStoreMember = [](XenonSerializerHandle hSerializer, const uint32_t gpDstRegIndex, const uint32_t gpSrcRegIndex, const uint32_t memberIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_STORE_MEMBER);
+		XenonSerializerWriteUint32(hSerializer, gpDstRegIndex);
+		XenonSerializerWriteUint32(hSerializer, gpSrcRegIndex);
+		XenonSerializerWriteUint32(hSerializer, memberIndex);
 	};
 
 	auto writeOpCall = [](XenonSerializerHandle hSerializer, const uint32_t constantIndex)
@@ -192,6 +208,13 @@ int main(int argc, char* argv[])
 		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_YIELD);
 	};
 
+	auto writeOpInitObject = [](XenonSerializerHandle hSerializer, const uint32_t registerIndex, const uint32_t constantIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_INIT_OBJECT);
+		XenonSerializerWriteUint32(hSerializer, registerIndex);
+		XenonSerializerWriteUint32(hSerializer, constantIndex);
+	};
+
 	XenonSerializerHandle hFileSerializer = XENON_SERIALIZER_HANDLE_NULL;
 	XenonSerializerHandle hMainFuncSerializer = XENON_SERIALIZER_HANDLE_NULL;
 	XenonSerializerHandle hSubFuncSerializer = XENON_SERIALIZER_HANDLE_NULL;
@@ -200,13 +223,15 @@ int main(int argc, char* argv[])
 	XenonSerializerCreate(&hMainFuncSerializer, XENON_SERIALIZER_MODE_WRITER);
 	XenonSerializerCreate(&hSubFuncSerializer, XENON_SERIALIZER_MODE_WRITER);
 
-	const char* const mainFuncSignature = "void Program.Main()";
-	const char* const subFuncSignature = "int32 Program.DoWork(float64)";
-	const char* const nativeFuncSignature = "void Program.PrintString(string)";
+	const char* const mainFuncSignature = "void App.Program.Main()";
+	const char* const subFuncSignature = "int32 App.Program.DoWork(float64)";
+	const char* const nativeFuncSignature = "void App.Program.PrintString(string)";
 	const char* const opAddStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_ADD_STRING);
 	const char* const opCastStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT32_TO_STRING);
 	const char* const globalVariableName = "globalTestVar";
 	const char* const localVariableName = "localTestVar";
+	const char* const objectTypeName = "App.ClassType";
+	const char* const objectMemberName = "memberTest";
 
 	uint32_t constIndex0;
 	XenonProgramWriterAddConstantNull(hProgramWriter, &constIndex0);
@@ -244,8 +269,18 @@ int main(int argc, char* argv[])
 	uint32_t constIndex11;
 	XenonProgramWriterAddConstantString(hProgramWriter, opCastStringSignature, &constIndex11);
 
+	uint32_t constIndex12;
+	XenonProgramWriterAddConstantString(hProgramWriter, objectTypeName, &constIndex12);
+
+	uint32_t constIndex13;
+	XenonProgramWriterAddConstantString(hProgramWriter, objectMemberName, &constIndex13);
+
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);
+
+	// Write the program object types.
+	XenonProgramWriterAddObjectType(hProgramWriter, objectTypeName);
+	XenonProgramWriterAddObjectMember(hProgramWriter, objectTypeName, objectMemberName, XENON_VALUE_TYPE_INT32, nullptr);
 
 	// void Program.Main()
 	{
@@ -283,6 +318,10 @@ int main(int argc, char* argv[])
 		writeOpYield(hSubFuncSerializer);
 		writeOpPop(hSubFuncSerializer, 1);
 
+		writeOpInitObject(hSubFuncSerializer, 2, constIndex12);
+		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex1);
+		writeOpStoreMember(hSubFuncSerializer, 2, 1, 0);
+
 		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex4);
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 
@@ -291,11 +330,12 @@ int main(int argc, char* argv[])
 
 		writeOpCall(hSubFuncSerializer, constIndex10);
 		writeOpCall(hSubFuncSerializer, constIndex8);
+
 		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex0);
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 		writeOpStoreParam(hSubFuncSerializer, 1, 0);
 
-		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex1);
+		writeOpLoadMember(hSubFuncSerializer, 0, 2, 0);
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 
 		writeOpCall(hSubFuncSerializer, constIndex11);

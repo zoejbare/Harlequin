@@ -419,7 +419,7 @@ int XenonProgramWriterAddObjectMember(
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
-	if(*pOutIndex)
+	if(pOutIndex)
 	{
 		(*pOutIndex) = uint32_t(typeKv->value.orderedMemberNames.size());
 	}

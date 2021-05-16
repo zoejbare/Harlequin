@@ -71,6 +71,8 @@ XENON_DECLARE_OP_CODE_FN(StoreParam);
 XENON_DECLARE_OP_CODE_FN(Push);
 XENON_DECLARE_OP_CODE_FN(Pop);
 
+XENON_DECLARE_OP_CODE_FN(InitObject);
+
 //----------------------------------------------------------------------------------------------------------------------
 
 #ifdef __cplusplus

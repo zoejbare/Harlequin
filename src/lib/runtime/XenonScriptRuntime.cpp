@@ -319,14 +319,23 @@ int XenonVmListGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable o
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetObjectProfile(XenonVmHandle hVm, XenonValueHandle* phOutObjectProfile, const char* objectTypeName)
+int XenonVmListObjectSchemas(XenonVmHandle hVm, XenonCallbackIterateString onIterateFn, void* pUserData)
 {
-	// TODO: Implement this
-	(void) hVm;
-	(void) phOutObjectProfile;
-	(void) objectTypeName;
+	if(!hVm || !onIterateFn)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
 
-	return XENON_ERROR_UNSPECIFIED_FAILURE;
+	// Call the callback for each object schema we currently have loaded.
+	for(auto& kv : hVm->objectSchemas)
+	{
+		if(!onIterateFn(pUserData, kv.key->data))
+		{
+			break;
+		}
+	}
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1879,14 +1888,14 @@ int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberNa
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember iterateFn, void* pUserData)
+int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember onIterateFn, void* pUserData)
 {
 	if(XenonValueIsObject(hValue))
 	{
 		// Iterate through each member definition on the object.
 		for(auto& kv : hValue->as.pObject->definitions)
 		{
-			iterateFn(pUserData, kv.key->data, kv.value.valueType);
+			onIterateFn(pUserData, kv.key->data, kv.value.valueType);
 		}
 
 		return XENON_SUCCESS;

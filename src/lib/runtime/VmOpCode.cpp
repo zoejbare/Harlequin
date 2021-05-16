@@ -42,6 +42,7 @@ void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
 	XENON_BIND_OP_CODE(STORE_PARAM, StoreParam);
 	XENON_BIND_OP_CODE(PUSH, Push);
 	XENON_BIND_OP_CODE(POP, Pop);
+	XENON_BIND_OP_CODE(INIT_OBJECT, InitObject);
 
 	#undef XENON_BIND_OP_CODE
 }
