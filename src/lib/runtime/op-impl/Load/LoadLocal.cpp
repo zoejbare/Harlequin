@@ -55,7 +55,12 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 		XenonValueHandle hLocalVariable = XenonFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString, &result);
 		if(hLocalVariable)
 		{
-			XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
+			result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
+			if(result != XENON_SUCCESS)
+			{
+				// TODO: Raise script exception.
+				hExec->exception = true;
+			}
 		}
 		else
 		{

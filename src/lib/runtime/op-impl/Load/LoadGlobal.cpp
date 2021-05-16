@@ -55,7 +55,12 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 		XenonValueHandle hGlobalVariable = XenonVm::GetGlobalVariable(hExec->hVm, hNameValue->as.pString, &result);
 		if(hGlobalVariable)
 		{
-			XenonFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
+			result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
+			if(result != XENON_SUCCESS)
+			{
+				// TODO: Raise script exception.
+				hExec->exception = true;
+			}
 		}
 		else
 		{

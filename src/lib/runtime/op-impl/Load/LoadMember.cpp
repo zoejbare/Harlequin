@@ -60,7 +60,12 @@ void OpCodeExec_LoadMember(XenonExecutionHandle hExec)
 			XenonValueHandle hMember = XenonObject::GetMemberValue(pScriptObject, memberIndex, &result);
 			if(result == XENON_SUCCESS)
 			{
-				XenonFrame::SetGpRegister(hExec->hCurrentFrame, hMember, gpDstRegIndex);
+				result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hMember, gpDstRegIndex);
+				if(result != XENON_SUCCESS)
+				{
+					// TODO: Raise script exception
+					hExec->exception = true;
+				}
 			}
 			else
 			{

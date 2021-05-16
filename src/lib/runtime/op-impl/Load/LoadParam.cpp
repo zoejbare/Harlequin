@@ -54,6 +54,7 @@ void OpCodeExec_LoadParam(XenonExecutionHandle hExec)
 		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
 		if(result == XENON_SUCCESS)
 		{
+			// Clear the I/O register to prevent leaking values left in there.
 			result = XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
 			if(result != XENON_SUCCESS)
 			{
