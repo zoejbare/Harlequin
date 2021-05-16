@@ -22,7 +22,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject* XenonObject::CreateTemplate(XenonString* const pTypeName, const MemberDefinitionMap& definitions)
+XenonObject* XenonObject::CreateSchema(XenonString* const pTypeName, const MemberDefinitionMap& definitions)
 {
 	assert(pTypeName != nullptr);
 
@@ -44,7 +44,7 @@ XenonObject* XenonObject::CreateTemplate(XenonString* const pTypeName, const Mem
 		pOutput->members.pData[i] = XenonValue::CreateNull();
 	}
 
-	return nullptr;
+	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

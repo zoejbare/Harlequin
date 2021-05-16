@@ -270,10 +270,10 @@ XenonValueHandle XenonValue::CreateString(XenonVmHandle hVm, XenonString* const 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonObject* const pObjectTemplate)
+XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonObject* const pObjectSchema)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
-	assert(pObjectTemplate != nullptr);
+	assert(pObjectSchema != nullptr);
 
 	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_OBJECT, hVm);
 	if(!pOutput)
@@ -282,7 +282,7 @@ XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonObject* const 
 	}
 
 	// Make a copy of the input object template for this value.
-	pOutput->as.pObject = XenonObject::CreateInstance(pObjectTemplate);
+	pOutput->as.pObject = XenonObject::CreateInstance(pObjectSchema);
 
 	return pOutput;
 }

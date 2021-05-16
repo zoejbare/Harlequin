@@ -53,7 +53,7 @@ struct XenonObject
 		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, XenonObject*>>
 	> StringToPtrMap;
 
-	static XenonObject* CreateTemplate(XenonString* pTypeName, const MemberDefinitionMap& definitions);
+	static XenonObject* CreateSchema(XenonString* pTypeName, const MemberDefinitionMap& definitions);
 	static XenonObject* CreateInstance(XenonObject* const pSchema);
 	static XenonObject* CreateCopy(XenonObject* const pObject);
 	static void Dispose(XenonObject* const pObject);
