@@ -551,21 +551,25 @@ bool XenonProgramWriter::Serialize(
 	}
 
 	// Write the common header.
-	result |= XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[0]);
-	result |= XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[1]);
-	result |= XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[2]);
-	result |= XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[3]);
-	result |= XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[4]);
-	result |= XenonSerializerWriteUint8(hSerializer, commonHeader.bigEndianFlag);
-	result |= XenonSerializerWriteUint16(hSerializer, commonHeader.fileVersion);
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[0]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[1]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[2]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[3]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[4]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.bigEndianFlag); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint16(hSerializer, commonHeader.fileVersion); }
 
 	if(result != XENON_SUCCESS)
 	{
+		const char* const errorString = XenonGetErrorCodeString(result);
+
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to write program common header"
+			"Failed to write program common header: error=\"%s\"",
+			errorString
 		);
+
 		return false;
 	}
 
@@ -573,18 +577,18 @@ bool XenonProgramWriter::Serialize(
 	{
 		int result = XENON_SUCCESS;
 
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableOffset);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableLength);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableOffset);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableLength);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableOffset);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableLength);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.globalTableOffset);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.globalTableLength);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.functionTableOffset);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.functionTableLength);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.bytecodeOffset);
-		result |= XenonSerializerWriteUint32(hSerializer, versionHeader.bytecodeLength);
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.globalTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.globalTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.functionTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.functionTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.bytecodeOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.bytecodeLength); }
 
 		return result;
 	};
@@ -597,11 +601,15 @@ bool XenonProgramWriter::Serialize(
 
 	if(result != XENON_SUCCESS)
 	{
+		const char* const errorString = XenonGetErrorCodeString(result);
+
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to write program version header data"
+			"Failed to write program version header data: error=\"%s\"",
+			errorString
 		);
+
 		return false;
 	}
 
@@ -630,12 +638,34 @@ bool XenonProgramWriter::Serialize(
 			return false;
 		}
 
+		const uint32_t memberCount = uint32_t(typeKv.value.orderedMemberNames.size());
+
+		// Write the number of members belonging to this object.
+		result = XenonSerializerWriteUint32(hSerializer, memberCount);
+		if(result != XENON_SUCCESS)
+		{
+			const char* const errorString = XenonGetErrorCodeString(result);
+
+			XenonReportMessage(
+				hReport,
+				XENON_MESSAGE_TYPE_ERROR,
+				"Failed to serialize object member count: error=\"%s\", objectType=\"%s\", memberCount=%" PRIu32,
+				errorString,
+				typeKv.key->data,
+				memberCount
+			);
+
+			return false;
+		}
+
 		for(size_t memberIndex = 0; memberIndex < typeKv.value.orderedMemberNames.size(); ++memberIndex)
 		{
 			XenonString* const pMemberName = typeKv.value.orderedMemberNames[memberIndex];
 			const uint8_t memberValueType = uint8_t(typeKv.value.members.Get(pMemberName));
 
-			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing object member: name=\"%s\", type=%" PRIu8, pMemberName->data, memberValueType);
+			const char* const memberTypeString = XenonGetValueTypeString(memberValueType);
+
+			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing object member: name=\"%s\", type=%s" , pMemberName->data, memberTypeString);
 
 			// Write the member name string.
 			if(!SerializeString(hSerializer, hReport, pMemberName->data, pMemberName->length))
@@ -647,13 +677,16 @@ bool XenonProgramWriter::Serialize(
 			result = XenonSerializerWriteUint8(hSerializer, uint8_t(memberValueType));
 			if(result != XENON_SUCCESS)
 			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to serialize object member type: objectType=\"%s\", memberName=\"%s\", memberType=%" PRIu8,
+					"Failed to serialize object member type: error=\"%s\", objectType=\"%s\", memberName=\"%s\", memberType=%s",
+					errorString,
 					typeKv.key->data,
 					pMemberName->data,
-					memberValueType
+					memberTypeString
 				);
 
 				return false;
@@ -691,10 +724,13 @@ bool XenonProgramWriter::Serialize(
 		result = XenonSerializerWriteUint32(hSerializer, kv.value);
 		if(result != XENON_SUCCESS)
 		{
+			const char* const errorString = XenonGetErrorCodeString(result);
+
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize global variable value index: name=\"%s\", index=%" PRIu32,
+				"Failed to serialize global variable value index: error=\"%s\", name=\"%s\", index=%" PRIu32,
+				errorString,
 				kv.key->data,
 				kv.value
 			);
@@ -742,39 +778,54 @@ bool XenonProgramWriter::Serialize(
 		result = XenonSerializerWriteBool(hSerializer, binding.pFunction->isNative);
 		if(result != XENON_SUCCESS)
 		{
+			const char* const errorString = XenonGetErrorCodeString(result);
+
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function 'isNative' flag: signature=\"%s\", native=%s",
+				"Failed to serialize function 'isNative' flag: error=\"%s\", signature=\"%s\", native=%s",
+				errorString,
 				binding.pSignature->data,
 				binding.pFunction->isNative ? "true" : "false"
 			);
+
+			return false;
 		}
 
 		// Write the function's parameter count into the program file.
 		result = XenonSerializerWriteUint16(hSerializer, binding.pFunction->numParameters);
 		if(result != XENON_SUCCESS)
 		{
+			const char* const errorString = XenonGetErrorCodeString(result);
+
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function parameter count: signature=\"%s\", count=%" PRIu16,
+				"Failed to serialize function parameter count: error=\"%s\", signature=\"%s\", count=%" PRIu16,
+				errorString,
 				binding.pSignature->data,
 				binding.pFunction->numParameters
 			);
+
+			return false;
 		}
 
 		// Write the function's return value count into the program file.
 		result = XenonSerializerWriteUint16(hSerializer, binding.pFunction->numReturnValues);
 		if(result != XENON_SUCCESS)
 		{
+			const char* const errorString = XenonGetErrorCodeString(result);
+
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function return value count: signature=\"%s\", count=%" PRIu16,
+				"Failed to serialize function return value count: error=\"%s\", signature=\"%s\", count=%" PRIu16,
+				errorString,
 				binding.pSignature->data,
 				binding.pFunction->numReturnValues
 			);
+
+			return false;
 		}
 
 		if(!binding.pFunction->isNative)
@@ -783,26 +834,36 @@ bool XenonProgramWriter::Serialize(
 			result = XenonSerializerWriteUint32(hSerializer, binding.finalOffset);
 			if(result != XENON_SUCCESS)
 			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function offset: signature=\"%s\", offset=%" PRIu32,
+					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
+					errorString,
 					binding.pSignature->data,
 					binding.finalOffset
 				);
+
+				return false;
 			}
 
 			// Write the function's local variable count.
 			result = XenonSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.Size()));
 			if(result != XENON_SUCCESS)
 			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function local variable count: signature=\"%s\", count=%" PRIu32,
+					"Failed to serialize function local variable count: error=\"%s\", signature=\"%s\", count=%" PRIu32,
+					errorString,
 					binding.pSignature->data,
 					uint32_t(binding.pFunction->locals.Size())
 				);
+
+				return false;
 			}
 
 			// Write the function's local variable table.
@@ -820,10 +881,13 @@ bool XenonProgramWriter::Serialize(
 				result = XenonSerializerWriteUint32(hSerializer, kv.value);
 				if(result != XENON_SUCCESS)
 				{
+					const char* const errorString = XenonGetErrorCodeString(result);
+
 					XenonReportMessage(
 						hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to serialize local variable value index: name=\"%s\", index=%" PRIu32,
+						"Failed to serialize local variable value index: error=\"%s\", name=\"%s\", index=%" PRIu32,
+						errorString,
 						kv.key->data,
 						kv.value
 					);
@@ -879,11 +943,15 @@ bool XenonProgramWriter::Serialize(
 
 	if(result != XENON_SUCCESS)
 	{
+		const char* const errorString = XenonGetErrorCodeString(result);
+
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to write program version header data"
+			"Failed to write program version header data (2nd pass): error=\"%s\"",
+			errorString
 		);
+
 		return false;
 	}
 

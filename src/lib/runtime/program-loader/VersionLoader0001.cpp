@@ -49,9 +49,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file dependency table offset: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file dependency table offset: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -66,9 +66,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file dependency table length: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file dependency table length: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -83,9 +83,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file object table offset: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file object table offset: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -100,9 +100,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file object table length: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file object table length: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -117,9 +117,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file constant table offset: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file constant table offset: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -134,9 +134,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file constant table length: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file constant table length: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -151,9 +151,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file global table offset: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file global table offset: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -168,9 +168,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file global table length: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file global table length: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -185,9 +185,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file function table offset: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file function table offset: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -202,9 +202,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file function table length: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file function table length: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -219,9 +219,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file bytecode offset: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file bytecode offset: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -236,9 +236,9 @@ static bool ReadHeader(
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file bytecode length: program=\"%s\", error=\"%s\"",
-			pProgramName->data,
-			errorString
+			"Error reading program file bytecode length: error=\"%s\", program=\"%s\"",
+			errorString,
+			pProgramName->data
 		);
 
 		return false;
@@ -373,9 +373,9 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the dependency table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
-				pOutProgram->pName->data,
+				"Error setting program file stream position to the offset of the dependency table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				errorString,
+				pOutProgram->pName->data,
 				header.dependencyTableOffset
 			);
 
@@ -412,9 +412,9 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the object table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
-				pOutProgram->pName->data,
+				"Error setting program file stream position to the offset of the object table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				errorString,
+				pOutProgram->pName->data,
 				header.objectTableOffset
 			);
 
@@ -443,9 +443,9 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Error setting program file stream position to the offset of the constant table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
-					pOutProgram->pName->data,
+					"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 					errorString,
+					pOutProgram->pName->data,
 					header.constantTableOffset
 				);
 
@@ -476,9 +476,9 @@ bool XenonProgramVersion0001::Load(
 					XenonReportMessage(
 						hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Error reading object member type: program=\"%s\", error=\"%s\", objectType=\"%s\", memberName=\"%s\"",
-						pOutProgram->pName->data,
+						"Error reading object member type: error=\"%s\", program=\"%s\", objectType=\"%s\", memberName=\"%s\"",
 						errorString,
+						pOutProgram->pName->data,
 						pTypeName->data,
 						pMemberName->data
 					);
@@ -509,6 +509,13 @@ bool XenonProgramVersion0001::Load(
 
 				return false;
 			}
+			else
+			{
+				XenonObject* const pObjectSchema = XenonObject::CreateSchema(pTypeName, memberDefinitions);
+
+				XenonString::AddRef(pTypeName);
+				hVm->objectSchemas.Insert(pTypeName, pObjectSchema);
+			}
 		}
 	}
 
@@ -523,9 +530,9 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the constant table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
-				pOutProgram->pName->data,
+				"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				errorString,
+				pOutProgram->pName->data,
 				header.constantTableOffset
 			);
 
@@ -563,9 +570,9 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the global variable table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
-				pOutProgram->pName->data,
+				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				errorString,
+				pOutProgram->pName->data,
 				header.globalTableOffset
 			);
 
@@ -610,10 +617,10 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read global variable value index: program=\"%s\", variableName=\"%s\", error=\"%s\"",
+					"Failed to read global variable value index: error=\"%s\", program=\"%s\", variableName=\"%s\"",
+					errorString,
 					pOutProgram->pName->data,
-					pVarName->data,
-					errorString
+					pVarName->data
 				);
 
 				XenonString::Release(pVarName);
@@ -660,9 +667,9 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the global variable table: program=\"%s\", error=\"%s\", offset=%" PRIu32,
-				pOutProgram->pName->data,
+				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				errorString,
+				pOutProgram->pName->data,
 				header.globalTableOffset
 			);
 
@@ -703,10 +710,10 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function 'isNative' flag: program=\"%s\", function=\"%s\", error=\"%s\"",
+					"Failed to read function 'isNative' flag: error=\"%s\", program=\"%s\", function=\"%s\"",
+					errorString,
 					pOutProgram->pName->data,
-					pSignature->data,
-					errorString
+					pSignature->data
 				);
 
 				XenonString::Release(pSignature);
@@ -724,10 +731,10 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function parameter count: program=\"%s\", function=\"%s\", error=\"%s\"",
+					"Failed to read function parameter count: error=\"%s\", program=\"%s\", function=\"%s\"",
+					errorString,
 					pOutProgram->pName->data,
-					pSignature->data,
-					errorString
+					pSignature->data
 				);
 
 				XenonString::Release(pSignature);
@@ -745,10 +752,10 @@ bool XenonProgramVersion0001::Load(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read function return value count: program=\"%s\", function=\"%s\", error=\"%s\"",
+					"Failed to read function return value count: error=\"%s\", program=\"%s\", function=\"%s\"",
+					errorString,
 					pOutProgram->pName->data,
-					pSignature->data,
-					errorString
+					pSignature->data
 				);
 
 				XenonString::Release(pSignature);
@@ -770,10 +777,10 @@ bool XenonProgramVersion0001::Load(
 					XenonReportMessage(
 						hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to read function bytecode offset: program=\"%s\", function=\"%s\", error=\"%s\"",
+						"Failed to read function bytecode offset: error=\"%s\", program=\"%s\", function=\"%s\"",
+						errorString,
 						pOutProgram->pName->data,
-						pSignature->data,
-						errorString
+						pSignature->data
 					);
 
 					XenonString::Release(pSignature);
@@ -791,10 +798,10 @@ bool XenonProgramVersion0001::Load(
 					XenonReportMessage(
 						hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to read function local variable count: program=\"%s\", function=\"%s\", error=\"%s\"",
+						"Failed to read function local variable count: error=\"%s\", program=\"%s\", function=\"%s\"",
+						errorString,
 						pOutProgram->pName->data,
-						pSignature->data,
-						errorString
+						pSignature->data
 					);
 
 					XenonString::Release(pSignature);
@@ -845,11 +852,11 @@ bool XenonProgramVersion0001::Load(
 							XenonReportMessage(
 								hReport,
 								XENON_MESSAGE_TYPE_ERROR,
-								"Failed to read local variable value index: program=\"%s\", function=\"%s\", variableName=\"%s\", error=\"%s\"",
+								"Failed to read local variable value index: error=\"%s\", program=\"%s\", function=\"%s\", variableName=\"%s\"",
+								errorString,
 								pOutProgram->pName->data,
 								pSignature->data,
-								pVarName->data,
-								errorString
+								pVarName->data
 							);
 
 							XenonString::Release(pVarName);
@@ -965,9 +972,9 @@ bool XenonProgramVersion0001::Load(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the program bytecode: program=\"%s\", error=\"%s\", offset=%" PRIu32,
-				pOutProgram->pName->data,
+				"Error setting program file stream position to the offset of the program bytecode: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				errorString,
+				pOutProgram->pName->data,
 				header.bytecodeOffset
 			);
 
