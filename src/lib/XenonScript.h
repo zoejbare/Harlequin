@@ -562,7 +562,7 @@ XENON_MAIN_API size_t XenonValueGetObjectMemberCount(XenonValueHandle hValue);
 
 XENON_MAIN_API XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const char* memberName);
 
-XENON_MAIN_API int XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* memberName);
+XENON_MAIN_API uint8_t XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* memberName);
 
 XENON_MAIN_API int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberName, XenonValueHandle hMemberValue);
 
@@ -640,7 +640,8 @@ XENON_MAIN_API int XenonProgramWriterAddObjectMember(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* objectTypeName,
 	const char* memberName,
-	int memberValueType
+	uint8_t memberValueType,
+	uint32_t* pOutIndex
 );
 
 XENON_MAIN_API int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const char* variableName, uint32_t constantIndex);
@@ -718,10 +719,12 @@ enum XenonOpCodeEnum
 	XENON_OP_CODE_LOAD_CONSTANT,
 	XENON_OP_CODE_LOAD_GLOBAL,
 	XENON_OP_CODE_LOAD_LOCAL,
+	XENON_OP_CODE_LOAD_MEMBER,
 	XENON_OP_CODE_LOAD_PARAM,
 
 	XENON_OP_CODE_STORE_GLOBAL,
 	XENON_OP_CODE_STORE_LOCAL,
+	XENON_OP_CODE_STORE_MEMBER,
 	XENON_OP_CODE_STORE_PARAM,
 
 	XENON_OP_CODE_PUSH,

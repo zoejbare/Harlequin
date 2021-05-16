@@ -104,46 +104,62 @@ void XenonObject::Dispose(XenonObject* const pObject)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonObject::GetMemberValue(XenonObject* const pObject, const int memberIndex)
+XenonValueHandle XenonObject::GetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, int* const pOutResult)
 {
 	assert(pObject != nullptr);
 
-	if(memberIndex < int(pObject->members.count))
+	if(memberIndex < uint32_t(pObject->members.count))
 	{
+		(*pOutResult) = XENON_SUCCESS;
+
 		return pObject->members.pData[memberIndex];
 	}
+
+	(*pOutResult) = XENON_ERROR_INDEX_OUT_OF_RANGE;
 
 	return XENON_VALUE_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject::MemberDefinition XenonObject::GetMemberDefinition(XenonObject* const pObject, XenonString* const pMemberName)
+XenonObject::MemberDefinition XenonObject::GetMemberDefinition(
+	XenonObject* const pObject,
+	XenonString* const pMemberName,
+	int* const pOutResult
+)
 {
 	assert(pObject != nullptr);
 	assert(pMemberName != nullptr);
+	assert(pOutResult != nullptr);
 
 	auto kv = pObject->definitions.find(pMemberName);
 	if(kv == pObject->definitions.end())
 	{
-		MemberDefinition dummyDef = { -1, -1 };
+		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
+
+		MemberDefinition dummyDef = { 0, 0 };
 		return dummyDef;
 	}
+
+	(*pOutResult) = XENON_SUCCESS;
 
 	return kv->value;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonObject::SetMemberValue(XenonObject* const pObject, const int memberIndex, XenonValueHandle hValue)
+int XenonObject::SetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue)
 {
 	assert(pObject != nullptr);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 
-	if(memberIndex < int(pObject->members.count))
+	if(memberIndex < uint32_t(pObject->members.count))
 	{
 		pObject->members.pData[memberIndex] = hValue;
+		return XENON_SUCCESS;
 	}
+
+	return XENON_ERROR_INDEX_OUT_OF_RANGE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

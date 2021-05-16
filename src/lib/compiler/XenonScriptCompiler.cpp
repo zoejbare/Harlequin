@@ -373,7 +373,8 @@ int XenonProgramWriterAddObjectMember(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* objectTypeName,
 	const char* memberName,
-	int memberValueType
+	uint8_t memberValueType,
+	uint32_t* pOutIndex
 )
 {
 	if(!hProgramWriter
@@ -416,6 +417,11 @@ int XenonProgramWriterAddObjectMember(
 	{
 		XenonString::Release(pMemberName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
+	}
+
+	if(*pOutIndex)
+	{
+		(*pOutIndex) = uint32_t(typeKv->value.orderedMemberNames.size());
 	}
 
 	// Add the member to the object type.

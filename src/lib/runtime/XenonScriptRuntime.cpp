@@ -1797,12 +1797,22 @@ XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const c
 		XenonObject* const pScriptObject = hValue->as.pObject;
 		XenonString* const pMemberName = XenonString::Create(memberName);
 
-		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName);
+		int result;
+
+		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		if(result != XENON_SUCCESS)
+		{
+			return XENON_VALUE_HANDLE_NULL;
+		}
 
 		// Release the member name string now that we don't need it anymore.
 		XenonString::Release(pMemberName);
 
-		XenonValueHandle hMemberValue = XenonObject::GetMemberValue(pScriptObject, memberDef.bindingIndex);
+		XenonValueHandle hMemberValue = XenonObject::GetMemberValue(pScriptObject, memberDef.bindingIndex, &result);
+		if(result != XENON_SUCCESS)
+		{
+			return XENON_VALUE_HANDLE_NULL;
+		}
 
 		// Guard the value against being garbage collected.
 		XenonValue::SetAutoMark(hMemberValue, true);
@@ -1815,14 +1825,20 @@ XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const c
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* memberName)
+uint8_t XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* memberName)
 {
 	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
 	{
 		XenonObject* const pScriptObject = hValue->as.pObject;
 		XenonString* const pMemberName = XenonString::Create(memberName);
 
-		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName);
+		int result;
+
+		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		if(!result)
+		{
+			return XENON_VALUE_TYPE_NULL;
+		}
 
 		// Release the member name string now that we don't need it anymore.
 		XenonString::Release(pMemberName);
@@ -1842,7 +1858,13 @@ int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberNa
 		XenonObject* const pScriptObject = hValue->as.pObject;
 		XenonString* const pMemberName = XenonString::Create(memberName);
 
-		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName);
+		int result;
+
+		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		if(result != XENON_SUCCESS)
+		{
+			return result;
+		}
 
 		// Release the member name string now that we don't need it anymore.
 		XenonString::Release(pMemberName);

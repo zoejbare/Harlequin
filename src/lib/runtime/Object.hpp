@@ -33,8 +33,8 @@ struct XenonObject
 {
 	struct MemberDefinition
 	{
-		int valueType;
-		int bindingIndex;
+		uint32_t bindingIndex;
+		uint8_t valueType;
 	};
 
 	typedef SkipProbe::HashMap<
@@ -58,10 +58,10 @@ struct XenonObject
 	static XenonObject* CreateCopy(XenonObject* const pObject);
 	static void Dispose(XenonObject* const pObject);
 
-	static XenonValueHandle GetMemberValue(XenonObject* const pObject, const int memberIndex);
-	static MemberDefinition GetMemberDefinition(XenonObject* const pObject, XenonString* const pMemberName);
+	static XenonValueHandle GetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, int* const pOutResult);
+	static MemberDefinition GetMemberDefinition(XenonObject* const pObject, XenonString* const pMemberName, int* const pOutResult);
 
-	static void SetMemberValue(XenonObject* const pObject, const int memberIndex, XenonValueHandle hValue);
+	static int SetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue);
 
 	static XenonObject* prv_createObject(XenonObject*);
 
