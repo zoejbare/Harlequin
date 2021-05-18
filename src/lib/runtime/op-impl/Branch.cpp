@@ -23,6 +23,7 @@
 #include "../Function.hpp"
 #include "../Program.hpp"
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 
