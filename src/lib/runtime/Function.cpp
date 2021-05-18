@@ -27,7 +27,8 @@ XenonFunctionHandle XenonFunction::CreateScript(
 	XenonProgramHandle hProgram,
 	XenonString* const pSignature,
 	XenonValue::StringToHandleMap& locals,
-	const uint32_t bytecodeOffset,
+	const uint32_t bytecodeOffsetStart,
+	const uint32_t bytecodeOffsetEnd,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
@@ -41,7 +42,8 @@ XenonFunctionHandle XenonFunction::CreateScript(
 	pOutput->hProgram = hProgram;
 	pOutput->pSignature = pSignature;
 	pOutput->locals = std::move(locals);
-	pOutput->bytecodeOffset = bytecodeOffset;
+	pOutput->bytecodeOffsetStart = bytecodeOffsetStart;
+	pOutput->bytecodeOffsetEnd = bytecodeOffsetEnd;
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = false;

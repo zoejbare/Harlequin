@@ -79,6 +79,7 @@ struct XenonExecution
 	bool started;
 	bool finished;
 	bool exception;
+	bool abort;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

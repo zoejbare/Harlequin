@@ -189,9 +189,9 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(runMode == XENON_RUN_STEP || runMode == XENON_RUN_CONTINUOUS);
 
-	if(hExec->finished || hExec->exception)
+	if(hExec->finished || hExec->exception || hExec->abort)
 	{
-		// Do nothing if the execution has finished or an unhandled exception was thrown.
+		// Do nothing if the script is no longer executing.
 		return;
 	}
 
@@ -212,7 +212,7 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 
 		case XENON_RUN_CONTINUOUS:
 		{
-			while(!hExec->finished && !hExec->exception && !hExec->yield)
+			while(!hExec->finished && !hExec->exception && !hExec->yield && !hExec->abort)
 			{
 				prv_runStep(hExec);
 			}

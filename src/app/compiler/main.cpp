@@ -215,6 +215,31 @@ int main(int argc, char* argv[])
 		XenonSerializerWriteUint32(hSerializer, constantIndex);
 	};
 
+	auto writeOpAbort = [](XenonSerializerHandle hSerializer)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_ABORT);
+	};
+
+	auto writeOpBranch = [](XenonSerializerHandle hSerializer, int32_t offset)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_BRANCH);
+		XenonSerializerWriteInt32(hSerializer, offset);
+	};
+
+	auto writeOpBranchIfTrue = [](XenonSerializerHandle hSerializer, const uint32_t registerIndex, const int32_t offset)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_BRANCH_IF_TRUE);
+		XenonSerializerWriteUint32(hSerializer, registerIndex);
+		XenonSerializerWriteInt32(hSerializer, offset);
+	};
+
+	auto writeOpBranchIfFalse = [](XenonSerializerHandle hSerializer, const uint32_t registerIndex, const int32_t offset)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_BRANCH_IF_FALSE);
+		XenonSerializerWriteUint32(hSerializer, registerIndex);
+		XenonSerializerWriteInt32(hSerializer, offset);
+	};
+
 	XenonSerializerHandle hFileSerializer = XENON_SERIALIZER_HANDLE_NULL;
 	XenonSerializerHandle hMainFuncSerializer = XENON_SERIALIZER_HANDLE_NULL;
 	XenonSerializerHandle hSubFuncSerializer = XENON_SERIALIZER_HANDLE_NULL;
@@ -225,7 +250,8 @@ int main(int argc, char* argv[])
 
 	const char* const mainFuncSignature = "void App.Program.Main()";
 	const char* const subFuncSignature = "int32 App.Program.DoWork(float64)";
-	const char* const nativeFuncSignature = "void App.Program.PrintString(string)";
+	const char* const nativePrintFuncSignature = "void App.Program.PrintString(string)";
+	const char* const nativeDecrementFuncSignature = "(int32, bool) App.Program.Decrement(int32)";
 	const char* const opAddStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_ADD_STRING);
 	const char* const opCastStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT32_TO_STRING);
 	const char* const globalVariableName = "globalTestVar";
@@ -258,7 +284,7 @@ int main(int argc, char* argv[])
 	XenonProgramWriterAddConstantString(hProgramWriter, subFuncSignature, &constIndex7);
 
 	uint32_t constIndex8;
-	XenonProgramWriterAddConstantString(hProgramWriter, nativeFuncSignature, &constIndex8);
+	XenonProgramWriterAddConstantString(hProgramWriter, nativePrintFuncSignature, &constIndex8);
 
 	uint32_t constIndex9;
 	XenonProgramWriterAddConstantString(hProgramWriter, localVariableName, &constIndex9);
@@ -275,6 +301,12 @@ int main(int argc, char* argv[])
 	uint32_t constIndex13;
 	XenonProgramWriterAddConstantString(hProgramWriter, objectMemberName, &constIndex13);
 
+	uint32_t constIndex14;
+	XenonProgramWriterAddConstantString(hProgramWriter, nativeDecrementFuncSignature, &constIndex14);
+
+	uint32_t constIndex15;
+	XenonProgramWriterAddConstantInt32(hProgramWriter, 5, &constIndex15);
+
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);
 
@@ -282,7 +314,7 @@ int main(int argc, char* argv[])
 	XenonProgramWriterAddObjectType(hProgramWriter, objectTypeName);
 	XenonProgramWriterAddObjectMember(hProgramWriter, objectTypeName, objectMemberName, XENON_VALUE_TYPE_INT32, nullptr);
 
-	// void Program.Main()
+	// void App.Program.Main()
 	{
 		writeOpLoadConstant(hMainFuncSerializer, 0, constIndex0);
 		writeOpLoadConstant(hMainFuncSerializer, 1, constIndex1);
@@ -291,6 +323,7 @@ int main(int argc, char* argv[])
 		writeOpLoadConstant(hMainFuncSerializer, 4, constIndex4);
 		writeOpLoadConstant(hMainFuncSerializer, 5, constIndex5);
 		writeOpLoadConstant(hMainFuncSerializer, 6, constIndex6);
+		writeOpNop(hMainFuncSerializer);
 
 		writeOpLoadGlobal(hMainFuncSerializer, 7, constIndex6);
 		writeOpStoreGlobal(hMainFuncSerializer, constIndex6, 5);
@@ -307,7 +340,7 @@ int main(int argc, char* argv[])
 		XenonProgramWriterAddFunction(hProgramWriter, mainFuncSignature, pMainFuncData, mainFuncLength, 0, 0);
 	}
 
-	// int32 Program.DoWork(float64)
+	// int32 App.Program.DoWork(float64)
 	{
 		writeOpLoadParam(hSubFuncSerializer, 0, 0);
 
@@ -319,7 +352,7 @@ int main(int argc, char* argv[])
 		writeOpPop(hSubFuncSerializer, 1);
 
 		writeOpInitObject(hSubFuncSerializer, 2, constIndex12);
-		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex1);
+		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex15);
 		writeOpStoreMember(hSubFuncSerializer, 2, 1, 0);
 
 		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex4);
@@ -331,18 +364,36 @@ int main(int argc, char* argv[])
 		writeOpCall(hSubFuncSerializer, constIndex10);
 		writeOpCall(hSubFuncSerializer, constIndex8);
 
-		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex0);
+		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex15);
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 		writeOpStoreParam(hSubFuncSerializer, 1, 0);
 
-		writeOpLoadMember(hSubFuncSerializer, 0, 2, 0);
-		writeOpStoreParam(hSubFuncSerializer, 0, 0);
+		const size_t loopOffsetStart = XenonSerializerGetStreamPosition(hSubFuncSerializer);
 
+		writeOpLoadMember(hSubFuncSerializer, 0, 2, 0);
+
+		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 		writeOpCall(hSubFuncSerializer, constIndex11);
 		writeOpCall(hSubFuncSerializer, constIndex8);
-		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 
-		writeOpNop(hSubFuncSerializer);
+		writeOpStoreParam(hSubFuncSerializer, 0, 0);
+		writeOpCall(hSubFuncSerializer, constIndex14);
+		writeOpLoadParam(hSubFuncSerializer, 0, 0);
+		writeOpStoreMember(hSubFuncSerializer, 2, 0, 0);
+
+		writeOpLoadParam(hSubFuncSerializer, 0, 1);
+		writeOpBranchIfTrue(hSubFuncSerializer, 0, 14);
+
+		const size_t loopOffsetEnd = XenonSerializerGetStreamPosition(hSubFuncSerializer);
+		const int32_t loopRelativeOffset = int32_t(loopOffsetEnd - loopOffsetStart);
+
+		writeOpBranch(hSubFuncSerializer, -loopRelativeOffset);
+
+		writeOpLoadMember(hSubFuncSerializer, 0, 2, 0);
+		writeOpBranchIfFalse(hSubFuncSerializer, 0, 10);
+		writeOpAbort(hSubFuncSerializer);
+
+		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 		writeOpReturn(hSubFuncSerializer);
 
 		const void* const pSubFuncData = XenonSerializerGetRawStreamPointer(hSubFuncSerializer);
@@ -352,9 +403,14 @@ int main(int argc, char* argv[])
 		XenonProgramWriterAddLocalVariable(hProgramWriter, subFuncSignature, localVariableName, constIndex2);
 	}
 
-	// void Program.PrintString(string)
+	// void App.Program.PrintString(string)
 	{
-		XenonProgramWriterAddNativeFunction(hProgramWriter, nativeFuncSignature, 1, 0);
+		XenonProgramWriterAddNativeFunction(hProgramWriter, nativePrintFuncSignature, 1, 0);
+	}
+
+	// (int32, bool) App.Program.Decrement(int32)
+	{
+		XenonProgramWriterAddNativeFunction(hProgramWriter, nativeDecrementFuncSignature, 1, 2);
 	}
 
 	result = XenonProgramWriterSerialize(hProgramWriter, hCompiler, hFileSerializer, XENON_ENDIAN_MODE_NATIVE);

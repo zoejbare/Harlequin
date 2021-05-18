@@ -260,23 +260,65 @@ int main(int argc, char* argv[])
 
 		if(XenonExecutionCreate(&hExec, hVm, hEntryFunc) == XENON_SUCCESS)
 		{
-			XenonFunctionHandle hNativeFunc = XENON_FUNCTION_HANDLE_NULL;
-			XenonVmGetFunction(hVm, &hNativeFunc, "void App.Program.PrintString(string)");
+			XenonFunctionHandle hNativePrintFunc = XENON_FUNCTION_HANDLE_NULL;
+			XenonVmGetFunction(hVm, &hNativePrintFunc, "void App.Program.PrintString(string)");
 
-			if(hNativeFunc != XENON_FUNCTION_HANDLE_NULL)
+			if(hNativePrintFunc != XENON_FUNCTION_HANDLE_NULL)
 			{
 				auto printString = [](XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 				{
-					XenonValueHandle hParam = XENON_VALUE_HANDLE_NULL;
-					XenonExecutionGetIoRegister(hExec, &hParam, 0);
+					XenonValueHandle hInputParam = XENON_VALUE_HANDLE_NULL;
+					XenonExecutionGetIoRegister(hExec, &hInputParam, 0);
 
-					const char* const param = XenonValueGetString(hParam);
+					const char* const inputParam = XenonValueGetString(hInputParam);
 
-					printf("> \"%s\"\n", param);
-					XenonValueAbandon(hParam);
+					printf("> \"%s\"\n", inputParam);
+					XenonValueAbandon(hInputParam);
 				};
 
-				XenonFunctionSetNativeBinding(hNativeFunc, printString, nullptr);
+				XenonFunctionSetNativeBinding(hNativePrintFunc, printString, nullptr);
+			}
+
+			XenonFunctionHandle hNativeDecrementFunc = XENON_FUNCTION_HANDLE_NULL;
+			XenonVmGetFunction(hVm, &hNativeDecrementFunc, "(int32, bool) App.Program.Decrement(int32)");
+
+			if(hNativeDecrementFunc != XENON_FUNCTION_HANDLE_NULL)
+			{
+				auto decrement = [](XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+				{
+					XenonValueHandle hInputParam = XENON_VALUE_HANDLE_NULL;
+					XenonExecutionGetIoRegister(hExec, &hInputParam, 0);
+
+					if(XenonValueIsInt32(hInputParam))
+					{
+						const int32_t output = XenonValueGetInt32(hInputParam) - 1;
+
+						XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
+						XenonExecutionGetVm(hExec, &hVm);
+
+						XenonValueHandle hOutputParam = XenonValueCreateInt32(hVm, output);
+						XenonExecutionSetIoRegister(hExec, hOutputParam, 0);
+						XenonValueAbandon(hOutputParam);
+
+						if(output <= 0)
+						{
+							hOutputParam = XenonValueCreateBool(hVm, true);
+						}
+						else
+						{
+							hOutputParam = XenonValueCreateNull();
+						}
+
+						XenonExecutionSetIoRegister(hExec, hOutputParam, 1);
+						XenonValueAbandon(hOutputParam);
+					}
+					else
+					{
+						XenonExecutionRaiseException(hExec);
+					}
+				};
+
+				XenonFunctionSetNativeBinding(hNativeDecrementFunc, decrement, nullptr);
 			}
 
 			char msg[256];
@@ -301,7 +343,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Check if there was an unhandled exception raised.
-				result = XenonExecutionGetStatus(hExec, &status, XENON_EXEC_STATUS_EXCEPTION);
+				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_EXCEPTION, &status);
 				if(result != XENON_SUCCESS)
 				{
 					snprintf(msg, sizeof(msg), "Error occurred while retrieving exception status: \"%s\"", XenonGetErrorCodeString(result));
@@ -359,7 +401,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Check if the script has finished running.
-				result = XenonExecutionGetStatus(hExec, &status, XENON_EXEC_STATUS_COMPLETE);
+				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_COMPLETE, &status);
 				if(result != XENON_SUCCESS)
 				{
 					snprintf(msg, sizeof(msg), "Error occurred while retrieving completion status: \"%s\"", XenonGetErrorCodeString(result));
@@ -369,6 +411,20 @@ int main(int argc, char* argv[])
 				if(status)
 				{
 					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Finished executing script");
+					break;
+				}
+
+				// Check if the script has been aborted.
+				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_ABORT, &status);
+				if(result != XENON_SUCCESS)
+				{
+					snprintf(msg, sizeof(msg), "Error occurred while retrieving abort status: \"%s\"", XenonGetErrorCodeString(result));
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					break;
+				}
+				if(status)
+				{
+					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_WARNING, "Script execution aborted");
 					break;
 				}
 			}

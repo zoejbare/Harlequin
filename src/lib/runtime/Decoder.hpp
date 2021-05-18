@@ -28,6 +28,7 @@ struct XenonDecoder
 {
 	static void Initialize(XenonDecoder& output, XenonProgramHandle hProgram, uint32_t offset);
 
+	static int32_t LoadInt32(XenonDecoder& decoder);
 	static uint8_t LoadUint8(XenonDecoder& decoder);
 	static uint32_t LoadUint32(XenonDecoder& decoder);
 

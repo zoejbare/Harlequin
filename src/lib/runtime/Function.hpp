@@ -53,7 +53,8 @@ struct XenonFunction
 		XenonProgramHandle hProgram,
 		XenonString* const pSignature,
 		XenonValue::StringToHandleMap& locals,
-		const uint32_t bytecodeOffset,
+		const uint32_t bytecodeOffsetStart,
+		const uint32_t bytecodeOffsetEnd,
 		const uint16_t numParameters,
 		const uint16_t numReturnValues
 	);
@@ -84,7 +85,8 @@ struct XenonFunction
 
 	XenonValue::StringToHandleMap locals;
 
-	uint32_t bytecodeOffset;
+	uint32_t bytecodeOffsetStart;
+	uint32_t bytecodeOffsetEnd;
 
 	uint16_t numParameters;
 	uint16_t numReturnValues;

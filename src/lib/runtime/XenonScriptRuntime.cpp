@@ -602,7 +602,7 @@ int XenonFunctionGetBytecodeOffset(XenonFunctionHandle hFunction, uint32_t* pOut
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
-	(*pOutOffset) = hFunction->bytecodeOffset;
+	(*pOutOffset) = hFunction->bytecodeOffsetStart;
 
 	return XENON_SUCCESS;
 }
@@ -685,7 +685,7 @@ int XenonFunctionDisassemble(XenonFunctionHandle hFunction, XenonCallbackOpDisas
 	disasm.onDisasmFn = onDisasmFn;
 	disasm.pUserData = pUserData;
 
-	XenonDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->bytecodeOffset);
+	XenonDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
 
 	// Iterate through each instruction.
 	for(;;)
@@ -815,7 +815,7 @@ int XenonExecutionGetVm(XenonExecutionHandle hExec, XenonVmHandle* phOutVm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionGetStatus(XenonExecutionHandle hExec, bool* pOutStatus, int statusType)
+int XenonExecutionGetStatus(XenonExecutionHandle hExec, int statusType, bool* pOutStatus)
 {
 	if(!hExec || !pOutStatus)
 	{
@@ -838,6 +838,10 @@ int XenonExecutionGetStatus(XenonExecutionHandle hExec, bool* pOutStatus, int st
 
 		case XENON_EXEC_STATUS_EXCEPTION:
 			(*pOutStatus) = hExec->exception;
+			break;
+
+		case XENON_EXEC_STATUS_ABORT:
+			(*pOutStatus) = hExec->abort;
 			break;
 
 		default:

@@ -16,69 +16,36 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "../OpDecl.hpp"
+
+#include "../Decoder.hpp"
+#include "../Execution.hpp"
+
+#include <stdio.h>
 
 //----------------------------------------------------------------------------------------------------------------------
-
-#include "../XenonScript.h"
-
-#include "Decoder.hpp"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XenonDisassemble
-{
-	XenonProgramHandle hProgram;
-	XenonCallbackOpDisasm onDisasmFn;
-
-	void* pUserData;
-
-	uintptr_t opcodeOffset;
-
-	XenonDecoder decoder;
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-#define XENON_DECLARE_OP_CODE_FN(op_name) \
-	void OpCodeExec_ ## op_name(XenonExecutionHandle); \
-	void OpCodeDisasm_ ## op_name(XenonDisassemble&)
-
+//
+// Perform no operation (idle runtime cycle).
+//
+// 0x: NOP
+//
 //----------------------------------------------------------------------------------------------------------------------
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//----------------------------------------------------------------------------------------------------------------------
-
-XENON_DECLARE_OP_CODE_FN(Nop);
-XENON_DECLARE_OP_CODE_FN(Abort);
-XENON_DECLARE_OP_CODE_FN(Return);
-XENON_DECLARE_OP_CODE_FN(Yield);
-XENON_DECLARE_OP_CODE_FN(Call);
-
-XENON_DECLARE_OP_CODE_FN(LoadConstant);
-XENON_DECLARE_OP_CODE_FN(LoadGlobal);
-XENON_DECLARE_OP_CODE_FN(LoadLocal);
-XENON_DECLARE_OP_CODE_FN(LoadMember);
-XENON_DECLARE_OP_CODE_FN(LoadParam);
-
-XENON_DECLARE_OP_CODE_FN(StoreGlobal);
-XENON_DECLARE_OP_CODE_FN(StoreLocal);
-XENON_DECLARE_OP_CODE_FN(StoreMember);
-XENON_DECLARE_OP_CODE_FN(StoreParam);
-
-XENON_DECLARE_OP_CODE_FN(Push);
-XENON_DECLARE_OP_CODE_FN(Pop);
-
-XENON_DECLARE_OP_CODE_FN(InitObject);
-
-XENON_DECLARE_OP_CODE_FN(Branch);
-XENON_DECLARE_OP_CODE_FN(BranchIfTrue);
-XENON_DECLARE_OP_CODE_FN(BranchIfFalse);
+void OpCodeExec_Abort(XenonExecutionHandle hExec)
+{
+	hExec->abort = true;
+}
 
 //----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_Abort(XenonDisassemble& disasm)
+{
+	disasm.onDisasmFn(disasm.pUserData, "ABORT", disasm.opcodeOffset);
+}
 
 #ifdef __cplusplus
 }

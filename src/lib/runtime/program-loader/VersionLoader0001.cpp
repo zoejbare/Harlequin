@@ -764,12 +764,13 @@ bool XenonProgramVersion0001::Load(
 			}
 
 			XenonValue::StringToHandleMap locals;
-			uint32_t bytecodeOffset = 0;
+			uint32_t bytecodeOffsetStart = 0;
+			uint32_t bytecodeOffsetEnd = 0;
 
 			if(!isNativeFunction)
 			{
-				// Read the function's bytecode offset.
-				result = XenonSerializerReadUint32(hSerializer, &bytecodeOffset);
+				// Read the function's bytecode offset start.
+				result = XenonSerializerReadUint32(hSerializer, &bytecodeOffsetStart);
 				if(result != XENON_SUCCESS)
 				{
 					const char* const errorString = XenonGetErrorCodeString(result);
@@ -777,7 +778,27 @@ bool XenonProgramVersion0001::Load(
 					XenonReportMessage(
 						hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to read function bytecode offset: error=\"%s\", program=\"%s\", function=\"%s\"",
+						"Failed to read function bytecode offset start: error=\"%s\", program=\"%s\", function=\"%s\"",
+						errorString,
+						pOutProgram->pName->data,
+						pSignature->data
+					);
+
+					XenonString::Release(pSignature);
+
+					return false;
+				}
+
+				// Read the function's bytecode offset end.
+				result = XenonSerializerReadUint32(hSerializer, &bytecodeOffsetEnd);
+				if(result != XENON_SUCCESS)
+				{
+					const char* const errorString = XenonGetErrorCodeString(result);
+
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to read function bytecode offset end: error=\"%s\", program=\"%s\", function=\"%s\"",
 						errorString,
 						pOutProgram->pName->data,
 						pSignature->data
@@ -918,7 +939,8 @@ bool XenonProgramVersion0001::Load(
 						pOutProgram,
 						pSignature,
 						locals,
-						bytecodeOffset,
+						bytecodeOffsetStart,
+						bytecodeOffsetEnd,
 						numParameters,
 						numReturnValues
 					);

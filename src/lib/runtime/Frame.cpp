@@ -71,7 +71,7 @@ XenonFrameHandle XenonFrame::Create(XenonExecutionHandle hExec, XenonFunctionHan
 			pOutput->locals.Insert(kv.key, XenonValueCopy(hExec->hVm, kv.value));
 		}
 
-		XenonDecoder::Initialize(pOutput->decoder, hFunction->hProgram, hFunction->bytecodeOffset);
+		XenonDecoder::Initialize(pOutput->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
 	}
 
 	return pOutput;

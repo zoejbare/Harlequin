@@ -28,6 +28,7 @@ void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
 		hVm->opCodes.pData[XENON_OP_CODE_ ## opCode].disasmFn = OpCodeDisasm_ ## name
 
 	XENON_BIND_OP_CODE(NOP, Nop);
+	XENON_BIND_OP_CODE(ABORT, Abort);
 	XENON_BIND_OP_CODE(RETURN, Return);
 	XENON_BIND_OP_CODE(YIELD, Yield);
 	XENON_BIND_OP_CODE(CALL, Call);
@@ -43,6 +44,9 @@ void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
 	XENON_BIND_OP_CODE(PUSH, Push);
 	XENON_BIND_OP_CODE(POP, Pop);
 	XENON_BIND_OP_CODE(INIT_OBJECT, InitObject);
+	XENON_BIND_OP_CODE(BRANCH, Branch);
+	XENON_BIND_OP_CODE(BRANCH_IF_TRUE, BranchIfTrue);
+	XENON_BIND_OP_CODE(BRANCH_IF_FALSE, BranchIfFalse);
 
 	#undef XENON_BIND_OP_CODE
 }

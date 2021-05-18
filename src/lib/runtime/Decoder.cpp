@@ -34,6 +34,24 @@ void XenonDecoder::Initialize(XenonDecoder& output, XenonProgramHandle hProgram,
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int32_t XenonDecoder::LoadInt32(XenonDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	// Get the byte of the current position of the instruction pointer.
+	const int32_t output = *reinterpret_cast<int32_t*>(decoder.ip);
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(int32_t);
+
+	// Return the data, endian swapping it if needed.
+	return decoder.sameEndian
+		? output
+		: XenonEndianSwapInt32(output);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 uint8_t XenonDecoder::LoadUint8(XenonDecoder& decoder)
 {
 	assert(decoder.ip != nullptr);

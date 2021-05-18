@@ -283,6 +283,7 @@ enum XenonExecStatusEnum
 	XENON_EXEC_STATUS_RUNNING,
 	XENON_EXEC_STATUS_COMPLETE,
 	XENON_EXEC_STATUS_EXCEPTION,
+	XENON_EXEC_STATUS_ABORT,
 };
 
 typedef struct XenonVm* XenonVmHandle;
@@ -424,7 +425,7 @@ XENON_MAIN_API int XenonExecutionRaiseException(XenonExecutionHandle hExec);
 
 XENON_MAIN_API int XenonExecutionGetVm(XenonExecutionHandle hExec, XenonVmHandle* phOutVm);
 
-XENON_MAIN_API int XenonExecutionGetStatus(XenonExecutionHandle hExec, bool* pOutStatus, int statusType);
+XENON_MAIN_API int XenonExecutionGetStatus(XenonExecutionHandle hExec, int statusType, bool* pOutStatus);
 
 XENON_MAIN_API int XenonExecutionHasUnhandledExceptionOccurred(XenonExecutionHandle hExec, bool* pOutException);
 
@@ -714,6 +715,7 @@ enum XenonValueType
 enum XenonOpCodeEnum
 {
 	XENON_OP_CODE_NOP,
+	XENON_OP_CODE_ABORT,
 	XENON_OP_CODE_RETURN,
 	XENON_OP_CODE_YIELD,
 	XENON_OP_CODE_CALL,
@@ -733,6 +735,10 @@ enum XenonOpCodeEnum
 	XENON_OP_CODE_POP,
 
 	XENON_OP_CODE_INIT_OBJECT,
+
+	XENON_OP_CODE_BRANCH,
+	XENON_OP_CODE_BRANCH_IF_TRUE,
+	XENON_OP_CODE_BRANCH_IF_FALSE,
 
 	XENON_OP_CODE__TOTAL_COUNT,
 	XENON_OP_CODE__FOCE_DWORD = 0x7FFFFFFFul,

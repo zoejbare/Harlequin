@@ -477,8 +477,8 @@ bool XenonProgramWriter::Serialize(
 		XenonFunctionData* pFunction;
 		XenonString* pSignature;
 
-		uint32_t finalOffset;
-
+		uint32_t offsetStart;
+		uint32_t offsetEnd;
 	};
 
 	std::deque<FunctionBinding> functionBindings;
@@ -486,7 +486,7 @@ bool XenonProgramWriter::Serialize(
 
 	// Get the function bindings and bytecode ready to be written out.
 	{
-		size_t bytecodeLength = 0;
+		uint32_t bytecodeLength = 0;
 
 		// Build the binding data for each function while calculating total length of the bytecode.
 		for(auto& kv : hProgramWriter->functions)
@@ -495,11 +495,11 @@ bool XenonProgramWriter::Serialize(
 
 			binding.pFunction = &kv.value;
 			binding.pSignature = kv.key;
-			binding.finalOffset = uint32_t(bytecodeLength);
+			binding.offsetStart = uint32_t(bytecodeLength);
+			binding.offsetEnd = binding.offsetStart + uint32_t(binding.pFunction->bytecode.size());
 
-			// Add the length of the function's bytecode, but also align the length to add padding between each function.
-			bytecodeLength += binding.pFunction->bytecode.size();
-			bytecodeLength = getAlignedSize(bytecodeLength);
+			// Align the end of the offset to add padding between each function.
+			bytecodeLength = getAlignedSize(binding.offsetEnd);
 
 			functionBindings.push_back(binding);
 		}
@@ -507,6 +507,7 @@ bool XenonProgramWriter::Serialize(
 		// Allocate space for the entire block of bytecode for the program.
 		bytecode.resize(bytecodeLength);
 
+		// Clear the bytecode buffer.
 		uint8_t* const pProgramBytecode = bytecode.data();
 		memset(pProgramBytecode, 0, bytecode.size());
 
@@ -514,7 +515,7 @@ bool XenonProgramWriter::Serialize(
 		for(const FunctionBinding& binding : functionBindings)
 		{
 			memcpy(
-				pProgramBytecode + binding.finalOffset,
+				pProgramBytecode + binding.offsetStart,
 				binding.pFunction->bytecode.data(),
 				binding.pFunction->bytecode.size()
 			);
@@ -760,11 +761,13 @@ bool XenonProgramWriter::Serialize(
 			XenonReportMessage(
 				hReport,
 				XENON_MESSAGE_TYPE_VERBOSE,
-				"Serializing script function: signature=\"%s\", numParams=%" PRIu16 ", numReturnValues=%" PRIu16 ", offset=%" PRIu32,
+				"Serializing script function: signature=\"%s\", numParams=%" PRIu16
+				", numReturnValues=%" PRIu16 ", offsetStart=%" PRIX32 ", offsetEnd=%" PRIX32,
 				binding.pSignature->data,
 				binding.pFunction->numParameters,
 				binding.pFunction->numReturnValues,
-				binding.finalOffset
+				binding.offsetStart,
+				binding.offsetEnd
 			);
 		}
 
@@ -830,8 +833,8 @@ bool XenonProgramWriter::Serialize(
 
 		if(!binding.pFunction->isNative)
 		{
-			// Write the function's offset into the program file.
-			result = XenonSerializerWriteUint32(hSerializer, binding.finalOffset);
+			// Write the function's offset start into the program file.
+			result = XenonSerializerWriteUint32(hSerializer, binding.offsetStart);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -839,10 +842,28 @@ bool XenonProgramWriter::Serialize(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
+					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offsetStart=%" PRIX32,
 					errorString,
 					binding.pSignature->data,
-					binding.finalOffset
+					binding.offsetStart
+				);
+
+				return false;
+			}
+
+			// Write the function's offset end into the program file.
+			result = XenonSerializerWriteUint32(hSerializer, binding.offsetEnd);
+			if(result != XENON_SUCCESS)
+			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offsetEnd=%" PRIX32,
+					errorString,
+					binding.pSignature->data,
+					binding.offsetEnd
 				);
 
 				return false;
