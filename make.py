@@ -38,10 +38,14 @@ visual_studio.SetEnableFileTypeFolders(False)
 
 ###################################################################################################
 
-outputSubPath = "{toolchainName}/{architectureName}/{targetName}"
+outputSubPath = "{userData.outputRootName}/{targetName}"
 
+csbuild.SetUserData("outputRootName", "{toolchainName}")
 csbuild.SetOutputDirectory(f"_out/{outputSubPath}")
 csbuild.SetIntermediateDirectory(f"_int/{outputSubPath}")
+
+with csbuild.Toolchain("gcc", "clang", "msvc"):
+	csbuild.SetUserData("outputRootName", f"{platform.system().lower()}-{{toolchainName}}-{{architectureName}}")
 
 ###################################################################################################
 
@@ -225,7 +229,7 @@ with csbuild.Project(ExtXxHash.projectName, ExtXxHash.path, autoDiscoverSourceFi
 
 ###################################################################################################
 
-class XenonLib(object):
+class XenonScriptLib(object):
 	rootPath = "src/lib"
 
 	@staticmethod
@@ -237,37 +241,37 @@ class XenonLib(object):
 			csbuild.AddDefines("XENON_BUILD_STATIC_LIB")
 
 		with csbuild.Scope(csbuild.ScopeDef.All):
-			csbuild.AddIncludeDirectories(XenonLib.rootPath)
+			csbuild.AddIncludeDirectories(XenonScriptLib.rootPath)
 
 		if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-			csbuild.AddSourceDirectories(XenonLib.rootPath)
+			csbuild.AddSourceDirectories(XenonScriptLib.rootPath)
 
 ###################################################################################################
 
-class LibXenonBase(object):
-	projectName = "LibXenonBase"
-	outputName = "libxenonbase"
+class LibXenonScriptBase(object):
+	projectName = "LibXenonScriptBase"
+	outputName = "libxenonscriptbase"
 	dependencies = [
 		ExtNcps.projectName,
 		ExtSkipProbe.projectName,
 		ExtXxHash.projectName,
 	]
 
-with csbuild.Project(LibXenonBase.projectName, XenonLib.rootPath, LibXenonBase.dependencies, autoDiscoverSourceFiles=False):
-	XenonLib.setCommonOptions(LibXenonBase.outputName)
+with csbuild.Project(LibXenonScriptBase.projectName, XenonScriptLib.rootPath, LibXenonScriptBase.dependencies, autoDiscoverSourceFiles=False):
+	XenonScriptLib.setCommonOptions(LibXenonScriptBase.outputName)
 
-	csbuild.AddSourceDirectories(f"{XenonLib.rootPath}/base")
+	csbuild.AddSourceDirectories(f"{XenonScriptLib.rootPath}/base")
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
-			f"{XenonLib.rootPath}/compiler",
-			f"{XenonLib.rootPath}/runtime",
+			f"{XenonScriptLib.rootPath}/compiler",
+			f"{XenonScriptLib.rootPath}/runtime",
 		)
 	else:
 		csbuild.AddExcludeDirectories(
-			f"{XenonLib.rootPath}/base/mutex-impl",
-			f"{XenonLib.rootPath}/base/rwlock-impl",
-			f"{XenonLib.rootPath}/base/thread-impl",
+			f"{XenonScriptLib.rootPath}/base/mutex-impl",
+			f"{XenonScriptLib.rootPath}/base/rwlock-impl",
+			f"{XenonScriptLib.rootPath}/base/thread-impl",
 		)
 
 	with csbuild.Toolchain("msvc", "gcc", "clang"):
@@ -275,36 +279,36 @@ with csbuild.Project(LibXenonBase.projectName, XenonLib.rootPath, LibXenonBase.d
 
 	with csbuild.Toolchain("msvc"):
 		csbuild.AddSourceFiles(
-			f"{XenonLib.rootPath}/base/*-impl/*Win32.cpp",
+			f"{XenonScriptLib.rootPath}/base/*-impl/*Win32.cpp",
 		)
 
 	with csbuild.Toolchain("gcc", "clang", "ps4"):
 		csbuild.AddSourceFiles(
-			f"{XenonLib.rootPath}/base/*-impl/*Posix.cpp",
+			f"{XenonScriptLib.rootPath}/base/*-impl/*Posix.cpp",
 		)
 
 ###################################################################################################
 
-class LibXenonCompiler(object):
-	projectName = "LibXenonCompiler"
-	outputName = "libxenoncompiler"
+class LibXenonScriptCompiler(object):
+	projectName = "LibXenonScriptCompiler"
+	outputName = "libxenonscriptcompiler"
 	dependencies = [
-		LibXenonBase.projectName,
+		LibXenonScriptBase.projectName,
 	]
 
-with csbuild.Project(LibXenonCompiler.projectName, XenonLib.rootPath, LibXenonCompiler.dependencies, autoDiscoverSourceFiles=False):
-	XenonLib.setCommonOptions(LibXenonCompiler.outputName)
+with csbuild.Project(LibXenonScriptCompiler.projectName, XenonScriptLib.rootPath, LibXenonScriptCompiler.dependencies, autoDiscoverSourceFiles=False):
+	XenonScriptLib.setCommonOptions(LibXenonScriptCompiler.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 	csbuild.AddSourceDirectories(
-		f"{XenonLib.rootPath}/common",
-		f"{XenonLib.rootPath}/compiler",
+		f"{XenonScriptLib.rootPath}/common",
+		f"{XenonScriptLib.rootPath}/compiler",
 	)
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
-			f"{XenonLib.rootPath}/base",
-			f"{XenonLib.rootPath}/runtime",
+			f"{XenonScriptLib.rootPath}/base",
+			f"{XenonScriptLib.rootPath}/runtime",
 		)
 
 	with csbuild.Scope(csbuild.ScopeDef.All):
@@ -315,25 +319,25 @@ with csbuild.Project(LibXenonCompiler.projectName, XenonLib.rootPath, LibXenonCo
 
 ###################################################################################################
 
-class LibXenonRuntime(object):
-	projectName = "LibXenonRuntime"
-	outputName = "libxenonruntime"
+class LibXenonScriptRuntime(object):
+	projectName = "LibXenonScriptRuntime"
+	outputName = "libxenonscriptruntime"
 	dependencies = [
-		LibXenonBase.projectName,
+		LibXenonScriptBase.projectName,
 	]
 
-with csbuild.Project(LibXenonRuntime.projectName, XenonLib.rootPath, LibXenonRuntime.dependencies, autoDiscoverSourceFiles=False):
-	XenonLib.setCommonOptions(LibXenonRuntime.outputName)
+with csbuild.Project(LibXenonScriptRuntime.projectName, XenonScriptLib.rootPath, LibXenonScriptRuntime.dependencies, autoDiscoverSourceFiles=False):
+	XenonScriptLib.setCommonOptions(LibXenonScriptRuntime.outputName)
 
 	csbuild.AddSourceDirectories(
-		f"{XenonLib.rootPath}/common",
-		f"{XenonLib.rootPath}/runtime",
+		f"{XenonScriptLib.rootPath}/common",
+		f"{XenonScriptLib.rootPath}/runtime",
 	)
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
-			f"{XenonLib.rootPath}/base",
-			f"{XenonLib.rootPath}/compiler",
+			f"{XenonScriptLib.rootPath}/base",
+			f"{XenonScriptLib.rootPath}/compiler",
 		)
 
 	with csbuild.Scope(csbuild.ScopeDef.All):
@@ -344,7 +348,7 @@ with csbuild.Project(LibXenonRuntime.projectName, XenonLib.rootPath, LibXenonRun
 
 ###################################################################################################
 
-class XenonApp(object):
+class XenonScriptApp(object):
 	rootPath = "src/app"
 
 	@staticmethod
@@ -366,46 +370,46 @@ class XenonApp(object):
 
 ###################################################################################################
 
-class XenonRuntime(object):
-	projectName = "XenonRuntime"
+class XenonScriptRuntime(object):
+	projectName = "XenonScriptRuntime"
 	outputName = "xenon"
-	path = f"{XenonApp.rootPath}/runtime"
+	path = f"{XenonScriptApp.rootPath}/runtime"
 	dependencies = [
-		LibXenonRuntime.projectName
+		LibXenonScriptRuntime.projectName
 	]
 
-with csbuild.Project(XenonRuntime.projectName, XenonRuntime.path, XenonRuntime.dependencies):
-	XenonApp.setCommonOptions(XenonRuntime.outputName)
+with csbuild.Project(XenonScriptRuntime.projectName, XenonScriptRuntime.path, XenonScriptRuntime.dependencies):
+	XenonScriptApp.setCommonOptions(XenonScriptRuntime.outputName)
 
 ###################################################################################################
 
-class XenonCompiler(object):
-	projectName = "XenonCompiler"
+class XenonScriptCompiler(object):
+	projectName = "XenonScriptCompiler"
 	outputName = "xenonc"
-	path = f"{XenonApp.rootPath}/compiler"
+	path = f"{XenonScriptApp.rootPath}/compiler"
 	dependencies = [
-		LibXenonCompiler.projectName
+		LibXenonScriptCompiler.projectName
 	]
 
-with csbuild.Project(XenonCompiler.projectName, XenonCompiler.path, XenonCompiler.dependencies):
-	XenonApp.setCommonOptions(XenonCompiler.outputName)
+with csbuild.Project(XenonScriptCompiler.projectName, XenonScriptCompiler.path, XenonScriptCompiler.dependencies):
+	XenonScriptApp.setCommonOptions(XenonScriptCompiler.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
 ###################################################################################################
 
-class XenonUnitTest(object):
-	projectName = "XenonUnitTest"
-	outputName = "xenonunittest"
-	path = f"{XenonApp.rootPath}/unit_test"
+class XenonScriptUnitTest(object):
+	projectName = "XenonScriptUnitTest"
+	outputName = "XenonScriptUnitTest"
+	path = f"{XenonScriptApp.rootPath}/unit_test"
 	dependencies = [
 		ExtGoogleTest.projectName,
-		LibXenonCompiler.projectName,
-		LibXenonRuntime.projectName,
+		LibXenonScriptCompiler.projectName,
+		LibXenonScriptRuntime.projectName,
 	]
 
-with csbuild.Project(XenonUnitTest.projectName, XenonUnitTest.path, XenonUnitTest.dependencies):
-	XenonApp.setCommonOptions(XenonUnitTest.outputName)
+with csbuild.Project(XenonScriptUnitTest.projectName, XenonScriptUnitTest.path, XenonScriptUnitTest.dependencies):
+	XenonScriptApp.setCommonOptions(XenonScriptUnitTest.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
