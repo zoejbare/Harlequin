@@ -499,7 +499,7 @@ bool XenonProgramWriter::Serialize(
 			binding.offsetEnd = binding.offsetStart + uint32_t(binding.pFunction->bytecode.size());
 
 			// Align the end of the offset to add padding between each function.
-			bytecodeLength = getAlignedSize(binding.offsetEnd);
+			bytecodeLength = uint32_t(getAlignedSize(binding.offsetEnd));
 
 			functionBindings.push_back(binding);
 		}
