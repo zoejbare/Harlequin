@@ -48,7 +48,7 @@ void XenonBuiltIn::OpMulBool(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 	XenonValueAbandon(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateBool(hVm, left * right);
+	XenonValueHandle hOutput = XenonValueCreateBool(hVm, left && right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
 	XenonValueAbandon(hOutput);
 }

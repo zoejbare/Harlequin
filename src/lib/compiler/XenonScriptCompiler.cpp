@@ -382,7 +382,6 @@ int XenonProgramWriterAddObjectMember(
 		|| objectTypeName[0] == '\0'
 		|| !memberName
 		|| memberName[0] == '\0'
-		|| memberValueType < 0
 		|| memberValueType > XENON_VALUE_TYPE__MAX_VALUE)
 	{
 		return XENON_ERROR_INVALID_ARG;
