@@ -484,9 +484,13 @@ void XenonGarbageCollector::prv_reset(XenonGarbageCollector& gc)
 void XenonGarbageCollector::prv_clearQueue(XenonGarbageCollector& gc)
 {
 	// Clear the proxy queue.
-	XenonGcProxy* pProxy;
-	while(gc.proxyQueue.Dequeue(pProxy, gc.proxyReadTicket))
-	{
+    decltype(proxyQueue)::BatchDequeueList list;
+    for (;;) {
+        gc.proxyQueue.DequeueBatch(list, 512);
+        if (!list.More()) // i.e., if the queue's empty
+        {
+            break;
+        }
 	}
 }
 
