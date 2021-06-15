@@ -400,7 +400,7 @@ with csbuild.Project(XenonScriptCompiler.projectName, XenonScriptCompiler.path, 
 
 class XenonScriptUnitTest(object):
 	projectName = "XenonScriptUnitTest"
-	outputName = "xenonunittest"
+	outputName = "xs-unittest"
 	path = f"{XenonScriptApp.rootPath}/unit_test"
 	dependencies = [
 		ExtGoogleTest.projectName,
