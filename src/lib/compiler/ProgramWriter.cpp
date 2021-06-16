@@ -24,6 +24,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -377,13 +378,13 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 	// Dispose of all dependency names.
 	for(auto& kv : hProgramWriter->dependencies)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(kv.first);
 	}
 
 	// Dispose of all program globals.
 	for(auto& kv : hProgramWriter->globals)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(kv.first);
 	}
 
 	// Dispose of all program constants.
@@ -398,23 +399,23 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 	// Dispose of all functions.
 	for(auto& funcKv : hProgramWriter->functions)
 	{
-		XenonString::Release(funcKv.key);
+		XenonString::Release(funcKv.first);
 
-		for(auto& valueKv : funcKv.value.locals)
+		for(auto& valueKv : funcKv.second.locals)
 		{
-			XenonString::Release(valueKv.key);
+			XenonString::Release(valueKv.first);
 		}
 	}
 
 	// Dispose of all object types.
 	for(auto& typeKv : hProgramWriter->objectTypes)
 	{
-		XenonString::Release(typeKv.value.pTypeName);
+		XenonString::Release(typeKv.second.pTypeName);
 
 		// Dispose of all members belonging to the current object type.
-		for(auto& memberKv : typeKv.value.members)
+		for(auto& memberKv : typeKv.second.members)
 		{
-			XenonString::Release(memberKv.key);
+			XenonString::Release(memberKv.first);
 		}
 	}
 
@@ -493,8 +494,8 @@ bool XenonProgramWriter::Serialize(
 		{
 			FunctionBinding binding;
 
-			binding.pFunction = &kv.value;
-			binding.pSignature = kv.key;
+			binding.pFunction = &kv.second;
+			binding.pSignature = kv.first;
 			binding.offsetStart = uint32_t(bytecodeLength);
 			binding.offsetEnd = binding.offsetStart + uint32_t(binding.pFunction->bytecode.size());
 
@@ -522,10 +523,10 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	versionHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.Size());
-	versionHeader.objectTableLength = uint32_t(hProgramWriter->objectTypes.Size());
+	versionHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.size());
+	versionHeader.objectTableLength = uint32_t(hProgramWriter->objectTypes.size());
 	versionHeader.constantTableLength = uint32_t(hProgramWriter->constants.size());
-	versionHeader.globalTableLength = uint32_t(hProgramWriter->globals.Size());
+	versionHeader.globalTableLength = uint32_t(hProgramWriter->globals.size());
 	versionHeader.functionTableLength = uint32_t(functionBindings.size());
 	versionHeader.bytecodeLength = uint32_t(bytecode.size());
 
@@ -619,9 +620,9 @@ bool XenonProgramWriter::Serialize(
 	// Write the dependency table.
 	for(auto& kv : hProgramWriter->dependencies)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", kv.key->data);
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", kv.first->data);
 
-		if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
+		if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
 		{
 			return false;
 		}
@@ -632,14 +633,14 @@ bool XenonProgramWriter::Serialize(
 	// Write the object type schemas.
 	for(auto& typeKv : hProgramWriter->objectTypes)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing object type: name=\"%s\"", typeKv.key->data);
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing object type: name=\"%s\"", typeKv.first->data);
 
-		if(!SerializeString(hSerializer, hReport, typeKv.key->data, typeKv.key->length))
+		if(!SerializeString(hSerializer, hReport, typeKv.first->data, typeKv.first->length))
 		{
 			return false;
 		}
 
-		const uint32_t memberCount = uint32_t(typeKv.value.orderedMemberNames.size());
+		const uint32_t memberCount = uint32_t(typeKv.second.orderedMemberNames.size());
 
 		// Write the number of members belonging to this object.
 		result = XenonSerializerWriteUint32(hSerializer, memberCount);
@@ -652,17 +653,17 @@ bool XenonProgramWriter::Serialize(
 				XENON_MESSAGE_TYPE_ERROR,
 				"Failed to serialize object member count: error=\"%s\", objectType=\"%s\", memberCount=%" PRIu32,
 				errorString,
-				typeKv.key->data,
+				typeKv.first->data,
 				memberCount
 			);
 
 			return false;
 		}
 
-		for(size_t memberIndex = 0; memberIndex < typeKv.value.orderedMemberNames.size(); ++memberIndex)
+		for(size_t memberIndex = 0; memberIndex < typeKv.second.orderedMemberNames.size(); ++memberIndex)
 		{
-			XenonString* const pMemberName = typeKv.value.orderedMemberNames[memberIndex];
-			const uint8_t memberValueType = uint8_t(typeKv.value.members.Get(pMemberName));
+			XenonString* const pMemberName = typeKv.second.orderedMemberNames[memberIndex];
+			const uint8_t memberValueType = uint8_t(typeKv.second.members[pMemberName]);
 
 			const char* const memberTypeString = XenonGetValueTypeString(memberValueType);
 
@@ -685,7 +686,7 @@ bool XenonProgramWriter::Serialize(
 					XENON_MESSAGE_TYPE_ERROR,
 					"Failed to serialize object member type: error=\"%s\", objectType=\"%s\", memberName=\"%s\", memberType=%s",
 					errorString,
-					typeKv.key->data,
+					typeKv.first->data,
 					pMemberName->data,
 					memberTypeString
 				);
@@ -713,16 +714,16 @@ bool XenonProgramWriter::Serialize(
 	// Write the global variable table.
 	for(auto& kv : hProgramWriter->globals)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", kv.key->data);
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", kv.first->data);
 
 		// First, write the string key of the global.
-		if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
+		if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
 		{
 			return false;
 		}
 
 		// Write the global's constant index.
-		result = XenonSerializerWriteUint32(hSerializer, kv.value);
+		result = XenonSerializerWriteUint32(hSerializer, kv.second);
 		if(result != XENON_SUCCESS)
 		{
 			const char* const errorString = XenonGetErrorCodeString(result);
@@ -732,8 +733,8 @@ bool XenonProgramWriter::Serialize(
 				XENON_MESSAGE_TYPE_ERROR,
 				"Failed to serialize global variable value index: error=\"%s\", name=\"%s\", index=%" PRIu32,
 				errorString,
-				kv.key->data,
-				kv.value
+				kv.first->data,
+				kv.second
 			);
 
 			return false;
@@ -870,7 +871,7 @@ bool XenonProgramWriter::Serialize(
 			}
 
 			// Write the function's local variable count.
-			result = XenonSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.Size()));
+			result = XenonSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.size()));
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -881,7 +882,7 @@ bool XenonProgramWriter::Serialize(
 					"Failed to serialize function local variable count: error=\"%s\", signature=\"%s\", count=%" PRIu32,
 					errorString,
 					binding.pSignature->data,
-					uint32_t(binding.pFunction->locals.Size())
+					uint32_t(binding.pFunction->locals.size())
 				);
 
 				return false;
@@ -890,16 +891,16 @@ bool XenonProgramWriter::Serialize(
 			// Write the function's local variable table.
 			for(auto& kv : binding.pFunction->locals)
 			{
-				XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing local variable: name=\"%s\"", kv.key->data);
+				XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing local variable: name=\"%s\"", kv.first->data);
 
 				// First, write the string key of the local.
-				if(!SerializeString(hSerializer, hReport, kv.key->data, kv.key->length))
+				if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
 				{
 					return false;
 				}
 
 				// Write the local's constant index.
-				result = XenonSerializerWriteUint32(hSerializer, kv.value);
+				result = XenonSerializerWriteUint32(hSerializer, kv.second);
 				if(result != XENON_SUCCESS)
 				{
 					const char* const errorString = XenonGetErrorCodeString(result);
@@ -909,8 +910,8 @@ bool XenonProgramWriter::Serialize(
 						XENON_MESSAGE_TYPE_ERROR,
 						"Failed to serialize local variable value index: error=\"%s\", name=\"%s\", index=%" PRIu32,
 						errorString,
-						kv.key->data,
-						kv.value
+						kv.first->data,
+						kv.second
 					);
 
 					return false;
@@ -1022,7 +1023,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int8_
 	auto kv = hWriter->indexMapInt8.find(value);
 	if(kv != hWriter->indexMapInt8.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1031,7 +1032,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int8_
 	container.type = XENON_VALUE_TYPE_INT8;
 	container.as.int8 = value;
 
-	hWriter->indexMapInt8.Insert(value, output);
+	hWriter->indexMapInt8.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1046,7 +1047,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int16
 	auto kv = hWriter->indexMapInt16.find(value);
 	if(kv != hWriter->indexMapInt16.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1055,7 +1056,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int16
 	container.type = XENON_VALUE_TYPE_INT16;
 	container.as.int16 = value;
 
-	hWriter->indexMapInt16.Insert(value, output);
+	hWriter->indexMapInt16.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1070,7 +1071,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int32
 	auto kv = hWriter->indexMapInt32.find(value);
 	if(kv != hWriter->indexMapInt32.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1079,7 +1080,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int32
 	container.type = XENON_VALUE_TYPE_INT32;
 	container.as.int32 = value;
 
-	hWriter->indexMapInt32.Insert(value, output);
+	hWriter->indexMapInt32.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1094,7 +1095,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int64
 	auto kv = hWriter->indexMapInt64.find(value);
 	if(kv != hWriter->indexMapInt64.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1103,7 +1104,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int64
 	container.type = XENON_VALUE_TYPE_INT64;
 	container.as.int64 = value;
 
-	hWriter->indexMapInt64.Insert(value, output);
+	hWriter->indexMapInt64.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1118,7 +1119,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint8
 	auto kv = hWriter->indexMapUint8.find(value);
 	if(kv != hWriter->indexMapUint8.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1127,7 +1128,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint8
 	container.type = XENON_VALUE_TYPE_UINT8;
 	container.as.uint8 = value;
 
-	hWriter->indexMapUint8.Insert(value, output);
+	hWriter->indexMapUint8.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1142,7 +1143,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint1
 	auto kv = hWriter->indexMapUint16.find(value);
 	if(kv != hWriter->indexMapUint16.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1151,7 +1152,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint1
 	container.type = XENON_VALUE_TYPE_UINT16;
 	container.as.uint16 = value;
 
-	hWriter->indexMapUint16.Insert(value, output);
+	hWriter->indexMapUint16.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1166,7 +1167,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint3
 	auto kv = hWriter->indexMapUint32.find(value);
 	if(kv != hWriter->indexMapUint32.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1175,7 +1176,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint3
 	container.type = XENON_VALUE_TYPE_UINT32;
 	container.as.uint32 = value;
 
-	hWriter->indexMapUint32.Insert(value, output);
+	hWriter->indexMapUint32.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1190,7 +1191,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint6
 	auto kv = hWriter->indexMapUint64.find(value);
 	if(kv != hWriter->indexMapUint64.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1199,7 +1200,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint6
 	container.type = XENON_VALUE_TYPE_UINT64;
 	container.as.uint64 = value;
 
-	hWriter->indexMapUint64.Insert(value, output);
+	hWriter->indexMapUint64.emplace(value, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1222,7 +1223,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, float
 	auto kv = hWriter->indexMapFloat32.find(temp.bits);
 	if(kv != hWriter->indexMapFloat32.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1231,7 +1232,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, float
 	container.type = XENON_VALUE_TYPE_FLOAT32;
 	container.as.float32 = value;
 
-	hWriter->indexMapFloat32.Insert(temp.bits, output);
+	hWriter->indexMapFloat32.emplace(temp.bits, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1254,7 +1255,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, doubl
 	auto kv = hWriter->indexMapFloat64.find(temp.bits);
 	if(kv != hWriter->indexMapFloat64.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1263,7 +1264,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, doubl
 	container.type = XENON_VALUE_TYPE_FLOAT64;
 	container.as.float64 = value;
 
-	hWriter->indexMapFloat64.Insert(temp.bits, output);
+	hWriter->indexMapFloat64.emplace(temp.bits, output);
 	hWriter->constants.push_back(container);
 
 	return output;
@@ -1279,7 +1280,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, Xenon
 	auto kv = hWriter->indexMapString.find(pValue);
 	if(kv != hWriter->indexMapString.end())
 	{
-		return kv->value;
+		return kv->second;
 	}
 
 	const uint32_t output = uint32_t(hWriter->constants.size());
@@ -1290,7 +1291,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, Xenon
 
 	XenonString::AddRef(pValue);
 
-	hWriter->indexMapString.Insert(pValue, output);
+	hWriter->indexMapString.emplace(pValue, output);
 	hWriter->constants.push_back(container);
 
 	return output;

@@ -26,9 +26,8 @@
 #include "../base/String.hpp"
 #include "../common/Array.hpp"
 
-#include <SkipProbe/SkipProbe.hpp>
-
 #include <deque>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -61,34 +60,34 @@ struct XenonProgramWriter
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	typedef SkipProbe::HashMap<
+	typedef std::unordered_map<
 		XenonString*,
 		bool,
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> DependencySet;
 
-	typedef SkipProbe::HashMap<
+	typedef std::unordered_map<
 		XenonString*,
 		uint32_t,
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> GlobalValueMap;
 
-	typedef SkipProbe::HashMap<int8_t, uint32_t> IndexMapInt8;
-	typedef SkipProbe::HashMap<int16_t, uint32_t> IndexMapInt16;
-	typedef SkipProbe::HashMap<int32_t, uint32_t> IndexMapInt32;
-	typedef SkipProbe::HashMap<int64_t, uint32_t> IndexMapInt64;
+	typedef std::unordered_map<int8_t, uint32_t> IndexMapInt8;
+	typedef std::unordered_map<int16_t, uint32_t> IndexMapInt16;
+	typedef std::unordered_map<int32_t, uint32_t> IndexMapInt32;
+	typedef std::unordered_map<int64_t, uint32_t> IndexMapInt64;
 
-	typedef SkipProbe::HashMap<uint8_t, uint32_t> IndexMapUint8;
-	typedef SkipProbe::HashMap<uint16_t, uint32_t> IndexMapUint16;
-	typedef SkipProbe::HashMap<uint32_t, uint32_t> IndexMapUint32;
-	typedef SkipProbe::HashMap<uint64_t, uint32_t> IndexMapUint64;
+	typedef std::unordered_map<uint8_t, uint32_t> IndexMapUint8;
+	typedef std::unordered_map<uint16_t, uint32_t> IndexMapUint16;
+	typedef std::unordered_map<uint32_t, uint32_t> IndexMapUint32;
+	typedef std::unordered_map<uint64_t, uint32_t> IndexMapUint64;
 
-	typedef SkipProbe::HashMap<uint32_t, uint32_t> IndexMapFloat32;
-	typedef SkipProbe::HashMap<uint64_t, uint32_t> IndexMapFloat64;
+	typedef std::unordered_map<uint32_t, uint32_t> IndexMapFloat32;
+	typedef std::unordered_map<uint64_t, uint32_t> IndexMapFloat64;
 
-	typedef SkipProbe::HashMap<
+	typedef std::unordered_map<
 		XenonString*,
 		uint32_t,
 		XenonString::StlHash,

@@ -24,6 +24,8 @@
 
 #include "../base/String.hpp"
 
+#include <string.h>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 extern "C" {
@@ -136,13 +138,13 @@ int XenonProgramWriterAddDependency(XenonProgramWriterHandle hProgramWriter, con
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	if(hProgramWriter->dependencies.Contains(pProgramName))
+	if(hProgramWriter->dependencies.count(pProgramName))
 	{
 		XenonString::Release(pProgramName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
-	hProgramWriter->dependencies.Insert(pProgramName, false);
+	hProgramWriter->dependencies.emplace(pProgramName, false);
 
 	return XENON_SUCCESS;
 }
@@ -353,7 +355,7 @@ int XenonProgramWriterAddObjectType(XenonProgramWriterHandle hProgramWriter, con
 	}
 
 	// Verify a object type mapped to the input name doesn't already exist.
-	if(hProgramWriter->objectTypes.Contains(pTypeName))
+	if(hProgramWriter->objectTypes.count(pTypeName))
 	{
 		XenonString::Release(pTypeName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
@@ -362,7 +364,7 @@ int XenonProgramWriterAddObjectType(XenonProgramWriterHandle hProgramWriter, con
 	XenonObjectData objectData;
 	objectData.pTypeName = pTypeName;
 
-	hProgramWriter->objectTypes.Insert(pTypeName, objectData);
+	hProgramWriter->objectTypes.emplace(pTypeName, objectData);
 
 	return XENON_SUCCESS;
 }
@@ -411,8 +413,8 @@ int XenonProgramWriterAddObjectMember(
 	}
 
 	// Find the member in the object type.
-	auto memberKv = typeKv->value.members.find(pMemberName);
-	if(memberKv != typeKv->value.members.end())
+	auto memberKv = typeKv->second.members.find(pMemberName);
+	if(memberKv != typeKv->second.members.end())
 	{
 		XenonString::Release(pMemberName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
@@ -420,12 +422,12 @@ int XenonProgramWriterAddObjectMember(
 
 	if(pOutIndex)
 	{
-		(*pOutIndex) = uint32_t(typeKv->value.orderedMemberNames.size());
+		(*pOutIndex) = uint32_t(typeKv->second.orderedMemberNames.size());
 	}
 
 	// Add the member to the object type.
-	typeKv->value.members.Insert(pMemberName, memberValueType);
-	typeKv->value.orderedMemberNames.push_back(pMemberName);
+	typeKv->second.members.emplace(pMemberName, memberValueType);
+	typeKv->second.orderedMemberNames.push_back(pMemberName);
 
 	return XENON_SUCCESS;
 }
@@ -453,14 +455,14 @@ int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const c
 	}
 
 	// Verify a value mapped to the input name doesn't already exist.
-	if(hProgramWriter->globals.Contains(pKey))
+	if(hProgramWriter->globals.count(pKey))
 	{
 		XenonString::Release(pKey);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
 
 	// Map the global variable name to the constant table index.
-	hProgramWriter->globals.Insert(pKey, constantIndex);
+	hProgramWriter->globals.emplace(pKey, constantIndex);
 
 	return XENON_SUCCESS;
 }
@@ -504,7 +506,7 @@ int XenonProgramWriterAddFunction(
 	function.numReturnValues = numReturnValues;
 	function.isNative = false;
 
-	hProgramWriter->functions.Insert(pSignature, function);
+	hProgramWriter->functions.emplace(pSignature, function);
 
 	return XENON_SUCCESS;
 }
@@ -539,7 +541,7 @@ int XenonProgramWriterAddNativeFunction(
 	function.numReturnValues = numReturnValues;
 	function.isNative = true;
 
-	hProgramWriter->functions.Insert(pSignature, function);
+	hProgramWriter->functions.emplace(pSignature, function);
 
 	return XENON_SUCCESS;
 }
@@ -581,7 +583,7 @@ int XenonProgramWriterAddLocalVariable(
 	XenonString::Release(pSignature);
 
 	// Script local variables cannot be added to native functions.
-	if(kv->value.isNative)
+	if(kv->second.isNative)
 	{
 		return XENON_ERROR_INVALID_TYPE;
 	}
@@ -592,7 +594,7 @@ int XenonProgramWriterAddLocalVariable(
 		return XENON_ERROR_BAD_ALLOCATION;
 	}
 
-	kv->value.locals.Insert(pVariableName, constantIndex);
+	kv->second.locals.emplace(pVariableName, constantIndex);
 
 	return XENON_SUCCESS;
 }

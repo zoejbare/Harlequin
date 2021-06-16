@@ -22,22 +22,21 @@
 
 #include "../base/String.hpp"
 
-#include <SkipProbe/SkipProbe.hpp>
-
 #include <vector>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XenonFunctionData
 {
-	typedef SkipProbe::HashMap<
+	typedef std::unordered_map<
 		XenonString*,
 		XenonFunctionData,
 		XenonString::StlHash,
 		XenonString::StlCompare
 	> StringToFunctionMap;
 
-	typedef SkipProbe::HashMap<
+	typedef std::unordered_map<
 		XenonString*,
 		uint32_t,
 		XenonString::StlHash,
