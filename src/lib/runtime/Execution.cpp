@@ -75,7 +75,7 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 	}
 
 	// Map the execution context to the VM used to create it.
-	hVm->executionContexts.Insert(pOutput, false);
+	XENON_MAP_FUNC_INSERT(hVm->executionContexts, pOutput, false);
 
 	// Keep the execution context alive indefinitely until we're ready to dispose of it.
 	pOutput->gcProxy.autoMark = true;
@@ -106,8 +106,7 @@ void XenonExecution::DetachFromVm(XenonExecutionHandle hExec)
 	XenonScopedWriteLock gcLock(hVm->gcRwLock);
 
 	// Unlink the execution context from the VM.
-	hVm->executionContexts.Delete(hExec);
-
+	XENON_MAP_FUNC_REMOVE(hVm->executionContexts, hExec);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

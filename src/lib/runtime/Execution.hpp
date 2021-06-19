@@ -24,10 +24,9 @@
 #include "GcProxy.hpp"
 #include "Value.hpp"
 
+#include "../common/Map.hpp"
 #include "../common/Stack.hpp"
 #include "../common/StlAllocator.hpp"
-
-#include <SkipProbe/SkipProbe.hpp>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,12 +36,16 @@ struct XenonExecution
 {
 	typedef XenonStack<XenonExecutionHandle> HandleStack;
 
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonExecutionHandle,
 		bool,
-		SkipProbe::Hash<XenonExecutionHandle>,
+#if XENON_MAP_IS_UNORDERED
+		std::hash<XenonExecutionHandle>,
 		std::equal_to<XenonExecutionHandle>,
-		XenonStlAllocator<SkipProbe::LinkedNode<XenonExecutionHandle, bool>>
+#else
+		std::less<XenonExecutionHandle>,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonExecutionHandle, bool)>
 	> HandleToBoolMap;
 
 	static XenonExecutionHandle Create(XenonVmHandle hVm, XenonFunctionHandle hEntryPoint);

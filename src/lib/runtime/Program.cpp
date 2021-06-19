@@ -27,6 +27,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -259,7 +260,7 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 		if(ProgramLoad(pOutput, hVm, hSerializer))
 		{
 			// Map the program to the VM.
-			hVm->programs.Insert(pProgramName, pOutput);
+			XENON_MAP_FUNC_INSERT(hVm->programs, pProgramName, pOutput);
 		}
 		else
 		{
@@ -366,7 +367,7 @@ XenonProgramHandle XenonProgram::Create(
 		if(ProgramLoad(pOutput, hVm, hSerializer))
 		{
 			// Map the program to the VM.
-			hVm->programs.Insert(pProgramName, pOutput);
+			XENON_MAP_FUNC_INSERT(hVm->programs, pProgramName, pOutput);
 		}
 		else
 		{
@@ -406,19 +407,19 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 	// Dispose of all program dependencies.
 	for(auto& kv : hProgram->dependencies)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
 	// Release the function signature keys.
 	for(auto& kv : hProgram->functions)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
 	// Release the global variable name keys.
 	for(auto& kv : hProgram->globals)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
 	// Clean up the data structures.
@@ -458,19 +459,22 @@ void XenonProgram::prv_freeLoadedData(XenonProgramHandle hProgram, XenonVmHandle
 	// Remove the loaded globals from the VM.
 	for(auto& kv : hProgram->globals)
 	{
-		hVm->globals.Delete(kv.key);
+		XenonString* const pKey = XENON_MAP_ITER_KEY(kv);
 
-		XenonString::Release(kv.key);
+		XENON_MAP_FUNC_REMOVE(hVm->globals, pKey);
+
+		XenonString::Release(pKey);
 	}
 
 	// Remove the loaded functions from the VM.
 	for(auto& kv : hProgram->functions)
 	{
-		XenonFunctionHandle hFunction = hVm->functions.Get(kv.key);
+		XenonString* const pKey = XENON_MAP_ITER_KEY(kv);
+		XenonFunctionHandle hFunction = XENON_MAP_FUNC_GET(hVm->functions, pKey);
 
-		hVm->functions.Delete(kv.key);
+		XENON_MAP_FUNC_REMOVE(hVm->functions, pKey);
 
-		XenonString::Release(kv.key);
+		XenonString::Release(pKey);
 		XenonFunction::Dispose(hFunction);
 	}
 }

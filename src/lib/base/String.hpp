@@ -26,19 +26,13 @@
 
 struct XENON_BASE_API XenonString
 {
-	struct XENON_BASE_API StlRawCompare
-	{
-		bool operator()(const char* const left, const char* const right);
-		bool operator()(const char* const left, const char* const right) const;
-	};
-
-	struct XENON_BASE_API StlRawHash
-	{
-		size_t operator()(const char* const string);
-		size_t operator()(const char* const string) const;
-	};
-
 	struct XENON_BASE_API StlCompare
+	{
+		bool operator()(XenonString* const pLeft, XenonString* const pRight);
+		bool operator()(const XenonString* const pLeft, const XenonString* const pRight) const;
+	};
+
+	struct XENON_BASE_API StlLess
 	{
 		bool operator()(XenonString* const pLeft, XenonString* const pRight);
 		bool operator()(const XenonString* const pLeft, const XenonString* const pRight) const;
@@ -54,6 +48,7 @@ struct XENON_BASE_API XenonString
 	static int32_t AddRef(XenonString* const pString);
 	static int32_t Release(XenonString* const pString);
 	static bool Compare(const XenonString* const pLeft, const XenonString* const pRight);
+	static bool Less(const XenonString* const pLeft, const XenonString* const pRight);
 
 	static bool RawCompare(const char* const left, const char* right);
 	static size_t RawHash(const char* const string);

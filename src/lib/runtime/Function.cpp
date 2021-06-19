@@ -52,7 +52,7 @@ XenonFunctionHandle XenonFunction::CreateScript(
 
 	// Just in case the std::move() doesn't do the trick,
 	// make sure the input locals are cleared out.
-	locals.Clear();
+	XENON_MAP_FUNC_CLEAR(locals);
 
 	return pOutput;
 }
@@ -128,7 +128,7 @@ void XenonFunction::Dispose(XenonFunctionHandle hFunction)
 	// Dispose of the local variables.
 	for(auto& kv : hFunction->locals)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
 	delete hFunction;

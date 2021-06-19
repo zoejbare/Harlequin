@@ -24,18 +24,25 @@
 #include "Value.hpp"
 
 #include "../base/String.hpp"
+
 #include "../common/ByteHelper.hpp"
+#include "../common/Map.hpp"
 #include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XenonProgram
 {
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonString*,
 		XenonProgramHandle,
+#if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
-		XenonString::StlCompare
+		XenonString::StlCompare,
+#else
+		XenonString::StlLess,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonProgramHandle)>
 	> StringToHandleMap;
 
 	typedef XenonStack<XenonProgramHandle> HandleStack;

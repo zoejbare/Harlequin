@@ -68,7 +68,10 @@ XenonFrameHandle XenonFrame::Create(XenonExecutionHandle hExec, XenonFunctionHan
 		// so any changes made the variables in the frame will not affect the prototypes in the function.
 		for(auto& kv : hFunction->locals)
 		{
-			pOutput->locals.Insert(kv.key, XenonValueCopy(hExec->hVm, kv.value));
+			XenonString* const pKey = XENON_MAP_ITER_KEY(kv);
+			XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+
+			XENON_MAP_FUNC_INSERT(pOutput->locals, pKey, XenonValueCopy(hExec->hVm, hValue));
 		}
 
 		XenonDecoder::Initialize(pOutput->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
@@ -151,7 +154,7 @@ int XenonFrame::SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValu
 		return XENON_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
-	kv->value = hValue;
+	XENON_MAP_ITER_PTR_VALUE(kv) = hValue;
 
 	return XENON_SUCCESS;
 }
@@ -181,14 +184,14 @@ XenonValueHandle XenonFrame::GetLocalVariable(XenonFrameHandle hFrame, XenonStri
 	assert(pVariableName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!hFrame->locals.Contains(pVariableName))
+	if(!XENON_MAP_FUNC_CONTAINS(hFrame->locals, pVariableName))
 	{
 		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
 		return XENON_VALUE_HANDLE_NULL;
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return hFrame->locals.Get(pVariableName);
+	return XENON_MAP_FUNC_GET(hFrame->locals, pVariableName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -224,7 +227,7 @@ void XenonFrame::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 	// Discover the local variable values.
 	for(auto& kv : hFrame->locals)
 	{
-		XenonValueHandle hValue = kv.value;
+		XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
 
 		if(XenonValue::CanBeMarked(hValue))
 		{

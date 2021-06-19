@@ -33,13 +33,15 @@ XenonObject* XenonObject::CreateSchema(XenonString* const pTypeName, const Membe
 	pOutput->pSchema = nullptr;
 	pOutput->definitions = definitions;
 
+	const size_t defCount = XENON_MAP_FUNC_SIZE(definitions);
+
 	// Initialize the members array and reserve enough space for each of them.
 	XenonValue::HandleArray::Initialize(pOutput->members);
-	XenonValue::HandleArray::Reserve(pOutput->members, definitions.Size());
-	pOutput->members.count = definitions.Size();
+	XenonValue::HandleArray::Reserve(pOutput->members, defCount);
+	pOutput->members.count = defCount;
 
 	// Initialize the members to null values.
-	for(size_t i = 0; i < pOutput->members.count; ++i)
+	for(size_t i = 0; i < defCount; ++i)
 	{
 		pOutput->members.pData[i] = XenonValue::CreateNull();
 	}
@@ -84,10 +86,7 @@ void XenonObject::Dispose(XenonObject* const pObject)
 	// Release all the member names from the definition table.
 	for(auto& kv : pObject->definitions)
 	{
-		if(kv.key)
-		{
-			XenonString::Release(kv.key);
-		}
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
 	// Dispose of the member values.
@@ -143,7 +142,7 @@ XenonObject::MemberDefinition XenonObject::GetMemberDefinition(
 
 	(*pOutResult) = XENON_SUCCESS;
 
-	return kv->value;
+	return XENON_MAP_ITER_PTR_VALUE(kv);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -180,10 +179,7 @@ XenonObject* XenonObject::prv_createObject(XenonObject* const pOriginalObject)
 	// Add a reference for each member name.
 	for(auto& kv : pOutput->definitions)
 	{
-		if(kv.key)
-		{
-			XenonString::AddRef(kv.key);
-		}
+		XenonString::AddRef(XENON_MAP_ITER_KEY(kv));
 	}
 
 	// Initialize the members array and reserve enough space for each of them.

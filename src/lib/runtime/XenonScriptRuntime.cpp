@@ -129,7 +129,7 @@ int XenonVmGetProgramCount(XenonVmHandle hVm, size_t* pOutCount)
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hVm->programs.Size();
+	(*pOutCount) = XENON_MAP_FUNC_SIZE(hVm->programs);
 
 	return XENON_SUCCESS;
 }
@@ -146,7 +146,7 @@ int XenonVmListPrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIterate
 	// Call the callback for each program we currently have loaded.
 	for(auto& kv : hVm->programs)
 	{
-		if(!onIterateFn(pUserData, kv.value))
+		if(!onIterateFn(pUserData, XENON_MAP_ITER_VALUE(kv)))
 		{
 			break;
 		}
@@ -193,7 +193,7 @@ int XenonVmGetFunctionCount(XenonVmHandle hVm, size_t* pOutCount)
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hVm->functions.Size();
+	(*pOutCount) = XENON_MAP_FUNC_SIZE(hVm->functions);
 
 	return XENON_SUCCESS;
 }
@@ -210,7 +210,7 @@ int XenonVmListFunctions(XenonVmHandle hVm, XenonCallbackIterateFunction onItera
 	// Call the callback for each function we currently have loaded.
 	for(auto& kv : hVm->functions)
 	{
-		if(!onIterateFn(pUserData, kv.value))
+		if(!onIterateFn(pUserData, XENON_MAP_ITER_VALUE(kv)))
 		{
 			break;
 		}
@@ -291,7 +291,7 @@ int XenonVmGetGlobalVariableCount(XenonVmHandle hVm, size_t* pOutCount)
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hVm->globals.Size();
+	(*pOutCount) = XENON_MAP_FUNC_SIZE(hVm->globals);
 
 	return XENON_SUCCESS;
 }
@@ -308,7 +308,10 @@ int XenonVmListGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable o
 	// Call the callback for each global variable we currently have loaded.
 	for(auto& kv : hVm->globals)
 	{
-		if(!onIterateFn(pUserData, kv.key->data, kv.value))
+		XenonString* const pGlobalName = XENON_MAP_ITER_KEY(kv);
+		XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+
+		if(!onIterateFn(pUserData, pGlobalName->data, hValue))
 		{
 			break;
 		}
@@ -329,7 +332,9 @@ int XenonVmListObjectSchemas(XenonVmHandle hVm, XenonCallbackIterateString onIte
 	// Call the callback for each object schema we currently have loaded.
 	for(auto& kv : hVm->objectSchemas)
 	{
-		if(!onIterateFn(pUserData, kv.key->data))
+		XenonString* const pObjectTypeName = XENON_MAP_ITER_KEY(kv);
+
+		if(!onIterateFn(pUserData, pObjectTypeName->data))
 		{
 			break;
 		}
@@ -360,7 +365,7 @@ int XenonVmLoadProgram(
 	}
 
 	// Check if a program with this name has already been loaded.
-	if(hVm->programs.Contains(pProgramName))
+	if(XENON_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
 	{
 		XenonString::Release(pProgramName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
@@ -375,15 +380,17 @@ int XenonVmLoadProgram(
 	}
 
 	// Map the program inside the VM state.
-	hVm->programs.Insert(pProgramName, hProgram);
+	XENON_MAP_FUNC_INSERT(hVm->programs, pProgramName, hProgram);
 
 	// Report the program dependencies to the user code.
 	for(auto& kv : hProgram->dependencies)
 	{
+		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
+
 		// Only report the dependency if it hasn't already been loaded.
-		if(!hVm->programs.Contains(kv.key))
+		if(!XENON_MAP_FUNC_CONTAINS(hVm->programs, pDependencyName))
 		{
-			hVm->dependency.onRequestFn(hVm->dependency.pUserData, kv.key->data);
+			hVm->dependency.onRequestFn(hVm->dependency.pUserData, pDependencyName->data);
 		}
 	}
 
@@ -407,7 +414,7 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 	}
 
 	// Check if a program with this name has already been loaded.
-	if(hVm->programs.Contains(pProgramName))
+	if(XENON_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
 	{
 		XenonString::Release(pProgramName);
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
@@ -424,10 +431,12 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 	// Report the program dependencies to the user code.
 	for(auto& kv : hProgram->dependencies)
 	{
+		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
+
 		// Only report the dependency if it hasn't already been loaded.
-		if(!hVm->programs.Contains(kv.key))
+		if(!XENON_MAP_FUNC_CONTAINS(hVm->programs, pDependencyName))
 		{
-			hVm->dependency.onRequestFn(hVm->dependency.pUserData, kv.key->data);
+			hVm->dependency.onRequestFn(hVm->dependency.pUserData, pDependencyName->data);
 		}
 	}
 
@@ -471,7 +480,7 @@ int XenonProgramGetFunctionCount(XenonProgramHandle hProgram, size_t* pOutCount)
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hProgram->functions.Size();
+	(*pOutCount) = XENON_MAP_FUNC_SIZE(hProgram->functions);
 
 	return XENON_SUCCESS;
 }
@@ -488,7 +497,9 @@ int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateS
 	// Call the callback for each function signature in the program.
 	for(auto& kv : hProgram->functions)
 	{
-		if(!onIterateFn(pUserData, kv.key->data))
+		XenonString* const pFunctionSignature = XENON_MAP_ITER_KEY(kv);
+
+		if(!onIterateFn(pUserData, pFunctionSignature->data))
 		{
 			break;
 		}
@@ -506,7 +517,7 @@ int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOut
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hProgram->globals.Size();
+	(*pOutCount) = XENON_MAP_FUNC_SIZE(hProgram->globals);
 
 	return XENON_SUCCESS;
 }
@@ -523,7 +534,9 @@ int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIt
 	// Call the callback for each global variable name in the program.
 	for(auto& kv : hProgram->globals)
 	{
-		if(!onIterateFn(pUserData, kv.key->data))
+		XenonString* const pGlobalName = XENON_MAP_ITER_KEY(kv);
+
+		if(!onIterateFn(pUserData, pGlobalName->data))
 		{
 			break;
 		}
@@ -1257,7 +1270,7 @@ int XenonFrameGetLocalVariableCount(XenonFrameHandle hFrame, size_t* pOutCount)
 		return XENON_ERROR_INVALID_TYPE;
 	}
 
-	(*pOutCount) = hFrame->locals.Size();
+	(*pOutCount) = XENON_MAP_FUNC_SIZE(hFrame->locals);
 
 	return XENON_SUCCESS;
 }
@@ -1278,7 +1291,10 @@ int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVa
 
 	for(auto& kv : hFrame->locals)
 	{
-		if(!onIterateFn(pUserData, kv.key->data, kv.value))
+		XenonString* const pLocalName = XENON_MAP_ITER_KEY(kv);
+		XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+
+		if(!onIterateFn(pUserData, pLocalName->data, hValue))
 		{
 			break;
 		}
@@ -1899,7 +1915,13 @@ int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObj
 		// Iterate through each member definition on the object.
 		for(auto& kv : hValue->as.pObject->definitions)
 		{
-			onIterateFn(pUserData, kv.key->data, kv.value.valueType);
+			XenonString* const pMemberName = XENON_MAP_ITER_KEY(kv);
+			XenonObject::MemberDefinition& memberDef = XENON_MAP_ITER_VALUE(kv);
+
+			if(!onIterateFn(pUserData, pMemberName->data, memberDef.valueType))
+			{
+				break;
+			}
 		}
 
 		return XENON_SUCCESS;

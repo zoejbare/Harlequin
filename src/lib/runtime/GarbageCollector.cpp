@@ -238,9 +238,11 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			// program contains many hundreds of globals or more. We'll cross that bridge when we come to it.
 			for(auto& kv : gc.hVm->globals)
 			{
-				if(XenonValue::CanBeMarked(kv.value))
+				XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+
+				if(XenonValue::CanBeMarked(hValue))
 				{
-					MarkObject(gc, &kv.value->gcProxy);
+					MarkObject(gc, &(hValue->gcProxy));
 				}
 			}
 

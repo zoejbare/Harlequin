@@ -31,9 +31,9 @@ void XenonVm::prv_setupBuiltIns(XenonVmHandle hVm)
 			assert(signature != nullptr); \
 			XenonString* const pSignature = XenonString::Create(signature); \
 			assert(pSignature != nullptr); \
-			assert(!hVm->functions.Contains(pSignature)); \
+			assert(!XENON_MAP_FUNC_CONTAINS(hVm->functions, pSignature)); \
 			XenonFunctionHandle hFunction = XenonFunction::CreateBuiltIn(pSignature, XenonBuiltIn::func, numParams, numRetVals); \
-			hVm->functions.Insert(pSignature, hFunction); \
+			XENON_MAP_FUNC_INSERT(hVm->functions, pSignature, hFunction); \
 		}
 
 	XENON_BUILT_IN(OP_ADD_BOOL,    OpAddBool,    2, 1);

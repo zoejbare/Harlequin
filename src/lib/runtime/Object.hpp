@@ -23,9 +23,9 @@
 #include "Value.hpp"
 
 #include "../base/String.hpp"
-#include "../common/StlAllocator.hpp"
 
-#include <SkipProbe/SkipProbe.hpp>
+#include "../common/Map.hpp"
+#include "../common/StlAllocator.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,20 +37,28 @@ struct XenonObject
 		uint8_t valueType;
 	};
 
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonString*,
 		MemberDefinition,
+#if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
 		XenonString::StlCompare,
-		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, MemberDefinition>>
+#else
+		XenonString::StlLess,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, MemberDefinition)>
 	> MemberDefinitionMap;
 
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonString*,
 		XenonObject*,
+#if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
 		XenonString::StlCompare,
-		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, XenonObject*>>
+#else
+		XenonString::StlLess,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonObject*)>
 	> StringToPtrMap;
 
 	static XenonObject* CreateSchema(XenonString* pTypeName, const MemberDefinitionMap& definitions);

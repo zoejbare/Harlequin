@@ -27,34 +27,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::StlRawCompare::operator()(const char* const left, const char* const right)
-{
-	return RawCompare(left, right);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonString::StlRawCompare::operator()(const char* const left, const char* const right) const
-{
-	return RawCompare(left, right);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-size_t XenonString::StlRawHash::operator()(const char* const string)
-{
-	return RawHash(string);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-size_t XenonString::StlRawHash::operator()(const char* const string) const
-{
-	return RawHash(string);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 bool XenonString::StlCompare::operator()(
 	XenonString* const pLeft,
 	XenonString* const pRight
@@ -70,7 +42,27 @@ bool XenonString::StlCompare::operator()(
 	const XenonString* const pRight
 ) const
 {
-	return XenonString::Compare(pLeft, pRight) ;
+	return Compare(pLeft, pRight) ;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonString::StlLess::operator()(
+	XenonString* const pLeft,
+	XenonString* const pRight
+)
+{
+	return Less(pLeft, pRight);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonString::StlLess::operator()(
+	const XenonString* const pLeft,
+	const XenonString* const pRight
+) const
+{
+	return Less(pLeft, pRight) ;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -158,6 +150,24 @@ bool XenonString::Compare(const XenonString* const pLeft, const XenonString* con
 	}
 
 	return strcmp(pLeft->data, pRight->data) == 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonString::Less(const XenonString* const pLeft, const XenonString* const pRight)
+{
+	assert(pLeft != nullptr);
+	assert(pRight != nullptr);
+
+	const size_t minSize = (pLeft->length < pRight->length) ? pLeft->length : pRight->length;
+	const int cmp = memcmp(pLeft->data, pRight->data, minSize);
+
+	if(cmp != 0)
+	{
+		return cmp < 0;
+	}
+
+	return pLeft->length < pRight->length;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

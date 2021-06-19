@@ -85,34 +85,34 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 	// Clean up each loaded program.
 	for(auto& kv : hVm->programs)
 	{
-		XenonString::Release(kv.key);
-		XenonProgram::Dispose(kv.value);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+		XenonProgram::Dispose(XENON_MAP_ITER_VALUE(kv));
 	}
 
 	// Clean up each loaded function.
 	for(auto& kv : hVm->functions)
 	{
-		XenonString::Release(kv.key);
-		XenonFunction::Dispose(kv.value);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+		XenonFunction::Dispose(XENON_MAP_ITER_VALUE(kv));
 	}
 
 	// Clean up each loaded global.
 	for(auto& kv : hVm->globals)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
 	// Clean up each loaded object schema.
 	for(auto& kv : hVm->objectSchemas)
 	{
-		XenonString::Release(kv.key);
-		XenonObject::Dispose(kv.value);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+		XenonObject::Dispose(XENON_MAP_ITER_VALUE(kv));
 	}
 
 	// Clean up each active execution context.
 	for(auto& kv : hVm->executionContexts)
 	{
-		XenonExecution::ReleaseWithNoDetach(kv.key);
+		XenonExecution::ReleaseWithNoDetach(XENON_MAP_ITER_KEY(kv));
 	}
 
 	XenonGarbageCollector::Dispose(hVm->gc);
@@ -135,7 +135,7 @@ int XenonVm::SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, Xenon
 		return XENON_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
-	kv->value = hValue;
+	XENON_MAP_ITER_PTR_VALUE(kv) = hValue;
 
 	return XENON_SUCCESS;
 }
@@ -148,14 +148,14 @@ XenonProgramHandle XenonVm::GetProgram(XenonVmHandle hVm, XenonString* const pPr
 	assert(pProgramName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!hVm->programs.Contains(pProgramName))
+	if(!XENON_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
 	{
 		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
 		return XENON_PROGRAM_HANDLE_NULL;
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return hVm->programs.Get(pProgramName);
+	return XENON_MAP_FUNC_GET(hVm->programs, pProgramName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -166,14 +166,14 @@ XenonFunctionHandle XenonVm::GetFunction(XenonVmHandle hVm, XenonString* const p
 	assert(pFunctionSignature != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!hVm->functions.Contains(pFunctionSignature))
+	if(!XENON_MAP_FUNC_CONTAINS(hVm->functions, pFunctionSignature))
 	{
 		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
 		return XENON_FUNCTION_HANDLE_NULL;
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return hVm->functions.Get(pFunctionSignature);
+	return XENON_MAP_FUNC_GET(hVm->functions, pFunctionSignature);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -184,14 +184,14 @@ XenonValueHandle XenonVm::GetGlobalVariable(XenonVmHandle hVm, XenonString* cons
 	assert(pVariableName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!hVm->globals.Contains(pVariableName))
+	if(!XENON_MAP_FUNC_CONTAINS(hVm->globals, pVariableName))
 	{
 		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
 		return XENON_VALUE_HANDLE_NULL;
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return hVm->globals.Get(pVariableName);
+	return XENON_MAP_FUNC_GET(hVm->globals, pVariableName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -202,14 +202,14 @@ XenonObject* XenonVm::GetObjectSchema(XenonVmHandle hVm, XenonString* const pTyp
 	assert(pTypeName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!hVm->objectSchemas.Contains(pTypeName))
+	if(!XENON_MAP_FUNC_CONTAINS(hVm->objectSchemas, pTypeName))
 	{
 		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
 		return nullptr;
 	}
 
 	(*pOutResult) = XENON_SUCCESS;
-	return hVm->objectSchemas.Get(pTypeName);
+	return XENON_MAP_FUNC_GET(hVm->objectSchemas, pTypeName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -23,9 +23,9 @@
 #include "Value.hpp"
 
 #include "../base/String.hpp"
-#include "../common/Stack.hpp"
 
-#include <SkipProbe/SkipProbe.hpp>
+#include "../common/Map.hpp"
+#include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -33,18 +33,28 @@ struct XenonProgram;
 
 struct XenonFunction
 {
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonString*,
 		XenonFunctionHandle,
+#if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
-		XenonString::StlCompare
+		XenonString::StlCompare,
+#else
+		XenonString::StlLess,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonFunctionHandle)>
 	> StringToHandleMap;
 
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonString*,
 		bool,
+#if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
-		XenonString::StlCompare
+		XenonString::StlCompare,
+#else
+		XenonString::StlLess,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, bool)>
 	> StringToBoolMap;
 
 	typedef XenonStack<XenonFunctionHandle> HandleStack;

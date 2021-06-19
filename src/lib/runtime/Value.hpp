@@ -27,10 +27,9 @@
 #include "../base/String.hpp"
 
 #include "../common/Array.hpp"
+#include "../common/Map.hpp"
 #include "../common/Stack.hpp"
 #include "../common/StlAllocator.hpp"
-
-#include <SkipProbe/SkipProbe.hpp>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -41,20 +40,28 @@ struct XenonValue
 	typedef XenonArray<XenonValueHandle> HandleArray;
 	typedef XenonStack<XenonValueHandle> HandleStack;
 
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonString*,
 		XenonValueHandle,
+#if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
 		XenonString::StlCompare,
-		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, XenonValueHandle>>
+#else
+		XenonString::StlLess,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonValueHandle)>
 	> StringToHandleMap;
 
-	typedef SkipProbe::HashMap<
+	typedef XENON_MAP_TYPE<
 		XenonString*,
 		bool,
+#if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
 		XenonString::StlCompare,
-		XenonStlAllocator<SkipProbe::LinkedNode<XenonString*, bool>>
+#else
+		XenonString::StlLess,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, bool)>
 	> StringToBoolMap;
 
 	static XenonValue NullValue;

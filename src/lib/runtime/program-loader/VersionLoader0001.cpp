@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -383,7 +384,7 @@ bool XenonProgramVersion0001::Load(
 		}
 
 		// Initialize the dependency table.
-		pOutProgram->dependencies.Reserve(header.dependencyTableLength);
+		XENON_MAP_FUNC_RESERVE(pOutProgram->dependencies, header.dependencyTableLength);
 
 		// Iterate for each dependency.
 		for(uint32_t index = 0; index < header.dependencyTableLength; ++index)
@@ -397,7 +398,7 @@ bool XenonProgramVersion0001::Load(
 
 			// We stuff the dependency name into a map, but that's just for convenience of storing it.
 			// The value it's mapped to isn't used for anything, so it can be null.
-			pOutProgram->dependencies.Insert(pDependencyName, XENON_VALUE_HANDLE_NULL);
+			XENON_MAP_FUNC_INSERT(pOutProgram->dependencies, pDependencyName, XENON_VALUE_HANDLE_NULL);
 		}
 	}
 
@@ -422,7 +423,7 @@ bool XenonProgramVersion0001::Load(
 		}
 
 		// Initialize the object schema table.
-		pOutProgram->objectSchemas.Reserve(header.objectTableLength);
+		XENON_MAP_FUNC_RESERVE(pOutProgram->objectSchemas, header.objectTableLength);
 
 		// Iterate for each object type.
 		for(uint32_t objectIndex = 0; objectIndex < header.objectTableLength; ++objectIndex)
@@ -494,7 +495,7 @@ bool XenonProgramVersion0001::Load(
 				def.valueType = memberType;
 				def.bindingIndex = memberIndex;
 
-				memberDefinitions.Insert(pMemberName, def);
+				XENON_MAP_FUNC_INSERT(memberDefinitions, pMemberName, def);
 			}
 
 			if(memberReadError)
@@ -504,7 +505,7 @@ bool XenonProgramVersion0001::Load(
 				// Release all member names currently loaded for the current object type.
 				for(auto& kv : memberDefinitions)
 				{
-					XenonString::Release(kv.key);
+					XenonString::Release(XENON_MAP_ITER_KEY(kv));
 				}
 
 				return false;
@@ -514,7 +515,7 @@ bool XenonProgramVersion0001::Load(
 				XenonObject* const pObjectSchema = XenonObject::CreateSchema(pTypeName, memberDefinitions);
 
 				XenonString::AddRef(pTypeName);
-				hVm->objectSchemas.Insert(pTypeName, pObjectSchema);
+				XENON_MAP_FUNC_INSERT(hVm->objectSchemas, pTypeName, pObjectSchema);
 			}
 		}
 	}
@@ -580,7 +581,7 @@ bool XenonProgramVersion0001::Load(
 		}
 
 		// Initialize the global table.
-		pOutProgram->globals.Reserve(header.globalTableLength);
+		XENON_MAP_FUNC_RESERVE(pOutProgram->globals, header.globalTableLength);
 
 		// Iterate for each global variable.
 		for(uint32_t globalIndex = 0; globalIndex < header.globalTableLength; ++globalIndex)
@@ -592,7 +593,7 @@ bool XenonProgramVersion0001::Load(
 				return false;
 			}
 
-			if(hVm->globals.Contains(pVarName))
+			if(XENON_MAP_FUNC_CONTAINS(hVm->globals, pVarName))
 			{
 				XenonReportMessage(
 					hReport,
@@ -651,8 +652,8 @@ bool XenonProgramVersion0001::Load(
 			XenonString::AddRef(pVarName);
 
 			// Map the global variable.
-			pOutProgram->globals.Insert(pVarName, false);
-			hVm->globals.Insert(pVarName, hValue);
+			XENON_MAP_FUNC_INSERT(pOutProgram->globals, pVarName, false);
+			XENON_MAP_FUNC_INSERT(hVm->globals, pVarName, hValue);
 		}
 	}
 
@@ -680,7 +681,7 @@ bool XenonProgramVersion0001::Load(
 		{
 			for(auto& kv : map)
 			{
-				XenonString::Release(kv.key);
+				XenonString::Release(XENON_MAP_ITER_KEY(kv));
 			}
 		};
 
@@ -832,7 +833,7 @@ bool XenonProgramVersion0001::Load(
 
 				if(numLocalVariables > 0)
 				{
-					locals.Reserve(numLocalVariables);
+					XENON_MAP_FUNC_RESERVE(locals, numLocalVariables);
 
 					bool localVarError = false;
 
@@ -846,7 +847,7 @@ bool XenonProgramVersion0001::Load(
 							return false;
 						}
 
-						if(locals.Contains(pVarName))
+						if(XENON_MAP_FUNC_CONTAINS(locals, pVarName))
 						{
 							XenonReportMessage(
 								hReport,
@@ -909,7 +910,7 @@ bool XenonProgramVersion0001::Load(
 						}
 
 						// Map the local variable to the function.
-						locals.Insert(pVarName, hValue);
+						XENON_MAP_FUNC_INSERT(locals, pVarName, hValue);
 					}
 
 					if(localVarError)
@@ -921,7 +922,7 @@ bool XenonProgramVersion0001::Load(
 				}
 			}
 
-			if(!hVm->functions.Contains(pSignature))
+			if(!XENON_MAP_FUNC_CONTAINS(hVm->functions, pSignature))
 			{
 				XenonFunctionHandle hFunction;
 				if(isNativeFunction)
@@ -961,11 +962,11 @@ bool XenonProgramVersion0001::Load(
 				// Map the function signature to output program.
 				// Only the name is mapped since the function itself will live in the VM.
 				XenonString::AddRef(pSignature);
-				pOutProgram->functions.Insert(pSignature, false);
+				XENON_MAP_FUNC_INSERT(pOutProgram->functions, pSignature, false);
 
 				// Map the function in the load data map which will be transferred to the VM.
 				XenonString::AddRef(pSignature);
-				hVm->functions.Insert(pSignature, hFunction);
+				XENON_MAP_FUNC_INSERT(hVm->functions, pSignature, hFunction);
 			}
 			else
 			{
