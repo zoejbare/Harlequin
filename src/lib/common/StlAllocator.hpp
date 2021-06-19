@@ -22,37 +22,151 @@
 
 #include "../XenonScript.h"
 
-#include <type_traits>
+#include <memory>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
+class XenonStlAllocator;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// The <void> implementation needs to be defined first since it's used in the generic implementation.
+template<>
+class XenonStlAllocator<void>
+{
+public:
+
+	typedef void*       pointer;
+	typedef const void* const_pointer;
+	typedef void        value_type;
+
+	template <class U>
+	struct rebind
+	{
+		typedef XenonStlAllocator<U> other;
+	};
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+template <class T>
 class XenonStlAllocator
 {
 public:
 
-    using value_type = T;
+	typedef T         value_type;
+	typedef T*        pointer;
+	typedef T&        reference;
+	typedef const T*  const_pointer;
+	typedef const T&  const_reference;
+	typedef size_t    size_type;
+	typedef ptrdiff_t difference_type;
 
-	constexpr XenonStlAllocator() noexcept {}
-	constexpr XenonStlAllocator(const XenonStlAllocator&) noexcept = default;
-
-	template <typename _Other>
-	constexpr XenonStlAllocator(const XenonStlAllocator<_Other>&) noexcept {}
-
-    template <class _Other>
-    struct rebind
+	template <typename U>
+	struct rebind
 	{
-        using other = XenonStlAllocator<_Other>;
-    };
+		typedef XenonStlAllocator<U> other;
+	};
 
-    T* allocate(const size_t count)
+	XenonStlAllocator()
 	{
-		return reinterpret_cast<T*>(XenonMemAlloc(sizeof(T) * count));
+		// Default construct allocator; do nothing.
 	}
 
-    void deallocate(T* const pPtr, size_t)
+	XenonStlAllocator(const XenonStlAllocator& /*other*/)
 	{
-		XenonMemFree(pPtr);
+		// Copy construct from other allocator; do nothing.
+	}
+
+	template <class U>
+	XenonStlAllocator(const XenonStlAllocator<U>& /*other*/)
+	{
+		// Copy construct from other allocator of related type; do nothing.
+	}
+
+	XenonStlAllocator& operator =(const XenonStlAllocator& /*other*/)
+	{
+		// Assign another allocator to this one; effectively does nothing.
+		return *this;
+	}
+
+	template <class U>
+	XenonStlAllocator& operator =(const XenonStlAllocator<U>& /*other*/)
+	{
+		// Assign another allocator of a different type to this one; effectively does nothing.
+		return *this;
+	}
+
+	bool operator ==(const XenonStlAllocator& /*other*/) const
+	{
+		// Compare equality of this allocator to another; always true.
+		return true;
+	}
+
+	bool operator !=(const XenonStlAllocator& /*other*/) const
+	{
+		// Compare inequality of this allocator to another; always false.
+		return false;
+	}
+
+	pointer address(reference ref) const
+	{
+		// Return address of mutable 'ref'.
+		return reinterpret_cast<value_type*>(&reinterpret_cast<char&>(ref));
+	}
+
+	const_pointer address(const_reference ref) const
+	{
+		// Return address of non-mutable 'ref'.
+		return reinterpret_cast<const value_type*>(&reinterpret_cast<const char&>(ref));
+	}
+
+	pointer allocate(size_type count, XenonStlAllocator<void>::const_pointer hint = nullptr)
+	{
+		// Allocate array of 'count' elements; ignore hint.
+		(void)(hint);
+		return reinterpret_cast<pointer>(XenonMemAlloc(sizeof(T) * count));
+	}
+
+	void deallocate(pointer ptr, size_type /*count*/)
+	{
+		// Free memory at 'ptr'; ignore count.
+		XenonMemFree(ptr);
+	}
+
+	size_type max_size() const
+	{
+		// Estimate maximum array size.
+		return size_type(-1);
+	}
+
+	void construct(pointer ptr)
+	{
+		// Default construct allocated object at 'ptr'.
+		new(reinterpret_cast<void*>(ptr)) value_type();
+	}
+
+	void construct(pointer ptr, const_reference val)
+	{
+		// Construct allocated object at 'ptr' with parameter value 'val'.
+		new(reinterpret_cast<void*>(ptr)) value_type(val);
+	}
+
+#if !defined(XENON_PLATFORM_XBOX_360)
+	template <class U, class... Args>
+	void construct(U* const p, Args&&... args)
+	{
+		// Construct allocated object at 'ptr' with parameter value(s) 'args'.
+		new(reinterpret_cast<void*>(p)) U(std::forward<Args>(args)...);
+	}
+#endif
+
+	template <class U>
+	void destroy(U* const ptr)
+	{
+		// Destruct the allocated object at 'ptr'.
+		ptr->~U();
 	}
 };
 
