@@ -78,10 +78,7 @@ with csbuild.Toolchain("ps3", "psvita"):
 		"-Xmserrors",
 	)
 
-with csbuild.Toolchain("ps3"):
-	csbuild.SetCxxLanguageStandard("c++11")
-
-with csbuild.Toolchain("psvita"):
+with csbuild.Toolchain("ps3", "psvita"):
 	csbuild.SetCxxLanguageStandard("cpp11")
 
 with csbuild.Platform("Windows"):
