@@ -41,12 +41,14 @@ XenonFunctionHandle XenonFunction::CreateScript(
 
 	pOutput->hProgram = hProgram;
 	pOutput->pSignature = pSignature;
-	pOutput->locals = std::move(locals);
+	pOutput->locals = locals;
 	pOutput->bytecodeOffsetStart = bytecodeOffsetStart;
 	pOutput->bytecodeOffsetEnd = bytecodeOffsetEnd;
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = false;
+
+	XENON_MAP_FUNC_CLEAR(locals);
 
 	XenonString::AddRef(pOutput->pSignature);
 

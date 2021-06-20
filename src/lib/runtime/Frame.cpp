@@ -114,7 +114,7 @@ int XenonFrame::PeekValue(
 	assert(phOutValue != nullptr);
 	assert(*phOutValue == XENON_VALUE_HANDLE_NULL);
 
-	XenonValueHandle hValue;
+	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
 
 	int result = XenonValue::HandleStack::Peek(hFrame->stack, &hValue, index);
 	if(result != XENON_SUCCESS)
