@@ -23,7 +23,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
+extern "C" void _XenonThreadImplCreate(XenonInternalThread& obj, const XenonThreadConfig& threadConfig)
 {
 	assert(threadConfig.mainFn != nullptr);
 	assert(threadConfig.stackSize >= XENON_VM_THREAD_MINIMUM_STACK_SIZE);
@@ -81,75 +81,44 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 
 	(*pConfig) = threadConfig;
 
-	XenonThread output;
-
 	// Create and start the thread.
-	output.obj.handle = HANDLE(_beginthreadex(nullptr, threadConfig.stackSize, threadEntryPoint, pConfig, 0, &output.obj.id));
-	assert(output.obj.handle != nullptr);
+	obj.handle = HANDLE(_beginthreadex(nullptr, threadConfig.stackSize, threadEntryPoint, pConfig, 0, &obj.id));
+	assert(obj.handle != nullptr);
 
-	output.obj.real = true;
-
-	return output;
+	obj.real = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonThread XenonThread::GetCurrentThread()
+extern "C" void _XenonThreadImplGetCurrentThread(XenonInternalThread& obj)
 {
-	XenonThread thread;
-
 	// This will return a pseudo handle which will NOT equal the original handle value.
-	// This means the handle value itself is not portable between threads and it only
+	// This means the handle value itself is not portable between threads and is only
 	// valid on the thread where it is retrieved. However, the retrieved thread ID
 	// should be portable.
-	thread.obj.handle = ::GetCurrentThread();
-	thread.obj.id = ::GetCurrentThreadId();
-	thread.obj.real = false;
-
-	return thread;
+	obj.handle = ::GetCurrentThread();
+	obj.id = ::GetCurrentThreadId();
+	obj.real = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonThread::Equal(const XenonThread& left, const XenonThread& right)
+extern "C" void _XenonThreadImplJoin(XenonInternalThread& obj, int32_t* const pOutReturnValue)
 {
-	return left.obj.handle
-		&& right.obj.handle
-		&& left.obj.id == right.obj.id;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonThread::IsInitialized(const XenonThread& thread)
-{
-	return thread.obj.handle != nullptr;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonThread::IsReal(const XenonThread& thread)
-{
-	return thread.obj.real;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
-{
-	assert(thread.obj.handle != nullptr);
-	assert(thread.obj.real);
+	assert(obj.handle != nullptr);
+	assert(obj.real);
 
 	// Wait for the thread to exit.
-	WaitForSingleObject(thread.obj.handle, INFINITE);
+	WaitForSingleObject(obj.handle, INFINITE);
 
 	// Get the thread's return value.
 	DWORD result = 0;
-	GetExitCodeThread(thread.obj.handle, &result);
+	GetExitCodeThread(obj.handle, &result);
 
 	// Free the thread's internal resources.
-	CloseHandle(thread.obj.handle);
+	CloseHandle(obj.handle);
 
-	thread.obj = XenonInternalThread();
+	obj = XenonInternalThread();
 
 	if(pOutReturnValue)
 	{
@@ -159,16 +128,39 @@ void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonThread::Sleep(uint32_t ms)
+extern "C" void _XenonThreadImplSleep(uint32_t ms)
 {
 	::Sleep(ms);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonThread::Yield()
+extern "C" void _XenonThreadImplYield()
 {
 	YieldProcessor();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _XenonThreadImplEqual(const XenonInternalThread& left, const XenonInternalThread& right)
+{
+	return left.handle
+		&& right.handle
+		&& left.id == right.id;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _XenonThreadImplIsInitialized(const XenonInternalThread& obj)
+{
+	return obj.handle != nullptr;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _XenonThreadImplIsReal(const XenonInternalThread& obj)
+{
+	return obj.real;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -33,6 +33,9 @@
 	|| defined(XENON_PLATFORM_PS4)
 	#include "rwlock-impl/RwLockPosix.hpp"
 
+#elif defined(XENON_PLATFORM_PS3)
+	#include "../../../../XenonScriptImpl-PS3/lib/base/rwlock/RwLock.hpp"
+
 #else
 	#error "XenonRwLock not implemented for this platform"
 
@@ -40,18 +43,65 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+extern "C"
+{
+	void _XenonRwLockImplCreate(XenonInternalRwLock&);
+	void _XenonRwLockImplDispose(XenonInternalRwLock&);
+
+	bool _XenonRwLockImplTryReadLock(XenonInternalRwLock&);
+	void _XenonRwLockImplReadLock(XenonInternalRwLock&);
+	void _XenonRwLockImplReadUnlock(XenonInternalRwLock&);
+
+	bool _XenonRwLockImplTryWriteLock(XenonInternalRwLock&);
+	void _XenonRwLockImplWriteLock(XenonInternalRwLock&);
+	void _XenonRwLockImplWriteUnlock(XenonInternalRwLock&);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 struct XENON_BASE_API XenonRwLock
 {
-	static XenonRwLock Create();
-	static void Dispose(XenonRwLock& rwlock);
+	static XenonRwLock Create()
+	{
+		XenonRwLock output;
+		_XenonRwLockImplCreate(output.obj);
+		return output;
+	}
 
-	static bool TryReadLock(XenonRwLock& rwlock);
-	static void ReadLock(XenonRwLock& rwlock);
-	static void ReadUnlock(XenonRwLock& rwlock);
+	static void Dispose(XenonRwLock& rwlock)
+	{
+		_XenonRwLockImplDispose(rwlock.obj);
+	}
 
-	static bool TryWriteLock(XenonRwLock& rwlock);
-	static void WriteLock(XenonRwLock& rwlock);
-	static void WriteUnlock(XenonRwLock& rwlock);
+	static bool TryReadLock(XenonRwLock& rwlock)
+	{
+		return _XenonRwLockImplTryReadLock(rwlock.obj);
+	}
+
+	static void ReadLock(XenonRwLock& rwlock)
+	{
+		_XenonRwLockImplReadLock(rwlock.obj);
+	}
+
+	static void ReadUnlock(XenonRwLock& rwlock)
+	{
+		_XenonRwLockImplReadUnlock(rwlock.obj);
+	}
+
+	static bool TryWriteLock(XenonRwLock& rwlock)
+	{
+		return _XenonRwLockImplTryWriteLock(rwlock.obj);
+	}
+
+	static void WriteLock(XenonRwLock& rwlock)
+	{
+		_XenonRwLockImplWriteLock(rwlock.obj);
+	}
+
+	static void WriteUnlock(XenonRwLock& rwlock)
+	{
+		_XenonRwLockImplWriteUnlock(rwlock.obj);
+	}
 
 	XenonInternalRwLock obj;
 };

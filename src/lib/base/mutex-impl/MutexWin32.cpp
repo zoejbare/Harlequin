@@ -22,54 +22,50 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonMutex XenonMutex::Create()
+extern "C" void _XenonMutexImplCreate(XenonInternalMutex& obj)
 {
-	XenonMutex output;
+	BOOL lockInitResult = InitializeCriticalSectionAndSpinCount(&obj.lock, 0x400);
+	assert(lockInitResult == TRUE); (void) lockInitResult;
 
-	BOOL lockInitResult = InitializeCriticalSectionAndSpinCount(&output.obj.lock, 0x400);
-	assert(lockInitResult == TRUE);
-
-	output.obj.initialized = true;
-
-	return output;
+	obj.initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Dispose(XenonMutex& mutex)
+extern "C" void _XenonMutexImplDispose(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	DeleteCriticalSection(&mutex.obj.lock);
+	DeleteCriticalSection(&obj.lock);
 
-	mutex.obj = XenonInternalMutex();
+	obj = XenonInternalMutex();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonMutex::TryLock(XenonMutex& mutex)
+extern "C" bool _XenonMutexImplTryLock(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	return TryEnterCriticalSection(&mutex.obj.lock) == TRUE;
+	return TryEnterCriticalSection(&obj.lock) == TRUE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Lock(XenonMutex& mutex)
+extern "C" void _XenonMutexImplLock(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	EnterCriticalSection(&mutex.obj.lock);
+	EnterCriticalSection(&obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Unlock(XenonMutex& mutex)
+extern "C" void _XenonMutexImplUnlock(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	LeaveCriticalSection(&mutex.obj.lock);
+	LeaveCriticalSection(&obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

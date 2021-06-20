@@ -22,70 +22,68 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonMutex XenonMutex::Create()
+extern "C" void _XenonMutexImplCreate(XenonInternalMutex& obj)
 {
 	pthread_mutexattr_t attr;
 
 	// Create an attributes object for configuring the mutex.
 	const int attrInitResult = pthread_mutexattr_init(&attr);
-	assert(attrInitResult == 0);
+	assert(attrInitResult == 0); (void) attrInitResult;
 
 	// Set the mutex type to be recursive.
 	const int attrSetTypeResult = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	assert(attrSetTypeResult == 0);
+	assert(attrSetTypeResult == 0); (void) attrSetTypeResult;
 
 	XenonMutex output;
 
 	// Create the mutex.
-	const int mutexInitResult = pthread_mutex_init(&output.obj.handle, &attr);
-	assert(mutexInitResult == 0);
+	const int mutexInitResult = pthread_mutex_init(&obj.handle, &attr);
+	assert(mutexInitResult == 0); (void) mutexInitResult;
 
 	// Destroy the attributes since they are no longer needed.
 	const int attrDestroyResult = pthread_mutexattr_destroy(&attr);
-	assert(attrDestroyResult == 0);
+	assert(attrDestroyResult == 0); (void) attrDestroyResult;
 
-	output.obj.initialized = true;
-
-	return output;
+	obj.initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Dispose(XenonMutex& mutex)
+extern "C" void _XenonMutexImplDispose(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	const int mutexDestroyResult = pthread_mutex_destroy(&mutex.obj.handle);
-	assert(mutexDestroyResult == 0);
+	const int mutexDestroyResult = pthread_mutex_destroy(&obj.handle);
+	assert(mutexDestroyResult == 0); (void) mutexDestroyResult;
 
-	mutex.obj.initialized = false;
+	obj.initialized = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonMutex::TryLock(XenonMutex& mutex)
+extern "C" bool _XenonMutexImplTryLock(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	return pthread_mutex_trylock(&mutex.obj.handle) == 0;
+	return pthread_mutex_trylock(&obj.handle) == 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Lock(XenonMutex& mutex)
+extern "C" void _XenonMutexImplLock(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	pthread_mutex_lock(&mutex.obj.handle);
+	pthread_mutex_lock(&obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonMutex::Unlock(XenonMutex& mutex)
+extern "C" void _XenonMutexImplUnlock(XenonInternalMutex& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	pthread_mutex_unlock(&mutex.obj.handle);
+	pthread_mutex_unlock(&obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

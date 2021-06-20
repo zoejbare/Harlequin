@@ -22,93 +22,89 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonRwLock XenonRwLock::Create()
+extern "C" void _XenonRwLockImplCreate(XenonInternalRwLock& obj)
 {
 	pthread_rwlockattr_t attr;
 
 	// Create an attributes object for configuring the rwlock.
 	const int attrInitResult = pthread_rwlockattr_init(&attr);
-	assert(attrInitResult == 0);
-
-	XenonRwLock output;
+	assert(attrInitResult == 0); (void) attrInitResult;
 
 	// Create the rwlock.
-	const int rwlockInitResult = pthread_rwlock_init(&output.obj.handle, &attr);
-	assert(rwlockInitResult == 0);
+	const int rwlockInitResult = pthread_rwlock_init(&obj.handle, &attr);
+	assert(rwlockInitResult == 0); (void) rwlockInitResult;
 
 	// Destroy the attributes since they are no longer needed.
 	const int attrDestroyResult = pthread_rwlockattr_destroy(&attr);
-	assert(attrDestroyResult == 0);
+	assert(attrDestroyResult == 0); (void) attrDestroyResult;
 
-	output.obj.initialized = true;
-
-	return output;
+	obj.initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::Dispose(XenonRwLock& rwlock)
+extern "C" void _XenonRwLockImplDispose(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
-	const int rwlockDestroyResult = pthread_rwlock_destroy(&rwlock.obj.handle);
-	assert(rwlockDestroyResult == 0);
+	const int rwlockDestroyResult = pthread_rwlock_destroy(&obj.handle);
+	assert(rwlockDestroyResult == 0); (void) rwlockDestroyResult;
 
-	rwlock.obj.initialized = false;
+	obj.initialized = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonRwLock::TryReadLock(XenonRwLock& rwlock)
+extern "C" bool _XenonRwLockImplTryReadLock(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
-	return pthread_rwlock_tryrdlock(&rwlock.obj.handle) == 0;
+	return pthread_rwlock_tryrdlock(&obj.handle) == 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::ReadLock(XenonRwLock& rwlock)
+extern "C" void _XenonRwLockImplReadLock(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
-	pthread_rwlock_rdlock(&rwlock.obj.handle);
+	pthread_rwlock_rdlock(&obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::ReadUnlock(XenonRwLock& rwlock)
+extern "C" void _XenonRwLockImplReadUnlock(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
-	pthread_rwlock_unlock(&rwlock.obj.handle);
+	pthread_rwlock_unlock(&obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonRwLock::TryWriteLock(XenonRwLock& rwlock)
+extern "C" bool _XenonRwLockImplTryWriteLock(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
-	return pthread_rwlock_trywrlock(&rwlock.obj.handle) == 0;
+	return pthread_rwlock_trywrlock(&obj.handle) == 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::WriteLock(XenonRwLock& rwlock)
+extern "C" void _XenonRwLockImplWriteLock(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
-	pthread_rwlock_wrlock(&rwlock.obj.handle);
+	pthread_rwlock_wrlock(&obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::WriteUnlock(XenonRwLock& rwlock)
+extern "C" void _XenonRwLockImplWriteUnlock(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
-	pthread_rwlock_unlock(&rwlock.obj.handle);
+	pthread_rwlock_unlock(&obj.handle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

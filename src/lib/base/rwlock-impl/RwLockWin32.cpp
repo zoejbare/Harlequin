@@ -22,78 +22,75 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonRwLock XenonRwLock::Create()
+extern "C" void _XenonRwLockImplCreate(XenonInternalRwLock& obj)
 {
-	XenonRwLock output;
+	InitializeSRWLock(&obj.lock);
 
-	InitializeSRWLock(&output.obj.lock);
-	output.obj.initialized = true;
-
-	return output;
+	obj.initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::Dispose(XenonRwLock& rwlock)
+extern "C" void _XenonRwLockImplDispose(XenonInternalRwLock& obj)
 {
-	assert(rwlock.obj.initialized);
+	assert(obj.initialized);
 
 	// SRWLOCK has no explicit destruction.
-	rwlock.obj = XenonInternalRwLock();
+	obj = XenonInternalRwLock();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonRwLock::TryReadLock(XenonRwLock& mutex)
+extern "C" bool _XenonRwLockImplTryReadLock(XenonInternalRwLock& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	return TryAcquireSRWLockShared(&mutex.obj.lock) == TRUE;
+	return TryAcquireSRWLockShared(&obj.lock) == TRUE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::ReadLock(XenonRwLock& mutex)
+extern "C" void _XenonRwLockImplReadLock(XenonInternalRwLock& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	AcquireSRWLockShared(&mutex.obj.lock);
+	AcquireSRWLockShared(&obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::ReadUnlock(XenonRwLock& mutex)
+extern "C" void _XenonRwLockImplReadUnlock(XenonInternalRwLock& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	ReleaseSRWLockShared(&mutex.obj.lock);
+	ReleaseSRWLockShared(&obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonRwLock::TryWriteLock(XenonRwLock& mutex)
+extern "C" bool _XenonRwLockImplTryWriteLock(XenonInternalRwLock& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	return TryAcquireSRWLockExclusive(&mutex.obj.lock) == TRUE;
+	return TryAcquireSRWLockExclusive(&obj.lock) == TRUE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::WriteLock(XenonRwLock& mutex)
+extern "C" void _XenonRwLockImplWriteLock(XenonInternalRwLock& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	AcquireSRWLockExclusive(&mutex.obj.lock);
+	AcquireSRWLockExclusive(&obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonRwLock::WriteUnlock(XenonRwLock& mutex)
+extern "C" void _XenonRwLockImplWriteUnlock(XenonInternalRwLock& obj)
 {
-	assert(mutex.obj.initialized);
+	assert(obj.initialized);
 
-	ReleaseSRWLockExclusive(&mutex.obj.lock);
+	ReleaseSRWLockExclusive(&obj.lock);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

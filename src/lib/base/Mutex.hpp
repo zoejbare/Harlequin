@@ -33,6 +33,9 @@
 	|| defined(XENON_PLATFORM_PS4)
 	#include "mutex-impl/MutexPosix.hpp"
 
+#elif defined(XENON_PLATFORM_PS3)
+	#include "../../../../XenonScriptImpl-PS3/lib/base/mutex/Mutex.hpp"
+
 #else
 	#error "XenonMutex not implemented for this platform"
 
@@ -40,14 +43,45 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+extern "C"
+{
+	void _XenonMutexImplCreate(XenonInternalMutex&);
+	void _XenonMutexImplDispose(XenonInternalMutex&);
+	bool _XenonMutexImplTryLock(XenonInternalMutex&);
+	void _XenonMutexImplLock(XenonInternalMutex&);
+	void _XenonMutexImplUnlock(XenonInternalMutex&);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 struct XENON_BASE_API XenonMutex
 {
-	static XenonMutex Create();
-	static void Dispose(XenonMutex& mutex);
+	static XenonMutex Create()
+	{
+		XenonMutex output;
+		_XenonMutexImplCreate(output.obj);
+		return output;
+	}
 
-	static bool TryLock(XenonMutex& mutex);
-	static void Lock(XenonMutex& mutex);
-	static void Unlock(XenonMutex& mutex);
+	static void Dispose(XenonMutex& mutex)
+	{
+		_XenonMutexImplDispose(mutex.obj);
+	}
+
+	static bool TryLock(XenonMutex& mutex)
+	{
+		return _XenonMutexImplTryLock(mutex.obj);
+	}
+
+	static void Lock(XenonMutex& mutex)
+	{
+		_XenonMutexImplLock(mutex.obj);
+	}
+
+	static void Unlock(XenonMutex& mutex)
+	{
+		_XenonMutexImplUnlock(mutex.obj);
+	}
 
 	XenonInternalMutex obj;
 };
@@ -62,13 +96,13 @@ public:
 	XenonScopedMutex(const XenonScopedMutex&) = delete;
 	XenonScopedMutex(XenonScopedMutex&&) = delete;
 
-	explicit XenonScopedMutex(XenonMutex& mutex)
+	explicit inline XenonScopedMutex(XenonMutex& mutex)
 		: m_pMutex(&mutex)
 	{
 		XenonMutex::Lock(*m_pMutex);
 	}
 
-	~XenonScopedMutex()
+	inline ~XenonScopedMutex()
 	{
 		XenonMutex::Unlock(*m_pMutex);
 	}

@@ -36,6 +36,9 @@
 	|| defined(XENON_PLATFORM_PS4)
 	#include "thread-impl/ThreadPosix.hpp"
 
+#elif defined(XENON_PLATFORM_PS3)
+	#include "../../../../XenonScriptImpl-PS3/lib/base/thread/Thread.hpp"
+
 #else
 	#error "Threads not implemented for this platform"
 
@@ -55,37 +58,73 @@ struct XenonThreadConfig
 
 //----------------------------------------------------------------------------------------------------------------------
 
+extern "C"
+{
+	void _XenonThreadImplCreate(XenonInternalThread&, const XenonThreadConfig&);
+	void _XenonThreadImplGetCurrentThread(XenonInternalThread&);
+	void _XenonThreadImplJoin(XenonInternalThread&, int32_t*);
+	void _XenonThreadImplSleep(uint32_t);
+	void _XenonThreadImplYield();
+
+	bool _XenonThreadImplEqual(const XenonInternalThread&, const XenonInternalThread&);
+	bool _XenonThreadImplIsInitialized(const XenonInternalThread&);
+	bool _XenonThreadImplIsReal(const XenonInternalThread&);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 struct XENON_BASE_API XenonThread
 {
-	static XenonThread Create(const XenonThreadConfig& threadConfig);
-	static XenonThread GetCurrentThread();
+	static XenonThread Create(const XenonThreadConfig& threadConfig)
+	{
+		XenonThread output;
+		_XenonThreadImplCreate(output.obj, threadConfig);
+		return output;
+	}
 
-	static bool Equal(const XenonThread& left, const XenonThread& right);
-	static bool IsInitialized(const XenonThread& thread);
-	static bool IsReal(const XenonThread& thread);
+	static XenonThread GetCurrentThread()
+	{
+		XenonThread output;
+		_XenonThreadImplGetCurrentThread(output.obj);
+		return output;
+	}
 
-	static void Join(XenonThread& thread, int32_t* const pOutReturnValue);
-	static void Sleep(uint32_t ms);
-	static void Yield();
+	static void Join(XenonThread& thread, int32_t* const pOutReturnValue)
+	{
+		_XenonThreadImplJoin(thread.obj, pOutReturnValue);
+	}
 
-	inline bool operator==(const XenonThread& other) const;
-	inline bool operator!=(const XenonThread& other) const;
+	static void Sleep(uint32_t ms)
+	{
+		_XenonThreadImplSleep(ms);
+	}
+
+	static void Yield()
+	{
+		_XenonThreadImplYield();
+	}
+
+	static bool IsInitialized(const XenonThread& thread)
+	{
+		return _XenonThreadImplIsInitialized(thread.obj);
+	}
+
+	static bool IsReal(const XenonThread& thread)
+	{
+		return _XenonThreadImplIsReal(thread.obj);
+	}
+
+	bool operator==(const XenonThread& other) const
+	{
+		return _XenonThreadImplEqual(obj, other.obj);
+	}
+
+	bool operator!=(const XenonThread& other) const
+	{
+		return !_XenonThreadImplEqual(obj, other.obj);
+	}
 
 	XenonInternalThread obj;
 };
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonThread::operator==(const XenonThread& other) const
-{
-	return XenonThread::Equal(*this, other);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonThread::operator!=(const XenonThread& other) const
-{
-	return XenonThread::Equal(*this, other);
-}
 
 //----------------------------------------------------------------------------------------------------------------------

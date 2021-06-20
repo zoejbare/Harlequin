@@ -33,6 +33,9 @@
 	|| defined(XENON_PLATFORM_PS4)
 	#include "atomic-impl/AtomicPosix.hpp"
 
+#elif defined(XENON_PLATFORM_PS3)
+	#include "../../../../XenonScriptImpl-PS3/lib/common/atomic/Atomic.hpp"
+
 #else
 	#error "Atomic functions not implemented for this platform"
 

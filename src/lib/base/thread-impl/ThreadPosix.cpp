@@ -25,7 +25,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
+extern "C" void _XenonThreadImplCreate(XenonInternalThread& obj, const XenonThreadConfig& threadConfig)
 {
 	assert(threadConfig.mainFn != nullptr);
 	assert(threadConfig.stackSize >= XENON_VM_THREAD_MINIMUM_STACK_SIZE);
@@ -55,87 +55,55 @@ XenonThread XenonThread::Create(const XenonThreadConfig& threadConfig)
 
 	(*pConfig) = threadConfig;
 
-	XenonThread output;
 	pthread_attr_t attr;
 
 	// Create a thread attributes object where the thread properties will be set.
 	const int attrInitResult = pthread_attr_init(&attr);
-	assert(attrInitResult == 0);
+	assert(attrInitResult == 0); (void) attrInitResult;
 
 	// Configure the thread stack size.
 	pthread_attr_setstacksize(&attr, size_t(threadConfig.stackSize));
 
 	// Create and start the thread.
-	const int threadCreateResult = pthread_create(&output.obj.handle, &attr, threadEntryPoint, pConfig);
-	assert(threadCreateResult == 0);
+	const int threadCreateResult = pthread_create(&obj.handle, &attr, threadEntryPoint, pConfig);
+	assert(threadCreateResult == 0); (void) threadCreateResult;
 
 	// Destroy the thread attributes since they are no longer needed.
 	// This will not affect the thread since it creates its own copy.
 	const int attrDestroyResult = pthread_attr_destroy(&attr);
-	assert(attrDestroyResult == 0);
+	assert(attrDestroyResult == 0); (void) attrDestroyResult;
 
 	// Setting the thread name through the pthread interface is only supported on a few platforms.
 #if defined(XENON_PLATFORM_LINUX) || defined(XENON_PLATFORM_ANDROID)
 	if(threadConfig.name[0] != '\0')
 	{
-		pthread_setname_np(output.obj.handle, threadConfig.name);
+		pthread_setname_np(obj.handle, threadConfig.name);
 	}
 #endif
 
-	output.obj.initialized = true;
-
-	return output;
+	obj.initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonThread XenonThread::GetCurrentThread()
+extern "C" void _XenonThreadImplGetCurrentThread(XenonInternalThread& obj)
 {
-	XenonThread thread;
-	thread.obj.handle = pthread_self();
-	thread.obj.initialized = true;
-
-	return thread;
+	obj.handle = pthread_self();
+	obj.initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonThread::Equal(const XenonThread& left, const XenonThread& right)
+extern "C" void _XenonThreadImplJoin(XenonInternalThread& obj, int32_t* const pOutReturnValue)
 {
-	return left.obj.initialized
-		&& right.obj.initialized
-		&& pthread_equal(left.obj.handle, right.obj.handle) != 0;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonThread::IsInitialized(const XenonThread& thread)
-{
-	return thread.obj.initialized;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool XenonThread::IsReal(const XenonThread& thread)
-{
-	(void) thread;
-
-	// Pthreads are never psuedo handles.
-	return true;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
-{
-	assert(thread.obj.initialized);
+	assert(obj.initialized);
 
 	void* pThreadResult = nullptr;
 
-	const int joinResult = pthread_join(thread.obj.handle, &pThreadResult);
-	assert(joinResult == 0);
+	const int joinResult = pthread_join(obj.handle, &pThreadResult);
+	assert(joinResult == 0); (void) joinResult;
 
-	thread.obj = XenonInternalThread();
+	obj.initialized = false;
 
 	if(pOutReturnValue)
 	{
@@ -146,16 +114,40 @@ void XenonThread::Join(XenonThread& thread, int32_t* const pOutReturnValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonThread::Sleep(uint32_t ms)
+extern "C" void _XenonThreadImplSleep(uint32_t ms)
 {
 	usleep(ms * 1000);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonThread::Yield()
+extern "C" void _XenonThreadImplYield()
 {
 	sched_yield();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _XenonThreadImplEqual(const XenonInternalThread& left, const XenonInternalThread& right)
+{
+	return left.initialized
+		&& right.initialized
+		&& pthread_equal(left.handle, right.handle) != 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _XenonThreadImplIsInitialized(const XenonInternalThread& obj)
+{
+	return obj.initialized;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _XenonThreadImplIsReal(const XenonInternalThread&)
+{
+	// Pthreads are never psuedo handles.
+	return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
