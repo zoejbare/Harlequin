@@ -604,21 +604,19 @@ int XenonProgramWriterAddLocalVariable(
 int XenonProgramWriterSerialize(
 	XenonProgramWriterHandle hProgramWriter,
 	XenonCompilerHandle hCompiler,
-	XenonSerializerHandle hSerializer,
-	int endianness
+	XenonSerializerHandle hSerializer
 )
 {
 	if(!hProgramWriter
 		|| !hCompiler
 		|| !hSerializer
-		|| XenonSerializerGetMode(hSerializer) != XENON_SERIALIZER_MODE_WRITER
-		|| XenonGetEndianModeString(endianness) == nullptr)
+		|| XenonSerializerGetMode(hSerializer) != XENON_SERIALIZER_MODE_WRITER)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
 
 	// Write the program to the serializer.
-	if(!XenonProgramWriter::Serialize(hProgramWriter, hCompiler, hSerializer, endianness))
+	if(!XenonProgramWriter::Serialize(hProgramWriter, hCompiler, hSerializer))
 	{
 		return XENON_ERROR_UNSPECIFIED_FAILURE;
 	}

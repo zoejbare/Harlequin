@@ -38,6 +38,10 @@ visual_studio.SetEnableFileTypeFolders(False)
 
 ###################################################################################################
 
+_REPO_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+
+###################################################################################################
+
 outputSubPath = "{userData.outputRootName}/{targetName}"
 
 csbuild.SetUserData("outputRootName", "{toolchainName}")
@@ -80,6 +84,10 @@ with csbuild.Toolchain("ps3", "psvita"):
 
 with csbuild.Toolchain("ps3", "psvita"):
 	csbuild.SetCxxLanguageStandard("cpp11")
+	csbuild.AddCompilerFlags(
+		"-Xmserrors",
+		"-Xdiag=1",
+	)
 
 with csbuild.Platform("Windows"):
 	with csbuild.Toolchain("gcc", "clang", "ps4", "android-gcc", "android-clang"):
@@ -233,7 +241,7 @@ class XenonScriptLib(object):
 	def setCommonOptions(outputName):
 		csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
 
-		with csbuild.Toolchain("ps4"):
+		with csbuild.Toolchain("ps3", "ps4", "psvita"):
 			csbuild.SetOutput(outputName, csbuild.ProjectType.StaticLibrary)
 			csbuild.AddDefines("XENON_BUILD_STATIC_LIB")
 
@@ -266,6 +274,7 @@ with csbuild.Project(LibXenonScriptBase.projectName, XenonScriptLib.rootPath, Li
 		)
 	else:
 		csbuild.AddExcludeDirectories(
+			f"{XenonScriptLib.rootPath}/base/hi-res-timer-impl",
 			f"{XenonScriptLib.rootPath}/base/mutex-impl",
 			f"{XenonScriptLib.rootPath}/base/rwlock-impl",
 			f"{XenonScriptLib.rootPath}/base/thread-impl",
@@ -282,6 +291,11 @@ with csbuild.Project(LibXenonScriptBase.projectName, XenonScriptLib.rootPath, Li
 	with csbuild.Toolchain("gcc", "clang", "ps4"):
 		csbuild.AddSourceFiles(
 			f"{XenonScriptLib.rootPath}/base/*-impl/*Posix.cpp",
+		)
+
+	with csbuild.Toolchain("ps3"):
+		csbuild.AddSourceFiles(
+			f"{_REPO_ROOT_PATH}/../XenonScriptImpl-PS3/lib/base/*/*.cpp",
 		)
 
 ###################################################################################################

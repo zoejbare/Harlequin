@@ -267,6 +267,12 @@ XENON_BASE_API double XenonEndianSwapFloat64(double value);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
+XENON_BASE_API uint64_t XenonHiResTimerGetFrequency();
+
+XENON_BASE_API uint64_t XenonHiResTimerGetTimestamp();
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
 #if XENON_LIB_RUNTIME
 
 /*---------------------------------------------------------------------------------------------------------------------*/
@@ -675,8 +681,7 @@ XENON_MAIN_API int XenonProgramWriterAddLocalVariable(
 XENON_MAIN_API int XenonProgramWriterSerialize(
 	XenonProgramWriterHandle hProgramWriter,
 	XenonCompilerHandle hCompiler,
-	XenonSerializerHandle hSerializer,
-	int endianness
+	XenonSerializerHandle hSerializer
 );
 
 /*---------------------------------------------------------------------------------------------------------------------*/

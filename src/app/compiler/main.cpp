@@ -248,6 +248,13 @@ int main(int argc, char* argv[])
 	XenonSerializerCreate(&hMainFuncSerializer, XENON_SERIALIZER_MODE_WRITER);
 	XenonSerializerCreate(&hSubFuncSerializer, XENON_SERIALIZER_MODE_WRITER);
 
+	const int endianness = XENON_ENDIAN_MODE_BIG;
+
+	// Set the endianness of each serializer.
+	XenonSerializerSetEndianness(hFileSerializer, endianness);
+	XenonSerializerSetEndianness(hMainFuncSerializer, endianness);
+	XenonSerializerSetEndianness(hSubFuncSerializer, endianness);
+
 	const char* const mainFuncSignature = "void App.Program.Main()";
 	const char* const subFuncSignature = "int32 App.Program.DoWork(float64)";
 	const char* const nativePrintFuncSignature = "void App.Program.PrintString(string)";
@@ -413,7 +420,7 @@ int main(int argc, char* argv[])
 		XenonProgramWriterAddNativeFunction(hProgramWriter, nativeDecrementFuncSignature, 1, 2);
 	}
 
-	result = XenonProgramWriterSerialize(hProgramWriter, hCompiler, hFileSerializer, XENON_ENDIAN_MODE_NATIVE);
+	result = XenonProgramWriterSerialize(hProgramWriter, hCompiler, hFileSerializer);
 	if(result == XENON_SUCCESS)
 	{
 		const void* const pFileData = XenonSerializerGetRawStreamPointer(hFileSerializer);

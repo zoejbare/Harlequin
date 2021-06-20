@@ -427,8 +427,7 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 bool XenonProgramWriter::Serialize(
 	XenonProgramWriterHandle hProgramWriter,
 	XenonCompilerHandle hCompiler,
-	XenonSerializerHandle hSerializer,
-	int endianness
+	XenonSerializerHandle hSerializer
 )
 {
 	assert(hProgramWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
@@ -446,6 +445,8 @@ bool XenonProgramWriter::Serialize(
 	commonHeader.magicNumber[3] = 'G';
 	commonHeader.magicNumber[4] = '_';
 	commonHeader.fileVersion = XENON_PROGRAM_VERSION_0001;
+
+	const int endianness = XenonSerializerGetEndianness(hSerializer);
 
 	// Set the big endian flag.
 	switch(endianness)
@@ -530,27 +531,7 @@ bool XenonProgramWriter::Serialize(
 	versionHeader.functionTableLength = uint32_t(functionBindings.size());
 	versionHeader.bytecodeLength = uint32_t(bytecode.size());
 
-	// Cache the current endianness of the serializer so we can restore it after writing the file.
-	const int cachedEndianness = XenonSerializerGetEndianness(hSerializer);
-	int result = 0;
-
-	// Update the serializer to use the input endianness.
-	result = XenonSerializerSetEndianness(hSerializer, endianness);
-	if(result != XENON_SUCCESS)
-	{
-		const char* const errorString = XenonGetErrorCodeString(result);
-		const char* const endianString = XenonGetEndianModeString(endianness);
-
-		XenonReportMessage(
-			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to set serializer endian mode: error=\"%s\", endian=\"%s\"",
-			errorString,
-			endianString
-		);
-
-		return false;
-	}
+	int result = XENON_SUCCESS;
 
 	// Write the common header.
 	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[0]); }
@@ -988,24 +969,6 @@ bool XenonProgramWriter::Serialize(
 			"Failed to move serializer position to the end of the file stream: error=\"%s\", position=%" PRIuPTR,
 			errorString,
 			fileEndPosition
-		);
-
-		return false;
-	}
-
-	// Restore the old endianness.
-	result = XenonSerializerSetEndianness(hSerializer, cachedEndianness);
-	if(result != XENON_SUCCESS)
-	{
-		const char* const errorString = XenonGetErrorCodeString(result);
-		const char* const endianString = XenonGetEndianModeString(cachedEndianness);
-
-		XenonReportMessage(
-			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
-			"Failed to restore original serializer endian mode: error=\"%s\", endian=\"%s\"",
-			errorString,
-			endianString
 		);
 
 		return false;

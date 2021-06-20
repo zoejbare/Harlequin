@@ -19,6 +19,8 @@
 #include "../XenonScript.h"
 
 #include "../common/Report.hpp"
+
+#include "HiResTimer.hpp"
 #include "Serializer.hpp"
 
 #include <assert.h>
@@ -1088,6 +1090,20 @@ double XenonEndianSwapFloat64(const double value)
 	tempInt = XENON_SWAP_64(tempInt);
 
 	return tempFloat;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint64_t XenonHiResTimerGetFrequency()
+{
+	return _XenonHiResTimerImplGetFrequency();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint64_t XenonHiResTimerGetTimestamp()
+{
+	return _XenonHiResTimerImplGetTimestamp();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

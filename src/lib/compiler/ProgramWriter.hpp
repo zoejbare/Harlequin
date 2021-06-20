@@ -38,8 +38,7 @@ struct XenonProgramWriter
 	static bool Serialize(
 		XenonProgramWriterHandle hProgramWriter,
 		XenonCompilerHandle hCompiler,
-		XenonSerializerHandle hSerializer,
-		const int endianness
+		XenonSerializerHandle hSerializer
 	);
 
 	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int8_t value);
