@@ -22,7 +22,8 @@
 
 #include "../XenonScript.h"
 
-#include <memory>
+#include <stddef.h>
+#include <utility>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -153,7 +154,7 @@ public:
 		new(reinterpret_cast<void*>(ptr)) value_type(val);
 	}
 
-#if !defined(XENON_PLATFORM_XBOX_360)
+#if !defined(XENON_PLATFORM_XBOX_360) && !defined(XENON_PLATFORM_PS3)
 	template <class U, class... Args>
 	void construct(U* const p, Args&&... args)
 	{
