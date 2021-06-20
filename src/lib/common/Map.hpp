@@ -39,7 +39,13 @@
 	#define XENON_MAP_FUNC_INSERT(dict, key, value) ((dict)[key] = (value))
 	#define XENON_MAP_FUNC_REMOVE(dict, key) (dict).erase(key)
 	#define XENON_MAP_FUNC_CONTAINS(dict, key) ((dict).count(key) > 0)
-	#define XENON_MAP_FUNC_GET(dict, key) (dict).at(key)
+
+	#if defined(XENON_PLATFORM_PS3)
+		#define XENON_MAP_FUNC_GET(dict, key) (dict)[(key)]
+	#else
+		#define XENON_MAP_FUNC_GET(dict, key) (dict).at(key)
+	#endif
+
 	#define XENON_MAP_FUNC_RESERVE(dict, count) // No equivalent function for std::map
 	#define XENON_MAP_FUNC_CLEAR(dict) (dict).clear()
 	#define XENON_MAP_FUNC_SIZE(dict) (dict).size()
