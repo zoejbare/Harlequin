@@ -236,6 +236,7 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 			errorString
 		);
 
+		XenonSerializerDispose(&hSerializer);
 		return nullptr;
 	}
 
