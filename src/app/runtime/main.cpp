@@ -24,11 +24,11 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <deque>
-#include <unordered_map>
+#include <map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -70,7 +70,10 @@ void OnMessageReported(void* const pUserData, const int messageType, const char*
 			break;
 	}
 
-	fprintf((messageType >= XENON_MESSAGE_TYPE_ERROR) ? stderr : stdout, "[%s] %s\n", tag, message);
+	FILE* const pStream = (messageType >= XENON_MESSAGE_TYPE_ERROR) ? stderr : stdout;
+
+	fprintf(pStream, "[%s] %s\n", tag, message);
+	fflush(pStream);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -98,10 +101,10 @@ int main(int argc, char* argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	static std::unordered_map<void*, size_t> allocations;
+	static std::map<void*, size_t> allocations;
 
 	static size_t maxAllocSize = 0;
-	static size_t minAllocSize = SIZE_MAX;
+	static size_t minAllocSize = size_t(-1);
 	static size_t peakMemUsage = 0;
 	static size_t allocationCount = 0;
 	static size_t mallocCount = 0;
@@ -135,7 +138,7 @@ int main(int argc, char* argv[])
 	{
 		void* const pMem = malloc(size);
 
-		allocations.emplace(pMem, size);
+		allocations.insert(std::pair<void*, size_t>(pMem, size));
 		onAlloc(size);
 
 		++mallocCount;
@@ -150,7 +153,7 @@ int main(int argc, char* argv[])
 		currentTotalSize -= allocations[pOldMem];
 
 		allocations.erase(pOldMem);
-		allocations.emplace(pNewMem, newSize);
+		allocations.insert(std::pair<void*, size_t>(pNewMem, newSize));
 		onAlloc(newSize);
 
 		++reallocCount;
@@ -188,7 +191,11 @@ int main(int argc, char* argv[])
 
 	XenonMemSetAllocator(allocator);
 
-#if 1
+	const uint64_t timerFrequency = XenonHiResTimerGetFrequency();
+	const uint64_t overallTimeStart = XenonHiResTimerGetTimestamp();
+
+	const uint64_t createVmTimeStart = overallTimeStart;
+
 	// Create the VM context.
 	int result = XenonVmCreate(&hVm, init);
 	if(result != XENON_SUCCESS)
@@ -199,8 +206,23 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	const uint64_t createVmTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t createVmTimeSlice = createVmTimeEnd - createVmTimeStart;
+
+	const uint64_t loadProgramTimeStart = createVmTimeEnd;
+
 	// Load the test program.
-	if(XenonVmLoadProgramFromFile(hVm, "test", argv[1]) == XENON_SUCCESS)
+	const int loadProgramResult = XenonVmLoadProgramFromFile(hVm, "test", argv[1]);
+
+	const uint64_t loadProgramTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t loadProgramTimeSlice = loadProgramTimeEnd - loadProgramTimeStart;
+
+	uint64_t disassembleTimeSlice = 0;
+	uint64_t createExecTimeSlice = 0;
+	uint64_t runProgramTimeSlice = 0;
+	uint64_t disposeExecTimeSlice = 0;
+
+	if(loadProgramResult == XENON_SUCCESS)
 	{
 		auto iterateProgram = [](void* const pUserData, XenonProgramHandle hProgram) -> bool
 		{
@@ -248,8 +270,13 @@ int main(int argc, char* argv[])
 
 		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
 
+		const uint64_t disassembleTimeStart = XenonHiResTimerGetTimestamp();
+
 		// Iterate all the programs to disassemble them.
 		XenonVmListPrograms(hVm, iterateProgram, hVm);
+
+		const uint64_t disassembleTimeEnd = XenonHiResTimerGetTimestamp();
+		disassembleTimeSlice = disassembleTimeEnd - disassembleTimeStart;
 
 		const char* const entryPoint = "void App.Program.Main()";
 
@@ -258,7 +285,15 @@ int main(int argc, char* argv[])
 
 		XenonVmGetFunction(hVm, &hEntryFunc, entryPoint);
 
-		if(XenonExecutionCreate(&hExec, hVm, hEntryFunc) == XENON_SUCCESS)
+		const uint64_t createExecTimeStart = XenonHiResTimerGetTimestamp();
+
+		// Create an execution context that will run the program's entry point function.
+		bool createExecResult = XenonExecutionCreate(&hExec, hVm, hEntryFunc);
+
+		const uint64_t createExecTimeEnd = XenonHiResTimerGetTimestamp();
+		createExecTimeSlice = createExecTimeEnd - createExecTimeStart;
+
+		if(createExecResult == XENON_SUCCESS)
 		{
 			XenonFunctionHandle hNativePrintFunc = XENON_FUNCTION_HANDLE_NULL;
 			XenonVmGetFunction(hVm, &hNativePrintFunc, "void App.Program.PrintString(string)");
@@ -330,6 +365,8 @@ int main(int argc, char* argv[])
 			//allocationCount = 0;
 			//mallocCount = 0;
 			//reallocCount= 0;
+
+			const uint64_t runProgramTimeStart = XenonHiResTimerGetTimestamp();
 
 			// Run the script until it has completed.
 			for(;;)
@@ -429,9 +466,19 @@ int main(int argc, char* argv[])
 				}
 			}
 
+			const uint64_t runProgramTimeEnd = XenonHiResTimerGetTimestamp();
+			runProgramTimeSlice = runProgramTimeEnd - runProgramTimeStart;
+
+			const uint64_t disposeExecTimeStart = runProgramTimeEnd;
+
 			XenonExecutionDispose(&hExec);
+
+			const uint64_t disposeExecTimeEnd = XenonHiResTimerGetTimestamp();
+			disposeExecTimeSlice = disposeExecTimeEnd - disposeExecTimeStart;
 		}
 	}
+
+	const uint64_t disposeVmTimeStart = XenonHiResTimerGetTimestamp();
 
 	// Dispose of the VM context.
 	result = XenonVmDispose(&hVm);
@@ -441,7 +488,9 @@ int main(int argc, char* argv[])
 		snprintf(msg, sizeof(msg), "Failed to dispose of Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(result));
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_WARNING, msg);
 	}
-#endif
+
+	const uint64_t disposeVmTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t disposeVmTimeSlice = disposeVmTimeEnd - disposeVmTimeStart;
 
 	if(!allocations.empty())
 	{
@@ -469,6 +518,38 @@ int main(int argc, char* argv[])
 			allocationCount,
 			mallocCount,
 			reallocCount
+		);
+		OnMessageReported(NULL, XENON_MESSAGE_TYPE_INFO, msg);
+	}
+
+	const uint64_t overallTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t overallTimeSlice = overallTimeEnd - overallTimeStart;
+
+	const double invTimerFreq = 1.0 / double(timerFrequency);
+
+	// Output the timing metrics.
+	{
+		char msg[512];
+		snprintf(
+			msg,
+			sizeof(msg),
+			"Timing metrics:\n"
+			"\tTotal time: %f ms\n"
+			"\tCreate VM time: %f ms\n"
+			"\tDispose VM time: %f ms\n"
+			"\tCreate exec-context time: %f ms\n"
+			"\tDispose exec-context time: %f ms\n"
+			"\tLoad program time: %f ms\n"
+			"\tRun program time: %f ms\n"
+			"\tDisassemble time: %f ms\n",
+			double(overallTimeSlice * 1000) * invTimerFreq,
+			double(createVmTimeSlice * 1000) * invTimerFreq,
+			double(disposeVmTimeSlice * 1000) * invTimerFreq,
+			double(createExecTimeSlice * 1000) * invTimerFreq,
+			double(disposeExecTimeSlice * 1000) * invTimerFreq,
+			double(loadProgramTimeSlice * 1000) * invTimerFreq,
+			double(runProgramTimeSlice * 1000) * invTimerFreq,
+			double(disassembleTimeSlice * 1000) * invTimerFreq
 		);
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_INFO, msg);
 	}
