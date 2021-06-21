@@ -206,6 +206,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	XenonReportHandle hReport = XENON_REPORT_HANDLE_NULL;
+	XenonVmGetReportHandle(hVm, &hReport);
+
 	const uint64_t createVmTimeEnd = XenonHiResTimerGetTimestamp();
 	const uint64_t createVmTimeSlice = createVmTimeEnd - createVmTimeStart;
 
@@ -268,7 +271,7 @@ int main(int argc, char* argv[])
 			return true;
 		};
 
-		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
+		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
 
 		const uint64_t disassembleTimeStart = XenonHiResTimerGetTimestamp();
 
@@ -356,9 +359,7 @@ int main(int argc, char* argv[])
 				XenonFunctionSetNativeBinding(hNativeDecrementFunc, decrement, nullptr);
 			}
 
-			char msg[256];
-			snprintf(msg, sizeof(msg), "Executing script function: \"%s\"", entryPoint);
-			OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, msg);
+			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Executing script function: \"%s\"", entryPoint);
 
 			bool status;
 
@@ -374,8 +375,7 @@ int main(int argc, char* argv[])
 				result = XenonExecutionRun(hExec, XENON_RUN_CONTINUOUS);
 				if(result != XENON_SUCCESS)
 				{
-					snprintf(msg, sizeof(msg), "Error occurred while executing script: \"%s\"", XenonGetErrorCodeString(result));
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while executing script: \"%s\"", XenonGetErrorCodeString(result));
 					break;
 				}
 
@@ -383,13 +383,12 @@ int main(int argc, char* argv[])
 				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_EXCEPTION, &status);
 				if(result != XENON_SUCCESS)
 				{
-					snprintf(msg, sizeof(msg), "Error occurred while retrieving exception status: \"%s\"", XenonGetErrorCodeString(result));
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while retrieving exception status: \"%s\"", XenonGetErrorCodeString(result));
 					break;
 				}
 				if(status)
 				{
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
+					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
 
 					auto iterateFrame = [](void* const pUserData, XenonFrameHandle hFrame) -> bool
 					{
@@ -441,13 +440,12 @@ int main(int argc, char* argv[])
 				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_COMPLETE, &status);
 				if(result != XENON_SUCCESS)
 				{
-					snprintf(msg, sizeof(msg), "Error occurred while retrieving completion status: \"%s\"", XenonGetErrorCodeString(result));
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while retrieving completion status: \"%s\"", XenonGetErrorCodeString(result));
 					break;
 				}
 				if(status)
 				{
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_VERBOSE, "Finished executing script");
+					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Finished executing script");
 					break;
 				}
 
@@ -455,13 +453,12 @@ int main(int argc, char* argv[])
 				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_ABORT, &status);
 				if(result != XENON_SUCCESS)
 				{
-					snprintf(msg, sizeof(msg), "Error occurred while retrieving abort status: \"%s\"", XenonGetErrorCodeString(result));
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_ERROR, msg);
+					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while retrieving abort status: \"%s\"", XenonGetErrorCodeString(result));
 					break;
 				}
 				if(status)
 				{
-					OnMessageReported(nullptr, XENON_MESSAGE_TYPE_WARNING, "Script execution aborted");
+					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_WARNING, "Script execution aborted");
 					break;
 				}
 			}
@@ -500,27 +497,21 @@ int main(int argc, char* argv[])
 	}
 
 	// Output memory allocation stats.
-	{
-		char msg[256];
-		snprintf(
-			msg,
-			sizeof(msg),
-			"Memory Stats:\n"
-			"\tMin allocation size: %zu\n"
-			"\tMax allocation size: %zu\n"
-			"\tPeak memory usage: %zu\n"
-			"\tTotal allocation count: %zu\n"
-			"\tMalloc() call count: %zu\n"
-			"\tRealloc() call count: %zu",
-			minAllocSize,
-			maxAllocSize,
-			peakMemUsage,
-			allocationCount,
-			mallocCount,
-			reallocCount
-		);
-		OnMessageReported(NULL, XENON_MESSAGE_TYPE_INFO, msg);
-	}
+	printf(
+		"Memory Stats:\n"
+		"\tMin allocation size: %zu\n"
+		"\tMax allocation size: %zu\n"
+		"\tPeak memory usage: %zu\n"
+		"\tTotal allocation count: %zu\n"
+		"\tMalloc() call count: %zu\n"
+		"\tRealloc() call count: %zu\n",
+		minAllocSize,
+		maxAllocSize,
+		peakMemUsage,
+		allocationCount,
+		mallocCount,
+		reallocCount
+	);
 
 	const uint64_t overallTimeEnd = XenonHiResTimerGetTimestamp();
 	const uint64_t overallTimeSlice = overallTimeEnd - overallTimeStart;
@@ -528,31 +519,25 @@ int main(int argc, char* argv[])
 	const double invTimerFreq = 1.0 / double(timerFrequency);
 
 	// Output the timing metrics.
-	{
-		char msg[512];
-		snprintf(
-			msg,
-			sizeof(msg),
-			"Timing metrics:\n"
-			"\tTotal time: %f ms\n"
-			"\tCreate VM time: %f ms\n"
-			"\tDispose VM time: %f ms\n"
-			"\tCreate exec-context time: %f ms\n"
-			"\tDispose exec-context time: %f ms\n"
-			"\tLoad program time: %f ms\n"
-			"\tRun program time: %f ms\n"
-			"\tDisassemble time: %f ms\n",
-			double(overallTimeSlice * 1000) * invTimerFreq,
-			double(createVmTimeSlice * 1000) * invTimerFreq,
-			double(disposeVmTimeSlice * 1000) * invTimerFreq,
-			double(createExecTimeSlice * 1000) * invTimerFreq,
-			double(disposeExecTimeSlice * 1000) * invTimerFreq,
-			double(loadProgramTimeSlice * 1000) * invTimerFreq,
-			double(runProgramTimeSlice * 1000) * invTimerFreq,
-			double(disassembleTimeSlice * 1000) * invTimerFreq
-		);
-		OnMessageReported(NULL, XENON_MESSAGE_TYPE_INFO, msg);
-	}
+	printf(
+		"Timing metrics:\n"
+		"\tTotal time: %f ms\n"
+		"\tCreate VM time: %f ms\n"
+		"\tDispose VM time: %f ms\n"
+		"\tCreate exec-context time: %f ms\n"
+		"\tDispose exec-context time: %f ms\n"
+		"\tLoad program time: %f ms\n"
+		"\tRun program time: %f ms\n"
+		"\tDisassemble time: %f ms\n",
+		double(overallTimeSlice * 1000) * invTimerFreq,
+		double(createVmTimeSlice * 1000) * invTimerFreq,
+		double(disposeVmTimeSlice * 1000) * invTimerFreq,
+		double(createExecTimeSlice * 1000) * invTimerFreq,
+		double(disposeExecTimeSlice * 1000) * invTimerFreq,
+		double(loadProgramTimeSlice * 1000) * invTimerFreq,
+		double(runProgramTimeSlice * 1000) * invTimerFreq,
+		double(disassembleTimeSlice * 1000) * invTimerFreq
+	);
 
 	return 0;
 }
