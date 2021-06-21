@@ -39,6 +39,9 @@
 #elif defined(XENON_PLATFORM_PS3)
 	#include "../../../../XenonScriptImpl-PS3/lib/base/thread/Thread.hpp"
 
+#elif defined(XENON_PLATFORM_PSVITA)
+	#include "../../../../XenonScriptImpl-PSVita/lib/base/thread/Thread.hpp"
+
 #else
 	#error "Threads not implemented for this platform"
 

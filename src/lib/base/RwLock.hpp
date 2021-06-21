@@ -36,6 +36,9 @@
 #elif defined(XENON_PLATFORM_PS3)
 	#include "../../../../XenonScriptImpl-PS3/lib/base/rwlock/RwLock.hpp"
 
+#elif defined(XENON_PLATFORM_PSVITA)
+	#include "../../../../XenonScriptImpl-PSVita/lib/base/rwlock/RwLock.hpp"
+
 #else
 	#error "XenonRwLock not implemented for this platform"
 

@@ -36,6 +36,9 @@
 #elif defined(XENON_PLATFORM_PS3)
 	#include "../../../../XenonScriptImpl-PS3/lib/common/atomic/Atomic.hpp"
 
+#elif defined(XENON_PLATFORM_PSVITA)
+	#include "../../../../XenonScriptImpl-PSVita/lib/common/atomic/Atomic.hpp"
+
 #else
 	#error "Atomic functions not implemented for this platform"
 

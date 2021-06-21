@@ -36,6 +36,9 @@
 #elif defined(XENON_PLATFORM_PS3)
 	#include "../../../../XenonScriptImpl-PS3/lib/base/mutex/Mutex.hpp"
 
+#elif defined(XENON_PLATFORM_PSVITA)
+	#include "../../../../XenonScriptImpl-PSVita/lib/base/mutex/Mutex.hpp"
+
 #else
 	#error "XenonMutex not implemented for this platform"
 

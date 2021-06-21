@@ -21,9 +21,19 @@
 #include <assert.h>
 #include <string.h>
 
+#if defined(XENON_PLATFORM_PSVITA)
+	// Work around xxhash using the wrong 'restrict' keyword.
+	#pragma push_macro("restrict")
+	#define restrict __restrict__
+#endif
+
 #define XXH_INLINE_ALL 1
 #define XXH_ACCEPT_NULL_INPUT_POINTER 1
 #include <xxhash.h>
+
+#if defined(XENON_PLATFORM_PSVITA)
+	#pragma pop_macro("restrict")
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 

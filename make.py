@@ -76,18 +76,14 @@ with csbuild.Target("release"):
 csbuild.SetCcLanguageStandard("c99")
 csbuild.SetCxxLanguageStandard("c++17")
 
-with csbuild.Toolchain("ps3", "psvita"):
-	csbuild.AddCompilerFlags(
-		"-Xdiag=1",
-		"-Xmserrors",
-	)
+with csbuild.Toolchain("psvita"):
+	# PSVita needs "__STDC_FORMAT_MACROS" defined in order
+	# to see the integer type format macros in <inttypes.h>.
+	csbuild.AddDefines("__STDC_FORMAT_MACROS")
+	csbuild.AddCompilerFlags("-Xthumb=1")
 
 with csbuild.Toolchain("ps3", "psvita"):
 	csbuild.SetCxxLanguageStandard("cpp11")
-	csbuild.AddCompilerFlags(
-		"-Xmserrors",
-		"-Xdiag=1",
-	)
 
 with csbuild.Platform("Windows"):
 	with csbuild.Toolchain("gcc", "clang", "ps4", "android-gcc", "android-clang"):
@@ -296,6 +292,11 @@ with csbuild.Project(LibXenonScriptBase.projectName, XenonScriptLib.rootPath, Li
 	with csbuild.Toolchain("ps3"):
 		csbuild.AddSourceFiles(
 			f"{_REPO_ROOT_PATH}/../XenonScriptImpl-PS3/lib/base/*/*.cpp",
+		)
+
+	with csbuild.Toolchain("psvita"):
+		csbuild.AddSourceFiles(
+			f"{_REPO_ROOT_PATH}/../XenonScriptImpl-PSVita/lib/base/*/*.cpp",
 		)
 
 ###################################################################################################
