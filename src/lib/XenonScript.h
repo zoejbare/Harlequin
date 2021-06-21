@@ -373,6 +373,8 @@ XENON_MAIN_API int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* pro
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
+XENON_MAIN_API int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm);
+
 XENON_MAIN_API int XenonProgramGetName(XenonProgramHandle hProgram, const char** pOutName);
 
 XENON_MAIN_API int XenonProgramGetEndianness(XenonProgramHandle hProgram, int* pOutEndianness);
@@ -386,6 +388,8 @@ XENON_MAIN_API int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgra
 XENON_MAIN_API int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
+
+XENON_MAIN_API int XenonFunctionGetProgram(XenonFunctionHandle hFunction, XenonProgramHandle* phOutProgram);
 
 XENON_MAIN_API int XenonFunctionGetSignature(XenonFunctionHandle hFunction, const char** pOutSignature);
 

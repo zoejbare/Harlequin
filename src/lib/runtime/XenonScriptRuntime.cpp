@@ -445,6 +445,20 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm)
+{
+	if(!hProgram || !phOutVm)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*phOutVm) = hProgram->hVm;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonProgramGetName(XenonProgramHandle hProgram, const char** pOutName)
 {
 	if(!hProgram || !pOutName)
@@ -541,6 +555,20 @@ int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIt
 			break;
 		}
 	}
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonFunctionGetProgram(XenonFunctionHandle hFunction, XenonProgramHandle* phOutProgram)
+{
+	if(!hFunction || !phOutProgram)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	(*phOutProgram) = hFunction->hProgram;
 
 	return XENON_SUCCESS;
 }
