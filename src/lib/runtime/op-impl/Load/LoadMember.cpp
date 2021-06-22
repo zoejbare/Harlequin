@@ -30,11 +30,11 @@
 //
 // Load a member from an object value into a general-purpose register.
 //
-// 0x: LOAD_MEMBER r#, r#, i#
+// 0x: LOAD_MEMBER r#, r#, ##
 //
 //   r# [first]  = General-purpose register index where the extracted member value will be stored
 //   r# [second] = General-purpose register index that contains the object where the member resides
-//   i#          = Immediate integer used as the direct index into the object's member table
+//   ##          = Immediate integer used as the direct index into the object's member table
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ void OpCodeDisasm_LoadMember(XenonDisassemble& disasm)
 	const uint32_t memberIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "LOAD_MEMBER r%" PRIu32 ", r%" PRIu32 ", i%" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);
+	snprintf(str, sizeof(str), "LOAD_MEMBER r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

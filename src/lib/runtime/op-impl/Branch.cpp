@@ -32,16 +32,16 @@
 // Move the instruction pointer by a specified offset. Offset cannot exceed the bounds of the current function.
 // The conditional branch instructions will depend on the boolean evaluation of a specified register.
 //
-// 0x: BRANCH #
-//   # - Relative bytecode offset
+// 0x: BRANCH ##
+//   ## - Relative bytecode offset
 //
-// 0x: BRANCH_IF_TRUE r#, #
+// 0x: BRANCH_IF_TRUE r#, ##
 //   r# - Register to evaluate
-//   #  - Relative bytecode offset
+//   ## - Relative bytecode offset
 //
-// 0x: BRANCH_IF_FALSE r#, #
+// 0x: BRANCH_IF_FALSE r#, ##
 //   r# - Register to evaluate
-//   #  - Relative bytecode offset
+//   ## - Relative bytecode offset
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -147,7 +147,7 @@ void OpCodeDisasm_Branch(XenonDisassemble& disasm)
 	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
 
 	char str[32];
-	snprintf(str, sizeof(str), "BRANCH %" PRId32, offset);
+	snprintf(str, sizeof(str), "BRANCH #%" PRId32, offset);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -194,7 +194,7 @@ void OpCodeDisasm_BranchIfTrue(XenonDisassemble& disasm)
 	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
 
 	char str[32];
-	snprintf(str, sizeof(str), "BRANCH_IF_TRUE r%" PRIu32 ", %" PRId32, registerIndex, offset);
+	snprintf(str, sizeof(str), "BRANCH_IF_TRUE r%" PRIu32 ", #%" PRId32, registerIndex, offset);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -241,7 +241,7 @@ void OpCodeDisasm_BranchIfFalse(XenonDisassemble& disasm)
 	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
 
 	char str[32];
-	snprintf(str, sizeof(str), "BRANCH_IF_FALSE r%" PRIu32 ", %" PRId32, registerIndex, offset);
+	snprintf(str, sizeof(str), "BRANCH_IF_FALSE r%" PRIu32 ", #%" PRId32, registerIndex, offset);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
