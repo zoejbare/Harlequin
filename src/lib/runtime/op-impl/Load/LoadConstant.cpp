@@ -51,9 +51,10 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
 	if(result == XENON_SUCCESS)
 	{
-		// Upload the constant directly. This is a little risky since any native, built-in functions could potentially
-		// change the underlying data, but the alternative is forcing a new allocation every time a constant is loaded.
-		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+		// Make a copy of the value, then upload that copy to the register.
+		// A copy must be made to avoid accidentally changing the underlying
+		// data of the constant.
+		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, XenonValue::Copy(hExec->hVm, hValue), registerIndex);
 		if(result != XENON_SUCCESS)
 		{
 			// TODO: Raise script exception
