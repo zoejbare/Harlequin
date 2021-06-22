@@ -18,6 +18,8 @@
 
 #include "Vm.hpp"
 
+#include "../base/HiResTimer.hpp"
+
 #include <assert.h>
 #include <stdio.h>
 
@@ -249,17 +251,32 @@ int32_t XenonVm::prv_gcThreadMain(void* const pArg)
 	XenonVmHandle hVm = reinterpret_cast<XenonVmHandle>(pArg);
 	assert(hVm != XENON_VM_HANDLE_NULL);
 
+	const uint64_t gcWaitTimeMs = 50;
+
+	// Calculate the amount of time to wait between steps.
+	const uint64_t timerFrequency = XenonHiResTimerGetFrequency();
+	const uint64_t timerInterval = gcWaitTimeMs * timerFrequency / 1000;
+
+	uint64_t lastUpdateTime = 0;
+
 	while(!hVm->isShuttingDown)
 	{
-		// Run a step of the garbage collector.
+		const uint64_t currentTime = XenonHiResTimerGetTimestamp();
+
+		// Check if enough time has elapsed to run the GC step again.
+		if(currentTime - lastUpdateTime >= timerInterval)
 		{
 			XenonScopedWriteLock writeLock(hVm->gcRwLock);
 
+			// Run a step of the garbage collector.
 			XenonGarbageCollector::RunStep(hVm->gc);
+
+			// Get a new timestamp for the last update time to offset the time taken by the GC step.
+			lastUpdateTime = XenonHiResTimerGetTimestamp();
 		}
 
-		// TODO: Need a separate timing mechanism to keep the garbage collector from running too much while not forcing long sleep times.
-		XenonThread::Sleep(50);
+		// Force a very small sleep to deprioritize the GC thread.
+		XenonThread::Sleep(1);
 	}
 
 	return XENON_SUCCESS;
