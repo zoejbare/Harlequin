@@ -24,8 +24,8 @@
 
 extern "C" void _XenonMutexImplCreate(XenonInternalMutex& obj)
 {
-	BOOL lockInitResult = InitializeCriticalSectionAndSpinCount(&obj.lock, 0x400);
-	assert(lockInitResult == TRUE); (void) lockInitResult;
+	const bool mutexInitResult = (InitializeCriticalSectionAndSpinCount(&obj.lock, 0x400) == TRUE);
+	assert(mutexInitResult == true); (void) mutexInitResult;
 
 	obj.initialized = true;
 }

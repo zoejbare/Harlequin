@@ -54,7 +54,7 @@
 	#define XENON_MAP_ITER_PTR_KEY(iter) (iter)->first
 	#define XENON_MAP_ITER_PTR_VALUE(iter) (iter)->second
 
-#elif XENON_MAP_TEST_FORCE_STD_UNORDERED_MAP || defined(XENON_PLATFORM_XBOX_360) || defined(XENON_PLATFORM_PSVITA)
+#elif XENON_MAP_TEST_FORCE_STD_UNORDERED_MAP || defined(XENON_PLATFORM_PSVITA)
 	#include <unordered_map>
 
 	#define XENON_MAP_IS_UNORDERED 1

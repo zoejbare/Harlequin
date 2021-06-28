@@ -43,7 +43,7 @@
 	#include "../../../../XenonScriptImpl-PSVita/lib/base/thread/Thread.hpp"
 
 #else
-	#error "Threads not implemented for this platform"
+	#error "XenonThread not implemented for this platform"
 
 #endif
 

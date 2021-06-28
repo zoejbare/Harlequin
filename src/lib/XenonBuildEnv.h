@@ -33,16 +33,6 @@
 #elif defined(__psp2__)
 	#define XENON_PLATFORM_PSVITA
 
-#elif defined(_XBOX)
-	#include <xtl.h>
-	#if _XBOX_VER >= 200 && _XBOX_VER < 300
-		#define XENON_PLATFORM_XBOX_360
-
-	#else
-		#error "Unrecognized Xbox platform!"
-
-	#endif
-
 #elif defined(__APPLE__)
 	#define XENON_PLATFORM_MAC_OS
 
