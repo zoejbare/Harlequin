@@ -451,11 +451,11 @@ bool XenonProgramWriter::Serialize(
 	// Set the big endian flag.
 	switch(endianness)
 	{
-		case XENON_ENDIAN_MODE_LITTLE:
+		case XENON_ENDIAN_ORDER_LITTLE:
 			commonHeader.bigEndianFlag = 0;
 			break;
 
-		case XENON_ENDIAN_MODE_BIG:
+		case XENON_ENDIAN_ORDER_BIG:
 			commonHeader.bigEndianFlag = 1;
 			break;
 

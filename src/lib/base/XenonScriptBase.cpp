@@ -91,10 +91,10 @@ const char* XenonGetEndianModeString(int endianness)
 {
 	switch(endianness)
 	{
-		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_MODE_UNKNOWN);
-		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_MODE_NATIVE);
-		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_MODE_LITTLE);
-		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_MODE_BIG);
+		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_ORDER_UNKNOWN);
+		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_ORDER_NATIVE);
+		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_ORDER_LITTLE);
+		XENON_SWITCH_CASE_RETURN_STRING(XENON_ENDIAN_ORDER_BIG);
 
 		default:
 			break;
@@ -136,10 +136,10 @@ const char* XenonGetValueTypeString(int valueType)
 int XenonGetPlatformEndianMode()
 {
 #ifdef XENON_CPU_ENDIAN_LITTLE
-	return XENON_ENDIAN_MODE_LITTLE;
+	return XENON_ENDIAN_ORDER_LITTLE;
 
 #else
-	return XENON_ENDIAN_MODE_BIG;
+	return XENON_ENDIAN_ORDER_BIG;
 
 #endif
 }
@@ -532,7 +532,7 @@ int XenonSerializerGetEndianness(XenonSerializerHandle hSerializer)
 {
 	if(!hSerializer)
 	{
-		return XENON_ENDIAN_MODE_UNKNOWN;
+		return XENON_ENDIAN_ORDER_UNKNOWN;
 	}
 
 	return hSerializer->endianness;
@@ -578,7 +578,7 @@ void* XenonSerializerGetRawStreamPointer(XenonSerializerHandle hSerializer)
 
 int XenonSerializerSetEndianness(XenonSerializerHandle hSerializer, int endianness)
 {
-	if(!hSerializer || endianness < XENON_ENDIAN_MODE_NATIVE || endianness > XENON_ENDIAN_MODE_BIG)
+	if(!hSerializer || endianness < XENON_ENDIAN_ORDER_NATIVE || endianness > XENON_ENDIAN_ORDER_BIG)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}

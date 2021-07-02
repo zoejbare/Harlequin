@@ -34,9 +34,9 @@ namespace SerializerUtility
 		{
 #ifndef XENON_CPU_ENDIAN_UNKNOWN
 	#ifdef XENON_CPU_ENDIAN_BIG
-			case XENON_ENDIAN_MODE_LITTLE:
+			case XENON_ENDIAN_ORDER_LITTLE:
 	#else
-			case XENON_ENDIAN_MODE_BIG:
+			case XENON_ENDIAN_ORDER_BIG:
 	#endif
 				reverseEndian = true;
 				break;
@@ -80,7 +80,7 @@ XenonSerializerHandle XenonSerializer::Create(int mode)
 
 	pOutput->position = 0;
 	pOutput->mode = mode;
-	pOutput->endianness = XENON_ENDIAN_MODE_NATIVE;
+	pOutput->endianness = XENON_ENDIAN_ORDER_NATIVE;
 
 	return pOutput;
 }

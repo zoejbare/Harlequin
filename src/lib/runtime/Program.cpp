@@ -47,11 +47,11 @@ static bool ProgramLoad(
 
 	// The first few bytes should always be read natively. We'll switch
 	// the endianness after reading the 'isBigEndian' flag.
-	result = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_MODE_NATIVE);
+	result = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_ORDER_NATIVE);
 	if(result != XENON_SUCCESS)
 	{
 		const char* const errorString = XenonGetErrorCodeString(result);
-		const char* const endianString = XenonGetEndianModeString(XENON_ENDIAN_MODE_NATIVE);
+		const char* const endianString = XenonGetEndianModeString(XENON_ENDIAN_ORDER_NATIVE);
 
 		XenonReportMessage(
 			hReport,
@@ -126,8 +126,8 @@ static bool ProgramLoad(
 	// Save the endianness value to the output program since we'll need
 	// that when dispatching bytecode data.
 	pOutProgram->endianness = (commonHeader.bigEndianFlag > 0)
-		? XENON_ENDIAN_MODE_BIG
-		: XENON_ENDIAN_MODE_LITTLE;
+		? XENON_ENDIAN_ORDER_BIG
+		: XENON_ENDIAN_ORDER_LITTLE;
 
 	// Now that we know the endianness, we can set it on the serializer.
 	result = XenonSerializerSetEndianness(hSerializer, pOutProgram->endianness);

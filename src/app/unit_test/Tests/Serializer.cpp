@@ -299,7 +299,7 @@ TEST(TestSerializer, ReadStreamFromBuffer)
 
 	// Verify the serializer is set to native endianness.
 	const int serializerEndianness = XenonSerializerGetEndianness(hSerializer);
-	EXPECT_EQ(serializerEndianness, XENON_ENDIAN_MODE_NATIVE);
+	EXPECT_EQ(serializerEndianness, XENON_ENDIAN_ORDER_NATIVE);
 
 	// Load the stream from the in-memory test data.
 	const int loadStreamResult = XenonSerializerLoadStreamFromBuffer(hSerializer, SerializerTestData, sizeof(SerializerTestData));
@@ -337,7 +337,7 @@ TEST(TestSerializer, ReadStreamFromFile)
 
 	// Verify the serializer is set to native endianness.
 	const int serializerEndianness = XenonSerializerGetEndianness(hSerializer);
-	EXPECT_EQ(serializerEndianness, XENON_ENDIAN_MODE_NATIVE);
+	EXPECT_EQ(serializerEndianness, XENON_ENDIAN_ORDER_NATIVE);
 
 	// Load the stream from the temporary file.
 	const int loadStreamResult = XenonSerializerLoadStreamFromFile(hSerializer, tempFile.GetFilename());
@@ -378,7 +378,7 @@ TEST(TestSerializer, LoadFileThenWriteFile)
 
 	// Verify the serializer is set to native endianness.
 	const int serializerEndianness = XenonSerializerGetEndianness(hSerializer);
-	EXPECT_EQ(serializerEndianness, XENON_ENDIAN_MODE_NATIVE);
+	EXPECT_EQ(serializerEndianness, XENON_ENDIAN_ORDER_NATIVE);
 
 	// Load the stream from the temporary, prototype file.
 	const int loadStreamResult = XenonSerializerLoadStreamFromFile(hSerializer, protoFile.GetFilename());
@@ -436,9 +436,9 @@ TEST(TestSerializer, WriteNativeEndianData)
 
 		// Verify the serializer is set to native endianness.
 		const int endianness = XenonSerializerGetEndianness(hSerializer);
-		EXPECT_EQ(endianness, XENON_ENDIAN_MODE_NATIVE);
+		EXPECT_EQ(endianness, XENON_ENDIAN_ORDER_NATIVE);
 
-		if(endianness == XENON_ENDIAN_MODE_NATIVE)
+		if(endianness == XENON_ENDIAN_ORDER_NATIVE)
 		{
 			// Write an 8-bit integer to the stream.
 			const int writeInt8Result = XenonSerializerWriteInt8(hSerializer, 1);
@@ -502,9 +502,9 @@ TEST(TestSerializer, WriteNativeEndianData)
 
 		// Verify the serializer is set to native endianness.
 		const int endianness = XenonSerializerGetEndianness(hSerializer);
-		EXPECT_EQ(endianness, XENON_ENDIAN_MODE_NATIVE);
+		EXPECT_EQ(endianness, XENON_ENDIAN_ORDER_NATIVE);
 
-		if(endianness == XENON_ENDIAN_MODE_NATIVE)
+		if(endianness == XENON_ENDIAN_ORDER_NATIVE)
 		{
 			// Load the stream from the temp file.
 			const int loadStreamResult = XenonSerializerLoadStreamFromFile(hSerializer, tempFile.GetFilename());
@@ -598,7 +598,7 @@ TEST(TestSerializer, WriteLittleEndianData)
 	ASSERT_EQ(createSerializerResult, XENON_SUCCESS);
 
 	// Set the serializer to little endian.
-	const int setLittleEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_MODE_LITTLE);
+	const int setLittleEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_ORDER_LITTLE);
 	EXPECT_EQ(setLittleEndianResult, XENON_SUCCESS);
 
 	// Write a test value to the stream.
@@ -610,7 +610,7 @@ TEST(TestSerializer, WriteLittleEndianData)
 	EXPECT_EQ(setPositionResult, XENON_SUCCESS);
 
 	// Reset to use the native CPU endianness to avoid endian-correcting the value being read.
-	const int setNativeEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_MODE_NATIVE);
+	const int setNativeEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_ORDER_NATIVE);
 	EXPECT_EQ(setNativeEndianResult, XENON_SUCCESS);
 
 	// Read the test value back out.
@@ -642,7 +642,7 @@ TEST(TestSerializer, WriteBigEndianData)
 	ASSERT_EQ(createSerializerResult, XENON_SUCCESS);
 
 	// Set the serializer to big endian.
-	const int setBigEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_MODE_BIG);
+	const int setBigEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_ORDER_BIG);
 	EXPECT_EQ(setBigEndianResult, XENON_SUCCESS);
 
 	// Write a test value to the stream.
@@ -654,7 +654,7 @@ TEST(TestSerializer, WriteBigEndianData)
 	EXPECT_EQ(setPositionResult, XENON_SUCCESS);
 
 	// Reset to use the native CPU endianness to avoid endian-correcting the value being read.
-	const int setNativeEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_MODE_NATIVE);
+	const int setNativeEndianResult = XenonSerializerSetEndianness(hSerializer, XENON_ENDIAN_ORDER_NATIVE);
 	EXPECT_EQ(setNativeEndianResult, XENON_SUCCESS);
 
 	// Read the test value back out.

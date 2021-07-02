@@ -72,12 +72,12 @@ enum XenonErrorCodeEnum
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-enum XenonEndianModeEnum
+enum XenonEndianOrderEnum
 {
-	XENON_ENDIAN_MODE_UNKNOWN,
-	XENON_ENDIAN_MODE_NATIVE,
-	XENON_ENDIAN_MODE_LITTLE,
-	XENON_ENDIAN_MODE_BIG,
+	XENON_ENDIAN_ORDER_UNKNOWN,
+	XENON_ENDIAN_ORDER_NATIVE,
+	XENON_ENDIAN_ORDER_LITTLE,
+	XENON_ENDIAN_ORDER_BIG,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/

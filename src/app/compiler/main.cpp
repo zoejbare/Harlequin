@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
 	XenonSerializerCreate(&hMainFuncSerializer, XENON_SERIALIZER_MODE_WRITER);
 	XenonSerializerCreate(&hSubFuncSerializer, XENON_SERIALIZER_MODE_WRITER);
 
-	const int endianness = XENON_ENDIAN_MODE_BIG;
+	const int endianness = XENON_ENDIAN_ORDER_BIG;
 
 	// Set the endianness of each serializer.
 	XenonSerializerSetEndianness(hFileSerializer, endianness);
