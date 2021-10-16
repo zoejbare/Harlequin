@@ -128,12 +128,12 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 				XenonGcProxy* const pCurrent = gc.pPendingHead;
 				XenonGcProxy* const pNext = pCurrent->pNext;
 
-				XenonGcProxy::Unlink(pCurrent);
+				prv_proxyUnlink(pCurrent);
 
 				// Link the object at the head of the pending list to the head of the active unmarked list.
 				if(gc.pUnmarkedHead)
 				{
-					XenonGcProxy::InsertBefore(gc.pUnmarkedHead, pCurrent);
+					prv_proxyInsertBefore(gc.pUnmarkedHead, pCurrent);
 				}
 
 				// Clear the proxy's 'pending' state.
@@ -365,7 +365,7 @@ void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy* 
 
 	if(gc.pPendingHead)
 	{
-		XenonGcProxy::InsertBefore(gc.pPendingHead, pGcProxy);
+		prv_proxyInsertBefore(gc.pPendingHead, pGcProxy);
 	}
 
 	gc.pPendingHead = pGcProxy;
@@ -386,7 +386,7 @@ void XenonGarbageCollector::MarkObject(XenonGarbageCollector& gc, XenonGcProxy* 
 			gc.pUnmarkedHead = pGcProxy->pNext;
 		}
 
-		XenonGcProxy::Unlink(pGcProxy);
+		prv_proxyUnlink(pGcProxy);
 
 		if(!gc.pMarkedHead)
 		{
@@ -396,7 +396,7 @@ void XenonGarbageCollector::MarkObject(XenonGarbageCollector& gc, XenonGcProxy* 
 		}
 		else
 		{
-			XenonGcProxy::InsertAfter(gc.pMarkedTail, pGcProxy);
+			prv_proxyInsertAfter(gc.pMarkedTail, pGcProxy);
 
 			gc.pMarkedTail = pGcProxy;
 		}
@@ -410,7 +410,7 @@ void XenonGarbageCollector::prv_reset(XenonGarbageCollector& gc)
 	if(gc.pMarkedTail && gc.pUnmarkedHead)
 	{
 		// Link the head of the unmarked objects to the end of the marked list.
-		XenonGcProxy::InsertAfter(gc.pMarkedTail, gc.pUnmarkedHead);
+		prv_proxyInsertAfter(gc.pMarkedTail, gc.pUnmarkedHead);
 	}
 
 	if(gc.pMarkedHead)
@@ -432,7 +432,70 @@ void XenonGarbageCollector::prv_onDisposeObject(XenonGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 
-	pGcProxy->onGcDestructFn(pGcProxy->pObject);
+	pGcProxy->onGcDisposeFn(pGcProxy->pObject);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGarbageCollector::prv_proxyInsertBefore(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
+{
+	assert(pGcListProxy != nullptr);
+	assert(pGcInsertProxy != nullptr);
+
+	XenonGcProxy* const pListPrev = pGcListProxy->pPrev;
+
+	if(pListPrev)
+	{
+		pListPrev->pNext = pGcInsertProxy;
+	}
+
+	pGcListProxy->pPrev = pGcInsertProxy;
+
+	pGcInsertProxy->pPrev = pListPrev;
+	pGcInsertProxy->pNext = pGcListProxy;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGarbageCollector::prv_proxyInsertAfter(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
+{
+	assert(pGcListProxy != nullptr);
+	assert(pGcInsertProxy != nullptr);
+
+	XenonGcProxy* const pListNext = pGcListProxy->pNext;
+
+	if(pListNext)
+	{
+		pListNext->pPrev = pGcInsertProxy;
+	}
+
+	pGcListProxy->pNext = pGcInsertProxy;
+
+	pGcInsertProxy->pPrev = pGcListProxy;
+	pGcInsertProxy->pNext = pListNext;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGarbageCollector::prv_proxyUnlink(XenonGcProxy* const pGcProxy)
+{
+	assert(pGcProxy != nullptr);
+
+	XenonGcProxy* const pPrev = pGcProxy->pPrev;
+	XenonGcProxy* const pNext = pGcProxy->pNext;
+
+	if(pPrev)
+	{
+		pPrev->pNext = pNext;
+	}
+
+	if(pNext)
+	{
+		pNext->pPrev = pPrev;
+	}
+
+	pGcProxy->pPrev = nullptr;
+	pGcProxy->pNext = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

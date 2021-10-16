@@ -22,7 +22,7 @@
 
 #include "../XenonScript.h"
 
-#include "../common/DestructCallback.hpp"
+#include "../common/DisposeCallback.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -38,17 +38,13 @@ struct XenonGcProxy
 		XenonGcProxy& output,
 		XenonGarbageCollector& gc,
 		XenonGcDiscoveryCallback onGcDiscoveryFn,
-		XenonDestructCallback onGcDestructFn,
+		XenonDisposeCallback onGcDisposeFn,
 		void* const pObject,
 		const bool autoMark
 	);
 
-	static void InsertBefore(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy);
-	static void InsertAfter(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy);
-	static void Unlink(XenonGcProxy* const pGcProxy);
-
 	XenonGcDiscoveryCallback onGcDiscoveryFn;
-	XenonDestructCallback onGcDestructFn;
+	XenonDisposeCallback onGcDisposeFn;
 
 	XenonGarbageCollector* pGc;
 

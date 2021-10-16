@@ -29,17 +29,17 @@ void XenonGcProxy::Initialize(
 	XenonGcProxy& output,
 	XenonGarbageCollector& gc,
 	XenonGcDiscoveryCallback onGcDiscoveryFn,
-	XenonDestructCallback onGcDestructFn,
+	XenonDisposeCallback onGcDisposeFn,
 	void* const pObject,
 	const bool autoMark
 )
 {
 	assert(onGcDiscoveryFn != nullptr);
-	assert(onGcDestructFn != nullptr);
+	assert(onGcDisposeFn != nullptr);
 	assert(pObject != nullptr);
 
 	output.onGcDiscoveryFn = onGcDiscoveryFn;
-	output.onGcDestructFn = onGcDestructFn;
+	output.onGcDisposeFn = onGcDisposeFn;
 	output.pGc = &gc;
 	output.pPrev = nullptr;
 	output.pNext = nullptr;
@@ -49,69 +49,6 @@ void XenonGcProxy::Initialize(
 	output.autoMark = autoMark;
 
 	XenonGarbageCollector::LinkObject(gc, &output);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonGcProxy::InsertBefore(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
-{
-	assert(pGcListProxy != nullptr);
-	assert(pGcInsertProxy != nullptr);
-
-	XenonGcProxy* const pListPrev = pGcListProxy->pPrev;
-
-	if(pListPrev)
-	{
-		pListPrev->pNext = pGcInsertProxy;
-	}
-
-	pGcListProxy->pPrev = pGcInsertProxy;
-
-	pGcInsertProxy->pPrev = pListPrev;
-	pGcInsertProxy->pNext = pGcListProxy;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonGcProxy::InsertAfter(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
-{
-	assert(pGcListProxy != nullptr);
-	assert(pGcInsertProxy != nullptr);
-
-	XenonGcProxy* const pListNext = pGcListProxy->pNext;
-
-	if(pListNext)
-	{
-		pListNext->pPrev = pGcInsertProxy;
-	}
-
-	pGcListProxy->pNext = pGcInsertProxy;
-
-	pGcInsertProxy->pPrev = pGcListProxy;
-	pGcInsertProxy->pNext = pListNext;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonGcProxy::Unlink(XenonGcProxy* const pGcProxy)
-{
-	assert(pGcProxy != nullptr);
-
-	XenonGcProxy* const pPrev = pGcProxy->pPrev;
-	XenonGcProxy* const pNext = pGcProxy->pNext;
-
-	if(pPrev)
-	{
-		pPrev->pNext = pNext;
-	}
-
-	if(pNext)
-	{
-		pNext->pPrev = pPrev;
-	}
-
-	pGcProxy->pPrev = nullptr;
-	pGcProxy->pNext = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

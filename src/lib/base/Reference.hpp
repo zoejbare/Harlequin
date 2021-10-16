@@ -22,7 +22,7 @@
 
 #include "../XenonScript.h"
 
-#include "../common/DestructCallback.hpp"
+#include "../common/DisposeCallback.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ struct XENON_BASE_API XenonReference
 {
 	static void Initialize(
 		XenonReference& output,
-		XenonDestructCallback onDestructFn,
+		XenonDisposeCallback onDestructFn,
 		void* const pObject
 	);
 
@@ -39,7 +39,7 @@ struct XENON_BASE_API XenonReference
 
 	void* pObject;
 
-	XenonDestructCallback onDestructFn;
+	XenonDisposeCallback onDisposeFn;
 
 	volatile int32_t count;
 };

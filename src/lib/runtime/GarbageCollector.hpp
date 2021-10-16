@@ -20,10 +20,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "Execution.hpp"
-#include "Program.hpp"
-#include "Value.hpp"
-
 #include "../base/Mutex.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -42,6 +38,9 @@ struct XenonGarbageCollector
 
 	static void prv_reset(XenonGarbageCollector&);
 	static void prv_onDisposeObject(XenonGcProxy*);
+	static void prv_proxyInsertBefore(XenonGcProxy*, XenonGcProxy*);
+	static void prv_proxyInsertAfter(XenonGcProxy*, XenonGcProxy*);
+	static void prv_proxyUnlink(XenonGcProxy*);
 
 	XenonMutex pendingLock;
 

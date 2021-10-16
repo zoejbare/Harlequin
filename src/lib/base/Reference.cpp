@@ -26,14 +26,14 @@
 
 void XenonReference::Initialize(
 	XenonReference& output,
-	XenonDestructCallback onDestructFn,
+	XenonDisposeCallback onDisposeFn,
 	void* pObject
 )
 {
-	assert(onDestructFn != nullptr);
+	assert(onDisposeFn != nullptr);
 	assert(pObject != nullptr);
 
-	output.onDestructFn = onDestructFn;
+	output.onDisposeFn = onDisposeFn;
 	output.pObject = pObject;
 	output.count = 1;
 
@@ -54,8 +54,8 @@ int32_t XenonReference::Release(XenonReference& ref)
 
 	if(currentValue == 0)
 	{
-		// Don't do anything with the reference object after destructing because it has probably been freed.
-		ref.onDestructFn(ref.pObject);
+		// Don't do anything with the reference object after disposing because it will probably been freed by this call.
+		ref.onDisposeFn(ref.pObject);
 	}
 
 	return currentValue;
