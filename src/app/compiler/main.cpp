@@ -138,9 +138,9 @@ int main(int argc, char* argv[])
 		XenonSerializerWriteUint32(hSerializer, ioRegIndex);
 	};
 
-	auto writeOpLoadMember = [](XenonSerializerHandle hSerializer, const uint32_t gpDstRegIndex, const uint32_t gpSrcRegIndex, const uint32_t memberIndex)
+	auto writeOpLoadObject = [](XenonSerializerHandle hSerializer, const uint32_t gpDstRegIndex, const uint32_t gpSrcRegIndex, const uint32_t memberIndex)
 	{
-		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_LOAD_MEMBER);
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_LOAD_OBJECT);
 		XenonSerializerWriteUint32(hSerializer, gpDstRegIndex);
 		XenonSerializerWriteUint32(hSerializer, gpSrcRegIndex);
 		XenonSerializerWriteUint32(hSerializer, memberIndex);
@@ -167,9 +167,9 @@ int main(int argc, char* argv[])
 		XenonSerializerWriteUint32(hSerializer, gpRegIndex);
 	};
 
-	auto writeOpStoreMember = [](XenonSerializerHandle hSerializer, const uint32_t gpDstRegIndex, const uint32_t gpSrcRegIndex, const uint32_t memberIndex)
+	auto writeOpStoreObject = [](XenonSerializerHandle hSerializer, const uint32_t gpDstRegIndex, const uint32_t gpSrcRegIndex, const uint32_t memberIndex)
 	{
-		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_STORE_MEMBER);
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_STORE_OBJECT);
 		XenonSerializerWriteUint32(hSerializer, gpDstRegIndex);
 		XenonSerializerWriteUint32(hSerializer, gpSrcRegIndex);
 		XenonSerializerWriteUint32(hSerializer, memberIndex);
@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
 
 		writeOpInitObject(hSubFuncSerializer, 2, constIndex12);
 		writeOpLoadConstant(hSubFuncSerializer, 1, constIndex15);
-		writeOpStoreMember(hSubFuncSerializer, 2, 1, 0);
+		writeOpStoreObject(hSubFuncSerializer, 2, 1, 0);
 
 		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex4);
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
@@ -377,7 +377,7 @@ int main(int argc, char* argv[])
 
 		const size_t loopOffsetStart = XenonSerializerGetStreamPosition(hSubFuncSerializer);
 
-		writeOpLoadMember(hSubFuncSerializer, 0, 2, 0);
+		writeOpLoadObject(hSubFuncSerializer, 0, 2, 0);
 
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 		writeOpCall(hSubFuncSerializer, constIndex11);
@@ -386,7 +386,7 @@ int main(int argc, char* argv[])
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 		writeOpCall(hSubFuncSerializer, constIndex14);
 		writeOpLoadParam(hSubFuncSerializer, 0, 0);
-		writeOpStoreMember(hSubFuncSerializer, 2, 0, 0);
+		writeOpStoreObject(hSubFuncSerializer, 2, 0, 0);
 
 		writeOpLoadParam(hSubFuncSerializer, 0, 1);
 		writeOpBranchIfTrue(hSubFuncSerializer, 0, 14);
@@ -396,7 +396,7 @@ int main(int argc, char* argv[])
 
 		writeOpBranch(hSubFuncSerializer, -loopRelativeOffset);
 
-		writeOpLoadMember(hSubFuncSerializer, 0, 2, 0);
+		writeOpLoadObject(hSubFuncSerializer, 0, 2, 0);
 		writeOpBranchIfFalse(hSubFuncSerializer, 0, 10);
 		writeOpAbort(hSubFuncSerializer);
 

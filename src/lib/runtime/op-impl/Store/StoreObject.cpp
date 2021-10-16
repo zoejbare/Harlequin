@@ -30,7 +30,7 @@
 //
 // Set the value in a general-purpose register to an I/O register.
 //
-// 0x: STORE_MEMBER r#, r#, ##
+// 0x: STORE_OBJECT r#, r#, ##
 //
 //   r# [first]  = General-purpose register index that contains the object where the member will be stored
 //   r# [second] = General-purpose register index of the value to store on the object
@@ -42,7 +42,7 @@
 extern "C" {
 #endif
 
-void OpCodeExec_StoreMember(XenonExecutionHandle hExec)
+void OpCodeExec_StoreObject(XenonExecutionHandle hExec)
 {
 	int result;
 
@@ -88,14 +88,14 @@ void OpCodeExec_StoreMember(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_StoreMember(XenonDisassemble& disasm)
+void OpCodeDisasm_StoreObject(XenonDisassemble& disasm)
 {
 	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const uint32_t memberIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "STORE_MEMBER r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);
+	snprintf(str, sizeof(str), "STORE_OBJECT r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
