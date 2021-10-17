@@ -32,6 +32,11 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#define PROGRAM_RESULT_SUCCESS 0
+#define PROGRAM_RESULT_FAILURE 1
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void OnMessageReported(void* const pUserData, const int messageType, const char* const message)
 {
 	(void) pUserData;
@@ -92,7 +97,7 @@ int main(int argc, char* argv[])
 	if(argc < 2)
 	{
 		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_FATAL, "Missing required 'filepath' argument");
-		return 1;
+		return PROGRAM_RESULT_FAILURE;
 	}
 
 #if defined(XENON_PLATFORM_WINDOWS)
@@ -203,7 +208,7 @@ int main(int argc, char* argv[])
 		char msg[128];
 		snprintf(msg, sizeof(msg) - 1, "Failed to create Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(result));
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
-		return 1;
+		return PROGRAM_RESULT_FAILURE;
 	}
 
 	XenonReportHandle hReport = XENON_REPORT_HANDLE_NULL;
@@ -224,6 +229,8 @@ int main(int argc, char* argv[])
 	uint64_t createExecTimeSlice = 0;
 	uint64_t runProgramTimeSlice = 0;
 	uint64_t disposeExecTimeSlice = 0;
+
+	int programResult = PROGRAM_RESULT_SUCCESS;
 
 	if(loadProgramResult == XENON_SUCCESS)
 	{
@@ -433,6 +440,8 @@ int main(int argc, char* argv[])
 					XenonExecutionResolveFrameStack(hExec, iterateFrame, &isTopFrame);
 
 					printf("\n");
+
+					programResult = PROGRAM_RESULT_FAILURE;
 					break;
 				}
 
@@ -474,6 +483,10 @@ int main(int argc, char* argv[])
 			disposeExecTimeSlice = disposeExecTimeEnd - disposeExecTimeStart;
 		}
 	}
+	else
+	{
+		programResult = PROGRAM_RESULT_FAILURE;
+	}
 
 	const uint64_t disposeVmTimeStart = XenonHiResTimerGetTimestamp();
 
@@ -494,6 +507,8 @@ int main(int argc, char* argv[])
 		char msg[128];
 		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", allocations.size());
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_ERROR, msg);
+
+		programResult = PROGRAM_RESULT_FAILURE;
 	}
 
 	// Output memory allocation stats.
@@ -539,7 +554,7 @@ int main(int argc, char* argv[])
 		double(disassembleTimeSlice * 1000) * invTimerFreq
 	);
 
-	return 0;
+	return programResult;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
