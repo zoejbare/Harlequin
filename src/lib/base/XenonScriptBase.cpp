@@ -164,28 +164,28 @@ const char* XenonGetBuiltInFunctionSignature(int builtInFunctionId)
 		case XENON_BUILT_IN_OP_ADD_STRING:  return "string `builtin.string.operator+(string, string)";
 
 		case XENON_BUILT_IN_OP_SUB_BOOL:    return "bool `builtin.bool.operator-(bool, bool)";
-		case XENON_BUILT_IN_OP_SUB_INT8:    return "int8 `builtin.int8.OpSub(int8, int8)";
-		case XENON_BUILT_IN_OP_SUB_INT16:   return "int16 `builtin.int16.OpSub(int16, int16)";
-		case XENON_BUILT_IN_OP_SUB_INT32:   return "int32 `builtin.int32.OpSub(int32, int32)";
-		case XENON_BUILT_IN_OP_SUB_INT64:   return "int64 `builtin.int64.OpSub(int64, int64)";
-		case XENON_BUILT_IN_OP_SUB_UINT8:   return "uint8 `builtin.uint8.OpSub(uint8, uint8)";
-		case XENON_BUILT_IN_OP_SUB_UINT16:  return "uint16 `builtin.uint16.OpSub(uint16, uint16)";
-		case XENON_BUILT_IN_OP_SUB_UINT32:  return "uint32 `builtin.uint32.OpSub(uint32, uint32)";
-		case XENON_BUILT_IN_OP_SUB_UINT64:  return "uint64 `builtin.uint64.OpSub(uint64, uint64)";
-		case XENON_BUILT_IN_OP_SUB_FLOAT32: return "float32 `builtin.float32.OpSub(float32, float32)";
-		case XENON_BUILT_IN_OP_SUB_FLOAT64: return "float64 `builtin.float64.OpSub(float64, float64)";
+		case XENON_BUILT_IN_OP_SUB_INT8:    return "int8 `builtin.int8.operator-(int8, int8)";
+		case XENON_BUILT_IN_OP_SUB_INT16:   return "int16 `builtin.int16.operator-(int16, int16)";
+		case XENON_BUILT_IN_OP_SUB_INT32:   return "int32 `builtin.int32.operator-(int32, int32)";
+		case XENON_BUILT_IN_OP_SUB_INT64:   return "int64 `builtin.int64.operator-(int64, int64)";
+		case XENON_BUILT_IN_OP_SUB_UINT8:   return "uint8 `builtin.uint8.operator-(uint8, uint8)";
+		case XENON_BUILT_IN_OP_SUB_UINT16:  return "uint16 `builtin.uint16.operator-(uint16, uint16)";
+		case XENON_BUILT_IN_OP_SUB_UINT32:  return "uint32 `builtin.uint32.operator-(uint32, uint32)";
+		case XENON_BUILT_IN_OP_SUB_UINT64:  return "uint64 `builtin.uint64.operator-(uint64, uint64)";
+		case XENON_BUILT_IN_OP_SUB_FLOAT32: return "float32 `builtin.float32.operator-(float32, float32)";
+		case XENON_BUILT_IN_OP_SUB_FLOAT64: return "float64 `builtin.float64.operator-(float64, float64)";
 
 		case XENON_BUILT_IN_OP_MUL_BOOL:    return "bool `builtin.bool.operator*(bool, bool)";
-		case XENON_BUILT_IN_OP_MUL_INT8:    return "int8 `builtin.int8.OpMul(int8, int8)";
-		case XENON_BUILT_IN_OP_MUL_INT16:   return "int16 `builtin.int16.OpMul(int16, int16)";
-		case XENON_BUILT_IN_OP_MUL_INT32:   return "int32 `builtin.int32.OpMul(int32, int32)";
-		case XENON_BUILT_IN_OP_MUL_INT64:   return "int64 `builtin.int64.OpMul(int64, int64)";
-		case XENON_BUILT_IN_OP_MUL_UINT8:   return "uint8 `builtin.uint8.OpMul(uint8, uint8)";
-		case XENON_BUILT_IN_OP_MUL_UINT16:  return "uint16 `builtin.uint16.OpMul(uint16, uint16)";
-		case XENON_BUILT_IN_OP_MUL_UINT32:  return "uint32 `builtin.uint32.OpMul(uint32, uint32)";
-		case XENON_BUILT_IN_OP_MUL_UINT64:  return "uint64 `builtin.uint64.OpMul(uint64, uint64)";
-		case XENON_BUILT_IN_OP_MUL_FLOAT32: return "float32 `builtin.float32.OpMul(float32, float32)";
-		case XENON_BUILT_IN_OP_MUL_FLOAT64: return "float64 `builtin.float64.OpMul(float64, float64)";
+		case XENON_BUILT_IN_OP_MUL_INT8:    return "int8 `builtin.int8.operator*(int8, int8)";
+		case XENON_BUILT_IN_OP_MUL_INT16:   return "int16 `builtin.int16.operator*(int16, int16)";
+		case XENON_BUILT_IN_OP_MUL_INT32:   return "int32 `builtin.int32.operator*(int32, int32)";
+		case XENON_BUILT_IN_OP_MUL_INT64:   return "int64 `builtin.int64.operator*(int64, int64)";
+		case XENON_BUILT_IN_OP_MUL_UINT8:   return "uint8 `builtin.uint8.operator*(uint8, uint8)";
+		case XENON_BUILT_IN_OP_MUL_UINT16:  return "uint16 `builtin.uint16.operator*(uint16, uint16)";
+		case XENON_BUILT_IN_OP_MUL_UINT32:  return "uint32 `builtin.uint32.operator*(uint32, uint32)";
+		case XENON_BUILT_IN_OP_MUL_UINT64:  return "uint64 `builtin.uint64.operator*(uint64, uint64)";
+		case XENON_BUILT_IN_OP_MUL_FLOAT32: return "float32 `builtin.float32.operator*(float32, float32)";
+		case XENON_BUILT_IN_OP_MUL_FLOAT64: return "float64 `builtin.float64.operator*(float64, float64)";
 
 		case XENON_BUILT_IN_OP_DIV_BOOL:    return "bool `builtin.bool.operator/(bool, bool)";
 		case XENON_BUILT_IN_OP_DIV_INT8:    return "int8 `builtin.int8.operator/(int8, int8)";
