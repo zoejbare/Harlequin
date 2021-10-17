@@ -24,13 +24,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// These should only ever be set to a non-zero value when testing those specific implementations.
-#define XENON_MAP_TEST_FORCE_STD_MAP 0
-#define XENON_MAP_TEST_FORCE_STD_UNORDERED_MAP 0
+#define XENON_MAP_IMPL_FORCE_STD_MAP           0
+#define XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP 0
+
+#if defined(XENON_PLATFORM_PS3)
+	#undef XENON_MAP_IMPL_FORCE_STD_MAP
+	#define XENON_MAP_IMPL_FORCE_STD_MAP 1
+
+#elif defined(XENON_PLATFORM_PSVITA)
+	#undef XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP
+	#define XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP 1
+
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if XENON_MAP_TEST_FORCE_STD_MAP || defined(XENON_PLATFORM_PS3)
+#if XENON_MAP_IMPL_FORCE_STD_MAP
 	#include <map>
 
 	#define XENON_MAP_IS_UNORDERED 0
@@ -54,7 +63,7 @@
 	#define XENON_MAP_ITER_PTR_KEY(iter) (iter)->first
 	#define XENON_MAP_ITER_PTR_VALUE(iter) (iter)->second
 
-#elif XENON_MAP_TEST_FORCE_STD_UNORDERED_MAP || defined(XENON_PLATFORM_PSVITA)
+#elif XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP
 	#include <unordered_map>
 
 	#define XENON_MAP_IS_UNORDERED 1
@@ -94,7 +103,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#undef XENON_MAP_TEST_FORCE_STD_MAP
-#undef XENON_MAP_TEST_FORCE_STD_UNORDERED_MAP
+#undef XENON_MAP_IMPL_FORCE_STD_MAP
+#undef XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP
 
 //----------------------------------------------------------------------------------------------------------------------
