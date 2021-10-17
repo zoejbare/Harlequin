@@ -343,6 +343,8 @@ const char* XenonGetBuiltInFunctionSignature(int builtInFunctionId)
 		case XENON_BUILT_IN_OP_CAST_STRING_TO_FLOAT32: return "float32 `builtin.string.operator$ float32(string)";
 		case XENON_BUILT_IN_OP_CAST_STRING_TO_FLOAT64: return "float64 `builtin.string.operator$ float64(string)";
 
+		case XENON_BUILT_IN_OP_LEN_STRING: return "int64 `builtin.string.operator#(string)";
+
 		default:
 			// Type value unhandled.
 			break;

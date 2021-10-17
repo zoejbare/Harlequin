@@ -260,7 +260,9 @@ int main(int argc, char* argv[])
 	const char* const nativePrintFuncSignature = "void App.Program.PrintString(string)";
 	const char* const nativeDecrementFuncSignature = "(int32, bool) App.Program.Decrement(int32)";
 	const char* const opAddStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_ADD_STRING);
-	const char* const opCastStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT32_TO_STRING);
+	const char* const opCastInt32ToStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT32_TO_STRING);
+	const char* const opCastInt64ToStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT64_TO_STRING);
+	const char* const opLenStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_LEN_STRING);
 	const char* const globalVariableName = "globalTestVar";
 	const char* const localVariableName = "localTestVar";
 	const char* const objectTypeName = "App.ClassType";
@@ -300,7 +302,7 @@ int main(int argc, char* argv[])
 	XenonProgramWriterAddConstantString(hProgramWriter, opAddStringSignature, &constIndex10);
 
 	uint32_t constIndex11;
-	XenonProgramWriterAddConstantString(hProgramWriter, opCastStringSignature, &constIndex11);
+	XenonProgramWriterAddConstantString(hProgramWriter, opCastInt32ToStringSignature, &constIndex11);
 
 	uint32_t constIndex12;
 	XenonProgramWriterAddConstantString(hProgramWriter, objectTypeName, &constIndex12);
@@ -313,6 +315,12 @@ int main(int argc, char* argv[])
 
 	uint32_t constIndex15;
 	XenonProgramWriterAddConstantInt32(hProgramWriter, 5, &constIndex15);
+
+	uint32_t constIndex16;
+	XenonProgramWriterAddConstantString(hProgramWriter, opCastInt64ToStringSignature, &constIndex16);
+
+	uint32_t constIndex17;
+	XenonProgramWriterAddConstantString(hProgramWriter, opLenStringSignature, &constIndex17);
 
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);
@@ -369,6 +377,13 @@ int main(int argc, char* argv[])
 		writeOpStoreParam(hSubFuncSerializer, 1, 1);
 
 		writeOpCall(hSubFuncSerializer, constIndex10);
+		writeOpLoadParam(hSubFuncSerializer, 3, 0);
+		writeOpStoreParam(hSubFuncSerializer, 0, 3);
+		writeOpCall(hSubFuncSerializer, constIndex8);
+
+		writeOpStoreParam(hSubFuncSerializer, 0, 3);
+		writeOpCall(hSubFuncSerializer, constIndex17);
+		writeOpCall(hSubFuncSerializer, constIndex16);
 		writeOpCall(hSubFuncSerializer, constIndex8);
 
 		writeOpLoadConstant(hSubFuncSerializer, 0, constIndex15);
