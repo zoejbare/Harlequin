@@ -29,7 +29,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Load a global variable to a general-purpose register in the current frame.
+// Load a global variable into a general-purpose register.
 //
 // 0x: LOAD_GLOBAL r#, c#
 //

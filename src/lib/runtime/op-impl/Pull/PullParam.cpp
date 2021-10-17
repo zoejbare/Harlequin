@@ -20,21 +20,20 @@
 
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
-#include "../../Function.hpp"
-#include "../../Program.hpp"
+#include "../../Frame.hpp"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Load a local variable into a general-purpose register.
+// Dual operation to load a value from an I/O register into a general-purpose register,
+// then clearing the orignal I/O register.
 //
-// 0x: LOAD_LOCAL r#, c#
+// 0x: PULL_PARAM r#, p#
 //
 //   r# = General-purpose register index
-//   c# = Constant index of the name string of the local variable
+//   p# = I/O register index
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -42,29 +41,32 @@
 extern "C" {
 #endif
 
-void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
+void OpCodeExec_PullParam(XenonExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(XenonValueIsString(hNameValue))
+	// Load the value from the I/O register.
+	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, ioRegIndex, &result);
+	if(result == XENON_SUCCESS)
 	{
-		XenonValueHandle hLocalVariable = XenonFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString, &result);
-		if(hLocalVariable)
+		// Store the loaded value in the general-purpose register.
+		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
+		if(result == XENON_SUCCESS)
 		{
-			result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
+			// Clear the I/O register.
+			result = XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
 			if(result != XENON_SUCCESS)
 			{
-				// TODO: Raise script exception.
+				// TODO: Raise script exception
 				hExec->exception = true;
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception.
+			// TODO: Raise script exception
 			hExec->exception = true;
 		}
 	}
@@ -77,21 +79,14 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadLocal(XenonDisassemble& disasm)
+void OpCodeDisasm_PullParam(XenonDisassemble& disasm)
 {
-	int result;
+	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
-
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	XenonString* const pValueData = XenonValue::GetDebugString(hNameValue);
-
-	char str[256];
-	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
+	char str[64];
+	snprintf(str, sizeof(str), "PULL_PARAM r%" PRIu32 ", p%" PRIu32, gpRegIndex, ioRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-
-	XenonString::Release(pValueData);
 }
 
 #ifdef __cplusplus

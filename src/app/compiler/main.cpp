@@ -175,6 +175,35 @@ int main(int argc, char* argv[])
 		XenonSerializerWriteUint32(hSerializer, memberIndex);
 	};
 
+	auto writeOpPullGlobal = [](XenonSerializerHandle hSerializer, const uint32_t registerIndex, const uint32_t constantIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_PULL_GLOBAL);
+		XenonSerializerWriteUint32(hSerializer, registerIndex);
+		XenonSerializerWriteUint32(hSerializer, constantIndex);
+	};
+
+	auto writeOpPullLocal = [](XenonSerializerHandle hSerializer, const uint32_t registerIndex, const uint32_t constantIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_PULL_LOCAL);
+		XenonSerializerWriteUint32(hSerializer, registerIndex);
+		XenonSerializerWriteUint32(hSerializer, constantIndex);
+	};
+
+	auto writeOpPullParam = [](XenonSerializerHandle hSerializer, const uint32_t gpRegIndex, const uint32_t ioRegIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_PULL_PARAM);
+		XenonSerializerWriteUint32(hSerializer, gpRegIndex);
+		XenonSerializerWriteUint32(hSerializer, ioRegIndex);
+	};
+
+	auto writeOpPullObject = [](XenonSerializerHandle hSerializer, const uint32_t gpDstRegIndex, const uint32_t gpSrcRegIndex, const uint32_t memberIndex)
+	{
+		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_PULL_OBJECT);
+		XenonSerializerWriteUint32(hSerializer, gpDstRegIndex);
+		XenonSerializerWriteUint32(hSerializer, gpSrcRegIndex);
+		XenonSerializerWriteUint32(hSerializer, memberIndex);
+	};
+
 	auto writeOpCall = [](XenonSerializerHandle hSerializer, const uint32_t constantIndex)
 	{
 		XenonSerializerWriteUint8(hSerializer, XENON_OP_CODE_CALL);
@@ -345,7 +374,7 @@ int main(int argc, char* argv[])
 
 		writeOpStoreParam(hMainFuncSerializer, 0, 3);
 		writeOpCall(hMainFuncSerializer, constIndex7);
-		writeOpLoadParam(hMainFuncSerializer, 8, 0);
+		writeOpPullParam(hMainFuncSerializer, 8, 0);
 
 		writeOpReturn(hMainFuncSerializer);
 
@@ -357,7 +386,7 @@ int main(int argc, char* argv[])
 
 	// int32 App.Program.DoWork(float64)
 	{
-		writeOpLoadParam(hSubFuncSerializer, 0, 0);
+		writeOpPullParam(hSubFuncSerializer, 0, 0);
 
 		writeOpLoadLocal(hSubFuncSerializer, 1, constIndex9);
 		writeOpStoreLocal(hSubFuncSerializer, constIndex9, 0);
@@ -378,7 +407,6 @@ int main(int argc, char* argv[])
 
 		writeOpCall(hSubFuncSerializer, constIndex10);
 		writeOpLoadParam(hSubFuncSerializer, 3, 0);
-		writeOpStoreParam(hSubFuncSerializer, 0, 3);
 		writeOpCall(hSubFuncSerializer, constIndex8);
 
 		writeOpStoreParam(hSubFuncSerializer, 0, 3);
@@ -400,10 +428,10 @@ int main(int argc, char* argv[])
 
 		writeOpStoreParam(hSubFuncSerializer, 0, 0);
 		writeOpCall(hSubFuncSerializer, constIndex14);
-		writeOpLoadParam(hSubFuncSerializer, 0, 0);
+		writeOpPullParam(hSubFuncSerializer, 0, 0);
 		writeOpStoreObject(hSubFuncSerializer, 2, 0, 0);
 
-		writeOpLoadParam(hSubFuncSerializer, 0, 1);
+		writeOpPullParam(hSubFuncSerializer, 0, 1);
 		writeOpBranchIfTrue(hSubFuncSerializer, 0, 14);
 
 		const size_t loopOffsetEnd = XenonSerializerGetStreamPosition(hSubFuncSerializer);

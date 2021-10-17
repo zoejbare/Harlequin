@@ -27,8 +27,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Get a value in an I/O register, storing it to a general-purpose register.
-// The I/O register will then be cleared to avoid leaking value data.
+// Load a value from an I/O register into a general-purpose register.
 //
 // 0x: LOAD_PARAM r#, p#
 //
@@ -48,21 +47,13 @@ void OpCodeExec_LoadParam(XenonExecutionHandle hExec)
 	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
+	// Load the value from the I/O register.
 	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, ioRegIndex, &result);
 	if(result == XENON_SUCCESS)
 	{
+		// Store the loaded value in the general-purpose register.
 		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
-		if(result == XENON_SUCCESS)
-		{
-			// Clear the I/O register to prevent leaking values left in there.
-			result = XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
-			if(result != XENON_SUCCESS)
-			{
-				// TODO: Raise script exception
-				hExec->exception = true;
-			}
-		}
-		else
+		if(result != XENON_SUCCESS)
 		{
 			// TODO: Raise script exception
 			hExec->exception = true;

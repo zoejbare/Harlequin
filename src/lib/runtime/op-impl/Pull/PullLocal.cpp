@@ -29,9 +29,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Load a local variable into a general-purpose register.
+// Dual operation to load a local variable into a general-purpose register, then clear the variable.
 //
-// 0x: LOAD_LOCAL r#, c#
+// 0x: PULL_LOCAL r#, c#
 //
 //   r# = General-purpose register index
 //   c# = Constant index of the name string of the local variable
@@ -42,21 +42,34 @@
 extern "C" {
 #endif
 
-void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
+void OpCodeExec_PullLocal(XenonExecutionHandle hExec)
 {
 	int result;
 
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
+	// Get the constant containing the name of the variable.
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
 	if(XenonValueIsString(hNameValue))
 	{
+		// Load the value from the variable.
 		XenonValueHandle hLocalVariable = XenonFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString, &result);
 		if(hLocalVariable)
 		{
+			// Store the loaded value in the general-purpose register.
 			result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
-			if(result != XENON_SUCCESS)
+			if(result == XENON_SUCCESS)
+			{
+				// Clear the variable.
+				result = XenonFrame::SetLocalVariable(hExec->hCurrentFrame, XENON_VALUE_HANDLE_NULL, hNameValue->as.pString);
+				if(result != XENON_SUCCESS)
+				{
+					// TODO: Raise script exception
+					hExec->exception = true;
+				}
+			}
+			else
 			{
 				// TODO: Raise script exception.
 				hExec->exception = true;
@@ -77,7 +90,7 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadLocal(XenonDisassemble& disasm)
+void OpCodeDisasm_PullLocal(XenonDisassemble& disasm)
 {
 	int result;
 
@@ -88,7 +101,7 @@ void OpCodeDisasm_LoadLocal(XenonDisassemble& disasm)
 	XenonString* const pValueData = XenonValue::GetDebugString(hNameValue);
 
 	char str[256];
-	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
+	snprintf(str, sizeof(str), "PULL_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 
 	XenonString::Release(pValueData);
