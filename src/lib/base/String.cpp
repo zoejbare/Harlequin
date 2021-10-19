@@ -138,7 +138,10 @@ int32_t XenonString::Release(XenonString* const pString)
 bool XenonString::Compare(const XenonString* const pLeft, const XenonString* const pRight)
 {
 	assert(pLeft != nullptr);
+	assert(pLeft->data != nullptr);
+
 	assert(pRight != nullptr);
+	assert(pRight->data != nullptr);
 
 	if(pLeft->data == pRight->data)
 	{
@@ -159,7 +162,10 @@ bool XenonString::Compare(const XenonString* const pLeft, const XenonString* con
 		return false;
 	}
 
-	return strcmp(pLeft->data, pRight->data) == 0;
+	// We should only get here if the two strings are located in different spots in memory, have the same length,
+	// and have same hash. In reality, this should only ever happen if identical string data exists in two
+	// separate string objects, so it's not likely to happen much.
+	return memcmp(pLeft->data, pRight->data, pLeft->length) == 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -167,7 +173,10 @@ bool XenonString::Compare(const XenonString* const pLeft, const XenonString* con
 bool XenonString::Less(const XenonString* const pLeft, const XenonString* const pRight)
 {
 	assert(pLeft != nullptr);
+	assert(pLeft->data != nullptr);
+
 	assert(pRight != nullptr);
+	assert(pRight->data != nullptr);
 
 	const size_t minSize = (pLeft->length < pRight->length) ? pLeft->length : pRight->length;
 	const int cmp = memcmp(pLeft->data, pRight->data, minSize);
