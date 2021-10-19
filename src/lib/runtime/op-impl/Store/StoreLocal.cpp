@@ -83,7 +83,7 @@ void OpCodeDisasm_StoreLocal(XenonDisassemble& disasm)
 	XenonString* const pValueData = XenonValue::GetDebugString(hNameValue);
 
 	char str[256];
-	snprintf(str, sizeof(str), "STORE_LOCAL r%" PRIu32 " %s, c%" PRIu32, constantIndex, pValueData->data, registerIndex);
+	snprintf(str, sizeof(str), "STORE_LOCAL c%" PRIu32 " %s, r%" PRIu32, constantIndex, pValueData->data, registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 
 	XenonString::Release(pValueData);
