@@ -33,7 +33,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonObject;
+struct XenonScriptObject;
 
 struct XenonValue
 {
@@ -80,7 +80,7 @@ struct XenonValue
 	static XenonValueHandle CreateNull();
 	static XenonValueHandle CreateString(XenonVmHandle hVm, const char* const string);
 	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
-	static XenonValueHandle CreateObject(XenonVmHandle hVm, XenonObject* const pObjectSchema);
+	static XenonValueHandle CreateObject(XenonVmHandle hVm, XenonScriptObject* const pObjectSchema);
 	static XenonValueHandle Copy(XenonVmHandle hVm, XenonValueHandle hValue);
 
 	static XenonString* GetDebugString(XenonValueHandle hValue);
@@ -102,7 +102,7 @@ struct XenonValue
 	union
 	{
 		XenonString* pString;
-		XenonObject* pObject;
+		XenonScriptObject* pObject;
 
 		double float64;
 		uint64_t uint64;

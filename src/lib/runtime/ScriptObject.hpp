@@ -29,7 +29,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonObject
+struct XenonScriptObject
 {
 	struct MemberDefinition
 	{
@@ -51,33 +51,33 @@ struct XenonObject
 
 	typedef XENON_MAP_TYPE<
 		XenonString*,
-		XenonObject*,
+		XenonScriptObject*,
 #if XENON_MAP_IS_UNORDERED
 		XenonString::StlHash,
 		XenonString::StlCompare,
 #else
 		XenonString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonObject*)>
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonScriptObject*)>
 	> StringToPtrMap;
 
-	static XenonObject* CreateSchema(XenonString* pTypeName, const MemberDefinitionMap& definitions);
-	static XenonObject* CreateInstance(XenonObject* const pSchema);
-	static XenonObject* CreateCopy(XenonObject* const pObject);
-	static void Dispose(XenonObject* const pObject);
+	static XenonScriptObject* CreateSchema(XenonString* pTypeName, const MemberDefinitionMap& definitions);
+	static XenonScriptObject* CreateInstance(XenonScriptObject* const pSchema);
+	static XenonScriptObject* CreateCopy(XenonScriptObject* const pObject);
+	static void Dispose(XenonScriptObject* const pObject);
 
-	static XenonValueHandle GetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, int* const pOutResult);
-	static MemberDefinition GetMemberDefinition(XenonObject* const pObject, XenonString* const pMemberName, int* const pOutResult);
+	static XenonValueHandle GetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, int* const pOutResult);
+	static MemberDefinition GetMemberDefinition(XenonScriptObject* const pObject, XenonString* const pMemberName, int* const pOutResult);
 
-	static int SetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue);
+	static int SetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue);
 
-	static XenonObject* prv_createObject(XenonObject*);
+	static XenonScriptObject* prv_createObject(XenonScriptObject*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	XenonString* pTypeName;
-	XenonObject* pSchema;
+	XenonScriptObject* pSchema;
 
 	MemberDefinitionMap definitions;
 

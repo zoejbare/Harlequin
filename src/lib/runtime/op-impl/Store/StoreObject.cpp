@@ -21,7 +21,7 @@
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Frame.hpp"
-#include "../../Object.hpp"
+#include "../../ScriptObject.hpp"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -55,12 +55,12 @@ void OpCodeExec_StoreObject(XenonExecutionHandle hExec)
 	{
 		if(XenonValueIsObject(hDestination))
 		{
-			XenonObject* const pScriptObject = hDestination->as.pObject;
+			XenonScriptObject* const pScriptObject = hDestination->as.pObject;
 
 			XenonValueHandle hSource = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
 			if(result == XENON_SUCCESS)
 			{
-				result = XenonObject::SetMemberValue(pScriptObject, memberIndex, hSource);
+				result = XenonScriptObject::SetMemberValue(pScriptObject, memberIndex, hSource);
 				if(result != XENON_SUCCESS)
 				{
 					// TODO: Raise script exception

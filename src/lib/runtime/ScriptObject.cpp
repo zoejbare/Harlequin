@@ -16,17 +16,17 @@
 // IN THE SOFTWARE.
 //
 
-#include "Object.hpp"
+#include "ScriptObject.hpp"
 
 #include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject* XenonObject::CreateSchema(XenonString* const pTypeName, const MemberDefinitionMap& definitions)
+XenonScriptObject* XenonScriptObject::CreateSchema(XenonString* const pTypeName, const MemberDefinitionMap& definitions)
 {
 	assert(pTypeName != nullptr);
 
-	XenonObject* const pOutput = new XenonObject();
+	XenonScriptObject* const pOutput = new XenonScriptObject();
 	assert(pOutput != nullptr);
 
 	pOutput->pTypeName = pTypeName;
@@ -51,11 +51,11 @@ XenonObject* XenonObject::CreateSchema(XenonString* const pTypeName, const Membe
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject* XenonObject::CreateInstance(XenonObject* const pSchema)
+XenonScriptObject* XenonScriptObject::CreateInstance(XenonScriptObject* const pSchema)
 {
 	assert(pSchema != nullptr);
 
-	XenonObject* const pOutput = XenonObject::prv_createObject(pSchema);
+	XenonScriptObject* const pOutput = XenonScriptObject::prv_createObject(pSchema);
 	assert(pOutput != nullptr);
 
 	pOutput->pSchema = pSchema;
@@ -65,11 +65,11 @@ XenonObject* XenonObject::CreateInstance(XenonObject* const pSchema)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject* XenonObject::CreateCopy(XenonObject* const pObject)
+XenonScriptObject* XenonScriptObject::CreateCopy(XenonScriptObject* const pObject)
 {
 	assert(pObject != nullptr);
 
-	XenonObject* const pOutput = XenonObject::prv_createObject(pObject);
+	XenonScriptObject* const pOutput = XenonScriptObject::prv_createObject(pObject);
 	assert(pOutput != nullptr);
 
 	pOutput->pSchema = pObject->pSchema;
@@ -79,7 +79,7 @@ XenonObject* XenonObject::CreateCopy(XenonObject* const pObject)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonObject::Dispose(XenonObject* const pObject)
+void XenonScriptObject::Dispose(XenonScriptObject* const pObject)
 {
 	assert(pObject != nullptr);
 
@@ -103,7 +103,7 @@ void XenonObject::Dispose(XenonObject* const pObject)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonObject::GetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, int* const pOutResult)
+XenonValueHandle XenonScriptObject::GetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, int* const pOutResult)
 {
 	assert(pObject != nullptr);
 
@@ -121,8 +121,8 @@ XenonValueHandle XenonObject::GetMemberValue(XenonObject* const pObject, const u
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject::MemberDefinition XenonObject::GetMemberDefinition(
-	XenonObject* const pObject,
+XenonScriptObject::MemberDefinition XenonScriptObject::GetMemberDefinition(
+	XenonScriptObject* const pObject,
 	XenonString* const pMemberName,
 	int* const pOutResult
 )
@@ -147,7 +147,7 @@ XenonObject::MemberDefinition XenonObject::GetMemberDefinition(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonObject::SetMemberValue(XenonObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue)
+int XenonScriptObject::SetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue)
 {
 	assert(pObject != nullptr);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
@@ -163,11 +163,11 @@ int XenonObject::SetMemberValue(XenonObject* const pObject, const uint32_t membe
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject* XenonObject::prv_createObject(XenonObject* const pOriginalObject)
+XenonScriptObject* XenonScriptObject::prv_createObject(XenonScriptObject* const pOriginalObject)
 {
 	assert(pOriginalObject != nullptr);
 
-	XenonObject* const pOutput = new XenonObject();
+	XenonScriptObject* const pOutput = new XenonScriptObject();
 	assert(pOutput != nullptr);
 
 	pOutput->pTypeName = pOriginalObject->pTypeName;
@@ -198,14 +198,14 @@ XenonObject* XenonObject::prv_createObject(XenonObject* const pOriginalObject)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonObject::operator new(const size_t sizeInBytes)
+void* XenonScriptObject::operator new(const size_t sizeInBytes)
 {
 	return XenonMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonObject::operator delete(void* const pObject)
+void XenonScriptObject::operator delete(void* const pObject)
 {
 	XenonMemFree(pObject);
 }

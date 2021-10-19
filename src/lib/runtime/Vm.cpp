@@ -109,7 +109,7 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 	for(auto& kv : hVm->objectSchemas)
 	{
 		XenonString::Release(XENON_MAP_ITER_KEY(kv));
-		XenonObject::Dispose(XENON_MAP_ITER_VALUE(kv));
+		XenonScriptObject::Dispose(XENON_MAP_ITER_VALUE(kv));
 	}
 
 	// Clean up each active execution context.
@@ -199,7 +199,7 @@ XenonValueHandle XenonVm::GetGlobalVariable(XenonVmHandle hVm, XenonString* cons
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonObject* XenonVm::GetObjectSchema(XenonVmHandle hVm, XenonString* const pTypeName, int* const pOutResult)
+XenonScriptObject* XenonVm::GetObjectSchema(XenonVmHandle hVm, XenonString* const pTypeName, int* const pOutResult)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(pTypeName != nullptr);

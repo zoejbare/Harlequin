@@ -21,7 +21,7 @@
 
 #include "../Function.hpp"
 #include "../Program.hpp"
-#include "../Object.hpp"
+#include "../ScriptObject.hpp"
 #include "../Vm.hpp"
 
 #include "../Value.hpp"
@@ -454,7 +454,7 @@ bool XenonProgramVersion0001::Load(
 				return false;
 			}
 
-			XenonObject::MemberDefinitionMap memberDefinitions;
+			XenonScriptObject::MemberDefinitionMap memberDefinitions;
 
 			bool memberReadError = false;
 
@@ -490,7 +490,7 @@ bool XenonProgramVersion0001::Load(
 					break;
 				}
 
-				XenonObject::MemberDefinition def;
+				XenonScriptObject::MemberDefinition def;
 
 				def.valueType = memberType;
 				def.bindingIndex = memberIndex;
@@ -512,7 +512,7 @@ bool XenonProgramVersion0001::Load(
 			}
 			else
 			{
-				XenonObject* const pObjectSchema = XenonObject::CreateSchema(pTypeName, memberDefinitions);
+				XenonScriptObject* const pObjectSchema = XenonScriptObject::CreateSchema(pTypeName, memberDefinitions);
 
 				XenonString::AddRef(pTypeName);
 				XENON_MAP_FUNC_INSERT(hVm->objectSchemas, pTypeName, pObjectSchema);

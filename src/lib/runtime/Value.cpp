@@ -18,7 +18,7 @@
 
 #include "Value.hpp"
 
-#include "Object.hpp"
+#include "ScriptObject.hpp"
 #include "Vm.hpp"
 
 #include <assert.h>
@@ -271,7 +271,7 @@ XenonValueHandle XenonValue::CreateString(XenonVmHandle hVm, XenonString* const 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonObject* const pObjectSchema)
+XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonScriptObject* const pObjectSchema)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
 	assert(pObjectSchema != nullptr);
@@ -283,7 +283,7 @@ XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonObject* const 
 	}
 
 	// Make a copy of the input object template for this value.
-	pOutput->as.pObject = XenonObject::CreateInstance(pObjectSchema);
+	pOutput->as.pObject = XenonScriptObject::CreateInstance(pObjectSchema);
 
 	return pOutput;
 }
@@ -354,7 +354,7 @@ XenonValueHandle XenonValue::Copy(XenonVmHandle hVm, XenonValueHandle hValue)
 			break;
 
 		case XENON_VALUE_TYPE_OBJECT:
-			pOutput->as.pObject = XenonObject::CreateCopy(hValue->as.pObject->pSchema);
+			pOutput->as.pObject = XenonScriptObject::CreateCopy(hValue->as.pObject->pSchema);
 			break;
 
 		default:
@@ -509,7 +509,7 @@ void XenonValue::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 
 	if(hValue->type == XENON_VALUE_TYPE_OBJECT)
 	{
-		XenonObject* const pScriptObject = hValue->as.pObject;
+		XenonScriptObject* const pScriptObject = hValue->as.pObject;
 
 		// Mark each member inside the object.
 		for(size_t i = 0; i < pScriptObject->members.count; ++i)
@@ -539,7 +539,7 @@ void XenonValue::prv_onGcDestruct(void* const pOpaqueValue)
 			break;
 
 		case XENON_VALUE_TYPE_OBJECT:
-			XenonObject::Dispose(hValue->as.pObject);
+			XenonScriptObject::Dispose(hValue->as.pObject);
 			break;
 
 		default:

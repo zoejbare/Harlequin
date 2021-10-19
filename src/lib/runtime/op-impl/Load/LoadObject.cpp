@@ -21,7 +21,7 @@
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Frame.hpp"
-#include "../../Object.hpp"
+#include "../../ScriptObject.hpp"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -57,10 +57,10 @@ void OpCodeExec_LoadObject(XenonExecutionHandle hExec)
 		// Verify the loaded value is an object type.
 		if(XenonValueIsObject(hSource))
 		{
-			XenonObject* const pScriptObject = hSource->as.pObject;
+			XenonScriptObject* const pScriptObject = hSource->as.pObject;
 
 			// Load the member variable of the object value from the source index.
-			XenonValueHandle hMember = XenonObject::GetMemberValue(pScriptObject, memberIndex, &result);
+			XenonValueHandle hMember = XenonScriptObject::GetMemberValue(pScriptObject, memberIndex, &result);
 			if(result == XENON_SUCCESS)
 			{
 				// Store the variable's value in the destination register.

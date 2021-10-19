@@ -22,8 +22,8 @@
 #include "../base/String.hpp"
 
 #include "Execution.hpp"
-#include "Object.hpp"
 #include "Program.hpp"
+#include "ScriptObject.hpp"
 #include "Vm.hpp"
 #include "Value.hpp"
 
@@ -1494,7 +1494,7 @@ XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typ
 	XenonString* const pTypeName = XenonString::Create(typeName);
 
 	int result;
-	XenonObject* const pSchema = XenonVm::GetObjectSchema(hVm, pTypeName, &result);
+	XenonScriptObject* const pSchema = XenonVm::GetObjectSchema(hVm, pTypeName, &result);
 
 	// Release the type name string now that we're done with it.
 	XenonString::Release(pTypeName);
@@ -1851,12 +1851,12 @@ XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const c
 {
 	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
 	{
-		XenonObject* const pScriptObject = hValue->as.pObject;
+		XenonScriptObject* const pScriptObject = hValue->as.pObject;
 		XenonString* const pMemberName = XenonString::Create(memberName);
 
 		int result;
 
-		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		const XenonScriptObject::MemberDefinition memberDef = XenonScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
 		if(result != XENON_SUCCESS)
 		{
 			return XENON_VALUE_HANDLE_NULL;
@@ -1865,7 +1865,7 @@ XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const c
 		// Release the member name string now that we don't need it anymore.
 		XenonString::Release(pMemberName);
 
-		XenonValueHandle hMemberValue = XenonObject::GetMemberValue(pScriptObject, memberDef.bindingIndex, &result);
+		XenonValueHandle hMemberValue = XenonScriptObject::GetMemberValue(pScriptObject, memberDef.bindingIndex, &result);
 		if(result != XENON_SUCCESS)
 		{
 			return XENON_VALUE_HANDLE_NULL;
@@ -1886,12 +1886,12 @@ uint8_t XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* membe
 {
 	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
 	{
-		XenonObject* const pScriptObject = hValue->as.pObject;
+		XenonScriptObject* const pScriptObject = hValue->as.pObject;
 		XenonString* const pMemberName = XenonString::Create(memberName);
 
 		int result;
 
-		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		const XenonScriptObject::MemberDefinition memberDef = XenonScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
 		if(!result)
 		{
 			return XENON_VALUE_TYPE_NULL;
@@ -1912,12 +1912,12 @@ int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberNa
 {
 	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
 	{
-		XenonObject* const pScriptObject = hValue->as.pObject;
+		XenonScriptObject* const pScriptObject = hValue->as.pObject;
 		XenonString* const pMemberName = XenonString::Create(memberName);
 
 		int result;
 
-		const XenonObject::MemberDefinition memberDef = XenonObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		const XenonScriptObject::MemberDefinition memberDef = XenonScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
 		if(result != XENON_SUCCESS)
 		{
 			return result;
@@ -1926,7 +1926,7 @@ int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberNa
 		// Release the member name string now that we don't need it anymore.
 		XenonString::Release(pMemberName);
 
-		XenonObject::SetMemberValue(pScriptObject, memberDef.bindingIndex, hMemberValue);
+		XenonScriptObject::SetMemberValue(pScriptObject, memberDef.bindingIndex, hMemberValue);
 
 		return XENON_SUCCESS;
 	}
@@ -1944,7 +1944,7 @@ int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObj
 		for(auto& kv : hValue->as.pObject->definitions)
 		{
 			XenonString* const pMemberName = XENON_MAP_ITER_KEY(kv);
-			XenonObject::MemberDefinition& memberDef = XENON_MAP_ITER_VALUE(kv);
+			XenonScriptObject::MemberDefinition& memberDef = XENON_MAP_ITER_VALUE(kv);
 
 			if(!onIterateFn(pUserData, pMemberName->data, memberDef.valueType))
 			{

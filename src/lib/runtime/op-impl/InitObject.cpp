@@ -54,7 +54,7 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 	{
 		if(XenonValueIsString(hObjectTypeName))
 		{
-			XenonObject* const pObjectSchema = XenonVm::GetObjectSchema(hExec->hVm, hObjectTypeName->as.pString, &result);
+			XenonScriptObject* const pObjectSchema = XenonVm::GetObjectSchema(hExec->hVm, hObjectTypeName->as.pString, &result);
 			if(result == XENON_SUCCESS)
 			{
 				XenonValueHandle hObject = XenonValue::CreateObject(hExec->hVm, pObjectSchema);
