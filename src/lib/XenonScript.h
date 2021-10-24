@@ -300,8 +300,14 @@ typedef struct XenonFrame* XenonFrameHandle;
 typedef struct XenonValue* XenonValueHandle;
 
 typedef void (*XenonNativeFunction)(XenonExecutionHandle, XenonFunctionHandle, void*);
+
 typedef void (*XenonCallbackProgramDependency)(void*, const char*);
 typedef void (*XenonCallbackOpDisasm)(void*, const char*, uintptr_t);
+
+typedef void (*XenonCallbackNativeValueCopy)(void**, const void*);
+typedef void (*XenonCallbackNativeValueDestruct)(void*);
+typedef bool (*XenonCallbackNativeValueEqual)(const void*, const void*);
+typedef bool (*XenonCallbackNativeValueLessThan)(const void*, const void*);
 
 typedef bool (*XenonCallbackIterateFrame)(void*, XenonFrameHandle);
 typedef bool (*XenonCallbackIterateProgram)(void*, XenonProgramHandle);
@@ -507,6 +513,15 @@ XENON_MAIN_API XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const 
 
 XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typeName);
 
+XENON_MAIN_API XenonValueHandle XenonValueCreateNative(
+	XenonVmHandle hVm,
+	void* pNativeObject,
+	XenonCallbackNativeValueCopy onCopy,
+	XenonCallbackNativeValueDestruct onDestruct,
+	XenonCallbackNativeValueEqual onTestEqual,
+	XenonCallbackNativeValueLessThan onTestLessThan
+);
+
 XENON_MAIN_API XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue);
 
 XENON_MAIN_API void XenonValueAbandon(XenonValueHandle hValue);
@@ -537,6 +552,8 @@ XENON_MAIN_API bool XenonValueIsFloat64(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsNull(XenonValueHandle hValue);
 
+XENON_MAIN_API bool XenonValueIsNative(XenonValueHandle hValue);
+
 XENON_MAIN_API bool XenonValueIsString(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsObject(XenonValueHandle hValue);
@@ -562,6 +579,8 @@ XENON_MAIN_API uint64_t XenonValueGetUint64(XenonValueHandle hValue);
 XENON_MAIN_API float XenonValueGetFloat32(XenonValueHandle hValue);
 
 XENON_MAIN_API double XenonValueGetFloat64(XenonValueHandle hValue);
+
+XENON_MAIN_API void* XenonValueGetNative(XenonValueHandle hValue);
 
 XENON_MAIN_API const char* XenonValueGetString(XenonValueHandle hValue);
 
@@ -715,6 +734,7 @@ enum XenonValueType
 
 	XENON_VALUE_TYPE_STRING,
 	XENON_VALUE_TYPE_OBJECT,
+	XENON_VALUE_TYPE_NATIVE,
 
 	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_OBJECT,
 };

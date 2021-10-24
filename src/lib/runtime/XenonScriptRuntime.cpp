@@ -1510,6 +1510,25 @@ XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typ
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonValueHandle XenonValueCreateNative(
+	XenonVmHandle hVm,
+	void* pNativeObject,
+	XenonCallbackNativeValueCopy onCopy,
+	XenonCallbackNativeValueDestruct onDestruct,
+	XenonCallbackNativeValueEqual onTestEqual,
+	XenonCallbackNativeValueLessThan onTestLessThan
+)
+{
+	if(!hVm || !onCopy || !onDestruct || !onTestEqual || !onTestLessThan)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	return XenonValue::CreateNative(hVm, pNativeObject, onCopy, onDestruct, onTestEqual, onTestLessThan);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue)
 {
 	return XenonValue::Copy(hVm, hValue);
@@ -1637,6 +1656,13 @@ bool XenonValueIsFloat64(XenonValueHandle hValue)
 bool XenonValueIsNull(XenonValueHandle hValue)
 {
 	return !hValue || (hValue->type == XENON_VALUE_TYPE_NULL);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsNative(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_NATIVE);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1783,6 +1809,18 @@ double XenonValueGetFloat64(XenonValueHandle hValue)
 	}
 
 	return 0.0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void* XenonValueGetNative(XenonValueHandle hValue)
+{
+	if(XenonValueIsNative(hValue))
+	{
+		return hValue->as.native.pObject;
+	}
+
+	return nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

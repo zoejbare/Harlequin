@@ -290,6 +290,38 @@ XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonScriptObject* 
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonValueHandle XenonValue::CreateNative(
+	XenonVmHandle hVm,
+	void* const pNativeObject,
+	XenonCallbackNativeValueCopy onCopy,
+	XenonCallbackNativeValueDestruct onDestruct,
+	XenonCallbackNativeValueEqual onTestEqual,
+	XenonCallbackNativeValueLessThan onTestLessThan
+)
+{
+	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(onCopy != nullptr);
+	assert(onDestruct != nullptr);
+	assert(onTestEqual != nullptr);
+	assert(onTestLessThan != nullptr);
+
+	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_NATIVE, hVm);
+	if(!pOutput)
+	{
+		return &NullValue;
+	}
+
+	pOutput->as.native.pObject = pNativeObject;
+	pOutput->as.native.onCopy = onCopy;
+	pOutput->as.native.onDestruct = onDestruct;
+	pOutput->as.native.onTestEqual = onTestEqual;
+	pOutput->as.native.onTestLessThan = onTestLessThan;
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValueHandle XenonValue::Copy(XenonVmHandle hVm, XenonValueHandle hValue)
 {
 	if(!hValue || hValue->type == XENON_VALUE_TYPE_NULL)
@@ -355,6 +387,13 @@ XenonValueHandle XenonValue::Copy(XenonVmHandle hVm, XenonValueHandle hValue)
 
 		case XENON_VALUE_TYPE_OBJECT:
 			pOutput->as.pObject = XenonScriptObject::CreateCopy(hValue->as.pObject->pSchema);
+			break;
+
+		case XENON_VALUE_TYPE_NATIVE:
+			pOutput->as.native.onCopy = hValue->as.native.onCopy;
+			pOutput->as.native.onDestruct = hValue->as.native.onDestruct;
+
+			pOutput->as.native.onCopy(&pOutput->as.native.pObject, hValue->as.native.pObject);
 			break;
 
 		default:
@@ -450,6 +489,15 @@ XenonString* XenonValue::GetDebugString(XenonValueHandle hValue)
 				);
 				break;
 
+			case XENON_VALUE_TYPE_NATIVE:
+				snprintf(
+					str,
+					sizeof(str),
+					"<native: 0x%" PRIXPTR ">",
+					reinterpret_cast<uintptr_t>(hValue->as.native.pObject)
+				);
+				break;
+
 			default:
 				// This should never happen.
 				assert(false);
@@ -533,6 +581,10 @@ void XenonValue::prv_onGcDestruct(void* const pOpaqueValue)
 			// The null value should never be destructed since it isn't dynamic.
 			assert(false);
 			return;
+
+		case XENON_VALUE_TYPE_NATIVE:
+			hValue->as.native.onDestruct(hValue->as.native.pObject);
+			break;
 
 		case XENON_VALUE_TYPE_STRING:
 			XenonString::Release(hValue->as.pString);

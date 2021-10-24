@@ -33,6 +33,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+struct XenonNativeValueWrapper
+{
+	void* pObject;
+
+	XenonCallbackNativeValueCopy onCopy;
+	XenonCallbackNativeValueDestruct onDestruct;
+	XenonCallbackNativeValueEqual onTestEqual;
+	XenonCallbackNativeValueLessThan onTestLessThan;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
 struct XenonScriptObject;
 
 struct XenonValue
@@ -81,6 +93,14 @@ struct XenonValue
 	static XenonValueHandle CreateString(XenonVmHandle hVm, const char* const string);
 	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
 	static XenonValueHandle CreateObject(XenonVmHandle hVm, XenonScriptObject* const pObjectSchema);
+	static XenonValueHandle CreateNative(
+		XenonVmHandle hVm,
+		void* const pNativeObject,
+		XenonCallbackNativeValueCopy onCopy,
+		XenonCallbackNativeValueDestruct onDestruct,
+		XenonCallbackNativeValueEqual onTestEqual,
+		XenonCallbackNativeValueLessThan onTestLessThan
+	);
 	static XenonValueHandle Copy(XenonVmHandle hVm, XenonValueHandle hValue);
 
 	static XenonString* GetDebugString(XenonValueHandle hValue);
@@ -101,6 +121,8 @@ struct XenonValue
 
 	union
 	{
+		XenonNativeValueWrapper native;
+
 		XenonString* pString;
 		XenonScriptObject* pObject;
 
