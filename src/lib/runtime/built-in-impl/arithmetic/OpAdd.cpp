@@ -16,7 +16,7 @@
 // IN THE SOFTWARE.
 //
 
-#include "../../BuiltIn.hpp"
+#include "../../BuiltInDecl.hpp"
 
 #include <assert.h>
 #include <stdio.h>

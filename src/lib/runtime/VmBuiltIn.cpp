@@ -17,7 +17,7 @@
 //
 
 #include "Vm.hpp"
-#include "BuiltIn.hpp"
+#include "BuiltInDecl.hpp"
 
 #include <assert.h>
 

@@ -17,7 +17,7 @@
 //
 
 #include "Program.hpp"
-#include "BuiltIn.hpp"
+#include "BuiltInDecl.hpp"
 #include "Vm.hpp"
 
 #include "program-loader/CommonLoader.hpp"
