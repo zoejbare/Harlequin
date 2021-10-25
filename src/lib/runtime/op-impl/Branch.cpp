@@ -145,9 +145,10 @@ void OpCodeExec_Branch(XenonExecutionHandle hExec)
 void OpCodeDisasm_Branch(XenonDisassemble& disasm)
 {
 	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
+	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
-	char str[32];
-	snprintf(str, sizeof(str), "BRANCH #%" PRId32, offset);
+	char str[64];
+	snprintf(str, sizeof(str), "BRANCH #%" PRId32 " (0x%" PRIXPTR ")", offset, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -192,9 +193,10 @@ void OpCodeDisasm_BranchIfTrue(XenonDisassemble& disasm)
 {
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
+	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
-	char str[32];
-	snprintf(str, sizeof(str), "BRANCH_IF_TRUE r%" PRIu32 ", #%" PRId32, registerIndex, offset);
+	char str[64];
+	snprintf(str, sizeof(str), "BRANCH_IF_TRUE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -239,9 +241,10 @@ void OpCodeDisasm_BranchIfFalse(XenonDisassemble& disasm)
 {
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
+	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
-	char str[32];
-	snprintf(str, sizeof(str), "BRANCH_IF_FALSE r%" PRIu32 ", #%" PRId32, registerIndex, offset);
+	char str[64];
+	snprintf(str, sizeof(str), "BRANCH_IF_FALSE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
