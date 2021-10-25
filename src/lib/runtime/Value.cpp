@@ -452,7 +452,7 @@ XenonString* XenonValue::GetDebugString(XenonValueHandle hValue)
 				break;
 
 			case XENON_VALUE_TYPE_UINT64:
-				snprintf(str, sizeof(str), "uint64: %" PRIu64 ">", hValue->as.uint64);
+				snprintf(str, sizeof(str), "<uint64: %" PRIu64 ">", hValue->as.uint64);
 				break;
 
 			case XENON_VALUE_TYPE_FLOAT32:
