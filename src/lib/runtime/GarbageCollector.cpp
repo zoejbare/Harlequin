@@ -66,28 +66,38 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 
 void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 {
-	auto clearList = [](XenonGcProxy* const pListHead)
+	auto disableAutoMark = [](XenonGcProxy* const pListHead)
 	{
 		if(pListHead)
 		{
 			XenonGcProxy* pCurrent = pListHead;
-			XenonGcProxy* pNext;
 
-			// Dispose of all objects in the list.
+			// Disable auto-mark on each proxy.
 			while(pCurrent)
 			{
-				pNext = pCurrent->pNext;
-
-				prv_onDisposeObject(pCurrent);
-
-				pCurrent = pNext;
+				pCurrent->autoMark = false;
+				pCurrent = pCurrent->pNext;
 			}
 		}
 	};
 
-	clearList(gc.pPendingHead);
-	clearList(gc.pUnmarkedHead);
-	clearList(gc.pMarkedHead);
+	// Disable auto-mark on all proxies. They should all be have auto-mark removed prior to getting
+	// to this point, but any user code that screwed up and didn't abandon some values or other
+	// object types might still have auto-mark enabled.
+	disableAutoMark(gc.pPendingHead);
+	disableAutoMark(gc.pUnmarkedHead);
+	disableAutoMark(gc.pMarkedHead);
+
+	// Continue running the garbage collector until everything has been released.
+	for(;;)
+	{
+		RunFull(gc);
+
+		if(!gc.pPendingHead && !gc.pUnmarkedHead && !gc.pMarkedHead)
+		{
+			break;
+		}
+	};
 
 	XenonMutex::Dispose(gc.pendingLock);
 

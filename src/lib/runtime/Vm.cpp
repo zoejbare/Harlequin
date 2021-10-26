@@ -118,6 +118,13 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 		XenonExecution::ReleaseWithNoDetach(XENON_MAP_ITER_KEY(kv));
 	}
 
+	XENON_MAP_FUNC_CLEAR(hVm->programs);
+	XENON_MAP_FUNC_CLEAR(hVm->functions);
+	XENON_MAP_FUNC_CLEAR(hVm->globals);
+	XENON_MAP_FUNC_CLEAR(hVm->objectSchemas);
+	XENON_MAP_FUNC_CLEAR(hVm->executionContexts);
+	XENON_MAP_FUNC_CLEAR(hVm->embeddedExceptions);
+
 	XenonGarbageCollector::Dispose(hVm->gc);
 	OpCodeArray::Dispose(hVm->opCodes);
 
