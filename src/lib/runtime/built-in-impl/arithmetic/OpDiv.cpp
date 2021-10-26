@@ -50,13 +50,18 @@ void XenonBuiltIn::OpDivBool(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateBool(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (bool)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -90,13 +95,18 @@ void XenonBuiltIn::OpDivInt8(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt8(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int8)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -130,13 +140,18 @@ void XenonBuiltIn::OpDivInt16(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt16(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int16)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -170,13 +185,18 @@ void XenonBuiltIn::OpDivInt32(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt32(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int32)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -210,13 +230,18 @@ void XenonBuiltIn::OpDivInt64(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt64(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int64)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -250,13 +275,18 @@ void XenonBuiltIn::OpDivUint8(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateUint8(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint8)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -290,13 +320,18 @@ void XenonBuiltIn::OpDivUint16(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateUint16(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint16)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -336,7 +371,11 @@ void XenonBuiltIn::OpDivUint32(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint32)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -370,13 +409,18 @@ void XenonBuiltIn::OpDivUint64(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateUint64(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint64)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -416,7 +460,11 @@ void XenonBuiltIn::OpDivFloat32(XenonExecutionHandle hExec, XenonFunctionHandle,
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (float32)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 
@@ -450,13 +498,18 @@ void XenonBuiltIn::OpDivFloat64(XenonExecutionHandle hExec, XenonFunctionHandle,
 	{
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateFloat64(hVm, left / right);
+
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
 		XenonValueAbandon(hOutput);
 	}
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (float64)", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 }
 

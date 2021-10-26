@@ -36,7 +36,6 @@ void XenonReference::Initialize(
 	output.onDisposeFn = onDisposeFn;
 	output.pObject = pObject;
 	output.count = 1;
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------

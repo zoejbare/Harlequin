@@ -423,6 +423,12 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
+	// Release all constant values.
+	for(size_t i = 0; i < hProgram->constants.count; ++i)
+	{
+		XenonValueAbandon(hProgram->constants.pData[i]);
+	}
+
 	// Clean up the data structures.
 	XenonValue::HandleArray::Dispose(hProgram->constants);
 	XenonByteHelper::Array::Dispose(hProgram->code);

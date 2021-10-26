@@ -47,8 +47,16 @@ void XenonBuiltIn::OpLenString(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	}
 	else
 	{
+		// Get the VM associated with the input execution context.
+		XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
+		XenonExecutionGetVm(hExec, &hVm);
+
 		// Raise the type-mismatch script exception.
-		XenonExecutionRaiseException(hExec);
+		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
+
+		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_TYPE_ERROR, "Type mismatch; expected string", &hExceptionValue);
+		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		XenonValueAbandon(hExceptionValue);
 	}
 
 	// Release the input parameter value.

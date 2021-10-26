@@ -331,15 +331,15 @@ int main(int argc, char* argv[])
 			{
 				auto decrement = [](XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 				{
+					XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
+					XenonExecutionGetVm(hExec, &hVm);
+
 					XenonValueHandle hInputParam = XENON_VALUE_HANDLE_NULL;
 					XenonExecutionGetIoRegister(hExec, &hInputParam, 0);
 
 					if(XenonValueIsInt32(hInputParam))
 					{
 						const int32_t output = XenonValueGetInt32(hInputParam) - 1;
-
-						XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-						XenonExecutionGetVm(hExec, &hVm);
 
 						XenonValueHandle hOutputParam = XenonValueCreateInt32(hVm, output);
 						XenonExecutionSetIoRegister(hExec, hOutputParam, 0);
@@ -359,7 +359,11 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						XenonExecutionRaiseException(hExec);
+						XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
+
+						XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_TYPE_ERROR, "Type mismatch; expected int32", &hValue);
+						XenonExecutionRaiseException(hExec, hValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+						XenonValueAbandon(hValue);
 					}
 				};
 

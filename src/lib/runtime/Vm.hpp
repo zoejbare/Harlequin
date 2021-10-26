@@ -39,6 +39,18 @@
 
 struct XenonVm
 {
+	typedef XENON_MAP_TYPE<
+		int,
+		XenonScriptObject*,
+#if XENON_MAP_IS_UNORDERED
+		std::hash<int>,
+		std::equal_to<int>,
+#else
+		std::less<int>,
+#endif
+		XenonStlAllocator<XENON_MAP_NODE_TYPE(int, XenonScriptObject*)>
+	> EmbeddedExceptionMap;
+
 	struct OpCode
 	{
 		typedef void (*ExecuteCallback)(XenonExecutionHandle);
@@ -60,11 +72,14 @@ struct XenonVm
 	static XenonValueHandle GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName, int* const pOutResult);
 	static XenonScriptObject* GetObjectSchema(XenonVmHandle hVm, XenonString* const pTypeName, int* const pOutResult);
 
+	static XenonValueHandle CreateStandardException(XenonVmHandle hVm, const int exceptionType, const char* const message);
+
 	static void ExecuteOpCode(XenonVmHandle hVm, XenonExecutionHandle hExec, const int opCode);
 	static void DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, const int opCode);
 
 	static void prv_setupOpCodes(XenonVmHandle);
 	static void prv_setupBuiltIns(XenonVmHandle);
+	static void prv_setupEmbeddedExceptions(XenonVmHandle);
 
 	static int32_t prv_gcThreadMain(void*);
 
@@ -72,6 +87,7 @@ struct XenonVm
 	void operator delete(void* const pObject);
 
 	OpCodeArray opCodes;
+	EmbeddedExceptionMap embeddedExceptions;
 
 	XenonProgram::StringToHandleMap programs;
 	XenonFunction::StringToHandleMap functions;

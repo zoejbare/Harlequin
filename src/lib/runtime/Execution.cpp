@@ -226,6 +226,44 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, const int severity)
+{
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(severity >= 0);
+	assert(severity < XENON_EXCEPTION_SEVERITY__COUNT);
+
+	// The exception value will always be stored to I/O register index 0.
+	hExec->registers.pData[0] = hValue;
+
+	if(severity == XENON_EXCEPTION_SEVERITY_FATAL)
+	{
+		// Force this exception to be unhandled.
+		hExec->exception = true;
+	}
+	else
+	{
+		// TODO: Attempt to handle the exception.
+		hExec->exception = true;
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonExecution::RaiseFatalStandardException(XenonExecutionHandle hExec, const int type, const char* const msg)
+{
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(type >= 0);
+	assert(type < XENON_STANDARD_EXCEPTION__COUNT);
+	assert(msg != nullptr);
+
+	XenonValueHandle hThrowValue = XenonVm::CreateStandardException(hExec->hVm, type, msg);
+
+	XenonExecution::RaiseException(hExec, hThrowValue, XENON_EXCEPTION_SEVERITY_FATAL);
+	XenonValue::SetAutoMark(hThrowValue, false);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void XenonExecution::prv_runStep(XenonExecutionHandle hExec)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);

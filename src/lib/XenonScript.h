@@ -292,6 +292,23 @@ enum XenonExecStatusEnum
 	XENON_EXEC_STATUS_ABORT,
 };
 
+enum XenonStandardExceptionEnum
+{
+	XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+	XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+	XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+
+	XENON_STANDARD_EXCEPTION__COUNT,
+};
+
+enum XenonExceptionSeverity
+{
+	XENON_EXCEPTION_SEVERITY_NORMAL,
+	XENON_EXCEPTION_SEVERITY_FATAL,
+
+	XENON_EXCEPTION_SEVERITY__COUNT,
+};
+
 typedef struct XenonVm* XenonVmHandle;
 typedef struct XenonProgram* XenonProgramHandle;
 typedef struct XenonFunction* XenonFunctionHandle;
@@ -377,6 +394,8 @@ XENON_MAIN_API int XenonVmLoadProgram(
 
 XENON_MAIN_API int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const char* filePath);
 
+XENON_MAIN_API int XenonVmCreateStandardException(XenonVmHandle hVm, int exceptionType, const char* message, XenonValueHandle* phOutValue);
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 XENON_MAIN_API int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm);
@@ -437,7 +456,7 @@ XENON_MAIN_API int XenonExecutionRun(XenonExecutionHandle hExec, int runMode);
 
 XENON_MAIN_API int XenonExecutionYield(XenonExecutionHandle hExec);
 
-XENON_MAIN_API int XenonExecutionRaiseException(XenonExecutionHandle hExec);
+XENON_MAIN_API int XenonExecutionRaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, int severity);
 
 XENON_MAIN_API int XenonExecutionGetVm(XenonExecutionHandle hExec, XenonVmHandle* phOutVm);
 

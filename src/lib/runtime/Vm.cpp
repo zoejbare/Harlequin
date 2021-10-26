@@ -47,6 +47,7 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 
 	prv_setupOpCodes(pOutput);
 	prv_setupBuiltIns(pOutput);
+	prv_setupEmbeddedExceptions(pOutput);
 
 	XenonThreadConfig threadConfig;
 	threadConfig.mainFn = prv_gcThreadMain;
@@ -116,6 +117,12 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 	for(auto& kv : hVm->executionContexts)
 	{
 		XenonExecution::ReleaseWithNoDetach(XENON_MAP_ITER_KEY(kv));
+	}
+
+	// Dispose of each embedded exception.
+	for(auto& kv : hVm->embeddedExceptions)
+	{
+		XenonScriptObject::Dispose(kv.value);
 	}
 
 	XENON_MAP_FUNC_CLEAR(hVm->programs);
@@ -220,6 +227,32 @@ XenonScriptObject* XenonVm::GetObjectSchema(XenonVmHandle hVm, XenonString* cons
 
 	(*pOutResult) = XENON_SUCCESS;
 	return XENON_MAP_FUNC_GET(hVm->objectSchemas, pTypeName);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+XenonValueHandle XenonVm::CreateStandardException(XenonVmHandle hVm, const int exceptionType, const char* const message)
+{
+	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(exceptionType >= 0);
+	assert(exceptionType < XENON_STANDARD_EXCEPTION__COUNT);
+
+	if(!XENON_MAP_FUNC_CONTAINS(hVm->embeddedExceptions, exceptionType))
+	{
+		return nullptr;
+	}
+
+	XenonScriptObject* const pSchema = XENON_MAP_FUNC_GET(hVm->embeddedExceptions, exceptionType);
+
+	XenonValueHandle hExceptionValue = XenonValue::CreateObject(hVm, pSchema);
+	XenonValueHandle hMessageValue = XenonValue::CreateString(hVm, message);
+
+	XenonScriptObject::SetMemberValue(hExceptionValue->as.pObject, 0, hMessageValue);
+
+	XenonValue::SetAutoMark(hExceptionValue, false);
+	XenonValue::SetAutoMark(hMessageValue, false);
+
+	return hExceptionValue;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

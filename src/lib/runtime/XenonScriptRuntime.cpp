@@ -445,6 +445,27 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonVmCreateStandardException(
+	XenonVmHandle hVm,
+	const int exceptionType,
+	const char* const message,
+	XenonValueHandle* const phOutValue
+)
+{
+	if(!hVm || exceptionType < 0 || exceptionType >= XENON_STANDARD_EXCEPTION__COUNT || !phOutValue)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonScopedReadLock gcLock(hVm->gcRwLock);
+
+	(*phOutValue) = XenonVm::CreateStandardException(hVm, exceptionType, message ? message : "");
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm)
 {
 	if(!hProgram || !phOutVm)
@@ -828,14 +849,16 @@ int XenonExecutionYield(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionRaiseException(XenonExecutionHandle hExec)
+int XenonExecutionRaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, int severity)
 {
-	if(!hExec)
+	if(!hExec || severity < 0 || severity >= XENON_EXCEPTION_SEVERITY__COUNT)
 	{
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	hExec->exception = true;
+	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
+
+	XenonExecution::RaiseException(hExec, hValue, severity);
 
 	return XENON_SUCCESS;
 }
