@@ -498,24 +498,28 @@ bool XenonProgramVersion0001::Load(
 				XENON_MAP_FUNC_INSERT(memberDefinitions, pMemberName, def);
 			}
 
-			if(memberReadError)
+			if(!memberReadError)
 			{
-				XenonString::Release(pTypeName);
-
-				// Release all member names currently loaded for the current object type.
-				for(auto& kv : memberDefinitions)
-				{
-					XenonString::Release(XENON_MAP_ITER_KEY(kv));
-				}
-
-				return false;
-			}
-			else
-			{
+				// Create the object schema from the type name and member definitions.
 				XenonScriptObject* const pObjectSchema = XenonScriptObject::CreateSchema(pTypeName, memberDefinitions);
 
+				// Track the schema in the VM.
 				XenonString::AddRef(pTypeName);
 				XENON_MAP_FUNC_INSERT(hVm->objectSchemas, pTypeName, pObjectSchema);
+			}
+
+			XenonString::Release(pTypeName);
+
+			// Release all member names currently loaded for the current object type.
+			for(auto& kv : memberDefinitions)
+			{
+				XenonString::Release(XENON_MAP_ITER_KEY(kv));
+			}
+
+			if(memberReadError)
+			{
+				// Encountered an error while parsing object member data.
+				return false;
 			}
 		}
 	}

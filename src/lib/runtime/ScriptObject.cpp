@@ -33,6 +33,14 @@ XenonScriptObject* XenonScriptObject::CreateSchema(XenonString* const pTypeName,
 	pOutput->pSchema = nullptr;
 	pOutput->definitions = definitions;
 
+	// Track string references.
+	XenonString::AddRef(pOutput->pTypeName);
+
+	for(auto& kv : pOutput->definitions)
+	{
+		XenonString::AddRef(kv.key);
+	}
+
 	const size_t defCount = XENON_MAP_FUNC_SIZE(definitions);
 
 	// Initialize the members array and reserve enough space for each of them.
