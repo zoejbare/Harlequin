@@ -20,6 +20,7 @@
 
 #include "../Decoder.hpp"
 #include "../Execution.hpp"
+#include "../Vm.hpp"
 
 #include <stdio.h>
 
@@ -41,8 +42,10 @@ void OpCodeExec_Return(XenonExecutionHandle hExec)
 
 	if(result != XENON_SUCCESS)
 	{
-		// TODO: Raise script exception.
-		hExec->exception = true;
+		char msg[64];
+		snprintf(msg, sizeof(msg), "Failed to pop frame: error=%d", result);
+
+		XenonExecution::RaiseFatalStandardException(hExec, XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, msg);
 	}
 	else if(!hExec->hCurrentFrame)
 	{
