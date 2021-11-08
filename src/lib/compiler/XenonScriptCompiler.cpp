@@ -601,6 +601,151 @@ int XenonProgramWriterAddLocalVariable(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonProgramWriterAddGuardedBlock(
+	XenonProgramWriterHandle hProgramWriter,
+	const char* functionSignature,
+	XenonExceptionHandler* exceptionHandlers,
+	size_t exceptionHandlerCount,
+	size_t guardedOffsetStart,
+	size_t guardedOffsetEnd
+)
+{
+	if(!hProgramWriter
+		|| !functionSignature
+		|| functionSignature[0] == '\0'
+		|| !exceptionHandlers
+		|| exceptionHandlerCount == 0
+		|| guardedOffsetStart >= guardedOffsetEnd)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonFunctionData* pFunction = nullptr;
+
+	// Find the function in the program writer.
+	const int lookupResult = XenonProgramWriter::LookupFunction(hProgramWriter, functionSignature, &pFunction);
+	if(lookupResult != XENON_SUCCESS)
+	{
+		return lookupResult;
+	}
+
+	// Verify this block isn't already being guarded in this function.
+	for(XenonFunctionData::GuardedBlock& block : pFunction->guardedBlocks)
+	{
+		if(block.offsetStart == guardedOffsetStart && block.offsetEnd == guardedOffsetEnd)
+		{
+			return XENON_ERROR_INVALID_RANGE;
+		}
+	}
+
+	typedef std::unordered_map<
+		const char*,
+		XenonString*,
+		XenonString::StlRawHash,
+		XenonString::StlRawCompare
+	> RawStringToXenonStringMap;
+
+	RawStringToXenonStringMap classNameMap;
+	XenonFunctionData::ExceptionHandler::Map handlers;
+
+	auto releaseResources = [&classNameMap]()
+	{
+		// Release the existing class name string objects.
+		for(auto& kv : classNameMap)
+		{
+			XenonString::Release(kv.second);
+		}
+	};
+
+	// Build the exception handler map, checking for duplicates along the way.
+	for(size_t handlerIndex = 0; handlerIndex < exceptionHandlerCount; ++handlerIndex)
+	{
+		const XenonExceptionHandler& inputHandler = exceptionHandlers[handlerIndex];
+
+		// Verify the handler references a valid value type.
+		if(inputHandler.type < 0 || inputHandler.type > XENON_VALUE_TYPE__MAX_VALUE)
+		{
+			return XENON_ERROR_INVALID_TYPE;
+		}
+
+		// If the handler's value type is an object, make sure it has a valid name.
+		if(inputHandler.type == XENON_VALUE_TYPE_OBJECT && (!inputHandler.className || inputHandler.className[0] == '\0'))
+		{
+			return XENON_ERROR_INVALID_DATA;
+		}
+
+		// Verify multiple handlers aren't registered at the same bytecode offset.
+		if(handlers.count(inputHandler.bytecodeOffset))
+		{
+			return XENON_ERROR_KEY_ALREADY_EXISTS;
+		}
+
+		XenonFunctionData::ExceptionHandler newHandler;
+
+		newHandler.pClassName = nullptr;
+		newHandler.offset = inputHandler.bytecodeOffset;
+		newHandler.type = inputHandler.type;
+
+		// Insert the new handler into the map.
+		handlers.emplace(inputHandler.bytecodeOffset, newHandler);
+	}
+
+	// Construct the XenonString objects for the class names, looking for duplicates along the way.
+	for(size_t handlerIndex = 0; handlerIndex < exceptionHandlerCount; ++handlerIndex)
+	{
+		const XenonExceptionHandler& handler = exceptionHandlers[handlerIndex];
+
+		if(handler.type == XENON_VALUE_TYPE_OBJECT)
+		{
+			if(classNameMap.count(handler.className))
+			{
+				releaseResources();
+
+				return XENON_ERROR_KEY_ALREADY_EXISTS;
+			}
+
+			XenonString* const pClassName = XenonString::Create(handler.className);
+
+			if(!pClassName)
+			{
+				releaseResources();
+
+				return XENON_ERROR_BAD_ALLOCATION;
+			}
+
+			classNameMap.emplace(handler.className, pClassName);
+		}
+	}
+
+	// Assign the newly created class name string objects to their respective handlers.
+	for(size_t handlerIndex = 0; handlerIndex < exceptionHandlerCount; ++handlerIndex)
+	{
+		const XenonExceptionHandler& inputHandler = exceptionHandlers[handlerIndex];
+
+		if(inputHandler.type == XENON_VALUE_TYPE_OBJECT)
+		{
+			XenonFunctionData::ExceptionHandler& mappedHandler = handlers.find(inputHandler.bytecodeOffset)->second;
+			XenonString* const pClassName = classNameMap.find(inputHandler.className)->second;
+
+			mappedHandler.pClassName = pClassName;
+		}
+	}
+
+	// Push an empty block to the list.
+	pFunction->guardedBlocks.push_back(XenonFunctionData::GuardedBlock());
+
+	// Grab the empty block we just pushed and fill it out.
+	XenonFunctionData::GuardedBlock& newBlock = pFunction->guardedBlocks.back();
+
+	newBlock.handlers = std::move(handlers);
+	newBlock.offsetStart = guardedOffsetStart;
+	newBlock.offsetEnd = guardedOffsetEnd;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonProgramWriterSerialize(
 	XenonProgramWriterHandle hProgramWriter,
 	XenonCompilerHandle hCompiler,

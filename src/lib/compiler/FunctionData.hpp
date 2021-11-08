@@ -24,11 +24,14 @@
 
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XenonFunctionData
 {
+	typedef std::vector<uint8_t> Bytecode;
+
 	typedef std::unordered_map<
 		XenonString*,
 		XenonFunctionData,
@@ -43,9 +46,30 @@ struct XenonFunctionData
 		XenonString::StlCompare
 	> LocalVariableMap;
 
-	LocalVariableMap locals;
+	struct ExceptionHandler
+	{
+		typedef std::unordered_map<size_t, ExceptionHandler> Map;
 
-	std::vector<uint8_t> bytecode;
+		XenonString* pClassName;
+
+		size_t offset;
+		int type;
+	};
+
+	struct GuardedBlock
+	{
+		typedef std::vector<GuardedBlock> Vector;
+
+		ExceptionHandler::Map handlers;
+
+		size_t offsetStart;
+		size_t offsetEnd;
+	};
+
+
+	LocalVariableMap locals;
+	GuardedBlock::Vector guardedBlocks;
+	Bytecode bytecode;
 
 	uint16_t numParameters;
 	uint16_t numReturnValues;

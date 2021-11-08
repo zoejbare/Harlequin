@@ -41,6 +41,12 @@ struct XenonProgramWriter
 		XenonSerializerHandle hSerializer
 	);
 
+	static int LookupFunction(
+		XenonProgramWriterHandle hWriter,
+		const char* const functionSignature,
+		XenonFunctionData** const ppOutFunction
+	);
+
 	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int8_t value);
 	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int16_t value);
 	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int32_t value);

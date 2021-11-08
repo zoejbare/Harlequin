@@ -58,16 +58,17 @@ enum XenonErrorCodeEnum
 	XENON_ERROR_INVALID_ARG = -2,
 	XENON_ERROR_INVALID_TYPE = -3,
 	XENON_ERROR_INVALID_DATA = -4,
-	XENON_ERROR_BAD_ALLOCATION = -5,
-	XENON_ERROR_KEY_ALREADY_EXISTS = -6,
-	XENON_ERROR_KEY_DOES_NOT_EXIST = -7,
-	XENON_ERROR_FAILED_TO_OPEN_FILE = -8,
-	XENON_ERROR_STREAM_END = -9,
-	XENON_ERROR_STACK_EMPTY = -10,
-	XENON_ERROR_STACK_FULL = -11,
-	XENON_ERROR_INDEX_OUT_OF_RANGE = -12,
-	XENON_ERROR_SCRIPT_NO_FUNCTION = -13,
-	XENON_ERROR_MISMATCH = -14,
+	XENON_ERROR_INVALID_RANGE = -5,
+	XENON_ERROR_BAD_ALLOCATION = -6,
+	XENON_ERROR_KEY_ALREADY_EXISTS = -7,
+	XENON_ERROR_KEY_DOES_NOT_EXIST = -8,
+	XENON_ERROR_FAILED_TO_OPEN_FILE = -9,
+	XENON_ERROR_STREAM_END = -10,
+	XENON_ERROR_STACK_EMPTY = -11,
+	XENON_ERROR_STACK_FULL = -12,
+	XENON_ERROR_INDEX_OUT_OF_RANGE = -13,
+	XENON_ERROR_SCRIPT_NO_FUNCTION = -14,
+	XENON_ERROR_MISMATCH = -15,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/
@@ -635,8 +636,15 @@ typedef struct XenonProgramWriter* XenonProgramWriterHandle;
 typedef struct
 {
 	XenonCommonInit common;
-
 } XenonCompilerInit;
+
+typedef struct
+{
+	const char* className;
+
+	size_t bytecodeOffset;
+	int type;
+} XenonExceptionHandler;
 
 typedef bool (*XenonCallbackIterateBuiltInFunction)(void*, int, const char*);
 
@@ -720,6 +728,15 @@ XENON_MAIN_API int XenonProgramWriterAddLocalVariable(
 	uint32_t constantIndex
 );
 
+XENON_MAIN_API int XenonProgramWriterAddGuardedBlock(
+	XenonProgramWriterHandle hProgramWriter,
+	const char* functionSignature,
+	XenonExceptionHandler* exceptionHandlers,
+	size_t exceptionHandlerCount,
+	size_t guardedOffsetStart,
+	size_t guardedOffsetEnd
+);
+
 XENON_MAIN_API int XenonProgramWriterSerialize(
 	XenonProgramWriterHandle hProgramWriter,
 	XenonCompilerHandle hCompiler,
@@ -755,7 +772,7 @@ enum XenonValueType
 	XENON_VALUE_TYPE_OBJECT,
 	XENON_VALUE_TYPE_NATIVE,
 
-	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_OBJECT,
+	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_NATIVE,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/

@@ -405,6 +405,19 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 		{
 			XenonString::Release(valueKv.first);
 		}
+
+		// Dispose of each guarded block.
+		for(XenonFunctionData::GuardedBlock& guardedBlock : funcKv.second.guardedBlocks)
+		{
+			// Dispose of each exception handler registered under this guarded block.
+			for(auto& handlerKv : guardedBlock.handlers)
+			{
+				if(handlerKv.second.pClassName)
+				{
+					XenonString::Release(handlerKv.second.pClassName);
+				}
+			}
+		}
 	}
 
 	// Dispose of all object types.
@@ -975,6 +988,41 @@ bool XenonProgramWriter::Serialize(
 	}
 
 	return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramWriter::LookupFunction(
+	XenonProgramWriterHandle hWriter,
+	const char* const functionSignature,
+	XenonFunctionData** const ppOutFunction
+)
+{
+	if(!hWriter || !functionSignature || functionSignature[0] == '\0')
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	XenonString* const pSignature = XenonString::Create(functionSignature);
+	if(!pSignature)
+	{
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	// Find the desired function by checking what we currently have mapped.
+	auto kv = hWriter->functions.find(pSignature);
+	if(kv == hWriter->functions.end())
+	{
+		XenonString::Release(pSignature);
+		return XENON_ERROR_KEY_DOES_NOT_EXIST;
+	}
+
+	// The string object for the function signature is no longer needed.
+	XenonString::Release(pSignature);
+
+	(*ppOutFunction) = &kv->second;
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
