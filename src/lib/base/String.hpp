@@ -44,6 +44,18 @@ struct XENON_BASE_API XenonString
 		size_t operator()(const XenonString* const pString) const;
 	};
 
+	struct XENON_BASE_API StlRawCompare
+	{
+		bool operator()(char* const pLeft, char* const pRight);
+		bool operator()(const char* const pLeft, const char* const pRight) const;
+	};
+
+	struct XENON_BASE_API StlRawHash
+	{
+		size_t operator()(char* const pString);
+		size_t operator()(const char* const pString) const;
+	};
+
 	static XenonString* Create(const char* const stringData);
 	static int32_t AddRef(XenonString* const pString);
 	static int32_t Release(XenonString* const pString);

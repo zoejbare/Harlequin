@@ -91,6 +91,40 @@ size_t XenonString::StlHash::operator()(const XenonString* const pObject) const
 
 //----------------------------------------------------------------------------------------------------------------------
 
+bool XenonString::StlRawCompare::operator()(
+	char* const strLeft,
+	char* const strRight
+)
+{
+	return RawCompare(strLeft, strRight);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonString::StlRawCompare::operator()(
+	const char* const strLeft,
+	const char* const strRight
+) const
+{
+	return RawCompare(strLeft, strRight) ;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t XenonString::StlRawHash::operator()(char* const str)
+{
+	return RawHash(str);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t XenonString::StlRawHash::operator()(const char* const str) const
+{
+	return RawHash(str);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonString* XenonString::Create(const char* const stringData)
 {
 	// TODO: Implement string pooling.
