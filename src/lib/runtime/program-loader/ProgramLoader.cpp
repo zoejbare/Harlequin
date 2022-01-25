@@ -41,7 +41,7 @@ XenonProgramLoader::XenonProgramLoader(
 	, m_hVm(hVm)
 	, m_hSerializer(hSerializer)
 	, m_hReport(XENON_REPORT_HANDLE_NULL)
-	, m_fileHeader()
+	, m_programHeader()
 	, m_strings()
 	, m_objectSchemas()
 	, m_globalValues()
@@ -96,14 +96,14 @@ bool XenonProgramLoader::Load(
 
 bool XenonProgramLoader::prv_loadFile()
 {
-	// Attempt to read the file header.
-	if(!prv_readFileHeader())
+	// Attempt to read the program header.
+	if(!prv_readProgramHeader())
 	{
 		return false;
 	}
 
-	// Validated the data read into the file header.
-	if(!prv_validateFileHeader())
+	// Validated the data read into the program header.
+	if(!prv_validateProgramHeader())
 	{
 		return false;
 	}
@@ -138,6 +138,12 @@ bool XenonProgramLoader::prv_loadFile()
 		return false;
 	}
 
+	// Read the program bytecode.
+	if(!prv_readBytecode())
+	{
+		return false;
+	}
+
 	return prv_finalize();
 }
 
@@ -147,44 +153,46 @@ bool XenonProgramLoader::prv_finalize()
 {
 	// Link the object schemas into the program and VM.
 	{
-		bool error = false;
+		// Initialize the program's object table and reserve extra space in the VM's object table.
+		XENON_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
+		XENON_MAP_FUNC_RESERVE(m_hVm->objectSchemas, XENON_MAP_FUNC_SIZE(m_hVm->objectSchemas) + m_programHeader.objectTable.length);
 
-		// Check for object types that already exist in the VM.
+		// Distribute the object schemas.
 		for(auto& kv : m_objectSchemas)
 		{
+			XenonString* const pTypeName = XENON_MAP_ITER_KEY(kv);
+			XenonScriptObject* const pObjectSchema = XENON_MAP_ITER_VALUE(kv);
+
 			if(XENON_MAP_FUNC_CONTAINS(m_hVm->objectSchemas, XENON_MAP_ITER_KEY(kv)))
 			{
-				error = true;
-				break;
-			}
-		}
-
-		if(!error)
-		{
-			// Distribute the object schemas.
-			for(auto& kv : m_objectSchemas)
-			{
-				XenonString* const pTypeName = XENON_MAP_ITER_KEY(kv);
-				XenonScriptObject* const pObjectSchema = XENON_MAP_ITER_VALUE(kv);
-
-				// Track the name of the schema in the program.
-				XenonString::AddRef(pTypeName);
-				XENON_MAP_FUNC_INSERT(m_hProgram->objectSchemas, pTypeName, false);
-
-				// Track the schema itself in the VM.
-				XenonString::AddRef(pTypeName);
-				XENON_MAP_FUNC_INSERT(m_hVm->objectSchemas, pTypeName, pObjectSchema);
+				XenonReportMessage(
+					m_hReport,
+					XENON_MESSAGE_TYPE_WARNING,
+					"Class type conflict: program=\"%s\", className=\"%s\"",
+					m_hProgram->pName->data,
+					pTypeName->data
+				);
+				XenonScriptObject::Dispose(pObjectSchema);
+				continue;
 			}
 
-			XENON_MAP_FUNC_CLEAR(m_objectSchemas);
+			// Track the name of the schema in the program.
+			XenonString::AddRef(pTypeName);
+			XENON_MAP_FUNC_INSERT(m_hProgram->objectSchemas, pTypeName, false);
+
+			// Track the schema itself in the VM.
+			XenonString::AddRef(pTypeName);
+			XENON_MAP_FUNC_INSERT(m_hVm->objectSchemas, pTypeName, pObjectSchema);
 		}
+
+		XENON_MAP_FUNC_CLEAR(m_objectSchemas);
 	}
 
 	// Link the global variables to the VM
 	{
 		// Initialize the program's global table and reserve extra space in the VM's global table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->globals, m_fileHeader.globalTableLength);
-		XENON_MAP_FUNC_RESERVE(m_hVm->globals, XENON_MAP_FUNC_SIZE(m_hVm->globals) + m_fileHeader.globalTableLength);
+		XENON_MAP_FUNC_RESERVE(m_hProgram->globals, m_programHeader.globalTable.length);
+		XENON_MAP_FUNC_RESERVE(m_hVm->globals, XENON_MAP_FUNC_SIZE(m_hVm->globals) + m_programHeader.globalTable.length);
 
 		// Map the global variables.
 		for(auto& kv : m_globalValues)
@@ -220,8 +228,8 @@ bool XenonProgramLoader::prv_finalize()
 	// Link the functions to the VM.
 	{
 		// Initialize the program's function table and reserve extra space in the VM's function table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->functions, m_fileHeader.functionTableLength);
-		XENON_MAP_FUNC_RESERVE(m_hVm->functions, XENON_MAP_FUNC_SIZE(m_hVm->functions) + m_fileHeader.functionTableLength);
+		XENON_MAP_FUNC_RESERVE(m_hProgram->functions, m_programHeader.functionTable.length);
+		XENON_MAP_FUNC_RESERVE(m_hVm->functions, XENON_MAP_FUNC_SIZE(m_hVm->functions) + m_programHeader.functionTable.length);
 
 		for(auto& kv : m_functions)
 		{
@@ -260,12 +268,12 @@ bool XenonProgramLoader::prv_finalize()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readFileHeader()
+bool XenonProgramLoader::prv_readProgramHeader()
 {
 	int result = XENON_SUCCESS;
 
 	// Read the dependency table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.dependencyTableOffset);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.offset);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -279,7 +287,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the dependency table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.dependencyTableLength);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.length);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -293,7 +301,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the object table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.objectTableOffset);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.offset);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -307,7 +315,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the object table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.objectTableLength);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.length);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -321,7 +329,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the constant table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.constantTableOffset);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.offset);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -335,7 +343,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the constant table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.constantTableLength);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.length);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -349,7 +357,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the global table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.globalTableOffset);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.offset);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -363,7 +371,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the global table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.globalTableLength);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.length);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -377,7 +385,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the function table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.functionTableOffset);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.offset);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -391,7 +399,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the function table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.functionTableLength);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.length);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -404,8 +412,36 @@ bool XenonProgramLoader::prv_readFileHeader()
 		return false;
 	}
 
+	// Read the extension table offset.
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.offset);
+	if(result != XENON_SUCCESS)
+	{
+		XenonReportMessage(
+			m_hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Error reading program file extension table offset: error=\"%s\", program=\"%s\"",
+			XenonGetErrorCodeString(result),
+			m_hProgram->pName->data
+		);
+		return false;
+	}
+
+	// Read the extension table length.
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.length);
+	if(result != XENON_SUCCESS)
+	{
+		XenonReportMessage(
+			m_hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Error reading program file extension table length: error=\"%s\", program=\"%s\"",
+			XenonGetErrorCodeString(result),
+			m_hProgram->pName->data
+		);
+		return false;
+	}
+
 	// Read the bytecode offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.bytecodeOffset);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.offset);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -420,7 +456,7 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Read the bytecode length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_fileHeader.bytecodeLength);
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.length);
 	if(result != XENON_SUCCESS)
 	{
 		XenonReportMessage(
@@ -434,81 +470,81 @@ bool XenonProgramLoader::prv_readFileHeader()
 	}
 
 	// Get the offset that indicates the end of the file header.
-	m_fileHeader.headerEndPosition = uint32_t(XenonSerializerGetStreamPosition(m_hSerializer));
+	m_programHeader.headerEndPosition = uint32_t(XenonSerializerGetStreamPosition(m_hSerializer));
 
 	return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_validateFileHeader()
+bool XenonProgramLoader::prv_validateProgramHeader()
 {
 	// Verify the dependency table does not start before the end of the header data.
-	if(m_fileHeader.dependencyTableOffset < m_fileHeader.headerEndPosition)
+	if(m_programHeader.dependencyTable.offset < m_programHeader.headerEndPosition)
 	{
 		XenonReportMessage(
 			m_hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Invalid program file dependency table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
-			m_fileHeader.dependencyTableOffset,
-			m_fileHeader.headerEndPosition
+			m_programHeader.dependencyTable.offset,
+			m_programHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the dependency table does not start before the end of the header data.
-	if(m_fileHeader.objectTableOffset < m_fileHeader.headerEndPosition)
+	if(m_programHeader.objectTable.offset < m_programHeader.headerEndPosition)
 	{
 		XenonReportMessage(
 			m_hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Invalid program file object table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
-			m_fileHeader.objectTableOffset,
-			m_fileHeader.headerEndPosition
+			m_programHeader.objectTable.offset,
+			m_programHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the constant table does not start before the end of the header data.
-	if(m_fileHeader.constantTableOffset < m_fileHeader.headerEndPosition)
+	if(m_programHeader.constantTable.offset < m_programHeader.headerEndPosition)
 	{
 		XenonReportMessage(
 			m_hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Invalid program file constant table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
-			m_fileHeader.constantTableOffset,
-			m_fileHeader.headerEndPosition
+			m_programHeader.constantTable.offset,
+			m_programHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the global table does not start before the end of the header data.
-	if(m_fileHeader.globalTableOffset < m_fileHeader.headerEndPosition)
+	if(m_programHeader.globalTable.offset < m_programHeader.headerEndPosition)
 	{
 		XenonReportMessage(
 			m_hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Invalid program file global table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
-			m_fileHeader.globalTableOffset,
-			m_fileHeader.headerEndPosition
+			m_programHeader.globalTable.offset,
+			m_programHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the bytecode does not start before the end of the header data.
-	if(m_fileHeader.bytecodeOffset < m_fileHeader.headerEndPosition)
+	if(m_programHeader.bytecode.offset < m_programHeader.headerEndPosition)
 	{
 		XenonReportMessage(
 			m_hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Invalid program file bytecode offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
-			m_fileHeader.bytecodeOffset,
-			m_fileHeader.headerEndPosition
+			m_programHeader.bytecode.offset,
+			m_programHeader.headerEndPosition
 		);
 		return false;
 	}
@@ -522,12 +558,12 @@ bool XenonProgramLoader::prv_validateFileHeader()
 
 bool XenonProgramLoader::prv_readDependencyTable()
 {
-	if(m_fileHeader.dependencyTableLength > 0)
+	if(m_programHeader.dependencyTable.length > 0)
 	{
 		int result = XENON_SUCCESS;
 
 		// Move the stream position to the start of the dependency table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_fileHeader.dependencyTableOffset);
+		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.dependencyTable.offset);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
@@ -536,16 +572,16 @@ bool XenonProgramLoader::prv_readDependencyTable()
 				"Error setting program file stream position to the offset of the dependency table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				XenonGetErrorCodeString(result),
 				m_hProgram->pName->data,
-				m_fileHeader.dependencyTableOffset
+				m_programHeader.dependencyTable.offset
 			);
 			return false;
 		}
 
 		// Initialize the dependency table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->dependencies, m_fileHeader.dependencyTableLength);
+		XENON_MAP_FUNC_RESERVE(m_hProgram->dependencies, m_programHeader.dependencyTable.length);
 
 		// Iterate for each dependency.
-		for(uint32_t index = 0; index < m_fileHeader.dependencyTableLength; ++index)
+		for(uint32_t index = 0; index < m_programHeader.dependencyTable.length; ++index)
 		{
 			// Read the name of the dependency.
 			XenonString* const pDependencyName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
@@ -570,12 +606,12 @@ bool XenonProgramLoader::prv_readDependencyTable()
 
 bool XenonProgramLoader::prv_readObjectTable()
 {
-	if(m_fileHeader.objectTableLength > 0)
+	if(m_programHeader.objectTable.length > 0)
 	{
 		int result = XENON_SUCCESS;
 
 		// Move the stream position to the start of the constant table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_fileHeader.objectTableOffset);
+		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.objectTable.offset);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
@@ -584,16 +620,16 @@ bool XenonProgramLoader::prv_readObjectTable()
 				"Error setting program file stream position to the offset of the object table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				XenonGetErrorCodeString(result),
 				m_hProgram->pName->data,
-				m_fileHeader.objectTableOffset
+				m_programHeader.objectTable.offset
 			);
 			return false;
 		}
 
 		// Initialize the object schema table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_fileHeader.objectTableLength);
+		XENON_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
 
 		// Iterate for each object type.
-		for(uint32_t objectIndex = 0; objectIndex < m_fileHeader.objectTableLength; ++objectIndex)
+		for(uint32_t objectIndex = 0; objectIndex < m_programHeader.objectTable.length; ++objectIndex)
 		{
 			// Read the name of the global variable.
 			XenonString* const pTypeName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
@@ -614,7 +650,7 @@ bool XenonProgramLoader::prv_readObjectTable()
 					"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 					XenonGetErrorCodeString(result),
 					m_hProgram->pName->data,
-					m_fileHeader.constantTableOffset
+					m_programHeader.constantTable.offset
 				);
 				return false;
 			}
@@ -634,7 +670,7 @@ bool XenonProgramLoader::prv_readObjectTable()
 						XenonGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pTypeName->data,
-						pMemberName->data
+						memberIndex
 					);
 					return false;
 				}
@@ -662,7 +698,8 @@ bool XenonProgramLoader::prv_readObjectTable()
 				def.valueType = memberType;
 				def.bindingIndex = memberIndex;
 
-				XenonString::AddRef(pMemberName);
+				// We don't need to add a reference on the member name here since
+				// creating the schema will do that for us.
 				XENON_MAP_FUNC_INSERT(memberDefinitions, pMemberName, def);
 			}
 
@@ -680,12 +717,12 @@ bool XenonProgramLoader::prv_readObjectTable()
 
 bool XenonProgramLoader::prv_readConstantTable()
 {
-	if(m_fileHeader.constantTableLength > 0)
+	if(m_programHeader.constantTable.length > 0)
 	{
 		int result = XENON_SUCCESS;
 
 		// Move the stream position to the start of the constant table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_fileHeader.constantTableOffset);
+		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.constantTable.offset);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
@@ -694,17 +731,17 @@ bool XenonProgramLoader::prv_readConstantTable()
 				"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				XenonGetErrorCodeString(result),
 				m_hProgram->pName->data,
-				m_fileHeader.constantTableOffset
+				m_programHeader.constantTable.offset
 			);
 			return false;
 		}
 
 		// Make space in the constant table.
-		XenonValue::HandleArray::Reserve(m_hProgram->constants, m_fileHeader.constantTableLength);
-		m_hProgram->constants.count = m_fileHeader.constantTableLength;
+		XenonValue::HandleArray::Reserve(m_hProgram->constants, m_programHeader.constantTable.length);
+		m_hProgram->constants.count = m_programHeader.constantTable.length;
 
 		// Iterate for each constant.
-		for(uint32_t index = 0; index < m_fileHeader.constantTableLength; ++index)
+		for(uint32_t index = 0; index < m_programHeader.constantTable.length; ++index)
 		{
 			XenonValueHandle hValue = XenonProgramCommonLoader::ReadValue(m_hSerializer, m_hVm, m_hReport);
 			if(!hValue)
@@ -724,12 +761,12 @@ bool XenonProgramLoader::prv_readConstantTable()
 
 bool XenonProgramLoader::prv_readGlobalTable()
 {
-	if(m_fileHeader.globalTableLength > 0)
+	if(m_programHeader.globalTable.length > 0)
 	{
 		int result = XENON_SUCCESS;
 
 		// Move the stream position to the start of the global table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_fileHeader.globalTableOffset);
+		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.globalTable.offset);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
@@ -738,13 +775,13 @@ bool XenonProgramLoader::prv_readGlobalTable()
 				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				XenonGetErrorCodeString(result),
 				m_hProgram->pName->data,
-				m_fileHeader.globalTableOffset
+				m_programHeader.globalTable.offset
 			);
 			return false;
 		}
 
 		// Iterate for each global variable.
-		for(uint32_t globalIndex = 0; globalIndex < m_fileHeader.globalTableLength; ++globalIndex)
+		for(uint32_t globalIndex = 0; globalIndex < m_programHeader.globalTable.length; ++globalIndex)
 		{
 			// Read the name of the global variable.
 			XenonString* const pVarName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
@@ -802,12 +839,12 @@ bool XenonProgramLoader::prv_readGlobalTable()
 
 bool XenonProgramLoader::prv_readFunctions()
 {
-	if(m_fileHeader.functionTableLength > 0)
+	if(m_programHeader.functionTable.length > 0)
 	{
 		int result = XENON_SUCCESS;
 
 		// Move the stream position to the start of the function table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_fileHeader.functionTableOffset);
+		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.functionTable.offset);
 		if(result != XENON_SUCCESS)
 		{
 			XenonReportMessage(
@@ -816,16 +853,14 @@ bool XenonProgramLoader::prv_readFunctions()
 				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				XenonGetErrorCodeString(result),
 				m_hProgram->pName->data,
-				m_fileHeader.globalTableOffset
+				m_programHeader.globalTable.offset
 			);
 			return false;
 		}
 
 		// Iterate for each function.
-		for(uint32_t funcIndex = 0; funcIndex < m_fileHeader.functionTableLength; ++funcIndex)
+		for(uint32_t funcIndex = 0; funcIndex < m_programHeader.functionTable.length; ++funcIndex)
 		{
-			XenonValue::StringToHandleMap locals;
-
 			// Read the function signature.
 			XenonString* const pSignature = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pSignature)
@@ -986,6 +1021,46 @@ bool XenonProgramLoader::prv_readFunctions()
 
 			prv_trackFunction(pSignature, hFunction);
 		}
+	}
+
+	return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonProgramLoader::prv_readBytecode()
+{
+	if(m_programHeader.bytecode.length > 0)
+	{
+		int result = XENON_SUCCESS;
+
+		// Move the stream position to the start of the bytecode.
+		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.bytecode.offset);
+		if(result != XENON_SUCCESS)
+		{
+			const char* const errorString = XenonGetErrorCodeString(result);
+
+			XenonReportMessage(
+				m_hReport,
+				XENON_MESSAGE_TYPE_ERROR,
+				"Error setting program file stream position to the offset of the program bytecode: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				errorString,
+				m_hProgram->pName->data,
+				m_programHeader.bytecode.offset
+			);
+
+			return false;
+		}
+
+		// Reserve space in the program's bytecode array.
+		XenonByteHelper::Array::Reserve(m_hProgram->code, m_programHeader.bytecode.length);
+		m_hProgram->code.count = m_programHeader.bytecode.length;
+
+		// Get the stream pointer directly to avoid having to create a staging buffer.
+		const uint8_t* const pBytecode = reinterpret_cast<const uint8_t*>(XenonSerializerGetRawStreamPointer(m_hSerializer));
+
+		// Copy the bytecode into the program.
+		memcpy(m_hProgram->code.pData, pBytecode + m_programHeader.bytecode.offset, m_programHeader.bytecode.length);
 	}
 
 	return true;

@@ -24,13 +24,13 @@
 
 #include "../../base/String.hpp"
 
-#include "../../common/program-format/CommonHeader.hpp"
+#include "../../common/program-format/FileHeader.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XenonProgramCommonLoader
 {
-	static bool CheckMagicNumber(const XenonProgramCommonHeader& commonHeader);
+	static bool CheckMagicNumber(const XenonFileHeader& fileHeader);
 
 	static XenonString* ReadString(
 		XenonSerializerHandle hSerializer,

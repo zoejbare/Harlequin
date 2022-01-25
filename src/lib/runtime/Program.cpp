@@ -64,11 +64,11 @@ static bool ProgramLoad(
 		return false;
 	}
 
-	XenonProgramCommonHeader commonHeader;
-	memset(&commonHeader, 0, sizeof(commonHeader));
+	XenonFileHeader fileHeader;
+	memset(&fileHeader, 0, sizeof(fileHeader));
 
 	// Read the magic number.
-	result = XenonSerializerReadBuffer(hSerializer, sizeof(commonHeader.magicNumber), commonHeader.magicNumber);
+	result = XenonSerializerReadBuffer(hSerializer, sizeof(fileHeader.magicNumber), fileHeader.magicNumber);
 	if(result != XENON_SUCCESS)
 	{
 		const char* const errorString = XenonGetErrorCodeString(result);
@@ -84,35 +84,45 @@ static bool ProgramLoad(
 	}
 
 	// Validate the magic number.
-	if(!XenonProgramCommonLoader::CheckMagicNumber(commonHeader))
+	if(!XenonProgramCommonLoader::CheckMagicNumber(fileHeader))
 	{
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Invalid program file magic number: magicNumber=\"%c%c%c%c%c\", expected=\"XPRG_\"",
-			commonHeader.magicNumber[0],
-			commonHeader.magicNumber[1],
-			commonHeader.magicNumber[2],
-			commonHeader.magicNumber[3],
-			commonHeader.magicNumber[4]
+			fileHeader.magicNumber[0],
+			fileHeader.magicNumber[1],
+			fileHeader.magicNumber[2],
+			fileHeader.magicNumber[3],
+			fileHeader.magicNumber[4]
 		);
 
 		return false;
 	}
 
-	// Read the 'isBigEndian' flag.
-	result = XenonSerializerReadUint8(hSerializer, &commonHeader.bigEndianFlag);
+	// Read the reserved section of the file header.
+	result = XenonSerializerReadBuffer(hSerializer, sizeof(fileHeader.reserved), fileHeader.reserved);
 	if(result != XENON_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		XenonReportMessage(
+			hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Error reading program file reserved section: error=\"%s\"",
+			XenonGetErrorCodeString(result)
+		);
+		return false;
+	}
 
+	// Read the 'isBigEndian' flag.
+	result = XenonSerializerReadUint8(hSerializer, &fileHeader.bigEndianFlag);
+	if(result != XENON_SUCCESS)
+	{
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Error reading program file big endian flag: error=\"%s\"",
-			errorString
+			XenonGetErrorCodeString(result)
 		);
-
 		return false;
 	}
 
@@ -120,12 +130,12 @@ static bool ProgramLoad(
 		hReport,
 		XENON_MESSAGE_TYPE_VERBOSE,
 		"Detected program file endianness: bigEndian=%d",
-		commonHeader.bigEndianFlag
+		fileHeader.bigEndianFlag
 	);
 
 	// Save the endianness value to the output program since we'll need
 	// that when dispatching bytecode data.
-	pOutProgram->endianness = (commonHeader.bigEndianFlag > 0)
+	pOutProgram->endianness = (fileHeader.bigEndianFlag > 0)
 		? XENON_ENDIAN_ORDER_BIG
 		: XENON_ENDIAN_ORDER_LITTLE;
 
@@ -133,17 +143,13 @@ static bool ProgramLoad(
 	result = XenonSerializerSetEndianness(hSerializer, pOutProgram->endianness);
 	if(result != XENON_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
-		const char* const endianString = XenonGetEndianModeString(pOutProgram->endianness);
-
 		XenonReportMessage(
 			hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Error setting endian mode on the program file serializer: error=\"%s\", endianMode=\"%s\"",
-			errorString,
-			endianString
+			XenonGetErrorCodeString(result),
+			XenonGetEndianModeString(pOutProgram->endianness)
 		);
-
 		return false;
 	}
 

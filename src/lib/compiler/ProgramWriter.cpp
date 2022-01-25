@@ -19,9 +19,10 @@
 #include "ProgramWriter.hpp"
 #include "Compiler.hpp"
 
-#include "../common/program-format/CommonHeader.hpp"
+#include "../common/program-format/FileHeader.hpp"
 #include "../common/program-format/ProgramHeader.hpp"
 
+#include <algorithm>
 #include <assert.h>
 #include <inttypes.h>
 #include <string.h>
@@ -449,14 +450,14 @@ bool XenonProgramWriter::Serialize(
 
 	XenonReportHandle hReport = &hCompiler->report;
 
-	XenonProgramCommonHeader commonHeader = {};
+	XenonFileHeader fileHeader = {};
 	XenonProgramHeader programHeader = {};
 
-	commonHeader.magicNumber[0] = 'X';
-	commonHeader.magicNumber[1] = 'P';
-	commonHeader.magicNumber[2] = 'R';
-	commonHeader.magicNumber[3] = 'G';
-	commonHeader.magicNumber[4] = '_';
+	fileHeader.magicNumber[0] = 'X';
+	fileHeader.magicNumber[1] = 'P';
+	fileHeader.magicNumber[2] = 'R';
+	fileHeader.magicNumber[3] = 'G';
+	fileHeader.magicNumber[4] = '_';
 
 	const int endianness = XenonSerializerGetEndianness(hSerializer);
 
@@ -464,18 +465,18 @@ bool XenonProgramWriter::Serialize(
 	switch(endianness)
 	{
 		case XENON_ENDIAN_ORDER_LITTLE:
-			commonHeader.bigEndianFlag = 0;
+			fileHeader.bigEndianFlag = 0;
 			break;
 
 		case XENON_ENDIAN_ORDER_BIG:
-			commonHeader.bigEndianFlag = 1;
+			fileHeader.bigEndianFlag = 1;
 			break;
 
 		default:
 #ifdef XENON_CPU_ENDIAN_LITTLE
-			commonHeader.bigEndianFlag = 0;
+			fileHeader.bigEndianFlag = 0;
 #else
-			commonHeader.bigEndianFlag = 1;
+			fileHeader.bigEndianFlag = 1;
 #endif
 			break;
 	}
@@ -536,22 +537,36 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.size());
-	programHeader.objectTableLength = uint32_t(hProgramWriter->objectTypes.size());
-	programHeader.constantTableLength = uint32_t(hProgramWriter->constants.size());
-	programHeader.globalTableLength = uint32_t(hProgramWriter->globals.size());
-	programHeader.functionTableLength = uint32_t(functionBindings.size());
-	programHeader.bytecodeLength = uint32_t(bytecode.size());
+	programHeader.dependencyTable.length = uint32_t(hProgramWriter->dependencies.size());
+	programHeader.objectTable.length = uint32_t(hProgramWriter->objectTypes.size());
+	programHeader.constantTable.length = uint32_t(hProgramWriter->constants.size());
+	programHeader.globalTable.length = uint32_t(hProgramWriter->globals.size());
+	programHeader.bytecode.length = uint32_t(bytecode.size());
+	programHeader.functionTable.length = uint32_t(functionBindings.size());
+
+	// TODO: Add support for program extensions.
+	programHeader.extensionTable.offset = 0;
+	programHeader.extensionTable.length = 0;
 
 	int result = XENON_SUCCESS;
 
 	// Write the common header.
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[0]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[1]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[2]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[3]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[4]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.bigEndianFlag); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[0]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[1]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[2]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[3]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[4]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[0]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[1]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[2]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[3]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[4]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[5]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[6]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[7]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[8]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[9]); }
+	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.bigEndianFlag); }
 
 	if(result != XENON_SUCCESS)
 	{
@@ -571,18 +586,20 @@ bool XenonProgramWriter::Serialize(
 	{
 		int result = XENON_SUCCESS;
 
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecodeOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecodeLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTable.offset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTable.length); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTable.offset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTable.length); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTable.offset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTable.length); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTable.offset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTable.length); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTable.offset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTable.length); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.extensionTable.offset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.extensionTable.length); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecode.offset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecode.length); }
 
 		return result;
 	};
@@ -607,7 +624,7 @@ bool XenonProgramWriter::Serialize(
 		return false;
 	}
 
-	programHeader.dependencyTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.dependencyTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the dependency table.
 	for(auto& kv : hProgramWriter->dependencies)
@@ -620,7 +637,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.objectTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.objectTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the object type schemas.
 	for(auto& typeKv : hProgramWriter->objectTypes)
@@ -688,7 +705,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.constantTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.constantTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the constant table.
 	for(size_t index = 0; index < hProgramWriter->constants.size(); ++index)
@@ -701,7 +718,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.globalTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.globalTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the global variable table.
 	for(auto& kv : hProgramWriter->globals)
@@ -733,7 +750,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.functionTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.functionTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the function table.
 	for(const FunctionBinding& binding : functionBindings)
@@ -1092,7 +1109,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.bytecodeOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.bytecode.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	if(bytecode.size() > 0)
 	{

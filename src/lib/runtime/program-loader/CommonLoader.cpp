@@ -25,13 +25,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramCommonLoader::CheckMagicNumber(const XenonProgramCommonHeader& commonHeader)
+bool XenonProgramCommonLoader::CheckMagicNumber(const XenonFileHeader& fileHeader)
 {
-	return commonHeader.magicNumber[0] == 'X'
-		|| commonHeader.magicNumber[1] == 'P'
-		|| commonHeader.magicNumber[2] == 'R'
-		|| commonHeader.magicNumber[3] == 'G'
-		|| commonHeader.magicNumber[4] == '_';
+	return fileHeader.magicNumber[0] == 'X'
+		|| fileHeader.magicNumber[1] == 'P'
+		|| fileHeader.magicNumber[2] == 'R'
+		|| fileHeader.magicNumber[3] == 'G'
+		|| fileHeader.magicNumber[4] == '_';
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -23,7 +23,7 @@
 #include "../Program.hpp"
 #include "../ScriptObject.hpp"
 
-#include "../../common/program-format/CommonHeader.hpp"
+#include "../../common/program-format/FileHeader.hpp"
 #include "../../common/program-format/ProgramHeader.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -76,14 +76,15 @@ private:
 	bool prv_loadFile();
 	bool prv_finalize();
 
-	bool prv_readFileHeader();
-	bool prv_validateFileHeader();
+	bool prv_readProgramHeader();
+	bool prv_validateProgramHeader();
 
 	bool prv_readDependencyTable();
 	bool prv_readObjectTable();
 	bool prv_readConstantTable();
 	bool prv_readGlobalTable();
 	bool prv_readFunctions();
+	bool prv_readBytecode();
 
 	bool prv_readLocalVariables(XenonString*, XenonValue::StringToHandleMap&);
 	bool prv_readGuardedBlocks(XenonString*, XenonGuardedBlock::Array&);
@@ -98,7 +99,7 @@ private:
 	XenonSerializerHandle m_hSerializer;
 	XenonReportHandle m_hReport;
 
-	XenonProgramHeader m_fileHeader;
+	XenonProgramHeader m_programHeader;
 
 	StringResources m_strings;
 

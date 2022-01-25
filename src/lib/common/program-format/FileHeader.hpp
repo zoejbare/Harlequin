@@ -24,9 +24,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgramCommonHeader
+struct XenonFileHeader
 {
 	uint8_t magicNumber[5];
+	uint8_t reserved[10];
 	uint8_t bigEndianFlag;
 };
 

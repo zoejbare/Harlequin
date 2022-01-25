@@ -26,23 +26,19 @@
 
 struct XenonProgramHeader
 {
-	uint32_t dependencyTableOffset;
-	uint32_t dependencyTableLength;
+	struct Section
+	{
+		uint32_t offset;
+		uint32_t length;
+	};
 
-	uint32_t objectTableOffset;
-	uint32_t objectTableLength;
-
-	uint32_t constantTableOffset;
-	uint32_t constantTableLength;
-
-	uint32_t globalTableOffset;
-	uint32_t globalTableLength;
-
-	uint32_t functionTableOffset;
-	uint32_t functionTableLength;
-
-	uint32_t bytecodeOffset;
-	uint32_t bytecodeLength;
+	Section dependencyTable;
+	Section objectTable;
+	Section constantTable;
+	Section globalTable;
+	Section functionTable;
+	Section extensionTable;
+	Section bytecode;
 
 	uint32_t headerEndPosition;
 };
