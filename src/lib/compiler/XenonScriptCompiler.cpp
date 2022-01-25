@@ -697,7 +697,7 @@ int XenonProgramWriterAddExceptionHandler(
 	XenonFunctionData::GuardedBlock& guardedBlock = pFunction->guardedBlocks[blockId];
 
 	// Verify a handler at this offset hasn't already been added to this guarded block.
-	if(guardedBlock.handlers.count(bytecodeOffset))
+	if(guardedBlock.handlers.count(uint32_t(bytecodeOffset)))
 	{
 		return XENON_ERROR_KEY_ALREADY_EXISTS;
 	}
@@ -722,11 +722,11 @@ int XenonProgramWriterAddExceptionHandler(
 	XenonFunctionData::ExceptionHandler newHandler;
 
 	newHandler.pClassName = pClassName;
-	newHandler.offset = bytecodeOffset;
+	newHandler.offset = uint32_t(bytecodeOffset);
 	newHandler.type = handledType;
 
 	// Map the new handler to the guarded block.
-	guardedBlock.handlers.emplace(bytecodeOffset, newHandler);
+	guardedBlock.handlers.emplace(uint32_t(bytecodeOffset), newHandler);
 
 	return XENON_SUCCESS;
 }
