@@ -16,7 +16,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
@@ -24,6 +24,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -40,7 +41,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
@@ -48,6 +49,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -64,7 +66,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
@@ -72,6 +74,7 @@
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -88,7 +91,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
@@ -96,6 +99,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -112,7 +116,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
@@ -120,6 +124,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -136,7 +141,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
@@ -144,6 +149,7 @@
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -160,7 +166,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
@@ -168,6 +174,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -184,7 +191,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
@@ -192,6 +199,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -208,7 +216,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
@@ -216,6 +224,7 @@
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -232,7 +241,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
@@ -240,6 +249,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -256,7 +266,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
@@ -264,6 +274,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -280,7 +291,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
@@ -288,6 +299,7 @@
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -307,7 +319,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -327,7 +339,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -347,7 +359,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -367,7 +379,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -387,7 +399,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -407,7 +419,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -447,7 +459,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "psvita"]
 			}
 		},
@@ -467,7 +479,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "psvita"]
 			}
 		},
@@ -487,7 +499,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "ps3"]
 			}
 		},
@@ -507,7 +519,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "ps3"]
 			}
 		},
@@ -527,7 +539,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "ps3"]
 			}
 		},
@@ -547,7 +559,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "ps4"]
 			}
 		},
@@ -567,7 +579,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "ps4"]
 			}
 		},
@@ -587,7 +599,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "ps4"]
 			}
 		},
@@ -604,7 +616,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
@@ -612,6 +624,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -628,7 +641,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
@@ -636,6 +649,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -652,7 +666,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
@@ -660,6 +674,7 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -676,7 +691,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
@@ -684,6 +699,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -700,7 +716,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
@@ -708,6 +724,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -724,7 +741,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
@@ -732,6 +749,7 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -748,7 +766,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
@@ -756,6 +774,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -772,7 +791,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
@@ -780,6 +799,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -796,7 +816,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
@@ -804,6 +824,7 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -820,7 +841,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
@@ -828,6 +849,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -844,7 +866,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
@@ -852,6 +874,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -868,7 +891,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
@@ -876,6 +899,7 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -895,7 +919,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -915,7 +939,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -935,7 +959,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -955,7 +979,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -975,7 +999,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -995,7 +1019,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1015,7 +1039,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "psvita", "-j1", "--show-commands"]
 			}
 		},
@@ -1035,7 +1059,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "psvita"]
 			}
 		},
@@ -1055,7 +1079,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "psvita"]
 			}
 		},
@@ -1075,7 +1099,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "ps3"]
 			}
 		},
@@ -1095,7 +1119,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "ps3"]
 			}
 		},
@@ -1115,7 +1139,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "ps3"]
 			}
 		},
@@ -1135,7 +1159,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "ps4"]
 			}
 		},
@@ -1155,7 +1179,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "ps4"]
 			}
 		},
@@ -1175,7 +1199,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "ps4"]
 			}
 		},
@@ -1192,7 +1216,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
@@ -1200,6 +1224,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -1216,7 +1241,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
@@ -1224,6 +1249,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -1240,7 +1266,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
@@ -1248,6 +1274,7 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -1264,7 +1291,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
@@ -1272,6 +1299,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -1288,7 +1316,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
@@ -1296,6 +1324,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -1312,7 +1341,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
@@ -1320,6 +1349,7 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -1336,7 +1366,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
@@ -1344,6 +1374,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -1360,7 +1391,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
@@ -1368,6 +1399,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -1384,7 +1416,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
@@ -1392,6 +1424,7 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -1408,7 +1441,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
@@ -1416,6 +1449,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -1432,7 +1466,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
@@ -1440,6 +1474,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -1456,7 +1491,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "python3",
+			"command": "${workspaceFolder}/_build/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
@@ -1464,6 +1499,7 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -1483,7 +1519,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1503,7 +1539,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1523,7 +1559,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1543,7 +1579,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1563,7 +1599,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1583,7 +1619,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1603,7 +1639,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "psvita"]
 			}
 		},
@@ -1623,7 +1659,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "psvita"]
 			}
 		},
@@ -1643,7 +1679,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "psvita"]
 			}
 		},
@@ -1663,7 +1699,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "ps3"]
 			}
 		},
@@ -1683,7 +1719,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "ps3"]
 			}
 		},
@@ -1703,7 +1739,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "ps3"]
 			}
 		},
@@ -1723,7 +1759,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "ps4"]
 			}
 		},
@@ -1743,7 +1779,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "ps4"]
 			}
 		},
@@ -1763,7 +1799,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "python",
+				"command": "${workspaceFolder}/_build/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "ps4"]
 			}
 		}

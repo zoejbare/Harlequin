@@ -10,3 +10,6 @@
 [submodule "external/googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest.git
+[submodule "external/csbuild2"]
+	path = external/csbuild2
+	url = https://github.com/SleepingCatGames/csbuild2.git
