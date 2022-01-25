@@ -1,9 +1,9 @@
 [submodule "external/NCPSQueue"]
 	path = external/NCPSQueue
-	url = https://github.com/ShadauxCat/NCPSQueue.git
+	url = https://github.com/zoejbare/NCPSQueue.git
 [submodule "external/SkipProbe"]
 	path = external/SkipProbe
-	url = https://github.com/ShadauxCat/SkipProbe.git
+	url = https://github.com/zoejbare/SkipProbe.git
 [submodule "external/xxHash"]
 	path = external/xxHash
 	url = https://github.com/Cyan4973/xxHash.git
