@@ -20,6 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "GuardedBlock.hpp"
 #include "Value.hpp"
 
 #include "../base/String.hpp"
@@ -63,6 +64,7 @@ struct XenonFunction
 		XenonProgramHandle hProgram,
 		XenonString* const pSignature,
 		XenonValue::StringToHandleMap& locals,
+		XenonGuardedBlock::Array& guardedBlocks,
 		const uint32_t bytecodeOffsetStart,
 		const uint32_t bytecodeOffsetEnd,
 		const uint16_t numParameters,
@@ -93,6 +95,7 @@ struct XenonFunction
 	XenonString* pSignature;
 	void* pNativeUserData;
 
+	XenonGuardedBlock::Array guardedBlocks;
 	XenonValue::StringToHandleMap locals;
 
 	uint32_t bytecodeOffsetStart;

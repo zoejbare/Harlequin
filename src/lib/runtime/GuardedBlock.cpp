@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2022, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -16,37 +16,48 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "GuardedBlock.hpp"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include <stdint.h>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-#define XENON_PROGRAM_VERSION_0001 0x0001
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XenonProgramHeader0001
+XenonGuardedBlock* XenonGuardedBlock::Create(const uint32_t offset, const uint32_t length, const size_t handlerCount)
 {
-	uint32_t dependencyTableOffset;
-	uint32_t dependencyTableLength;
+	XenonGuardedBlock* const pOutput = new XenonGuardedBlock();
+	assert(pOutput != nullptr);
 
-	uint32_t objectTableOffset;
-	uint32_t objectTableLength;
+	pOutput->bytecodeOffset = offset;
+	pOutput->bytecodeLength = length;
 
-	uint32_t constantTableOffset;
-	uint32_t constantTableLength;
+	// Initialize the array of exception handlers.
+	XenonExceptionHandler::Array::Initialize(pOutput->handlers);
+	XenonExceptionHandler::Array::Reserve(pOutput->handlers, handlerCount);
 
-	uint32_t globalTableOffset;
-	uint32_t globalTableLength;
+	return pOutput;
+}
 
-	uint32_t functionTableOffset;
-	uint32_t functionTableLength;
+//----------------------------------------------------------------------------------------------------------------------
 
-	uint32_t bytecodeOffset;
-	uint32_t bytecodeLength;
-};
+void XenonGuardedBlock::Dispose(XenonGuardedBlock* const pGuardedBlock)
+{
+	XenonExceptionHandler::Array::Dispose(pGuardedBlock->handlers);
+
+	delete pGuardedBlock;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void* XenonGuardedBlock::operator new(const size_t sizeInBytes)
+{
+	return XenonMemAlloc(sizeInBytes);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void XenonGuardedBlock::operator delete(void* const pObject)
+{
+	XenonMemFree(pObject);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

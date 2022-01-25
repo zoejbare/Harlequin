@@ -69,6 +69,7 @@ enum XenonErrorCodeEnum
 	XENON_ERROR_INDEX_OUT_OF_RANGE = -13,
 	XENON_ERROR_SCRIPT_NO_FUNCTION = -14,
 	XENON_ERROR_MISMATCH = -15,
+	XENON_ERROR_UNKNOWN_ID = -16,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/
@@ -638,14 +639,6 @@ typedef struct
 	XenonCommonInit common;
 } XenonCompilerInit;
 
-typedef struct
-{
-	const char* className;
-
-	size_t bytecodeOffset;
-	int type;
-} XenonExceptionHandler;
-
 typedef bool (*XenonCallbackIterateBuiltInFunction)(void*, int, const char*);
 
 #define XENON_COMPILER_HANDLE_NULL       ((XenonCompilerHandle)0)
@@ -731,10 +724,18 @@ XENON_MAIN_API int XenonProgramWriterAddLocalVariable(
 XENON_MAIN_API int XenonProgramWriterAddGuardedBlock(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* functionSignature,
-	XenonExceptionHandler* exceptionHandlers,
-	size_t exceptionHandlerCount,
-	size_t guardedOffsetStart,
-	size_t guardedOffsetEnd
+	uint32_t bytecodeOffset,
+	uint32_t bytecodeLength,
+	size_t* pOutBlockId
+);
+
+XENON_MAIN_API int XenonProgramWriterAddExceptionHandler(
+	XenonProgramWriterHandle hProgramWriter,
+	const char* functionSignature,
+	size_t blockId,
+	size_t bytecodeOffset,
+	int handledType,
+	const char* className
 );
 
 XENON_MAIN_API int XenonProgramWriterSerialize(

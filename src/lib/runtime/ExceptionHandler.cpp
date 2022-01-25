@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2022, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -16,68 +16,53 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "ExceptionHandler.hpp"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../base/String.hpp"
-
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XenonFunctionData
+XenonExceptionHandler* XenonExceptionHandler::Create(const uint8_t type, const uint32_t offset, XenonString* const pClassName)
 {
-	typedef std::vector<uint8_t> Bytecode;
+	XenonExceptionHandler* const pOutput = new XenonExceptionHandler();
+	assert(pOutput != nullptr);
 
-	typedef std::unordered_map<
-		XenonString*,
-		XenonFunctionData,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> StringToFunctionMap;
+	pOutput->type = type;
+	pOutput->offset = offset;
+	pOutput->pClassName = pClassName;
 
-	typedef std::unordered_map<
-		XenonString*,
-		uint32_t,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> LocalVariableMap;
-
-	struct ExceptionHandler
+	if(pOutput->pClassName)
 	{
-		typedef std::unordered_map<uint32_t, ExceptionHandler> Map;
-		typedef std::vector<ExceptionHandler> Vector;
+		XenonString::AddRef(pOutput->pClassName);
+	}
 
-		XenonString* pClassName;
+	return pOutput;
+}
 
-		uint32_t offset;
-		int type;
-	};
+//----------------------------------------------------------------------------------------------------------------------
 
-	struct GuardedBlock
+void XenonExceptionHandler::Dispose(XenonExceptionHandler* const pExceptionHandler)
+{
+	if(pExceptionHandler->pClassName)
 	{
-		typedef std::vector<GuardedBlock> Vector;
+		XenonString::Release(pExceptionHandler->pClassName);
+	}
 
-		ExceptionHandler::Map handlers;
+	delete pExceptionHandler;
+}
 
-		size_t id;
+//----------------------------------------------------------------------------------------------------------------------
 
-		uint32_t offset;
-		uint32_t length;
-	};
+void* XenonExceptionHandler::operator new(const size_t sizeInBytes)
+{
+	return XenonMemAlloc(sizeInBytes);
+}
 
+//----------------------------------------------------------------------------------------------------------------------
 
-	LocalVariableMap locals;
-	GuardedBlock::Vector guardedBlocks;
-	Bytecode bytecode;
-
-	uint16_t numParameters;
-	uint16_t numReturnValues;
-
-	bool isNative;
-};
+void XenonExceptionHandler::operator delete(void* const pObject)
+{
+	XenonMemFree(pObject);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

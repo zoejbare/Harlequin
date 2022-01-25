@@ -20,7 +20,7 @@
 #include "Compiler.hpp"
 
 #include "../common/program-format/CommonHeader.hpp"
-#include "../common/program-format/VersionHeader0001.hpp"
+#include "../common/program-format/ProgramHeader.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -450,14 +450,13 @@ bool XenonProgramWriter::Serialize(
 	XenonReportHandle hReport = &hCompiler->report;
 
 	XenonProgramCommonHeader commonHeader = {};
-	XenonProgramHeader0001 versionHeader = {};
+	XenonProgramHeader programHeader = {};
 
 	commonHeader.magicNumber[0] = 'X';
 	commonHeader.magicNumber[1] = 'P';
 	commonHeader.magicNumber[2] = 'R';
 	commonHeader.magicNumber[3] = 'G';
 	commonHeader.magicNumber[4] = '_';
-	commonHeader.fileVersion = XENON_PROGRAM_VERSION_0001;
 
 	const int endianness = XenonSerializerGetEndianness(hSerializer);
 
@@ -537,12 +536,12 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	versionHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.size());
-	versionHeader.objectTableLength = uint32_t(hProgramWriter->objectTypes.size());
-	versionHeader.constantTableLength = uint32_t(hProgramWriter->constants.size());
-	versionHeader.globalTableLength = uint32_t(hProgramWriter->globals.size());
-	versionHeader.functionTableLength = uint32_t(functionBindings.size());
-	versionHeader.bytecodeLength = uint32_t(bytecode.size());
+	programHeader.dependencyTableLength = uint32_t(hProgramWriter->dependencies.size());
+	programHeader.objectTableLength = uint32_t(hProgramWriter->objectTypes.size());
+	programHeader.constantTableLength = uint32_t(hProgramWriter->constants.size());
+	programHeader.globalTableLength = uint32_t(hProgramWriter->globals.size());
+	programHeader.functionTableLength = uint32_t(functionBindings.size());
+	programHeader.bytecodeLength = uint32_t(bytecode.size());
 
 	int result = XENON_SUCCESS;
 
@@ -553,7 +552,6 @@ bool XenonProgramWriter::Serialize(
 	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[3]); }
 	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.magicNumber[4]); }
 	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, commonHeader.bigEndianFlag); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint16(hSerializer, commonHeader.fileVersion); }
 
 	if(result != XENON_SUCCESS)
 	{
@@ -569,22 +567,22 @@ bool XenonProgramWriter::Serialize(
 		return false;
 	}
 
-	auto writeVersionHeader = [&hSerializer, &versionHeader]() -> int
+	auto writeVersionHeader = [&hSerializer, &programHeader]() -> int
 	{
 		int result = XENON_SUCCESS;
 
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.dependencyTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.objectTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.constantTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.globalTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.globalTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.functionTableOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.functionTableLength); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.bytecodeOffset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, versionHeader.bytecodeLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTableOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTableLength); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecodeOffset); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecodeLength); }
 
 		return result;
 	};
@@ -609,7 +607,7 @@ bool XenonProgramWriter::Serialize(
 		return false;
 	}
 
-	versionHeader.dependencyTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.dependencyTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the dependency table.
 	for(auto& kv : hProgramWriter->dependencies)
@@ -622,7 +620,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	versionHeader.objectTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.objectTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the object type schemas.
 	for(auto& typeKv : hProgramWriter->objectTypes)
@@ -690,7 +688,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	versionHeader.constantTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.constantTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the constant table.
 	for(size_t index = 0; index < hProgramWriter->constants.size(); ++index)
@@ -703,7 +701,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	versionHeader.globalTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.globalTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the global variable table.
 	for(auto& kv : hProgramWriter->globals)
@@ -735,7 +733,7 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	versionHeader.functionTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.functionTableOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	// Write the function table.
 	for(const FunctionBinding& binding : functionBindings)
@@ -911,10 +909,190 @@ bool XenonProgramWriter::Serialize(
 					return false;
 				}
 			}
+
+			const size_t guardedBlockCount = uint32_t(binding.pFunction->guardedBlocks.size());
+
+			// Write the function's guarded block count into the program file.
+			result = XenonSerializerWriteUint32(hSerializer, uint32_t(guardedBlockCount));
+			if(result != XENON_SUCCESS)
+			{
+				const char* const errorString = XenonGetErrorCodeString(result);
+
+				XenonReportMessage(
+					hReport,
+					XENON_MESSAGE_TYPE_ERROR,
+					"Failed to serialize function guarded block count: error=\"%s\", signature=\"%s\", count=%zu",
+					errorString,
+					binding.pSignature->data,
+					guardedBlockCount
+				);
+
+				return false;
+			}
+
+			auto guardedBlockSortFunc = [](
+				const XenonFunctionData::GuardedBlock& left,
+				const XenonFunctionData::GuardedBlock& right
+			) -> bool
+			{
+				if(left.offset < right.offset)
+				{
+					// Earlier guarded blocks are sorted before the blocks that come after them.
+					return true;
+				}
+				else if(left.offset == right.offset)
+				{
+					// Nested blocks are sorted *after* the blocks that contain them.
+					if(left.length > right.length)
+					{
+						return true;
+					}
+				}
+
+				return false;
+			};
+
+			auto exceptionHandlerSortFunc = [](
+				const XenonFunctionData::ExceptionHandler& left,
+				const XenonFunctionData::ExceptionHandler& right
+			) -> bool
+			{
+				return left.offset < right.offset;
+			};
+
+			// Sort the guarded blocks for this function.
+			std::sort(
+				binding.pFunction->guardedBlocks.begin(),
+				binding.pFunction->guardedBlocks.end(),
+				guardedBlockSortFunc
+			);
+
+			// Serialize the guarded blocks with their exception handlers.
+			for(const XenonFunctionData::GuardedBlock& block : binding.pFunction->guardedBlocks)
+			{
+				XenonFunctionData::ExceptionHandler::Vector exceptionHandlers(block.handlers.size());
+
+				// Build a flat array of exception handlers for this guarded block.
+				for(auto& kv : block.handlers)
+				{
+					exceptionHandlers.push_back(kv.second);
+				}
+
+				// Sort the array of exception handlers.
+				std::sort(exceptionHandlers.begin(), exceptionHandlers.end(), exceptionHandlerSortFunc);
+
+				// Write the guarded block bytecode offset.
+				result = XenonSerializerWriteUint32(hSerializer, block.offset);
+				if(result != XENON_SUCCESS)
+				{
+					const char* const errorString = XenonGetErrorCodeString(result);
+
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to write guarded block bytecode offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
+						errorString,
+						binding.pSignature->data,
+						block.offset
+					);
+
+					return false;
+				}
+
+				// Write the guarded block bytecode length.
+				result = XenonSerializerWriteUint32(hSerializer, block.length);
+				if(result != XENON_SUCCESS)
+				{
+					const char* const errorString = XenonGetErrorCodeString(result);
+
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to write guarded block bytecode length: error=\"%s\", signature=\"%s\", length=%" PRIu32,
+						errorString,
+						binding.pSignature->data,
+						block.length
+					);
+
+					return false;
+				}
+
+				const uint32_t exceptionHandlerCount = uint32_t(exceptionHandlers.size());
+
+				// Write the number of exception handlers contained in this guarded block.
+				result = XenonSerializerWriteUint32(hSerializer, exceptionHandlerCount);
+				if(result != XENON_SUCCESS)
+				{
+					const char* const errorString = XenonGetErrorCodeString(result);
+
+					XenonReportMessage(
+						hReport,
+						XENON_MESSAGE_TYPE_ERROR,
+						"Failed to write guarded block exception handler count: error=\"%s\", signature=\"%s\", count=%" PRIu32,
+						errorString,
+						binding.pSignature->data,
+						exceptionHandlerCount
+					);
+
+					return false;
+				}
+
+				// Serialize each exception handler contained by this guarded block.
+				for(uint32_t handlerIndex = 0; handlerIndex < exceptionHandlerCount; ++handlerIndex)
+				{
+					const XenonFunctionData::ExceptionHandler& handler = exceptionHandlers[handlerIndex];
+
+					// Write the value type for this exception handler.
+					result = XenonSerializerWriteUint8(hSerializer, uint8_t(handler.type));
+					if(result != XENON_SUCCESS)
+					{
+						const char* const errorString = XenonGetErrorCodeString(result);
+						const char* const valueTypeString = XenonGetValueTypeString(handler.type);
+
+						XenonReportMessage(
+							hReport,
+							XENON_MESSAGE_TYPE_ERROR,
+							"Failed to write exception handler type: error=\"%s\", signature=\"%s\", type=\"%s\"",
+							errorString,
+							binding.pSignature->data,
+							valueTypeString
+						);
+
+						return false;
+					}
+
+					// Write the offset where this exception handler is located.
+					result = XenonSerializerWriteUint32(hSerializer, handler.offset);
+					if(result != XENON_SUCCESS)
+					{
+						const char* const errorString = XenonGetErrorCodeString(result);
+
+						XenonReportMessage(
+							hReport,
+							XENON_MESSAGE_TYPE_ERROR,
+							"Failed to write exception handler offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
+							errorString,
+							binding.pSignature->data,
+							handler.offset
+						);
+
+						return false;
+					}
+
+					if(handler.type == XENON_VALUE_TYPE_OBJECT)
+					{
+						// Write the class name if this exception handler references an object type.
+						if(!SerializeString(hSerializer, hReport, handler.pClassName->data, handler.pClassName->length))
+						{
+							return false;
+						}
+					}
+				}
+			}
 		}
 	}
 
-	versionHeader.bytecodeOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.bytecodeOffset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
 
 	if(bytecode.size() > 0)
 	{

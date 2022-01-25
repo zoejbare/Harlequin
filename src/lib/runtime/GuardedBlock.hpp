@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2022, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,64 +20,24 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../base/String.hpp"
-
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
+#include "ExceptionHandler.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonFunctionData
+struct XenonGuardedBlock
 {
-	typedef std::vector<uint8_t> Bytecode;
+	typedef XenonArray<XenonGuardedBlock*> Array;
 
-	typedef std::unordered_map<
-		XenonString*,
-		XenonFunctionData,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> StringToFunctionMap;
+	static XenonGuardedBlock* Create(const uint32_t offset, const uint32_t length, const size_t handlerCount);
+	static void Dispose(XenonGuardedBlock* const pGuardedBlock);
 
-	typedef std::unordered_map<
-		XenonString*,
-		uint32_t,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> LocalVariableMap;
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
 
-	struct ExceptionHandler
-	{
-		typedef std::unordered_map<uint32_t, ExceptionHandler> Map;
-		typedef std::vector<ExceptionHandler> Vector;
+	XenonExceptionHandler::Array handlers;
 
-		XenonString* pClassName;
-
-		uint32_t offset;
-		int type;
-	};
-
-	struct GuardedBlock
-	{
-		typedef std::vector<GuardedBlock> Vector;
-
-		ExceptionHandler::Map handlers;
-
-		size_t id;
-
-		uint32_t offset;
-		uint32_t length;
-	};
-
-
-	LocalVariableMap locals;
-	GuardedBlock::Vector guardedBlocks;
-	Bytecode bytecode;
-
-	uint16_t numParameters;
-	uint16_t numReturnValues;
-
-	bool isNative;
+	uint32_t bytecodeOffset;
+	uint32_t bytecodeLength;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

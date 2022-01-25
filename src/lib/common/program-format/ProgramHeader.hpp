@@ -20,64 +20,31 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../base/String.hpp"
-
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
+#include <stdint.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonFunctionData
+struct XenonProgramHeader
 {
-	typedef std::vector<uint8_t> Bytecode;
+	uint32_t dependencyTableOffset;
+	uint32_t dependencyTableLength;
 
-	typedef std::unordered_map<
-		XenonString*,
-		XenonFunctionData,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> StringToFunctionMap;
+	uint32_t objectTableOffset;
+	uint32_t objectTableLength;
 
-	typedef std::unordered_map<
-		XenonString*,
-		uint32_t,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> LocalVariableMap;
+	uint32_t constantTableOffset;
+	uint32_t constantTableLength;
 
-	struct ExceptionHandler
-	{
-		typedef std::unordered_map<uint32_t, ExceptionHandler> Map;
-		typedef std::vector<ExceptionHandler> Vector;
+	uint32_t globalTableOffset;
+	uint32_t globalTableLength;
 
-		XenonString* pClassName;
+	uint32_t functionTableOffset;
+	uint32_t functionTableLength;
 
-		uint32_t offset;
-		int type;
-	};
+	uint32_t bytecodeOffset;
+	uint32_t bytecodeLength;
 
-	struct GuardedBlock
-	{
-		typedef std::vector<GuardedBlock> Vector;
-
-		ExceptionHandler::Map handlers;
-
-		size_t id;
-
-		uint32_t offset;
-		uint32_t length;
-	};
-
-
-	LocalVariableMap locals;
-	GuardedBlock::Vector guardedBlocks;
-	Bytecode bytecode;
-
-	uint16_t numParameters;
-	uint16_t numReturnValues;
-
-	bool isNative;
+	uint32_t headerEndPosition;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

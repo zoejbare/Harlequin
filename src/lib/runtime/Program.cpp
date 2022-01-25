@@ -21,7 +21,7 @@
 #include "Vm.hpp"
 
 #include "program-loader/CommonLoader.hpp"
-#include "program-loader/VersionLoader0001.hpp"
+#include "program-loader/ProgramLoader.hpp"
 
 #include "../base/Mutex.hpp"
 
@@ -147,47 +147,7 @@ static bool ProgramLoad(
 		return false;
 	}
 
-	// Read the program file version.
-	result = XenonSerializerReadUint16(hSerializer, &commonHeader.fileVersion);
-	if(result != XENON_SUCCESS)
-	{
-		const char* const errorString = XenonGetErrorCodeString(result);
-
-		XenonReportMessage(
-			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
-			"Error reading program file version number: error=\"%s\"",
-			errorString
-		);
-		return false;
-	}
-
-	XenonReportMessage(
-		hReport,
-		XENON_MESSAGE_TYPE_VERBOSE,
-		"Detected program file version: version=0x%04X",
-		commonHeader.fileVersion
-	);
-
-	// Continue loading for the correct file version.
-	switch(commonHeader.fileVersion)
-	{
-		case XENON_PROGRAM_VERSION_0001:
-			return XenonProgramVersion0001::Load(pOutProgram, hVm, hSerializer);
-
-		default:
-			break;
-	}
-
-	// Getting here means the file we're loading has file version we don't support.
-	XenonReportMessage(
-		hReport,
-		XENON_MESSAGE_TYPE_ERROR,
-		"No loader available for program file version: version=0x%04X",
-		commonHeader.fileVersion
-	);
-
-	return false;
+	return XenonProgramLoader::Load(pOutProgram, hVm, hSerializer);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -413,6 +373,12 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 
 	// Release the function signature keys.
 	for(auto& kv : hProgram->functions)
+	{
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+	}
+
+	// Release the object schemas and their type names.
+	for(auto& kv : hProgram->objectSchemas)
 	{
 		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}

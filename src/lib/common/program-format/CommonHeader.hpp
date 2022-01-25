@@ -28,7 +28,6 @@ struct XenonProgramCommonHeader
 {
 	uint8_t magicNumber[5];
 	uint8_t bigEndianFlag;
-	uint16_t fileVersion;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2022, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,20 +20,26 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../Program.hpp"
+#include "../base/String.hpp"
 
-#include "../../common/program-format/CommonHeader.hpp"
-#include "../../common/program-format/VersionHeader0001.hpp"
+#include "../common/Array.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgramVersion0001
+struct XenonExceptionHandler
 {
-	static bool Load(
-		XenonProgram* const pOutProgram,
-		XenonVmHandle hVm,
-		XenonSerializerHandle hSerializer
-	);
+	typedef XenonArray<XenonExceptionHandler*> Array;
+
+	static XenonExceptionHandler* Create(const uint8_t type, const uint32_t offset, XenonString* const pClassName);
+	static void Dispose(XenonExceptionHandler* const pExceptionHandler);
+
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
+
+	XenonString* pClassName;
+
+	uint32_t offset;
+	uint8_t type;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
