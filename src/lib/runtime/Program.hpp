@@ -58,8 +58,6 @@ struct XenonProgram
 
 	static XenonValueHandle GetConstant(XenonProgramHandle hProgram, const uint32_t index, int* const pOutResult);
 
-	static void prv_freeLoadedData(XenonProgramHandle, XenonVmHandle);
-
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 

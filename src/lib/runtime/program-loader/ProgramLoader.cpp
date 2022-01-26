@@ -144,12 +144,15 @@ bool XenonProgramLoader::prv_loadFile()
 		return false;
 	}
 
-	return prv_finalize();
+	// Finalize the loaded program data. No load failure past this point or things are likely to fall apart!
+	prv_finalize();
+
+	return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_finalize()
+void XenonProgramLoader::prv_finalize()
 {
 	// Link the object schemas into the program and VM.
 	{
@@ -262,8 +265,6 @@ bool XenonProgramLoader::prv_finalize()
 
 		XENON_MAP_FUNC_CLEAR(m_functions);
 	}
-
-	return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

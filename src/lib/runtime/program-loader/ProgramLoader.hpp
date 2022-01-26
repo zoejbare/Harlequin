@@ -74,7 +74,7 @@ private:
 	~XenonProgramLoader();
 
 	bool prv_loadFile();
-	bool prv_finalize();
+	void prv_finalize();
 
 	bool prv_readProgramHeader();
 	bool prv_validateProgramHeader();

@@ -231,9 +231,6 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 		}
 		else
 		{
-			// The program failed to load, so any stale load data needs to be freed.
-			prv_freeLoadedData(pOutput, hVm);
-
 			XenonString::Release(pProgramName);
 			XenonProgram::Dispose(pOutput);
 
@@ -338,9 +335,6 @@ XenonProgramHandle XenonProgram::Create(
 		}
 		else
 		{
-			// The program failed to load, so any stale load data needs to be freed.
-			prv_freeLoadedData(pOutput, hVm);
-
 			XenonString::Release(pProgramName);
 			XenonProgram::Dispose(pOutput);
 
@@ -426,36 +420,6 @@ XenonValueHandle XenonProgram::GetConstant(XenonProgramHandle hProgram, const ui
 	(*pOutResult) = XENON_SUCCESS;
 
 	return hProgram->constants.pData[index];
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void XenonProgram::prv_freeLoadedData(XenonProgramHandle hProgram, XenonVmHandle hVm)
-{
-	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-
-	// Remove the loaded globals from the VM.
-	for(auto& kv : hProgram->globals)
-	{
-		XenonString* const pKey = XENON_MAP_ITER_KEY(kv);
-
-		XENON_MAP_FUNC_REMOVE(hVm->globals, pKey);
-
-		XenonString::Release(pKey);
-	}
-
-	// Remove the loaded functions from the VM.
-	for(auto& kv : hProgram->functions)
-	{
-		XenonString* const pKey = XENON_MAP_ITER_KEY(kv);
-		XenonFunctionHandle hFunction = XENON_MAP_FUNC_GET(hVm->functions, pKey);
-
-		XENON_MAP_FUNC_REMOVE(hVm->functions, pKey);
-
-		XenonString::Release(pKey);
-		XenonFunction::Dispose(hFunction);
-	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
