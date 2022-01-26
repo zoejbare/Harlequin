@@ -70,6 +70,7 @@ enum XenonErrorCodeEnum
 	XENON_ERROR_SCRIPT_NO_FUNCTION = -14,
 	XENON_ERROR_MISMATCH = -15,
 	XENON_ERROR_UNKNOWN_ID = -16,
+	XENON_ERROR_NO_WRITE = -17,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/
@@ -742,6 +743,123 @@ XENON_MAIN_API int XenonProgramWriterSerialize(
 	XenonProgramWriterHandle hProgramWriter,
 	XenonCompilerHandle hCompiler,
 	XenonSerializerHandle hSerializer
+);
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+XENON_MAIN_API int XenonBytecodeWriteNop(XenonSerializerHandle hSerializer);
+
+XENON_MAIN_API int XenonBytecodeWriteAbort(XenonSerializerHandle hSerializer);
+
+XENON_MAIN_API int XenonBytecodeWriteReturn(XenonSerializerHandle hSerializer);
+
+XENON_MAIN_API int XenonBytecodeWriteYield(XenonSerializerHandle hSerializer);
+
+XENON_MAIN_API int XenonBytecodeWriteCall(XenonSerializerHandle hSerializer, uint32_t constantIndex);
+
+XENON_MAIN_API int XenonBytecodeWriteLoadConstant(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t constantIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteLoadGlobal(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t constantIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteLoadLocal(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t constantIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteLoadParam(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t ioRegIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteLoadObject(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t memberIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteStoreGlobal(
+	XenonSerializerHandle hSerializer,
+	uint32_t constantIndex,
+	uint32_t gpRegIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteStoreLocal(
+	XenonSerializerHandle hSerializer,
+	uint32_t constantIndex,
+	uint32_t gpRegIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteStoreParam(
+	XenonSerializerHandle hSerializer,
+	uint32_t ioRegIndex,
+	uint32_t gpRegIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteStoreObject(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t memberIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWritePullGlobal(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t constantIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWritePullLocal(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t constantIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWritePullParam(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t ioRegIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWritePullObject(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t memberIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWritePush(XenonSerializerHandle hSerializer, uint32_t gpRegIndex);
+
+XENON_MAIN_API int XenonBytecodeWritePop(XenonSerializerHandle hSerializer, uint32_t gpRegIndex);
+
+XENON_MAIN_API int XenonBytecodeWriteInitObject(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t constantIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWriteBranch(XenonSerializerHandle hSerializer, int32_t offset);
+
+XENON_MAIN_API int XenonBytecodeWriteBranchIfTrue(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	int32_t offset
+);
+
+XENON_MAIN_API int XenonBytecodeWriteBranchIfFalse(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	int32_t offset
 );
 
 /*---------------------------------------------------------------------------------------------------------------------*/
