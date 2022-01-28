@@ -160,7 +160,7 @@ public:
 	explicit TemporaryFile(const TempFileBehavior behavior)
 	{
 		// The last 6 characters *must* end in "XXXXXX" unless we switch to using mkstemps().
-		strcpy(m_filename, "chaostest_XXXXXX");
+		strcpy(m_filename, "xenontest_XXXXXX");
 
 		// Generate a temporary filename, then open the file, returning an active file descriptor.
 		const int fd = mkstemp(m_filename);
@@ -170,7 +170,8 @@ public:
 		{
 			case TempFileBehavior::Filled:
 			{
-				write(fd, SerializerTestData, sizeof(SerializerTestData));
+				const int result = write(fd, SerializerTestData, sizeof(SerializerTestData));
+				(void) result;
 				break;
 			}
 
