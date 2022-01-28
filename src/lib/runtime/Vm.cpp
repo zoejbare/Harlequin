@@ -123,7 +123,7 @@ void XenonVm::Dispose(XenonVmHandle hVm)
 	// Dispose of each embedded exception.
 	for(auto& kv : hVm->embeddedExceptions)
 	{
-		XenonScriptObject::Dispose(kv.value);
+		XenonScriptObject::Dispose(XENON_MAP_ITER_VALUE(kv));
 	}
 
 	XENON_MAP_FUNC_CLEAR(hVm->programs);

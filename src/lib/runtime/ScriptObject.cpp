@@ -38,7 +38,7 @@ XenonScriptObject* XenonScriptObject::CreateSchema(XenonString* const pTypeName,
 
 	for(auto& kv : pOutput->definitions)
 	{
-		XenonString::AddRef(kv.key);
+		XenonString::AddRef(XENON_MAP_ITER_KEY(kv));
 	}
 
 	const size_t defCount = XENON_MAP_FUNC_SIZE(definitions);

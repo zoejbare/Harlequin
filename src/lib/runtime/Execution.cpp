@@ -23,6 +23,7 @@
 
 #include "../base/Mutex.hpp"
 
+#include <algorithm>
 #include <assert.h>
 #include <inttypes.h>
 

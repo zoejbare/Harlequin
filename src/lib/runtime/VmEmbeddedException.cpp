@@ -37,7 +37,7 @@ void XenonVm::prv_setupEmbeddedExceptions(XenonVmHandle hVm)
 	{ \
 		def.bindingIndex = index; \
 		def.valueType = XENON_VALUE_TYPE_ ## value_type; \
-		memberDefs.Insert(XenonString::Create(name), def); \
+		XENON_MAP_FUNC_INSERT(memberDefs, XenonString::Create(name), def); \
 	}
 
 #define XENON_EMBEDDED_EXCEPTION(type, name) \
@@ -59,7 +59,7 @@ void XenonVm::prv_setupEmbeddedExceptions(XenonVmHandle hVm)
 	// Clean up the member names.
 	for(auto& kv : memberDefs)
 	{
-		XenonString::Release(kv.key);
+		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
 #undef XENON_EMBEDDED_EXCEPTION
