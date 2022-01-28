@@ -33,7 +33,8 @@
 #elif defined(XENON_PLATFORM_LINUX) \
 	|| defined(XENON_PLATFORM_MAC_OS) \
 	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4)
+	|| defined(XENON_PLATFORM_PS4) \
+	|| defined(XENON_PLATFORM_PS5)
 	#include "thread-impl/ThreadPosix.hpp"
 
 #elif defined(XENON_PLATFORM_PS3)

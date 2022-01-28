@@ -24,6 +24,9 @@
 #if defined(__ANDROID__)
 	#define XENON_PLATFORM_ANDROID
 
+#elif defined(__PROSPERO__)
+	#define XENON_PLATFORM_PS5
+
 #elif defined(__ORBIS__)
 	#define XENON_PLATFORM_PS4
 

@@ -86,7 +86,7 @@ with csbuild.Toolchain("ps3", "psvita"):
 	csbuild.SetCxxLanguageStandard("cpp11")
 
 with csbuild.Platform("Windows"):
-	with csbuild.Toolchain("gcc", "clang", "ps4", "android-gcc", "android-clang"):
+	with csbuild.Toolchain("gcc", "clang", "ps4", "ps5", "android-gcc", "android-clang"):
 		csbuild.AddCompilerFlags("-fdiagnostics-format=msvc")
 
 with csbuild.Platform("Linux"):
@@ -101,7 +101,7 @@ with csbuild.Toolchain("android-gcc", "android-clang"):
 	csbuild.SetAndroidTargetSdkVersion(26) # Android 7.0
 	csbuild.SetAndroidStlLibType(AndroidStlLibType.LibCpp)
 
-with csbuild.Toolchain("gcc", "clang", "ps4", "android-gcc", "android-clang"):
+with csbuild.Toolchain("gcc", "clang", "ps4", "ps5", "android-gcc", "android-clang"):
 	with csbuild.Architecture("x86", "x64"):
 		csbuild.AddCompilerCxxFlags("-msse4.1")
 
@@ -122,7 +122,7 @@ with csbuild.Toolchain("gcc", "android-gcc"):
 		"-Wno-nonnull-compare",
 	)
 
-with csbuild.Toolchain("clang", "ps4", "android-clang"):
+with csbuild.Toolchain("clang", "ps4", "ps5", "android-clang"):
 	csbuild.AddCompilerCxxFlags(
 		# Enabled warnings.
 		"-Wall",
@@ -237,7 +237,7 @@ class XenonScriptLib(object):
 	def setCommonOptions(outputName):
 		csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
 
-		with csbuild.Toolchain("ps3", "ps4", "psvita"):
+		with csbuild.Toolchain("ps3", "ps4", "ps5", "psvita"):
 			csbuild.SetOutput(outputName, csbuild.ProjectType.StaticLibrary)
 			csbuild.AddDefines("XENON_BUILD_STATIC_LIB")
 
@@ -284,7 +284,7 @@ with csbuild.Project(LibXenonBase.projectName, XenonScriptLib.rootPath, LibXenon
 			f"{XenonScriptLib.rootPath}/base/*-impl/*Win32.cpp",
 		)
 
-	with csbuild.Toolchain("gcc", "clang", "ps4"):
+	with csbuild.Toolchain("gcc", "clang", "ps4", "ps5"):
 		csbuild.AddSourceFiles(
 			f"{XenonScriptLib.rootPath}/base/*-impl/*Posix.cpp",
 		)
@@ -375,7 +375,7 @@ class XenonScriptApp(object):
 				"pthread",
 			)
 
-		with csbuild.Toolchain("ps4"):
+		with csbuild.Toolchain("ps4", "ps5", "blup"):
 			csbuild.AddLibraries(
 				"ScePosix_stub_weak",
 			)
