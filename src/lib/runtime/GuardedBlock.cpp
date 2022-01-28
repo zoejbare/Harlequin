@@ -27,8 +27,8 @@ XenonGuardedBlock* XenonGuardedBlock::Create(const uint32_t offset, const uint32
 	XenonGuardedBlock* const pOutput = new XenonGuardedBlock();
 	assert(pOutput != nullptr);
 
-	pOutput->bytecodeOffset = offset;
-	pOutput->bytecodeLength = length;
+	pOutput->bytecodeOffsetStart = offset;
+	pOutput->bytecodeOffsetEnd = offset + length;
 
 	// Initialize the array of exception handlers.
 	XenonExceptionHandler::Array::Initialize(pOutput->handlers);
@@ -41,6 +41,13 @@ XenonGuardedBlock* XenonGuardedBlock::Create(const uint32_t offset, const uint32
 
 void XenonGuardedBlock::Dispose(XenonGuardedBlock* const pGuardedBlock)
 {
+	for(size_t i = 0; i < pGuardedBlock->handlers.count; ++i)
+	{
+		XenonExceptionHandler* const pHandler = pGuardedBlock->handlers.pData[i];
+
+		XenonExceptionHandler::Dispose(pHandler);
+	}
+
 	XenonExceptionHandler::Array::Dispose(pGuardedBlock->handlers);
 
 	delete pGuardedBlock;

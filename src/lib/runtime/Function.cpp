@@ -28,8 +28,8 @@ XenonFunctionHandle XenonFunction::CreateScript(
 	XenonString* const pSignature,
 	XenonValue::StringToHandleMap& locals,
 	XenonGuardedBlock::Array& guardedBlocks,
-	const uint32_t bytecodeOffsetStart,
-	const uint32_t bytecodeOffsetEnd,
+	const uint32_t bytecodeOffset,
+	const uint32_t bytecodeLength,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
@@ -44,8 +44,8 @@ XenonFunctionHandle XenonFunction::CreateScript(
 	pOutput->pSignature = pSignature;
 	pOutput->locals = locals;
 	pOutput->guardedBlocks = guardedBlocks;
-	pOutput->bytecodeOffsetStart = bytecodeOffsetStart;
-	pOutput->bytecodeOffsetEnd = bytecodeOffsetEnd;
+	pOutput->bytecodeOffsetStart = bytecodeOffset;
+	pOutput->bytecodeOffsetEnd = bytecodeOffset + bytecodeLength;
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = false;
@@ -140,6 +140,8 @@ void XenonFunction::Dispose(XenonFunctionHandle hFunction)
 	{
 		XenonGuardedBlock::Dispose(hFunction->guardedBlocks.pData[blockIndex]);
 	}
+
+	XenonGuardedBlock::Array::Dispose(hFunction->guardedBlocks);
 
 	delete hFunction;
 }

@@ -932,11 +932,11 @@ bool XenonProgramLoader::prv_readFunctions()
 				XenonValue::StringToHandleMap locals;
 				XenonGuardedBlock::Array guardedBlocks;
 
-				uint32_t bytecodeOffsetStart = 0;
-				uint32_t bytecodeOffsetEnd = 0;
+				uint32_t bytecodeOffset = 0;
+				uint32_t bytecodeLength = 0;
 
-				// Read the function's bytecode offset start.
-				result = XenonSerializerReadUint32(m_hSerializer, &bytecodeOffsetStart);
+				// Read the function's bytecode offset.
+				result = XenonSerializerReadUint32(m_hSerializer, &bytecodeOffset);
 				if(result != XENON_SUCCESS)
 				{
 					XenonReportMessage(
@@ -950,8 +950,8 @@ bool XenonProgramLoader::prv_readFunctions()
 					return false;
 				}
 
-				// Read the function's bytecode offset end.
-				result = XenonSerializerReadUint32(m_hSerializer, &bytecodeOffsetEnd);
+				// Read the function's bytecode length.
+				result = XenonSerializerReadUint32(m_hSerializer, &bytecodeLength);
 				if(result != XENON_SUCCESS)
 				{
 					XenonReportMessage(
@@ -993,8 +993,8 @@ bool XenonProgramLoader::prv_readFunctions()
 					pSignature,
 					locals,
 					guardedBlocks,
-					bytecodeOffsetStart,
-					bytecodeOffsetEnd,
+					bytecodeOffset,
+					bytecodeLength,
 					numParameters,
 					numReturnValues
 				);
@@ -1203,7 +1203,7 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 				XenonReportMessage(
 					m_hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read guarded block's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=" PRIu32,
+					"Failed to read guarded block's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
 					XenonGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data,
@@ -1220,7 +1220,7 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 				XenonReportMessage(
 					m_hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read guarded block's length: error=\"%s\", program=\"%s\", function=\"%s\", block=" PRIu32,
+					"Failed to read guarded block's length: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
 					XenonGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data,
@@ -1237,7 +1237,7 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 				XenonReportMessage(
 					m_hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to read guarded block's exception handler count: error=\"%s\", program=\"%s\", function=\"%s\", block=" PRIu32,
+					"Failed to read guarded block's exception handler count: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
 					XenonGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data,
@@ -1247,12 +1247,12 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 			}
 
 			XenonGuardedBlock* const pGuardedBlock = XenonGuardedBlock::Create(offset, length, numExceptionHandlers);
-			if(pGuardedBlock)
+			if(!pGuardedBlock)
 			{
 				XenonReportMessage(
 					m_hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to allocate new guarded block: program=\"%s\", function=\"%s\", block=" PRIu32,
+					"Failed to allocate new guarded block: program=\"%s\", function=\"%s\", block=%" PRIu32,
 					m_hProgram->pName->data,
 					pSignature->data,
 					blockIndex
@@ -1275,7 +1275,7 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 					XenonReportMessage(
 						m_hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to read exception handler's type: error=\"%s\", program=\"%s\", function=\"%s\", block=" PRIu32 ", handler=" PRIu32,
+						"Failed to read exception handler's type: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 						XenonGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pSignature->data,
@@ -1293,7 +1293,7 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 					XenonReportMessage(
 						m_hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to read exception handler's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=" PRIu32 ", handler=" PRIu32,
+						"Failed to read exception handler's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 						XenonGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pSignature->data,
@@ -1316,7 +1316,7 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 							XenonReportMessage(
 								m_hReport,
 								XENON_MESSAGE_TYPE_ERROR,
-								"Failed to read exception handler type class name: program=\"%s\", function=\"%s\", block=" PRIu32 ", handler=" PRIu32,
+								"Failed to read exception handler type class name: program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 								XenonGetErrorCodeString(result),
 								m_hProgram->pName->data,
 								pSignature->data,
@@ -1336,7 +1336,7 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 					XenonReportMessage(
 						m_hReport,
 						XENON_MESSAGE_TYPE_ERROR,
-						"Failed to allocate new exception handler: program=\"%s\", function=\"%s\", block=" PRIu32 ", handler=\"%s\"",
+						"Failed to allocate new exception handler: program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 						m_hProgram->pName->data,
 						pSignature->data,
 						blockIndex,

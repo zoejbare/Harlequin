@@ -57,11 +57,12 @@ void XenonBuiltIn::OpDivBool(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (bool)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (bool)"
+		);
 	}
 }
 
@@ -102,11 +103,12 @@ void XenonBuiltIn::OpDivInt8(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int8)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (int8)"
+		);
 	}
 }
 
@@ -147,11 +149,12 @@ void XenonBuiltIn::OpDivInt16(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int16)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (int16)"
+		);
 	}
 }
 
@@ -192,11 +195,12 @@ void XenonBuiltIn::OpDivInt32(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int32)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (int32)"
+		);
 	}
 }
 
@@ -237,11 +241,12 @@ void XenonBuiltIn::OpDivInt64(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (int64)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (int64)"
+		);
 	}
 }
 
@@ -282,11 +287,12 @@ void XenonBuiltIn::OpDivUint8(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint8)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (uint8)"
+		);
 	}
 }
 
@@ -327,11 +333,12 @@ void XenonBuiltIn::OpDivUint16(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint16)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (uint16)"
+		);
 	}
 }
 
@@ -371,11 +378,12 @@ void XenonBuiltIn::OpDivUint32(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint32)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (uint32)"
+		);
 	}
 }
 
@@ -416,11 +424,12 @@ void XenonBuiltIn::OpDivUint64(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (uint64)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (uint64)"
+		);
 	}
 }
 
@@ -460,11 +469,12 @@ void XenonBuiltIn::OpDivFloat32(XenonExecutionHandle hExec, XenonFunctionHandle,
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (float32)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (float32)"
+		);
 	}
 }
 
@@ -505,11 +515,12 @@ void XenonBuiltIn::OpDivFloat64(XenonExecutionHandle hExec, XenonFunctionHandle,
 	else
 	{
 		// Raise the divide-by-zero script exception.
-		XenonValueHandle hExceptionValue = XENON_VALUE_HANDLE_NULL;
-
-		XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR, "Divide-by-zero error (float64)", &hExceptionValue);
-		XenonExecutionRaiseException(hExec, hExceptionValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-		XenonValueAbandon(hExceptionValue);
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_DIVIDE_BY_ZERO_ERROR,
+			"Divide-by-zero error (float64)"
+		);
 	}
 }
 

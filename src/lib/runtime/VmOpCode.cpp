@@ -19,6 +19,8 @@
 #include "Vm.hpp"
 #include "OpDecl.hpp"
 
+#include "../common/OpCodeEnum.hpp"
+
 //----------------------------------------------------------------------------------------------------------------------
 
 void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
@@ -32,6 +34,7 @@ void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
 	XENON_BIND_OP_CODE(RETURN, Return);
 	XENON_BIND_OP_CODE(YIELD, Yield);
 	XENON_BIND_OP_CODE(CALL, Call);
+	XENON_BIND_OP_CODE(RAISE, Raise);
 	XENON_BIND_OP_CODE(LOAD_CONSTANT, LoadConstant);
 	XENON_BIND_OP_CODE(LOAD_GLOBAL, LoadGlobal);
 	XENON_BIND_OP_CODE(LOAD_LOCAL, LoadLocal);

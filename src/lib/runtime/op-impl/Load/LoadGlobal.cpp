@@ -50,28 +50,59 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(XenonValueIsString(hNameValue))
+	if(result == XENON_SUCCESS)
 	{
-		XenonValueHandle hGlobalVariable = XenonVm::GetGlobalVariable(hExec->hVm, hNameValue->as.pString, &result);
-		if(hGlobalVariable)
+		if(XenonValueIsString(hNameValue))
 		{
-			result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
-			if(result != XENON_SUCCESS)
+			XenonValueHandle hGlobalVariable = XenonVm::GetGlobalVariable(hExec->hVm, hNameValue->as.pString, &result);
+			if(result == XENON_SUCCESS)
 			{
-				// TODO: Raise script exception.
-				hExec->exception = true;
+				result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
+				if(result != XENON_SUCCESS)
+				{
+					// Raise a fatal script exception.
+					XenonExecutionRaiseStandardException(
+						hExec,
+						XENON_EXCEPTION_SEVERITY_FATAL,
+						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						"Failed to set general-purpose register: r(%" PRIu32 ")",
+						registerIndex
+					);
+				}
+			}
+			else
+			{
+				// Raise a fatal script exception.
+				XenonExecutionRaiseStandardException(
+					hExec,
+					XENON_EXCEPTION_SEVERITY_FATAL,
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to retrieve global variable: %s",
+					hNameValue->as.pString->data
+				);
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception.
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecutionRaiseStandardException(
+				hExec,
+				XENON_EXCEPTION_SEVERITY_FATAL,
+				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+				"Type mismatch; expected string"
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception.
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_FATAL,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to retrieve value for constant index: c(%" PRIu32 ")",
+			constantIndex
+		);
 	}
 }
 

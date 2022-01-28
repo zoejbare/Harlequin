@@ -163,6 +163,10 @@ XENON_BASE_API int XenonReportGetLevel(XenonReportHandle hReport);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
+XENON_BASE_API const char* XenonFormatString(const char* fmt, ...);
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
 enum XenonSerializerModeEnum
 {
 	XENON_SERIALIZER_MODE_UNKNOWN,
@@ -397,8 +401,6 @@ XENON_MAIN_API int XenonVmLoadProgram(
 
 XENON_MAIN_API int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const char* filePath);
 
-XENON_MAIN_API int XenonVmCreateStandardException(XenonVmHandle hVm, int exceptionType, const char* message, XenonValueHandle* phOutValue);
-
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 XENON_MAIN_API int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm);
@@ -458,6 +460,14 @@ XENON_MAIN_API int XenonExecutionDispose(XenonExecutionHandle* phExecution);
 XENON_MAIN_API int XenonExecutionRun(XenonExecutionHandle hExec, int runMode);
 
 XENON_MAIN_API int XenonExecutionYield(XenonExecutionHandle hExec);
+
+XENON_MAIN_API int XenonExecutionRaiseStandardException(
+	XenonExecutionHandle hExec,
+	int severity,
+	int exceptionType,
+	const char* message,
+	...
+);
 
 XENON_MAIN_API int XenonExecutionRaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, int severity);
 
@@ -725,15 +735,15 @@ XENON_MAIN_API int XenonProgramWriterAddLocalVariable(
 XENON_MAIN_API int XenonProgramWriterAddGuardedBlock(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* functionSignature,
-	uint32_t bytecodeOffset,
-	uint32_t bytecodeLength,
-	size_t* pOutBlockId
+	size_t bytecodeOffset,
+	size_t bytecodeLength,
+	uint32_t* pOutBlockId
 );
 
 XENON_MAIN_API int XenonProgramWriterAddExceptionHandler(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* functionSignature,
-	size_t blockId,
+	uint32_t blockId,
 	size_t bytecodeOffset,
 	int handledType,
 	const char* className
@@ -756,6 +766,8 @@ XENON_MAIN_API int XenonBytecodeWriteReturn(XenonSerializerHandle hSerializer);
 XENON_MAIN_API int XenonBytecodeWriteYield(XenonSerializerHandle hSerializer);
 
 XENON_MAIN_API int XenonBytecodeWriteCall(XenonSerializerHandle hSerializer, uint32_t constantIndex);
+
+XENON_MAIN_API int XenonBytecodeWriteRaise(XenonSerializerHandle hSerializer, uint32_t gpRegIndex);
 
 XENON_MAIN_API int XenonBytecodeWriteLoadConstant(
 	XenonSerializerHandle hSerializer,
@@ -892,45 +904,6 @@ enum XenonValueType
 	XENON_VALUE_TYPE_NATIVE,
 
 	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_NATIVE,
-};
-
-/*---------------------------------------------------------------------------------------------------------------------*/
-
-enum XenonOpCodeEnum
-{
-	XENON_OP_CODE_NOP,
-	XENON_OP_CODE_ABORT,
-	XENON_OP_CODE_RETURN,
-	XENON_OP_CODE_YIELD,
-	XENON_OP_CODE_CALL,
-
-	XENON_OP_CODE_LOAD_CONSTANT,
-	XENON_OP_CODE_LOAD_GLOBAL,
-	XENON_OP_CODE_LOAD_LOCAL,
-	XENON_OP_CODE_LOAD_PARAM,
-	XENON_OP_CODE_LOAD_OBJECT,
-
-	XENON_OP_CODE_STORE_GLOBAL,
-	XENON_OP_CODE_STORE_LOCAL,
-	XENON_OP_CODE_STORE_PARAM,
-	XENON_OP_CODE_STORE_OBJECT,
-
-	XENON_OP_CODE_PULL_GLOBAL,
-	XENON_OP_CODE_PULL_LOCAL,
-	XENON_OP_CODE_PULL_PARAM,
-	XENON_OP_CODE_PULL_OBJECT,
-
-	XENON_OP_CODE_PUSH,
-	XENON_OP_CODE_POP,
-
-	XENON_OP_CODE_INIT_OBJECT,
-
-	XENON_OP_CODE_BRANCH,
-	XENON_OP_CODE_BRANCH_IF_TRUE,
-	XENON_OP_CODE_BRANCH_IF_FALSE,
-
-	XENON_OP_CODE__TOTAL_COUNT,
-	XENON_OP_CODE__FOCE_DWORD = 0x7FFFFFFFul,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/

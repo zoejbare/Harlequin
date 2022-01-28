@@ -19,6 +19,8 @@
 #include "String.hpp"
 
 #include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 
 #if defined(XENON_PLATFORM_PSVITA)
@@ -282,6 +284,40 @@ size_t XenonString::RawHash(const char* const string)
 #endif
 		(string, length, seed)
 	);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const char* XenonString::RawFormatVarArgs(const char* const fmt, va_list vl)
+{
+	const char* output = nullptr;
+
+	if(fmt)
+	{
+		va_list vl2;
+
+		// Make a copy of the variable args list since we need to go through them twice.
+		va_copy(vl2, vl);
+
+		// Determine the required length of the message string.
+		const int messageLength = vsnprintf(nullptr, 0, fmt, vl2);
+
+		// Discard empty messages.
+		if(messageLength > 0)
+		{
+			// Allocate a message string to the required length, including space for the null terminator.
+			char* const message = reinterpret_cast<char*>(XenonMemAlloc(size_t(messageLength) + 1));
+
+			// Write the message to the string.
+			vsnprintf(message, size_t(messageLength) + 1, fmt, vl);
+
+			output = message;
+		}
+
+		va_end(vl2);
+	}
+
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

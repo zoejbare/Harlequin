@@ -22,11 +22,14 @@
 
 #include "ExceptionHandler.hpp"
 
+#include "../common/Stack.hpp"
+
 //----------------------------------------------------------------------------------------------------------------------
 
 struct XenonGuardedBlock
 {
 	typedef XenonArray<XenonGuardedBlock*> Array;
+	typedef XenonStack<XenonGuardedBlock*> Stack;
 
 	static XenonGuardedBlock* Create(const uint32_t offset, const uint32_t length, const size_t handlerCount);
 	static void Dispose(XenonGuardedBlock* const pGuardedBlock);
@@ -36,8 +39,8 @@ struct XenonGuardedBlock
 
 	XenonExceptionHandler::Array handlers;
 
-	uint32_t bytecodeOffset;
-	uint32_t bytecodeLength;
+	uint32_t bytecodeOffsetStart;
+	uint32_t bytecodeOffsetEnd;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

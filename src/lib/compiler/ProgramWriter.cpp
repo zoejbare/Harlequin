@@ -492,8 +492,8 @@ bool XenonProgramWriter::Serialize(
 		XenonFunctionData* pFunction;
 		XenonString* pSignature;
 
-		uint32_t offsetStart;
-		uint32_t offsetEnd;
+		uint32_t offset;
+		uint32_t length;
 	};
 
 	std::deque<FunctionBinding> functionBindings;
@@ -510,11 +510,11 @@ bool XenonProgramWriter::Serialize(
 
 			binding.pFunction = &kv.second;
 			binding.pSignature = kv.first;
-			binding.offsetStart = uint32_t(bytecodeLength);
-			binding.offsetEnd = binding.offsetStart + uint32_t(binding.pFunction->bytecode.size());
+			binding.offset = uint32_t(bytecodeLength);
+			binding.length = uint32_t(binding.pFunction->bytecode.size());
 
-			// Align the end of the offset to add padding between each function.
-			bytecodeLength = uint32_t(getAlignedSize(binding.offsetEnd));
+			// Align the bytecode length to add padding between each function.
+			bytecodeLength += uint32_t(getAlignedSize(binding.length));
 
 			functionBindings.push_back(binding);
 		}
@@ -530,7 +530,7 @@ bool XenonProgramWriter::Serialize(
 		for(const FunctionBinding& binding : functionBindings)
 		{
 			memcpy(
-				pProgramBytecode + binding.offsetStart,
+				pProgramBytecode + binding.offset,
 				binding.pFunction->bytecode.data(),
 				binding.pFunction->bytecode.size()
 			);
@@ -772,12 +772,12 @@ bool XenonProgramWriter::Serialize(
 				hReport,
 				XENON_MESSAGE_TYPE_VERBOSE,
 				"Serializing script function: signature=\"%s\", numParams=%" PRIu16
-				", numReturnValues=%" PRIu16 ", offsetStart=%" PRIX32 ", offsetEnd=%" PRIX32,
+				", numReturnValues=%" PRIu16 ", offset=0x%" PRIX32 ", length=%" PRIu32,
 				binding.pSignature->data,
 				binding.pFunction->numParameters,
 				binding.pFunction->numReturnValues,
-				binding.offsetStart,
-				binding.offsetEnd
+				binding.offset,
+				binding.length
 			);
 		}
 
@@ -843,8 +843,8 @@ bool XenonProgramWriter::Serialize(
 
 		if(!binding.pFunction->isNative)
 		{
-			// Write the function's offset start into the program file.
-			result = XenonSerializerWriteUint32(hSerializer, binding.offsetStart);
+			// Write the function's offset into the program file.
+			result = XenonSerializerWriteUint32(hSerializer, binding.offset);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -852,17 +852,17 @@ bool XenonProgramWriter::Serialize(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offsetStart=%" PRIX32,
+					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offset=0x%" PRIX32,
 					errorString,
 					binding.pSignature->data,
-					binding.offsetStart
+					binding.offset
 				);
 
 				return false;
 			}
 
-			// Write the function's offset end into the program file.
-			result = XenonSerializerWriteUint32(hSerializer, binding.offsetEnd);
+			// Write the function's length in bytes into the program file.
+			result = XenonSerializerWriteUint32(hSerializer, binding.length);
 			if(result != XENON_SUCCESS)
 			{
 				const char* const errorString = XenonGetErrorCodeString(result);
@@ -870,10 +870,10 @@ bool XenonProgramWriter::Serialize(
 				XenonReportMessage(
 					hReport,
 					XENON_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offsetEnd=%" PRIX32,
+					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", length=%" PRIu32,
 					errorString,
 					binding.pSignature->data,
-					binding.offsetEnd
+					binding.length
 				);
 
 				return false;
@@ -987,7 +987,8 @@ bool XenonProgramWriter::Serialize(
 			// Serialize the guarded blocks with their exception handlers.
 			for(const XenonFunctionData::GuardedBlock& block : binding.pFunction->guardedBlocks)
 			{
-				XenonFunctionData::ExceptionHandler::Vector exceptionHandlers(block.handlers.size());
+				XenonFunctionData::ExceptionHandler::Vector exceptionHandlers;
+				exceptionHandlers.reserve(block.handlers.size());
 
 				// Build a flat array of exception handlers for this guarded block.
 				for(auto& kv : block.handlers)
@@ -998,8 +999,11 @@ bool XenonProgramWriter::Serialize(
 				// Sort the array of exception handlers.
 				std::sort(exceptionHandlers.begin(), exceptionHandlers.end(), exceptionHandlerSortFunc);
 
+				// Calculate the offset from the start of the bytecode for this guarded block.
+				const uint32_t blockOffset = binding.offset + block.offset;
+
 				// Write the guarded block bytecode offset.
-				result = XenonSerializerWriteUint32(hSerializer, block.offset);
+				result = XenonSerializerWriteUint32(hSerializer, blockOffset);
 				if(result != XENON_SUCCESS)
 				{
 					const char* const errorString = XenonGetErrorCodeString(result);
@@ -1078,8 +1082,11 @@ bool XenonProgramWriter::Serialize(
 						return false;
 					}
 
+					// Calculate the offset from the start of the bytecode for this exception handler.
+					const uint32_t handlerOffset = binding.offset + handler.offset;
+
 					// Write the offset where this exception handler is located.
-					result = XenonSerializerWriteUint32(hSerializer, handler.offset);
+					result = XenonSerializerWriteUint32(hSerializer, handlerOffset);
 					if(result != XENON_SUCCESS)
 					{
 						const char* const errorString = XenonGetErrorCodeString(result);

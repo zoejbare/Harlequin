@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2022, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,64 +20,42 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../base/String.hpp"
-
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct XenonFunctionData
+enum XenonOpCodeEnum
 {
-	typedef std::vector<uint8_t> Bytecode;
+	XENON_OP_CODE_NOP,
+	XENON_OP_CODE_ABORT,
+	XENON_OP_CODE_RETURN,
+	XENON_OP_CODE_YIELD,
 
-	typedef std::unordered_map<
-		XenonString*,
-		XenonFunctionData,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> StringToFunctionMap;
+	XENON_OP_CODE_CALL,
+	XENON_OP_CODE_RAISE,
 
-	typedef std::unordered_map<
-		XenonString*,
-		uint32_t,
-		XenonString::StlHash,
-		XenonString::StlCompare
-	> LocalVariableMap;
+	XENON_OP_CODE_LOAD_CONSTANT,
+	XENON_OP_CODE_LOAD_GLOBAL,
+	XENON_OP_CODE_LOAD_LOCAL,
+	XENON_OP_CODE_LOAD_PARAM,
+	XENON_OP_CODE_LOAD_OBJECT,
 
-	struct ExceptionHandler
-	{
-		typedef std::unordered_map<uint32_t, ExceptionHandler> Map;
-		typedef std::vector<ExceptionHandler> Vector;
+	XENON_OP_CODE_STORE_GLOBAL,
+	XENON_OP_CODE_STORE_LOCAL,
+	XENON_OP_CODE_STORE_PARAM,
+	XENON_OP_CODE_STORE_OBJECT,
 
-		XenonString* pClassName;
+	XENON_OP_CODE_PULL_GLOBAL,
+	XENON_OP_CODE_PULL_LOCAL,
+	XENON_OP_CODE_PULL_PARAM,
+	XENON_OP_CODE_PULL_OBJECT,
 
-		uint32_t offset;
-		int type;
-	};
+	XENON_OP_CODE_PUSH,
+	XENON_OP_CODE_POP,
 
-	struct GuardedBlock
-	{
-		typedef std::vector<GuardedBlock> Vector;
+	XENON_OP_CODE_INIT_OBJECT,
 
-		ExceptionHandler::Map handlers;
+	XENON_OP_CODE_BRANCH,
+	XENON_OP_CODE_BRANCH_IF_TRUE,
+	XENON_OP_CODE_BRANCH_IF_FALSE,
 
-		uint32_t id;
-
-		uint32_t offset;
-		uint32_t length;
-	};
-
-
-	LocalVariableMap locals;
-	GuardedBlock::Vector guardedBlocks;
-	Bytecode bytecode;
-
-	uint16_t numParameters;
-	uint16_t numReturnValues;
-
-	bool isNative;
+	XENON_OP_CODE__TOTAL_COUNT,
 };
 
 //----------------------------------------------------------------------------------------------------------------------

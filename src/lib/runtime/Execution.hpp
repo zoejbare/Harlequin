@@ -79,6 +79,8 @@ struct XenonExecution
 	XenonFrame::HandleStack frameStack;
 	XenonValue::HandleArray registers;
 
+	uint8_t* pExceptionLocation;
+
 	int endianness;
 
 	bool yield;

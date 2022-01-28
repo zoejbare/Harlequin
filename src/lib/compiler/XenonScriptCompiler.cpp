@@ -23,6 +23,7 @@
 #include "ProgramWriter.hpp"
 
 #include "../base/String.hpp"
+#include "../common/OpCodeEnum.hpp"
 
 #include <string.h>
 
@@ -604,9 +605,9 @@ int XenonProgramWriterAddLocalVariable(
 int XenonProgramWriterAddGuardedBlock(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* const functionSignature,
-	const uint32_t bytecodeOffset,
-	const uint32_t bytecodeLength,
-	size_t* const pOutBlockId
+	const size_t bytecodeOffset,
+	const size_t bytecodeLength,
+	uint32_t* const pOutBlockId
 )
 {
 	if(!hProgramWriter
@@ -642,13 +643,13 @@ int XenonProgramWriterAddGuardedBlock(
 		}
 	}
 
-	const size_t blockId = pFunction->guardedBlocks.size();
+	const uint32_t blockId = uint32_t(pFunction->guardedBlocks.size());
 
 	XenonFunctionData::GuardedBlock newBlock;
 
 	newBlock.id = blockId;
-	newBlock.offset = bytecodeOffset;
-	newBlock.length = bytecodeLength;
+	newBlock.offset = uint32_t(bytecodeOffset);
+	newBlock.length = uint32_t(bytecodeLength);
 
 	// Add the guarded block to the function.
 	pFunction->guardedBlocks.push_back(newBlock);
@@ -663,7 +664,7 @@ int XenonProgramWriterAddGuardedBlock(
 int XenonProgramWriterAddExceptionHandler(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* const functionSignature,
-	const size_t blockId,
+	const uint32_t blockId,
 	const size_t bytecodeOffset,
 	const int handledType,
 	const char* const className
@@ -689,7 +690,7 @@ int XenonProgramWriterAddExceptionHandler(
 	}
 
 	// Make sure the block ID is valid.
-	if(blockId >= pFunction->guardedBlocks.size())
+	if(blockId >= uint32_t(pFunction->guardedBlocks.size()))
 	{
 		return XENON_ERROR_UNKNOWN_ID;
 	}
@@ -726,7 +727,7 @@ int XenonProgramWriterAddExceptionHandler(
 	newHandler.type = handledType;
 
 	// Map the new handler to the guarded block.
-	guardedBlock.handlers.emplace(uint32_t(bytecodeOffset), newHandler);
+	guardedBlock.handlers.emplace(newHandler.offset, newHandler);
 
 	return XENON_SUCCESS;
 }
@@ -836,8 +837,23 @@ int XenonBytecodeWriteCall(XenonSerializerHandle hSerializer, const uint32_t con
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_RETURN);
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_CALL);
 	_XENON_WRITE_OP_UDWORD(constantIndex);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonBytecodeWriteRaise(XenonSerializerHandle hSerializer, const uint32_t gpRegIndex)
+{
+	if(!hSerializer)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_RAISE);
+	_XENON_WRITE_OP_UDWORD(gpRegIndex);
 
 	return XENON_SUCCESS;
 }
@@ -1117,7 +1133,7 @@ int XenonBytecodeWritePush(XenonSerializerHandle hSerializer, const uint32_t gpR
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_PULL_OBJECT);
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_PUSH);
 	_XENON_WRITE_OP_UDWORD(gpRegIndex);
 
 	return XENON_SUCCESS;
@@ -1132,7 +1148,7 @@ int XenonBytecodeWritePop(XenonSerializerHandle hSerializer, const uint32_t gpRe
 		return XENON_ERROR_INVALID_ARG;
 	}
 
-	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_PULL_OBJECT);
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_POP);
 	_XENON_WRITE_OP_UDWORD(gpRegIndex);
 
 	return XENON_SUCCESS;

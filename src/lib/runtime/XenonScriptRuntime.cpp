@@ -21,6 +21,8 @@
 #include "../base/Mutex.hpp"
 #include "../base/String.hpp"
 
+#include "../common/OpCodeEnum.hpp"
+
 #include "Execution.hpp"
 #include "Program.hpp"
 #include "ScriptObject.hpp"
@@ -445,27 +447,6 @@ int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmCreateStandardException(
-	XenonVmHandle hVm,
-	const int exceptionType,
-	const char* const message,
-	XenonValueHandle* const phOutValue
-)
-{
-	if(!hVm || exceptionType < 0 || exceptionType >= XENON_STANDARD_EXCEPTION__COUNT || !phOutValue)
-	{
-		return XENON_ERROR_INVALID_ARG;
-	}
-
-	XenonScopedReadLock gcLock(hVm->gcRwLock);
-
-	(*phOutValue) = XenonVm::CreateStandardException(hVm, exceptionType, message ? message : "");
-
-	return XENON_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm)
 {
 	if(!hProgram || !phOutVm)
@@ -843,6 +824,56 @@ int XenonExecutionYield(XenonExecutionHandle hExec)
 	}
 
 	hExec->yield = true;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonExecutionRaiseStandardException(
+	XenonExecutionHandle hExec,
+	const int severity,
+	const int exceptionType,
+	const char* const message,
+	...
+)
+{
+	if(!hExec
+		|| severity < 0
+		|| severity >= XENON_EXCEPTION_SEVERITY__COUNT
+		|| exceptionType < 0
+		|| exceptionType >= XENON_STANDARD_EXCEPTION__COUNT)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	const char* formattedMessage = nullptr;
+	{
+		va_list vl;
+
+		// Make a copy of the variable args list since we need to go through them twice.
+		va_start(vl, message);
+		formattedMessage = XenonString::RawFormatVarArgs(message, vl);
+		va_end(vl);
+	}
+
+	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
+
+	XenonValueHandle hException = XenonVm::CreateStandardException(
+		hExec->hVm,
+		exceptionType,
+		formattedMessage
+			? formattedMessage
+			: ""
+	);
+
+	if(formattedMessage)
+	{
+		XenonMemFree((void*)(formattedMessage));
+	}
+
+	XenonExecution::RaiseException(hExec, hException, severity);
+	XenonValue::SetAutoMark(hException, false);
 
 	return XENON_SUCCESS;
 }

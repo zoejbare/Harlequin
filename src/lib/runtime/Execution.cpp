@@ -242,8 +242,145 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 	}
 	else
 	{
-		// TODO: Attempt to handle the exception.
-		hExec->exception = true;
+		auto blockReverseSortFunc = [](
+			XenonGuardedBlock* const pLeft,
+			XenonGuardedBlock* const pRight
+		) -> bool
+		{
+			if(pLeft->bytecodeOffsetStart > pRight->bytecodeOffsetStart)
+			{
+				// Earlier guarded blocks are sorted after the blocks that come after them.
+				return true;
+			}
+			else if(pLeft->bytecodeOffsetStart == pRight->bytecodeOffsetStart)
+			{
+				// Nested blocks are sorted *before* the blocks that contain them.
+				if(pLeft->bytecodeOffsetEnd < pRight->bytecodeOffsetEnd)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		};
+
+		auto findExceptionHandler = [&hValue, &blockReverseSortFunc](
+			XenonFrameHandle hFrame,
+			uint32_t* pOutHandlerOffset
+		) -> bool
+		{
+			uint32_t currentOffset = 0;
+			if(XenonFrameGetBytecodeOffset(hFrame, &currentOffset) != XENON_SUCCESS)
+			{
+				// Failing to get the current offset within the frame means that it
+				// can't possibly handle this (or any) exception.
+				return false;
+			}
+
+			XenonGuardedBlock::Stack validBlocks;
+			XenonGuardedBlock::Stack::Initialize(validBlocks, hFrame->hFunction->guardedBlocks.count);
+
+			// Find all the guarded blocks that encapsulate the instruction that raised the exception.
+			for(size_t blockIndex = 0; blockIndex < hFrame->hFunction->guardedBlocks.count; ++blockIndex)
+			{
+				XenonGuardedBlock* pBlock = hFrame->hFunction->guardedBlocks.pData[blockIndex];
+
+				if(currentOffset >= pBlock->bytecodeOffsetStart
+					&& currentOffset <= pBlock->bytecodeOffsetEnd)
+				{
+					XenonGuardedBlock::Stack::Push(validBlocks, pBlock);
+				}
+			}
+
+			// Sort the guarded blocks in reverse order since we need to start with the most nested block first.
+			std::sort(validBlocks.memory.pData, validBlocks.memory.pData + validBlocks.nextIndex, blockReverseSortFunc);
+
+			// Search the blocks for an exception handler that is capable of handling the raised value.
+			for(size_t blockIndex = 0; blockIndex < validBlocks.nextIndex; ++blockIndex)
+			{
+				XenonGuardedBlock* const pBlock = validBlocks.memory.pData[blockIndex];
+
+				// Check each handler on the current block.
+				for(size_t handlerIndex = 0; handlerIndex < pBlock->handlers.count; ++handlerIndex)
+				{
+					XenonExceptionHandler* const pHandler = pBlock->handlers.pData[handlerIndex];
+
+					// Check if the general type of the handler matches the raised value.
+					if(pHandler->type == hValue->type)
+					{
+						// If the value is an object, we need to also compare the class type name to
+						// verify this handler will handle the exact object type that was raised.
+						if(hValue->type != XENON_VALUE_TYPE_OBJECT ||
+							(
+								hValue->type == XENON_VALUE_TYPE_OBJECT
+								&& XenonString::Compare(pHandler->pClassName, hValue->as.pObject->pTypeName)
+							)
+						)
+						{
+							// This is the handler we'll use.
+							XenonGuardedBlock::Stack::Dispose(validBlocks);
+
+							(*pOutHandlerOffset) = pHandler->offset;
+							return true;
+						}
+					}
+				}
+			}
+
+			// No acceptable handler was found for this frame.
+			XenonGuardedBlock::Stack::Dispose(validBlocks);
+
+			return false;
+		};
+
+		const size_t frameStackLength = hExec->frameStack.nextIndex;
+		if(frameStackLength > 0)
+		{
+			// Search the frame stack from the end to find a handler for the raised value.
+			size_t frameIndex = frameStackLength - 1;
+			for(;; --frameIndex)
+			{
+				XenonFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
+
+				uint32_t handlerOffset = 0;
+
+				if(findExceptionHandler(hFrame, &handlerOffset))
+				{
+					// We found the frame that will handle the exception, now we need
+					// to actually pop the frame stack until we get to that frame.
+					while(hExec->hCurrentFrame != hFrame)
+					{
+						const int popFrameResult = XenonExecution::PopFrame(hExec);
+
+						// Sanity check: There should not be any errors on popping the frame stack.
+						assert(popFrameResult == XENON_SUCCESS);
+						(void) popFrameResult;
+					}
+
+					// Sanity check: The current frame should never be null after popping the frame stack.
+					assert(hExec->hCurrentFrame != XENON_FRAME_HANDLE_NULL);
+
+					// Set the instruction pointer to the start of the exception handler.
+					hExec->hCurrentFrame->decoder.cachedIp = hExec->hCurrentFrame->hFunction->hProgram->code.pData + handlerOffset;
+					hExec->hCurrentFrame->decoder.ip = hExec->hCurrentFrame->decoder.cachedIp;
+
+					break;
+				}
+
+				if(frameIndex == 0)
+				{
+					// There are either no exception handlers in the frame stack
+					// or none capable of handling this exception.
+					hExec->exception = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// There are no frames on the stack, so there is nothing that can catch this exception.
+			hExec->exception = true;
+		}
 	}
 }
 

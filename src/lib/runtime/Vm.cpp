@@ -19,6 +19,7 @@
 #include "Vm.hpp"
 
 #include "../base/HiResTimer.hpp"
+#include "../common/OpCodeEnum.hpp"
 
 #include <assert.h>
 #include <stdio.h>

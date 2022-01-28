@@ -35,6 +35,9 @@
 #define PROGRAM_RESULT_SUCCESS 0
 #define PROGRAM_RESULT_FAILURE 1
 
+// Needed by some of the Playstation platforms so we can use malloc without running out of memory.
+size_t sceLibcHeapSize = 10 * 1024 * 1024;
+
 //----------------------------------------------------------------------------------------------------------------------
 
 void OnMessageReported(void* const pUserData, const int messageType, const char* const message)
@@ -92,6 +95,39 @@ void OnDependencyRequested(void* const pUserData, const char* const programName)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+static std::map<void*, size_t> allocations;
+
+static size_t maxAllocSize = 0;
+static size_t minAllocSize = size_t(-1);
+static size_t peakMemUsage = 0;
+static size_t allocationCount = 0;
+static size_t mallocCount = 0;
+static size_t reallocCount = 0;
+
+static size_t currentTotalSize = 0;
+
+auto onAlloc = [](const size_t size)
+{
+	if(size > maxAllocSize)
+	{
+		maxAllocSize = size;
+	}
+
+	if(size < minAllocSize)
+	{
+		minAllocSize = size;
+	}
+
+	currentTotalSize += size;
+
+	if(currentTotalSize >= peakMemUsage)
+	{
+		peakMemUsage = currentTotalSize;
+	}
+
+	++allocationCount;
+};
+
 int main(int argc, char* argv[])
 {
 	if(argc < 2)
@@ -105,39 +141,6 @@ int main(int argc, char* argv[])
 	// Visual Studio output window on application exit.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
-	static std::map<void*, size_t> allocations;
-
-	static size_t maxAllocSize = 0;
-	static size_t minAllocSize = size_t(-1);
-	static size_t peakMemUsage = 0;
-	static size_t allocationCount = 0;
-	static size_t mallocCount = 0;
-	static size_t reallocCount = 0;
-
-	static size_t currentTotalSize = 0;
-
-	static auto onAlloc = [](const size_t size)
-	{
-		if(size > maxAllocSize)
-		{
-			maxAllocSize = size;
-		}
-
-		if(size < minAllocSize)
-		{
-			minAllocSize = size;
-		}
-
-		currentTotalSize += size;
-
-		if(currentTotalSize >= peakMemUsage)
-		{
-			peakMemUsage = currentTotalSize;
-		}
-
-		++allocationCount;
-	};
 
 	auto trackedAlloc = [](const size_t size) -> void*
 	{
@@ -359,11 +362,12 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
-
-						XenonVmCreateStandardException(hVm, XENON_STANDARD_EXCEPTION_TYPE_ERROR, "Type mismatch; expected int32", &hValue);
-						XenonExecutionRaiseException(hExec, hValue, XENON_EXCEPTION_SEVERITY_NORMAL);
-						XenonValueAbandon(hValue);
+						XenonExecutionRaiseStandardException(
+							hExec,
+							XENON_EXCEPTION_SEVERITY_NORMAL,
+							XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+							"Type mismatch; expected int32"
+						);
 					}
 				};
 

@@ -22,6 +22,7 @@
 
 #include "HiResTimer.hpp"
 #include "Serializer.hpp"
+#include "String.hpp"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -429,31 +430,14 @@ int XenonReportMessage(XenonReportHandle hReport, const int messageType, const c
 		return XENON_SUCCESS;
 	}
 
-	va_list vl, vl2;
-
-	// Make a copy of the variable args list since we need to go through them twice.
+	va_list vl;
 	va_start(vl, fmt);
-	va_copy(vl2, vl);
-
-	// Determine the required length of the message string.
-	const int messageLength = vsnprintf(nullptr, 0, fmt, vl2);
-
-	// Discard empty messages.
-	if(messageLength > 0)
-	{
-		// Allocate a message string to the required length, including space for the null terminator.
-		char* const message = reinterpret_cast<char*>(XenonMemAlloc(messageLength + 1));
-
-		// Write the message to the string.
-		vsnprintf(message, size_t(messageLength + 1), fmt, vl);
-
-		// Send off the message, then free the message string.
-		hReport->onMessageFn(hReport->pUserData, messageType, message);
-		XenonMemFree(message);
-	}
-
-	va_end(vl2);
+	const char* const message = XenonString::RawFormatVarArgs(fmt, vl);
 	va_end(vl);
+
+	// Send off the message, then free the message string.
+	hReport->onMessageFn(hReport->pUserData, messageType, message);
+	XenonMemFree((void*)(message));
 
 	return XENON_SUCCESS;
 }
@@ -481,6 +465,19 @@ int XenonReportGetLevel(XenonReportHandle hReport)
 	}
 
 	return XENON_MESSAGE_TYPE_FATAL;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const char* XenonFormatString(const char* const fmt, ...)
+{
+	va_list vl;
+	va_start(vl, fmt);
+
+	const char* output = XenonString::RawFormatVarArgs(fmt, vl);
+
+	va_end(vl);
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
