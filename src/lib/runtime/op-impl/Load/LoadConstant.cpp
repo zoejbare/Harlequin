@@ -74,7 +74,7 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 			hExec,
 			XENON_EXCEPTION_SEVERITY_FATAL,
 			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve value for constant index: c(%" PRIu32 ")",
+			"Failed to retrieve constant value: c(%" PRIu32 ")",
 			constantIndex
 		);
 	}

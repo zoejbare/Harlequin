@@ -89,7 +89,8 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 				hExec,
 				XENON_EXCEPTION_SEVERITY_FATAL,
 				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
-				"Type mismatch; expected string"
+				"Type mismatch; expected string: c(%" PRIu32 ")",
+				constantIndex
 			);
 		}
 	}
@@ -100,7 +101,7 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 			hExec,
 			XENON_EXCEPTION_SEVERITY_FATAL,
 			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve value for constant index: c(%" PRIu32 ")",
+			"Failed to retrieve constant value: c(%" PRIu32 ")",
 			constantIndex
 		);
 	}
