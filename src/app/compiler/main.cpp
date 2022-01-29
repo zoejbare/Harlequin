@@ -329,6 +329,7 @@ int main(int argc, char* argv[])
 		{
 			tryBlockStart = XenonSerializerGetStreamPosition(hExcFuncSerializer);
 
+			XenonBytecodeWriteInitArray(hExcFuncSerializer, 1, 4);
 			XenonBytecodeWriteLoadConstant(hExcFuncSerializer, 0, constIndex19);
 			XenonBytecodeWriteRaise(hExcFuncSerializer, 0);
 			XenonBytecodeWriteAbort(hExcFuncSerializer);

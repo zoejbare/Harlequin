@@ -27,6 +27,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#define _XENON_ARRAY_DEFAULT_CAPACITY 8
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValue XenonValue::NullValue =
 {
 	XENON_VM_HANDLE_NULL,
@@ -290,6 +294,35 @@ XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonScriptObject* 
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonValueHandle XenonValue::CreateArray(XenonVmHandle hVm, const size_t count)
+{
+	assert(hVm != XENON_VM_HANDLE_NULL);
+
+	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_ARRAY, hVm);
+	if(!pOutput)
+	{
+		return &NullValue;
+	}
+
+	const size_t capacity = (count > _XENON_ARRAY_DEFAULT_CAPACITY) ? count : _XENON_ARRAY_DEFAULT_CAPACITY;
+
+	// Initialize the array storage.
+	HandleArray::Initialize(pOutput->as.array);
+	HandleArray::Reserve(pOutput->as.array, capacity);
+
+	pOutput->as.array.count = count;
+
+	if(pOutput->as.array.count > 0)
+	{
+		// Initialize the array memory so it's not filled with garbage data.
+		memset(pOutput->as.array.pData, 0, sizeof(XenonValueHandle) * pOutput->as.array.count);
+	}
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValueHandle XenonValue::CreateNative(
 	XenonVmHandle hVm,
 	void* const pNativeObject,
@@ -389,6 +422,27 @@ XenonValueHandle XenonValue::Copy(XenonVmHandle hVm, XenonValueHandle hValue)
 			pOutput->as.pObject = XenonScriptObject::CreateCopy(hValue->as.pObject->pSchema);
 			break;
 
+		case XENON_VALUE_TYPE_ARRAY:
+			HandleArray::Initialize(pOutput->as.array);
+			HandleArray::Reserve(
+				pOutput->as.array,
+				(hValue->as.array.count > _XENON_ARRAY_DEFAULT_CAPACITY)
+					? hValue->as.array.count
+					: _XENON_ARRAY_DEFAULT_CAPACITY
+			);
+
+			pOutput->as.array.count = hValue->as.array.count;
+
+			if(pOutput->as.array.count > 0)
+			{
+				memcpy(
+					pOutput->as.array.pData,
+					hValue->as.array.pData,
+					sizeof(XenonValueHandle) * pOutput->as.array.count
+				);
+			}
+			break;
+
 		case XENON_VALUE_TYPE_NATIVE:
 			pOutput->as.native.onCopy = hValue->as.native.onCopy;
 			pOutput->as.native.onDestruct = hValue->as.native.onDestruct;
@@ -483,9 +537,18 @@ XenonString* XenonValue::GetDebugString(XenonValueHandle hValue)
 					str,
 					sizeof(str),
 					"<object: 0x%" PRIXPTR ", \"%.48s\"%s>",
-					reinterpret_cast<uintptr_t>(hValue),
+					reinterpret_cast<uintptr_t>(hValue->as.pObject),
 					hValue->as.pObject->pTypeName->data,
 					(hValue->as.pObject->pTypeName->length > 48) ? "..." : ""
+				);
+				break;
+
+			case XENON_VALUE_TYPE_ARRAY:
+				snprintf(
+					str,
+					sizeof(str),
+					"<array: 0x%" PRIXPTR ">",
+					reinterpret_cast<uintptr_t>(hValue->as.array.pData)
 				);
 				break;
 
@@ -550,20 +613,39 @@ XenonValue* XenonValue::prv_onCreate(const int valueType, XenonVmHandle hVm)
 
 void XenonValue::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaque)
 {
-	(void) gc;
-
 	XenonValueHandle hValue = reinterpret_cast<XenonValueHandle>(pOpaque);
 	assert(hValue != XENON_VALUE_HANDLE_NULL);
 
-	if(hValue->type == XENON_VALUE_TYPE_OBJECT)
+	switch(hValue->type)
 	{
-		XenonScriptObject* const pScriptObject = hValue->as.pObject;
-
-		// Mark each member inside the object.
-		for(size_t i = 0; i < pScriptObject->members.count; ++i)
+		case XENON_VALUE_TYPE_OBJECT:
 		{
-			XenonGarbageCollector::MarkObject(gc, &pScriptObject->members.pData[i]->gcProxy);
+			XenonScriptObject* const pScriptObject = hValue->as.pObject;
+
+			// Mark each member inside the object.
+			for(size_t i = 0; i < pScriptObject->members.count; ++i)
+			{
+				XenonGarbageCollector::MarkObject(gc, &pScriptObject->members.pData[i]->gcProxy);
+			}
+
+			break;
 		}
+
+		case XENON_VALUE_TYPE_ARRAY:
+		{
+			HandleArray& array = hValue->as.array;
+
+			// Mark each element in the array.
+			for(size_t i = 0; i < array.count; ++i)
+			{
+				XenonGarbageCollector::MarkObject(gc, &array.pData[i]->gcProxy);
+			}
+
+			break;
+		}
+
+		default:
+			break;
 	}
 }
 
@@ -592,6 +674,10 @@ void XenonValue::prv_onGcDestruct(void* const pOpaqueValue)
 
 		case XENON_VALUE_TYPE_OBJECT:
 			XenonScriptObject::Dispose(hValue->as.pObject);
+			break;
+
+		case XENON_VALUE_TYPE_ARRAY:
+			HandleArray::Dispose(hValue->as.array);
 			break;
 
 		default:

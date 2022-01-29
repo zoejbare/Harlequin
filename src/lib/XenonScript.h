@@ -545,6 +545,8 @@ XENON_MAIN_API XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const 
 
 XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typeName);
 
+XENON_MAIN_API XenonValueHandle XenonValueCreateArray(XenonVmHandle hVm, size_t count);
+
 XENON_MAIN_API XenonValueHandle XenonValueCreateNative(
 	XenonVmHandle hVm,
 	void* pNativeObject,
@@ -589,6 +591,8 @@ XENON_MAIN_API bool XenonValueIsNative(XenonValueHandle hValue);
 XENON_MAIN_API bool XenonValueIsString(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsObject(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsArray(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueGetBool(XenonValueHandle hValue);
 
@@ -860,6 +864,12 @@ XENON_MAIN_API int XenonBytecodeWriteInitObject(
 	uint32_t constantIndex
 );
 
+XENON_MAIN_API int XenonBytecodeWriteInitArray(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t initialCount
+);
+
 XENON_MAIN_API int XenonBytecodeWriteBranch(XenonSerializerHandle hSerializer, int32_t offset);
 
 XENON_MAIN_API int XenonBytecodeWriteBranchIfTrue(
@@ -901,6 +911,7 @@ enum XenonValueType
 
 	XENON_VALUE_TYPE_STRING,
 	XENON_VALUE_TYPE_OBJECT,
+	XENON_VALUE_TYPE_ARRAY,
 	XENON_VALUE_TYPE_NATIVE,
 
 	XENON_VALUE_TYPE__MAX_VALUE = XENON_VALUE_TYPE_NATIVE,

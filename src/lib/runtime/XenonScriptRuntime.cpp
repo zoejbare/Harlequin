@@ -1564,6 +1564,18 @@ XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typ
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonValueHandle XenonValueCreateArray(XenonVmHandle hVm, const size_t count)
+{
+	if(!hVm)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	return XenonValue::CreateArray(hVm, count);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValueHandle XenonValueCreateNative(
 	XenonVmHandle hVm,
 	void* pNativeObject,
@@ -1731,6 +1743,13 @@ bool XenonValueIsString(XenonValueHandle hValue)
 bool XenonValueIsObject(XenonValueHandle hValue)
 {
 	return hValue && (hValue->type == XENON_VALUE_TYPE_OBJECT);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsArray(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_ARRAY);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

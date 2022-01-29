@@ -51,11 +51,11 @@ struct XenonArray
 		}
 	}
 
-	static void Reserve(XenonArray& array, size_t newCount)
+	static void Reserve(XenonArray& array, size_t desiredCapacity)
 	{
-		if(array.capacity < newCount)
+		if(array.capacity < desiredCapacity)
 		{
-			while(array.capacity < newCount)
+			while(array.capacity < desiredCapacity)
 			{
 				const size_t lowCount = 16;
 

@@ -1176,6 +1176,26 @@ int XenonBytecodeWriteInitObject(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonBytecodeWriteInitArray(
+	XenonSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint32_t initialCount
+)
+{
+	if(!hSerializer)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_INIT_ARRAY);
+	_XENON_WRITE_OP_UDWORD(gpRegIndex);
+	_XENON_WRITE_OP_UDWORD(initialCount);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonBytecodeWriteBranch(XenonSerializerHandle hSerializer, const int32_t offset)
 {
 	if(!hSerializer)

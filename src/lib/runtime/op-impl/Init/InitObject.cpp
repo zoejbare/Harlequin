@@ -16,13 +16,13 @@
 // IN THE SOFTWARE.
 //
 
-#include "../OpDecl.hpp"
+#include "../../OpDecl.hpp"
 
-#include "../Decoder.hpp"
-#include "../Execution.hpp"
-#include "../Frame.hpp"
-#include "../Program.hpp"
-#include "../Vm.hpp"
+#include "../../Decoder.hpp"
+#include "../../Execution.hpp"
+#include "../../Frame.hpp"
+#include "../../Program.hpp"
+#include "../../Vm.hpp"
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -58,32 +58,68 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 			if(result == XENON_SUCCESS)
 			{
 				XenonValueHandle hObject = XenonValue::CreateObject(hExec->hVm, pObjectSchema);
-
-				result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hObject, registerIndex);
-				if(result != XENON_SUCCESS)
+				if(XenonValueIsObject(hObject))
 				{
-					// TODO: Raise script exception
-					hExec->exception = true;
-				}
+					result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hObject, registerIndex);
+					if(result != XENON_SUCCESS)
+					{
+						// Raise a fatal script exception.
+						XenonExecutionRaiseStandardException(
+							hExec,
+							XENON_EXCEPTION_SEVERITY_FATAL,
+							XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+							"Failed to set general-purpose register: r(%" PRIu32 ")",
+							registerIndex
+						);
+					}
 
-				XenonValueAbandon(hObject);
+					XenonValueAbandon(hObject);
+				}
+				else
+				{
+					// Raise a fatal script exception.
+					XenonExecutionRaiseStandardException(
+						hExec,
+						XENON_EXCEPTION_SEVERITY_FATAL,
+						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						"Failed to create object value"
+					);
+				}
 			}
 			else
 			{
-				// TODO: Raise script exception
-				hExec->exception = true;
+				// Raise a fatal script exception.
+				XenonExecutionRaiseStandardException(
+					hExec,
+					XENON_EXCEPTION_SEVERITY_FATAL,
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to find object schema: type=%s",
+					hObjectTypeName->as.pString->data
+				);
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecutionRaiseStandardException(
+				hExec,
+				XENON_EXCEPTION_SEVERITY_FATAL,
+				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+				"Type mismatch; expected string: c(%" PRIu32 ")",
+				constantIndex
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_FATAL,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to retrieve constant value: c(%" PRIu32 ")",
+			constantIndex
+		);
 	}
 }
 

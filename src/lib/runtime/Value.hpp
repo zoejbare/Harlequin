@@ -93,6 +93,7 @@ struct XenonValue
 	static XenonValueHandle CreateString(XenonVmHandle hVm, const char* const string);
 	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
 	static XenonValueHandle CreateObject(XenonVmHandle hVm, XenonScriptObject* const pObjectSchema);
+	static XenonValueHandle CreateArray(XenonVmHandle hVm, const size_t count);
 	static XenonValueHandle CreateNative(
 		XenonVmHandle hVm,
 		void* const pNativeObject,
@@ -122,6 +123,7 @@ struct XenonValue
 	union
 	{
 		XenonNativeValueWrapper native;
+		HandleArray array;
 
 		XenonString* pString;
 		XenonScriptObject* pObject;
