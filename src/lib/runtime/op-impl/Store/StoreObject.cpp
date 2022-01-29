@@ -28,7 +28,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Set the value in a general-purpose register to an I/O register.
+// Set the value in a general-purpose register to a member of an object.
 //
 // 0x: STORE_OBJECT r#, r#, ##
 //

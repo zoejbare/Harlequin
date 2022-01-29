@@ -52,12 +52,17 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 	XenonValueHandle hObjectTypeName= XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
 	if(result == XENON_SUCCESS)
 	{
+		// Verify the loaded value is a string.
 		if(XenonValueIsString(hObjectTypeName))
 		{
+			// Get the object schema matching the type name.
 			XenonScriptObject* const pObjectSchema = XenonVm::GetObjectSchema(hExec->hVm, hObjectTypeName->as.pString, &result);
 			if(result == XENON_SUCCESS)
 			{
+				// Create a new object from the schema.
 				XenonValueHandle hObject = XenonValue::CreateObject(hExec->hVm, pObjectSchema);
+
+				// Verify the created value is an object.
 				if(XenonValueIsObject(hObject))
 				{
 					result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hObject, registerIndex);

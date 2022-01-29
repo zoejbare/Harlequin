@@ -33,8 +33,8 @@
 //
 // 0x: INIT_ARRAY r#, ##
 //
-//   r# = General-purpose register where the new array will be stored.
-//   ## = Literal integer for the initial size of the array.
+//   r# = General-purpose register where the new array will be stored
+//   ## = Immediate integer for the size of the array
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,9 +47,9 @@ void OpCodeExec_InitArray(XenonExecutionHandle hExec)
 	int result;
 
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t initialCount = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t count = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hArray = XenonValue::CreateArray(hExec->hVm, size_t(initialCount));
+	XenonValueHandle hArray = XenonValue::CreateArray(hExec->hVm, size_t(count));
 	if(XenonValueIsArray(hArray))
 	{
 		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hArray, registerIndex);

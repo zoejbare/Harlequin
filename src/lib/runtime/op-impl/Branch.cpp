@@ -33,15 +33,15 @@
 // The conditional branch instructions will depend on the boolean evaluation of a specified register.
 //
 // 0x: BRANCH ##
-//   ## - Relative bytecode offset
+//   ## - Signed offset relative to the bytecode the current branch instruction
 //
 // 0x: BRANCH_IF_TRUE r#, ##
 //   r# - Register to evaluate
-//   ## - Relative bytecode offset
+//   ## - Signed offset relative to the bytecode the current branch instruction
 //
 // 0x: BRANCH_IF_FALSE r#, ##
 //   r# - Register to evaluate
-//   ## - Relative bytecode offset
+//   ## - Signed offset relative to the bytecode the current branch instruction
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -58,8 +58,17 @@ static void MoveInstructionPointer(XenonExecutionHandle hExec, const int32_t rel
 	// Verify the new instruction pointer falls within the bounds of the current function.
 	if(pNewIp < pFunctionStart || pNewIp >= pFunctionEnd)
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_FATAL,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Invalid branch offset: offset=%" PRId32 ", currentPosition=0x%" PRIXPTR ", functionStart=0x%" PRIXPTR ", functionEnd=0x%" PRIXPTR,
+			relativeOffset,
+			hExec->hCurrentFrame->decoder.cachedIp,
+			pFunctionStart,
+			pFunctionEnd
+		);
 	}
 	else
 	{
@@ -176,14 +185,26 @@ void OpCodeExec_BranchIfTrue(XenonExecutionHandle hExec)
 		}
 		else
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecutionRaiseStandardException(
+				hExec,
+				XENON_EXCEPTION_SEVERITY_FATAL,
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Directly evaluating object as boolean: r(%" PRIu32 ")",
+				registerIndex
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_FATAL,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
+			registerIndex
+		);
 	}
 }
 
@@ -224,14 +245,26 @@ void OpCodeExec_BranchIfFalse(XenonExecutionHandle hExec)
 		}
 		else
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecutionRaiseStandardException(
+				hExec,
+				XENON_EXCEPTION_SEVERITY_FATAL,
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Directly evaluating object as boolean: r(%" PRIu32 ")",
+				registerIndex
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_FATAL,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
+			registerIndex
+		);
 	}
 }
 
