@@ -218,6 +218,7 @@ void XenonVm::prv_setupBuiltIns(XenonVmHandle hVm)
 	XENON_BUILT_IN(OP_CAST_FLOAT64_TO_STRING,  OpCastFloat64ToString,  1, 1);
 
 	XENON_BUILT_IN(OP_LEN_STRING, OpLenString, 1, 1);
+	XENON_BUILT_IN(OP_LEN_ARRAY, OpLenArray, 1, 1);
 
 	#undef XENON_BUILT_IN
 }

@@ -212,6 +212,7 @@ struct XENON_MAIN_API XenonBuiltIn
 	XENON_DECLARE_BUILT_IN(OpCastFloat64ToString);
 
 	XENON_DECLARE_BUILT_IN(OpLenString);
+	XENON_DECLARE_BUILT_IN(OpLenArray);
 };
 
 //----------------------------------------------------------------------------------------------------------------------

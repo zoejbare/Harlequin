@@ -137,6 +137,7 @@ int main(int argc, char* argv[])
 	const char* const opCastInt32ToStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT32_TO_STRING);
 	const char* const opCastInt64ToStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT64_TO_STRING);
 	const char* const opLenStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_LEN_STRING);
+	const char* const opLenArraySignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_LEN_ARRAY);
 	const char* const globalVariableName = "globalTestVar";
 	const char* const localVariableName = "localTestVar";
 	const char* const objectTypeName = "App.ClassType";
@@ -204,6 +205,9 @@ int main(int argc, char* argv[])
 
 	uint32_t constIndex20;
 	XenonProgramWriterAddConstantString(hProgramWriter, "The exception was handled successfully!", &constIndex20);
+
+	uint32_t constIndex21;
+	XenonProgramWriterAddConstantString(hProgramWriter, opLenArraySignature, &constIndex21);
 
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);
@@ -329,8 +333,18 @@ int main(int argc, char* argv[])
 		{
 			tryBlockStart = XenonSerializerGetStreamPosition(hExcFuncSerializer);
 
-			XenonBytecodeWriteInitArray(hExcFuncSerializer, 1, 4);
-			XenonBytecodeWriteLoadConstant(hExcFuncSerializer, 0, constIndex19);
+			XenonBytecodeWriteInitArray(hExcFuncSerializer, 0, 4);
+			XenonBytecodeWriteLoadConstant(hExcFuncSerializer, 1, constIndex19);
+			XenonBytecodeWriteLoadConstant(hExcFuncSerializer, 2, constIndex12);
+			XenonBytecodeWriteStoreArray(hExcFuncSerializer, 0, 1, 1);
+			XenonBytecodeWriteStoreArray(hExcFuncSerializer, 0, 2, 3);
+			XenonBytecodeWriteLoadConstant(hExcFuncSerializer, 1, constIndex0);
+			XenonBytecodeWriteLoadConstant(hExcFuncSerializer, 2, constIndex0);
+
+			XenonBytecodeWriteStoreParam(hExcFuncSerializer, 0, 0);
+			XenonBytecodeWriteCall(hExcFuncSerializer, constIndex21);
+
+			XenonBytecodeWriteLoadArray(hExcFuncSerializer, 0, 0, 1);
 			XenonBytecodeWriteRaise(hExcFuncSerializer, 0);
 			XenonBytecodeWriteAbort(hExcFuncSerializer);
 

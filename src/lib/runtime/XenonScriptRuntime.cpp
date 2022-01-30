@@ -2071,4 +2071,66 @@ int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObj
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonValueGetArrayLength(XenonValueHandle hValue, size_t* const pOutIndex)
+{
+	if(!pOutIndex)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	if(!XenonValueIsArray(hValue))
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
+
+	(*pOutIndex) = hValue->as.array.count;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonValueGetArrayElement(XenonValueHandle hValue, size_t index, XenonValueHandle* phOutElementValue)
+{
+	if(!phOutElementValue)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	if(!XenonValueIsArray(hValue))
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
+
+	if(index >= hValue->as.array.count)
+	{
+		return XENON_ERROR_INDEX_OUT_OF_RANGE;
+	}
+
+	(*phOutElementValue) = hValue->as.array.pData[index];
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonValueSetArrayElement(XenonValueHandle hValue, size_t index, XenonValueHandle hElementValue)
+{
+	if(!XenonValueIsArray(hValue))
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
+
+	if(index >= hValue->as.array.count)
+	{
+		return XENON_ERROR_INDEX_OUT_OF_RANGE;
+	}
+
+	hValue->as.array.pData[index] = hElementValue;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 }

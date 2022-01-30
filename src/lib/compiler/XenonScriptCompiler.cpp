@@ -962,6 +962,28 @@ int XenonBytecodeWriteLoadObject(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonBytecodeWriteLoadArray(
+	XenonSerializerHandle hSerializer,
+	const uint32_t gpDstRegIndex,
+	const uint32_t gpSrcRegIndex,
+	const uint32_t arrayIndex
+)
+{
+	if(!hSerializer)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_LOAD_ARRAY);
+	_XENON_WRITE_OP_UDWORD(gpDstRegIndex);
+	_XENON_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_XENON_WRITE_OP_UDWORD(arrayIndex);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonBytecodeWriteStoreGlobal(
 	XenonSerializerHandle hSerializer,
 	const uint32_t constantIndex,
@@ -1044,6 +1066,28 @@ int XenonBytecodeWriteStoreObject(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonBytecodeWriteStoreArray(
+	XenonSerializerHandle hSerializer,
+	const uint32_t gpDstRegIndex,
+	const uint32_t gpSrcRegIndex,
+	const uint32_t arrayIndex
+)
+{
+	if(!hSerializer)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_STORE_ARRAY);
+	_XENON_WRITE_OP_UDWORD(gpDstRegIndex);
+	_XENON_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_XENON_WRITE_OP_UDWORD(arrayIndex);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonBytecodeWritePullGlobal(
 	XenonSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
@@ -1120,6 +1164,28 @@ int XenonBytecodeWritePullObject(
 	_XENON_WRITE_OP_UDWORD(gpDstRegIndex);
 	_XENON_WRITE_OP_UDWORD(gpSrcRegIndex);
 	_XENON_WRITE_OP_UDWORD(memberIndex);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonBytecodeWritePullArray(
+	XenonSerializerHandle hSerializer,
+	const uint32_t gpDstRegIndex,
+	const uint32_t gpSrcRegIndex,
+	const uint32_t arrayIndex
+)
+{
+	if(!hSerializer)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_PULL_ARRAY);
+	_XENON_WRITE_OP_UDWORD(gpDstRegIndex);
+	_XENON_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_XENON_WRITE_OP_UDWORD(arrayIndex);
 
 	return XENON_SUCCESS;
 }

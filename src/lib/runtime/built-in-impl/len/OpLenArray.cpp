@@ -16,50 +16,50 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "../../BuiltInDecl.hpp"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-enum XenonOpCodeEnum
+void XenonBuiltIn::OpLenArray(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
 {
-	XENON_OP_CODE_NOP,
-	XENON_OP_CODE_ABORT,
-	XENON_OP_CODE_RETURN,
-	XENON_OP_CODE_YIELD,
+	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 
-	XENON_OP_CODE_CALL,
-	XENON_OP_CODE_RAISE,
+	// Get the parameter operand.
+	XenonValueHandle hParam;
+	XenonExecutionGetIoRegister(hExec, &hParam, 0);
 
-	XENON_OP_CODE_LOAD_CONSTANT,
-	XENON_OP_CODE_LOAD_GLOBAL,
-	XENON_OP_CODE_LOAD_LOCAL,
-	XENON_OP_CODE_LOAD_PARAM,
-	XENON_OP_CODE_LOAD_OBJECT,
-	XENON_OP_CODE_LOAD_ARRAY,
+	// Verify the value pulled from the I/O register is an array.
+	if(XenonValueIsArray(hParam))
+	{
+		size_t length = 0;
+		XenonValueGetArrayLength(hParam, &length);
 
-	XENON_OP_CODE_STORE_GLOBAL,
-	XENON_OP_CODE_STORE_LOCAL,
-	XENON_OP_CODE_STORE_PARAM,
-	XENON_OP_CODE_STORE_OBJECT,
-	XENON_OP_CODE_STORE_ARRAY,
+		const int64_t outputLength = int64_t(length);
 
-	XENON_OP_CODE_PULL_GLOBAL,
-	XENON_OP_CODE_PULL_LOCAL,
-	XENON_OP_CODE_PULL_PARAM,
-	XENON_OP_CODE_PULL_OBJECT,
-	XENON_OP_CODE_PULL_ARRAY,
+		// Get the VM associated with the execution context.
+		XenonVmHandle hVm;
+		XenonExecutionGetVm(hExec, &hVm);
 
-	XENON_OP_CODE_PUSH,
-	XENON_OP_CODE_POP,
+		// Create the output result and store it to an I/O register.
+		XenonValueHandle hOutput = XenonValueCreateInt64(hVm, (outputLength > 0) ? outputLength : 0);
+		XenonExecutionSetIoRegister(hExec, hOutput, 0);
+		XenonValueAbandon(hOutput);
+	}
+	else
+	{
+		// Raise the type-mismatch script exception.
+		XenonExecutionRaiseStandardException(
+			hExec,
+			XENON_EXCEPTION_SEVERITY_NORMAL,
+			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			"Type mismatch; expected array"
+		);
+	}
 
-	XENON_OP_CODE_INIT_OBJECT,
-	XENON_OP_CODE_INIT_ARRAY,
-
-	XENON_OP_CODE_BRANCH,
-	XENON_OP_CODE_BRANCH_IF_TRUE,
-	XENON_OP_CODE_BRANCH_IF_FALSE,
-
-	XENON_OP_CODE__TOTAL_COUNT,
-};
+	// Release the input parameter value.
+	XenonValueAbandon(hParam);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -636,6 +636,12 @@ XENON_MAIN_API int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const
 
 XENON_MAIN_API int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember onIterateFn, void* pUserData);
 
+XENON_MAIN_API int XenonValueGetArrayLength(XenonValueHandle hValue, size_t* pOutLength);
+
+XENON_MAIN_API int XenonValueGetArrayElement(XenonValueHandle hValue, size_t index, XenonValueHandle* phOutElementValue);
+
+XENON_MAIN_API int XenonValueSetArrayElement(XenonValueHandle hValue, size_t index, XenonValueHandle hElementValue);
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 #endif /* XENON_LIB_RUNTIME */
@@ -804,6 +810,13 @@ XENON_MAIN_API int XenonBytecodeWriteLoadObject(
 	uint32_t memberIndex
 );
 
+XENON_MAIN_API int XenonBytecodeWriteLoadArray(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t arrayIndex
+);
+
 XENON_MAIN_API int XenonBytecodeWriteStoreGlobal(
 	XenonSerializerHandle hSerializer,
 	uint32_t constantIndex,
@@ -829,6 +842,13 @@ XENON_MAIN_API int XenonBytecodeWriteStoreObject(
 	uint32_t memberIndex
 );
 
+XENON_MAIN_API int XenonBytecodeWriteStoreArray(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t arrayIndex
+);
+
 XENON_MAIN_API int XenonBytecodeWritePullGlobal(
 	XenonSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
@@ -852,6 +872,13 @@ XENON_MAIN_API int XenonBytecodeWritePullObject(
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
 	uint32_t memberIndex
+);
+
+XENON_MAIN_API int XenonBytecodeWritePullArray(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t arrayIndex
 );
 
 XENON_MAIN_API int XenonBytecodeWritePush(XenonSerializerHandle hSerializer, uint32_t gpRegIndex);
@@ -1115,6 +1142,7 @@ enum XenonBuiltInEnum
 	XENON_BUILT_IN_OP_CAST_STRING_TO_FLOAT64,
 
 	XENON_BUILT_IN_OP_LEN_STRING,
+	XENON_BUILT_IN_OP_LEN_ARRAY,
 
 	XENON_BUILT_IN__TOTAL_COUNT,
 	XENON_BUILT_IN__FOCE_DWORD = 0x7FFFFFFFul,
