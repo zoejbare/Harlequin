@@ -194,18 +194,6 @@ with csbuild.Project(ExtGoogleTest.projectName, ExtGoogleTest.path, autoDiscover
 
 ###################################################################################################
 
-class ExtNcps(object):
-	projectName = "external_ncps"
-	path = "external/NCPSQueue"
-
-with csbuild.Project(ExtNcps.projectName, ExtNcps.path, autoDiscoverSourceFiles=False):
-	csbuild.SetOutput("{name}", csbuild.ProjectType.Stub)
-
-	with csbuild.Scope(csbuild.ScopeDef.Children):
-		csbuild.AddIncludeDirectories(f"{ExtNcps.path}/include")
-
-###################################################################################################
-
 class ExtSkipProbe(object):
 	projectName = "external_skipprobe"
 	path = "external/SkipProbe/include"
@@ -253,7 +241,6 @@ class LibXenonBase(object):
 	projectName = "LibXenonBase"
 	outputName = "libxenonbase"
 	dependencies = [
-		ExtNcps.projectName,
 		ExtSkipProbe.projectName,
 		ExtXxHash.projectName,
 	]

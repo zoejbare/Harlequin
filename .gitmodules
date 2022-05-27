@@ -1,6 +1,3 @@
-[submodule "external/NCPSQueue"]
-	path = external/NCPSQueue
-	url = https://github.com/zoejbare/NCPSQueue.git
 [submodule "external/SkipProbe"]
 	path = external/SkipProbe
 	url = https://github.com/zoejbare/SkipProbe.git
