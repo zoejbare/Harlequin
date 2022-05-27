@@ -165,8 +165,6 @@ XENON_BASE_API char* XenonFormatString(const char* fmt, ...);
 
 XENON_BASE_API char* XenonGetBuiltInFunctionSignature(int builtInFunctionId);
 
-XENON_BASE_API char* XenonGetGlobalInitFunctionSignature(const char* programName);
-
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 enum XenonSerializerModeEnum
@@ -720,6 +718,12 @@ XENON_MAIN_API int XenonProgramWriterAddObjectMember(
 );
 
 XENON_MAIN_API int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const char* variableName, uint32_t constantIndex);
+
+XENON_MAIN_API int XenonProgramWriterSetProgramInitFunction(
+	XenonProgramWriterHandle hProgramWriter,
+	const void* pBytecode,
+	size_t bytecodeLength
+);
 
 XENON_MAIN_API int XenonProgramWriterAddFunction(
 	XenonProgramWriterHandle hProgramWriter,

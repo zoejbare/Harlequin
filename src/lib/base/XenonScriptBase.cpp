@@ -495,18 +495,6 @@ char* XenonGetBuiltInFunctionSignature(const int builtInFunctionId)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-char* XenonGetGlobalInitFunctionSignature(const char* const programName)
-{
-	if(!programName || programName[0] == '\0')
-	{
-		return nullptr;
-	}
-
-	return XenonFormatString("void `global-init.%s()", programName);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int XenonSerializerCreate(XenonSerializerHandle* phOutSerializer, int mode)
 {
 	if(!phOutSerializer

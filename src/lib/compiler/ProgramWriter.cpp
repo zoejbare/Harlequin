@@ -367,6 +367,23 @@ XenonProgramWriterHandle XenonProgramWriter::Create()
 	pOutput->boolTrueIndex = uint32_t(pOutput->constants.size());
 	pOutput->constants.push_back(value);
 
+	// Serialize bytecode for the default init function bytecode just in case the high-level compiler does not supply it.
+	XenonSerializerHandle hInitSerializer = XENON_SERIALIZER_HANDLE_NULL;
+	XenonSerializerCreate(&hInitSerializer, XENON_SERIALIZER_MODE_WRITER);
+	XenonBytecodeWriteReturn(hInitSerializer);
+
+	const void* const pInitBytecode = XenonSerializerGetRawStreamPointer(hInitSerializer);
+	const size_t initBytecodeLength = XenonSerializerGetStreamLength(hInitSerializer);
+
+	if(initBytecodeLength > 0)
+	{
+		// Copy the default init bytecode into the program writer.
+		pOutput->initBytecode.resize(initBytecodeLength);
+		memcpy(pOutput->initBytecode.data(), pInitBytecode, initBytecodeLength);
+	}
+
+	XenonSerializerDispose(&hInitSerializer);
+
 	return pOutput;
 }
 
@@ -497,11 +514,13 @@ bool XenonProgramWriter::Serialize(
 	};
 
 	std::deque<FunctionBinding> functionBindings;
-	std::vector<uint8_t> bytecode;
+	XenonFunctionData::Bytecode bytecode;
 
 	// Get the function bindings and bytecode ready to be written out.
 	{
-		uint32_t bytecodeLength = 0;
+		// The program's init function will always be at the start of the bytecode.
+		// All other functions will be defined after it.
+		uint32_t bytecodeLength = uint32_t(getAlignedSize(hProgramWriter->initBytecode.size()));
 
 		// Build the binding data for each function while calculating total length of the bytecode.
 		for(auto& kv : hProgramWriter->functions)
@@ -525,6 +544,12 @@ bool XenonProgramWriter::Serialize(
 		// Clear the bytecode buffer.
 		uint8_t* const pProgramBytecode = bytecode.data();
 		memset(pProgramBytecode, 0, bytecode.size());
+
+		// Copy the program's init function to the start of the bytecode.
+		if(hProgramWriter->initBytecode.size() > 0)
+		{
+			memcpy(bytecode.data(), hProgramWriter->initBytecode.data(), hProgramWriter->initBytecode.size());
+		}
 
 		// Fill out the full program bytecode from each function's individual bytecode.
 		for(const FunctionBinding& binding : functionBindings)

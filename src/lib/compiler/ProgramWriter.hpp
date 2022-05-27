@@ -130,6 +130,8 @@ struct XenonProgramWriter
 	XenonFunctionData::StringToFunctionMap functions;
 	XenonObjectData::StringToObjectMap objectTypes;
 
+	XenonFunctionData::Bytecode initBytecode;
+
 	IndexMapInt8 indexMapInt8;
 	IndexMapInt16 indexMapInt16;
 	IndexMapInt32 indexMapInt32;

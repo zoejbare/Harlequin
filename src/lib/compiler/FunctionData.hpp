@@ -69,7 +69,6 @@ struct XenonFunctionData
 		uint32_t length;
 	};
 
-
 	LocalVariableMap locals;
 	GuardedBlock::Vector guardedBlocks;
 	Bytecode bytecode;

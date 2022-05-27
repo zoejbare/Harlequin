@@ -470,11 +470,35 @@ int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const c
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonProgramWriterSetProgramInitFunction(
+	XenonProgramWriterHandle hProgramWriter,
+	const void* const pBytecode,
+	const size_t bytecodeLength
+)
+{
+	if(!hProgramWriter
+		|| !pBytecode
+		|| bytecodeLength == 0)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	// Copy the input bytecode data to the byte vector that will be set in the program writer.
+	std::vector<uint8_t> bytecode(bytecodeLength);
+	memcpy(bytecode.data(), pBytecode, bytecode.size());
+
+	hProgramWriter->initBytecode = std::move(bytecode);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonProgramWriterAddFunction(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* const functionSignature,
 	const void* const pBytecode,
-	const size_t functionBytecodeLength,
+	const size_t bytecodeLength,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
@@ -483,7 +507,7 @@ int XenonProgramWriterAddFunction(
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
 		|| !pBytecode
-		|| functionBytecodeLength == 0
+		|| bytecodeLength == 0
 		|| numParameters > XENON_VM_IO_REGISTER_COUNT
 		|| numReturnValues > XENON_VM_IO_REGISTER_COUNT)
 	{
@@ -497,7 +521,7 @@ int XenonProgramWriterAddFunction(
 	}
 
 	// Copy the input bytecode data to the byte vector that will be mapped into the program writer.
-	std::vector<uint8_t> bytecode(functionBytecodeLength);
+	std::vector<uint8_t> bytecode(bytecodeLength);
 	memcpy(bytecode.data(), pBytecode, bytecode.size());
 
 	XenonFunctionData function;
