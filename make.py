@@ -151,10 +151,10 @@ with csbuild.Toolchain("clang", "ps4", "ps5", "android-clang"):
 with csbuild.Toolchain("msvc"):
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddDefines(
-			"__cplusplus=201403",
+			"__cplusplus=201703L",
 			"_HAS_CXX14=1",
 		)
-	csbuild.SetVisualStudioVersion("16") # Visual Studio 2019
+	csbuild.SetVisualStudioVersion("17") # Visual Studio 2022
 	csbuild.AddDefines(
 		"_CRT_SECURE_NO_WARNINGS",
 		"_CRT_NONSTDC_NO_WARNINGS",
