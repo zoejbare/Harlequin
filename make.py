@@ -371,9 +371,10 @@ class XenonScriptApp(object):
 			csbuild.SetMsvcSubsystem("CONSOLE")
 
 		with csbuild.Toolchain("gcc", "clang"):
-			csbuild.AddLibraries(
-				"pthread",
-			)
+			with csbuild.Platform("Linux"):
+				csbuild.AddLibraries(
+					"pthread",
+				)
 
 		with csbuild.Toolchain("ps4", "ps5", "blup"):
 			csbuild.AddLibraries(
