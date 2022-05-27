@@ -473,7 +473,7 @@ int XenonProgramWriterAddGlobal(XenonProgramWriterHandle hProgramWriter, const c
 int XenonProgramWriterAddFunction(
 	XenonProgramWriterHandle hProgramWriter,
 	const char* const functionSignature,
-	const void* const pFunctionBytecode,
+	const void* const pBytecode,
 	const size_t functionBytecodeLength,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
@@ -482,7 +482,7 @@ int XenonProgramWriterAddFunction(
 	if(!hProgramWriter
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
-		|| !pFunctionBytecode
+		|| !pBytecode
 		|| functionBytecodeLength == 0
 		|| numParameters > XENON_VM_IO_REGISTER_COUNT
 		|| numReturnValues > XENON_VM_IO_REGISTER_COUNT)
@@ -498,7 +498,7 @@ int XenonProgramWriterAddFunction(
 
 	// Copy the input bytecode data to the byte vector that will be mapped into the program writer.
 	std::vector<uint8_t> bytecode(functionBytecodeLength);
-	memcpy(bytecode.data(), pFunctionBytecode, bytecode.size());
+	memcpy(bytecode.data(), pBytecode, bytecode.size());
 
 	XenonFunctionData function;
 

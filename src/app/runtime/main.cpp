@@ -106,7 +106,7 @@ static size_t reallocCount = 0;
 
 static size_t currentTotalSize = 0;
 
-auto onAlloc = [](const size_t size)
+static void OnAlloc(const size_t size)
 {
 	if(size > maxAllocSize)
 	{
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 		void* const pMem = malloc(size);
 
 		allocations.insert(std::pair<void*, size_t>(pMem, size));
-		onAlloc(size);
+		OnAlloc(size);
 
 		++mallocCount;
 
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 
 		allocations.erase(pOldMem);
 		allocations.insert(std::pair<void*, size_t>(pNewMem, newSize));
-		onAlloc(newSize);
+		OnAlloc(newSize);
 
 		++reallocCount;
 
