@@ -30,6 +30,7 @@ void XenonVm::prv_setupBuiltIns(XenonVmHandle hVm)
 			const char* const signature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_ ## id); \
 			assert(signature != nullptr); \
 			XenonString* const pSignature = XenonString::Create(signature); \
+			XenonMemFree((void*)(signature)); \
 			assert(pSignature != nullptr); \
 			assert(!XENON_MAP_FUNC_CONTAINS(hVm->functions, pSignature)); \
 			XenonFunctionHandle hFunction = XenonFunction::CreateBuiltIn(pSignature, XenonBuiltIn::func, numParams, numRetVals); \

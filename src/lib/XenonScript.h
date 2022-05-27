@@ -93,8 +93,6 @@ XENON_BASE_API const char* XenonGetValueTypeString(int valueType);
 
 XENON_BASE_API int XenonGetPlatformEndianMode();
 
-XENON_BASE_API const char* XenonGetBuiltInFunctionSignature(int builtInFunctionId);
-
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 typedef void* (*XenonCallbackMemAlloc)(size_t);
@@ -163,7 +161,11 @@ XENON_BASE_API int XenonReportGetLevel(XenonReportHandle hReport);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-XENON_BASE_API const char* XenonFormatString(const char* fmt, ...);
+XENON_BASE_API char* XenonFormatString(const char* fmt, ...);
+
+XENON_BASE_API char* XenonGetBuiltInFunctionSignature(int builtInFunctionId);
+
+XENON_BASE_API char* XenonGetGlobalInitFunctionSignature(const char* programName);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

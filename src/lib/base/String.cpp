@@ -287,9 +287,9 @@ size_t XenonString::RawHash(const char* const string)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* XenonString::RawFormatVarArgs(const char* const fmt, va_list vl)
+char* XenonString::RawFormatVarArgs(const char* const fmt, va_list vl)
 {
-	const char* output = nullptr;
+	char* output = nullptr;
 
 	if(fmt)
 	{

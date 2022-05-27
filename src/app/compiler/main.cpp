@@ -133,15 +133,16 @@ int main(int argc, char* argv[])
 	const char* const excFuncSignature = "void App.Program.ExceptionHandlingTest()";
 	const char* const nativePrintFuncSignature = "void App.Program.PrintString(string)";
 	const char* const nativeDecrementFuncSignature = "(int32, bool) App.Program.Decrement(int32)";
+	const char* const globalVariableName = "globalTestVar";
+	const char* const localVariableName = "localTestVar";
+	const char* const objectTypeName = "App.ClassType";
+	const char* const objectMemberName = "memberTest";
+
 	const char* const opAddStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_ADD_STRING);
 	const char* const opCastInt32ToStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT32_TO_STRING);
 	const char* const opCastInt64ToStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_CAST_INT64_TO_STRING);
 	const char* const opLenStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_LEN_STRING);
 	const char* const opLenArraySignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_LEN_ARRAY);
-	const char* const globalVariableName = "globalTestVar";
-	const char* const localVariableName = "localTestVar";
-	const char* const objectTypeName = "App.ClassType";
-	const char* const objectMemberName = "memberTest";
 
 	uint32_t constIndex0;
 	XenonProgramWriterAddConstantNull(hProgramWriter, &constIndex0);
@@ -215,6 +216,13 @@ int main(int argc, char* argv[])
 	// Write the program object types.
 	XenonProgramWriterAddObjectType(hProgramWriter, objectTypeName);
 	XenonProgramWriterAddObjectMember(hProgramWriter, objectTypeName, objectMemberName, XENON_VALUE_TYPE_INT32, nullptr);
+
+	// Free the built-in operator function signatures.
+	XenonMemFree((void*)(opAddStringSignature));
+	XenonMemFree((void*)(opCastInt32ToStringSignature));
+	XenonMemFree((void*)(opCastInt64ToStringSignature));
+	XenonMemFree((void*)(opLenStringSignature));
+	XenonMemFree((void*)(opLenArraySignature));
 
 	// void App.Program.Main()
 	{

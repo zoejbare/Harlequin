@@ -67,7 +67,7 @@ struct XENON_BASE_API XenonString
 	static bool RawCompare(const char* const left, const char* right);
 	static size_t RawHash(const char* const string);
 
-	static const char* RawFormatVarArgs(const char* const fmt, va_list vl);
+	static char* RawFormatVarArgs(const char* const fmt, va_list vl);
 
 	static void prv_onDestruct(void*);
 
