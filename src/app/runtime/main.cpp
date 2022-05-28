@@ -24,6 +24,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -33,8 +34,8 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define PROGRAM_RESULT_SUCCESS 0
-#define PROGRAM_RESULT_FAILURE 1
+#define APPLICATION_RESULT_SUCCESS 0
+#define APPLICATION_RESULT_FAILURE 1
 
 // Needed by some of the Playstation platforms so we can use malloc without running out of memory.
 size_t sceLibcHeapSize = 10 * 1024 * 1024;
@@ -134,7 +135,7 @@ int main(int argc, char* argv[])
 	if(argc < 2)
 	{
 		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_FATAL, "Missing required 'filepath' argument");
-		return PROGRAM_RESULT_FAILURE;
+		return APPLICATION_RESULT_FAILURE;
 	}
 
 #if defined(XENON_PLATFORM_WINDOWS)
@@ -209,7 +210,7 @@ int main(int argc, char* argv[])
 		char msg[128];
 		snprintf(msg, sizeof(msg), "Failed to create Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(createVmResult));
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
-		return PROGRAM_RESULT_FAILURE;
+		return APPLICATION_RESULT_FAILURE;
 	}
 
 	XenonReportHandle hReport = XENON_REPORT_HANDLE_NULL;
@@ -233,7 +234,7 @@ int main(int argc, char* argv[])
 			char msg[128];
 			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
 			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
-			return PROGRAM_RESULT_FAILURE;
+			return APPLICATION_RESULT_FAILURE;
 		}
 
 		const int readProgramFileResult = XenonSerializerLoadStreamFromFile(hFileSerializer, argv[1]);
@@ -255,7 +256,7 @@ int main(int argc, char* argv[])
 			char msg[128];
 			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
 			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
-			return PROGRAM_RESULT_FAILURE;
+			return APPLICATION_RESULT_FAILURE;
 		}
 	}
 
@@ -267,7 +268,7 @@ int main(int argc, char* argv[])
 	uint64_t runProgramTimeSlice = 0;
 	uint64_t disposeExecTimeSlice = 0;
 
-	int applicationResult = PROGRAM_RESULT_SUCCESS;
+	int applicationResult = APPLICATION_RESULT_SUCCESS;
 
 	const int loadProgramResult = XenonVmLoadProgram(hVm, "test", fileData.data(), fileData.size());
 	fileData.clear();
@@ -487,7 +488,7 @@ int main(int argc, char* argv[])
 
 					printf("\n");
 
-					applicationResult = PROGRAM_RESULT_FAILURE;
+					applicationResult = APPLICATION_RESULT_FAILURE;
 					break;
 				}
 
@@ -531,7 +532,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		applicationResult = PROGRAM_RESULT_FAILURE;
+		applicationResult = APPLICATION_RESULT_FAILURE;
 	}
 
 	const uint64_t disposeVmTimeStart = XenonHiResTimerGetTimestamp();
@@ -554,7 +555,7 @@ int main(int argc, char* argv[])
 		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", allocations.size());
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_ERROR, msg);
 
-		applicationResult = PROGRAM_RESULT_FAILURE;
+		applicationResult = APPLICATION_RESULT_FAILURE;
 	}
 
 	// Output memory allocation stats.
