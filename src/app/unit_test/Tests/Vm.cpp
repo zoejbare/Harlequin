@@ -36,8 +36,6 @@ XenonVmInit ConstructInitObject(void* const pUserData, const int reportLevel, Xe
 	output.common.report.onMessageFn = onMessageFn;
 	output.common.report.pUserData = pUserData;
 	output.common.report.reportLevel = reportLevel;
-	output.dependency.onRequestFn = onDependencyRequested;
-	output.dependency.pUserData = nullptr;
 	output.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
 	output.gcMaxIterationCount = XENON_VM_GC_DEFAULT_ITERATION_COUNT;
 

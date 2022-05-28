@@ -29,6 +29,7 @@
 
 #include <deque>
 #include <map>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -178,19 +179,16 @@ int main(int argc, char* argv[])
 	};
 
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonVmInit init;
+	XenonVmInit vmInit;
 
 	std::deque<const char*> dependencies;
 
-	init.common.report.onMessageFn = OnMessageReported;
-	init.common.report.pUserData = nullptr;
-	init.common.report.reportLevel = XENON_MESSAGE_TYPE_VERBOSE;
+	vmInit.common.report.onMessageFn = OnMessageReported;
+	vmInit.common.report.pUserData = nullptr;
+	vmInit.common.report.reportLevel = XENON_MESSAGE_TYPE_VERBOSE;
 
-	init.dependency.onRequestFn = OnDependencyRequested;
-	init.dependency.pUserData = &dependencies;
-
-	init.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
-	init.gcMaxIterationCount = XENON_VM_GC_DEFAULT_ITERATION_COUNT;
+	vmInit.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
+	vmInit.gcMaxIterationCount = XENON_VM_GC_DEFAULT_ITERATION_COUNT;
 
 	XenonMemAllocator allocator;
 	allocator.allocFn = trackedAlloc;
@@ -205,11 +203,11 @@ int main(int argc, char* argv[])
 	const uint64_t createVmTimeStart = overallTimeStart;
 
 	// Create the VM context.
-	int result = XenonVmCreate(&hVm, init);
-	if(result != XENON_SUCCESS)
+	const int createVmResult = XenonVmCreate(&hVm, vmInit);
+	if(createVmResult != XENON_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to create Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg), "Failed to create Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(createVmResult));
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
 		return PROGRAM_RESULT_FAILURE;
 	}
@@ -222,8 +220,44 @@ int main(int argc, char* argv[])
 
 	const uint64_t loadProgramTimeStart = createVmTimeEnd;
 
-	// Load the test program.
-	const int loadProgramResult = XenonVmLoadProgramFromFile(hVm, "test", argv[1]);
+	std::vector<uint8_t> fileData;
+
+	// Load the program file.
+	{
+		XenonSerializerHandle hFileSerializer = XENON_SERIALIZER_HANDLE_NULL;
+
+		// Create the serializer we'll use to read the program file data.
+		const int createFileSerializerResult = XenonSerializerCreate(&hFileSerializer, XENON_SERIALIZER_MODE_READER);
+		if(createFileSerializerResult != XENON_SUCCESS)
+		{
+			char msg[128];
+			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
+			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
+			return PROGRAM_RESULT_FAILURE;
+		}
+
+		const int readProgramFileResult = XenonSerializerLoadStreamFromFile(hFileSerializer, argv[1]);
+
+		const void* const pFileData = XenonSerializerGetRawStreamPointer(hFileSerializer);
+		const size_t fileSize = XenonSerializerGetStreamLength(hFileSerializer);
+
+		if(pFileData && fileSize > 0)
+		{
+			// Resize the file data vector, then copy the contents of the file to it.
+			fileData.resize(fileSize);
+			memcpy(fileData.data(), pFileData, fileSize);
+		}
+
+		XenonSerializerDispose(&hFileSerializer);
+
+		if(readProgramFileResult != XENON_SUCCESS)
+		{
+			char msg[128];
+			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
+			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
+			return PROGRAM_RESULT_FAILURE;
+		}
+	}
 
 	const uint64_t loadProgramTimeEnd = XenonHiResTimerGetTimestamp();
 	const uint64_t loadProgramTimeSlice = loadProgramTimeEnd - loadProgramTimeStart;
@@ -233,7 +267,10 @@ int main(int argc, char* argv[])
 	uint64_t runProgramTimeSlice = 0;
 	uint64_t disposeExecTimeSlice = 0;
 
-	int programResult = PROGRAM_RESULT_SUCCESS;
+	int applicationResult = PROGRAM_RESULT_SUCCESS;
+
+	const int loadProgramResult = XenonVmLoadProgram(hVm, "test", fileData.data(), fileData.size());
+	fileData.clear();
 
 	if(loadProgramResult == XENON_SUCCESS)
 	{
@@ -383,6 +420,7 @@ int main(int argc, char* argv[])
 			//reallocCount= 0;
 
 			const uint64_t runProgramTimeStart = XenonHiResTimerGetTimestamp();
+			int result = XENON_SUCCESS;
 
 			// Run the script until it has completed.
 			for(;;)
@@ -449,7 +487,7 @@ int main(int argc, char* argv[])
 
 					printf("\n");
 
-					programResult = PROGRAM_RESULT_FAILURE;
+					applicationResult = PROGRAM_RESULT_FAILURE;
 					break;
 				}
 
@@ -493,17 +531,17 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		programResult = PROGRAM_RESULT_FAILURE;
+		applicationResult = PROGRAM_RESULT_FAILURE;
 	}
 
 	const uint64_t disposeVmTimeStart = XenonHiResTimerGetTimestamp();
 
 	// Dispose of the VM context.
-	result = XenonVmDispose(&hVm);
-	if(result != XENON_SUCCESS)
+	const int disposeVmResult = XenonVmDispose(&hVm);
+	if(disposeVmResult != XENON_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg), "Failed to dispose of Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg), "Failed to dispose of Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(disposeVmResult));
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_WARNING, msg);
 	}
 
@@ -516,7 +554,7 @@ int main(int argc, char* argv[])
 		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", allocations.size());
 		OnMessageReported(NULL, XENON_MESSAGE_TYPE_ERROR, msg);
 
-		programResult = PROGRAM_RESULT_FAILURE;
+		applicationResult = PROGRAM_RESULT_FAILURE;
 	}
 
 	// Output memory allocation stats.
@@ -539,7 +577,7 @@ int main(int argc, char* argv[])
 	const uint64_t overallTimeEnd = XenonHiResTimerGetTimestamp();
 	const uint64_t overallTimeSlice = overallTimeEnd - overallTimeStart;
 
-	const double invTimerFreq = 1.0 / double(timerFrequency);
+	const double convertTimeToMs = 1000.0 / double(timerFrequency);
 
 	// Output the timing metrics.
 	printf(
@@ -552,17 +590,17 @@ int main(int argc, char* argv[])
 		"\tLoad program time: %f ms\n"
 		"\tRun program time: %f ms\n"
 		"\tDisassemble time: %f ms\n",
-		double(overallTimeSlice * 1000) * invTimerFreq,
-		double(createVmTimeSlice * 1000) * invTimerFreq,
-		double(disposeVmTimeSlice * 1000) * invTimerFreq,
-		double(createExecTimeSlice * 1000) * invTimerFreq,
-		double(disposeExecTimeSlice * 1000) * invTimerFreq,
-		double(loadProgramTimeSlice * 1000) * invTimerFreq,
-		double(runProgramTimeSlice * 1000) * invTimerFreq,
-		double(disassembleTimeSlice * 1000) * invTimerFreq
+		double(overallTimeSlice) * convertTimeToMs,
+		double(createVmTimeSlice) * convertTimeToMs,
+		double(disposeVmTimeSlice) * convertTimeToMs,
+		double(createExecTimeSlice) * convertTimeToMs,
+		double(disposeExecTimeSlice) * convertTimeToMs,
+		double(loadProgramTimeSlice) * convertTimeToMs,
+		double(runProgramTimeSlice) * convertTimeToMs,
+		double(disassembleTimeSlice) * convertTimeToMs
 	);
 
-	return programResult;
+	return applicationResult;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

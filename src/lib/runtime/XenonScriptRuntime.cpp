@@ -47,7 +47,6 @@ int XenonVmCreate(XenonVmHandle* phOutVm, XenonVmInit init)
 		|| (*phOutVm)
 		|| init.common.report.reportLevel < XENON_MESSAGE_TYPE_VERBOSE
 		|| init.common.report.reportLevel > XENON_MESSAGE_TYPE_FATAL
-		|| !init.dependency.onRequestFn
 		|| init.gcThreadStackSize < XENON_VM_THREAD_MINIMUM_STACK_SIZE
 		|| init.gcMaxIterationCount == 0)
 	{
@@ -349,9 +348,9 @@ int XenonVmListObjectSchemas(XenonVmHandle hVm, XenonCallbackIterateString onIte
 
 int XenonVmLoadProgram(
 	XenonVmHandle hVm,
-	const char* programName,
-	const void* pProgramFileData,
-	size_t programFileSize
+	const char* const programName,
+	const void* const pProgramFileData,
+	const size_t programFileSize
 )
 {
 	if(!hVm || !programName || programName[0] == '\0' || !pProgramFileData || programFileSize == 0)
@@ -383,64 +382,6 @@ int XenonVmLoadProgram(
 
 	// Map the program inside the VM state.
 	XENON_MAP_FUNC_INSERT(hVm->programs, pProgramName, hProgram);
-
-	// Report the program dependencies to the user code.
-	for(auto& kv : hProgram->dependencies)
-	{
-		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
-
-		// Only report the dependency if it hasn't already been loaded.
-		if(!XENON_MAP_FUNC_CONTAINS(hVm->programs, pDependencyName))
-		{
-			hVm->dependency.onRequestFn(hVm->dependency.pUserData, pDependencyName->data);
-		}
-	}
-
-	return XENON_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const char* filePath)
-{
-	if(!hVm || !programName || programName[0] == '\0' || !filePath || filePath[0] == '\0')
-	{
-		return XENON_ERROR_INVALID_ARG;
-	}
-
-	// Create a string to be the key in the program map.
-	XenonString* const pProgramName = XenonString::Create(programName);
-	if(!pProgramName)
-	{
-		return XENON_ERROR_BAD_ALLOCATION;
-	}
-
-	// Check if a program with this name has already been loaded.
-	if(XENON_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
-	{
-		XenonString::Release(pProgramName);
-		return XENON_ERROR_KEY_ALREADY_EXISTS;
-	}
-
-	// Attempt to load the program file.
-	XenonProgram* const hProgram = XenonProgram::Create(hVm, pProgramName, filePath);
-	if(!hProgram)
-	{
-		XenonString::Release(pProgramName);
-		return XENON_ERROR_FAILED_TO_OPEN_FILE;
-	}
-
-	// Report the program dependencies to the user code.
-	for(auto& kv : hProgram->dependencies)
-	{
-		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
-
-		// Only report the dependency if it hasn't already been loaded.
-		if(!XENON_MAP_FUNC_CONTAINS(hVm->programs, pDependencyName))
-		{
-			hVm->dependency.onRequestFn(hVm->dependency.pUserData, pDependencyName->data);
-		}
-	}
 
 	return XENON_SUCCESS;
 }
@@ -503,7 +444,7 @@ int XenonProgramGetFunctionCount(XenonProgramHandle hProgram, size_t* pOutCount)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData)
+int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* const pUserData)
 {
 	if(!hProgram || !onIterateFn)
 	{
@@ -540,7 +481,11 @@ int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOut
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData)
+int XenonProgramListGlobalVariables(
+	XenonProgramHandle hProgram, 
+	XenonCallbackIterateString onIterateFn, 
+	void* const pUserData
+)
 {
 	if(!hProgram || !onIterateFn)
 	{
@@ -555,6 +500,60 @@ int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIt
 		if(!onIterateFn(pUserData, pGlobalName->data))
 		{
 			break;
+		}
+	}
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramListDependencies(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* const pUserData)
+{
+	if(!hProgram || !onIterateFn)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	// Call the callback for each dependency name referenced by the program.
+	for(auto& kv : hProgram->dependencies)
+	{
+		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
+
+		if(!onIterateFn(pUserData, pDependencyName->data))
+		{
+			break;
+		}
+	}
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonProgramListUnloadedDependencies(
+	XenonProgramHandle hProgram, 
+	XenonCallbackIterateString onIterateFn, 
+	void* const pUserData
+)
+{
+	if(!hProgram || !onIterateFn)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	// Call the callback for only the dependency names referenced by the program that have not been loaded.
+	for(auto& kv : hProgram->dependencies)
+	{
+		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
+
+		// Check the VM to see if the dependent program has been loaded.
+		if(!XENON_MAP_FUNC_CONTAINS(hProgram->hVm->programs, pDependencyName))
+		{
+			if(!onIterateFn(pUserData, pDependencyName->data))
+			{
+				break;
+			}
 		}
 	}
 

@@ -349,7 +349,6 @@ typedef struct
 typedef struct
 {
 	XenonCommonInit common;
-	XenonDependencyInit dependency;
 
 	uint32_t gcThreadStackSize;
 	uint32_t gcMaxIterationCount;
@@ -396,10 +395,8 @@ XENON_MAIN_API int XenonVmLoadProgram(
 	XenonVmHandle hVm,
 	const char* programName,
 	const void* pProgramFileData,
-	const size_t programFileSize
+	size_t programFileSize
 );
-
-XENON_MAIN_API int XenonVmLoadProgramFromFile(XenonVmHandle hVm, const char* programName, const char* filePath);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -411,11 +408,31 @@ XENON_MAIN_API int XenonProgramGetEndianness(XenonProgramHandle hProgram, int* p
 
 XENON_MAIN_API int XenonProgramGetFunctionCount(XenonProgramHandle hProgram, size_t* pOutCount);
 
-XENON_MAIN_API int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData);
+XENON_MAIN_API int XenonProgramListFunctions(
+	XenonProgramHandle hProgram, 
+	XenonCallbackIterateString onIterateFn, 
+	void* pUserData
+);
 
 XENON_MAIN_API int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOutCount);
 
-XENON_MAIN_API int XenonProgramListGlobalVariables(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* pUserData);
+XENON_MAIN_API int XenonProgramListGlobalVariables(
+	XenonProgramHandle hProgram, 
+	XenonCallbackIterateString onIterateFn, 
+	void* pUserData
+);
+
+XENON_MAIN_API int XenonProgramListDependencies(
+	XenonProgramHandle hProgram, 
+	XenonCallbackIterateString onIterateFn, 
+	void* pUserData
+);
+
+XENON_MAIN_API int XenonProgramListUnloadedDependencies(
+	XenonProgramHandle hProgram, 
+	XenonCallbackIterateString onIterateFn, 
+	void* pUserData
+);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

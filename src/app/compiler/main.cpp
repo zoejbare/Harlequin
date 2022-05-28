@@ -144,71 +144,28 @@ int main(int argc, char* argv[])
 	const char* const opLenStringSignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_LEN_STRING);
 	const char* const opLenArraySignature = XenonGetBuiltInFunctionSignature(XENON_BUILT_IN_OP_LEN_ARRAY);
 
-	uint32_t constIndex0;
-	XenonProgramWriterAddConstantNull(hProgramWriter, &constIndex0);
-
-	uint32_t constIndex1;
-	XenonProgramWriterAddConstantInt32(hProgramWriter, 123, &constIndex1);
-
-	uint32_t constIndex2;
-	XenonProgramWriterAddConstantFloat64(hProgramWriter, 1.2345, &constIndex2);
-
-	uint32_t constIndex3;
-	XenonProgramWriterAddConstantFloat64(hProgramWriter, 2.3456, &constIndex3);
-
-	uint32_t constIndex4;
-	XenonProgramWriterAddConstantString(hProgramWriter, "this is ", &constIndex4);
-
-	uint32_t constIndex5;
-	XenonProgramWriterAddConstantString(hProgramWriter, "a test string", &constIndex5);
-
-	uint32_t constIndex6;
-	XenonProgramWriterAddConstantString(hProgramWriter, globalVariableName, &constIndex6);
-
-	uint32_t constIndex7;
-	XenonProgramWriterAddConstantString(hProgramWriter, subFuncSignature, &constIndex7);
-
-	uint32_t constIndex8;
-	XenonProgramWriterAddConstantString(hProgramWriter, nativePrintFuncSignature, &constIndex8);
-
-	uint32_t constIndex9;
-	XenonProgramWriterAddConstantString(hProgramWriter, localVariableName, &constIndex9);
-
-	uint32_t constIndex10;
-	XenonProgramWriterAddConstantString(hProgramWriter, opAddStringSignature, &constIndex10);
-
-	uint32_t constIndex11;
-	XenonProgramWriterAddConstantString(hProgramWriter, opCastInt32ToStringSignature, &constIndex11);
-
-	uint32_t constIndex12;
-	XenonProgramWriterAddConstantString(hProgramWriter, objectTypeName, &constIndex12);
-
-	uint32_t constIndex13;
-	XenonProgramWriterAddConstantString(hProgramWriter, objectMemberName, &constIndex13);
-
-	uint32_t constIndex14;
-	XenonProgramWriterAddConstantString(hProgramWriter, nativeDecrementFuncSignature, &constIndex14);
-
-	uint32_t constIndex15;
-	XenonProgramWriterAddConstantInt32(hProgramWriter, 5, &constIndex15);
-
-	uint32_t constIndex16;
-	XenonProgramWriterAddConstantString(hProgramWriter, opCastInt64ToStringSignature, &constIndex16);
-
-	uint32_t constIndex17;
-	XenonProgramWriterAddConstantString(hProgramWriter, opLenStringSignature, &constIndex17);
-
-	uint32_t constIndex18;
-	XenonProgramWriterAddConstantString(hProgramWriter, excFuncSignature, &constIndex18);
-
-	uint32_t constIndex19;
-	XenonProgramWriterAddConstantString(hProgramWriter, "This is an exception string", &constIndex19);
-
-	uint32_t constIndex20;
-	XenonProgramWriterAddConstantString(hProgramWriter, "The exception was handled successfully!", &constIndex20);
-
-	uint32_t constIndex21;
-	XenonProgramWriterAddConstantString(hProgramWriter, opLenArraySignature, &constIndex21);
+	uint32_t constIndex0; XenonProgramWriterAddConstantNull(hProgramWriter, &constIndex0);
+	uint32_t constIndex1; XenonProgramWriterAddConstantInt32(hProgramWriter, 123, &constIndex1);
+	uint32_t constIndex2; XenonProgramWriterAddConstantFloat64(hProgramWriter, 1.2345, &constIndex2);
+	uint32_t constIndex3; XenonProgramWriterAddConstantFloat64(hProgramWriter, 2.3456, &constIndex3);
+	uint32_t constIndex4; XenonProgramWriterAddConstantString(hProgramWriter, "this is ", &constIndex4);
+	uint32_t constIndex5; XenonProgramWriterAddConstantString(hProgramWriter, "a test string", &constIndex5);
+	uint32_t constIndex6; XenonProgramWriterAddConstantString(hProgramWriter, globalVariableName, &constIndex6);
+	uint32_t constIndex7; XenonProgramWriterAddConstantString(hProgramWriter, subFuncSignature, &constIndex7);
+	uint32_t constIndex8; XenonProgramWriterAddConstantString(hProgramWriter, nativePrintFuncSignature, &constIndex8);
+	uint32_t constIndex9; XenonProgramWriterAddConstantString(hProgramWriter, localVariableName, &constIndex9);
+	uint32_t constIndex10; XenonProgramWriterAddConstantString(hProgramWriter, opAddStringSignature, &constIndex10);
+	uint32_t constIndex11; XenonProgramWriterAddConstantString(hProgramWriter, opCastInt32ToStringSignature, &constIndex11);
+	uint32_t constIndex12; XenonProgramWriterAddConstantString(hProgramWriter, objectTypeName, &constIndex12);
+	uint32_t constIndex13; XenonProgramWriterAddConstantString(hProgramWriter, objectMemberName, &constIndex13);
+	uint32_t constIndex14; XenonProgramWriterAddConstantString(hProgramWriter, nativeDecrementFuncSignature, &constIndex14);
+	uint32_t constIndex15; XenonProgramWriterAddConstantInt32(hProgramWriter, 5, &constIndex15);
+	uint32_t constIndex16; XenonProgramWriterAddConstantString(hProgramWriter, opCastInt64ToStringSignature, &constIndex16);
+	uint32_t constIndex17; XenonProgramWriterAddConstantString(hProgramWriter, opLenStringSignature, &constIndex17);
+	uint32_t constIndex18; XenonProgramWriterAddConstantString(hProgramWriter, excFuncSignature, &constIndex18);
+	uint32_t constIndex19; XenonProgramWriterAddConstantString(hProgramWriter, "This is an exception string", &constIndex19);
+	uint32_t constIndex20; XenonProgramWriterAddConstantString(hProgramWriter, "The exception was handled successfully!", &constIndex20);
+	uint32_t constIndex21; XenonProgramWriterAddConstantString(hProgramWriter, opLenArraySignature, &constIndex21);
 
 	// Add the program globals.
 	XenonProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex4);

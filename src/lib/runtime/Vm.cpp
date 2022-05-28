@@ -34,8 +34,6 @@ XenonVmHandle XenonVm::Create(const XenonVmInit& init)
 	pOutput->report.onMessageFn = init.common.report.onMessageFn;
 	pOutput->report.pUserData = init.common.report.pUserData;
 	pOutput->report.level = init.common.report.reportLevel;
-	pOutput->dependency.onRequestFn = init.dependency.onRequestFn;
-	pOutput->dependency.pUserData = init.dependency.pUserData;
 
 	// Initialize the garbage collector.
 	XenonGarbageCollector::Initialize(pOutput->gc, pOutput, init.gcMaxIterationCount);

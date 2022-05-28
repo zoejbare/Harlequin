@@ -96,7 +96,6 @@ struct XenonVm
 	XenonExecution::HandleToBoolMap executionContexts;
 
 	XenonReport report;
-	XenonDependency dependency;
 	XenonGarbageCollector gc;
 	XenonThread gcThread;
 	XenonRwLock gcRwLock;
