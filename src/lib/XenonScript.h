@@ -398,6 +398,8 @@ XENON_MAIN_API int XenonVmLoadProgram(
 	size_t programFileSize
 );
 
+XENON_MAIN_API int XenonVmInitializePrograms(XenonVmHandle hVm, XenonExecutionHandle* phOutExecution);
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 XENON_MAIN_API int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm);

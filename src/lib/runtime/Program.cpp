@@ -212,6 +212,7 @@ XenonProgramHandle XenonProgram::Create(XenonVmHandle hVm, XenonString* const pP
 	assert(pOutput != XENON_PROGRAM_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
+	pOutput->hInitFunction = XENON_FUNCTION_HANDLE_NULL;
 	pOutput->pName = pProgramName;
 
 	// Initialize the program data.
@@ -398,6 +399,13 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 	// Clean up the data structures.
 	XenonValue::HandleArray::Dispose(hProgram->constants);
 	XenonByteHelper::Array::Dispose(hProgram->code);
+
+	if(hProgram->hInitFunction)
+	{
+		// Dispose of the initializer function.
+		XenonFunction::Dispose(hProgram->hInitFunction);
+		hProgram->hInitFunction = XENON_FUNCTION_HANDLE_NULL;
+	}
 
 	XenonString::Release(hProgram->pName);
 

@@ -568,6 +568,7 @@ bool XenonProgramWriter::Serialize(
 	programHeader.globalTable.length = uint32_t(hProgramWriter->globals.size());
 	programHeader.bytecode.length = uint32_t(bytecode.size());
 	programHeader.functionTable.length = uint32_t(functionBindings.size());
+	programHeader.initFunctionLength = uint32_t(hProgramWriter->initBytecode.size());
 
 	// TODO: Add support for program extensions.
 	programHeader.extensionTable.offset = 0;
@@ -625,6 +626,7 @@ bool XenonProgramWriter::Serialize(
 		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.extensionTable.length); }
 		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecode.offset); }
 		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecode.length); }
+		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.initFunctionLength); }
 
 		return result;
 	};

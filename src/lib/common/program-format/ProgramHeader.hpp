@@ -40,6 +40,7 @@ struct XenonProgramHeader
 	Section extensionTable;
 	Section bytecode;
 
+	uint32_t initFunctionLength;
 	uint32_t headerEndPosition;
 };
 

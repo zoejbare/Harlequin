@@ -23,6 +23,33 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonFunctionHandle XenonFunction::CreateInit(
+	XenonProgramHandle hProgram,
+	const uint32_t bytecodeLength
+)
+{
+	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
+	assert(bytecodeLength > 0);
+
+	XenonFunction* const pOutput = new XenonFunction();
+	assert(pOutput != XENON_FUNCTION_HANDLE_NULL);
+
+	char funcName[512];
+	snprintf(funcName, sizeof(funcName), "void `.init-program-'%s'()", hProgram->pName->data);
+
+	pOutput->hProgram = hProgram;
+	pOutput->pSignature = XenonString::Create(funcName);
+	pOutput->bytecodeOffsetStart = 0;
+	pOutput->bytecodeOffsetEnd = bytecodeLength;
+	pOutput->numParameters = 0;
+	pOutput->numReturnValues = 0;
+	pOutput->isNative = false;
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonFunctionHandle XenonFunction::CreateScript(
 	XenonProgramHandle hProgram,
 	XenonString* const pSignature,
@@ -49,8 +76,6 @@ XenonFunctionHandle XenonFunction::CreateScript(
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = false;
-
-	XENON_MAP_FUNC_CLEAR(locals);
 
 	XenonString::AddRef(pOutput->pSignature);
 

@@ -154,6 +154,12 @@ bool XenonProgramLoader::prv_loadFile()
 
 void XenonProgramLoader::prv_finalize()
 {
+	if(m_programHeader.initFunctionLength > 0)
+	{
+		// Create the program's initializer function.
+		m_hProgram->hInitFunction = XenonFunction::CreateInit(m_hProgram, m_programHeader.initFunctionLength);
+	}
+
 	// Link the object schemas into the program and VM.
 	{
 		// Initialize the program's object table and reserve extra space in the VM's object table.
@@ -464,6 +470,20 @@ bool XenonProgramLoader::prv_readProgramHeader()
 			m_hReport,
 			XENON_MESSAGE_TYPE_ERROR,
 			"Error reading program file bytecode length: error=\"%s\", program=\"%s\"",
+			XenonGetErrorCodeString(result),
+			m_hProgram->pName->data
+		);
+		return false;
+	}
+
+	// Read the initializer function bytecode length.
+	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.initFunctionLength);
+	if(result != XENON_SUCCESS)
+	{
+		XenonReportMessage(
+			m_hReport,
+			XENON_MESSAGE_TYPE_ERROR,
+			"Error reading program file initializer function bytecode length: error=\"%s\", program=\"%s\"",
 			XenonGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);

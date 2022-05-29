@@ -388,6 +388,53 @@ int XenonVmLoadProgram(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonVmInitializePrograms(XenonVmHandle hVm, XenonExecutionHandle* phOutExecution)
+{
+	if(!hVm || !phOutExecution || (*phOutExecution) != XENON_EXECUTION_HANDLE_NULL)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	for(auto& kv : hVm->programs)
+	{
+		XenonProgramHandle hProgram = XENON_MAP_ITER_VALUE(kv);
+
+		if(hProgram->hInitFunction)
+		{
+			// Create an execution context for running the program's initialize function.
+			const int execCreateResult = XenonExecutionCreate(phOutExecution, hVm, hProgram->hInitFunction);
+			assert(execCreateResult == XENON_SUCCESS); (void) execCreateResult;
+
+			// Run the initializer function to completion.
+			const int runResult = XenonExecutionRun(*phOutExecution, XENON_RUN_CONTINUOUS);
+			assert(runResult == XENON_SUCCESS); (void) runResult;
+
+			// Check for any unhandled exceptions that occurred when running the initializer.
+			bool exception = false;
+			XenonExecutionHasUnhandledExceptionOccurred(*phOutExecution, &exception);
+
+			if(exception)
+			{
+				// When script exceptions do occur, return immediately to allow the user code to
+				// query the execution context for more details on what went wrong.
+				break;
+			}
+
+			// We're done with the execution context.
+			XenonExecutionDispose(phOutExecution);
+
+			// Now that we've called the program's initializer function, we won't be calling it again,
+			// so we can dispose of it.
+			XenonFunction::Dispose(hProgram->hInitFunction);
+			hProgram->hInitFunction = XENON_FUNCTION_HANDLE_NULL;
+		}
+	}
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm)
 {
 	if(!hProgram || !phOutVm)

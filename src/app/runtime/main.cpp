@@ -179,6 +179,43 @@ int main(int argc, char* argv[])
 		free(pMem);
 	};
 
+	auto iterateCallstackFrame = [](void* const pUserData, XenonFrameHandle hFrame) -> bool
+	{
+		bool& isTopFrame = *reinterpret_cast<bool*>(pUserData);
+
+		XenonFunctionHandle hFunction = XENON_FUNCTION_HANDLE_NULL;
+		XenonFrameGetFunction(hFrame, &hFunction);
+
+		const char* functionSignature = nullptr;
+		XenonFunctionGetSignature(hFunction, &functionSignature);
+
+		bool isNative = false;
+		XenonFunctionGetIsNative(hFunction, &isNative);
+
+		uint32_t offset = 0;
+		XenonFrameGetBytecodeOffset(hFrame, &offset);
+
+		XenonNativeFunction nativeBinding = nullptr;
+		XenonFunctionGetNativeBinding(hFunction, &nativeBinding);
+
+		char frameMsg[512];
+		snprintf(
+			frameMsg,
+			sizeof(frameMsg),
+			"%s%s [%s: 0x%" PRIXPTR "]",
+			isTopFrame ? "" : "... ",
+			functionSignature,
+			isNative ? "ptr" : "offset",
+			isNative ? reinterpret_cast<uintptr_t>(nativeBinding) : offset
+		);
+
+		printf("%s\n", frameMsg);
+
+		isTopFrame = false;
+
+		return true;
+	};
+
 	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
 	XenonVmInit vmInit;
 
@@ -234,6 +271,7 @@ int main(int argc, char* argv[])
 			char msg[128];
 			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
 			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
+			XenonVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 
@@ -256,13 +294,17 @@ int main(int argc, char* argv[])
 			char msg[128];
 			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
 			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
+			XenonVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 	}
 
+	const int loadProgramResult = XenonVmLoadProgram(hVm, "test", fileData.data(), fileData.size());
+
 	const uint64_t loadProgramTimeEnd = XenonHiResTimerGetTimestamp();
 	const uint64_t loadProgramTimeSlice = loadProgramTimeEnd - loadProgramTimeStart;
 
+	uint64_t initProgramsTimeSlice = 0;
 	uint64_t disassembleTimeSlice = 0;
 	uint64_t createExecTimeSlice = 0;
 	uint64_t runProgramTimeSlice = 0;
@@ -270,8 +312,25 @@ int main(int argc, char* argv[])
 
 	int applicationResult = APPLICATION_RESULT_SUCCESS;
 
-	const int loadProgramResult = XenonVmLoadProgram(hVm, "test", fileData.data(), fileData.size());
+	// Clear the cached file data now that we no longer need it.
 	fileData.clear();
+
+	// Initialize the loaded programs.
+	{
+		const uint64_t initProgramsTimeStart = XenonHiResTimerGetTimestamp();
+
+		XenonExecutionHandle hInitExec = XENON_EXECUTION_HANDLE_NULL;
+		XenonVmInitializePrograms(hVm, &hInitExec);
+
+		const uint64_t initProgramsTimeEnd = XenonHiResTimerGetTimestamp();
+		initProgramsTimeSlice = initProgramsTimeEnd - initProgramsTimeStart;
+
+		if(hInitExec != XENON_EXECUTION_HANDLE_NULL)
+		{
+			XenonVmDispose(&hVm);
+			return APPLICATION_RESULT_FAILURE;
+		}
+	}
 
 	if(loadProgramResult == XENON_SUCCESS)
 	{
@@ -416,10 +475,6 @@ int main(int argc, char* argv[])
 
 			bool status;
 
-			//allocationCount = 0;
-			//mallocCount = 0;
-			//reallocCount= 0;
-
 			const uint64_t runProgramTimeStart = XenonHiResTimerGetTimestamp();
 			int result = XENON_SUCCESS;
 
@@ -444,47 +499,10 @@ int main(int argc, char* argv[])
 				{
 					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
 
-					auto iterateFrame = [](void* const pUserData, XenonFrameHandle hFrame) -> bool
-					{
-						bool& isTopFrame = *reinterpret_cast<bool*>(pUserData);
-
-						XenonFunctionHandle hFunction = XENON_FUNCTION_HANDLE_NULL;
-						XenonFrameGetFunction(hFrame, &hFunction);
-
-						const char* functionSignature = nullptr;
-						XenonFunctionGetSignature(hFunction, &functionSignature);
-
-						bool isNative = false;
-						XenonFunctionGetIsNative(hFunction, &isNative);
-
-						uint32_t offset = 0;
-						XenonFrameGetBytecodeOffset(hFrame, &offset);
-
-						XenonNativeFunction nativeBinding = nullptr;
-						XenonFunctionGetNativeBinding(hFunction, &nativeBinding);
-
-						char frameMsg[512];
-						snprintf(
-							frameMsg,
-							sizeof(frameMsg),
-							"%s%s [%s: 0x%" PRIXPTR "]",
-							isTopFrame ? "" : "... ",
-							functionSignature,
-							isNative ? "ptr" : "offset",
-							isNative ? reinterpret_cast<uintptr_t>(nativeBinding) : offset
-						);
-
-						printf("%s\n", frameMsg);
-
-						isTopFrame = false;
-
-						return true;
-					};
-
 					printf("\n<Callstack>\n");
 
 					bool isTopFrame = true;
-					XenonExecutionResolveFrameStack(hExec, iterateFrame, &isTopFrame);
+					XenonExecutionResolveFrameStack(hExec, iterateCallstackFrame, &isTopFrame);
 
 					printf("\n");
 
@@ -586,6 +604,7 @@ int main(int argc, char* argv[])
 		"\tTotal time: %f ms\n"
 		"\tCreate VM time: %f ms\n"
 		"\tDispose VM time: %f ms\n"
+		"\tInit programs time: %f ms\n"
 		"\tCreate exec-context time: %f ms\n"
 		"\tDispose exec-context time: %f ms\n"
 		"\tLoad program time: %f ms\n"
@@ -594,6 +613,7 @@ int main(int argc, char* argv[])
 		double(overallTimeSlice) * convertTimeToMs,
 		double(createVmTimeSlice) * convertTimeToMs,
 		double(disposeVmTimeSlice) * convertTimeToMs,
+		double(initProgramsTimeSlice) * convertTimeToMs,
 		double(createExecTimeSlice) * convertTimeToMs,
 		double(disposeExecTimeSlice) * convertTimeToMs,
 		double(loadProgramTimeSlice) * convertTimeToMs,

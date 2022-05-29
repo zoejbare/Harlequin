@@ -69,6 +69,7 @@ struct XenonProgram
 	XenonByteHelper::Array code;
 
 	XenonVmHandle hVm;
+	XenonFunctionHandle hInitFunction;
 
 	XenonString* pName;
 

@@ -60,27 +60,28 @@ struct XenonFunction
 
 	typedef XenonStack<XenonFunctionHandle> HandleStack;
 
+	static XenonFunctionHandle CreateInit(XenonProgramHandle hProgram, uint32_t bytecodeLength);
 	static XenonFunctionHandle CreateScript(
 		XenonProgramHandle hProgram,
-		XenonString* const pSignature,
+		XenonString* pSignature,
 		XenonValue::StringToHandleMap& locals,
 		XenonGuardedBlock::Array& guardedBlocks,
-		const uint32_t bytecodeOffsetStart,
-		const uint32_t bytecodeOffsetEnd,
-		const uint16_t numParameters,
-		const uint16_t numReturnValues
+		uint32_t bytecodeOffsetStart,
+		uint32_t bytecodeOffsetEnd,
+		uint16_t numParameters,
+		uint16_t numReturnValues
 	);
 	static XenonFunctionHandle CreateNative(
 		XenonProgramHandle hProgram,
-		XenonString* const pSignature,
-		const uint16_t numParameters,
-		const uint16_t numReturnValues
+		XenonString* pSignature,
+		uint16_t numParameters,
+		uint16_t numReturnValues
 	);
 	static XenonFunctionHandle CreateBuiltIn(
-		XenonString* const pSignature,
+		XenonString* pSignature,
 		XenonNativeFunction nativeFn,
-		const uint16_t numParameters,
-		const uint16_t numReturnValues
+		uint16_t numParameters,
+		uint16_t numReturnValues
 	);
 	static void Dispose(XenonFunctionHandle hFunction);
 
