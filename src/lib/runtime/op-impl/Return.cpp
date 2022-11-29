@@ -42,10 +42,13 @@ void OpCodeExec_Return(XenonExecutionHandle hExec)
 
 	if(result != XENON_SUCCESS)
 	{
-		char msg[64];
-		snprintf(msg, sizeof(msg), "Failed to pop frame: error=%d", result);
-
-		XenonExecution::RaiseFatalStandardException(hExec, XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, msg);
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec, 
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			"Failed to pop frame: error=%d", 
+			result
+		);
 	}
 	else if(!hExec->hCurrentFrame)
 	{

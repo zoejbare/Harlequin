@@ -55,14 +55,24 @@ void OpCodeExec_LoadParam(XenonExecutionHandle hExec)
 		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
 		if(result != XENON_SUCCESS)
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecution::RaiseOpCodeException(
+				hExec,
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to set general-purpose register: r(%" PRIu32 ")",
+				gpRegIndex
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to retrieve I/O register: p(%" PRIu32 ")",
+			ioRegIndex
+		);
 	}
 }
 

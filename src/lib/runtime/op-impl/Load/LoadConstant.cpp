@@ -58,9 +58,8 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 		if(result != XENON_SUCCESS)
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
+			XenonExecution::RaiseOpCodeException(
 				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
 				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to set general-purpose register: r(%" PRIu32 ")",
 				registerIndex
@@ -70,9 +69,8 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
+		XenonExecution::RaiseOpCodeException(
 			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
 			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve constant value: c(%" PRIu32 ")",
 			constantIndex

@@ -69,23 +69,21 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 					if(result != XENON_SUCCESS)
 					{
 						// Raise a fatal script exception.
-						XenonExecutionRaiseStandardException(
-							hExec,
-							XENON_EXCEPTION_SEVERITY_FATAL,
-							XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-							"Failed to set general-purpose register: r(%" PRIu32 ")",
+						XenonExecution::RaiseOpCodeException(
+							hExec, 
+							XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+							"Failed to set general-purpose register: r(%" PRIu32 ")", 
 							registerIndex
 						);
 					}
 
-					XenonValueAbandon(hObject);
+					XenonValue::SetAutoMark(hObject, false);
 				}
 				else
 				{
 					// Raise a fatal script exception.
-					XenonExecutionRaiseStandardException(
+					XenonExecution::RaiseOpCodeException(
 						hExec,
-						XENON_EXCEPTION_SEVERITY_FATAL,
 						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to create object value"
 					);
@@ -94,10 +92,9 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecutionRaiseStandardException(
-					hExec,
-					XENON_EXCEPTION_SEVERITY_FATAL,
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				XenonExecution::RaiseOpCodeException(
+					hExec, 
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 					"Failed to find object schema: type=%s",
 					hObjectTypeName->as.pString->data
 				);
@@ -106,10 +103,9 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
-				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
-				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			XenonExecution::RaiseOpCodeException(
+				hExec, 
+				XENON_STANDARD_EXCEPTION_TYPE_ERROR, 
 				"Type mismatch; expected string: c(%" PRIu32 ")",
 				constantIndex
 			);
@@ -118,10 +114,9 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
-			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+		XenonExecution::RaiseOpCodeException(
+			hExec, 
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to retrieve constant value: c(%" PRIu32 ")",
 			constantIndex
 		);

@@ -61,9 +61,8 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 				if(result != XENON_SUCCESS)
 				{
 					// Raise a fatal script exception.
-					XenonExecutionRaiseStandardException(
+					XenonExecution::RaiseOpCodeException(
 						hExec,
-						XENON_EXCEPTION_SEVERITY_FATAL,
 						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to set general-purpose register: r(%" PRIu32 ")",
 						registerIndex
@@ -73,9 +72,8 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecutionRaiseStandardException(
+				XenonExecution::RaiseOpCodeException(
 					hExec,
-					XENON_EXCEPTION_SEVERITY_FATAL,
 					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Failed to retrieve global variable: %s",
 					hNameValue->as.pString->data
@@ -85,9 +83,8 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
+			XenonExecution::RaiseOpCodeException(
 				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
 				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
 				"Type mismatch; expected string: c(%" PRIu32 ")",
 				constantIndex
@@ -97,9 +94,8 @@ void OpCodeExec_LoadGlobal(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
+		XenonExecution::RaiseOpCodeException(
 			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
 			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve constant value: c(%" PRIu32 ")",
 			constantIndex

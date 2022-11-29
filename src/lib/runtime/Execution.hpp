@@ -62,7 +62,7 @@ struct XenonExecution
 	static void Run(XenonExecutionHandle hExec, const int runMode);
 
 	static void RaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, const int severity);
-	static void RaiseFatalStandardException(XenonExecutionHandle hExec, const int type, const char* const msg);
+	static void RaiseOpCodeException(XenonExecutionHandle hExec, const int type, const char* const fmt, ...);
 
 	static void prv_runStep(XenonExecutionHandle);
 	static void prv_onGcDiscovery(XenonGarbageCollector&, void*);

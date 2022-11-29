@@ -65,26 +65,46 @@ void OpCodeExec_PullGlobal(XenonExecutionHandle hExec)
 				result = XenonVm::SetGlobalVariable(hExec->hVm, XENON_VALUE_HANDLE_NULL, hNameValue->as.pString);
 				if(result != XENON_SUCCESS)
 				{
-					// TODO: Raise script exception
-					hExec->exception = true;
+					// Raise a fatal script exception.
+					XenonExecution::RaiseOpCodeException(
+						hExec,
+						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						"Failed to clear global variable: %s",
+						hNameValue->as.pString->data
+					);
 				}
 			}
 			else
 			{
-				// TODO: Raise script exception.
-				hExec->exception = true;
+				// Raise a fatal script exception.
+				XenonExecution::RaiseOpCodeException(
+					hExec,
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to set general-purpose register: r(%" PRIu32 ")",
+					registerIndex
+				);
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception.
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecution::RaiseOpCodeException(
+				hExec,
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to retrieve global variable: %s",
+				hNameValue->as.pString->data
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception.
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec,
+			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			"Type mismatch; expected string: c(%" PRIu32 ")",
+			constantIndex
+		);
 	}
 }
 

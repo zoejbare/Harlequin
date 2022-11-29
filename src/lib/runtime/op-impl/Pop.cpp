@@ -52,14 +52,25 @@ void OpCodeExec_Pop(XenonExecutionHandle hExec)
 		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
 		if(result != XENON_SUCCESS)
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecution::RaiseOpCodeException(
+				hExec,
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to set general-purpose register: r(%" PRIu32 ")",
+				registerIndex
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to pop value from stack at frame: \"%s\", offset(0x%" PRIXPTR ")",
+			hExec->hCurrentFrame->hFunction->pSignature->data,
+			uintptr_t(hExec->hCurrentFrame->decoder.cachedIp)
+		);
 	}
 }
 

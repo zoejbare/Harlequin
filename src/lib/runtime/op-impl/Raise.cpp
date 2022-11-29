@@ -47,16 +47,16 @@ void OpCodeExec_Raise(XenonExecutionHandle hExec)
 	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
 	if(result == XENON_SUCCESS)
 	{
+		// Raise a regular exception from the value at the indicated register.
 		XenonExecution::RaiseException(hExec, hValue, XENON_EXCEPTION_SEVERITY_NORMAL);
 	}
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
-			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve value for general-purpose register: r(%" PRIu32 ")",
+		XenonExecution::RaiseOpCodeException(
+			hExec, 
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
 			registerIndex
 		);
 	}

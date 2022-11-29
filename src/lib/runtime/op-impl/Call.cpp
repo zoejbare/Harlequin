@@ -81,21 +81,36 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 				}
 				else
 				{
-					// TODO: Raise script exception
-					hExec->exception = true;
+					// Raise a fatal script exception.
+					XenonExecution::RaiseOpCodeException(
+						hExec, 
+						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+						"Script native function pointer is null: \"%s\"", 
+						hFunction->pSignature->data
+					);
 				}
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecution::RaiseOpCodeException(
+				hExec, 
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+				"Script function does not exist: \"%s\"", 
+				hValue->as.pString->data
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec, 
+			XENON_STANDARD_EXCEPTION_TYPE_ERROR, 
+			"Script function name register is not a string: c(%" PRIu32 ")",
+			constIndex
+		);
 	}
 }
 

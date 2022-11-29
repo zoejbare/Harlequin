@@ -58,20 +58,35 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 			result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
 			if(result != XENON_SUCCESS)
 			{
-				// TODO: Raise script exception.
-				hExec->exception = true;
+				// Raise a fatal script exception.
+				XenonExecution::RaiseOpCodeException(
+					hExec,
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to set general-purpose register: r(%" PRIu32 ")",
+					registerIndex
+				);
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception.
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecution::RaiseOpCodeException(
+				hExec,
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to retrieve local variable: %s",
+				hNameValue->as.pString->data
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec,
+			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			"Type mismatch; expected string: c(%" PRIu32 ")",
+			constantIndex
+		);
 	}
 }
 

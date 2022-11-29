@@ -60,20 +60,35 @@ void OpCodeExec_PullParam(XenonExecutionHandle hExec)
 			result = XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
 			if(result != XENON_SUCCESS)
 			{
-				// TODO: Raise script exception
-				hExec->exception = true;
+				// Raise a fatal script exception.
+				XenonExecution::RaiseOpCodeException(
+					hExec,
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to clear I/O register: p(%" PRIu32 ")",
+					gpRegIndex
+				);
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecution::RaiseOpCodeException(
+				hExec,
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to set general-purpose register: r(%" PRIu32 ")",
+				gpRegIndex
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to retrieve I/O register: p(%" PRIu32 ")",
+			ioRegIndex
+		);
 	}
 }
 

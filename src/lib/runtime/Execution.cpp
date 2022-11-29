@@ -387,12 +387,22 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::RaiseFatalStandardException(XenonExecutionHandle hExec, const int type, const char* const msg)
+void XenonExecution::RaiseOpCodeException(XenonExecutionHandle hExec, const int type, const char* const fmt, ...)
 {
 	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
 	assert(type >= 0);
 	assert(type < XENON_STANDARD_EXCEPTION__COUNT);
-	assert(msg != nullptr);
+	assert(fmt != nullptr);
+	
+	char msg[256];
+	{
+		va_list vl;
+
+		// Write the formatted message to the temporary string.
+		va_start(vl, fmt);
+		vsnprintf(msg, (sizeof(msg) / sizeof(char)) - 1, fmt, vl);
+		va_end(vl);
+	}
 
 	XenonValueHandle hThrowValue = XenonVm::CreateStandardException(hExec->hVm, type, msg);
 

@@ -56,11 +56,10 @@ void OpCodeExec_InitArray(XenonExecutionHandle hExec)
 		if(result != XENON_SUCCESS)
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
-				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-				"Failed to set general-purpose register: r(%" PRIu32 ")",
+			XenonExecution::RaiseOpCodeException(
+				hExec, 
+				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+				"Failed to set general-purpose register: r(%" PRIu32 ")", 
 				registerIndex
 			);
 		}
@@ -68,15 +67,15 @@ void OpCodeExec_InitArray(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
-			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+		XenonExecution::RaiseOpCodeException(
+			hExec, 
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to create array value"
 		);
+
 	}
 
-	XenonValueAbandon(hArray);
+	XenonValue::SetAutoMark(hArray, false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

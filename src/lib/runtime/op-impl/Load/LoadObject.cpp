@@ -67,26 +67,46 @@ void OpCodeExec_LoadObject(XenonExecutionHandle hExec)
 				result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hMember, gpDstRegIndex);
 				if(result != XENON_SUCCESS)
 				{
-					// TODO: Raise script exception
-					hExec->exception = true;
+					// Raise a fatal script exception.
+					XenonExecution::RaiseOpCodeException(
+						hExec,
+						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						"Failed to set general-purpose register: r(%" PRIu32 ")",
+						gpDstRegIndex
+					);
 				}
 			}
 			else
 			{
-				// TODO: Raise script exception
-				hExec->exception = true;
+				// Raise a fatal script exception.
+				XenonExecution::RaiseOpCodeException(
+					hExec,
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to retrieve object member at index: #%" PRIu32,
+					memberIndex
+				);
 			}
 		}
 		else
 		{
-			// TODO: Raise script exception
-			hExec->exception = true;
+			// Raise a fatal script exception.
+			XenonExecution::RaiseOpCodeException(
+				hExec,
+				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+				"Type mismatch; expected object: r(%" PRIu32 ")",
+				gpSrcRegIndex
+			);
 		}
 	}
 	else
 	{
-		// TODO: Raise script exception
-		hExec->exception = true;
+		// Raise a fatal script exception.
+		XenonExecution::RaiseOpCodeException(
+			hExec,
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
+			gpSrcRegIndex
+		);
 	}
 }
 

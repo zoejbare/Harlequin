@@ -897,26 +897,29 @@ int XenonExecutionRaiseStandardException(
 	{
 		va_list vl;
 
-		// Make a copy of the variable args list since we need to go through them twice.
+		// Resolve the formatted args to a va_list.
 		va_start(vl, message);
 		formattedMessage = XenonString::RawFormatVarArgs(message, vl);
 		va_end(vl);
 	}
 
+	if(!formattedMessage)
+	{
+		// Failed to allocate the formatted message string.
+		return XENON_ERROR_BAD_ALLOCATION;
+	}
+
+	// Lock the GC thread since we need to create a value for the exception and handle it in the execution context.
 	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
 	XenonValueHandle hException = XenonVm::CreateStandardException(
 		hExec->hVm,
 		exceptionType,
 		formattedMessage
-			? formattedMessage
-			: ""
 	);
 
-	if(formattedMessage)
-	{
-		XenonMemFree((void*)(formattedMessage));
-	}
+	// Free the formatted message string now that we're done with it.
+	XenonMemFree((void*)(formattedMessage));
 
 	XenonExecution::RaiseException(hExec, hException, severity);
 	XenonValue::SetAutoMark(hException, false);
@@ -933,6 +936,7 @@ int XenonExecutionRaiseException(XenonExecutionHandle hExec, XenonValueHandle hV
 		return XENON_ERROR_INVALID_ARG;
 	}
 
+	// Lock the GC thread since we need to handle the exception in the execution context.
 	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
 	XenonExecution::RaiseException(hExec, hValue, severity);

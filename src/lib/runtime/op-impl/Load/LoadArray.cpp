@@ -67,11 +67,10 @@ void OpCodeExec_LoadArray(XenonExecutionHandle hExec)
 				if(result != XENON_SUCCESS)
 				{
 					// Raise a fatal script exception.
-					XenonExecutionRaiseStandardException(
-						hExec,
-						XENON_EXCEPTION_SEVERITY_FATAL,
-						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-						"Failed to set general-purpose register: r(%" PRIu32 ")",
+					XenonExecution::RaiseOpCodeException(
+						hExec, 
+						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+						"Failed to set general-purpose register: r(%" PRIu32 ")", 
 						gpDstRegIndex
 					);
 				}
@@ -79,10 +78,9 @@ void OpCodeExec_LoadArray(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecutionRaiseStandardException(
-					hExec,
-					XENON_EXCEPTION_SEVERITY_FATAL,
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				XenonExecution::RaiseOpCodeException(
+					hExec, 
+					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 					"Array index out of range: r(%" PRIu32 "), length=%zu, index=%" PRIu32,
 					gpSrcRegIndex,
 					hSource->as.array.count,
@@ -93,11 +91,10 @@ void OpCodeExec_LoadArray(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
-				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
-				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
-				"Type mismatch; expected array: r(%" PRIu32 ")",
+			XenonExecution::RaiseOpCodeException(
+				hExec, 
+				XENON_STANDARD_EXCEPTION_TYPE_ERROR, 
+				"Type mismatch; expected array: r(%" PRIu32 ")", 
 				gpSrcRegIndex
 			);
 		}
@@ -105,11 +102,10 @@ void OpCodeExec_LoadArray(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
-			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
+		XenonExecution::RaiseOpCodeException(
+			hExec, 
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
 			gpSrcRegIndex
 		);
 	}

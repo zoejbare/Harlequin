@@ -59,15 +59,14 @@ static void MoveInstructionPointer(XenonExecutionHandle hExec, const int32_t rel
 	if(pNewIp < pFunctionStart || pNewIp >= pFunctionEnd)
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
-			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+		XenonExecution::RaiseOpCodeException(
+			hExec, 
+			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Invalid branch offset: offset=%" PRId32 ", currentPosition=0x%" PRIXPTR ", functionStart=0x%" PRIXPTR ", functionEnd=0x%" PRIXPTR,
 			relativeOffset,
-			hExec->hCurrentFrame->decoder.cachedIp,
-			pFunctionStart,
-			pFunctionEnd
+			uintptr_t(hExec->hCurrentFrame->decoder.cachedIp),
+			uintptr_t(pFunctionStart),
+			uintptr_t(pFunctionEnd)
 		);
 	}
 	else
@@ -116,10 +115,10 @@ static bool EvaluateValue(XenonValueHandle hValue)
 			return hValue->as.uint64 != 0;
 
 		case XENON_VALUE_TYPE_FLOAT32:
-			return hValue->as.float32 != 0;
+			return hValue->as.float32 != 0.0f;
 
 		case XENON_VALUE_TYPE_FLOAT64:
-			return hValue->as.float64 != 0;
+			return hValue->as.float64 != 0.0;
 
 		case XENON_VALUE_TYPE_BOOL:
 			return hValue->as.boolean;
@@ -133,6 +132,30 @@ static bool EvaluateValue(XenonValueHandle hValue)
 	}
 
 	return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+static void RaiseFatalException_ObjectAsBool(XenonExecutionHandle hExec, const uint32_t registerIndex)
+{
+	XenonExecution::RaiseOpCodeException(
+		hExec, 
+		XENON_STANDARD_EXCEPTION_TYPE_ERROR, 
+		"Type mismatch; expected boolean, null, primitive value, or string: r(%" PRIu32 ")", 
+		registerIndex
+	);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+static void RaiseFatalException_NoValueAtGpRegister(XenonExecutionHandle hExec, const uint32_t registerIndex)
+{
+	XenonExecution::RaiseOpCodeException(
+		hExec, 
+		XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+		"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
+		registerIndex
+	);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -186,25 +209,13 @@ void OpCodeExec_BranchIfTrue(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
-				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-				"Directly evaluating object as boolean: r(%" PRIu32 ")",
-				registerIndex
-			);
+			RaiseFatalException_ObjectAsBool(hExec, registerIndex);
 		}
 	}
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
-			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
-			registerIndex
-		);
+		RaiseFatalException_NoValueAtGpRegister(hExec, registerIndex);
 	}
 }
 
@@ -246,25 +257,13 @@ void OpCodeExec_BranchIfFalse(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
-				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-				"Directly evaluating object as boolean: r(%" PRIu32 ")",
-				registerIndex
-			);
+			RaiseFatalException_ObjectAsBool(hExec, registerIndex);
 		}
 	}
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
-			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
-			registerIndex
-		);
+		RaiseFatalException_NoValueAtGpRegister(hExec, registerIndex);
 	}
 }
 

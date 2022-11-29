@@ -69,9 +69,8 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 				else
 				{
 					// Raise a fatal script exception.
-					XenonExecutionRaiseStandardException(
+					XenonExecution::RaiseOpCodeException(
 						hExec,
-						XENON_EXCEPTION_SEVERITY_FATAL,
 						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
 						gpSrcRegIndex
@@ -81,9 +80,8 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecutionRaiseStandardException(
+				XenonExecution::RaiseOpCodeException(
 					hExec,
-					XENON_EXCEPTION_SEVERITY_FATAL,
 					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Array index out of range: r(%" PRIu32 "), length=%zu, index=%" PRIu32,
 					gpSrcRegIndex,
@@ -95,9 +93,8 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecutionRaiseStandardException(
+			XenonExecution::RaiseOpCodeException(
 				hExec,
-				XENON_EXCEPTION_SEVERITY_FATAL,
 				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
 				"Type mismatch; expected array: r(%" PRIu32 ")",
 				gpDstRegIndex
@@ -107,9 +104,8 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecutionRaiseStandardException(
+		XenonExecution::RaiseOpCodeException(
 			hExec,
-			XENON_EXCEPTION_SEVERITY_FATAL,
 			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve general-purpose regsiter: r(%" PRIu32 ")",
 			gpDstRegIndex
