@@ -655,6 +655,10 @@ XENON_MAIN_API int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const
 
 XENON_MAIN_API int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember onIterateFn, void* pUserData);
 
+XENON_MAIN_API void* XenonValueGetObjectUserData(XenonValueHandle hValue);
+
+XENON_MAIN_API int XenonValueSetObjectUserData(XenonValueHandle hValue, void* pUserData);
+
 XENON_MAIN_API int XenonValueGetArrayLength(XenonValueHandle hValue, size_t* pOutLength);
 
 XENON_MAIN_API int XenonValueGetArrayElement(XenonValueHandle hValue, size_t index, XenonValueHandle* phOutElementValue);

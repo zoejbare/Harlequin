@@ -79,6 +79,8 @@ struct XenonScriptObject
 	XenonString* pTypeName;
 	XenonScriptObject* pSchema;
 
+	void* pUserData;
+
 	MemberDefinitionMap definitions;
 
 	XenonValue::HandleArray members;

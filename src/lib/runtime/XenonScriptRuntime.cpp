@@ -2121,6 +2121,36 @@ int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObj
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void* XenonValueGetObjectUserData(XenonValueHandle hValue)
+{
+	if(XenonValueIsObject(hValue))
+	{
+		XenonScriptObject* const pScriptObject = hValue->as.pObject;
+
+		return pScriptObject->pUserData;
+	}
+
+	return nullptr;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonValueSetObjectUserData(XenonValueHandle hValue, void* pUserData)
+{
+	if(!XenonValueIsObject(hValue))
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
+
+	XenonScriptObject* const pScriptObject = hValue->as.pObject;
+
+	pScriptObject->pUserData = pUserData;
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonValueGetArrayLength(XenonValueHandle hValue, size_t* const pOutIndex)
 {
 	if(!pOutIndex)

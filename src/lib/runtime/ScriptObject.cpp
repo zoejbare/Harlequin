@@ -181,6 +181,9 @@ XenonScriptObject* XenonScriptObject::prv_createObject(XenonScriptObject* const 
 	pOutput->pTypeName = pOriginalObject->pTypeName;
 	pOutput->definitions = pOriginalObject->definitions;
 
+	// Object user data should always start out as null.
+	pOutput->pUserData = nullptr;
+
 	// Add a reference for the type name.
 	XenonString::AddRef(pOutput->pTypeName);
 
