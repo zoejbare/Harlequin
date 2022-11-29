@@ -24,9 +24,13 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#if !defined(XENON_PLATFORM_PS3) && !defined(XENON_PLATFORM_PSVITA)
+	#include <memory.h>
+#endif
 
 #include <deque>
 #include <map>
@@ -284,7 +288,7 @@ int main(int argc, char* argv[])
 		{
 			// Resize the file data vector, then copy the contents of the file to it.
 			fileData.resize(fileSize);
-			memcpy(fileData.data(), pFileData, fileSize);
+			memcpy(&fileData[0], pFileData, fileSize);
 		}
 
 		XenonSerializerDispose(&hFileSerializer);
@@ -299,7 +303,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	const int loadProgramResult = XenonVmLoadProgram(hVm, "test", fileData.data(), fileData.size());
+	const int loadProgramResult = XenonVmLoadProgram(hVm, "test", &fileData[0], fileData.size());
 
 	const uint64_t loadProgramTimeEnd = XenonHiResTimerGetTimestamp();
 	const uint64_t loadProgramTimeSlice = loadProgramTimeEnd - loadProgramTimeStart;
