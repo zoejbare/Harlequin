@@ -644,7 +644,12 @@ void XenonValue::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 			// Mark each member inside the object.
 			for(size_t i = 0; i < pScriptObject->members.count; ++i)
 			{
-				XenonGarbageCollector::MarkObject(gc, &pScriptObject->members.pData[i]->gcProxy);
+				XenonValueHandle hMemberValue = pScriptObject->members.pData[i];
+
+				if(CanBeMarked(hMemberValue))
+				{
+					XenonGarbageCollector::MarkObject(gc, &hMemberValue->gcProxy);
+				}
 			}
 
 			break;
@@ -657,7 +662,12 @@ void XenonValue::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaqu
 			// Mark each element in the array.
 			for(size_t i = 0; i < array.count; ++i)
 			{
-				XenonGarbageCollector::MarkObject(gc, &array.pData[i]->gcProxy);
+				XenonValueHandle hIndexValue = array.pData[i];
+
+				if(CanBeMarked(hIndexValue))
+				{
+					XenonGarbageCollector::MarkObject(gc, &hIndexValue->gcProxy);
+				}
 			}
 
 			break;
