@@ -97,12 +97,6 @@ void XenonScriptObject::Dispose(XenonScriptObject* const pObject)
 		XenonString::Release(XENON_MAP_ITER_KEY(kv));
 	}
 
-	// Dispose of the member values.
-	for(size_t i = 0; i < pObject->members.count; ++i)
-	{
-		XenonValueAbandon(pObject->members.pData[i]);
-	}
-
 	XenonValue::HandleArray::Dispose(pObject->members);
 	XenonString::Release(pObject->pTypeName);
 
