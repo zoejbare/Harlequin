@@ -24,6 +24,7 @@
 #include "../Program.hpp"
 #include "../Vm.hpp"
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 
@@ -175,8 +176,6 @@ void OpCodeExec_CallValue(XenonExecutionHandle hExec)
 
 void OpCodeDisasm_CallValue(XenonDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
