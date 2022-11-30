@@ -529,8 +529,8 @@ int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOut
 //----------------------------------------------------------------------------------------------------------------------
 
 int XenonProgramListGlobalVariables(
-	XenonProgramHandle hProgram, 
-	XenonCallbackIterateString onIterateFn, 
+	XenonProgramHandle hProgram,
+	XenonCallbackIterateString onIterateFn,
 	void* const pUserData
 )
 {
@@ -579,8 +579,8 @@ int XenonProgramListDependencies(XenonProgramHandle hProgram, XenonCallbackItera
 //----------------------------------------------------------------------------------------------------------------------
 
 int XenonProgramListUnloadedDependencies(
-	XenonProgramHandle hProgram, 
-	XenonCallbackIterateString onIterateFn, 
+	XenonProgramHandle hProgram,
+	XenonCallbackIterateString onIterateFn,
 	void* const pUserData
 )
 {
@@ -1588,6 +1588,18 @@ XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const char* const str
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonValueHandle XenonValueCreateFunction(XenonVmHandle hVm, XenonFunctionHandle hFunction)
+{
+	if(!hVm || !hFunction)
+	{
+		return XENON_VALUE_HANDLE_NULL;
+	}
+
+	return XenonValue::CreateFunction(hVm, hFunction);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typeName)
 {
 	if(!hVm || !typeName || typeName[0] == '\0')
@@ -1776,16 +1788,16 @@ bool XenonValueIsNull(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsNative(XenonValueHandle hValue)
+bool XenonValueIsString(XenonValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_NATIVE);
+	return hValue && (hValue->type == XENON_VALUE_TYPE_STRING);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsString(XenonValueHandle hValue)
+bool XenonValueIsFunction(XenonValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_STRING);
+	return hValue && (hValue->type == XENON_VALUE_TYPE_FUNCTION);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1800,6 +1812,13 @@ bool XenonValueIsObject(XenonValueHandle hValue)
 bool XenonValueIsArray(XenonValueHandle hValue)
 {
 	return hValue && (hValue->type == XENON_VALUE_TYPE_ARRAY);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool XenonValueIsNative(XenonValueHandle hValue)
+{
+	return hValue && (hValue->type == XENON_VALUE_TYPE_NATIVE);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1936,11 +1955,11 @@ double XenonValueGetFloat64(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonValueGetNative(XenonValueHandle hValue)
+const char* XenonValueGetString(XenonValueHandle hValue)
 {
-	if(XenonValueIsNative(hValue))
+	if(XenonValueIsString(hValue))
 	{
-		return hValue->as.native.pObject;
+		return hValue->as.pString->data ? hValue->as.pString->data : "";
 	}
 
 	return nullptr;
@@ -1948,11 +1967,23 @@ void* XenonValueGetNative(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* XenonValueGetString(XenonValueHandle hValue)
+XenonFunctionHandle XenonValueGetFunction(XenonValueHandle hValue)
 {
-	if(XenonValueIsString(hValue))
+	if(XenonValueIsFunction(hValue))
 	{
-		return hValue->as.pString->data ? hValue->as.pString->data : "";
+		return hValue->as.hFunction;
+	}
+
+	return XENON_FUNCTION_HANDLE_NULL;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void* XenonValueGetNative(XenonValueHandle hValue)
+{
+	if(XenonValueIsNative(hValue))
+	{
+		return hValue->as.native.pObject;
 	}
 
 	return nullptr;

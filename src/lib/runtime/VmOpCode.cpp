@@ -35,6 +35,7 @@ void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
 	XENON_BIND_OP_CODE(YIELD, Yield);
 
 	XENON_BIND_OP_CODE(CALL, Call);
+	XENON_BIND_OP_CODE(CALL_VALUE, CallValue);
 	XENON_BIND_OP_CODE(RAISE, Raise);
 
 	XENON_BIND_OP_CODE(LOAD_CONSTANT, LoadConstant);
@@ -61,6 +62,7 @@ void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
 
 	XENON_BIND_OP_CODE(INIT_OBJECT, InitObject);
 	XENON_BIND_OP_CODE(INIT_ARRAY, InitArray);
+	XENON_BIND_OP_CODE(INIT_FUNCTION, InitFunction);
 
 	XENON_BIND_OP_CODE(BRANCH, Branch);
 	XENON_BIND_OP_CODE(BRANCH_IF_TRUE, BranchIfTrue);

@@ -93,6 +93,7 @@ struct XenonValue
 	static XenonValueHandle CreateString(XenonVmHandle hVm, const char* const string);
 	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
 	static XenonValueHandle CreateObject(XenonVmHandle hVm, XenonScriptObject* const pObjectSchema);
+	static XenonValueHandle CreateFunction(XenonVmHandle hVm, XenonFunctionHandle hFunction);
 	static XenonValueHandle CreateArray(XenonVmHandle hVm, const size_t count);
 	static XenonValueHandle CreateNative(
 		XenonVmHandle hVm,
@@ -127,6 +128,8 @@ struct XenonValue
 
 		XenonString* pString;
 		XenonScriptObject* pObject;
+
+		XenonFunctionHandle hFunction;
 
 		double float64;
 		uint64_t uint64;

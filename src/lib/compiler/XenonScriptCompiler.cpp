@@ -869,6 +869,21 @@ int XenonBytecodeWriteCall(XenonSerializerHandle hSerializer, const uint32_t con
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int XenonBytecodeWriteCallValue(XenonSerializerHandle hSerializer, const uint32_t gpRegIndex)
+{
+	if(!hSerializer)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_CALL_VALUE);
+	_XENON_WRITE_OP_UDWORD(gpRegIndex);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int XenonBytecodeWriteRaise(XenonSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
@@ -1280,6 +1295,26 @@ int XenonBytecodeWriteInitArray(
 	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_INIT_ARRAY);
 	_XENON_WRITE_OP_UDWORD(gpRegIndex);
 	_XENON_WRITE_OP_UDWORD(initialCount);
+
+	return XENON_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int XenonBytecodeWriteInitFunction(
+	XenonSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint32_t constantIndex
+)
+{
+	if(!hSerializer)
+	{
+		return XENON_ERROR_INVALID_ARG;
+	}
+
+	_XENON_WRITE_OP_BYTE(XENON_OP_CODE_INIT_FUNCTION);
+	_XENON_WRITE_OP_UDWORD(gpRegIndex);
+	_XENON_WRITE_OP_UDWORD(constantIndex);
 
 	return XENON_SUCCESS;
 }

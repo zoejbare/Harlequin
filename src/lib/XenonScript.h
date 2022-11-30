@@ -411,28 +411,28 @@ XENON_MAIN_API int XenonProgramGetEndianness(XenonProgramHandle hProgram, int* p
 XENON_MAIN_API int XenonProgramGetFunctionCount(XenonProgramHandle hProgram, size_t* pOutCount);
 
 XENON_MAIN_API int XenonProgramListFunctions(
-	XenonProgramHandle hProgram, 
-	XenonCallbackIterateString onIterateFn, 
+	XenonProgramHandle hProgram,
+	XenonCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
 XENON_MAIN_API int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOutCount);
 
 XENON_MAIN_API int XenonProgramListGlobalVariables(
-	XenonProgramHandle hProgram, 
-	XenonCallbackIterateString onIterateFn, 
+	XenonProgramHandle hProgram,
+	XenonCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
 XENON_MAIN_API int XenonProgramListDependencies(
-	XenonProgramHandle hProgram, 
-	XenonCallbackIterateString onIterateFn, 
+	XenonProgramHandle hProgram,
+	XenonCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
 XENON_MAIN_API int XenonProgramListUnloadedDependencies(
-	XenonProgramHandle hProgram, 
-	XenonCallbackIterateString onIterateFn, 
+	XenonProgramHandle hProgram,
+	XenonCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
@@ -562,6 +562,8 @@ XENON_MAIN_API XenonValueHandle XenonValueCreateNull();
 
 XENON_MAIN_API XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const char* const string);
 
+XENON_MAIN_API XenonValueHandle XenonValueCreateFunction(XenonVmHandle hVm, XenonFunctionHandle hFunction);
+
 XENON_MAIN_API XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typeName);
 
 XENON_MAIN_API XenonValueHandle XenonValueCreateArray(XenonVmHandle hVm, size_t count);
@@ -605,13 +607,15 @@ XENON_MAIN_API bool XenonValueIsFloat64(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsNull(XenonValueHandle hValue);
 
-XENON_MAIN_API bool XenonValueIsNative(XenonValueHandle hValue);
-
 XENON_MAIN_API bool XenonValueIsString(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsFunction(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsObject(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsArray(XenonValueHandle hValue);
+
+XENON_MAIN_API bool XenonValueIsNative(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueGetBool(XenonValueHandle hValue);
 
@@ -635,9 +639,11 @@ XENON_MAIN_API float XenonValueGetFloat32(XenonValueHandle hValue);
 
 XENON_MAIN_API double XenonValueGetFloat64(XenonValueHandle hValue);
 
-XENON_MAIN_API void* XenonValueGetNative(XenonValueHandle hValue);
-
 XENON_MAIN_API const char* XenonValueGetString(XenonValueHandle hValue);
+
+XENON_MAIN_API XenonFunctionHandle XenonValueGetFunction(XenonValueHandle hValue);
+
+XENON_MAIN_API void* XenonValueGetNative(XenonValueHandle hValue);
 
 XENON_MAIN_API size_t XenonValueGetStringLength(XenonValueHandle hValue);
 
@@ -806,6 +812,8 @@ XENON_MAIN_API int XenonBytecodeWriteYield(XenonSerializerHandle hSerializer);
 
 XENON_MAIN_API int XenonBytecodeWriteCall(XenonSerializerHandle hSerializer, uint32_t constantIndex);
 
+XENON_MAIN_API int XenonBytecodeWriteCallValue(XenonSerializerHandle hSerializer, uint32_t gpRegIndex);
+
 XENON_MAIN_API int XenonBytecodeWriteRaise(XenonSerializerHandle hSerializer, uint32_t gpRegIndex);
 
 XENON_MAIN_API int XenonBytecodeWriteLoadConstant(
@@ -926,6 +934,12 @@ XENON_MAIN_API int XenonBytecodeWriteInitArray(
 	uint32_t initialCount
 );
 
+XENON_MAIN_API int XenonBytecodeWriteInitFunction(
+	XenonSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t constantIndex
+);
+
 XENON_MAIN_API int XenonBytecodeWriteBranch(XenonSerializerHandle hSerializer, int32_t offset);
 
 XENON_MAIN_API int XenonBytecodeWriteBranchIfTrue(
@@ -966,6 +980,7 @@ enum XenonValueType
 	XENON_VALUE_TYPE_BOOL,
 
 	XENON_VALUE_TYPE_STRING,
+	XENON_VALUE_TYPE_FUNCTION,
 	XENON_VALUE_TYPE_OBJECT,
 	XENON_VALUE_TYPE_ARRAY,
 	XENON_VALUE_TYPE_NATIVE,

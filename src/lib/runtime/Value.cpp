@@ -295,6 +295,24 @@ XenonValueHandle XenonValue::CreateObject(XenonVmHandle hVm, XenonScriptObject* 
 
 //----------------------------------------------------------------------------------------------------------------------
 
+XenonValueHandle XenonValue::CreateFunction(XenonVmHandle hVm, XenonFunctionHandle hFunction)
+{
+	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(hFunction != nullptr);
+
+	XenonValue* const pOutput = prv_onCreate(XENON_VALUE_TYPE_FUNCTION, hVm);
+	if(!pOutput)
+	{
+		return &NullValue;
+	}
+
+	pOutput->as.hFunction = hFunction;
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 XenonValueHandle XenonValue::CreateArray(XenonVmHandle hVm, const size_t count)
 {
 	assert(hVm != XENON_VM_HANDLE_NULL);
