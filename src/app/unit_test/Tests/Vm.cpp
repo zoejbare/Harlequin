@@ -198,7 +198,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_INT64);
 			EXPECT_EQ(peekValue.as.int64, testValue[3].as.int64);
 
-			const int peekTestValue3 = XenonValueAbandon(&peekValue);
+			const int peekTestValue3 = XenonValueGcExpose(&peekValue);
 			EXPECT_EQ(peekTestValue3, XENON_SUCCESS);
 
 			peekValue = XenonValueCreateNull();
@@ -208,7 +208,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_FLOAT64);
 			EXPECT_EQ(peekValue.as.float64, testValue[2].as.float64);
 
-			const int peekTestValue2 = XenonValueAbandon(&peekValue);
+			const int peekTestValue2 = XenonValueGcExpose(&peekValue);
 			EXPECT_EQ(peekTestValue2, XENON_SUCCESS);
 
 			peekValue = XenonValueCreateNull();
@@ -218,7 +218,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_UINT32);
 			EXPECT_EQ(peekValue.as.uint32, testValue[1].as.uint32);
 
-			const int peekTestValue1 = XenonValueAbandon(&peekValue);
+			const int peekTestValue1 = XenonValueGcExpose(&peekValue);
 			EXPECT_EQ(peekTestValue1, XENON_SUCCESS);
 
 			peekValue = XenonValueCreateNull();
@@ -228,7 +228,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_BOOL);
 			EXPECT_EQ(peekValue.as.boolean, testValue[0].as.boolean);
 
-			const int peekTestValue0 = XenonValueAbandon(&peekValue);
+			const int peekTestValue0 = XenonValueGcExpose(&peekValue);
 			EXPECT_EQ(peekTestValue0, XENON_SUCCESS);
 		}
 
@@ -245,7 +245,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_INT64);
 			EXPECT_EQ(popValue.as.int64, testValue[3].as.int64);
 
-			const int popTestValue3 = XenonValueAbandon(&popValue);
+			const int popTestValue3 = XenonValueGcExpose(&popValue);
 			EXPECT_EQ(popTestValue3, XENON_SUCCESS);
 
 			popValue = XenonValueCreateNull();
@@ -255,7 +255,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_FLOAT64);
 			EXPECT_EQ(popValue.as.float64, testValue[2].as.float64);
 
-			const int popTestValue2 = XenonValueAbandon(&popValue);
+			const int popTestValue2 = XenonValueGcExpose(&popValue);
 			EXPECT_EQ(popTestValue2, XENON_SUCCESS);
 
 			popValue = XenonValueCreateNull();
@@ -265,7 +265,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_UINT32);
 			EXPECT_EQ(popValue.as.uint32, testValue[1].as.uint32);
 
-			const int popTestValue1 = XenonValueAbandon(&popValue);
+			const int popTestValue1 = XenonValueGcExpose(&popValue);
 			EXPECT_EQ(popTestValue1, XENON_SUCCESS);
 
 			popValue = XenonValueCreateNull();
@@ -275,7 +275,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_BOOL);
 			EXPECT_EQ(popValue.as.boolean, testValue[0].as.boolean);
 
-			const int popTestValue0 = XenonValueAbandon(&popValue);
+			const int popTestValue0 = XenonValueGcExpose(&popValue);
 			EXPECT_EQ(popTestValue0, XENON_SUCCESS);
 		}
 
@@ -318,7 +318,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_BOOL);
 			EXPECT_EQ(localValue.as.boolean, testValue[0].as.boolean);
 
-			const int localTestValue0 = XenonValueAbandon(&localValue);
+			const int localTestValue0 = XenonValueGcExpose(&localValue);
 			EXPECT_EQ(localTestValue0, XENON_SUCCESS);
 
 			localValue = XenonValueCreateNull();
@@ -328,7 +328,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_UINT32);
 			EXPECT_EQ(localValue.as.uint32, testValue[1].as.uint32);
 
-			const int localTestValue1 = XenonValueAbandon(&localValue);
+			const int localTestValue1 = XenonValueGcExpose(&localValue);
 			EXPECT_EQ(localTestValue1, XENON_SUCCESS);
 
 			localValue = XenonValueCreateNull();
@@ -338,7 +338,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_FLOAT64);
 			EXPECT_EQ(localValue.as.float64, testValue[2].as.float64);
 
-			const int localTestValue2 = XenonValueAbandon(&localValue);
+			const int localTestValue2 = XenonValueGcExpose(&localValue);
 			EXPECT_EQ(localTestValue2, XENON_SUCCESS);
 
 			localValue = XenonValueCreateNull();
@@ -348,7 +348,7 @@ TEST(TestVm, Execution)
 			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_INT64);
 			EXPECT_EQ(localValue.as.int64, testValue[3].as.int64);
 
-			const int localTestValue3 = XenonValueAbandon(&localValue);
+			const int localTestValue3 = XenonValueGcExpose(&localValue);
 			EXPECT_EQ(localTestValue3, XENON_SUCCESS);
 		}
 

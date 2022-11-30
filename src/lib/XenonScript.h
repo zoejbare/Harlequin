@@ -46,7 +46,7 @@ extern "C" {
 #define XENON_VM_THREAD_MINIMUM_STACK_SIZE 262144
 #define XENON_VM_THREAD_DEFAULT_STACK_SIZE 1048576
 
-#define XENON_VM_GC_DEFAULT_ITERATION_COUNT 32
+#define XENON_VM_GC_DEFAULT_ITERATION_COUNT 64
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -579,7 +579,9 @@ XENON_MAIN_API XenonValueHandle XenonValueCreateNative(
 
 XENON_MAIN_API XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue);
 
-XENON_MAIN_API void XenonValueAbandon(XenonValueHandle hValue);
+XENON_MAIN_API int XenonValueGcProtect(XenonValueHandle hValue);
+
+XENON_MAIN_API int XenonValueGcExpose(XenonValueHandle hValue);
 
 XENON_MAIN_API bool XenonValueIsPrimitiveType(XenonValueHandle hValue);
 

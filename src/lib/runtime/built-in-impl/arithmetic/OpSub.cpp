@@ -43,13 +43,13 @@ void XenonBuiltIn::OpSubBool(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 	const bool right = XenonValueGetBool(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateBool(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -75,13 +75,13 @@ void XenonBuiltIn::OpSubInt8(XenonExecutionHandle hExec, XenonFunctionHandle, vo
 	const int8_t right = XenonValueGetInt8(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt8(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -107,13 +107,13 @@ void XenonBuiltIn::OpSubInt16(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	const int16_t right = XenonValueGetInt16(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt16(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -139,13 +139,13 @@ void XenonBuiltIn::OpSubInt32(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	const int32_t right = XenonValueGetInt32(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt32(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -171,13 +171,13 @@ void XenonBuiltIn::OpSubInt64(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	const int64_t right = XenonValueGetInt64(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateInt64(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -203,13 +203,13 @@ void XenonBuiltIn::OpSubUint8(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	const uint8_t right = XenonValueGetUint8(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint8(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -235,13 +235,13 @@ void XenonBuiltIn::OpSubUint16(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	const uint16_t right = XenonValueGetUint16(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint16(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -267,13 +267,13 @@ void XenonBuiltIn::OpSubUint32(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	const uint32_t right = XenonValueGetUint32(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint32(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -299,13 +299,13 @@ void XenonBuiltIn::OpSubUint64(XenonExecutionHandle hExec, XenonFunctionHandle, 
 	const uint64_t right = XenonValueGetUint64(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateUint64(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -331,13 +331,13 @@ void XenonBuiltIn::OpSubFloat32(XenonExecutionHandle hExec, XenonFunctionHandle,
 	const float right = XenonValueGetFloat32(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateFloat32(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -363,13 +363,13 @@ void XenonBuiltIn::OpSubFloat64(XenonExecutionHandle hExec, XenonFunctionHandle,
 	const double right = XenonValueGetFloat64(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueAbandon(hLeft);
-	XenonValueAbandon(hRight);
+	XenonValueGcExpose(hLeft);
+	XenonValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
 	XenonValueHandle hOutput = XenonValueCreateFloat64(hVm, left - right);
 	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueAbandon(hOutput);
+	XenonValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

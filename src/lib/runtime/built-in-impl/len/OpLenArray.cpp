@@ -45,7 +45,7 @@ void XenonBuiltIn::OpLenArray(XenonExecutionHandle hExec, XenonFunctionHandle, v
 		// Create the output result and store it to an I/O register.
 		XenonValueHandle hOutput = XenonValueCreateInt64(hVm, (outputLength > 0) ? outputLength : 0);
 		XenonExecutionSetIoRegister(hExec, hOutput, 0);
-		XenonValueAbandon(hOutput);
+		XenonValueGcExpose(hOutput);
 	}
 	else
 	{
@@ -59,7 +59,7 @@ void XenonBuiltIn::OpLenArray(XenonExecutionHandle hExec, XenonFunctionHandle, v
 	}
 
 	// Release the input parameter value.
-	XenonValueAbandon(hParam);
+	XenonValueGcExpose(hParam);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

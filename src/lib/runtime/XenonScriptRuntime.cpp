@@ -1664,16 +1664,30 @@ XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonValuePreserve(XenonValueHandle hValue)
+int XenonValueGcProtect(XenonValueHandle hValue)
 {
+	if(!XenonValue::CanBeMarked(hValue))
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
+
 	XenonValue::SetAutoMark(hValue, true);
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonValueAbandon(XenonValueHandle hValue)
+int XenonValueGcExpose(XenonValueHandle hValue)
 {
+	if(!XenonValue::CanBeMarked(hValue))
+	{
+		return XENON_ERROR_INVALID_TYPE;
+	}
+
 	XenonValue::SetAutoMark(hValue, false);
+
+	return XENON_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -393,7 +393,7 @@ void XenonProgram::Dispose(XenonProgramHandle hProgram)
 	// Release all constant values.
 	for(size_t i = 0; i < hProgram->constants.count; ++i)
 	{
-		XenonValueAbandon(hProgram->constants.pData[i]);
+		XenonValueGcExpose(hProgram->constants.pData[i]);
 	}
 
 	// Clean up the data structures.

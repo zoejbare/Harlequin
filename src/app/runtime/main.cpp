@@ -146,6 +146,7 @@ int main(int argc, char* argv[])
 	// This enables tracking of global heap allocations.  If any are leaked, they will show up in the
 	// Visual Studio output window on application exit.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(2659); // Uncomment this with the allocation order number when debugging a specific allocation.
 #endif
 
 	auto trackedAlloc = [](const size_t size) -> void*
@@ -422,7 +423,7 @@ int main(int argc, char* argv[])
 					const char* const inputParam = XenonValueGetString(hInputParam);
 
 					printf("> \"%s\"\n", inputParam);
-					XenonValueAbandon(hInputParam);
+					XenonValueGcExpose(hInputParam);
 				};
 
 				XenonFunctionSetNativeBinding(hNativePrintFunc, printString, nullptr);
@@ -447,7 +448,7 @@ int main(int argc, char* argv[])
 
 						XenonValueHandle hOutputParam = XenonValueCreateInt32(hVm, output);
 						XenonExecutionSetIoRegister(hExec, hOutputParam, 0);
-						XenonValueAbandon(hOutputParam);
+						XenonValueGcExpose(hOutputParam);
 
 						if(output <= 0)
 						{
@@ -459,7 +460,7 @@ int main(int argc, char* argv[])
 						}
 
 						XenonExecutionSetIoRegister(hExec, hOutputParam, 1);
-						XenonValueAbandon(hOutputParam);
+						XenonValueGcExpose(hOutputParam);
 					}
 					else
 					{
