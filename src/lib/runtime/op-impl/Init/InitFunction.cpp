@@ -100,12 +100,19 @@ void OpCodeExec_InitFunction(XenonExecutionHandle hExec)
 
 void OpCodeDisasm_InitFunction(XenonDisassemble& disasm)
 {
+	int result;
+
 	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
 	const uint32_t constIndex = XenonDecoder::LoadUint32(disasm.decoder);
 
+	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constIndex, &result);
+	XenonString* const pValueData = XenonValue::GetDebugString(hValue);
+
 	char instr[512];
-	snprintf(instr, sizeof(instr), "INIT_FUNC r%" PRIu32 ", c%" PRIu32, registerIndex, constIndex);
+	snprintf(instr, sizeof(instr), "INIT_FUNC r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
+
+	XenonString::Release(pValueData);
 }
 
 #ifdef __cplusplus

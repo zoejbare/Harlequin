@@ -199,7 +199,8 @@ int main(int argc, char* argv[])
 		XenonBytecodeWriteCall(hMainFuncSerializer, constIndex7);
 		XenonBytecodeWritePullParam(hMainFuncSerializer, 8, 0);
 
-		XenonBytecodeWriteCall(hMainFuncSerializer, constIndex18);
+		XenonBytecodeWriteInitFunction(hMainFuncSerializer, 0, constIndex18);
+		XenonBytecodeWriteCallValue(hMainFuncSerializer, 0);
 
 		XenonBytecodeWriteReturn(hMainFuncSerializer);
 
