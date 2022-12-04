@@ -42,31 +42,31 @@
 extern "C" {
 #endif
 
-void OpCodeExec_StoreObject(XenonExecutionHandle hExec)
+void OpCodeExec_StoreObject(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t memberIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t memberIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hDestination = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpDstRegIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hDestination = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpDstRegIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
-		if(XenonValueIsObject(hDestination))
+		if(HqValueIsObject(hDestination))
 		{
-			XenonScriptObject* const pScriptObject = hDestination->as.pObject;
+			HqScriptObject* const pScriptObject = hDestination->as.pObject;
 
-			XenonValueHandle hSource = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
-			if(result == XENON_SUCCESS)
+			HqValueHandle hSource = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
+			if(result == HQ_SUCCESS)
 			{
-				result = XenonScriptObject::SetMemberValue(pScriptObject, memberIndex, hSource);
-				if(result != XENON_SUCCESS)
+				result = HqScriptObject::SetMemberValue(pScriptObject, memberIndex, hSource);
+				if(result != HQ_SUCCESS)
 				{
 					// Raise a fatal script exception.
-					XenonExecution::RaiseOpCodeException(
+					HqExecution::RaiseOpCodeException(
 						hExec,
-						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to set object member at index: #%" PRIu32,
 						memberIndex
 					);
@@ -75,9 +75,9 @@ void OpCodeExec_StoreObject(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecution::RaiseOpCodeException(
+				HqExecution::RaiseOpCodeException(
 					hExec,
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
 					gpSrcRegIndex
 				);
@@ -86,9 +86,9 @@ void OpCodeExec_StoreObject(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+				HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 				"Type mismatch; expected object: r(%" PRIu32 ")",
 				gpDstRegIndex
 			);
@@ -97,9 +97,9 @@ void OpCodeExec_StoreObject(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
 			gpDstRegIndex
 		);
@@ -108,11 +108,11 @@ void OpCodeExec_StoreObject(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_StoreObject(XenonDisassemble& disasm)
+void OpCodeDisasm_StoreObject(HqDisassemble& disasm)
 {
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t memberIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t memberIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
 	snprintf(str, sizeof(str), "STORE_OBJECT r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);

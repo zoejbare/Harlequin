@@ -24,228 +24,228 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static uint64_t GetDataFromParam(XenonExecutionHandle hExec)
+static uint64_t GetDataFromParam(HqExecutionHandle hExec)
 {
 	// Get the parameter operand.
-	XenonValueHandle hParam;
-	XenonExecutionGetIoRegister(hExec, &hParam, 0);
+	HqValueHandle hParam;
+	HqExecutionGetIoRegister(hExec, &hParam, 0);
 
 	// Extract the parameter data.
-	const uint64_t param = XenonValueGetUint64(hParam);
+	const uint64_t param = HqValueGetUint64(hParam);
 
 	// Release the input parameter value now that we have its data.
-	XenonValueGcExpose(hParam);
+	HqValueGcExpose(hParam);
 
 	return param;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToBool(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToBool(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateBool(hVm, (param == 0) ? false : true);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateBool(hVm, (param == 0) ? false : true);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToInt8(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToInt8(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt8(hVm, int8_t(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateInt8(hVm, int8_t(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToInt16(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToInt16(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt16(hVm, int16_t(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateInt16(hVm, int16_t(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToInt32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToInt32(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt32(hVm, int32_t(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateInt32(hVm, int32_t(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToInt64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToInt64(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt64(hVm, int64_t(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueHandle hOutput = HqValueCreateInt64(hVm, int64_t(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToUint8(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToUint8(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint8(hVm, uint8_t(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateUint8(hVm, uint8_t(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToUint16(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToUint16(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint16(hVm, uint16_t(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueHandle hOutput = HqValueCreateUint16(hVm, uint16_t(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToUint32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToUint32(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint32(hVm, uint32_t(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateUint32(hVm, uint32_t(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToFloat32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToFloat32(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateFloat32(hVm, float(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateFloat32(hVm, float(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToFloat64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToFloat64(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateFloat64(hVm, double(param));
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueHandle hOutput = HqValueCreateFloat64(hVm, double(param));
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpCastUint64ToString(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpCastUint64ToString(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter data.
 	const uint64_t param = GetDataFromParam(hExec);
 
 	// Get the VM associated with the execution context.
-	XenonVmHandle hVm;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm;
+	HqExecutionGetVm(hExec, &hVm);
 
 	char str[20];
 	snprintf(str, sizeof(str), "%" PRIu64, param);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateString(hVm, str);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateString(hVm, str);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

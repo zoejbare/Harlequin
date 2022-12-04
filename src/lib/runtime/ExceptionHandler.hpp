@@ -26,17 +26,17 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonExceptionHandler
+struct HqExceptionHandler
 {
-	typedef XenonArray<XenonExceptionHandler*> Array;
+	typedef HqArray<HqExceptionHandler*> Array;
 
-	static XenonExceptionHandler* Create(const uint8_t type, const uint32_t offset, XenonString* const pClassName);
-	static void Dispose(XenonExceptionHandler* const pExceptionHandler);
+	static HqExceptionHandler* Create(const uint8_t type, const uint32_t offset, HqString* const pClassName);
+	static void Dispose(HqExceptionHandler* const pExceptionHandler);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonString* pClassName;
+	HqString* pClassName;
 
 	uint32_t offset;
 	uint8_t type;

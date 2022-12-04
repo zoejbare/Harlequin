@@ -32,9 +32,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalMutex
+struct HQ_BASE_API HqInternalMutex
 {
-	XenonInternalMutex() : lock(), initialized(false) {}
+	HqInternalMutex() : lock(), initialized(false) {}
 
 	CRITICAL_SECTION lock;
 	bool initialized;

@@ -25,28 +25,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-enum XenonGcPhase
+enum HqGcPhase
 {
-	XENON_GC_PHASE_LINK_PENDING,
-	XENON_GC_PHASE_RESET_STATE,
-	XENON_GC_PHASE_AUTO_MARK_DISCOVERY,
-	XENON_GC_PHASE_GLOBAL_DISCOVERY,
-	XENON_GC_PHASE_MARK_RECURSIVE,
-	XENON_GC_PHASE_DISPOSE,
+	HQ_GC_PHASE_LINK_PENDING,
+	HQ_GC_PHASE_RESET_STATE,
+	HQ_GC_PHASE_AUTO_MARK_DISCOVERY,
+	HQ_GC_PHASE_GLOBAL_DISCOVERY,
+	HQ_GC_PHASE_MARK_RECURSIVE,
+	HQ_GC_PHASE_DISPOSE,
 
-	XENON_GC_PHASE__COUNT,
-	XENON_GC_PHASE__START = XENON_GC_PHASE_LINK_PENDING,
-	XENON_GC_PHASE__END = XENON_GC_PHASE_DISPOSE,
+	HQ_GC_PHASE__COUNT,
+	HQ_GC_PHASE__START = HQ_GC_PHASE_LINK_PENDING,
+	HQ_GC_PHASE__END = HQ_GC_PHASE_DISPOSE,
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHandle hVm, const uint32_t maxIterationCount)
+void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, const uint32_t maxIterationCount)
 {
-	assert(hVm != XENON_VM_HANDLE_NULL);
+	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(maxIterationCount > 0);
 
-	output.pendingLock = XenonMutex::Create();
+	output.pendingLock = HqMutex::Create();
 	output.hVm = hVm;
 	output.pPendingHead = nullptr;
 	output.pUnmarkedHead = nullptr;
@@ -64,13 +64,13 @@ void XenonGarbageCollector::Initialize(XenonGarbageCollector& output, XenonVmHan
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
+void HqGarbageCollector::Dispose(HqGarbageCollector& gc)
 {
-	auto disableAutoMark = [](XenonGcProxy* const pListHead)
+	auto disableAutoMark = [](HqGcProxy* const pListHead)
 	{
 		if(pListHead)
 		{
-			XenonGcProxy* pCurrent = pListHead;
+			HqGcProxy* pCurrent = pListHead;
 
 			// Disable auto-mark on each proxy.
 			while(pCurrent)
@@ -99,9 +99,9 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 		}
 	};
 
-	XenonMutex::Dispose(gc.pendingLock);
+	HqMutex::Dispose(gc.pendingLock);
 
-	gc.hVm = XENON_VM_HANDLE_NULL;
+	gc.hVm = HQ_VM_HANDLE_NULL;
 	gc.pPendingHead = nullptr;
 	gc.pUnmarkedHead = nullptr;
 	gc.pMarkedHead = nullptr;
@@ -115,7 +115,7 @@ void XenonGarbageCollector::Dispose(XenonGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
+bool HqGarbageCollector::RunStep(HqGarbageCollector& gc)
 {
 	const bool isPhaseStart = (gc.lastPhase != gc.phase);
 
@@ -125,9 +125,9 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 	switch(gc.phase)
 	{
 		// Transfer all pending proxies to the active list.
-		case XENON_GC_PHASE_LINK_PENDING:
+		case HQ_GC_PHASE_LINK_PENDING:
 		{
-			XenonScopedMutex lock(gc.pendingLock);
+			HqScopedMutex lock(gc.pendingLock);
 
 			for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
 			{
@@ -137,8 +137,8 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 					break;
 				}
 
-				XenonGcProxy* const pCurrent = gc.pPendingHead;
-				XenonGcProxy* const pNext = pCurrent->pNext;
+				HqGcProxy* const pCurrent = gc.pPendingHead;
+				HqGcProxy* const pNext = pCurrent->pNext;
 
 				prv_proxyUnlink(pCurrent);
 
@@ -165,7 +165,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		}
 
 		// Reset the 'marked' state for each active proxy.
-		case XENON_GC_PHASE_RESET_STATE:
+		case HQ_GC_PHASE_RESET_STATE:
 		{
 			if(isPhaseStart)
 			{
@@ -198,7 +198,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		}
 
 		// Discover anything that is set to auto-mark.
-		case XENON_GC_PHASE_AUTO_MARK_DISCOVERY:
+		case HQ_GC_PHASE_AUTO_MARK_DISCOVERY:
 		{
 			if(isPhaseStart)
 			{
@@ -215,7 +215,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 					break;
 				}
 
-				XenonGcProxy* const pNext = gc.pIterCurrent->pNext;
+				HqGcProxy* const pNext = gc.pIterCurrent->pNext;
 
 				// Add any auto-mark objects to the active marked list so they and
 				// their sub-objects will be marked prior to the collection phase.
@@ -237,7 +237,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		}
 
 		// Discover all global variables.
-		case XENON_GC_PHASE_GLOBAL_DISCOVERY:
+		case HQ_GC_PHASE_GLOBAL_DISCOVERY:
 		{
 			// There's no good way to go over the globals incrementally since the map can hypothetically
 			// change between steps of the garbage collector. We also can't rely on auto-marking because
@@ -246,9 +246,9 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 			// program contains many hundreds of globals or more. We'll cross that bridge when we come to it.
 			for(auto& kv : gc.hVm->globals)
 			{
-				XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+				HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
 
-				if(XenonValue::CanBeMarked(hValue))
+				if(HqValue::CanBeMarked(hValue))
 				{
 					MarkObject(gc, &(hValue->gcProxy));
 				}
@@ -259,7 +259,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		}
 
 		// Recursively mark all active objects.
-		case XENON_GC_PHASE_MARK_RECURSIVE:
+		case HQ_GC_PHASE_MARK_RECURSIVE:
 		{
 			if(isPhaseStart)
 			{
@@ -293,7 +293,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 		}
 
 		// Dispose of any objects that are no longer in use.
-		case XENON_GC_PHASE_DISPOSE:
+		case HQ_GC_PHASE_DISPOSE:
 		{
 			// Iterate over the unmarked items to free, up to as many as we're allowed in one run.
 			for(uint32_t index = 0; index < gc.maxIterationCount; ++index)
@@ -305,7 +305,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 				}
 
 				// Cache the next proxy in case the current one is freed from memory when disposed.
-				XenonGcProxy* const pNext = gc.pUnmarkedHead->pNext;
+				HqGcProxy* const pNext = gc.pUnmarkedHead->pNext;
 
 				// Dispose of the current proxy.
 				prv_onDisposeObject(gc.pUnmarkedHead);
@@ -335,10 +335,10 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 	if(endOfPhase)
 	{
 		// Move to the next phase.
-		gc.phase = (gc.phase + 1) % XENON_GC_PHASE__COUNT;
+		gc.phase = (gc.phase + 1) % HQ_GC_PHASE__COUNT;
 
 		// The end of all phases is triggered when we have looped back to the first phase.
-		endOfAllPhases = (gc.phase == XENON_GC_PHASE__START);
+		endOfAllPhases = (gc.phase == HQ_GC_PHASE__START);
 	}
 
 	return endOfAllPhases;
@@ -346,7 +346,7 @@ bool XenonGarbageCollector::RunStep(XenonGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::RunFull(XenonGarbageCollector& gc)
+void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 {
 	// Reset the garbage collector state so that running it again starts at the beginning of the 1st phase.
 	prv_reset(gc);
@@ -367,11 +367,11 @@ void XenonGarbageCollector::RunFull(XenonGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy)
+void HqGarbageCollector::LinkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 
-	XenonScopedMutex lock(gc.pendingLock);
+	HqScopedMutex lock(gc.pendingLock);
 
 	// Link the proxy the head of the pending list.
 	pGcProxy->pending = true;
@@ -386,7 +386,7 @@ void XenonGarbageCollector::LinkObject(XenonGarbageCollector& gc, XenonGcProxy* 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::MarkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy)
+void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 	assert(pGcProxy->pObject != nullptr);
@@ -419,7 +419,7 @@ void XenonGarbageCollector::MarkObject(XenonGarbageCollector& gc, XenonGcProxy* 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::prv_reset(XenonGarbageCollector& gc)
+void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
 {
 	if(gc.pMarkedHead)
 	{
@@ -440,13 +440,13 @@ void XenonGarbageCollector::prv_reset(XenonGarbageCollector& gc)
 	gc.pMarkedHead = nullptr;
 	gc.pMarkedTail = nullptr;
 
-	gc.phase = XENON_GC_PHASE__START;
-	gc.lastPhase = XENON_GC_PHASE__END;
+	gc.phase = HQ_GC_PHASE__START;
+	gc.lastPhase = HQ_GC_PHASE__END;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::prv_onDisposeObject(XenonGcProxy* const pGcProxy)
+void HqGarbageCollector::prv_onDisposeObject(HqGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 
@@ -455,12 +455,12 @@ void XenonGarbageCollector::prv_onDisposeObject(XenonGcProxy* const pGcProxy)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::prv_proxyInsertBefore(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
+void HqGarbageCollector::prv_proxyInsertBefore(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
 {
 	assert(pGcListProxy != nullptr);
 	assert(pGcInsertProxy != nullptr);
 
-	XenonGcProxy* const pListPrev = pGcListProxy->pPrev;
+	HqGcProxy* const pListPrev = pGcListProxy->pPrev;
 
 	if(pListPrev)
 	{
@@ -475,12 +475,12 @@ void XenonGarbageCollector::prv_proxyInsertBefore(XenonGcProxy* const pGcListPro
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::prv_proxyInsertAfter(XenonGcProxy* const pGcListProxy, XenonGcProxy* const pGcInsertProxy)
+void HqGarbageCollector::prv_proxyInsertAfter(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
 {
 	assert(pGcListProxy != nullptr);
 	assert(pGcInsertProxy != nullptr);
 
-	XenonGcProxy* const pListNext = pGcListProxy->pNext;
+	HqGcProxy* const pListNext = pGcListProxy->pNext;
 
 	if(pListNext)
 	{
@@ -495,12 +495,12 @@ void XenonGarbageCollector::prv_proxyInsertAfter(XenonGcProxy* const pGcListProx
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGarbageCollector::prv_proxyUnlink(XenonGcProxy* const pGcProxy)
+void HqGarbageCollector::prv_proxyUnlink(HqGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 
-	XenonGcProxy* const pPrev = pGcProxy->pPrev;
-	XenonGcProxy* const pNext = pGcProxy->pNext;
+	HqGcProxy* const pPrev = pGcProxy->pPrev;
+	HqGcProxy* const pNext = pGcProxy->pNext;
 
 	if(pPrev)
 	{

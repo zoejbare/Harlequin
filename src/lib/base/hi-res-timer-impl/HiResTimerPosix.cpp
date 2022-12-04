@@ -21,16 +21,16 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _XenonHiResTimerImplGetFrequency()
+extern "C" uint64_t _HqHiResTimerImplGetFrequency()
 {
 	return 1000000000;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _XenonHiResTimerImplGetTimestamp()
+extern "C" uint64_t _HqHiResTimerImplGetTimestamp()
 {
-#if defined(XENON_PLATFORM_MAC_OS) || defined(XENON_PLATFORM_PS4)
+#if defined(HQ_PLATFORM_MAC_OS) || defined(HQ_PLATFORM_PS4)
 	return uint64_t(clock_gettime_nsec_np(CLOCK_UPTIME_RAW));
 
 #else

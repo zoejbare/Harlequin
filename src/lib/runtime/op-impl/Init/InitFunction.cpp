@@ -42,43 +42,43 @@
 extern "C" {
 #endif
 
-void OpCodeExec_InitFunction(XenonExecutionHandle hExec)
+void OpCodeExec_InitFunction(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t constIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hFuncName = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex, &result);
-	if(XenonValueIsString(hFuncName))
+	HqValueHandle hFuncName = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex, &result);
+	if(HqValueIsString(hFuncName))
 	{
-		XenonFunctionHandle hFunction = XenonVm::GetFunction(hExec->hVm, hFuncName->as.pString, &result);
+		HqFunctionHandle hFunction = HqVm::GetFunction(hExec->hVm, hFuncName->as.pString, &result);
 		if(hFunction)
 		{
-			XenonValueHandle hFuncValue = XenonValue::CreateFunction(hExec->hVm, hFunction);
+			HqValueHandle hFuncValue = HqValue::CreateFunction(hExec->hVm, hFunction);
 			if(hFuncValue)
 			{
-				result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hFuncValue, registerIndex);
-				if(result != XENON_SUCCESS)
+				result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hFuncValue, registerIndex);
+				if(result != HQ_SUCCESS)
 				{
 					// Raise a fatal script exception.
-					XenonExecution::RaiseOpCodeException(
+					HqExecution::RaiseOpCodeException(
 						hExec,
-						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to set general-purpose register: r(%" PRIu32 ")",
 						registerIndex
 					);
 				}
 
-				XenonValue::SetAutoMark(hFuncValue, false);
+				HqValue::SetAutoMark(hFuncValue, false);
 			}
 		}
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Invalid function signature: %s",
 				hFuncName->as.pString->data
 			);
@@ -87,9 +87,9 @@ void OpCodeExec_InitFunction(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 			"Type mismatch; expected string value: c(%" PRIu32 ")",
 			constIndex
 		);
@@ -98,21 +98,21 @@ void OpCodeExec_InitFunction(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_InitFunction(XenonDisassemble& disasm)
+void OpCodeDisasm_InitFunction(HqDisassemble& disasm)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t constIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constIndex, &result);
-	XenonString* const pValueData = XenonValue::GetDebugString(hValue);
+	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constIndex, &result);
+	HqString* const pValueData = HqValue::GetDebugString(hValue);
 
 	char instr[512];
 	snprintf(instr, sizeof(instr), "INIT_FUNC r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 
-	XenonString::Release(pValueData);
+	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

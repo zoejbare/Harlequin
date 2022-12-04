@@ -30,54 +30,54 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgram;
+struct HqProgram;
 
-struct XenonExecution
+struct HqExecution
 {
-	typedef XenonStack<XenonExecutionHandle> HandleStack;
+	typedef HqStack<HqExecutionHandle> HandleStack;
 
-	typedef XENON_MAP_TYPE<
-		XenonExecutionHandle,
+	typedef HQ_MAP_TYPE<
+		HqExecutionHandle,
 		bool,
-#if XENON_MAP_IS_UNORDERED
-		std::hash<XenonExecutionHandle>,
-		std::equal_to<XenonExecutionHandle>,
+#if HQ_MAP_IS_UNORDERED
+		std::hash<HqExecutionHandle>,
+		std::equal_to<HqExecutionHandle>,
 #else
-		std::less<XenonExecutionHandle>,
+		std::less<HqExecutionHandle>,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonExecutionHandle, bool)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqExecutionHandle, bool)>
 	> HandleToBoolMap;
 
-	static XenonExecutionHandle Create(XenonVmHandle hVm, XenonFunctionHandle hEntryPoint);
-	static void ReleaseWithNoDetach(XenonExecutionHandle hExec);
-	static void DetachFromVm(XenonExecutionHandle hExec);
+	static HqExecutionHandle Create(HqVmHandle hVm, HqFunctionHandle hEntryPoint);
+	static void ReleaseWithNoDetach(HqExecutionHandle hExec);
+	static void DetachFromVm(HqExecutionHandle hExec);
 
-	static int PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hFunction);
-	static int PopFrame(XenonExecutionHandle hExec);
+	static int PushFrame(HqExecutionHandle hExec, HqFunctionHandle hFunction);
+	static int PopFrame(HqExecutionHandle hExec);
 
-	static int SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, const size_t index);
+	static int SetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, const size_t index);
 
-	static XenonValueHandle GetIoRegister(XenonExecutionHandle hExec, const size_t index, int* const pOutResult);
+	static HqValueHandle GetIoRegister(HqExecutionHandle hExec, const size_t index, int* const pOutResult);
 
-	static void Run(XenonExecutionHandle hExec, const int runMode);
+	static void Run(HqExecutionHandle hExec, const int runMode);
 
-	static void RaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, const int severity);
-	static void RaiseOpCodeException(XenonExecutionHandle hExec, const int type, const char* const fmt, ...);
+	static void RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, const int severity);
+	static void RaiseOpCodeException(HqExecutionHandle hExec, const int type, const char* const fmt, ...);
 
-	static void prv_runStep(XenonExecutionHandle);
-	static void prv_onGcDiscovery(XenonGarbageCollector&, void*);
+	static void prv_runStep(HqExecutionHandle);
+	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
 	static void prv_onGcDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonGcProxy gcProxy;
+	HqGcProxy gcProxy;
 
-	XenonVmHandle hVm;
-	XenonFrameHandle hCurrentFrame;
+	HqVmHandle hVm;
+	HqFrameHandle hCurrentFrame;
 
-	XenonFrame::HandleStack frameStack;
-	XenonValue::HandleArray registers;
+	HqFrame::HandleStack frameStack;
+	HqValue::HandleArray registers;
 
 	uint8_t* pExceptionLocation;
 

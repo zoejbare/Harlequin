@@ -28,50 +28,50 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class XenonProgramLoader
+class HqProgramLoader
 {
 public:
 
 	static bool Load(
-		XenonProgramHandle hProgram,
-		XenonVmHandle hVm,
-		XenonSerializerHandle hSerializer
+		HqProgramHandle hProgram,
+		HqVmHandle hVm,
+		HqSerializerHandle hSerializer
 	);
 
 
 private:
 
-#if XENON_MAP_IS_UNORDERED
-	#define _XENON_RES_PTR_SET(type) \
-		XENON_MAP_TYPE< \
+#if HQ_MAP_IS_UNORDERED
+	#define _HQ_RES_PTR_SET(type) \
+		HQ_MAP_TYPE< \
 			type, \
 			bool, \
 			std::hash<type>, \
 			std::equal_to<type>, \
-			XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, bool)> \
+			HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)> \
 		>
 
 #else
-	#define _XENON_RES_PTR_SET(type) \
-		XENON_MAP_TYPE< \
+	#define _HQ_RES_PTR_SET(type) \
+		HQ_MAP_TYPE< \
 			type, \
 			bool, \
 			std::less<type>, \
-			XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, bool)> \
+			HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)> \
 		>
 
 #endif
 
-	typedef _XENON_RES_PTR_SET(XenonString*) StringResources;
+	typedef _HQ_RES_PTR_SET(HqString*) StringResources;
 
-#undef _XENON_RES_PTR_SET
+#undef _HQ_RES_PTR_SET
 
-	XenonProgramLoader(
-		XenonProgramHandle hProgram,
-		XenonVmHandle hVm,
-		XenonSerializerHandle hSerializer
+	HqProgramLoader(
+		HqProgramHandle hProgram,
+		HqVmHandle hVm,
+		HqSerializerHandle hSerializer
 	);
-	~XenonProgramLoader();
+	~HqProgramLoader();
 
 	bool prv_loadFile();
 	void prv_finalize();
@@ -86,54 +86,54 @@ private:
 	bool prv_readFunctions();
 	bool prv_readBytecode();
 
-	bool prv_readLocalVariables(XenonString*, XenonValue::StringToHandleMap&);
-	bool prv_readGuardedBlocks(XenonString*, XenonGuardedBlock::Array&);
+	bool prv_readLocalVariables(HqString*, HqValue::StringToHandleMap&);
+	bool prv_readGuardedBlocks(HqString*, HqGuardedBlock::Array&);
 
-	void prv_trackString(XenonString*);
-	void prv_trackObjectSchema(XenonString*, XenonScriptObject*);
-	void prv_trackGlobalValue(XenonString*, XenonValueHandle);
-	void prv_trackFunction(XenonString*, XenonFunctionHandle);
+	void prv_trackString(HqString*);
+	void prv_trackObjectSchema(HqString*, HqScriptObject*);
+	void prv_trackGlobalValue(HqString*, HqValueHandle);
+	void prv_trackFunction(HqString*, HqFunctionHandle);
 
-	XenonProgramHandle m_hProgram;
-	XenonVmHandle m_hVm;
-	XenonSerializerHandle m_hSerializer;
-	XenonReportHandle m_hReport;
+	HqProgramHandle m_hProgram;
+	HqVmHandle m_hVm;
+	HqSerializerHandle m_hSerializer;
+	HqReportHandle m_hReport;
 
-	XenonProgramHeader m_programHeader;
+	HqProgramHeader m_programHeader;
 
 	StringResources m_strings;
 
-	XenonScriptObject::StringToPtrMap m_objectSchemas;
-	XenonValue::StringToHandleMap m_globalValues;
-	XenonFunction::StringToHandleMap m_functions;
+	HqScriptObject::StringToPtrMap m_objectSchemas;
+	HqValue::StringToHandleMap m_globalValues;
+	HqFunction::StringToHandleMap m_functions;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void XenonProgramLoader::prv_trackString(XenonString* const pString)
+inline void HqProgramLoader::prv_trackString(HqString* const pString)
 {
-	XENON_MAP_FUNC_INSERT(m_strings, pString, false);
+	HQ_MAP_FUNC_INSERT(m_strings, pString, false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void XenonProgramLoader::prv_trackObjectSchema(XenonString* const pTypeName, XenonScriptObject* const pSchema)
+inline void HqProgramLoader::prv_trackObjectSchema(HqString* const pTypeName, HqScriptObject* const pSchema)
 {
-	XENON_MAP_FUNC_INSERT(m_objectSchemas, pTypeName, pSchema);
+	HQ_MAP_FUNC_INSERT(m_objectSchemas, pTypeName, pSchema);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void XenonProgramLoader::prv_trackGlobalValue(XenonString* const pGlobalName, XenonValueHandle hValue)
+inline void HqProgramLoader::prv_trackGlobalValue(HqString* const pGlobalName, HqValueHandle hValue)
 {
-	XENON_MAP_FUNC_INSERT(m_globalValues, pGlobalName, hValue);
+	HQ_MAP_FUNC_INSERT(m_globalValues, pGlobalName, hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void XenonProgramLoader::prv_trackFunction(XenonString* const pSignature, XenonFunctionHandle hFunction)
+inline void HqProgramLoader::prv_trackFunction(HqString* const pSignature, HqFunctionHandle hFunction)
 {
-	XENON_MAP_FUNC_INSERT(m_functions, pSignature, hFunction);
+	HQ_MAP_FUNC_INSERT(m_functions, pSignature, hFunction);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

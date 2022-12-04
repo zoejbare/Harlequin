@@ -20,39 +20,39 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "../common/ThreadMainCallback.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if defined(XENON_PLATFORM_WINDOWS)
+#if defined(HQ_PLATFORM_WINDOWS)
 	#include "thread-impl/ThreadWin32.hpp"
 	#undef Yield
 
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4) \
-	|| defined(XENON_PLATFORM_PS5)
+#elif defined(HQ_PLATFORM_LINUX) \
+	|| defined(HQ_PLATFORM_MAC_OS) \
+	|| defined(HQ_PLATFORM_ANDROID) \
+	|| defined(HQ_PLATFORM_PS4) \
+	|| defined(HQ_PLATFORM_PS5)
 	#include "thread-impl/ThreadPosix.hpp"
 
-#elif defined(XENON_PLATFORM_PS3)
-	#include "../../../../XenonScriptImpl-PS3/lib/base/thread/Thread.hpp"
+#elif defined(HQ_PLATFORM_PS3)
+	#include "../../../support/Harlequin-PS3/lib/base/thread/Thread.hpp"
 
-#elif defined(XENON_PLATFORM_PSVITA)
-	#include "../../../../XenonScriptImpl-PSVita/lib/base/thread/Thread.hpp"
+#elif defined(HQ_PLATFORM_PSVITA)
+	#include "../../../support/Harlequin-PSVita/lib/base/thread/Thread.hpp"
 
 #else
-	#error "XenonThread not implemented for this platform"
+	#error "HqThread not implemented for this platform"
 
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonThreadConfig
+struct HqThreadConfig
 {
-	XenonThreadMainCallback mainFn;
+	HqThreadMainCallback mainFn;
 
 	void* pArg;
 
@@ -64,71 +64,71 @@ struct XenonThreadConfig
 
 extern "C"
 {
-	void _XenonThreadImplCreate(XenonInternalThread&, const XenonThreadConfig&);
-	void _XenonThreadImplGetCurrentThread(XenonInternalThread&);
-	void _XenonThreadImplJoin(XenonInternalThread&, int32_t*);
-	void _XenonThreadImplSleep(uint32_t);
-	void _XenonThreadImplYield();
+	void _HqThreadImplCreate(HqInternalThread&, const HqThreadConfig&);
+	void _HqThreadImplGetCurrentThread(HqInternalThread&);
+	void _HqThreadImplJoin(HqInternalThread&, int32_t*);
+	void _HqThreadImplSleep(uint32_t);
+	void _HqThreadImplYield();
 
-	bool _XenonThreadImplEqual(const XenonInternalThread&, const XenonInternalThread&);
-	bool _XenonThreadImplIsInitialized(const XenonInternalThread&);
-	bool _XenonThreadImplIsReal(const XenonInternalThread&);
+	bool _HqThreadImplEqual(const HqInternalThread&, const HqInternalThread&);
+	bool _HqThreadImplIsInitialized(const HqInternalThread&);
+	bool _HqThreadImplIsReal(const HqInternalThread&);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonThread
+struct HQ_BASE_API HqThread
 {
-	static XenonThread Create(const XenonThreadConfig& threadConfig)
+	static HqThread Create(const HqThreadConfig& threadConfig)
 	{
-		XenonThread output;
-		_XenonThreadImplCreate(output.obj, threadConfig);
+		HqThread output;
+		_HqThreadImplCreate(output.obj, threadConfig);
 		return output;
 	}
 
-	static XenonThread GetCurrentThread()
+	static HqThread GetCurrentThread()
 	{
-		XenonThread output;
-		_XenonThreadImplGetCurrentThread(output.obj);
+		HqThread output;
+		_HqThreadImplGetCurrentThread(output.obj);
 		return output;
 	}
 
-	static void Join(XenonThread& thread, int32_t* const pOutReturnValue)
+	static void Join(HqThread& thread, int32_t* const pOutReturnValue)
 	{
-		_XenonThreadImplJoin(thread.obj, pOutReturnValue);
+		_HqThreadImplJoin(thread.obj, pOutReturnValue);
 	}
 
 	static void Sleep(uint32_t ms)
 	{
-		_XenonThreadImplSleep(ms);
+		_HqThreadImplSleep(ms);
 	}
 
 	static void Yield()
 	{
-		_XenonThreadImplYield();
+		_HqThreadImplYield();
 	}
 
-	static bool IsInitialized(const XenonThread& thread)
+	static bool IsInitialized(const HqThread& thread)
 	{
-		return _XenonThreadImplIsInitialized(thread.obj);
+		return _HqThreadImplIsInitialized(thread.obj);
 	}
 
-	static bool IsReal(const XenonThread& thread)
+	static bool IsReal(const HqThread& thread)
 	{
-		return _XenonThreadImplIsReal(thread.obj);
+		return _HqThreadImplIsReal(thread.obj);
 	}
 
-	bool operator==(const XenonThread& other) const
+	bool operator==(const HqThread& other) const
 	{
-		return _XenonThreadImplEqual(obj, other.obj);
+		return _HqThreadImplEqual(obj, other.obj);
 	}
 
-	bool operator!=(const XenonThread& other) const
+	bool operator!=(const HqThread& other) const
 	{
-		return !_XenonThreadImplEqual(obj, other.obj);
+		return !_HqThreadImplEqual(obj, other.obj);
 	}
 
-	XenonInternalThread obj;
+	HqInternalThread obj;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

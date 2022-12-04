@@ -20,29 +20,29 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "../common/ByteHelper.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonSerializer
+struct HQ_BASE_API HqSerializer
 {
-	static XenonSerializerHandle Create(int mode);
-	static void Dispose(XenonSerializerHandle hSerializer);
-	static int LoadFile(XenonSerializerHandle hSerializer, const char* const filePath);
-	static int LoadBuffer(XenonSerializerHandle hSerializer, const void* const pBuffer, const size_t length);
-	static int SaveFile(XenonSerializerHandle hSerializer, const char* const filePath, const bool append);
-	static int SaveBuffer(XenonSerializerHandle hSerializer, void* const pOutBuffer, size_t* const pLength);
-	static int WriteData(XenonSerializerHandle hSerializer, const uint8_t* const pSource, const size_t length);
-	static int WriteRawData(XenonSerializerHandle hSerializer, const void* const pSource, const size_t length);
-	static int ReadData(XenonSerializerHandle hSerializer, uint8_t* const pDest, const size_t length);
-	static int ReadRawData(XenonSerializerHandle hSerializer, void* const pDest, const size_t length);
+	static HqSerializerHandle Create(int mode);
+	static void Dispose(HqSerializerHandle hSerializer);
+	static int LoadFile(HqSerializerHandle hSerializer, const char* const filePath);
+	static int LoadBuffer(HqSerializerHandle hSerializer, const void* const pBuffer, const size_t length);
+	static int SaveFile(HqSerializerHandle hSerializer, const char* const filePath, const bool append);
+	static int SaveBuffer(HqSerializerHandle hSerializer, void* const pOutBuffer, size_t* const pLength);
+	static int WriteData(HqSerializerHandle hSerializer, const uint8_t* const pSource, const size_t length);
+	static int WriteRawData(HqSerializerHandle hSerializer, const void* const pSource, const size_t length);
+	static int ReadData(HqSerializerHandle hSerializer, uint8_t* const pDest, const size_t length);
+	static int ReadRawData(HqSerializerHandle hSerializer, void* const pDest, const size_t length);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonByteHelper::Array stream;
+	HqByteHelper::Array stream;
 
 	size_t position;
 

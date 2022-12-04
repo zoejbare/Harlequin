@@ -25,35 +25,35 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramCommonLoader::CheckMagicNumber(const XenonFileHeader& fileHeader)
+bool HqProgramCommonLoader::CheckMagicNumber(const HqFileHeader& fileHeader)
 {
-	return fileHeader.magicNumber[0] == 'X'
-		|| fileHeader.magicNumber[1] == 'P'
-		|| fileHeader.magicNumber[2] == 'R'
-		|| fileHeader.magicNumber[3] == 'G'
-		|| fileHeader.magicNumber[4] == '_';
+	return fileHeader.magicNumber[0] == 'H'
+		|| fileHeader.magicNumber[1] == 'Q'
+		|| fileHeader.magicNumber[2] == 'P'
+		|| fileHeader.magicNumber[3] == 'R'
+		|| fileHeader.magicNumber[4] == 'G';
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonString* XenonProgramCommonLoader::ReadString(
-	XenonSerializerHandle hSerializer,
-	XenonReportHandle hReport
+HqString* HqProgramCommonLoader::ReadString(
+	HqSerializerHandle hSerializer,
+	HqReportHandle hReport
 )
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
-	assert(hReport != XENON_REPORT_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+	assert(hReport != HQ_REPORT_HANDLE_NULL);
 
 	int result = 0;
 
-	const size_t streamPosition = XenonSerializerGetStreamPosition(hSerializer);
-	const size_t streamLength = XenonSerializerGetStreamLength(hSerializer);
+	const size_t streamPosition = HqSerializerGetStreamPosition(hSerializer);
+	const size_t streamLength = HqSerializerGetStreamLength(hSerializer);
 
 	if(streamPosition == streamLength)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"ReadString error: End of data stream"
 		);
 		return nullptr;
@@ -64,18 +64,18 @@ XenonString* XenonProgramCommonLoader::ReadString(
 	// each string means we can create the native string directly from the data in the
 	// serializer without having to allocate and copy to-then-from a staging string.
 	// It also saves space due to not having the size baked in for each string.
-	const char* const pStreamData = reinterpret_cast<const char*>(XenonSerializerGetRawStreamPointer(hSerializer));
+	const char* const pStreamData = reinterpret_cast<const char*>(HqSerializerGetRawStreamPointer(hSerializer));
 
 	// The stream data retrieved from the serializer is at the start of its memory,
 	// so we adjust to the current position in the stream to get to the beginning
 	// of the string data.
-	XenonString* const pString = XenonString::Create(pStreamData + streamPosition);
+	HqString* const pString = HqString::Create(pStreamData + streamPosition);
 	if(!pString)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
-			"ReadString error: Failed to create XenonString object"
+			HQ_MESSAGE_TYPE_ERROR,
+			"ReadString error: Failed to create HqString object"
 		);
 		return nullptr;
 	}
@@ -83,15 +83,15 @@ XenonString* XenonProgramCommonLoader::ReadString(
 	// Because we hacked our way into the stream to get the string data,
 	// we need to manually adjust the stream position ourselves. And we
 	// add 1 here to account for the null-terminator.
-	result = XenonSerializerSetStreamPosition(hSerializer, streamPosition + pString->length + 1);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerSetStreamPosition(hSerializer, streamPosition + pString->length + 1);
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonString::Release(pString);
-		XenonReportMessage(
+		HqString::Release(pString);
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"ReadString error: Failed to update stream position: error=\"%s\"",
 			errorString
 		);
@@ -103,206 +103,206 @@ XenonString* XenonProgramCommonLoader::ReadString(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonProgramCommonLoader::ReadValue(
-	XenonSerializerHandle hSerializer,
-	XenonVmHandle hVm,
-	XenonReportHandle hReport
+HqValueHandle HqProgramCommonLoader::ReadValue(
+	HqSerializerHandle hSerializer,
+	HqVmHandle hVm,
+	HqReportHandle hReport
 )
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
-	assert(hVm != XENON_VM_HANDLE_NULL);
-	assert(hReport != XENON_REPORT_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(hReport != HQ_REPORT_HANDLE_NULL);
 
 	int result = 0;
 	uint8_t valueType = 0;
 
 	// Read the value type.
-	result = XenonSerializerReadUint8(hSerializer, &valueType);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint8(hSerializer, &valueType);
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"ReadValue error: Failed to read value type: error=\"%s\"",
 			errorString
 		);
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	XenonValue temp;
+	HqValue temp;
 
 	// Read the data based on the value type.
 	switch(valueType)
 	{
-		case XENON_VALUE_TYPE_NULL:
+		case HQ_VALUE_TYPE_NULL:
 		{
-			return XenonValue::CreateNull();
+			return HqValue::CreateNull();
 		}
 
-		case XENON_VALUE_TYPE_INT8:
+		case HQ_VALUE_TYPE_INT8:
 		{
-			result = XenonSerializerReadInt8(hSerializer, &temp.as.int8);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadInt8(hSerializer, &temp.as.int8);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateInt8(hVm, temp.as.int8);
+			return HqValue::CreateInt8(hVm, temp.as.int8);
 		}
 
-		case XENON_VALUE_TYPE_INT16:
+		case HQ_VALUE_TYPE_INT16:
 		{
-			result = XenonSerializerReadInt16(hSerializer, &temp.as.int16);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadInt16(hSerializer, &temp.as.int16);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateInt16(hVm, temp.as.int16);
+			return HqValue::CreateInt16(hVm, temp.as.int16);
 		}
 
-		case XENON_VALUE_TYPE_INT32:
+		case HQ_VALUE_TYPE_INT32:
 		{
-			result = XenonSerializerReadInt32(hSerializer, &temp.as.int32);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadInt32(hSerializer, &temp.as.int32);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateInt32(hVm, temp.as.int32);
+			return HqValue::CreateInt32(hVm, temp.as.int32);
 		}
 
-		case XENON_VALUE_TYPE_INT64:
+		case HQ_VALUE_TYPE_INT64:
 		{
-			result = XenonSerializerReadInt64(hSerializer, &temp.as.int64);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadInt64(hSerializer, &temp.as.int64);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateInt64(hVm, temp.as.int64);
+			return HqValue::CreateInt64(hVm, temp.as.int64);
 		}
 
-		case XENON_VALUE_TYPE_UINT8:
+		case HQ_VALUE_TYPE_UINT8:
 		{
-			result = XenonSerializerReadUint8(hSerializer, &temp.as.uint8);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint8(hSerializer, &temp.as.uint8);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateUint8(hVm, temp.as.uint8);
+			return HqValue::CreateUint8(hVm, temp.as.uint8);
 		}
 
-		case XENON_VALUE_TYPE_UINT16:
+		case HQ_VALUE_TYPE_UINT16:
 		{
-			result = XenonSerializerReadUint16(hSerializer, &temp.as.uint16);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint16(hSerializer, &temp.as.uint16);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateUint16(hVm, temp.as.uint16);
+			return HqValue::CreateUint16(hVm, temp.as.uint16);
 		}
 
-		case XENON_VALUE_TYPE_UINT32:
+		case HQ_VALUE_TYPE_UINT32:
 		{
-			result = XenonSerializerReadUint32(hSerializer, &temp.as.uint32);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint32(hSerializer, &temp.as.uint32);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateUint32(hVm, temp.as.uint32);
+			return HqValue::CreateUint32(hVm, temp.as.uint32);
 		}
 
-		case XENON_VALUE_TYPE_UINT64:
+		case HQ_VALUE_TYPE_UINT64:
 		{
-			result = XenonSerializerReadUint64(hSerializer, &temp.as.uint64);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint64(hSerializer, &temp.as.uint64);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateUint64(hVm, temp.as.uint64);
+			return HqValue::CreateUint64(hVm, temp.as.uint64);
 		}
 
-		case XENON_VALUE_TYPE_FLOAT32:
+		case HQ_VALUE_TYPE_FLOAT32:
 		{
-			result = XenonSerializerReadFloat32(hSerializer, &temp.as.float32);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadFloat32(hSerializer, &temp.as.float32);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateFloat32(hVm, temp.as.float32);
+			return HqValue::CreateFloat32(hVm, temp.as.float32);
 		}
 
-		case XENON_VALUE_TYPE_FLOAT64:
+		case HQ_VALUE_TYPE_FLOAT64:
 		{
-			result = XenonSerializerReadFloat64(hSerializer, &temp.as.float64);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadFloat64(hSerializer, &temp.as.float64);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateFloat64(hVm, temp.as.float64);
+			return HqValue::CreateFloat64(hVm, temp.as.float64);
 		}
 
-		case XENON_VALUE_TYPE_BOOL:
+		case HQ_VALUE_TYPE_BOOL:
 		{
-			result = XenonSerializerReadBool(hSerializer, &temp.as.boolean);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadBool(hSerializer, &temp.as.boolean);
+			if(result != HQ_SUCCESS)
 			{
 				break;
 			}
 
-			return XenonValue::CreateBool(hVm, temp.as.boolean);
+			return HqValue::CreateBool(hVm, temp.as.boolean);
 		}
 
-		case XENON_VALUE_TYPE_STRING:
+		case HQ_VALUE_TYPE_STRING:
 		{
 			// Read the string from the serializer.
-			XenonString* const pString = ReadString(hSerializer, hReport);
+			HqString* const pString = ReadString(hSerializer, hReport);
 			if(!pString)
 			{
-				return XENON_VALUE_HANDLE_NULL;
+				return HQ_VALUE_HANDLE_NULL;
 			}
 
-			return XenonValue::CreateString(hVm, pString);
+			return HqValue::CreateString(hVm, pString);
 		}
 
-		case XENON_VALUE_TYPE_OBJECT:
-			XenonReportMessage(
+		case HQ_VALUE_TYPE_OBJECT:
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"ReadValue error: Found object value type, but they are currently unsupported"
 			);
-			return XENON_VALUE_HANDLE_NULL;
+			return HQ_VALUE_HANDLE_NULL;
 
 		default:
 			// Unknown (or currently unhandled) value type.
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"ReadValue error: Unknown value type: type=%d",
 				valueType
 			);
-			return XENON_VALUE_HANDLE_NULL;
+			return HQ_VALUE_HANDLE_NULL;
 	}
 
-	const char* const errorString = XenonGetErrorCodeString(result);
+	const char* const errorString = HqGetErrorCodeString(result);
 
-	XenonReportMessage(
+	HqReportMessage(
 		hReport,
-		XENON_MESSAGE_TYPE_ERROR,
+		HQ_MESSAGE_TYPE_ERROR,
 		"ReadValue error: Failed to read value data: error=\"%s\"",
 		errorString
 	);
 
-	return XENON_VALUE_HANDLE_NULL;
+	return HQ_VALUE_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

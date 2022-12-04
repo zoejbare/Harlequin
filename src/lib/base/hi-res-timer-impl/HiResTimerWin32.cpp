@@ -23,7 +23,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _XenonHiResTimerImplGetFrequency()
+extern "C" uint64_t _HqHiResTimerImplGetFrequency()
 {
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
@@ -33,7 +33,7 @@ extern "C" uint64_t _XenonHiResTimerImplGetFrequency()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _XenonHiResTimerImplGetTimestamp()
+extern "C" uint64_t _HqHiResTimerImplGetTimestamp()
 {
 	LARGE_INTEGER timestamp;
 	QueryPerformanceCounter(&timestamp);

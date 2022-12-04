@@ -45,10 +45,10 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-static void MoveInstructionPointer(XenonExecutionHandle hExec, const int32_t relativeOffset)
+static void MoveInstructionPointer(HqExecutionHandle hExec, const int32_t relativeOffset)
 {
-	XenonFunctionHandle hFunction = hExec->hCurrentFrame->hFunction;
-	XenonProgramHandle hProgram = hExec->hCurrentFrame->hFunction->hProgram;
+	HqFunctionHandle hFunction = hExec->hCurrentFrame->hFunction;
+	HqProgramHandle hProgram = hExec->hCurrentFrame->hFunction->hProgram;
 
 	uint8_t* const pNewIp = hExec->hCurrentFrame->decoder.cachedIp + relativeOffset;
 
@@ -59,9 +59,9 @@ static void MoveInstructionPointer(XenonExecutionHandle hExec, const int32_t rel
 	if(pNewIp < pFunctionStart || pNewIp >= pFunctionEnd)
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec, 
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Invalid branch offset: offset=%" PRId32 ", currentPosition=0x%" PRIXPTR ", functionStart=0x%" PRIXPTR ", functionEnd=0x%" PRIXPTR,
 			relativeOffset,
 			uintptr_t(hExec->hCurrentFrame->decoder.cachedIp),
@@ -78,7 +78,7 @@ static void MoveInstructionPointer(XenonExecutionHandle hExec, const int32_t rel
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static bool EvaluateValue(XenonValueHandle hValue)
+static bool EvaluateValue(HqValueHandle hValue)
 {
 	if(!hValue)
 	{
@@ -87,43 +87,43 @@ static bool EvaluateValue(XenonValueHandle hValue)
 
 	switch(hValue->type)
 	{
-		case XENON_VALUE_TYPE_NULL:
+		case HQ_VALUE_TYPE_NULL:
 			return false;
 
-		case XENON_VALUE_TYPE_INT8:
+		case HQ_VALUE_TYPE_INT8:
 			return hValue->as.int8 != 0;
 
-		case XENON_VALUE_TYPE_INT16:
+		case HQ_VALUE_TYPE_INT16:
 			return hValue->as.int16 != 0;
 
-		case XENON_VALUE_TYPE_INT32:
+		case HQ_VALUE_TYPE_INT32:
 			return hValue->as.int32 != 0;
 
-		case XENON_VALUE_TYPE_INT64:
+		case HQ_VALUE_TYPE_INT64:
 			return hValue->as.int64 != 0;
 
-		case XENON_VALUE_TYPE_UINT8:
+		case HQ_VALUE_TYPE_UINT8:
 			return hValue->as.uint8 != 0;
 
-		case XENON_VALUE_TYPE_UINT16:
+		case HQ_VALUE_TYPE_UINT16:
 			return hValue->as.uint16 != 0;
 
-		case XENON_VALUE_TYPE_UINT32:
+		case HQ_VALUE_TYPE_UINT32:
 			return hValue->as.uint32 != 0;
 
-		case XENON_VALUE_TYPE_UINT64:
+		case HQ_VALUE_TYPE_UINT64:
 			return hValue->as.uint64 != 0;
 
-		case XENON_VALUE_TYPE_FLOAT32:
+		case HQ_VALUE_TYPE_FLOAT32:
 			return hValue->as.float32 != 0.0f;
 
-		case XENON_VALUE_TYPE_FLOAT64:
+		case HQ_VALUE_TYPE_FLOAT64:
 			return hValue->as.float64 != 0.0;
 
-		case XENON_VALUE_TYPE_BOOL:
+		case HQ_VALUE_TYPE_BOOL:
 			return hValue->as.boolean;
 
-		case XENON_VALUE_TYPE_STRING:
+		case HQ_VALUE_TYPE_STRING:
 			return hValue->as.pString->length != 0;
 
 		default:
@@ -136,11 +136,11 @@ static bool EvaluateValue(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static void RaiseFatalException_ObjectAsBool(XenonExecutionHandle hExec, const uint32_t registerIndex)
+static void RaiseFatalException_ObjectAsBool(HqExecutionHandle hExec, const uint32_t registerIndex)
 {
-	XenonExecution::RaiseOpCodeException(
+	HqExecution::RaiseOpCodeException(
 		hExec, 
-		XENON_STANDARD_EXCEPTION_TYPE_ERROR, 
+		HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
 		"Type mismatch; expected boolean, null, primitive value, or string: r(%" PRIu32 ")", 
 		registerIndex
 	);
@@ -148,11 +148,11 @@ static void RaiseFatalException_ObjectAsBool(XenonExecutionHandle hExec, const u
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static void RaiseFatalException_NoValueAtGpRegister(XenonExecutionHandle hExec, const uint32_t registerIndex)
+static void RaiseFatalException_NoValueAtGpRegister(HqExecutionHandle hExec, const uint32_t registerIndex)
 {
-	XenonExecution::RaiseOpCodeException(
+	HqExecution::RaiseOpCodeException(
 		hExec, 
-		XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+		HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 		"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
 		registerIndex
 	);
@@ -164,9 +164,9 @@ static void RaiseFatalException_NoValueAtGpRegister(XenonExecutionHandle hExec, 
 extern "C" {
 #endif
 
-void OpCodeExec_Branch(XenonExecutionHandle hExec)
+void OpCodeExec_Branch(HqExecutionHandle hExec)
 {
-	const int32_t offset = XenonDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
+	const int32_t offset = HqDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
 
 	// No condition, just move the instruction pointer.
 	MoveInstructionPointer(hExec, offset);
@@ -174,9 +174,9 @@ void OpCodeExec_Branch(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Branch(XenonDisassemble& disasm)
+void OpCodeDisasm_Branch(HqDisassemble& disasm)
 {
-	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
+	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
@@ -186,18 +186,18 @@ void OpCodeDisasm_Branch(XenonDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_BranchIfTrue(XenonExecutionHandle hExec)
+void OpCodeExec_BranchIfTrue(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const int32_t offset = XenonDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const int32_t offset = HqDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Object values cannot be evaluated directly.
-		if(!XenonValueIsObject(hValue))
+		if(!HqValueIsObject(hValue))
 		{
 			const bool pass = EvaluateValue(hValue);
 
@@ -221,10 +221,10 @@ void OpCodeExec_BranchIfTrue(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_BranchIfTrue(XenonDisassemble& disasm)
+void OpCodeDisasm_BranchIfTrue(HqDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
@@ -234,18 +234,18 @@ void OpCodeDisasm_BranchIfTrue(XenonDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_BranchIfFalse(XenonExecutionHandle hExec)
+void OpCodeExec_BranchIfFalse(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const int32_t offset = XenonDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const int32_t offset = HqDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Object values cannot be evaluated directly.
-		if(!XenonValueIsObject(hValue))
+		if(!HqValueIsObject(hValue))
 		{
 			const bool pass = !EvaluateValue(hValue);
 
@@ -269,10 +269,10 @@ void OpCodeExec_BranchIfFalse(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_BranchIfFalse(XenonDisassemble& disasm)
+void OpCodeDisasm_BranchIfFalse(HqDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const int32_t offset = XenonDecoder::LoadInt32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];

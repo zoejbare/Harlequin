@@ -27,27 +27,27 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonObjectData
+struct HqObjectData
 {
 	typedef std::unordered_map<
-		XenonString*,
-		XenonObjectData,
-		XenonString::StlHash,
-		XenonString::StlCompare
+		HqString*,
+		HqObjectData,
+		HqString::StlHash,
+		HqString::StlCompare
 	> StringToObjectMap;
 
 	typedef std::unordered_map<
-		XenonString*,
+		HqString*,
 		int,
-		XenonString::StlHash,
-		XenonString::StlCompare
+		HqString::StlHash,
+		HqString::StlCompare
 	> MemberDefinitionMap;
 
-	XenonString* pTypeName;
+	HqString* pTypeName;
 
 	MemberDefinitionMap members;
 
-	std::vector<XenonString*> orderedMemberNames;
+	std::vector<HqString*> orderedMemberNames;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

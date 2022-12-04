@@ -20,28 +20,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if defined(XENON_PLATFORM_WINDOWS)
+#if defined(HQ_PLATFORM_WINDOWS)
 	#include "rwlock-impl/RwLockWin32.hpp"
 
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4) \
-	|| defined(XENON_PLATFORM_PS5)
+#elif defined(HQ_PLATFORM_LINUX) \
+	|| defined(HQ_PLATFORM_MAC_OS) \
+	|| defined(HQ_PLATFORM_ANDROID) \
+	|| defined(HQ_PLATFORM_PS4) \
+	|| defined(HQ_PLATFORM_PS5)
 	#include "rwlock-impl/RwLockPosix.hpp"
 
-#elif defined(XENON_PLATFORM_PS3)
-	#include "../../../../XenonScriptImpl-PS3/lib/base/rwlock/RwLock.hpp"
+#elif defined(HQ_PLATFORM_PS3)
+	#include "../../../support/Harlequin-PS3/lib/base/rwlock/RwLock.hpp"
 
-#elif defined(XENON_PLATFORM_PSVITA)
-	#include "../../../../XenonScriptImpl-PSVita/lib/base/rwlock/RwLock.hpp"
+#elif defined(HQ_PLATFORM_PSVITA)
+	#include "../../../support/Harlequin-PSVita/lib/base/rwlock/RwLock.hpp"
 
 #else
-	#error "XenonRwLock not implemented for this platform"
+	#error "HqRwLock not implemented for this platform"
 
 #endif
 
@@ -49,119 +49,119 @@
 
 extern "C"
 {
-	void _XenonRwLockImplCreate(XenonInternalRwLock&);
-	void _XenonRwLockImplDispose(XenonInternalRwLock&);
+	void _HqRwLockImplCreate(HqInternalRwLock&);
+	void _HqRwLockImplDispose(HqInternalRwLock&);
 
-	bool _XenonRwLockImplTryReadLock(XenonInternalRwLock&);
-	void _XenonRwLockImplReadLock(XenonInternalRwLock&);
-	void _XenonRwLockImplReadUnlock(XenonInternalRwLock&);
+	bool _HqRwLockImplTryReadLock(HqInternalRwLock&);
+	void _HqRwLockImplReadLock(HqInternalRwLock&);
+	void _HqRwLockImplReadUnlock(HqInternalRwLock&);
 
-	bool _XenonRwLockImplTryWriteLock(XenonInternalRwLock&);
-	void _XenonRwLockImplWriteLock(XenonInternalRwLock&);
-	void _XenonRwLockImplWriteUnlock(XenonInternalRwLock&);
+	bool _HqRwLockImplTryWriteLock(HqInternalRwLock&);
+	void _HqRwLockImplWriteLock(HqInternalRwLock&);
+	void _HqRwLockImplWriteUnlock(HqInternalRwLock&);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonRwLock
+struct HQ_BASE_API HqRwLock
 {
-	static XenonRwLock Create()
+	static HqRwLock Create()
 	{
-		XenonRwLock output;
-		_XenonRwLockImplCreate(output.obj);
+		HqRwLock output;
+		_HqRwLockImplCreate(output.obj);
 		return output;
 	}
 
-	static void Dispose(XenonRwLock& rwlock)
+	static void Dispose(HqRwLock& rwlock)
 	{
-		_XenonRwLockImplDispose(rwlock.obj);
+		_HqRwLockImplDispose(rwlock.obj);
 	}
 
-	static bool TryReadLock(XenonRwLock& rwlock)
+	static bool TryReadLock(HqRwLock& rwlock)
 	{
-		return _XenonRwLockImplTryReadLock(rwlock.obj);
+		return _HqRwLockImplTryReadLock(rwlock.obj);
 	}
 
-	static void ReadLock(XenonRwLock& rwlock)
+	static void ReadLock(HqRwLock& rwlock)
 	{
-		_XenonRwLockImplReadLock(rwlock.obj);
+		_HqRwLockImplReadLock(rwlock.obj);
 	}
 
-	static void ReadUnlock(XenonRwLock& rwlock)
+	static void ReadUnlock(HqRwLock& rwlock)
 	{
-		_XenonRwLockImplReadUnlock(rwlock.obj);
+		_HqRwLockImplReadUnlock(rwlock.obj);
 	}
 
-	static bool TryWriteLock(XenonRwLock& rwlock)
+	static bool TryWriteLock(HqRwLock& rwlock)
 	{
-		return _XenonRwLockImplTryWriteLock(rwlock.obj);
+		return _HqRwLockImplTryWriteLock(rwlock.obj);
 	}
 
-	static void WriteLock(XenonRwLock& rwlock)
+	static void WriteLock(HqRwLock& rwlock)
 	{
-		_XenonRwLockImplWriteLock(rwlock.obj);
+		_HqRwLockImplWriteLock(rwlock.obj);
 	}
 
-	static void WriteUnlock(XenonRwLock& rwlock)
+	static void WriteUnlock(HqRwLock& rwlock)
 	{
-		_XenonRwLockImplWriteUnlock(rwlock.obj);
+		_HqRwLockImplWriteUnlock(rwlock.obj);
 	}
 
-	XenonInternalRwLock obj;
+	HqInternalRwLock obj;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class XENON_BASE_API XenonScopedReadLock
+class HQ_BASE_API HqScopedReadLock
 {
 public:
 
-	XenonScopedReadLock() = delete;
-	XenonScopedReadLock(const XenonScopedReadLock&) = delete;
-	XenonScopedReadLock(XenonScopedReadLock&&) = delete;
+	HqScopedReadLock() = delete;
+	HqScopedReadLock(const HqScopedReadLock&) = delete;
+	HqScopedReadLock(HqScopedReadLock&&) = delete;
 
-	explicit XenonScopedReadLock(XenonRwLock& rwlock)
+	explicit HqScopedReadLock(HqRwLock& rwlock)
 		: m_pRwLock(&rwlock)
 	{
-		XenonRwLock::ReadLock(*m_pRwLock);
+		HqRwLock::ReadLock(*m_pRwLock);
 	}
 
-	~XenonScopedReadLock()
+	~HqScopedReadLock()
 	{
-		XenonRwLock::ReadUnlock(*m_pRwLock);
+		HqRwLock::ReadUnlock(*m_pRwLock);
 	}
 
 
 private:
 
-	XenonRwLock* m_pRwLock;
+	HqRwLock* m_pRwLock;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class XENON_BASE_API XenonScopedWriteLock
+class HQ_BASE_API HqScopedWriteLock
 {
 public:
 
-	XenonScopedWriteLock() = delete;
-	XenonScopedWriteLock(const XenonScopedWriteLock&) = delete;
-	XenonScopedWriteLock(XenonScopedWriteLock&&) = delete;
+	HqScopedWriteLock() = delete;
+	HqScopedWriteLock(const HqScopedWriteLock&) = delete;
+	HqScopedWriteLock(HqScopedWriteLock&&) = delete;
 
-	explicit XenonScopedWriteLock(XenonRwLock& rwlock)
+	explicit HqScopedWriteLock(HqRwLock& rwlock)
 		: m_pRwLock(&rwlock)
 	{
-		XenonRwLock::WriteLock(*m_pRwLock);
+		HqRwLock::WriteLock(*m_pRwLock);
 	}
 
-	~XenonScopedWriteLock()
+	~HqScopedWriteLock()
 	{
-		XenonRwLock::WriteUnlock(*m_pRwLock);
+		HqRwLock::WriteUnlock(*m_pRwLock);
 	}
 
 
 private:
 
-	XenonRwLock* m_pRwLock;
+	HqRwLock* m_pRwLock;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

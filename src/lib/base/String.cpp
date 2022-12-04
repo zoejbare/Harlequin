@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(XENON_PLATFORM_PSVITA)
+#if defined(HQ_PLATFORM_PSVITA)
 	// Work around xxhash using the wrong 'restrict' keyword.
 	#pragma push_macro("restrict")
 	#define restrict __restrict__
@@ -32,15 +32,15 @@
 #define XXH_ACCEPT_NULL_INPUT_POINTER 1
 #include <xxhash.h>
 
-#if defined(XENON_PLATFORM_PSVITA)
+#if defined(HQ_PLATFORM_PSVITA)
 	#pragma pop_macro("restrict")
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::StlCompare::operator()(
-	XenonString* const pLeft,
-	XenonString* const pRight
+bool HqString::StlCompare::operator()(
+	HqString* const pLeft,
+	HqString* const pRight
 )
 {
 	return Compare(pLeft, pRight);
@@ -48,9 +48,9 @@ bool XenonString::StlCompare::operator()(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::StlCompare::operator()(
-	const XenonString* const pLeft,
-	const XenonString* const pRight
+bool HqString::StlCompare::operator()(
+	const HqString* const pLeft,
+	const HqString* const pRight
 ) const
 {
 	return Compare(pLeft, pRight) ;
@@ -58,9 +58,9 @@ bool XenonString::StlCompare::operator()(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::StlLess::operator()(
-	XenonString* const pLeft,
-	XenonString* const pRight
+bool HqString::StlLess::operator()(
+	HqString* const pLeft,
+	HqString* const pRight
 )
 {
 	return Less(pLeft, pRight);
@@ -68,9 +68,9 @@ bool XenonString::StlLess::operator()(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::StlLess::operator()(
-	const XenonString* const pLeft,
-	const XenonString* const pRight
+bool HqString::StlLess::operator()(
+	const HqString* const pLeft,
+	const HqString* const pRight
 ) const
 {
 	return Less(pLeft, pRight) ;
@@ -78,21 +78,21 @@ bool XenonString::StlLess::operator()(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonString::StlHash::operator()(XenonString* const pObject)
+size_t HqString::StlHash::operator()(HqString* const pObject)
 {
 	return pObject->hash;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonString::StlHash::operator()(const XenonString* const pObject) const
+size_t HqString::StlHash::operator()(const HqString* const pObject) const
 {
 	return pObject->hash;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::StlRawCompare::operator()(
+bool HqString::StlRawCompare::operator()(
 	char* const strLeft,
 	char* const strRight
 )
@@ -102,7 +102,7 @@ bool XenonString::StlRawCompare::operator()(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::StlRawCompare::operator()(
+bool HqString::StlRawCompare::operator()(
 	const char* const strLeft,
 	const char* const strRight
 ) const
@@ -112,34 +112,34 @@ bool XenonString::StlRawCompare::operator()(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonString::StlRawHash::operator()(char* const str)
+size_t HqString::StlRawHash::operator()(char* const str)
 {
 	return RawHash(str);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonString::StlRawHash::operator()(const char* const str) const
+size_t HqString::StlRawHash::operator()(const char* const str) const
 {
 	return RawHash(str);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonString* XenonString::Create(const char* const stringData)
+HqString* HqString::Create(const char* const stringData)
 {
 	// TODO: Implement string pooling.
 
-	XenonString* const pOutput = new XenonString();
+	HqString* const pOutput = new HqString();
 	assert(pOutput != nullptr);
 
 	const size_t length = (stringData) ? strlen(stringData) : 0;
 
 	pOutput->length = length;
 	pOutput->hash = RawHash(stringData ? stringData : "");
-	pOutput->data = (length > 0) ? reinterpret_cast<char*>(XenonMemAlloc(length + 1)) : nullptr;
+	pOutput->data = (length > 0) ? reinterpret_cast<char*>(HqMemAlloc(length + 1)) : nullptr;
 
-	XenonReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
 	if(stringData && pOutput->data)
 	{
@@ -152,25 +152,25 @@ XenonString* XenonString::Create(const char* const stringData)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonString::AddRef(XenonString* const pString)
+int32_t HqString::AddRef(HqString* const pString)
 {
 	return (pString)
-		? XenonReference::AddRef(pString->ref)
+		? HqReference::AddRef(pString->ref)
 		: -1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonString::Release(XenonString* const pString)
+int32_t HqString::Release(HqString* const pString)
 {
 	return (pString)
-		? XenonReference::Release(pString->ref)
+		? HqReference::Release(pString->ref)
 		: -1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::Compare(const XenonString* const pLeft, const XenonString* const pRight)
+bool HqString::Compare(const HqString* const pLeft, const HqString* const pRight)
 {
 	assert(pLeft != nullptr);
 	assert(pLeft->data != nullptr);
@@ -205,7 +205,7 @@ bool XenonString::Compare(const XenonString* const pLeft, const XenonString* con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::Less(const XenonString* const pLeft, const XenonString* const pRight)
+bool HqString::Less(const HqString* const pLeft, const HqString* const pRight)
 {
 	assert(pLeft != nullptr);
 	assert(pLeft->data != nullptr);
@@ -226,7 +226,7 @@ bool XenonString::Less(const XenonString* const pLeft, const XenonString* const 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonString::RawCompare(const char* left, const char* right)
+bool HqString::RawCompare(const char* left, const char* right)
 {
 	assert(left != nullptr);
 	assert(right != nullptr);
@@ -242,11 +242,11 @@ bool XenonString::RawCompare(const char* left, const char* right)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonString::RawHash(const char* const string)
+size_t HqString::RawHash(const char* const string)
 {
 	auto calculateFnv1aHash = [](const char* const string, const size_t length) -> size_t
 	{
-#ifdef XENON_CPU_WIDTH_64_BIT
+#ifdef HQ_CPU_WIDTH_64_BIT
 		const uint64_t fnvOffsetBasis = 0xCBF29CE484222325ull;
 		const uint64_t fnvPrime = 0x00000100000001B3ull;
 
@@ -276,7 +276,7 @@ size_t XenonString::RawHash(const char* const string)
 	const size_t seed = calculateFnv1aHash(string, length);
 
 	return size_t(
-#ifdef XENON_CPU_WIDTH_64_BIT
+#ifdef HQ_CPU_WIDTH_64_BIT
 		XXH64
 #else
 		XXH32
@@ -287,7 +287,7 @@ size_t XenonString::RawHash(const char* const string)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-char* XenonString::RawFormatVarArgs(const char* const fmt, va_list vl)
+char* HqString::RawFormatVarArgs(const char* const fmt, va_list vl)
 {
 	char* output = nullptr;
 
@@ -305,7 +305,7 @@ char* XenonString::RawFormatVarArgs(const char* const fmt, va_list vl)
 		if(messageLength > 0)
 		{
 			// Allocate a message string to the required length, including space for the null terminator.
-			char* const message = reinterpret_cast<char*>(XenonMemAlloc(size_t(messageLength) + 1));
+			char* const message = reinterpret_cast<char*>(HqMemAlloc(size_t(messageLength) + 1));
 
 			// Write the message to the string.
 			vsnprintf(message, size_t(messageLength) + 1, fmt, vl);
@@ -321,13 +321,13 @@ char* XenonString::RawFormatVarArgs(const char* const fmt, va_list vl)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonString::prv_onDestruct(void* const pOpaque)
+void HqString::prv_onDestruct(void* const pOpaque)
 {
-	XenonString* const pString = reinterpret_cast<XenonString*>(pOpaque);
+	HqString* const pString = reinterpret_cast<HqString*>(pOpaque);
 
 	if(pString->data)
 	{
-		XenonMemFree(pString->data);
+		HqMemFree(pString->data);
 	}
 
 	delete pString;
@@ -335,16 +335,16 @@ void XenonString::prv_onDestruct(void* const pOpaque)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonString::operator new(const size_t sizeInBytes)
+void* HqString::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonString::operator delete(void* const pObject)
+void HqString::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -18,26 +18,26 @@
 
 #include <gtest/gtest.h>
 
-#include <XenonScript.h>
+#include <Harlequin.h>
 
 #include <string>
 #include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonVmInit ConstructInitObject(void* const pUserData, const int reportLevel, XenonMessageCallback onMessageFn)
+HqVmInit ConstructInitObject(void* const pUserData, const int reportLevel, HqMessageCallback onMessageFn)
 {
 	auto onDependencyRequested = [](void*, const char*)
 	{
 		// Don't need this right now, just stubbing it in to keep the context creation from failing.
 	};
 
-	XenonVmInit output;
+	HqVmInit output;
 	output.common.report.onMessageFn = onMessageFn;
 	output.common.report.pUserData = pUserData;
 	output.common.report.reportLevel = reportLevel;
-	output.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
-	output.gcMaxIterationCount = XENON_VM_GC_DEFAULT_ITERATION_COUNT;
+	output.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
+	output.gcMaxIterationCount = HQ_VM_GC_DEFAULT_ITERATION_COUNT;
 
 	return output;
 }
@@ -70,16 +70,16 @@ void DummyMessageCallback(void*, int, const char*)
 
 TEST(TestVm, CreateAndDisposeContext)
 {
-	XenonVmInit init = ConstructInitObject(nullptr, XENON_MESSAGE_TYPE_FATAL, DummyMessageCallback);
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
+	HqVmInit init = ConstructInitObject(nullptr, HQ_MESSAGE_TYPE_FATAL, DummyMessageCallback);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
 
 	// Create the VM context.
-	const int createContextResult = XenonVmCreate(&hVm, init);
-	ASSERT_EQ(createContextResult, XENON_SUCCESS);
+	const int createContextResult = HqVmCreate(&hVm, init);
+	ASSERT_EQ(createContextResult, HQ_SUCCESS);
 
 	// Dispose of the VM context.
-	const int disposeContextResult = XenonVmDispose(&hVm);
-	EXPECT_EQ(disposeContextResult, XENON_SUCCESS);
+	const int disposeContextResult = HqVmDispose(&hVm);
+	EXPECT_EQ(disposeContextResult, HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -88,51 +88,51 @@ TEST(TestVm, ReportMessages)
 {
 	ReportLine line;
 
-	XenonVmInit init = ConstructInitObject(&line, XENON_MESSAGE_TYPE_VERBOSE, StoreReportLine);
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
+	HqVmInit init = ConstructInitObject(&line, HQ_MESSAGE_TYPE_VERBOSE, StoreReportLine);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
 
 	// Create the VM context.
-	const int createContextResult = XenonVmCreate(&hVm, init);
-	ASSERT_EQ(createContextResult, XENON_SUCCESS);
+	const int createContextResult = HqVmCreate(&hVm, init);
+	ASSERT_EQ(createContextResult, HQ_SUCCESS);
 
-	XenonReportHandle hReport = XENON_REPORT_HANDLE_NULL;
-	const int getReportHandleResult = XenonVmGetReportHandle(hVm, &hReport);
-	ASSERT_EQ(getReportHandleResult, XENON_SUCCESS);
-	EXPECT_NE(hReport, XENON_REPORT_HANDLE_NULL);
+	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
+	const int getReportHandleResult = HqVmGetReportHandle(hVm, &hReport);
+	ASSERT_EQ(getReportHandleResult, HQ_SUCCESS);
+	EXPECT_NE(hReport, HQ_REPORT_HANDLE_NULL);
 
 	// Test writing a 'verbose' string.
-	const int verboseMessageResult = XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Verbose message");
-	EXPECT_EQ(verboseMessageResult, XENON_SUCCESS);
-	EXPECT_EQ(line.type, XENON_MESSAGE_TYPE_VERBOSE);
+	const int verboseMessageResult = HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Verbose message");
+	EXPECT_EQ(verboseMessageResult, HQ_SUCCESS);
+	EXPECT_EQ(line.type, HQ_MESSAGE_TYPE_VERBOSE);
 	EXPECT_STREQ(line.message, "Verbose message");
 
 	// Test writing an 'info' string.
-	const int infoMessageResult = XenonReportMessage(hReport, XENON_MESSAGE_TYPE_INFO, "Info message");
-	EXPECT_EQ(infoMessageResult, XENON_SUCCESS);
-	EXPECT_EQ(line.type, XENON_MESSAGE_TYPE_INFO);
+	const int infoMessageResult = HqReportMessage(hReport, HQ_MESSAGE_TYPE_INFO, "Info message");
+	EXPECT_EQ(infoMessageResult, HQ_SUCCESS);
+	EXPECT_EQ(line.type, HQ_MESSAGE_TYPE_INFO);
 	EXPECT_STREQ(line.message, "Info message");
 
 	// Test writing a 'warning' string.
-	const int warningMessageResult = XenonReportMessage(hReport, XENON_MESSAGE_TYPE_WARNING, "Warning message");
-	EXPECT_EQ(warningMessageResult, XENON_SUCCESS);
-	EXPECT_EQ(line.type, XENON_MESSAGE_TYPE_WARNING);
+	const int warningMessageResult = HqReportMessage(hReport, HQ_MESSAGE_TYPE_WARNING, "Warning message");
+	EXPECT_EQ(warningMessageResult, HQ_SUCCESS);
+	EXPECT_EQ(line.type, HQ_MESSAGE_TYPE_WARNING);
 	EXPECT_STREQ(line.message, "Warning message");
 
 	// Test writing an 'error' string.
-	const int errorMessageResult = XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error message");
-	EXPECT_EQ(errorMessageResult, XENON_SUCCESS);
-	EXPECT_EQ(line.type, XENON_MESSAGE_TYPE_ERROR);
+	const int errorMessageResult = HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error message");
+	EXPECT_EQ(errorMessageResult, HQ_SUCCESS);
+	EXPECT_EQ(line.type, HQ_MESSAGE_TYPE_ERROR);
 	EXPECT_STREQ(line.message, "Error message");
 
 	// Test writing a 'fatal' string.
-	const int fatalMessageResult = XenonReportMessage(hReport, XENON_MESSAGE_TYPE_FATAL, "Fatal message");
-	EXPECT_EQ(fatalMessageResult, XENON_SUCCESS);
-	EXPECT_EQ(line.type, XENON_MESSAGE_TYPE_FATAL);
+	const int fatalMessageResult = HqReportMessage(hReport, HQ_MESSAGE_TYPE_FATAL, "Fatal message");
+	EXPECT_EQ(fatalMessageResult, HQ_SUCCESS);
+	EXPECT_EQ(line.type, HQ_MESSAGE_TYPE_FATAL);
 	EXPECT_STREQ(line.message, "Fatal message");
 
 	// Dispose of the VM context.
-	const int disposeContextResult = XenonVmDispose(&hVm);
-	EXPECT_EQ(disposeContextResult, XENON_SUCCESS);
+	const int disposeContextResult = HqVmDispose(&hVm);
+	EXPECT_EQ(disposeContextResult, HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -141,244 +141,244 @@ TEST(TestVm, ReportMessages)
 #if 0
 TEST(TestVm, Execution)
 {
-	XenonVmInit init = ConstructInitObject(nullptr, XENON_MESSAGE_TYPE_FATAL, DummyMessageCallback);
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonFunctionHandle hFunc = XENON_FUNCTION_HANDLE_NULL;
-	XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
+	HqVmInit init = ConstructInitObject(nullptr, HQ_MESSAGE_TYPE_FATAL, DummyMessageCallback);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqFunctionHandle hFunc = HQ_FUNCTION_HANDLE_NULL;
+	HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
 
 	// Create the VM context.
-	const int createContextResult = XenonVmCreate(&hVm, init);
-	ASSERT_EQ(createContextResult, XENON_SUCCESS);
+	const int createContextResult = HqVmCreate(&hVm, init);
+	ASSERT_EQ(createContextResult, HQ_SUCCESS);
 
 	// Create an execution handle.
-	const int createExecutionResult = XenonExecutionCreate(&hExec, hVm, hFunc);
-	ASSERT_EQ(createExecutionResult, XENON_SUCCESS);
+	const int createExecutionResult = HqExecutionCreate(&hExec, hVm, hFunc);
+	ASSERT_EQ(createExecutionResult, HQ_SUCCESS);
 
 	const size_t testValueCount = 4;
 
-	XenonValue testValue[testValueCount] =
+	HqValue testValue[testValueCount] =
 	{
-		XenonValueCreateBool(true),
-		XenonValueCreateUint32(123),
-		XenonValueCreateFloat64(1.23456789),
-		XenonValueCreateInt64(-234),
+		HqValueCreateBool(true),
+		HqValueCreateUint32(123),
+		HqValueCreateFloat64(1.23456789),
+		HqValueCreateInt64(-234),
 	};
 
 	// Test the parameter stack.
 	{
 		// Check the initial stack size.
-		const size_t stackSizeBeforePush = XenonExecutionGetParameterStackSize(executionHandle);
+		const size_t stackSizeBeforePush = HqExecutionGetParameterStackSize(executionHandle);
 		EXPECT_EQ(stackSizeBeforePush, 0);
 
 		// Push the test values to the execution stack.
 		{
-			const int pushTestValue0Result = XenonExecutionPushParameter(executionHandle, &testValue[0]);
-			EXPECT_EQ(pushTestValue0Result, XENON_SUCCESS);
+			const int pushTestValue0Result = HqExecutionPushParameter(executionHandle, &testValue[0]);
+			EXPECT_EQ(pushTestValue0Result, HQ_SUCCESS);
 
-			const int pushTestValue1Result = XenonExecutionPushParameter(executionHandle, &testValue[1]);
-			EXPECT_EQ(pushTestValue1Result, XENON_SUCCESS);
+			const int pushTestValue1Result = HqExecutionPushParameter(executionHandle, &testValue[1]);
+			EXPECT_EQ(pushTestValue1Result, HQ_SUCCESS);
 
-			const int pushTestValue2Result = XenonExecutionPushParameter(executionHandle, &testValue[2]);
-			EXPECT_EQ(pushTestValue2Result, XENON_SUCCESS);
+			const int pushTestValue2Result = HqExecutionPushParameter(executionHandle, &testValue[2]);
+			EXPECT_EQ(pushTestValue2Result, HQ_SUCCESS);
 
-			const int pushTestValue3Result = XenonExecutionPushParameter(executionHandle, &testValue[3]);
-			EXPECT_EQ(pushTestValue3Result, XENON_SUCCESS);
+			const int pushTestValue3Result = HqExecutionPushParameter(executionHandle, &testValue[3]);
+			EXPECT_EQ(pushTestValue3Result, HQ_SUCCESS);
 		}
 
 		// Check the stack size after pushing each test value to the stack.
-		const size_t stackSizeAfterPush = XenonExecutionGetParameterStackSize(executionHandle);
+		const size_t stackSizeAfterPush = HqExecutionGetParameterStackSize(executionHandle);
 		EXPECT_EQ(stackSizeAfterPush, testValueCount);
 
 		// Peek at the values on the stack.
 		{
-			XenonValue peekValue = XenonValueCreateNull();
+			HqValue peekValue = HqValueCreateNull();
 
-			const int peekTestValue3Result = XenonExecutionPeekParameter(executionHandle, &peekValue, 0);
-			EXPECT_EQ(peekTestValue3Result, XENON_SUCCESS);
-			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_INT64);
+			const int peekTestValue3Result = HqExecutionPeekParameter(executionHandle, &peekValue, 0);
+			EXPECT_EQ(peekTestValue3Result, HQ_SUCCESS);
+			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_INT64);
 			EXPECT_EQ(peekValue.as.int64, testValue[3].as.int64);
 
-			const int peekTestValue3 = XenonValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue3, XENON_SUCCESS);
+			const int peekTestValue3 = HqValueGcExpose(&peekValue);
+			EXPECT_EQ(peekTestValue3, HQ_SUCCESS);
 
-			peekValue = XenonValueCreateNull();
+			peekValue = HqValueCreateNull();
 
-			const int peekTestValue2Result = XenonExecutionPeekParameter(executionHandle, &peekValue, 1);
-			EXPECT_EQ(peekTestValue2Result, XENON_SUCCESS);
-			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_FLOAT64);
+			const int peekTestValue2Result = HqExecutionPeekParameter(executionHandle, &peekValue, 1);
+			EXPECT_EQ(peekTestValue2Result, HQ_SUCCESS);
+			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_FLOAT64);
 			EXPECT_EQ(peekValue.as.float64, testValue[2].as.float64);
 
-			const int peekTestValue2 = XenonValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue2, XENON_SUCCESS);
+			const int peekTestValue2 = HqValueGcExpose(&peekValue);
+			EXPECT_EQ(peekTestValue2, HQ_SUCCESS);
 
-			peekValue = XenonValueCreateNull();
+			peekValue = HqValueCreateNull();
 
-			const int peekTestValue1Result = XenonExecutionPeekParameter(executionHandle, &peekValue, 2);
-			EXPECT_EQ(peekTestValue1Result, XENON_SUCCESS);
-			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_UINT32);
+			const int peekTestValue1Result = HqExecutionPeekParameter(executionHandle, &peekValue, 2);
+			EXPECT_EQ(peekTestValue1Result, HQ_SUCCESS);
+			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_UINT32);
 			EXPECT_EQ(peekValue.as.uint32, testValue[1].as.uint32);
 
-			const int peekTestValue1 = XenonValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue1, XENON_SUCCESS);
+			const int peekTestValue1 = HqValueGcExpose(&peekValue);
+			EXPECT_EQ(peekTestValue1, HQ_SUCCESS);
 
-			peekValue = XenonValueCreateNull();
+			peekValue = HqValueCreateNull();
 
-			const int peekTestValue0Result = XenonExecutionPeekParameter(executionHandle, &peekValue, 3);
-			EXPECT_EQ(peekTestValue0Result, XENON_SUCCESS);
-			EXPECT_EQ(peekValue.type, XENON_VALUE_TYPE_BOOL);
+			const int peekTestValue0Result = HqExecutionPeekParameter(executionHandle, &peekValue, 3);
+			EXPECT_EQ(peekTestValue0Result, HQ_SUCCESS);
+			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_BOOL);
 			EXPECT_EQ(peekValue.as.boolean, testValue[0].as.boolean);
 
-			const int peekTestValue0 = XenonValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue0, XENON_SUCCESS);
+			const int peekTestValue0 = HqValueGcExpose(&peekValue);
+			EXPECT_EQ(peekTestValue0, HQ_SUCCESS);
 		}
 
 		// Check the stack size after peeking at each value on the stack.
-		const size_t stackSizeAfterPeek = XenonExecutionGetParameterStackSize(executionHandle);
+		const size_t stackSizeAfterPeek = HqExecutionGetParameterStackSize(executionHandle);
 		EXPECT_EQ(stackSizeAfterPeek, testValueCount);
 
 		// Pop the values from the stack.
 		{
-			XenonValue popValue = XenonValueCreateNull();
+			HqValue popValue = HqValueCreateNull();
 
-			const int popTestValue3Result = XenonExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue3Result, XENON_SUCCESS);
-			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_INT64);
+			const int popTestValue3Result = HqExecutionPopParameter(executionHandle, &popValue);
+			EXPECT_EQ(popTestValue3Result, HQ_SUCCESS);
+			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_INT64);
 			EXPECT_EQ(popValue.as.int64, testValue[3].as.int64);
 
-			const int popTestValue3 = XenonValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue3, XENON_SUCCESS);
+			const int popTestValue3 = HqValueGcExpose(&popValue);
+			EXPECT_EQ(popTestValue3, HQ_SUCCESS);
 
-			popValue = XenonValueCreateNull();
+			popValue = HqValueCreateNull();
 
-			const int popTestValue2Result = XenonExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue2Result, XENON_SUCCESS);
-			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_FLOAT64);
+			const int popTestValue2Result = HqExecutionPopParameter(executionHandle, &popValue);
+			EXPECT_EQ(popTestValue2Result, HQ_SUCCESS);
+			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_FLOAT64);
 			EXPECT_EQ(popValue.as.float64, testValue[2].as.float64);
 
-			const int popTestValue2 = XenonValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue2, XENON_SUCCESS);
+			const int popTestValue2 = HqValueGcExpose(&popValue);
+			EXPECT_EQ(popTestValue2, HQ_SUCCESS);
 
-			popValue = XenonValueCreateNull();
+			popValue = HqValueCreateNull();
 
-			const int popTestValue1Result = XenonExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue1Result, XENON_SUCCESS);
-			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_UINT32);
+			const int popTestValue1Result = HqExecutionPopParameter(executionHandle, &popValue);
+			EXPECT_EQ(popTestValue1Result, HQ_SUCCESS);
+			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_UINT32);
 			EXPECT_EQ(popValue.as.uint32, testValue[1].as.uint32);
 
-			const int popTestValue1 = XenonValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue1, XENON_SUCCESS);
+			const int popTestValue1 = HqValueGcExpose(&popValue);
+			EXPECT_EQ(popTestValue1, HQ_SUCCESS);
 
-			popValue = XenonValueCreateNull();
+			popValue = HqValueCreateNull();
 
-			const int popTestValue0Result = XenonExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue0Result, XENON_SUCCESS);
-			EXPECT_EQ(popValue.type, XENON_VALUE_TYPE_BOOL);
+			const int popTestValue0Result = HqExecutionPopParameter(executionHandle, &popValue);
+			EXPECT_EQ(popTestValue0Result, HQ_SUCCESS);
+			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_BOOL);
 			EXPECT_EQ(popValue.as.boolean, testValue[0].as.boolean);
 
-			const int popTestValue0 = XenonValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue0, XENON_SUCCESS);
+			const int popTestValue0 = HqValueGcExpose(&popValue);
+			EXPECT_EQ(popTestValue0, HQ_SUCCESS);
 		}
 
 		// Check the stack size after popping each value from the stack.
-		const size_t stackSizeAfterPop = XenonExecutionGetParameterStackSize(executionHandle);
+		const size_t stackSizeAfterPop = HqExecutionGetParameterStackSize(executionHandle);
 		EXPECT_EQ(stackSizeAfterPop, 0);
 	}
 
 	// Test the local variable stack.
 	{
 		// Check the initial stack size.
-		const size_t localCountBeforePush = XenonExecutionGetLocalVariableCount(executionHandle);
+		const size_t localCountBeforePush = HqExecutionGetLocalVariableCount(executionHandle);
 		EXPECT_EQ(localCountBeforePush, 0);
 
 		// Push the test values to the parameter stack.
 		{
-			const int pushTestValue0Result = XenonExecutionPushLocalVariable(executionHandle, &testValue[0]);
-			EXPECT_EQ(pushTestValue0Result, XENON_SUCCESS);
+			const int pushTestValue0Result = HqExecutionPushLocalVariable(executionHandle, &testValue[0]);
+			EXPECT_EQ(pushTestValue0Result, HQ_SUCCESS);
 
-			const int pushTestValue1Result = XenonExecutionPushLocalVariable(executionHandle, &testValue[1]);
-			EXPECT_EQ(pushTestValue1Result, XENON_SUCCESS);
+			const int pushTestValue1Result = HqExecutionPushLocalVariable(executionHandle, &testValue[1]);
+			EXPECT_EQ(pushTestValue1Result, HQ_SUCCESS);
 
-			const int pushTestValue2Result = XenonExecutionPushLocalVariable(executionHandle, &testValue[2]);
-			EXPECT_EQ(pushTestValue2Result, XENON_SUCCESS);
+			const int pushTestValue2Result = HqExecutionPushLocalVariable(executionHandle, &testValue[2]);
+			EXPECT_EQ(pushTestValue2Result, HQ_SUCCESS);
 
-			const int pushTestValue3Result = XenonExecutionPushLocalVariable(executionHandle, &testValue[3]);
-			EXPECT_EQ(pushTestValue3Result, XENON_SUCCESS);
+			const int pushTestValue3Result = HqExecutionPushLocalVariable(executionHandle, &testValue[3]);
+			EXPECT_EQ(pushTestValue3Result, HQ_SUCCESS);
 		}
 
 		// Check the stack size after pushing each test value to the stack.
-		const size_t localCountAfterPush = XenonExecutionGetLocalVariableCount(executionHandle);
+		const size_t localCountAfterPush = HqExecutionGetLocalVariableCount(executionHandle);
 		EXPECT_EQ(localCountAfterPush, testValueCount);
 
 		// Retrieve local variables currently on the local stack.
 		{
-			XenonValue localValue = XenonValueCreateNull();
+			HqValue localValue = HqValueCreateNull();
 
-			const int localTestValue0Result = XenonExecutionGetLocalVariable(executionHandle, &localValue, 0);
-			EXPECT_EQ(localTestValue0Result, XENON_SUCCESS);
-			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_BOOL);
+			const int localTestValue0Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 0);
+			EXPECT_EQ(localTestValue0Result, HQ_SUCCESS);
+			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_BOOL);
 			EXPECT_EQ(localValue.as.boolean, testValue[0].as.boolean);
 
-			const int localTestValue0 = XenonValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue0, XENON_SUCCESS);
+			const int localTestValue0 = HqValueGcExpose(&localValue);
+			EXPECT_EQ(localTestValue0, HQ_SUCCESS);
 
-			localValue = XenonValueCreateNull();
+			localValue = HqValueCreateNull();
 
-			const int localTestValue1Result = XenonExecutionGetLocalVariable(executionHandle, &localValue, 1);
-			EXPECT_EQ(localTestValue1Result, XENON_SUCCESS);
-			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_UINT32);
+			const int localTestValue1Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 1);
+			EXPECT_EQ(localTestValue1Result, HQ_SUCCESS);
+			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_UINT32);
 			EXPECT_EQ(localValue.as.uint32, testValue[1].as.uint32);
 
-			const int localTestValue1 = XenonValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue1, XENON_SUCCESS);
+			const int localTestValue1 = HqValueGcExpose(&localValue);
+			EXPECT_EQ(localTestValue1, HQ_SUCCESS);
 
-			localValue = XenonValueCreateNull();
+			localValue = HqValueCreateNull();
 
-			const int localTestValue2Result = XenonExecutionGetLocalVariable(executionHandle, &localValue, 2);
-			EXPECT_EQ(localTestValue2Result, XENON_SUCCESS);
-			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_FLOAT64);
+			const int localTestValue2Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 2);
+			EXPECT_EQ(localTestValue2Result, HQ_SUCCESS);
+			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_FLOAT64);
 			EXPECT_EQ(localValue.as.float64, testValue[2].as.float64);
 
-			const int localTestValue2 = XenonValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue2, XENON_SUCCESS);
+			const int localTestValue2 = HqValueGcExpose(&localValue);
+			EXPECT_EQ(localTestValue2, HQ_SUCCESS);
 
-			localValue = XenonValueCreateNull();
+			localValue = HqValueCreateNull();
 
-			const int localTestValue3Result = XenonExecutionGetLocalVariable(executionHandle, &localValue, 3);
-			EXPECT_EQ(localTestValue3Result, XENON_SUCCESS);
-			EXPECT_EQ(localValue.type, XENON_VALUE_TYPE_INT64);
+			const int localTestValue3Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 3);
+			EXPECT_EQ(localTestValue3Result, HQ_SUCCESS);
+			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_INT64);
 			EXPECT_EQ(localValue.as.int64, testValue[3].as.int64);
 
-			const int localTestValue3 = XenonValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue3, XENON_SUCCESS);
+			const int localTestValue3 = HqValueGcExpose(&localValue);
+			EXPECT_EQ(localTestValue3, HQ_SUCCESS);
 		}
 
 		// Check the stack size after peeking at each value on the stack.
-		const size_t localCountAfterPeek = XenonExecutionGetLocalVariableCount(executionHandle);
+		const size_t localCountAfterPeek = HqExecutionGetLocalVariableCount(executionHandle);
 		EXPECT_EQ(localCountAfterPeek, testValueCount);
 
 		// Pop the values from the stack.
 		{
-			const int popTestValue3Result = XenonExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue3Result, XENON_SUCCESS);
+			const int popTestValue3Result = HqExecutionPopLocalVariable(executionHandle);
+			EXPECT_EQ(popTestValue3Result, HQ_SUCCESS);
 
-			const int popTestValue2Result = XenonExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue2Result, XENON_SUCCESS);
+			const int popTestValue2Result = HqExecutionPopLocalVariable(executionHandle);
+			EXPECT_EQ(popTestValue2Result, HQ_SUCCESS);
 
-			const int popTestValue1Result = XenonExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue1Result, XENON_SUCCESS);
+			const int popTestValue1Result = HqExecutionPopLocalVariable(executionHandle);
+			EXPECT_EQ(popTestValue1Result, HQ_SUCCESS);
 
-			const int popTestValue0Result = XenonExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue0Result, XENON_SUCCESS);
+			const int popTestValue0Result = HqExecutionPopLocalVariable(executionHandle);
+			EXPECT_EQ(popTestValue0Result, HQ_SUCCESS);
 		}
 
 		// Check the stack size after popping each value from the stack.
-		const size_t localCountAfterPop = XenonExecutionGetLocalVariableCount(executionHandle);
+		const size_t localCountAfterPop = HqExecutionGetLocalVariableCount(executionHandle);
 		EXPECT_EQ(localCountAfterPop, 0);
 	}
 
 	// Dispose of the VM context.
-	const int disposeContextResult = XenonVmDispose(&hVm);
-	EXPECT_EQ(disposeContextResult, XENON_SUCCESS);
+	const int disposeContextResult = HqVmDispose(&hVm);
+	EXPECT_EQ(disposeContextResult, HQ_SUCCESS);
 }
 #endif
 

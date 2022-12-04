@@ -218,140 +218,26 @@ with csbuild.Project(ExtXxHash.projectName, ExtXxHash.path, autoDiscoverSourceFi
 
 ###################################################################################################
 
-class XenonScriptLib(object):
-	rootPath = "src/lib"
+class HarlequinCommon(object):
+	appRootPath = "src/app"
+	libRootPath = "src/lib"
 
 	@staticmethod
-	def setCommonOptions(outputName):
+	def setLibCommonOptions(outputName):
 		csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
 
 		with csbuild.Toolchain("ps3", "ps4", "ps5", "psvita"):
 			csbuild.SetOutput(outputName, csbuild.ProjectType.StaticLibrary)
-			csbuild.AddDefines("XENON_BUILD_STATIC_LIB")
+			csbuild.AddDefines("HQ_BUILD_STATIC_LIB")
 
 		with csbuild.Scope(csbuild.ScopeDef.All):
-			csbuild.AddIncludeDirectories(XenonScriptLib.rootPath)
+			csbuild.AddIncludeDirectories(HarlequinCommon.libRootPath)
 
 		if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-			csbuild.AddSourceDirectories(XenonScriptLib.rootPath)
-
-###################################################################################################
-
-class LibXenonBase(object):
-	projectName = "LibXenonBase"
-	outputName = "libxenonbase"
-	dependencies = [
-		ExtSkipProbe.projectName,
-		ExtXxHash.projectName,
-	]
-
-with csbuild.Project(LibXenonBase.projectName, XenonScriptLib.rootPath, LibXenonBase.dependencies, autoDiscoverSourceFiles=False):
-	XenonScriptLib.setCommonOptions(LibXenonBase.outputName)
-
-	csbuild.AddSourceDirectories(f"{XenonScriptLib.rootPath}/base")
-
-	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-		csbuild.AddExcludeDirectories(
-			f"{XenonScriptLib.rootPath}/compiler",
-			f"{XenonScriptLib.rootPath}/runtime",
-		)
-	else:
-		csbuild.AddExcludeDirectories(
-			f"{XenonScriptLib.rootPath}/base/hi-res-timer-impl",
-			f"{XenonScriptLib.rootPath}/base/mutex-impl",
-			f"{XenonScriptLib.rootPath}/base/rwlock-impl",
-			f"{XenonScriptLib.rootPath}/base/thread-impl",
-		)
-
-	with csbuild.Toolchain("msvc", "gcc", "clang"):
-		csbuild.AddDefines("XENON_BUILD_BASE_LIB_EXPORT")
-
-	with csbuild.Toolchain("msvc"):
-		csbuild.AddSourceFiles(
-			f"{XenonScriptLib.rootPath}/base/*-impl/*Win32.cpp",
-		)
-
-	with csbuild.Toolchain("gcc", "clang", "ps4", "ps5"):
-		csbuild.AddSourceFiles(
-			f"{XenonScriptLib.rootPath}/base/*-impl/*Posix.cpp",
-		)
-
-	with csbuild.Toolchain("ps3"):
-		csbuild.AddSourceFiles(
-			f"{_REPO_ROOT_PATH}/../XenonScriptImpl-PS3/lib/base/*/*.cpp",
-		)
-
-	with csbuild.Toolchain("psvita"):
-		csbuild.AddSourceFiles(
-			f"{_REPO_ROOT_PATH}/../XenonScriptImpl-PSVita/lib/base/*/*.cpp",
-		)
-
-###################################################################################################
-
-class LibXenonCompiler(object):
-	projectName = "LibXenonCompiler"
-	outputName = "libxenoncompiler"
-	dependencies = [
-		LibXenonBase.projectName,
-	]
-
-with csbuild.Project(LibXenonCompiler.projectName, XenonScriptLib.rootPath, LibXenonCompiler.dependencies, autoDiscoverSourceFiles=False):
-	XenonScriptLib.setCommonOptions(LibXenonCompiler.outputName)
-
-	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
-	csbuild.AddSourceDirectories(
-		f"{XenonScriptLib.rootPath}/common",
-		f"{XenonScriptLib.rootPath}/compiler",
-	)
-
-	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-		csbuild.AddExcludeDirectories(
-			f"{XenonScriptLib.rootPath}/base",
-			f"{XenonScriptLib.rootPath}/runtime",
-		)
-
-	with csbuild.Scope(csbuild.ScopeDef.All):
-		csbuild.AddDefines("XENON_LIB_COMPILER")
-
-	with csbuild.Toolchain("msvc", "gcc", "clang"):
-		csbuild.AddDefines("XENON_BUILD_MAIN_LIB_EXPORT")
-
-###################################################################################################
-
-class LibXenonRuntime(object):
-	projectName = "LibXenonRuntime"
-	outputName = "libxenonruntime"
-	dependencies = [
-		LibXenonBase.projectName,
-	]
-
-with csbuild.Project(LibXenonRuntime.projectName, XenonScriptLib.rootPath, LibXenonRuntime.dependencies, autoDiscoverSourceFiles=False):
-	XenonScriptLib.setCommonOptions(LibXenonRuntime.outputName)
-
-	csbuild.AddSourceDirectories(
-		f"{XenonScriptLib.rootPath}/common",
-		f"{XenonScriptLib.rootPath}/runtime",
-	)
-
-	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-		csbuild.AddExcludeDirectories(
-			f"{XenonScriptLib.rootPath}/base",
-			f"{XenonScriptLib.rootPath}/compiler",
-		)
-
-	with csbuild.Scope(csbuild.ScopeDef.All):
-		csbuild.AddDefines("XENON_LIB_RUNTIME")
-
-	with csbuild.Toolchain("msvc", "gcc", "clang"):
-		csbuild.AddDefines("XENON_BUILD_MAIN_LIB_EXPORT")
-
-###################################################################################################
-
-class XenonScriptApp(object):
-	rootPath = "src/app"
+			csbuild.AddSourceDirectories(HarlequinCommon.libRootPath)
 
 	@staticmethod
-	def setCommonOptions(outputName):
+	def setAppCommonOptions(outputName):
 		csbuild.SetOutput(outputName, csbuild.ProjectType.Application)
 
 		with csbuild.Toolchain("msvc"):
@@ -370,46 +256,158 @@ class XenonScriptApp(object):
 
 ###################################################################################################
 
-class XenonCompiler(object):
-	projectName = "XenonCompiler"
-	outputName = "xenonc"
-	path = f"{XenonScriptApp.rootPath}/compiler"
+class LibHarlequinBase(object):
+	projectName = "LibHarlequinBase"
+	outputName = "libhqbase"
 	dependencies = [
-		LibXenonCompiler.projectName
+		ExtSkipProbe.projectName,
+		ExtXxHash.projectName,
 	]
 
-with csbuild.Project(XenonCompiler.projectName, XenonCompiler.path, XenonCompiler.dependencies):
-	XenonScriptApp.setCommonOptions(XenonCompiler.outputName)
+with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, LibHarlequinBase.dependencies, autoDiscoverSourceFiles=False):
+	HarlequinCommon.setLibCommonOptions(LibHarlequinBase.outputName)
+
+	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
+		csbuild.AddExcludeDirectories(
+			f"{HarlequinCommon.libRootPath}/compiler",
+			f"{HarlequinCommon.libRootPath}/runtime",
+		)
+	else:
+		csbuild.AddSourceDirectories(f"{HarlequinCommon.libRootPath}/base")
+		csbuild.AddExcludeDirectories(
+			f"{HarlequinCommon.libRootPath}/base/hi-res-timer-impl",
+			f"{HarlequinCommon.libRootPath}/base/mutex-impl",
+			f"{HarlequinCommon.libRootPath}/base/rwlock-impl",
+			f"{HarlequinCommon.libRootPath}/base/thread-impl",
+		)
+
+	with csbuild.Toolchain("msvc", "gcc", "clang"):
+		csbuild.AddDefines("HQ_BUILD_BASE_LIB_EXPORT")
+
+	with csbuild.Toolchain("msvc"):
+		csbuild.AddSourceFiles(
+			f"{HarlequinCommon.libRootPath}/base/*-impl/*Win32.cpp",
+		)
+
+	with csbuild.Toolchain("gcc", "clang", "ps4", "ps5"):
+		csbuild.AddSourceFiles(
+			f"{HarlequinCommon.libRootPath}/base/*-impl/*Posix.cpp",
+		)
+
+	with csbuild.Toolchain("ps3"):
+		csbuild.AddSourceFiles(
+			f"{_REPO_ROOT_PATH}/support/Harlequin-PS3/lib/base/*/*.cpp",
+		)
+
+	with csbuild.Toolchain("psvita"):
+		csbuild.AddSourceFiles(
+			f"{_REPO_ROOT_PATH}/support/Harlequin-PSVita/lib/base/*/*.cpp",
+		)
+
+###################################################################################################
+
+class LibHarlequinCompiler(object):
+	projectName = "LibHarlequinCompiler"
+	outputName = "libhqcompiler"
+	dependencies = [
+		LibHarlequinBase.projectName,
+	]
+
+with csbuild.Project(LibHarlequinCompiler.projectName, HarlequinCommon.libRootPath, LibHarlequinCompiler.dependencies, autoDiscoverSourceFiles=False):
+	HarlequinCommon.setLibCommonOptions(LibHarlequinCompiler.outputName)
+
+	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
+
+	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
+		csbuild.AddExcludeDirectories(
+			f"{HarlequinCommon.libRootPath}/base",
+			f"{HarlequinCommon.libRootPath}/runtime",
+		)
+
+	else:
+		csbuild.AddSourceDirectories(
+			f"{HarlequinCommon.libRootPath}/common",
+			f"{HarlequinCommon.libRootPath}/compiler",
+		)
+
+	with csbuild.Scope(csbuild.ScopeDef.All):
+		csbuild.AddDefines("HQ_LIB_COMPILER")
+
+	with csbuild.Toolchain("msvc", "gcc", "clang"):
+		csbuild.AddDefines("HQ_BUILD_MAIN_LIB_EXPORT")
+
+###################################################################################################
+
+class LibHarlequinRuntime(object):
+	projectName = "LibHarlequinRuntime"
+	outputName = "libhqruntime"
+	dependencies = [
+		LibHarlequinBase.projectName,
+	]
+
+with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPath, LibHarlequinRuntime.dependencies, autoDiscoverSourceFiles=False):
+	HarlequinCommon.setLibCommonOptions(LibHarlequinRuntime.outputName)
+
+	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
+		csbuild.AddExcludeDirectories(
+			f"{HarlequinCommon.libRootPath}/base",
+			f"{HarlequinCommon.libRootPath}/compiler",
+		)
+
+	else:
+		csbuild.AddSourceDirectories(
+			f"{HarlequinCommon.libRootPath}/common",
+			f"{HarlequinCommon.libRootPath}/runtime",
+		)
+
+	with csbuild.Scope(csbuild.ScopeDef.All):
+		csbuild.AddDefines("HQ_LIB_RUNTIME")
+
+	with csbuild.Toolchain("msvc", "gcc", "clang"):
+		csbuild.AddDefines("HQ_BUILD_MAIN_LIB_EXPORT")
+
+###################################################################################################
+
+class HarlequinCompiler(object):
+	projectName = "HarlequinCompiler"
+	outputName = "hqc"
+	path = f"{HarlequinCommon.appRootPath}/compiler"
+	dependencies = [
+		LibHarlequinCompiler.projectName
+	]
+
+with csbuild.Project(HarlequinCompiler.projectName, HarlequinCompiler.path, HarlequinCompiler.dependencies):
+	HarlequinCommon.setAppCommonOptions(HarlequinCompiler.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
 ###################################################################################################
 
-class XenonRuntime(object):
-	projectName = "XenonRuntime"
-	outputName = "xenon"
-	path = f"{XenonScriptApp.rootPath}/runtime"
+class HarlequinRuntime(object):
+	projectName = "HarlequinRuntime"
+	outputName = "hq"
+	path = f"{HarlequinCommon.appRootPath}/runtime"
 	dependencies = [
-		LibXenonRuntime.projectName
+		LibHarlequinRuntime.projectName
 	]
 
-with csbuild.Project(XenonRuntime.projectName, XenonRuntime.path, XenonRuntime.dependencies):
-	XenonScriptApp.setCommonOptions(XenonRuntime.outputName)
+with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, HarlequinRuntime.dependencies):
+	HarlequinCommon.setAppCommonOptions(HarlequinRuntime.outputName)
 
 ###################################################################################################
 
-class XenonUnitTest(object):
+class HarlequinUnitTest(object):
 	projectName = "UnitTest"
 	outputName = "unittest"
-	path = f"{XenonScriptApp.rootPath}/unit_test"
+	path = f"{HarlequinCommon.appRootPath}/unit_test"
 	dependencies = [
 		ExtGoogleTest.projectName,
-		LibXenonCompiler.projectName,
-		LibXenonRuntime.projectName,
+		LibHarlequinCompiler.projectName,
+		LibHarlequinRuntime.projectName,
 	]
 
-with csbuild.Project(XenonUnitTest.projectName, XenonUnitTest.path, XenonUnitTest.dependencies):
-	XenonScriptApp.setCommonOptions(XenonUnitTest.outputName)
+with csbuild.Project(HarlequinUnitTest.projectName, HarlequinUnitTest.path, HarlequinUnitTest.dependencies):
+	HarlequinCommon.setAppCommonOptions(HarlequinUnitTest.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 

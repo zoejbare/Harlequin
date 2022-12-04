@@ -26,43 +26,43 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonString
+struct HQ_BASE_API HqString
 {
-	struct XENON_BASE_API StlCompare
+	struct HQ_BASE_API StlCompare
 	{
-		bool operator()(XenonString* const pLeft, XenonString* const pRight);
-		bool operator()(const XenonString* const pLeft, const XenonString* const pRight) const;
+		bool operator()(HqString* const pLeft, HqString* const pRight);
+		bool operator()(const HqString* const pLeft, const HqString* const pRight) const;
 	};
 
-	struct XENON_BASE_API StlLess
+	struct HQ_BASE_API StlLess
 	{
-		bool operator()(XenonString* const pLeft, XenonString* const pRight);
-		bool operator()(const XenonString* const pLeft, const XenonString* const pRight) const;
+		bool operator()(HqString* const pLeft, HqString* const pRight);
+		bool operator()(const HqString* const pLeft, const HqString* const pRight) const;
 	};
 
-	struct XENON_BASE_API StlHash
+	struct HQ_BASE_API StlHash
 	{
-		size_t operator()(XenonString* const pString);
-		size_t operator()(const XenonString* const pString) const;
+		size_t operator()(HqString* const pString);
+		size_t operator()(const HqString* const pString) const;
 	};
 
-	struct XENON_BASE_API StlRawCompare
+	struct HQ_BASE_API StlRawCompare
 	{
 		bool operator()(char* const pLeft, char* const pRight);
 		bool operator()(const char* const pLeft, const char* const pRight) const;
 	};
 
-	struct XENON_BASE_API StlRawHash
+	struct HQ_BASE_API StlRawHash
 	{
 		size_t operator()(char* const pString);
 		size_t operator()(const char* const pString) const;
 	};
 
-	static XenonString* Create(const char* const stringData);
-	static int32_t AddRef(XenonString* const pString);
-	static int32_t Release(XenonString* const pString);
-	static bool Compare(const XenonString* const pLeft, const XenonString* const pRight);
-	static bool Less(const XenonString* const pLeft, const XenonString* const pRight);
+	static HqString* Create(const char* const stringData);
+	static int32_t AddRef(HqString* const pString);
+	static int32_t Release(HqString* const pString);
+	static bool Compare(const HqString* const pLeft, const HqString* const pRight);
+	static bool Less(const HqString* const pLeft, const HqString* const pRight);
 
 	static bool RawCompare(const char* const left, const char* right);
 	static size_t RawHash(const char* const string);
@@ -74,7 +74,7 @@ struct XENON_BASE_API XenonString
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonReference ref;
+	HqReference ref;
 
 	size_t length;
 	size_t hash;

@@ -20,26 +20,26 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "../common/DisposeCallback.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonReference
+struct HQ_BASE_API HqReference
 {
 	static void Initialize(
-		XenonReference& output,
-		XenonDisposeCallback onDestructFn,
+		HqReference& output,
+		HqDisposeCallback onDestructFn,
 		void* const pObject
 	);
 
-	static int32_t AddRef(XenonReference& ref);
-	static int32_t Release(XenonReference& ref);
+	static int32_t AddRef(HqReference& ref);
+	static int32_t Release(HqReference& ref);
 
 	void* pObject;
 
-	XenonDisposeCallback onDisposeFn;
+	HqDisposeCallback onDisposeFn;
 
 	volatile int32_t count;
 };

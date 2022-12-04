@@ -32,9 +32,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalRwLock
+struct HQ_BASE_API HqInternalRwLock
 {
-	XenonInternalRwLock() : lock(SRWLOCK_INIT), initialized(false) {}
+	HqInternalRwLock() : lock(SRWLOCK_INIT), initialized(false) {}
 
 	SRWLOCK lock;
 	bool initialized;

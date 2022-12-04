@@ -20,18 +20,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../XenonScript.h"
+#include "../../Harlequin.h"
 
 #include <intrin.h>
 
-#if defined(XENON_CPU_WIDTH_32_BIT)
+#if defined(HQ_CPU_WIDTH_32_BIT)
 	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonAtomic
+struct HqAtomic
 {
 	static __forceinline int8_t FetchAdd(volatile int8_t* const ptr, const int8_t value)
 	{
@@ -50,7 +50,7 @@ struct XenonAtomic
 
 	static __forceinline int64_t FetchAdd(volatile int64_t* const ptr, const int64_t value)
 	{
-#if defined(XENON_CPU_WIDTH_32_BIT)
+#if defined(HQ_CPU_WIDTH_32_BIT)
 		int64_t original;
 		int64_t exchange;
 

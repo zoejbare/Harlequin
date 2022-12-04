@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void OpCodeExec_Yield(XenonExecutionHandle hExec)
+void OpCodeExec_Yield(HqExecutionHandle hExec)
 {
 	// Set the trigger that says we're yielding execution.
 	hExec->yield = true;
@@ -43,7 +43,7 @@ void OpCodeExec_Yield(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Yield(XenonDisassemble& disasm)
+void OpCodeDisasm_Yield(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "YIELD", disasm.opcodeOffset);
 }

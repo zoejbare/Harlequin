@@ -22,7 +22,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonRwLockImplCreate(XenonInternalRwLock& obj)
+extern "C" void _HqRwLockImplCreate(HqInternalRwLock& obj)
 {
 	pthread_rwlockattr_t attr;
 
@@ -43,7 +43,7 @@ extern "C" void _XenonRwLockImplCreate(XenonInternalRwLock& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonRwLockImplDispose(XenonInternalRwLock& obj)
+extern "C" void _HqRwLockImplDispose(HqInternalRwLock& obj)
 {
 	assert(obj.initialized);
 
@@ -55,7 +55,7 @@ extern "C" void _XenonRwLockImplDispose(XenonInternalRwLock& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool _XenonRwLockImplTryReadLock(XenonInternalRwLock& obj)
+extern "C" bool _HqRwLockImplTryReadLock(HqInternalRwLock& obj)
 {
 	assert(obj.initialized);
 
@@ -64,7 +64,7 @@ extern "C" bool _XenonRwLockImplTryReadLock(XenonInternalRwLock& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonRwLockImplReadLock(XenonInternalRwLock& obj)
+extern "C" void _HqRwLockImplReadLock(HqInternalRwLock& obj)
 {
 	assert(obj.initialized);
 
@@ -73,7 +73,7 @@ extern "C" void _XenonRwLockImplReadLock(XenonInternalRwLock& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonRwLockImplReadUnlock(XenonInternalRwLock& obj)
+extern "C" void _HqRwLockImplReadUnlock(HqInternalRwLock& obj)
 {
 	assert(obj.initialized);
 
@@ -82,7 +82,7 @@ extern "C" void _XenonRwLockImplReadUnlock(XenonInternalRwLock& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool _XenonRwLockImplTryWriteLock(XenonInternalRwLock& obj)
+extern "C" bool _HqRwLockImplTryWriteLock(HqInternalRwLock& obj)
 {
 	assert(obj.initialized);
 
@@ -91,7 +91,7 @@ extern "C" bool _XenonRwLockImplTryWriteLock(XenonInternalRwLock& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonRwLockImplWriteLock(XenonInternalRwLock& obj)
+extern "C" void _HqRwLockImplWriteLock(HqInternalRwLock& obj)
 {
 	assert(obj.initialized);
 
@@ -100,7 +100,7 @@ extern "C" void _XenonRwLockImplWriteLock(XenonInternalRwLock& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonRwLockImplWriteUnlock(XenonInternalRwLock& obj)
+extern "C" void _HqRwLockImplWriteUnlock(HqInternalRwLock& obj)
 {
 	assert(obj.initialized);
 

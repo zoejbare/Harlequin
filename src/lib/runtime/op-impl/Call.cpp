@@ -42,16 +42,16 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-static void CallScriptFunction(XenonExecutionHandle hExec, XenonFunctionHandle hFunction)
+static void CallScriptFunction(HqExecutionHandle hExec, HqFunctionHandle hFunction)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
 	// A new frame gets pushed for all functions, even native functions.
 	// But for native functions, it's just a dummy frame for the sake of
 	// any code that would wish to resolve the frame stack if a script
 	// exception were to occur within the native function.
-	XenonExecution::PushFrame(hExec, hFunction);
+	HqExecution::PushFrame(hExec, hFunction);
 
 	if(hFunction->isNative)
 	{
@@ -62,23 +62,23 @@ static void CallScriptFunction(XenonExecutionHandle hExec, XenonFunctionHandle h
 			// are not allowed, we unlock the GC RwLock here to prevent possible deadlocks. We'll put
 			// a lock back on it immediately after it's finished, but during this time, the garbage
 			// collector will likely be running.
-			XenonRwLock::ReadUnlock(hExec->hVm->gcRwLock);
+			HqRwLock::ReadUnlock(hExec->hVm->gcRwLock);
 			hFunction->nativeFn(hExec, hFunction, hFunction->pNativeUserData);
-			XenonRwLock::ReadLock(hExec->hVm->gcRwLock);
+			HqRwLock::ReadLock(hExec->hVm->gcRwLock);
 
 			if(!hExec->exception)
 			{
 				// If no script exception occurred within the native function,
 				// we can pop the dummy frame from the frame stack.
-				XenonExecution::PopFrame(hExec);
+				HqExecution::PopFrame(hExec);
 			}
 		}
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Script native function pointer is null: \"%s\"",
 				hFunction->pSignature->data
 			);
@@ -92,16 +92,16 @@ static void CallScriptFunction(XenonExecutionHandle hExec, XenonFunctionHandle h
 extern "C" {
 #endif
 
-void OpCodeExec_Call(XenonExecutionHandle hExec)
+void OpCodeExec_Call(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t constIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t constIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex, &result);
-	if(XenonValueIsString(hValue))
+	HqValueHandle hValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex, &result);
+	if(HqValueIsString(hValue))
 	{
-		XenonFunctionHandle hFunction = XenonVm::GetFunction(hExec->hVm, hValue->as.pString, &result);
+		HqFunctionHandle hFunction = HqVm::GetFunction(hExec->hVm, hValue->as.pString, &result);
 		if(hFunction)
 		{
 			CallScriptFunction(hExec, hFunction);
@@ -109,9 +109,9 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Script function does not exist: \"%s\"",
 				hValue->as.pString->data
 			);
@@ -120,9 +120,9 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 			"Type mismatch; expected string value: c(%" PRIu32 ")",
 			constIndex
 		);
@@ -131,41 +131,41 @@ void OpCodeExec_Call(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Call(XenonDisassemble& disasm)
+void OpCodeDisasm_Call(HqDisassemble& disasm)
 {
 	int result;
 
-	const uint32_t constIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t constIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constIndex, &result);
-	XenonString* const pValueData = XenonValue::GetDebugString(hValue);
+	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constIndex, &result);
+	HqString* const pValueData = HqValue::GetDebugString(hValue);
 
 	char str[256];
 	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", constIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 
-	XenonString::Release(pValueData);
+	HqString::Release(pValueData);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_CallValue(XenonExecutionHandle hExec)
+void OpCodeExec_CallValue(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
-	if(XenonValueIsFunction(hValue))
+	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
+	if(HqValueIsFunction(hValue))
 	{
 		CallScriptFunction(hExec, hValue->as.hFunction);
 	}
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 			"Type mismatch; expected function value: r(%" PRIu32 ")",
 			registerIndex
 		);
@@ -174,9 +174,9 @@ void OpCodeExec_CallValue(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_CallValue(XenonDisassemble& disasm)
+void OpCodeDisasm_CallValue(HqDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
 	snprintf(str, sizeof(str), "CALL_VALUE r%" PRIu32, registerIndex);

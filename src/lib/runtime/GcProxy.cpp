@@ -25,11 +25,11 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGcProxy::Initialize(
-	XenonGcProxy& output,
-	XenonGarbageCollector& gc,
-	XenonGcDiscoveryCallback onGcDiscoveryFn,
-	XenonDisposeCallback onGcDisposeFn,
+void HqGcProxy::Initialize(
+	HqGcProxy& output,
+	HqGarbageCollector& gc,
+	HqGcDiscoveryCallback onGcDiscoveryFn,
+	HqDisposeCallback onGcDisposeFn,
 	void* const pObject,
 	const bool autoMark
 )
@@ -48,7 +48,7 @@ void XenonGcProxy::Initialize(
 	output.marked = false;
 	output.autoMark = autoMark;
 
-	XenonGarbageCollector::LinkObject(gc, &output);
+	HqGarbageCollector::LinkObject(gc, &output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -30,39 +30,39 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonFrame
+struct HqFrame
 {
-	typedef XenonArray<XenonFrameHandle> HandleArray;
-	typedef XenonStack<XenonFrameHandle> HandleStack;
+	typedef HqArray<HqFrameHandle> HandleArray;
+	typedef HqStack<HqFrameHandle> HandleStack;
 
-	static XenonFrameHandle Create(XenonExecutionHandle hExec, XenonFunctionHandle hFunction);
+	static HqFrameHandle Create(HqExecutionHandle hExec, HqFunctionHandle hFunction);
 
-	static int PushValue(XenonFrameHandle hFrame, XenonValueHandle hValue);
-	static int PopValue(XenonFrameHandle hFrame, XenonValueHandle* const phOutValue);
-	static int PeekValue(XenonFrameHandle hFrame, XenonValueHandle* const phOutValue, const size_t index);
+	static int PushValue(HqFrameHandle hFrame, HqValueHandle hValue);
+	static int PopValue(HqFrameHandle hFrame, HqValueHandle* const phOutValue);
+	static int PeekValue(HqFrameHandle hFrame, HqValueHandle* const phOutValue, const size_t index);
 
-	static int SetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, const uint32_t index);
-	static int SetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, XenonString* const pVariableName);
+	static int SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uint32_t index);
+	static int SetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, HqString* const pVariableName);
 
-	static XenonValueHandle GetGpRegister(XenonFrameHandle hFrame, const uint32_t index, int* const pOutResult);
-	static XenonValueHandle GetLocalVariable(XenonFrameHandle hFrame, XenonString* const pVariableName, int* const pOutResult);
+	static HqValueHandle GetGpRegister(HqFrameHandle hFrame, const uint32_t index, int* const pOutResult);
+	static HqValueHandle GetLocalVariable(HqFrameHandle hFrame, HqString* const pVariableName, int* const pOutResult);
 
-	static void prv_onGcDiscovery(XenonGarbageCollector&, void*);
+	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
 	static void prv_onGcDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonGcProxy gcProxy;
+	HqGcProxy gcProxy;
 
-	XenonValue::HandleStack stack;
-	XenonValue::HandleArray registers;
-	XenonValue::StringToHandleMap locals;
+	HqValue::HandleStack stack;
+	HqValue::HandleArray registers;
+	HqValue::StringToHandleMap locals;
 
-	XenonExecutionHandle hExec;
-	XenonFunctionHandle hFunction;
+	HqExecutionHandle hExec;
+	HqFunctionHandle hFunction;
 
-	XenonDecoder decoder;
+	HqDecoder decoder;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

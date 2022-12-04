@@ -1,2 +1,2 @@
-# XenonScript
-Xenon Scripting Language
+# Harlequin
+Harlequin Programming Language

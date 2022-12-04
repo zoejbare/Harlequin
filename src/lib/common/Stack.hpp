@@ -20,52 +20,52 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "Array.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-struct XenonStack
+struct HqStack
 {
-	XenonArray<T> memory;
+	HqArray<T> memory;
 
 	size_t nextIndex;
 
-	static void Initialize(XenonStack& output, const size_t size)
+	static void Initialize(HqStack& output, const size_t size)
 	{
 		// Initialize the stack's backing memory and reserve the desired size.
-		XenonArray<T>::Initialize(output.memory);
-		XenonArray<T>::Reserve(output.memory, size);
+		HqArray<T>::Initialize(output.memory);
+		HqArray<T>::Reserve(output.memory, size);
 
 		output.memory.count = size;
 		output.nextIndex = 0;
 	}
 
-	static void Dispose(XenonStack& stack)
+	static void Dispose(HqStack& stack)
 	{
-		XenonArray<T>::Dispose(stack.memory);
+		HqArray<T>::Dispose(stack.memory);
 	}
 
-	static void Expand(XenonStack& output, const size_t newSize)
+	static void Expand(HqStack& output, const size_t newSize)
 	{
 		if(output.memory.count < newSize)
 		{
-			XenonArray<T>::Reserve(output.memory, newSize);
+			HqArray<T>::Reserve(output.memory, newSize);
 
 			output.memory.count = newSize;
 		}
 	}
 
-	static int Push(XenonStack& stack, T& data)
+	static int Push(HqStack& stack, T& data)
 	{
 		const size_t stackNextIndex = stack.nextIndex;
 
 		// Make sure there is room in the stack for this push.
 		if(stackNextIndex >= stack.memory.count)
 		{
-			return XENON_ERROR_STACK_FULL;
+			return HQ_ERROR_STACK_FULL;
 		}
 
 		// Copy the input value to the stack to decouple the stack value's memory
@@ -73,17 +73,17 @@ struct XenonStack
 		stack.memory.pData[stackNextIndex] = data;
 		stack.nextIndex = stackNextIndex + 1;
 
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
-	static int Pop(XenonStack& stack, T* const pOutData)
+	static int Pop(HqStack& stack, T* const pOutData)
 	{
 		const size_t stackNextIndex = stack.nextIndex;
 
 		// Make sure the stack is not empty before attempting to pop from it.
 		if(stackNextIndex == 0)
 		{
-			return XENON_ERROR_STACK_EMPTY;
+			return HQ_ERROR_STACK_EMPTY;
 		}
 
 		const size_t stackTopIndex = stackNextIndex - 1;
@@ -91,32 +91,32 @@ struct XenonStack
 		(*pOutData) = stack.memory.pData[stackTopIndex];
 		stack.nextIndex = stackTopIndex;
 
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
-	static int Pop(XenonStack& stack)
+	static int Pop(HqStack& stack)
 	{
 		// Make sure the stack is not empty before attempting to pop from it.
 		if(stack.nextIndex == 0)
 		{
-			return XENON_ERROR_STACK_EMPTY;
+			return HQ_ERROR_STACK_EMPTY;
 		}
 
 		--stack.nextIndex;
 
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
-	static int Peek(XenonStack& stack, T* const pOutData, const size_t index)
+	static int Peek(HqStack& stack, T* const pOutData, const size_t index)
 	{
 		if(stack.nextIndex == 0)
 		{
-			return XENON_ERROR_STACK_EMPTY;
+			return HQ_ERROR_STACK_EMPTY;
 		}
 
 		if(index >= stack.nextIndex)
 		{
-			return XENON_ERROR_INDEX_OUT_OF_RANGE;
+			return HQ_ERROR_INDEX_OUT_OF_RANGE;
 		}
 
 		// The input index will access the stack in reverse order and relative to the end.
@@ -125,20 +125,20 @@ struct XenonStack
 
 		(*pOutData) = stack.memory.pData[stackPeekIndex];
 
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
-	static size_t GetCurrentSize(XenonStack& stack)
+	static size_t GetCurrentSize(HqStack& stack)
 	{
 		return stack.nextIndex;
 	}
 
-	static size_t GetMaximumSize(XenonStack& stack)
+	static size_t GetMaximumSize(HqStack& stack)
 	{
 		return stack.memory.count;
 	}
 
-	static bool IsEmpty(XenonStack& stack)
+	static bool IsEmpty(HqStack& stack)
 	{
 		return stack.nextIndex == 0;
 	}

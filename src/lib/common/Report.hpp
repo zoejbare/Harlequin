@@ -20,13 +20,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonReport
+struct HqReport
 {
-	XenonMessageCallback onMessageFn;
+	HqMessageCallback onMessageFn;
 	void* pUserData;
 	int level;
 };

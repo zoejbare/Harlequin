@@ -24,9 +24,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonReference::Initialize(
-	XenonReference& output,
-	XenonDisposeCallback onDisposeFn,
+void HqReference::Initialize(
+	HqReference& output,
+	HqDisposeCallback onDisposeFn,
 	void* pObject
 )
 {
@@ -40,16 +40,16 @@ void XenonReference::Initialize(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonReference::AddRef(XenonReference& ref)
+int32_t HqReference::AddRef(HqReference& ref)
 {
-	return XenonAtomic::FetchAdd(&ref.count, 1) + 1;
+	return HqAtomic::FetchAdd(&ref.count, 1) + 1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonReference::Release(XenonReference& ref)
+int32_t HqReference::Release(HqReference& ref)
 {
-	const int32_t currentValue = XenonAtomic::FetchAdd(&ref.count, -1) - 1;
+	const int32_t currentValue = HqAtomic::FetchAdd(&ref.count, -1) - 1;
 
 	if(currentValue == 0)
 	{

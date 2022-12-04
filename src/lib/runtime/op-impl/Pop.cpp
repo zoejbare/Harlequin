@@ -38,24 +38,24 @@
 extern "C" {
 #endif
 
-void OpCodeExec_Pop(XenonExecutionHandle hExec)
+void OpCodeExec_Pop(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
 
-	result = XenonFrame::PopValue(hExec->hCurrentFrame, &hValue);
-	if(result == XENON_SUCCESS)
+	result = HqFrame::PopValue(hExec->hCurrentFrame, &hValue);
+	if(result == HQ_SUCCESS)
 	{
-		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
-		if(result != XENON_SUCCESS)
+		result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+		if(result != HQ_SUCCESS)
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to set general-purpose register: r(%" PRIu32 ")",
 				registerIndex
 			);
@@ -64,9 +64,9 @@ void OpCodeExec_Pop(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to pop value from stack at frame: \"%s\", offset(0x%" PRIXPTR ")",
 			hExec->hCurrentFrame->hFunction->pSignature->data,
 			uintptr_t(hExec->hCurrentFrame->decoder.cachedIp)
@@ -76,9 +76,9 @@ void OpCodeExec_Pop(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Pop(XenonDisassemble& disasm)
+void OpCodeDisasm_Pop(HqDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[16];
 	snprintf(str, sizeof(str), "POP r%" PRIu32, registerIndex);

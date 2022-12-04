@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "GcProxy.hpp"
 
@@ -33,103 +33,103 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonNativeValueWrapper
+struct HqNativeValueWrapper
 {
 	void* pObject;
 
-	XenonCallbackNativeValueCopy onCopy;
-	XenonCallbackNativeValueDestruct onDestruct;
-	XenonCallbackNativeValueEqual onTestEqual;
-	XenonCallbackNativeValueLessThan onTestLessThan;
+	HqCallbackNativeValueCopy onCopy;
+	HqCallbackNativeValueDestruct onDestruct;
+	HqCallbackNativeValueEqual onTestEqual;
+	HqCallbackNativeValueLessThan onTestLessThan;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonScriptObject;
+struct HqScriptObject;
 
-struct XenonValue
+struct HqValue
 {
-	typedef XenonArray<XenonValueHandle> HandleArray;
-	typedef XenonStack<XenonValueHandle> HandleStack;
+	typedef HqArray<HqValueHandle> HandleArray;
+	typedef HqStack<HqValueHandle> HandleStack;
 
-	typedef XENON_MAP_TYPE<
-		XenonString*,
-		XenonValueHandle,
-#if XENON_MAP_IS_UNORDERED
-		XenonString::StlHash,
-		XenonString::StlCompare,
+	typedef HQ_MAP_TYPE<
+		HqString*,
+		HqValueHandle,
+#if HQ_MAP_IS_UNORDERED
+		HqString::StlHash,
+		HqString::StlCompare,
 #else
-		XenonString::StlLess,
+		HqString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonValueHandle)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqValueHandle)>
 	> StringToHandleMap;
 
-	typedef XENON_MAP_TYPE<
-		XenonString*,
+	typedef HQ_MAP_TYPE<
+		HqString*,
 		bool,
-#if XENON_MAP_IS_UNORDERED
-		XenonString::StlHash,
-		XenonString::StlCompare,
+#if HQ_MAP_IS_UNORDERED
+		HqString::StlHash,
+		HqString::StlCompare,
 #else
-		XenonString::StlLess,
+		HqString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, bool)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)>
 	> StringToBoolMap;
 
-	static XenonValue NullValue;
+	static HqValue NullValue;
 
-	static XenonValueHandle CreateBool(XenonVmHandle hVm, const bool value);
-	static XenonValueHandle CreateInt8(XenonVmHandle hVm, const int8_t value);
-	static XenonValueHandle CreateInt16(XenonVmHandle hVm, const int16_t value);
-	static XenonValueHandle CreateInt32(XenonVmHandle hVm, const int32_t value);
-	static XenonValueHandle CreateInt64(XenonVmHandle hVm, const int64_t value);
-	static XenonValueHandle CreateUint8(XenonVmHandle hVm, const uint8_t value);
-	static XenonValueHandle CreateUint16(XenonVmHandle hVm, const uint16_t value);
-	static XenonValueHandle CreateUint32(XenonVmHandle hVm, const uint32_t value);
-	static XenonValueHandle CreateUint64(XenonVmHandle hVm, const uint64_t value);
-	static XenonValueHandle CreateFloat32(XenonVmHandle hVm, const float value);
-	static XenonValueHandle CreateFloat64(XenonVmHandle hVm, const double value);
-	static XenonValueHandle CreateNull();
-	static XenonValueHandle CreateString(XenonVmHandle hVm, const char* const string);
-	static XenonValueHandle CreateString(XenonVmHandle hVm, XenonString* const pString);
-	static XenonValueHandle CreateObject(XenonVmHandle hVm, XenonScriptObject* const pObjectSchema);
-	static XenonValueHandle CreateFunction(XenonVmHandle hVm, XenonFunctionHandle hFunction);
-	static XenonValueHandle CreateArray(XenonVmHandle hVm, const size_t count);
-	static XenonValueHandle CreateNative(
-		XenonVmHandle hVm,
+	static HqValueHandle CreateBool(HqVmHandle hVm, const bool value);
+	static HqValueHandle CreateInt8(HqVmHandle hVm, const int8_t value);
+	static HqValueHandle CreateInt16(HqVmHandle hVm, const int16_t value);
+	static HqValueHandle CreateInt32(HqVmHandle hVm, const int32_t value);
+	static HqValueHandle CreateInt64(HqVmHandle hVm, const int64_t value);
+	static HqValueHandle CreateUint8(HqVmHandle hVm, const uint8_t value);
+	static HqValueHandle CreateUint16(HqVmHandle hVm, const uint16_t value);
+	static HqValueHandle CreateUint32(HqVmHandle hVm, const uint32_t value);
+	static HqValueHandle CreateUint64(HqVmHandle hVm, const uint64_t value);
+	static HqValueHandle CreateFloat32(HqVmHandle hVm, const float value);
+	static HqValueHandle CreateFloat64(HqVmHandle hVm, const double value);
+	static HqValueHandle CreateNull();
+	static HqValueHandle CreateString(HqVmHandle hVm, const char* const string);
+	static HqValueHandle CreateString(HqVmHandle hVm, HqString* const pString);
+	static HqValueHandle CreateObject(HqVmHandle hVm, HqScriptObject* const pObjectSchema);
+	static HqValueHandle CreateFunction(HqVmHandle hVm, HqFunctionHandle hFunction);
+	static HqValueHandle CreateArray(HqVmHandle hVm, const size_t count);
+	static HqValueHandle CreateNative(
+		HqVmHandle hVm,
 		void* const pNativeObject,
-		XenonCallbackNativeValueCopy onCopy,
-		XenonCallbackNativeValueDestruct onDestruct,
-		XenonCallbackNativeValueEqual onTestEqual,
-		XenonCallbackNativeValueLessThan onTestLessThan
+		HqCallbackNativeValueCopy onCopy,
+		HqCallbackNativeValueDestruct onDestruct,
+		HqCallbackNativeValueEqual onTestEqual,
+		HqCallbackNativeValueLessThan onTestLessThan
 	);
-	static XenonValueHandle Copy(XenonVmHandle hVm, XenonValueHandle hValue);
+	static HqValueHandle Copy(HqVmHandle hVm, HqValueHandle hValue);
 
-	static XenonString* GetDebugString(XenonValueHandle hValue);
+	static HqString* GetDebugString(HqValueHandle hValue);
 
-	static bool CanBeMarked(XenonValueHandle hValue);
-	static void SetAutoMark(XenonValueHandle hValue, const bool autoMark);
+	static bool CanBeMarked(HqValueHandle hValue);
+	static void SetAutoMark(HqValueHandle hValue, const bool autoMark);
 
-	static XenonValue* prv_onCreate(int, XenonVmHandle);
-	static void prv_onGcDiscovery(XenonGarbageCollector&, void*);
+	static HqValue* prv_onCreate(int, HqVmHandle);
+	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
 	static void prv_onGcDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonVmHandle hVm;
+	HqVmHandle hVm;
 
-	XenonGcProxy gcProxy;
+	HqGcProxy gcProxy;
 
 	union
 	{
-		XenonNativeValueWrapper native;
+		HqNativeValueWrapper native;
 		HandleArray array;
 
-		XenonString* pString;
-		XenonScriptObject* pObject;
+		HqString* pString;
+		HqScriptObject* pObject;
 
-		XenonFunctionHandle hFunction;
+		HqFunctionHandle hFunction;
 
 		double float64;
 		uint64_t uint64;

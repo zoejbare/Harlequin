@@ -20,13 +20,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonDependency
+struct HqDependency
 {
-	XenonCallbackProgramDependency onRequestFn;
+	HqCallbackProgramDependency onRequestFn;
 	void* pUserData;
 };
 

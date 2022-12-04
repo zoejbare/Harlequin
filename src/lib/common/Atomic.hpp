@@ -20,25 +20,25 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if defined(XENON_PLATFORM_WINDOWS)
+#if defined(HQ_PLATFORM_WINDOWS)
 	#include "atomic-impl/AtomicWin32.hpp"
 
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4) \
-	|| defined(XENON_PLATFORM_PS5)
+#elif defined(HQ_PLATFORM_LINUX) \
+	|| defined(HQ_PLATFORM_MAC_OS) \
+	|| defined(HQ_PLATFORM_ANDROID) \
+	|| defined(HQ_PLATFORM_PS4) \
+	|| defined(HQ_PLATFORM_PS5)
 	#include "atomic-impl/AtomicPosix.hpp"
 
-#elif defined(XENON_PLATFORM_PS3)
-	#include "../../../../XenonScriptImpl-PS3/lib/common/atomic/Atomic.hpp"
+#elif defined(HQ_PLATFORM_PS3)
+	#include "../../../support/Harlequin-PS3/lib/common/atomic/Atomic.hpp"
 
-#elif defined(XENON_PLATFORM_PSVITA)
-	#include "../../../../XenonScriptImpl-PSVita/lib/common/atomic/Atomic.hpp"
+#elif defined(HQ_PLATFORM_PSVITA)
+	#include "../../../support/Harlequin-PSVita/lib/common/atomic/Atomic.hpp"
 
 #else
 	#error "Atomic functions not implemented for this platform"

@@ -30,74 +30,74 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgram;
+struct HqProgram;
 
-struct XenonFunction
+struct HqFunction
 {
-	typedef XENON_MAP_TYPE<
-		XenonString*,
-		XenonFunctionHandle,
-#if XENON_MAP_IS_UNORDERED
-		XenonString::StlHash,
-		XenonString::StlCompare,
+	typedef HQ_MAP_TYPE<
+		HqString*,
+		HqFunctionHandle,
+#if HQ_MAP_IS_UNORDERED
+		HqString::StlHash,
+		HqString::StlCompare,
 #else
-		XenonString::StlLess,
+		HqString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonFunctionHandle)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqFunctionHandle)>
 	> StringToHandleMap;
 
-	typedef XENON_MAP_TYPE<
-		XenonString*,
+	typedef HQ_MAP_TYPE<
+		HqString*,
 		bool,
-#if XENON_MAP_IS_UNORDERED
-		XenonString::StlHash,
-		XenonString::StlCompare,
+#if HQ_MAP_IS_UNORDERED
+		HqString::StlHash,
+		HqString::StlCompare,
 #else
-		XenonString::StlLess,
+		HqString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, bool)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)>
 	> StringToBoolMap;
 
-	typedef XenonStack<XenonFunctionHandle> HandleStack;
+	typedef HqStack<HqFunctionHandle> HandleStack;
 
-	static XenonFunctionHandle CreateInit(XenonProgramHandle hProgram, uint32_t bytecodeLength);
-	static XenonFunctionHandle CreateScript(
-		XenonProgramHandle hProgram,
-		XenonString* pSignature,
-		XenonValue::StringToHandleMap& locals,
-		XenonGuardedBlock::Array& guardedBlocks,
+	static HqFunctionHandle CreateInit(HqProgramHandle hProgram, uint32_t bytecodeLength);
+	static HqFunctionHandle CreateScript(
+		HqProgramHandle hProgram,
+		HqString* pSignature,
+		HqValue::StringToHandleMap& locals,
+		HqGuardedBlock::Array& guardedBlocks,
 		uint32_t bytecodeOffsetStart,
 		uint32_t bytecodeOffsetEnd,
 		uint16_t numParameters,
 		uint16_t numReturnValues
 	);
-	static XenonFunctionHandle CreateNative(
-		XenonProgramHandle hProgram,
-		XenonString* pSignature,
+	static HqFunctionHandle CreateNative(
+		HqProgramHandle hProgram,
+		HqString* pSignature,
 		uint16_t numParameters,
 		uint16_t numReturnValues
 	);
-	static XenonFunctionHandle CreateBuiltIn(
-		XenonString* pSignature,
-		XenonNativeFunction nativeFn,
+	static HqFunctionHandle CreateBuiltIn(
+		HqString* pSignature,
+		HqNativeFunction nativeFn,
 		uint16_t numParameters,
 		uint16_t numReturnValues
 	);
-	static void Dispose(XenonFunctionHandle hFunction);
+	static void Dispose(HqFunctionHandle hFunction);
 
-	static XenonVmHandle GetVm(XenonFunctionHandle hFunction);
+	static HqVmHandle GetVm(HqFunctionHandle hFunction);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonProgramHandle hProgram;
-	XenonNativeFunction nativeFn;
+	HqProgramHandle hProgram;
+	HqNativeFunction nativeFn;
 
-	XenonString* pSignature;
+	HqString* pSignature;
 	void* pNativeUserData;
 
-	XenonGuardedBlock::Array guardedBlocks;
-	XenonValue::StringToHandleMap locals;
+	HqGuardedBlock::Array guardedBlocks;
+	HqValue::StringToHandleMap locals;
 
 	uint32_t bytecodeOffsetStart;
 	uint32_t bytecodeOffsetEnd;

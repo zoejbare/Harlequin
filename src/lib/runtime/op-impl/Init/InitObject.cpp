@@ -42,49 +42,49 @@
 extern "C" {
 #endif
 
-void OpCodeExec_InitObject(XenonExecutionHandle hExec)
+void OpCodeExec_InitObject(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hObjectTypeName= XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hObjectTypeName= HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Verify the loaded value is a string.
-		if(XenonValueIsString(hObjectTypeName))
+		if(HqValueIsString(hObjectTypeName))
 		{
 			// Get the object schema matching the type name.
-			XenonScriptObject* const pObjectSchema = XenonVm::GetObjectSchema(hExec->hVm, hObjectTypeName->as.pString, &result);
-			if(result == XENON_SUCCESS)
+			HqScriptObject* const pObjectSchema = HqVm::GetObjectSchema(hExec->hVm, hObjectTypeName->as.pString, &result);
+			if(result == HQ_SUCCESS)
 			{
 				// Create a new object from the schema.
-				XenonValueHandle hObject = XenonValue::CreateObject(hExec->hVm, pObjectSchema);
+				HqValueHandle hObject = HqValue::CreateObject(hExec->hVm, pObjectSchema);
 
 				// Verify the created value is an object.
-				if(XenonValueIsObject(hObject))
+				if(HqValueIsObject(hObject))
 				{
-					result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hObject, registerIndex);
-					if(result != XENON_SUCCESS)
+					result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hObject, registerIndex);
+					if(result != HQ_SUCCESS)
 					{
 						// Raise a fatal script exception.
-						XenonExecution::RaiseOpCodeException(
+						HqExecution::RaiseOpCodeException(
 							hExec, 
-							XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+							HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 							"Failed to set general-purpose register: r(%" PRIu32 ")", 
 							registerIndex
 						);
 					}
 
-					XenonValue::SetAutoMark(hObject, false);
+					HqValue::SetAutoMark(hObject, false);
 				}
 				else
 				{
 					// Raise a fatal script exception.
-					XenonExecution::RaiseOpCodeException(
+					HqExecution::RaiseOpCodeException(
 						hExec,
-						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to create object value"
 					);
 				}
@@ -92,9 +92,9 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecution::RaiseOpCodeException(
+				HqExecution::RaiseOpCodeException(
 					hExec, 
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 					"Failed to find object schema: type=%s",
 					hObjectTypeName->as.pString->data
 				);
@@ -103,9 +103,9 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec, 
-				XENON_STANDARD_EXCEPTION_TYPE_ERROR, 
+				HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
 				"Type mismatch; expected string: c(%" PRIu32 ")",
 				constantIndex
 			);
@@ -114,9 +114,9 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec, 
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to retrieve constant value: c(%" PRIu32 ")",
 			constantIndex
 		);
@@ -125,21 +125,21 @@ void OpCodeExec_InitObject(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_InitObject(XenonDisassemble& disasm)
+void OpCodeDisasm_InitObject(HqDisassemble& disasm)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	XenonString* const pValueData = XenonValue::GetDebugString(hValue);
+	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
+	HqString* const pValueData = HqValue::GetDebugString(hValue);
 
 	char instr[512];
 	snprintf(instr, sizeof(instr), "INIT_OBJECT r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 
-	XenonString::Release(pValueData);
+	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

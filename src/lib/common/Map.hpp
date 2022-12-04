@@ -20,90 +20,90 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define XENON_MAP_IMPL_FORCE_STD_MAP           0
-#define XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP 0
+#define HQ_MAP_IMPL_FORCE_STD_MAP           0
+#define HQ_MAP_IMPL_FORCE_STD_UNORDERED_MAP 0
 
-#if defined(XENON_PLATFORM_PS3)
-	#undef XENON_MAP_IMPL_FORCE_STD_MAP
-	#define XENON_MAP_IMPL_FORCE_STD_MAP 1
+#if defined(HQ_PLATFORM_PS3)
+	#undef HQ_MAP_IMPL_FORCE_STD_MAP
+	#define HQ_MAP_IMPL_FORCE_STD_MAP 1
 
-#elif defined(XENON_PLATFORM_PSVITA)
-	#undef XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP
-	#define XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP 1
+#elif defined(HQ_PLATFORM_PSVITA)
+	#undef HQ_MAP_IMPL_FORCE_STD_UNORDERED_MAP
+	#define HQ_MAP_IMPL_FORCE_STD_UNORDERED_MAP 1
 
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if XENON_MAP_IMPL_FORCE_STD_MAP
+#if HQ_MAP_IMPL_FORCE_STD_MAP
 	#include <map>
 
-	#define XENON_MAP_IS_UNORDERED 0
-	#define XENON_MAP_TYPE std::map
-	#define XENON_MAP_NODE_TYPE(key_type, value_type) std::pair<key_type const, value_type>
-	#define XENON_MAP_FUNC_INSERT(dict, key, value) ((dict)[key] = (value))
-	#define XENON_MAP_FUNC_REMOVE(dict, key) (dict).erase(key)
-	#define XENON_MAP_FUNC_CONTAINS(dict, key) ((dict).count(key) > 0)
+	#define HQ_MAP_IS_UNORDERED 0
+	#define HQ_MAP_TYPE std::map
+	#define HQ_MAP_NODE_TYPE(key_type, value_type) std::pair<key_type const, value_type>
+	#define HQ_MAP_FUNC_INSERT(dict, key, value) ((dict)[key] = (value))
+	#define HQ_MAP_FUNC_REMOVE(dict, key) (dict).erase(key)
+	#define HQ_MAP_FUNC_CONTAINS(dict, key) ((dict).count(key) > 0)
 
-	#if defined(XENON_PLATFORM_PS3)
-		#define XENON_MAP_FUNC_GET(dict, key) (dict)[(key)]
+	#if defined(HQ_PLATFORM_PS3)
+		#define HQ_MAP_FUNC_GET(dict, key) (dict)[(key)]
 	#else
-		#define XENON_MAP_FUNC_GET(dict, key) (dict).at(key)
+		#define HQ_MAP_FUNC_GET(dict, key) (dict).at(key)
 	#endif
 
-	#define XENON_MAP_FUNC_RESERVE(dict, count) // No equivalent function for std::map
-	#define XENON_MAP_FUNC_CLEAR(dict) (dict).clear()
-	#define XENON_MAP_FUNC_SIZE(dict) (dict).size()
-	#define XENON_MAP_ITER_KEY(iter) (iter).first
-	#define XENON_MAP_ITER_VALUE(iter) (iter).second
-	#define XENON_MAP_ITER_PTR_KEY(iter) (iter)->first
-	#define XENON_MAP_ITER_PTR_VALUE(iter) (iter)->second
+	#define HQ_MAP_FUNC_RESERVE(dict, count) // No equivalent function for std::map
+	#define HQ_MAP_FUNC_CLEAR(dict) (dict).clear()
+	#define HQ_MAP_FUNC_SIZE(dict) (dict).size()
+	#define HQ_MAP_ITER_KEY(iter) (iter).first
+	#define HQ_MAP_ITER_VALUE(iter) (iter).second
+	#define HQ_MAP_ITER_PTR_KEY(iter) (iter)->first
+	#define HQ_MAP_ITER_PTR_VALUE(iter) (iter)->second
 
-#elif XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP
+#elif HQ_MAP_IMPL_FORCE_STD_UNORDERED_MAP
 	#include <unordered_map>
 
-	#define XENON_MAP_IS_UNORDERED 1
-	#define XENON_MAP_TYPE std::unordered_map
-	#define XENON_MAP_NODE_TYPE(key_type, value_type) std::pair<key_type const, value_type>
-	#define XENON_MAP_FUNC_INSERT(dict, key, value) ((dict)[key] = (value))
-	#define XENON_MAP_FUNC_REMOVE(dict, key) (dict).erase(key)
-	#define XENON_MAP_FUNC_CONTAINS(dict, key) ((dict).count(key) > 0)
-	#define XENON_MAP_FUNC_GET(dict, key) (dict).at(key)
-	#define XENON_MAP_FUNC_RESERVE(dict, count) (dict).reserve(count)
-	#define XENON_MAP_FUNC_CLEAR(dict) (dict).clear()
-	#define XENON_MAP_FUNC_SIZE(dict) (dict).size()
-	#define XENON_MAP_ITER_KEY(iter) (iter).first
-	#define XENON_MAP_ITER_VALUE(iter) (iter).second
-	#define XENON_MAP_ITER_PTR_KEY(iter) (iter)->first
-	#define XENON_MAP_ITER_PTR_VALUE(iter) (iter)->second
+	#define HQ_MAP_IS_UNORDERED 1
+	#define HQ_MAP_TYPE std::unordered_map
+	#define HQ_MAP_NODE_TYPE(key_type, value_type) std::pair<key_type const, value_type>
+	#define HQ_MAP_FUNC_INSERT(dict, key, value) ((dict)[key] = (value))
+	#define HQ_MAP_FUNC_REMOVE(dict, key) (dict).erase(key)
+	#define HQ_MAP_FUNC_CONTAINS(dict, key) ((dict).count(key) > 0)
+	#define HQ_MAP_FUNC_GET(dict, key) (dict).at(key)
+	#define HQ_MAP_FUNC_RESERVE(dict, count) (dict).reserve(count)
+	#define HQ_MAP_FUNC_CLEAR(dict) (dict).clear()
+	#define HQ_MAP_FUNC_SIZE(dict) (dict).size()
+	#define HQ_MAP_ITER_KEY(iter) (iter).first
+	#define HQ_MAP_ITER_VALUE(iter) (iter).second
+	#define HQ_MAP_ITER_PTR_KEY(iter) (iter)->first
+	#define HQ_MAP_ITER_PTR_VALUE(iter) (iter)->second
 
 #else
 	#include <SkipProbe/SkipProbe.hpp>
 
-	#define XENON_MAP_IS_UNORDERED 1
-	#define XENON_MAP_TYPE SkipProbe::HashMap
-	#define XENON_MAP_NODE_TYPE(key_type, value_type) SkipProbe::LinkedNode<key_type, value_type>
-	#define XENON_MAP_FUNC_INSERT(dict, key, value) (dict).Insert((key), (value))
-	#define XENON_MAP_FUNC_REMOVE(dict, key) (dict).Delete(key)
-	#define XENON_MAP_FUNC_CONTAINS(dict, key) (dict).Contains(key)
-	#define XENON_MAP_FUNC_GET(dict, key) (dict).Get(key)
-	#define XENON_MAP_FUNC_RESERVE(dict, count) (dict).Reserve(count)
-	#define XENON_MAP_FUNC_CLEAR(dict) (dict).Clear()
-	#define XENON_MAP_FUNC_SIZE(dict) (dict).Size()
-	#define XENON_MAP_ITER_KEY(iter) (iter).key
-	#define XENON_MAP_ITER_VALUE(iter) (iter).value
-	#define XENON_MAP_ITER_PTR_KEY(iter) (iter)->key
-	#define XENON_MAP_ITER_PTR_VALUE(iter) (iter)->value
+	#define HQ_MAP_IS_UNORDERED 1
+	#define HQ_MAP_TYPE SkipProbe::HashMap
+	#define HQ_MAP_NODE_TYPE(key_type, value_type) SkipProbe::LinkedNode<key_type, value_type>
+	#define HQ_MAP_FUNC_INSERT(dict, key, value) (dict).Insert((key), (value))
+	#define HQ_MAP_FUNC_REMOVE(dict, key) (dict).Delete(key)
+	#define HQ_MAP_FUNC_CONTAINS(dict, key) (dict).Contains(key)
+	#define HQ_MAP_FUNC_GET(dict, key) (dict).Get(key)
+	#define HQ_MAP_FUNC_RESERVE(dict, count) (dict).Reserve(count)
+	#define HQ_MAP_FUNC_CLEAR(dict) (dict).Clear()
+	#define HQ_MAP_FUNC_SIZE(dict) (dict).Size()
+	#define HQ_MAP_ITER_KEY(iter) (iter).key
+	#define HQ_MAP_ITER_VALUE(iter) (iter).value
+	#define HQ_MAP_ITER_PTR_KEY(iter) (iter)->key
+	#define HQ_MAP_ITER_PTR_VALUE(iter) (iter)->value
 
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#undef XENON_MAP_IMPL_FORCE_STD_MAP
-#undef XENON_MAP_IMPL_FORCE_STD_UNORDERED_MAP
+#undef HQ_MAP_IMPL_FORCE_STD_MAP
+#undef HQ_MAP_IMPL_FORCE_STD_UNORDERED_MAP
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -22,11 +22,11 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonScriptObject* XenonScriptObject::CreateSchema(XenonString* const pTypeName, const MemberDefinitionMap& definitions)
+HqScriptObject* HqScriptObject::CreateSchema(HqString* const pTypeName, const MemberDefinitionMap& definitions)
 {
 	assert(pTypeName != nullptr);
 
-	XenonScriptObject* const pOutput = new XenonScriptObject();
+	HqScriptObject* const pOutput = new HqScriptObject();
 	assert(pOutput != nullptr);
 
 	pOutput->pTypeName = pTypeName;
@@ -34,24 +34,24 @@ XenonScriptObject* XenonScriptObject::CreateSchema(XenonString* const pTypeName,
 	pOutput->definitions = definitions;
 
 	// Track string references.
-	XenonString::AddRef(pOutput->pTypeName);
+	HqString::AddRef(pOutput->pTypeName);
 
 	for(auto& kv : pOutput->definitions)
 	{
-		XenonString::AddRef(XENON_MAP_ITER_KEY(kv));
+		HqString::AddRef(HQ_MAP_ITER_KEY(kv));
 	}
 
-	const size_t defCount = XENON_MAP_FUNC_SIZE(definitions);
+	const size_t defCount = HQ_MAP_FUNC_SIZE(definitions);
 
 	// Initialize the members array and reserve enough space for each of them.
-	XenonValue::HandleArray::Initialize(pOutput->members);
-	XenonValue::HandleArray::Reserve(pOutput->members, defCount);
+	HqValue::HandleArray::Initialize(pOutput->members);
+	HqValue::HandleArray::Reserve(pOutput->members, defCount);
 	pOutput->members.count = defCount;
 
 	// Initialize the members to null values.
 	for(size_t i = 0; i < defCount; ++i)
 	{
-		pOutput->members.pData[i] = XenonValue::CreateNull();
+		pOutput->members.pData[i] = HqValue::CreateNull();
 	}
 
 	return pOutput;
@@ -59,11 +59,11 @@ XenonScriptObject* XenonScriptObject::CreateSchema(XenonString* const pTypeName,
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonScriptObject* XenonScriptObject::CreateInstance(XenonScriptObject* const pSchema)
+HqScriptObject* HqScriptObject::CreateInstance(HqScriptObject* const pSchema)
 {
 	assert(pSchema != nullptr);
 
-	XenonScriptObject* const pOutput = XenonScriptObject::prv_createObject(pSchema);
+	HqScriptObject* const pOutput = HqScriptObject::prv_createObject(pSchema);
 	assert(pOutput != nullptr);
 
 	pOutput->pSchema = pSchema;
@@ -73,11 +73,11 @@ XenonScriptObject* XenonScriptObject::CreateInstance(XenonScriptObject* const pS
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonScriptObject* XenonScriptObject::CreateCopy(XenonScriptObject* const pObject)
+HqScriptObject* HqScriptObject::CreateCopy(HqScriptObject* const pObject)
 {
 	assert(pObject != nullptr);
 
-	XenonScriptObject* const pOutput = XenonScriptObject::prv_createObject(pObject);
+	HqScriptObject* const pOutput = HqScriptObject::prv_createObject(pObject);
 	assert(pOutput != nullptr);
 
 	pOutput->pSchema = pObject->pSchema;
@@ -87,45 +87,45 @@ XenonScriptObject* XenonScriptObject::CreateCopy(XenonScriptObject* const pObjec
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonScriptObject::Dispose(XenonScriptObject* const pObject)
+void HqScriptObject::Dispose(HqScriptObject* const pObject)
 {
 	assert(pObject != nullptr);
 
 	// Release all the member names from the definition table.
 	for(auto& kv : pObject->definitions)
 	{
-		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+		HqString::Release(HQ_MAP_ITER_KEY(kv));
 	}
 
-	XenonValue::HandleArray::Dispose(pObject->members);
-	XenonString::Release(pObject->pTypeName);
+	HqValue::HandleArray::Dispose(pObject->members);
+	HqString::Release(pObject->pTypeName);
 
 	delete pObject;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonScriptObject::GetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, int* const pOutResult)
+HqValueHandle HqScriptObject::GetMemberValue(HqScriptObject* const pObject, const uint32_t memberIndex, int* const pOutResult)
 {
 	assert(pObject != nullptr);
 
 	if(memberIndex < uint32_t(pObject->members.count))
 	{
-		(*pOutResult) = XENON_SUCCESS;
+		(*pOutResult) = HQ_SUCCESS;
 
 		return pObject->members.pData[memberIndex];
 	}
 
-	(*pOutResult) = XENON_ERROR_INDEX_OUT_OF_RANGE;
+	(*pOutResult) = HQ_ERROR_INDEX_OUT_OF_RANGE;
 
-	return XENON_VALUE_HANDLE_NULL;
+	return HQ_VALUE_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonScriptObject::MemberDefinition XenonScriptObject::GetMemberDefinition(
-	XenonScriptObject* const pObject,
-	XenonString* const pMemberName,
+HqScriptObject::MemberDefinition HqScriptObject::GetMemberDefinition(
+	HqScriptObject* const pObject,
+	HqString* const pMemberName,
 	int* const pOutResult
 )
 {
@@ -136,40 +136,40 @@ XenonScriptObject::MemberDefinition XenonScriptObject::GetMemberDefinition(
 	auto kv = pObject->definitions.find(pMemberName);
 	if(kv == pObject->definitions.end())
 	{
-		(*pOutResult) = XENON_ERROR_KEY_DOES_NOT_EXIST;
+		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
 
 		MemberDefinition dummyDef = { 0, 0 };
 		return dummyDef;
 	}
 
-	(*pOutResult) = XENON_SUCCESS;
+	(*pOutResult) = HQ_SUCCESS;
 
-	return XENON_MAP_ITER_PTR_VALUE(kv);
+	return HQ_MAP_ITER_PTR_VALUE(kv);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonScriptObject::SetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue)
+int HqScriptObject::SetMemberValue(HqScriptObject* const pObject, const uint32_t memberIndex, HqValueHandle hValue)
 {
 	assert(pObject != nullptr);
-	assert(hValue != XENON_VALUE_HANDLE_NULL);
+	assert(hValue != HQ_VALUE_HANDLE_NULL);
 
 	if(memberIndex < uint32_t(pObject->members.count))
 	{
 		pObject->members.pData[memberIndex] = hValue;
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
-	return XENON_ERROR_INDEX_OUT_OF_RANGE;
+	return HQ_ERROR_INDEX_OUT_OF_RANGE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonScriptObject* XenonScriptObject::prv_createObject(XenonScriptObject* const pOriginalObject)
+HqScriptObject* HqScriptObject::prv_createObject(HqScriptObject* const pOriginalObject)
 {
 	assert(pOriginalObject != nullptr);
 
-	XenonScriptObject* const pOutput = new XenonScriptObject();
+	HqScriptObject* const pOutput = new HqScriptObject();
 	assert(pOutput != nullptr);
 
 	pOutput->pTypeName = pOriginalObject->pTypeName;
@@ -179,17 +179,17 @@ XenonScriptObject* XenonScriptObject::prv_createObject(XenonScriptObject* const 
 	pOutput->pUserData = nullptr;
 
 	// Add a reference for the type name.
-	XenonString::AddRef(pOutput->pTypeName);
+	HqString::AddRef(pOutput->pTypeName);
 
 	// Add a reference for each member name.
 	for(auto& kv : pOutput->definitions)
 	{
-		XenonString::AddRef(XENON_MAP_ITER_KEY(kv));
+		HqString::AddRef(HQ_MAP_ITER_KEY(kv));
 	}
 
 	// Initialize the members array and reserve enough space for each of them.
-	XenonValue::HandleArray::Initialize(pOutput->members);
-	XenonValue::HandleArray::Reserve(pOutput->members, pOriginalObject->members.count);
+	HqValue::HandleArray::Initialize(pOutput->members);
+	HqValue::HandleArray::Reserve(pOutput->members, pOriginalObject->members.count);
 	pOutput->members.count = pOriginalObject->members.count;
 
 	// Copy the member values to the new array.
@@ -203,16 +203,16 @@ XenonScriptObject* XenonScriptObject::prv_createObject(XenonScriptObject* const 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonScriptObject::operator new(const size_t sizeInBytes)
+void* HqScriptObject::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonScriptObject::operator delete(void* const pObject)
+void HqScriptObject::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -20,28 +20,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if defined(XENON_PLATFORM_WINDOWS)
+#if defined(HQ_PLATFORM_WINDOWS)
 	#include "mutex-impl/MutexWin32.hpp"
 
-#elif defined(XENON_PLATFORM_LINUX) \
-	|| defined(XENON_PLATFORM_MAC_OS) \
-	|| defined(XENON_PLATFORM_ANDROID) \
-	|| defined(XENON_PLATFORM_PS4) \
-	|| defined(XENON_PLATFORM_PS5)
+#elif defined(HQ_PLATFORM_LINUX) \
+	|| defined(HQ_PLATFORM_MAC_OS) \
+	|| defined(HQ_PLATFORM_ANDROID) \
+	|| defined(HQ_PLATFORM_PS4) \
+	|| defined(HQ_PLATFORM_PS5)
 	#include "mutex-impl/MutexPosix.hpp"
 
-#elif defined(XENON_PLATFORM_PS3)
-	#include "../../../../XenonScriptImpl-PS3/lib/base/mutex/Mutex.hpp"
+#elif defined(HQ_PLATFORM_PS3)
+	#include "../../../support/Harlequin-PS3/lib/base/mutex/Mutex.hpp"
 
-#elif defined(XENON_PLATFORM_PSVITA)
-	#include "../../../../XenonScriptImpl-PSVita/lib/base/mutex/Mutex.hpp"
+#elif defined(HQ_PLATFORM_PSVITA)
+	#include "../../../support/Harlequin-PSVita/lib/base/mutex/Mutex.hpp"
 
 #else
-	#error "XenonMutex not implemented for this platform"
+	#error "HqMutex not implemented for this platform"
 
 #endif
 
@@ -49,72 +49,72 @@
 
 extern "C"
 {
-	void _XenonMutexImplCreate(XenonInternalMutex&);
-	void _XenonMutexImplDispose(XenonInternalMutex&);
-	bool _XenonMutexImplTryLock(XenonInternalMutex&);
-	void _XenonMutexImplLock(XenonInternalMutex&);
-	void _XenonMutexImplUnlock(XenonInternalMutex&);
+	void _HqMutexImplCreate(HqInternalMutex&);
+	void _HqMutexImplDispose(HqInternalMutex&);
+	bool _HqMutexImplTryLock(HqInternalMutex&);
+	void _HqMutexImplLock(HqInternalMutex&);
+	void _HqMutexImplUnlock(HqInternalMutex&);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonMutex
+struct HQ_BASE_API HqMutex
 {
-	static XenonMutex Create()
+	static HqMutex Create()
 	{
-		XenonMutex output;
-		_XenonMutexImplCreate(output.obj);
+		HqMutex output;
+		_HqMutexImplCreate(output.obj);
 		return output;
 	}
 
-	static void Dispose(XenonMutex& mutex)
+	static void Dispose(HqMutex& mutex)
 	{
-		_XenonMutexImplDispose(mutex.obj);
+		_HqMutexImplDispose(mutex.obj);
 	}
 
-	static bool TryLock(XenonMutex& mutex)
+	static bool TryLock(HqMutex& mutex)
 	{
-		return _XenonMutexImplTryLock(mutex.obj);
+		return _HqMutexImplTryLock(mutex.obj);
 	}
 
-	static void Lock(XenonMutex& mutex)
+	static void Lock(HqMutex& mutex)
 	{
-		_XenonMutexImplLock(mutex.obj);
+		_HqMutexImplLock(mutex.obj);
 	}
 
-	static void Unlock(XenonMutex& mutex)
+	static void Unlock(HqMutex& mutex)
 	{
-		_XenonMutexImplUnlock(mutex.obj);
+		_HqMutexImplUnlock(mutex.obj);
 	}
 
-	XenonInternalMutex obj;
+	HqInternalMutex obj;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class XENON_BASE_API XenonScopedMutex
+class HQ_BASE_API HqScopedMutex
 {
 public:
 
-	XenonScopedMutex() = delete;
-	XenonScopedMutex(const XenonScopedMutex&) = delete;
-	XenonScopedMutex(XenonScopedMutex&&) = delete;
+	HqScopedMutex() = delete;
+	HqScopedMutex(const HqScopedMutex&) = delete;
+	HqScopedMutex(HqScopedMutex&&) = delete;
 
-	explicit inline XenonScopedMutex(XenonMutex& mutex)
+	explicit inline HqScopedMutex(HqMutex& mutex)
 		: m_pMutex(&mutex)
 	{
-		XenonMutex::Lock(*m_pMutex);
+		HqMutex::Lock(*m_pMutex);
 	}
 
-	inline ~XenonScopedMutex()
+	inline ~HqScopedMutex()
 	{
-		XenonMutex::Unlock(*m_pMutex);
+		HqMutex::Unlock(*m_pMutex);
 	}
 
 
 private:
 
-	XenonMutex* m_pMutex;
+	HqMutex* m_pMutex;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

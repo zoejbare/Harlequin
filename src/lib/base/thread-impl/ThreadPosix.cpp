@@ -25,19 +25,19 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonThreadImplCreate(XenonInternalThread& obj, const XenonThreadConfig& threadConfig)
+extern "C" void _HqThreadImplCreate(HqInternalThread& obj, const HqThreadConfig& threadConfig)
 {
 	assert(threadConfig.mainFn != nullptr);
-	assert(threadConfig.stackSize >= XENON_VM_THREAD_MINIMUM_STACK_SIZE);
+	assert(threadConfig.stackSize >= HQ_VM_THREAD_MINIMUM_STACK_SIZE);
 	assert(threadConfig.name[0] != '\0');
 
 	auto threadEntryPoint = [](void* pOpaqueConfig) -> void*
 	{
 		// Copy thread config.
-		XenonThreadConfig config = *reinterpret_cast<XenonThreadConfig*>(pOpaqueConfig);
+		HqThreadConfig config = *reinterpret_cast<HqThreadConfig*>(pOpaqueConfig);
 
 		// Free their backing memory for the entry point input argument.
-		XenonMemFree(pOpaqueConfig);
+		HqMemFree(pOpaqueConfig);
 
 		// Call the read thread main function.
 		const int32_t result = config.mainFn(config.pArg);
@@ -50,8 +50,8 @@ extern "C" void _XenonThreadImplCreate(XenonInternalThread& obj, const XenonThre
 		return nullptr;
 	};
 
-	XenonThreadConfig* const pConfig =
-		reinterpret_cast<XenonThreadConfig*>(XenonMemAlloc(sizeof(XenonThreadConfig)));
+	HqThreadConfig* const pConfig =
+		reinterpret_cast<HqThreadConfig*>(HqMemAlloc(sizeof(HqThreadConfig)));
 
 	(*pConfig) = threadConfig;
 
@@ -74,7 +74,7 @@ extern "C" void _XenonThreadImplCreate(XenonInternalThread& obj, const XenonThre
 	assert(attrDestroyResult == 0); (void) attrDestroyResult;
 
 	// Setting the thread name through the pthread interface is only supported on a few platforms.
-#if defined(XENON_PLATFORM_LINUX) || defined(XENON_PLATFORM_ANDROID)
+#if defined(HQ_PLATFORM_LINUX) || defined(HQ_PLATFORM_ANDROID)
 	if(threadConfig.name[0] != '\0')
 	{
 		pthread_setname_np(obj.handle, threadConfig.name);
@@ -86,7 +86,7 @@ extern "C" void _XenonThreadImplCreate(XenonInternalThread& obj, const XenonThre
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonThreadImplGetCurrentThread(XenonInternalThread& obj)
+extern "C" void _HqThreadImplGetCurrentThread(HqInternalThread& obj)
 {
 	obj.handle = pthread_self();
 	obj.initialized = true;
@@ -94,7 +94,7 @@ extern "C" void _XenonThreadImplGetCurrentThread(XenonInternalThread& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonThreadImplJoin(XenonInternalThread& obj, int32_t* const pOutReturnValue)
+extern "C" void _HqThreadImplJoin(HqInternalThread& obj, int32_t* const pOutReturnValue)
 {
 	assert(obj.initialized);
 
@@ -114,21 +114,21 @@ extern "C" void _XenonThreadImplJoin(XenonInternalThread& obj, int32_t* const pO
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonThreadImplSleep(uint32_t ms)
+extern "C" void _HqThreadImplSleep(uint32_t ms)
 {
 	usleep(ms * 1000);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonThreadImplYield()
+extern "C" void _HqThreadImplYield()
 {
 	sched_yield();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool _XenonThreadImplEqual(const XenonInternalThread& left, const XenonInternalThread& right)
+extern "C" bool _HqThreadImplEqual(const HqInternalThread& left, const HqInternalThread& right)
 {
 	return left.initialized
 		&& right.initialized
@@ -137,14 +137,14 @@ extern "C" bool _XenonThreadImplEqual(const XenonInternalThread& left, const Xen
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool _XenonThreadImplIsInitialized(const XenonInternalThread& obj)
+extern "C" bool _HqThreadImplIsInitialized(const HqInternalThread& obj)
 {
 	return obj.initialized;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool _XenonThreadImplIsReal(const XenonInternalThread&)
+extern "C" bool _HqThreadImplIsReal(const HqInternalThread&)
 {
 	// Pthreads are never psuedo handles.
 	return true;

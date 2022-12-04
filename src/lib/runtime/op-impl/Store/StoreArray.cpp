@@ -42,36 +42,36 @@
 extern "C" {
 #endif
 
-void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
+void OpCodeExec_StoreArray(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t arrayIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t arrayIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Load the array from the destination register.
-	XenonValueHandle hDestination = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpDstRegIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hDestination = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpDstRegIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Verify the destination value is an array.
-		if(XenonValueIsArray(hDestination))
+		if(HqValueIsArray(hDestination))
 		{
 			// Verify the array index is within the bounds of the array.
 			if(size_t(arrayIndex) < hDestination->as.array.count)
 			{
 				// Load the source value to be placed into the array.
-				XenonValueHandle hSource = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
-				if(result == XENON_SUCCESS)
+				HqValueHandle hSource = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
+				if(result == HQ_SUCCESS)
 				{
 					hDestination->as.array.pData[arrayIndex] = hSource;
 				}
 				else
 				{
 					// Raise a fatal script exception.
-					XenonExecution::RaiseOpCodeException(
+					HqExecution::RaiseOpCodeException(
 						hExec,
-						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
 						gpSrcRegIndex
 					);
@@ -80,9 +80,9 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecution::RaiseOpCodeException(
+				HqExecution::RaiseOpCodeException(
 					hExec,
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Array index out of range: r(%" PRIu32 "), length=%zu, index=%" PRIu32,
 					gpSrcRegIndex,
 					hDestination->as.array.count,
@@ -93,9 +93,9 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+				HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 				"Type mismatch; expected array: r(%" PRIu32 ")",
 				gpDstRegIndex
 			);
@@ -104,9 +104,9 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve general-purpose regsiter: r(%" PRIu32 ")",
 			gpDstRegIndex
 		);
@@ -115,11 +115,11 @@ void OpCodeExec_StoreArray(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_StoreArray(XenonDisassemble& disasm)
+void OpCodeDisasm_StoreArray(HqDisassemble& disasm)
 {
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t arrayIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t arrayIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
 	snprintf(str, sizeof(str), "STORE_ARRAY r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, arrayIndex);

@@ -24,9 +24,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalRwLock
+struct HQ_BASE_API HqInternalRwLock
 {
-	XenonInternalRwLock() : handle(), initialized(false) {}
+	HqInternalRwLock() : handle(), initialized(false) {}
 
 	pthread_rwlock_t handle;
 	bool initialized;

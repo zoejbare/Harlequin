@@ -18,22 +18,22 @@
 
 #include <gtest/gtest.h>
 
-#include <XenonScript.h>
+#include <Harlequin.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 #if 0
 TEST(TestValue, CreateStringValue)
 {
 	// Create native string value object.
-	XenonValueHandle hValue = XenonValueCreateString("This is a native string");
+	HqValueHandle hValue = HqValueCreateString("This is a native string");
 
-	ASSERT_TRUE(XenonValueIsString(hValue));
-	EXPECT_EQ(XenonValueGetStringLength(hValue), 23);
-	EXPECT_STREQ(XenonValueGetString(hValue), "This is a native string");
+	ASSERT_TRUE(HqValueIsString(hValue));
+	EXPECT_EQ(HqValueGetStringLength(hValue), 23);
+	EXPECT_STREQ(HqValueGetString(hValue), "This is a native string");
 
-	const size_t nativeStringHash = XenonValueGetStringHash(hValue);
+	const size_t nativeStringHash = HqValueGetStringHash(hValue);
 
-#ifdef XENON_CPU_WIDTH_64_BIT
+#ifdef HQ_CPU_WIDTH_64_BIT
 	EXPECT_EQ(nativeStringHash, 8219377559199927259);
 
 #else
@@ -42,8 +42,8 @@ TEST(TestValue, CreateStringValue)
 #endif
 
 	// Dispose of the value object.
-	const int disposeValueResult = XenonValueGcExpose(hValue);
-	EXPECT_EQ(disposeValueResult, XENON_SUCCESS);
+	const int disposeValueResult = HqValueGcExpose(hValue);
+	EXPECT_EQ(disposeValueResult, HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -51,22 +51,22 @@ TEST(TestValue, CreateStringValue)
 TEST(TestValue, CreatePrimitiveValueCopy)
 {
 	// Create a primitive (int64) value object.
-	XenonValueHandle hOriginalIntValue = XenonValueCreateInt64(12345);
-	EXPECT_TRUE(XenonValueIsInt64(hOriginalIntValue));
-	EXPECT_EQ(XenonValueGetInt64(hOriginalIntValue), 12345);
+	HqValueHandle hOriginalIntValue = HqValueCreateInt64(12345);
+	EXPECT_TRUE(HqValueIsInt64(hOriginalIntValue));
+	EXPECT_EQ(HqValueGetInt64(hOriginalIntValue), 12345);
 
 	// Create a copy of the original value.
-	XenonValueHandle hCopiedIntValue = XenonValueCopy(hOriginalIntValue);
-	EXPECT_TRUE(XenonValueIsInt64(hCopiedIntValue));
-	EXPECT_EQ(XenonValueGetInt64(hCopiedIntValue), 12345);
+	HqValueHandle hCopiedIntValue = HqValueCopy(hOriginalIntValue);
+	EXPECT_TRUE(HqValueIsInt64(hCopiedIntValue));
+	EXPECT_EQ(HqValueGetInt64(hCopiedIntValue), 12345);
 
 	// Dispose of the original value object.
-	const int disposeOriginalIntValueResult = XenonValueGcExpose(hOriginalIntValue);
-	EXPECT_EQ(disposeOriginalIntValueResult, XENON_SUCCESS);
+	const int disposeOriginalIntValueResult = HqValueGcExpose(hOriginalIntValue);
+	EXPECT_EQ(disposeOriginalIntValueResult, HQ_SUCCESS);
 
 	// Dispose of the copied value object.
-	const int disposeCopiedIntValueResult = XenonValueGcExpose(hCopiedIntValue);
-	EXPECT_EQ(disposeCopiedIntValueResult, XENON_SUCCESS);
+	const int disposeCopiedIntValueResult = HqValueGcExpose(hCopiedIntValue);
+	EXPECT_EQ(disposeCopiedIntValueResult, HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -74,22 +74,22 @@ TEST(TestValue, CreatePrimitiveValueCopy)
 TEST(TestValue, CreateNativeStringValueCopy)
 {
 	// Create a native string value object.
-	XenonValueHandle hOriginalStringValue = XenonValueCreateString("Test string");
-	EXPECT_TRUE(XenonValueIsString(hOriginalStringValue));
-	EXPECT_STREQ(XenonValueGetString(hOriginalStringValue), "Test string");
+	HqValueHandle hOriginalStringValue = HqValueCreateString("Test string");
+	EXPECT_TRUE(HqValueIsString(hOriginalStringValue));
+	EXPECT_STREQ(HqValueGetString(hOriginalStringValue), "Test string");
 
 	// Create a copy of the original value.
-	XenonValueHandle hCopiedStringValue = XenonValueCopy(hOriginalStringValue);
-	EXPECT_TRUE(XenonValueIsString(hCopiedStringValue));
-	EXPECT_STREQ(XenonValueGetString(hCopiedStringValue), "Test string");
+	HqValueHandle hCopiedStringValue = HqValueCopy(hOriginalStringValue);
+	EXPECT_TRUE(HqValueIsString(hCopiedStringValue));
+	EXPECT_STREQ(HqValueGetString(hCopiedStringValue), "Test string");
 
 	// Dispose of the original value object.
-	const int disposeOriginalStringValue = XenonValueGcExpose(hOriginalStringValue);
-	EXPECT_EQ(disposeOriginalStringValue, XENON_SUCCESS);
+	const int disposeOriginalStringValue = HqValueGcExpose(hOriginalStringValue);
+	EXPECT_EQ(disposeOriginalStringValue, HQ_SUCCESS);
 
 	// Dispose of the copied value object.
-	const int disposeCopiedStringValue = XenonValueGcExpose(hCopiedStringValue);
-	EXPECT_EQ(disposeCopiedStringValue, XENON_SUCCESS);
+	const int disposeCopiedStringValue = HqValueGcExpose(hCopiedStringValue);
+	EXPECT_EQ(disposeCopiedStringValue, HQ_SUCCESS);
 }
 #endif
 //----------------------------------------------------------------------------------------------------------------------

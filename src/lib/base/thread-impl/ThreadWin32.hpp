@@ -26,9 +26,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalThread
+struct HQ_BASE_API HqInternalThread
 {
-	XenonInternalThread() : handle(nullptr), id(0), real(false) {}
+	HqInternalThread() : handle(nullptr), id(0), real(false) {}
 
 	HANDLE handle;
 	uint32_t id;

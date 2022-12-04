@@ -24,9 +24,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalThread
+struct HQ_BASE_API HqInternalThread
 {
-	XenonInternalThread() : handle(), initialized(false) {}
+	HqInternalThread() : handle(), initialized(false) {}
 
 	pthread_t handle;
 	bool initialized;

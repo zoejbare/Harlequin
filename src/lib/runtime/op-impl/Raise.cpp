@@ -38,24 +38,24 @@
 extern "C" {
 #endif
 
-void OpCodeExec_Raise(XenonExecutionHandle hExec)
+void OpCodeExec_Raise(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Raise a regular exception from the value at the indicated register.
-		XenonExecution::RaiseException(hExec, hValue, XENON_EXCEPTION_SEVERITY_NORMAL);
+		HqExecution::RaiseException(hExec, hValue, HQ_EXCEPTION_SEVERITY_NORMAL);
 	}
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec, 
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
 			registerIndex
 		);
@@ -64,9 +64,9 @@ void OpCodeExec_Raise(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Raise(XenonDisassemble& disasm)
+void OpCodeDisasm_Raise(HqDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[24];
 	snprintf(str, sizeof(str), "RAISE r%" PRIu32, registerIndex);

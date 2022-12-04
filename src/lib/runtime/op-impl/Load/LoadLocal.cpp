@@ -42,26 +42,26 @@
 extern "C" {
 #endif
 
-void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
+void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(XenonValueIsString(hNameValue))
+	HqValueHandle hNameValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
+	if(HqValueIsString(hNameValue))
 	{
-		XenonValueHandle hLocalVariable = XenonFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString, &result);
+		HqValueHandle hLocalVariable = HqFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString, &result);
 		if(hLocalVariable)
 		{
-			result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
-			if(result != XENON_SUCCESS)
+			result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
+			if(result != HQ_SUCCESS)
 			{
 				// Raise a fatal script exception.
-				XenonExecution::RaiseOpCodeException(
+				HqExecution::RaiseOpCodeException(
 					hExec,
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Failed to set general-purpose register: r(%" PRIu32 ")",
 					registerIndex
 				);
@@ -70,9 +70,9 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to retrieve local variable: %s",
 				hNameValue->as.pString->data
 			);
@@ -81,9 +81,9 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 			"Type mismatch; expected string: c(%" PRIu32 ")",
 			constantIndex
 		);
@@ -92,21 +92,21 @@ void OpCodeExec_LoadLocal(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadLocal(XenonDisassemble& disasm)
+void OpCodeDisasm_LoadLocal(HqDisassemble& disasm)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hNameValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	XenonString* const pValueData = XenonValue::GetDebugString(hNameValue);
+	HqValueHandle hNameValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
+	HqString* const pValueData = HqValue::GetDebugString(hNameValue);
 
 	char str[256];
 	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 
-	XenonString::Release(pValueData);
+	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

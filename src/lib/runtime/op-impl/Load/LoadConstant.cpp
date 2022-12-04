@@ -41,26 +41,26 @@
 extern "C" {
 #endif
 
-void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
+void OpCodeExec_LoadConstant(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Make a copy of the value, then upload that copy to the register.
 		// A copy must be made to avoid accidentally changing the underlying
 		// data of the constant.
-		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, XenonValue::Copy(hExec->hVm, hValue), registerIndex);
-		if(result != XENON_SUCCESS)
+		result = HqFrame::SetGpRegister(hExec->hCurrentFrame, HqValue::Copy(hExec->hVm, hValue), registerIndex);
+		if(result != HQ_SUCCESS)
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to set general-purpose register: r(%" PRIu32 ")",
 				registerIndex
 			);
@@ -69,9 +69,9 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve constant value: c(%" PRIu32 ")",
 			constantIndex
 		);
@@ -80,21 +80,21 @@ void OpCodeExec_LoadConstant(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstant(XenonDisassemble& disasm)
+void OpCodeDisasm_LoadConstant(HqDisassemble& disasm)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	XenonValueHandle hValue = XenonProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	XenonString* const pValueData = XenonValue::GetDebugString(hValue);
+	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
+	HqString* const pValueData = HqValue::GetDebugString(hValue);
 
 	char instr[512];
 	snprintf(instr, sizeof(instr), "LOAD_CONSTANT r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 
-	XenonString::Release(pValueData);
+	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

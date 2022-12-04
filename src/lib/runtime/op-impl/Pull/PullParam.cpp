@@ -41,29 +41,29 @@
 extern "C" {
 #endif
 
-void OpCodeExec_PullParam(XenonExecutionHandle hExec)
+void OpCodeExec_PullParam(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t ioRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Load the value from the I/O register.
-	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, ioRegIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hValue = HqExecution::GetIoRegister(hExec, ioRegIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Store the loaded value in the general-purpose register.
-		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
-		if(result == XENON_SUCCESS)
+		result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hValue, gpRegIndex);
+		if(result == HQ_SUCCESS)
 		{
 			// Clear the I/O register.
-			result = XenonExecution::SetIoRegister(hExec, XENON_VALUE_HANDLE_NULL, ioRegIndex);
-			if(result != XENON_SUCCESS)
+			result = HqExecution::SetIoRegister(hExec, HQ_VALUE_HANDLE_NULL, ioRegIndex);
+			if(result != HQ_SUCCESS)
 			{
 				// Raise a fatal script exception.
-				XenonExecution::RaiseOpCodeException(
+				HqExecution::RaiseOpCodeException(
 					hExec,
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Failed to clear I/O register: p(%" PRIu32 ")",
 					gpRegIndex
 				);
@@ -72,9 +72,9 @@ void OpCodeExec_PullParam(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to set general-purpose register: r(%" PRIu32 ")",
 				gpRegIndex
 			);
@@ -83,9 +83,9 @@ void OpCodeExec_PullParam(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve I/O register: p(%" PRIu32 ")",
 			ioRegIndex
 		);
@@ -94,10 +94,10 @@ void OpCodeExec_PullParam(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_PullParam(XenonDisassemble& disasm)
+void OpCodeDisasm_PullParam(HqDisassemble& disasm)
 {
-	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t ioRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
 	snprintf(str, sizeof(str), "PULL_PARAM r%" PRIu32 ", p%" PRIu32, gpRegIndex, ioRegIndex);

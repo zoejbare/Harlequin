@@ -18,13 +18,13 @@
 
 #include <gtest/gtest.h>
 
-#include <XenonScript.h>
+#include <Harlequin.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 TEST(TestEndianSwap, Int16)
 {
-	const int16_t value = XenonEndianSwapInt16(0x1020);
+	const int16_t value = HqEndianSwapInt16(0x1020);
 	EXPECT_EQ(value, 0x2010);
 }
 
@@ -32,7 +32,7 @@ TEST(TestEndianSwap, Int16)
 
 TEST(TestEndianSwap, Int32)
 {
-	const int32_t value = XenonEndianSwapInt32(0x10203040);
+	const int32_t value = HqEndianSwapInt32(0x10203040);
 	EXPECT_EQ(value, 0x40302010);
 }
 
@@ -40,7 +40,7 @@ TEST(TestEndianSwap, Int32)
 
 TEST(TestEndianSwap, Int64)
 {
-	const int64_t value = XenonEndianSwapInt64(0x0010203040506070ll);
+	const int64_t value = HqEndianSwapInt64(0x0010203040506070ll);
 	EXPECT_EQ(value, 0x7060504030201000ll);
 }
 
@@ -48,7 +48,7 @@ TEST(TestEndianSwap, Int64)
 
 TEST(TestEndianSwap, Uint16)
 {
-	const uint16_t value = XenonEndianSwapUint16(0x1020);
+	const uint16_t value = HqEndianSwapUint16(0x1020);
 	EXPECT_EQ(value, 0x2010);
 }
 
@@ -56,7 +56,7 @@ TEST(TestEndianSwap, Uint16)
 
 TEST(TestEndianSwap, Uint32)
 {
-	const uint32_t value = XenonEndianSwapUint32(0x10203040);
+	const uint32_t value = HqEndianSwapUint32(0x10203040);
 	EXPECT_EQ(value, 0x40302010ul);
 }
 
@@ -64,7 +64,7 @@ TEST(TestEndianSwap, Uint32)
 
 TEST(TestEndianSwap, Uint64)
 {
-	const uint64_t value = XenonEndianSwapUint64(0x0010203040506070ull);
+	const uint64_t value = HqEndianSwapUint64(0x0010203040506070ull);
 	EXPECT_EQ(value, 0x7060504030201000ull);
 }
 

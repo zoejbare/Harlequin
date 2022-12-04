@@ -19,11 +19,11 @@
                 "${defaultIncludePaths}"
             ],
             "defines": [
-                "XENON_LIB_COMPILER",
-                "XENON_LIB_RUNTIME"
+                "HQ_LIB_COMPILER",
+                "HQ_LIB_RUNTIME"
             ],
-            "cStandard": "c89",
-            "cppStandard": "c++14"
+            "cStandard": "c99",
+            "cppStandard": "c++17"
         },
         {
             "name": "macOS",
@@ -37,11 +37,11 @@
                 "${defaultIncludePaths}"
             ],
             "defines": [
-                "XENON_LIB_COMPILER",
-                "XENON_LIB_RUNTIME"
+                "HQ_LIB_COMPILER",
+                "HQ_LIB_RUNTIME"
             ],
-            "cStandard": "c89",
-            "cppStandard": "c++14"
+            "cStandard": "c99",
+            "cppStandard": "c++17"
         },
         {
             "name": "Win32",
@@ -50,13 +50,13 @@
             ],
             "defines": [
                 "_WIN32=1",
-                "XENON_LIB_COMPILER",
-                "XENON_LIB_RUNTIME"
+                "HQ_LIB_COMPILER",
+                "HQ_LIB_RUNTIME"
             ],
             "windowsSdkVersion": "10.0.19041.0",
             "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Professional/VC/Tools/MSVC/14.28.29910/bin/Hostx64/x64/cl.exe",
-            "cStandard": "c89",
-            "cppStandard": "c++14",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
             "intelliSenseMode": "windows-msvc-x64"
         },
         {
@@ -71,11 +71,11 @@
                 "C:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/V140/Platforms/PSVita/PlatformToolsets/SNC/psvita_intellisense.h"
             ],
             "defines": [
-                "XENON_LIB_RUNTIME"
+                "HQ_LIB_RUNTIME"
             ],
             "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
-            "cStandard": "c89",
-            "cppStandard": "c++11",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
             "intelliSenseMode": "${default}"
         },
         {
@@ -87,11 +87,11 @@
                 "C:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/Platforms/PS3/PlatformToolsets/SNC/ps3snc_intellisense.h"
             ],
             "defines": [
-                "XENON_LIB_RUNTIME"
+                "HQ_LIB_RUNTIME"
             ],
             "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
-            "cStandard": "c89",
-            "cppStandard": "c++11",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
             "intelliSenseMode": "${default}"
         },
         {
@@ -104,11 +104,11 @@
             ],
             "defines": [
                 "__ORBIS__=1",
-                "XENON_LIB_RUNTIME"
+                "HQ_LIB_RUNTIME"
             ],
             "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
-            "cStandard": "c89",
-            "cppStandard": "c++11",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
             "intelliSenseMode": "${default}"
         }
     ]

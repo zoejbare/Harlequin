@@ -29,7 +29,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonScriptObject
+struct HqScriptObject
 {
 	struct MemberDefinition
 	{
@@ -37,53 +37,53 @@ struct XenonScriptObject
 		uint8_t valueType;
 	};
 
-	typedef XENON_MAP_TYPE<
-		XenonString*,
+	typedef HQ_MAP_TYPE<
+		HqString*,
 		MemberDefinition,
-#if XENON_MAP_IS_UNORDERED
-		XenonString::StlHash,
-		XenonString::StlCompare,
+#if HQ_MAP_IS_UNORDERED
+		HqString::StlHash,
+		HqString::StlCompare,
 #else
-		XenonString::StlLess,
+		HqString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, MemberDefinition)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, MemberDefinition)>
 	> MemberDefinitionMap;
 
-	typedef XENON_MAP_TYPE<
-		XenonString*,
-		XenonScriptObject*,
-#if XENON_MAP_IS_UNORDERED
-		XenonString::StlHash,
-		XenonString::StlCompare,
+	typedef HQ_MAP_TYPE<
+		HqString*,
+		HqScriptObject*,
+#if HQ_MAP_IS_UNORDERED
+		HqString::StlHash,
+		HqString::StlCompare,
 #else
-		XenonString::StlLess,
+		HqString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonScriptObject*)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqScriptObject*)>
 	> StringToPtrMap;
 
-	static XenonScriptObject* CreateSchema(XenonString* pTypeName, const MemberDefinitionMap& definitions);
-	static XenonScriptObject* CreateInstance(XenonScriptObject* const pSchema);
-	static XenonScriptObject* CreateCopy(XenonScriptObject* const pObject);
-	static void Dispose(XenonScriptObject* const pObject);
+	static HqScriptObject* CreateSchema(HqString* pTypeName, const MemberDefinitionMap& definitions);
+	static HqScriptObject* CreateInstance(HqScriptObject* const pSchema);
+	static HqScriptObject* CreateCopy(HqScriptObject* const pObject);
+	static void Dispose(HqScriptObject* const pObject);
 
-	static XenonValueHandle GetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, int* const pOutResult);
-	static MemberDefinition GetMemberDefinition(XenonScriptObject* const pObject, XenonString* const pMemberName, int* const pOutResult);
+	static HqValueHandle GetMemberValue(HqScriptObject* const pObject, const uint32_t memberIndex, int* const pOutResult);
+	static MemberDefinition GetMemberDefinition(HqScriptObject* const pObject, HqString* const pMemberName, int* const pOutResult);
 
-	static int SetMemberValue(XenonScriptObject* const pObject, const uint32_t memberIndex, XenonValueHandle hValue);
+	static int SetMemberValue(HqScriptObject* const pObject, const uint32_t memberIndex, HqValueHandle hValue);
 
-	static XenonScriptObject* prv_createObject(XenonScriptObject*);
+	static HqScriptObject* prv_createObject(HqScriptObject*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonString* pTypeName;
-	XenonScriptObject* pSchema;
+	HqString* pTypeName;
+	HqScriptObject* pSchema;
 
 	void* pUserData;
 
 	MemberDefinitionMap definitions;
 
-	XenonValue::HandleArray members;
+	HqValue::HandleArray members;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

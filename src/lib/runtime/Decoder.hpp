@@ -20,17 +20,17 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonDecoder
+struct HqDecoder
 {
-	static void Initialize(XenonDecoder& output, XenonProgramHandle hProgram, uint32_t offset);
+	static void Initialize(HqDecoder& output, HqProgramHandle hProgram, uint32_t offset);
 
-	static int32_t LoadInt32(XenonDecoder& decoder);
-	static uint8_t LoadUint8(XenonDecoder& decoder);
-	static uint32_t LoadUint32(XenonDecoder& decoder);
+	static int32_t LoadInt32(HqDecoder& decoder);
+	static uint8_t LoadUint8(HqDecoder& decoder);
+	static uint32_t LoadUint32(HqDecoder& decoder);
 
 	uint8_t* ip;
 	uint8_t* cachedIp;

@@ -22,42 +22,42 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpLenString(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpLenString(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the parameter operand.
-	XenonValueHandle hParam;
-	XenonExecutionGetIoRegister(hExec, &hParam, 0);
+	HqValueHandle hParam;
+	HqExecutionGetIoRegister(hExec, &hParam, 0);
 
 	// Verify the value pulled from the I/O register is a string.
-	if(XenonValueIsString(hParam))
+	if(HqValueIsString(hParam))
 	{
-		const size_t length = XenonValueGetStringLength(hParam);
+		const size_t length = HqValueGetStringLength(hParam);
 		const int64_t outputLength = int64_t(length);
 
 		// Get the VM associated with the execution context.
-		XenonVmHandle hVm;
-		XenonExecutionGetVm(hExec, &hVm);
+		HqVmHandle hVm;
+		HqExecutionGetVm(hExec, &hVm);
 
 		// Create the output result and store it to an I/O register.
-		XenonValueHandle hOutput = XenonValueCreateInt64(hVm, (outputLength > 0) ? outputLength : 0);
-		XenonExecutionSetIoRegister(hExec, hOutput, 0);
-		XenonValueGcExpose(hOutput);
+		HqValueHandle hOutput = HqValueCreateInt64(hVm, (outputLength > 0) ? outputLength : 0);
+		HqExecutionSetIoRegister(hExec, hOutput, 0);
+		HqValueGcExpose(hOutput);
 	}
 	else
 	{
 		// Raise the type-mismatch script exception.
-		XenonExecutionRaiseStandardException(
+		HqExecutionRaiseStandardException(
 			hExec,
-			XENON_EXCEPTION_SEVERITY_NORMAL,
-			XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+			HQ_EXCEPTION_SEVERITY_NORMAL,
+			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 			"Type mismatch; expected string"
 		);
 	}
 
 	// Release the input parameter value.
-	XenonValueGcExpose(hParam);
+	HqValueGcExpose(hParam);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

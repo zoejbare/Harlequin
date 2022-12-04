@@ -16,9 +16,9 @@
 // IN THE SOFTWARE.
 //
 
-#include "XenonScript.h"
+#include "Harlequin.h"
 
-#if defined(XENON_PLATFORM_WINDOWS)
+#if defined(HQ_PLATFORM_WINDOWS)
 	#include <crtdbg.h>
 #endif
 
@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined(XENON_PLATFORM_PS3) && !defined(XENON_PLATFORM_PSVITA)
+#if !defined(HQ_PLATFORM_PS3) && !defined(HQ_PLATFORM_PSVITA)
 	#include <memory.h>
 #endif
 
@@ -59,23 +59,23 @@ void OnMessageReported(void* const pUserData, const int messageType, const char*
 
 	switch(messageType)
 	{
-		case XENON_MESSAGE_TYPE_VERBOSE:
+		case HQ_MESSAGE_TYPE_VERBOSE:
 			tag = "V";
 			break;
 
-		case XENON_MESSAGE_TYPE_INFO:
+		case HQ_MESSAGE_TYPE_INFO:
 			tag = "I";
 			break;
 
-		case XENON_MESSAGE_TYPE_WARNING:
+		case HQ_MESSAGE_TYPE_WARNING:
 			tag = "W";
 			break;
 
-		case XENON_MESSAGE_TYPE_ERROR:
+		case HQ_MESSAGE_TYPE_ERROR:
 			tag = "E";
 			break;
 
-		case XENON_MESSAGE_TYPE_FATAL:
+		case HQ_MESSAGE_TYPE_FATAL:
 			tag = "!";
 			break;
 
@@ -84,7 +84,7 @@ void OnMessageReported(void* const pUserData, const int messageType, const char*
 			break;
 	}
 
-	FILE* const pStream = (messageType >= XENON_MESSAGE_TYPE_ERROR) ? stderr : stdout;
+	FILE* const pStream = (messageType >= HQ_MESSAGE_TYPE_ERROR) ? stderr : stdout;
 
 	fprintf(pStream, "[%s] %s\n", tag, message);
 	fflush(pStream);
@@ -138,11 +138,11 @@ int main(int argc, char* argv[])
 {
 	if(argc < 2)
 	{
-		OnMessageReported(nullptr, XENON_MESSAGE_TYPE_FATAL, "Missing required 'filepath' argument");
+		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_FATAL, "Missing required 'filepath' argument");
 		return APPLICATION_RESULT_FAILURE;
 	}
 
-#if defined(XENON_PLATFORM_WINDOWS)
+#if defined(HQ_PLATFORM_WINDOWS)
 	// This enables tracking of global heap allocations.  If any are leaked, they will show up in the
 	// Visual Studio output window on application exit.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -184,24 +184,24 @@ int main(int argc, char* argv[])
 		free(pMem);
 	};
 
-	auto iterateCallstackFrame = [](void* const pUserData, XenonFrameHandle hFrame) -> bool
+	auto iterateCallstackFrame = [](void* const pUserData, HqFrameHandle hFrame) -> bool
 	{
 		bool& isTopFrame = *reinterpret_cast<bool*>(pUserData);
 
-		XenonFunctionHandle hFunction = XENON_FUNCTION_HANDLE_NULL;
-		XenonFrameGetFunction(hFrame, &hFunction);
+		HqFunctionHandle hFunction = HQ_FUNCTION_HANDLE_NULL;
+		HqFrameGetFunction(hFrame, &hFunction);
 
 		const char* functionSignature = nullptr;
-		XenonFunctionGetSignature(hFunction, &functionSignature);
+		HqFunctionGetSignature(hFunction, &functionSignature);
 
 		bool isNative = false;
-		XenonFunctionGetIsNative(hFunction, &isNative);
+		HqFunctionGetIsNative(hFunction, &isNative);
 
 		uint32_t offset = 0;
-		XenonFrameGetBytecodeOffset(hFrame, &offset);
+		HqFrameGetBytecodeOffset(hFrame, &offset);
 
-		XenonNativeFunction nativeBinding = nullptr;
-		XenonFunctionGetNativeBinding(hFunction, &nativeBinding);
+		HqNativeFunction nativeBinding = nullptr;
+		HqFunctionGetNativeBinding(hFunction, &nativeBinding);
 
 		char frameMsg[512];
 		snprintf(
@@ -221,44 +221,44 @@ int main(int argc, char* argv[])
 		return true;
 	};
 
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonVmInit vmInit;
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqVmInit vmInit;
 
 	std::deque<const char*> dependencies;
 
 	vmInit.common.report.onMessageFn = OnMessageReported;
 	vmInit.common.report.pUserData = nullptr;
-	vmInit.common.report.reportLevel = XENON_MESSAGE_TYPE_VERBOSE;
+	vmInit.common.report.reportLevel = HQ_MESSAGE_TYPE_VERBOSE;
 
-	vmInit.gcThreadStackSize = XENON_VM_THREAD_DEFAULT_STACK_SIZE;
-	vmInit.gcMaxIterationCount = XENON_VM_GC_DEFAULT_ITERATION_COUNT;
+	vmInit.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
+	vmInit.gcMaxIterationCount = HQ_VM_GC_DEFAULT_ITERATION_COUNT;
 
-	XenonMemAllocator allocator;
+	HqMemAllocator allocator;
 	allocator.allocFn = trackedAlloc;
 	allocator.reallocFn = trackedRealloc;
 	allocator.freeFn = trackedFree;
 
-	XenonMemSetAllocator(allocator);
+	HqMemSetAllocator(allocator);
 
-	const uint64_t timerFrequency = XenonHiResTimerGetFrequency();
-	const uint64_t overallTimeStart = XenonHiResTimerGetTimestamp();
+	const uint64_t timerFrequency = HqHiResTimerGetFrequency();
+	const uint64_t overallTimeStart = HqHiResTimerGetTimestamp();
 
 	const uint64_t createVmTimeStart = overallTimeStart;
 
 	// Create the VM context.
-	const int createVmResult = XenonVmCreate(&hVm, vmInit);
-	if(createVmResult != XENON_SUCCESS)
+	const int createVmResult = HqVmCreate(&hVm, vmInit);
+	if(createVmResult != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg), "Failed to create Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(createVmResult));
-		OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
+		snprintf(msg, sizeof(msg), "Failed to create Harlequin VM context: error=\"%s\"", HqGetErrorCodeString(createVmResult));
+		OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
 		return APPLICATION_RESULT_FAILURE;
 	}
 
-	XenonReportHandle hReport = XENON_REPORT_HANDLE_NULL;
-	XenonVmGetReportHandle(hVm, &hReport);
+	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
+	HqVmGetReportHandle(hVm, &hReport);
 
-	const uint64_t createVmTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t createVmTimeEnd = HqHiResTimerGetTimestamp();
 	const uint64_t createVmTimeSlice = createVmTimeEnd - createVmTimeStart;
 
 	const uint64_t loadProgramTimeStart = createVmTimeEnd;
@@ -267,23 +267,23 @@ int main(int argc, char* argv[])
 
 	// Load the program file.
 	{
-		XenonSerializerHandle hFileSerializer = XENON_SERIALIZER_HANDLE_NULL;
+		HqSerializerHandle hFileSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Create the serializer we'll use to read the program file data.
-		const int createFileSerializerResult = XenonSerializerCreate(&hFileSerializer, XENON_SERIALIZER_MODE_READER);
-		if(createFileSerializerResult != XENON_SUCCESS)
+		const int createFileSerializerResult = HqSerializerCreate(&hFileSerializer, HQ_SERIALIZER_MODE_READER);
+		if(createFileSerializerResult != HQ_SUCCESS)
 		{
 			char msg[128];
-			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
-			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
-			XenonVmDispose(&hVm);
+			snprintf(msg, sizeof(msg), "Failed to create Harlequin serializer: error=\"%s\"", HqGetErrorCodeString(createFileSerializerResult));
+			OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
+			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 
-		const int readProgramFileResult = XenonSerializerLoadStreamFromFile(hFileSerializer, argv[1]);
+		const int readProgramFileResult = HqSerializerLoadStreamFromFile(hFileSerializer, argv[1]);
 
-		const void* const pFileData = XenonSerializerGetRawStreamPointer(hFileSerializer);
-		const size_t fileSize = XenonSerializerGetStreamLength(hFileSerializer);
+		const void* const pFileData = HqSerializerGetRawStreamPointer(hFileSerializer);
+		const size_t fileSize = HqSerializerGetStreamLength(hFileSerializer);
 
 		if(pFileData && fileSize > 0)
 		{
@@ -292,21 +292,21 @@ int main(int argc, char* argv[])
 			memcpy(&fileData[0], pFileData, fileSize);
 		}
 
-		XenonSerializerDispose(&hFileSerializer);
+		HqSerializerDispose(&hFileSerializer);
 
-		if(readProgramFileResult != XENON_SUCCESS)
+		if(readProgramFileResult != HQ_SUCCESS)
 		{
 			char msg[128];
-			snprintf(msg, sizeof(msg), "Failed to create Xenon serializer: error=\"%s\"", XenonGetErrorCodeString(createFileSerializerResult));
-			OnMessageReported(NULL, XENON_MESSAGE_TYPE_FATAL, msg);
-			XenonVmDispose(&hVm);
+			snprintf(msg, sizeof(msg), "Failed to create Harlequin serializer: error=\"%s\"", HqGetErrorCodeString(createFileSerializerResult));
+			OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
+			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 	}
 
-	const int loadProgramResult = XenonVmLoadProgram(hVm, "test", &fileData[0], fileData.size());
+	const int loadProgramResult = HqVmLoadProgram(hVm, "test", &fileData[0], fileData.size());
 
-	const uint64_t loadProgramTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t loadProgramTimeEnd = HqHiResTimerGetTimestamp();
 	const uint64_t loadProgramTimeSlice = loadProgramTimeEnd - loadProgramTimeStart;
 
 	uint64_t initProgramsTimeSlice = 0;
@@ -322,24 +322,24 @@ int main(int argc, char* argv[])
 
 	// Initialize the loaded programs.
 	{
-		const uint64_t initProgramsTimeStart = XenonHiResTimerGetTimestamp();
+		const uint64_t initProgramsTimeStart = HqHiResTimerGetTimestamp();
 
-		XenonExecutionHandle hInitExec = XENON_EXECUTION_HANDLE_NULL;
-		XenonVmInitializePrograms(hVm, &hInitExec);
+		HqExecutionHandle hInitExec = HQ_EXECUTION_HANDLE_NULL;
+		HqVmInitializePrograms(hVm, &hInitExec);
 
-		const uint64_t initProgramsTimeEnd = XenonHiResTimerGetTimestamp();
+		const uint64_t initProgramsTimeEnd = HqHiResTimerGetTimestamp();
 		initProgramsTimeSlice = initProgramsTimeEnd - initProgramsTimeStart;
 
-		if(hInitExec != XENON_EXECUTION_HANDLE_NULL)
+		if(hInitExec != HQ_EXECUTION_HANDLE_NULL)
 		{
-			XenonVmDispose(&hVm);
+			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 	}
 
-	if(loadProgramResult == XENON_SUCCESS)
+	if(loadProgramResult == HQ_SUCCESS)
 	{
-		auto iterateProgram = [](void* const pUserData, XenonProgramHandle hProgram) -> bool
+		auto iterateProgram = [](void* const pUserData, HqProgramHandle hProgram) -> bool
 		{
 			auto iterateFunction = [](void* const pUserData, const char* const signature) -> bool
 			{
@@ -348,16 +348,16 @@ int main(int argc, char* argv[])
 					printf("\t\t0x%08" PRIXPTR ": %s\n", offset, asmLine);
 				};
 
-				XenonVmHandle hVm = reinterpret_cast<XenonVmHandle>(pUserData);
-				XenonFunctionHandle hFunction = XENON_FUNCTION_HANDLE_NULL;
+				HqVmHandle hVm = reinterpret_cast<HqVmHandle>(pUserData);
+				HqFunctionHandle hFunction = HQ_FUNCTION_HANDLE_NULL;
 
-				XenonVmGetFunction(hVm, &hFunction, signature);
+				HqVmGetFunction(hVm, &hFunction, signature);
 
-				assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
+				assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 				printf("\t%s\n", signature);
 
 				bool isNative = false;
-				XenonFunctionGetIsNative(hFunction, &isNative);
+				HqFunctionGetIsNative(hFunction, &isNative);
 
 				if(isNative)
 				{
@@ -365,7 +365,7 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					XenonFunctionDisassemble(hFunction, onDisasm, nullptr);
+					HqFunctionDisassemble(hFunction, onDisasm, nullptr);
 				}
 
 				printf("\n");
@@ -373,141 +373,141 @@ int main(int argc, char* argv[])
 			};
 
 			const char* programName = nullptr;
-			XenonProgramGetName(hProgram, &programName);
+			HqProgramGetName(hProgram, &programName);
 
 			printf("[Program: \"%s\"]\n", programName);
 
 			// Iterate each function within in the program.
-			XenonProgramListFunctions(hProgram, iterateFunction, pUserData);
+			HqProgramListFunctions(hProgram, iterateFunction, pUserData);
 
 			return true;
 		};
 
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
 
-		const uint64_t disassembleTimeStart = XenonHiResTimerGetTimestamp();
+		const uint64_t disassembleTimeStart = HqHiResTimerGetTimestamp();
 
 		// Iterate all the programs to disassemble them.
-		XenonVmListPrograms(hVm, iterateProgram, hVm);
+		HqVmListPrograms(hVm, iterateProgram, hVm);
 
-		const uint64_t disassembleTimeEnd = XenonHiResTimerGetTimestamp();
+		const uint64_t disassembleTimeEnd = HqHiResTimerGetTimestamp();
 		disassembleTimeSlice = disassembleTimeEnd - disassembleTimeStart;
 
 		const char* const entryPoint = "void App.Program.Main()";
 
-		XenonFunctionHandle hEntryFunc = XENON_FUNCTION_HANDLE_NULL;
-		XenonExecutionHandle hExec = XENON_EXECUTION_HANDLE_NULL;
+		HqFunctionHandle hEntryFunc = HQ_FUNCTION_HANDLE_NULL;
+		HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
 
-		XenonVmGetFunction(hVm, &hEntryFunc, entryPoint);
+		HqVmGetFunction(hVm, &hEntryFunc, entryPoint);
 
-		const uint64_t createExecTimeStart = XenonHiResTimerGetTimestamp();
+		const uint64_t createExecTimeStart = HqHiResTimerGetTimestamp();
 
 		// Create an execution context that will run the program's entry point function.
-		bool createExecResult = XenonExecutionCreate(&hExec, hVm, hEntryFunc);
+		bool createExecResult = HqExecutionCreate(&hExec, hVm, hEntryFunc);
 
-		const uint64_t createExecTimeEnd = XenonHiResTimerGetTimestamp();
+		const uint64_t createExecTimeEnd = HqHiResTimerGetTimestamp();
 		createExecTimeSlice = createExecTimeEnd - createExecTimeStart;
 
-		if(createExecResult == XENON_SUCCESS)
+		if(createExecResult == HQ_SUCCESS)
 		{
-			XenonFunctionHandle hNativePrintFunc = XENON_FUNCTION_HANDLE_NULL;
-			XenonVmGetFunction(hVm, &hNativePrintFunc, "void App.Program.PrintString(string)");
+			HqFunctionHandle hNativePrintFunc = HQ_FUNCTION_HANDLE_NULL;
+			HqVmGetFunction(hVm, &hNativePrintFunc, "void App.Program.PrintString(string)");
 
-			if(hNativePrintFunc != XENON_FUNCTION_HANDLE_NULL)
+			if(hNativePrintFunc != HQ_FUNCTION_HANDLE_NULL)
 			{
-				auto printString = [](XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+				auto printString = [](HqExecutionHandle hExec, HqFunctionHandle, void*)
 				{
-					XenonValueHandle hInputParam = XENON_VALUE_HANDLE_NULL;
-					XenonExecutionGetIoRegister(hExec, &hInputParam, 0);
+					HqValueHandle hInputParam = HQ_VALUE_HANDLE_NULL;
+					HqExecutionGetIoRegister(hExec, &hInputParam, 0);
 
-					const char* const inputParam = XenonValueGetString(hInputParam);
+					const char* const inputParam = HqValueGetString(hInputParam);
 
 					printf("> \"%s\"\n", inputParam);
-					XenonValueGcExpose(hInputParam);
+					HqValueGcExpose(hInputParam);
 				};
 
-				XenonFunctionSetNativeBinding(hNativePrintFunc, printString, nullptr);
+				HqFunctionSetNativeBinding(hNativePrintFunc, printString, nullptr);
 			}
 
-			XenonFunctionHandle hNativeDecrementFunc = XENON_FUNCTION_HANDLE_NULL;
-			XenonVmGetFunction(hVm, &hNativeDecrementFunc, "(int32, bool) App.Program.Decrement(int32)");
+			HqFunctionHandle hNativeDecrementFunc = HQ_FUNCTION_HANDLE_NULL;
+			HqVmGetFunction(hVm, &hNativeDecrementFunc, "(int32, bool) App.Program.Decrement(int32)");
 
-			if(hNativeDecrementFunc != XENON_FUNCTION_HANDLE_NULL)
+			if(hNativeDecrementFunc != HQ_FUNCTION_HANDLE_NULL)
 			{
-				auto decrement = [](XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+				auto decrement = [](HqExecutionHandle hExec, HqFunctionHandle, void*)
 				{
-					XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-					XenonExecutionGetVm(hExec, &hVm);
+					HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+					HqExecutionGetVm(hExec, &hVm);
 
-					XenonValueHandle hInputParam = XENON_VALUE_HANDLE_NULL;
-					XenonExecutionGetIoRegister(hExec, &hInputParam, 0);
+					HqValueHandle hInputParam = HQ_VALUE_HANDLE_NULL;
+					HqExecutionGetIoRegister(hExec, &hInputParam, 0);
 
-					if(XenonValueIsInt32(hInputParam))
+					if(HqValueIsInt32(hInputParam))
 					{
-						const int32_t output = XenonValueGetInt32(hInputParam) - 1;
+						const int32_t output = HqValueGetInt32(hInputParam) - 1;
 
-						XenonValueHandle hOutputParam = XenonValueCreateInt32(hVm, output);
-						XenonExecutionSetIoRegister(hExec, hOutputParam, 0);
-						XenonValueGcExpose(hOutputParam);
+						HqValueHandle hOutputParam = HqValueCreateInt32(hVm, output);
+						HqExecutionSetIoRegister(hExec, hOutputParam, 0);
+						HqValueGcExpose(hOutputParam);
 
 						if(output <= 0)
 						{
-							hOutputParam = XenonValueCreateBool(hVm, true);
+							hOutputParam = HqValueCreateBool(hVm, true);
 						}
 						else
 						{
-							hOutputParam = XenonValueCreateNull();
+							hOutputParam = HqValueCreateNull();
 						}
 
-						XenonExecutionSetIoRegister(hExec, hOutputParam, 1);
-						XenonValueGcExpose(hOutputParam);
+						HqExecutionSetIoRegister(hExec, hOutputParam, 1);
+						HqValueGcExpose(hOutputParam);
 					}
 					else
 					{
-						XenonExecutionRaiseStandardException(
+						HqExecutionRaiseStandardException(
 							hExec,
-							XENON_EXCEPTION_SEVERITY_NORMAL,
-							XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+							HQ_EXCEPTION_SEVERITY_NORMAL,
+							HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 							"Type mismatch; expected int32"
 						);
 					}
 				};
 
-				XenonFunctionSetNativeBinding(hNativeDecrementFunc, decrement, nullptr);
+				HqFunctionSetNativeBinding(hNativeDecrementFunc, decrement, nullptr);
 			}
 
-			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Executing script function: \"%s\"", entryPoint);
+			HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Executing script function: \"%s\"", entryPoint);
 
 			bool status;
 
-			const uint64_t runProgramTimeStart = XenonHiResTimerGetTimestamp();
-			int result = XENON_SUCCESS;
+			const uint64_t runProgramTimeStart = HqHiResTimerGetTimestamp();
+			int result = HQ_SUCCESS;
 
 			// Run the script until it has completed.
 			for(;;)
 			{
-				result = XenonExecutionRun(hExec, XENON_RUN_CONTINUOUS);
-				if(result != XENON_SUCCESS)
+				result = HqExecutionRun(hExec, HQ_RUN_CONTINUOUS);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while executing script: \"%s\"", XenonGetErrorCodeString(result));
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while executing script: \"%s\"", HqGetErrorCodeString(result));
 					break;
 				}
 
 				// Check if there was an unhandled exception raised.
-				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_EXCEPTION, &status);
-				if(result != XENON_SUCCESS)
+				result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &status);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while retrieving exception status: \"%s\"", XenonGetErrorCodeString(result));
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving exception status: \"%s\"", HqGetErrorCodeString(result));
 					break;
 				}
 				if(status)
 				{
-					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
 
 					printf("\n<Callstack>\n");
 
 					bool isTopFrame = true;
-					XenonExecutionResolveFrameStack(hExec, iterateCallstackFrame, &isTopFrame);
+					HqExecutionResolveFrameStack(hExec, iterateCallstackFrame, &isTopFrame);
 
 					printf("\n");
 
@@ -516,40 +516,40 @@ int main(int argc, char* argv[])
 				}
 
 				// Check if the script has finished running.
-				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_COMPLETE, &status);
-				if(result != XENON_SUCCESS)
+				result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &status);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while retrieving completion status: \"%s\"", XenonGetErrorCodeString(result));
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving completion status: \"%s\"", HqGetErrorCodeString(result));
 					break;
 				}
 				if(status)
 				{
-					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Finished executing script");
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Finished executing script");
 					break;
 				}
 
 				// Check if the script has been aborted.
-				result = XenonExecutionGetStatus(hExec, XENON_EXEC_STATUS_ABORT, &status);
-				if(result != XENON_SUCCESS)
+				result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &status);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_ERROR, "Error occurred while retrieving abort status: \"%s\"", XenonGetErrorCodeString(result));
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving abort status: \"%s\"", HqGetErrorCodeString(result));
 					break;
 				}
 				if(status)
 				{
-					XenonReportMessage(hReport, XENON_MESSAGE_TYPE_WARNING, "Script execution aborted");
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_WARNING, "Script execution aborted");
 					break;
 				}
 			}
 
-			const uint64_t runProgramTimeEnd = XenonHiResTimerGetTimestamp();
+			const uint64_t runProgramTimeEnd = HqHiResTimerGetTimestamp();
 			runProgramTimeSlice = runProgramTimeEnd - runProgramTimeStart;
 
 			const uint64_t disposeExecTimeStart = runProgramTimeEnd;
 
-			XenonExecutionDispose(&hExec);
+			HqExecutionDispose(&hExec);
 
-			const uint64_t disposeExecTimeEnd = XenonHiResTimerGetTimestamp();
+			const uint64_t disposeExecTimeEnd = HqHiResTimerGetTimestamp();
 			disposeExecTimeSlice = disposeExecTimeEnd - disposeExecTimeStart;
 		}
 	}
@@ -558,25 +558,25 @@ int main(int argc, char* argv[])
 		applicationResult = APPLICATION_RESULT_FAILURE;
 	}
 
-	const uint64_t disposeVmTimeStart = XenonHiResTimerGetTimestamp();
+	const uint64_t disposeVmTimeStart = HqHiResTimerGetTimestamp();
 
 	// Dispose of the VM context.
-	const int disposeVmResult = XenonVmDispose(&hVm);
-	if(disposeVmResult != XENON_SUCCESS)
+	const int disposeVmResult = HqVmDispose(&hVm);
+	if(disposeVmResult != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg), "Failed to dispose of Xenon VM context: error=\"%s\"", XenonGetErrorCodeString(disposeVmResult));
-		OnMessageReported(NULL, XENON_MESSAGE_TYPE_WARNING, msg);
+		snprintf(msg, sizeof(msg), "Failed to dispose of Harlequin VM context: error=\"%s\"", HqGetErrorCodeString(disposeVmResult));
+		OnMessageReported(NULL, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 
-	const uint64_t disposeVmTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t disposeVmTimeEnd = HqHiResTimerGetTimestamp();
 	const uint64_t disposeVmTimeSlice = disposeVmTimeEnd - disposeVmTimeStart;
 
 	if(!allocations.empty())
 	{
 		char msg[128];
 		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", allocations.size());
-		OnMessageReported(NULL, XENON_MESSAGE_TYPE_ERROR, msg);
+		OnMessageReported(NULL, HQ_MESSAGE_TYPE_ERROR, msg);
 
 		applicationResult = APPLICATION_RESULT_FAILURE;
 	}
@@ -598,7 +598,7 @@ int main(int argc, char* argv[])
 		reallocCount
 	);
 
-	const uint64_t overallTimeEnd = XenonHiResTimerGetTimestamp();
+	const uint64_t overallTimeEnd = HqHiResTimerGetTimestamp();
 	const uint64_t overallTimeSlice = overallTimeEnd - overallTimeStart;
 
 	const double convertTimeToMs = 1000.0 / double(timerFrequency);

@@ -24,7 +24,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonAtomic
+struct HqAtomic
 {
 	static inline __attribute__((always_inline)) int8_t FetchAdd(volatile int8_t* const ptr, const int8_t value)
 	{

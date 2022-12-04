@@ -42,37 +42,37 @@
 extern "C" {
 #endif
 
-void OpCodeExec_PullArray(XenonExecutionHandle hExec)
+void OpCodeExec_PullArray(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t arrayIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t arrayIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Load the object value from the source register.
-	XenonValueHandle hSource = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hSource = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Verify the loaded value is an array.
-		if(XenonValueIsArray(hSource))
+		if(HqValueIsArray(hSource))
 		{
 			// Verify the array index is within the bounds of the array.
 			if(size_t(arrayIndex) < hSource->as.array.count)
 			{
 				// Store the value at the specified array index in the destination register.
-				result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hSource->as.array.pData[arrayIndex], gpDstRegIndex);
-				if(result == XENON_SUCCESS)
+				result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hSource->as.array.pData[arrayIndex], gpDstRegIndex);
+				if(result == HQ_SUCCESS)
 				{
 					// Clear the array element.
-					hSource->as.array.pData[arrayIndex] = XENON_VALUE_HANDLE_NULL;
+					hSource->as.array.pData[arrayIndex] = HQ_VALUE_HANDLE_NULL;
 				}
 				else
 				{
 					// Raise a fatal script exception.
-					XenonExecution::RaiseOpCodeException(
+					HqExecution::RaiseOpCodeException(
 						hExec, 
-						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 						"Failed to set general-purpose register: r(%" PRIu32 ")", 
 						gpDstRegIndex
 					);
@@ -81,9 +81,9 @@ void OpCodeExec_PullArray(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecution::RaiseOpCodeException(
+				HqExecution::RaiseOpCodeException(
 					hExec, 
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 					"Array index out of range: r(%" PRIu32 "), length=%zu, index=%" PRIu32,
 					gpSrcRegIndex,
 					hSource->as.array.count,
@@ -94,9 +94,9 @@ void OpCodeExec_PullArray(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec, 
-				XENON_STANDARD_EXCEPTION_TYPE_ERROR, 
+				HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
 				"Type mismatch; expected array: r(%" PRIu32 ")", 
 				gpSrcRegIndex
 			);
@@ -105,9 +105,9 @@ void OpCodeExec_PullArray(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec, 
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
 			gpSrcRegIndex
 		);
@@ -116,11 +116,11 @@ void OpCodeExec_PullArray(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_PullArray(XenonDisassemble& disasm)
+void OpCodeDisasm_PullArray(HqDisassemble& disasm)
 {
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t arrayIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t arrayIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
 	snprintf(str, sizeof(str), "PULL_ARRAY r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, arrayIndex);

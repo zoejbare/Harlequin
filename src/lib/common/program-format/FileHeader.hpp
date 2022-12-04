@@ -24,7 +24,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonFileHeader
+struct HqFileHeader
 {
 	uint8_t magicNumber[5];
 	uint8_t reserved[10];

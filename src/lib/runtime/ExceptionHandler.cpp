@@ -22,9 +22,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonExceptionHandler* XenonExceptionHandler::Create(const uint8_t type, const uint32_t offset, XenonString* const pClassName)
+HqExceptionHandler* HqExceptionHandler::Create(const uint8_t type, const uint32_t offset, HqString* const pClassName)
 {
-	XenonExceptionHandler* const pOutput = new XenonExceptionHandler();
+	HqExceptionHandler* const pOutput = new HqExceptionHandler();
 	assert(pOutput != nullptr);
 
 	pOutput->type = type;
@@ -33,7 +33,7 @@ XenonExceptionHandler* XenonExceptionHandler::Create(const uint8_t type, const u
 
 	if(pOutput->pClassName)
 	{
-		XenonString::AddRef(pOutput->pClassName);
+		HqString::AddRef(pOutput->pClassName);
 	}
 
 	return pOutput;
@@ -41,11 +41,11 @@ XenonExceptionHandler* XenonExceptionHandler::Create(const uint8_t type, const u
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExceptionHandler::Dispose(XenonExceptionHandler* const pExceptionHandler)
+void HqExceptionHandler::Dispose(HqExceptionHandler* const pExceptionHandler)
 {
 	if(pExceptionHandler->pClassName)
 	{
-		XenonString::Release(pExceptionHandler->pClassName);
+		HqString::Release(pExceptionHandler->pClassName);
 	}
 
 	delete pExceptionHandler;
@@ -53,16 +53,16 @@ void XenonExceptionHandler::Dispose(XenonExceptionHandler* const pExceptionHandl
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonExceptionHandler::operator new(const size_t sizeInBytes)
+void* HqExceptionHandler::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExceptionHandler::operator delete(void* const pObject)
+void HqExceptionHandler::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

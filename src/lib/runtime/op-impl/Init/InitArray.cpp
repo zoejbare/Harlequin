@@ -42,23 +42,23 @@
 extern "C" {
 #endif
 
-void OpCodeExec_InitArray(XenonExecutionHandle hExec)
+void OpCodeExec_InitArray(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t count = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t count = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hArray = XenonValue::CreateArray(hExec->hVm, size_t(count));
-	if(XenonValueIsArray(hArray))
+	HqValueHandle hArray = HqValue::CreateArray(hExec->hVm, size_t(count));
+	if(HqValueIsArray(hArray))
 	{
-		result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hArray, registerIndex);
-		if(result != XENON_SUCCESS)
+		result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hArray, registerIndex);
+		if(result != HQ_SUCCESS)
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec, 
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 				"Failed to set general-purpose register: r(%" PRIu32 ")", 
 				registerIndex
 			);
@@ -67,23 +67,23 @@ void OpCodeExec_InitArray(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec, 
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to create array value"
 		);
 
 	}
 
-	XenonValue::SetAutoMark(hArray, false);
+	HqValue::SetAutoMark(hArray, false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_InitArray(XenonDisassemble& disasm)
+void OpCodeDisasm_InitArray(HqDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t initialCount = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t initialCount = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
 	snprintf(instr, sizeof(instr), "INIT_ARRAY r%" PRIu32 ", #%" PRIu32, registerIndex, initialCount);

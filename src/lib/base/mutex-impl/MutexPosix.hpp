@@ -24,9 +24,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XENON_BASE_API XenonInternalMutex
+struct HQ_BASE_API HqInternalMutex
 {
-	XenonInternalMutex() : handle(), initialized(false) {}
+	HqInternalMutex() : handle(), initialized(false) {}
 
 	pthread_mutex_t handle;
 	bool initialized;

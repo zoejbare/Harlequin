@@ -23,52 +23,52 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonVm::prv_setupOpCodes(XenonVmHandle hVm)
+void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 {
-	#define XENON_BIND_OP_CODE(opCode, name) \
-		hVm->opCodes.pData[XENON_OP_CODE_ ## opCode].execFn = OpCodeExec_ ## name; \
-		hVm->opCodes.pData[XENON_OP_CODE_ ## opCode].disasmFn = OpCodeDisasm_ ## name
+	#define HQ_BIND_OP_CODE(opCode, name) \
+		hVm->opCodes.pData[HQ_OP_CODE_ ## opCode].execFn = OpCodeExec_ ## name; \
+		hVm->opCodes.pData[HQ_OP_CODE_ ## opCode].disasmFn = OpCodeDisasm_ ## name
 
-	XENON_BIND_OP_CODE(NOP, Nop);
-	XENON_BIND_OP_CODE(ABORT, Abort);
-	XENON_BIND_OP_CODE(RETURN, Return);
-	XENON_BIND_OP_CODE(YIELD, Yield);
+	HQ_BIND_OP_CODE(NOP, Nop);
+	HQ_BIND_OP_CODE(ABORT, Abort);
+	HQ_BIND_OP_CODE(RETURN, Return);
+	HQ_BIND_OP_CODE(YIELD, Yield);
 
-	XENON_BIND_OP_CODE(CALL, Call);
-	XENON_BIND_OP_CODE(CALL_VALUE, CallValue);
-	XENON_BIND_OP_CODE(RAISE, Raise);
+	HQ_BIND_OP_CODE(CALL, Call);
+	HQ_BIND_OP_CODE(CALL_VALUE, CallValue);
+	HQ_BIND_OP_CODE(RAISE, Raise);
 
-	XENON_BIND_OP_CODE(LOAD_CONSTANT, LoadConstant);
-	XENON_BIND_OP_CODE(LOAD_GLOBAL, LoadGlobal);
-	XENON_BIND_OP_CODE(LOAD_LOCAL, LoadLocal);
-	XENON_BIND_OP_CODE(LOAD_PARAM, LoadParam);
-	XENON_BIND_OP_CODE(LOAD_OBJECT, LoadObject);
-	XENON_BIND_OP_CODE(LOAD_ARRAY, LoadArray);
+	HQ_BIND_OP_CODE(LOAD_CONSTANT, LoadConstant);
+	HQ_BIND_OP_CODE(LOAD_GLOBAL, LoadGlobal);
+	HQ_BIND_OP_CODE(LOAD_LOCAL, LoadLocal);
+	HQ_BIND_OP_CODE(LOAD_PARAM, LoadParam);
+	HQ_BIND_OP_CODE(LOAD_OBJECT, LoadObject);
+	HQ_BIND_OP_CODE(LOAD_ARRAY, LoadArray);
 
-	XENON_BIND_OP_CODE(STORE_GLOBAL, StoreGlobal);
-	XENON_BIND_OP_CODE(STORE_LOCAL, StoreLocal);
-	XENON_BIND_OP_CODE(STORE_PARAM, StoreParam);
-	XENON_BIND_OP_CODE(STORE_OBJECT, StoreObject);
-	XENON_BIND_OP_CODE(STORE_ARRAY, StoreArray);
+	HQ_BIND_OP_CODE(STORE_GLOBAL, StoreGlobal);
+	HQ_BIND_OP_CODE(STORE_LOCAL, StoreLocal);
+	HQ_BIND_OP_CODE(STORE_PARAM, StoreParam);
+	HQ_BIND_OP_CODE(STORE_OBJECT, StoreObject);
+	HQ_BIND_OP_CODE(STORE_ARRAY, StoreArray);
 
-	XENON_BIND_OP_CODE(PULL_GLOBAL, PullGlobal);
-	XENON_BIND_OP_CODE(PULL_LOCAL, PullLocal);
-	XENON_BIND_OP_CODE(PULL_PARAM, PullParam);
-	XENON_BIND_OP_CODE(PULL_OBJECT, PullObject);
-	XENON_BIND_OP_CODE(PULL_ARRAY, PullArray);
+	HQ_BIND_OP_CODE(PULL_GLOBAL, PullGlobal);
+	HQ_BIND_OP_CODE(PULL_LOCAL, PullLocal);
+	HQ_BIND_OP_CODE(PULL_PARAM, PullParam);
+	HQ_BIND_OP_CODE(PULL_OBJECT, PullObject);
+	HQ_BIND_OP_CODE(PULL_ARRAY, PullArray);
 
-	XENON_BIND_OP_CODE(PUSH, Push);
-	XENON_BIND_OP_CODE(POP, Pop);
+	HQ_BIND_OP_CODE(PUSH, Push);
+	HQ_BIND_OP_CODE(POP, Pop);
 
-	XENON_BIND_OP_CODE(INIT_OBJECT, InitObject);
-	XENON_BIND_OP_CODE(INIT_ARRAY, InitArray);
-	XENON_BIND_OP_CODE(INIT_FUNCTION, InitFunction);
+	HQ_BIND_OP_CODE(INIT_OBJECT, InitObject);
+	HQ_BIND_OP_CODE(INIT_ARRAY, InitArray);
+	HQ_BIND_OP_CODE(INIT_FUNCTION, InitFunction);
 
-	XENON_BIND_OP_CODE(BRANCH, Branch);
-	XENON_BIND_OP_CODE(BRANCH_IF_TRUE, BranchIfTrue);
-	XENON_BIND_OP_CODE(BRANCH_IF_FALSE, BranchIfFalse);
+	HQ_BIND_OP_CODE(BRANCH, Branch);
+	HQ_BIND_OP_CODE(BRANCH_IF_TRUE, BranchIfTrue);
+	HQ_BIND_OP_CODE(BRANCH_IF_FALSE, BranchIfFalse);
 
-	#undef XENON_BIND_OP_CODE
+	#undef HQ_BIND_OP_CODE
 }
 
 //----------------------------------------------------------------------------------------------------------------------

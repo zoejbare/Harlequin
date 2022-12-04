@@ -36,16 +36,16 @@
 extern "C" {
 #endif
 
-void OpCodeExec_Return(XenonExecutionHandle hExec)
+void OpCodeExec_Return(HqExecutionHandle hExec)
 {
-	const int result = XenonExecution::PopFrame(hExec);
+	const int result = HqExecution::PopFrame(hExec);
 
-	if(result != XENON_SUCCESS)
+	if(result != HQ_SUCCESS)
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec, 
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to pop frame: error=%d", 
 			result
 		);
@@ -59,7 +59,7 @@ void OpCodeExec_Return(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Return(XenonDisassemble& disasm)
+void OpCodeDisasm_Return(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "RETURN", disasm.opcodeOffset);
 }

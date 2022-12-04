@@ -28,22 +28,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonFunctionData
+struct HqFunctionData
 {
 	typedef std::vector<uint8_t> Bytecode;
 
 	typedef std::unordered_map<
-		XenonString*,
-		XenonFunctionData,
-		XenonString::StlHash,
-		XenonString::StlCompare
+		HqString*,
+		HqFunctionData,
+		HqString::StlHash,
+		HqString::StlCompare
 	> StringToFunctionMap;
 
 	typedef std::unordered_map<
-		XenonString*,
+		HqString*,
 		uint32_t,
-		XenonString::StlHash,
-		XenonString::StlCompare
+		HqString::StlHash,
+		HqString::StlCompare
 	> LocalVariableMap;
 
 	struct ExceptionHandler
@@ -51,7 +51,7 @@ struct XenonFunctionData
 		typedef std::unordered_map<uint32_t, ExceptionHandler> Map;
 		typedef std::vector<ExceptionHandler> Vector;
 
-		XenonString* pClassName;
+		HqString* pClassName;
 
 		uint32_t offset;
 		int type;

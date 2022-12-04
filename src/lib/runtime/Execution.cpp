@@ -31,54 +31,54 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHandle hEntryPoint)
+HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoint)
 {
-	assert(hVm != XENON_VM_HANDLE_NULL);
-	assert(hEntryPoint != XENON_FUNCTION_HANDLE_NULL);
+	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(hEntryPoint != HQ_FUNCTION_HANDLE_NULL);
 
-	XenonExecution* const pOutput = new XenonExecution();
-	assert(pOutput != XENON_EXECUTION_HANDLE_NULL);
+	HqExecution* const pOutput = new HqExecution();
+	assert(pOutput != HQ_EXECUTION_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
-	pOutput->endianness = XenonGetPlatformEndianMode();
+	pOutput->endianness = HqGetPlatformEndianMode();
 	pOutput->yield = false;
 	pOutput->started = false;
 	pOutput->finished = false;
 	pOutput->exception = false;
 
-	XenonScopedWriteLock gcLock(hVm->gcRwLock);
+	HqScopedWriteLock gcLock(hVm->gcRwLock);
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
-	XenonGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
+	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
 
-	XenonFrame::HandleStack::Initialize(pOutput->frameStack, XENON_VM_FRAME_STACK_SIZE);
-	XenonValue::HandleArray::Initialize(pOutput->registers);
-	XenonValue::HandleArray::Reserve(pOutput->registers, XENON_VM_IO_REGISTER_COUNT);
+	HqFrame::HandleStack::Initialize(pOutput->frameStack, HQ_VM_FRAME_STACK_SIZE);
+	HqValue::HandleArray::Initialize(pOutput->registers);
+	HqValue::HandleArray::Reserve(pOutput->registers, HQ_VM_IO_REGISTER_COUNT);
 
-	pOutput->registers.count = XENON_VM_IO_REGISTER_COUNT;
+	pOutput->registers.count = HQ_VM_IO_REGISTER_COUNT;
 
 	// Initialize each value in the I/O register set.
 	for(size_t i = 0; i < pOutput->registers.count; ++i)
 	{
-		pOutput->registers.pData[i] = XenonValue::CreateNull();
+		pOutput->registers.pData[i] = HqValue::CreateNull();
 	}
 
 	// Create the first frame using the entry point function.
-	pOutput->hCurrentFrame = XenonFrame::Create(pOutput, hEntryPoint);
+	pOutput->hCurrentFrame = HqFrame::Create(pOutput, hEntryPoint);
 	if(!pOutput->hCurrentFrame)
 	{
-		return XENON_EXECUTION_HANDLE_NULL;
+		return HQ_EXECUTION_HANDLE_NULL;
 	}
 
 	// Push the entry point frame to the frame stack.
-	int result = XenonFrame::HandleStack::Push(pOutput->frameStack, pOutput->hCurrentFrame);
-	if(result != XENON_SUCCESS)
+	int result = HqFrame::HandleStack::Push(pOutput->frameStack, pOutput->hCurrentFrame);
+	if(result != HQ_SUCCESS)
 	{
-		return XENON_EXECUTION_HANDLE_NULL;
+		return HQ_EXECUTION_HANDLE_NULL;
 	}
 
 	// Map the execution context to the VM used to create it.
-	XENON_MAP_FUNC_INSERT(hVm->executionContexts, pOutput, false);
+	HQ_MAP_FUNC_INSERT(hVm->executionContexts, pOutput, false);
 
 	// Keep the execution context alive indefinitely until we're ready to dispose of it.
 	pOutput->gcProxy.autoMark = true;
@@ -88,9 +88,9 @@ XenonExecutionHandle XenonExecution::Create(XenonVmHandle hVm, XenonFunctionHand
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::ReleaseWithNoDetach(XenonExecutionHandle hExec)
+void HqExecution::ReleaseWithNoDetach(HqExecutionHandle hExec)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Clearing the 'auto-mark' flag will allow the garbage
 	// collector to destruct the execution context.
@@ -99,34 +99,34 @@ void XenonExecution::ReleaseWithNoDetach(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::DetachFromVm(XenonExecutionHandle hExec)
+void HqExecution::DetachFromVm(HqExecutionHandle hExec)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	ReleaseWithNoDetach(hExec);
 
-	XenonVmHandle hVm = hExec->hVm;
-	XenonScopedWriteLock gcLock(hVm->gcRwLock);
+	HqVmHandle hVm = hExec->hVm;
+	HqScopedWriteLock gcLock(hVm->gcRwLock);
 
 	// Unlink the execution context from the VM.
-	XENON_MAP_FUNC_REMOVE(hVm->executionContexts, hExec);
+	HQ_MAP_FUNC_REMOVE(hVm->executionContexts, hExec);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecution::PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hFunction)
+int HqExecution::PushFrame(HqExecutionHandle hExec, HqFunctionHandle hFunction)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
-	XenonFrameHandle hFrame = XenonFrame::Create(hExec, hFunction);
+	HqFrameHandle hFrame = HqFrame::Create(hExec, hFunction);
 	if(!hFrame)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	int result = XenonFrame::HandleStack::Push(hExec->frameStack, hFrame);
-	if(result == XENON_SUCCESS)
+	int result = HqFrame::HandleStack::Push(hExec->frameStack, hFrame);
+	if(result == HQ_SUCCESS)
 	{
 		hExec->hCurrentFrame = hFrame;
 	}
@@ -136,11 +136,11 @@ int XenonExecution::PushFrame(XenonExecutionHandle hExec, XenonFunctionHandle hF
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecution::PopFrame(XenonExecutionHandle hExec)
+int HqExecution::PopFrame(HqExecutionHandle hExec)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
-	XenonFrameHandle hFrame = XENON_FRAME_HANDLE_NULL;
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
 	int result = hExec->frameStack.Pop(hExec->frameStack, &hFrame);
 
 	hExec->hCurrentFrame = (hExec->frameStack.nextIndex > 0)
@@ -152,44 +152,44 @@ int XenonExecution::PopFrame(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------;
 
-int XenonExecution::SetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, const size_t index)
+int HqExecution::SetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, const size_t index)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(index < XENON_VM_IO_REGISTER_COUNT);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+	assert(index < HQ_VM_IO_REGISTER_COUNT);
 
-	if(index >= XENON_VM_IO_REGISTER_COUNT)
+	if(index >= HQ_VM_IO_REGISTER_COUNT)
 	{
-		return XENON_ERROR_INDEX_OUT_OF_RANGE;
+		return HQ_ERROR_INDEX_OUT_OF_RANGE;
 	}
 
 	hExec->registers.pData[index] = hValue;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonExecution::GetIoRegister(XenonExecutionHandle hExec, const size_t index, int* const pOutResult)
+HqValueHandle HqExecution::GetIoRegister(HqExecutionHandle hExec, const size_t index, int* const pOutResult)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 	assert(pOutResult != nullptr);
 
-	if(index >= XENON_VM_IO_REGISTER_COUNT)
+	if(index >= HQ_VM_IO_REGISTER_COUNT)
 	{
-		(*pOutResult) = XENON_ERROR_INDEX_OUT_OF_RANGE;
-		return XENON_VALUE_HANDLE_NULL;
+		(*pOutResult) = HQ_ERROR_INDEX_OUT_OF_RANGE;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	(*pOutResult) = XENON_SUCCESS;
+	(*pOutResult) = HQ_SUCCESS;
 	return hExec->registers.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
+void HqExecution::Run(HqExecutionHandle hExec, const int runMode)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
-	assert(runMode == XENON_RUN_STEP || runMode == XENON_RUN_CONTINUOUS);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+	assert(runMode == HQ_RUN_STEP || runMode == HQ_RUN_CONTINUOUS);
 
 	if(hExec->finished || hExec->exception || hExec->abort)
 	{
@@ -206,13 +206,13 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 
 	switch(runMode)
 	{
-		case XENON_RUN_STEP:
+		case HQ_RUN_STEP:
 		{
 			prv_runStep(hExec);
 			break;
 		}
 
-		case XENON_RUN_CONTINUOUS:
+		case HQ_RUN_CONTINUOUS:
 		{
 			while(!hExec->finished && !hExec->exception && !hExec->yield && !hExec->abort)
 			{
@@ -229,16 +229,16 @@ void XenonExecution::Run(XenonExecutionHandle hExec, const int runMode)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, const int severity)
+void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, const int severity)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 	assert(severity >= 0);
-	assert(severity < XENON_EXCEPTION_SEVERITY__COUNT);
+	assert(severity < HQ_EXCEPTION_SEVERITY__COUNT);
 
 	// The exception value will always be stored to I/O register index 0.
 	hExec->registers.pData[0] = hValue;
 
-	if(severity == XENON_EXCEPTION_SEVERITY_FATAL)
+	if(severity == HQ_EXCEPTION_SEVERITY_FATAL)
 	{
 		// Force this exception to be unhandled.
 		hExec->exception = true;
@@ -246,8 +246,8 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 	else
 	{
 		auto blockReverseSortFunc = [](
-			XenonGuardedBlock* const pLeft,
-			XenonGuardedBlock* const pRight
+			HqGuardedBlock* const pLeft,
+			HqGuardedBlock* const pRight
 		) -> bool
 		{
 			if(pLeft->bytecodeOffsetStart > pRight->bytecodeOffsetStart)
@@ -268,30 +268,30 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 		};
 
 		auto findExceptionHandler = [&hValue, &blockReverseSortFunc](
-			XenonFrameHandle hFrame,
+			HqFrameHandle hFrame,
 			uint32_t* pOutHandlerOffset
 		) -> bool
 		{
 			uint32_t currentOffset = 0;
-			if(XenonFrameGetBytecodeOffset(hFrame, &currentOffset) != XENON_SUCCESS)
+			if(HqFrameGetBytecodeOffset(hFrame, &currentOffset) != HQ_SUCCESS)
 			{
 				// Failing to get the current offset within the frame means that it
 				// can't possibly handle this (or any) exception.
 				return false;
 			}
 
-			XenonGuardedBlock::Stack validBlocks;
-			XenonGuardedBlock::Stack::Initialize(validBlocks, hFrame->hFunction->guardedBlocks.count);
+			HqGuardedBlock::Stack validBlocks;
+			HqGuardedBlock::Stack::Initialize(validBlocks, hFrame->hFunction->guardedBlocks.count);
 
 			// Find all the guarded blocks that encapsulate the instruction that raised the exception.
 			for(size_t blockIndex = 0; blockIndex < hFrame->hFunction->guardedBlocks.count; ++blockIndex)
 			{
-				XenonGuardedBlock* pBlock = hFrame->hFunction->guardedBlocks.pData[blockIndex];
+				HqGuardedBlock* pBlock = hFrame->hFunction->guardedBlocks.pData[blockIndex];
 
 				if(currentOffset >= pBlock->bytecodeOffsetStart
 					&& currentOffset <= pBlock->bytecodeOffsetEnd)
 				{
-					XenonGuardedBlock::Stack::Push(validBlocks, pBlock);
+					HqGuardedBlock::Stack::Push(validBlocks, pBlock);
 				}
 			}
 
@@ -301,27 +301,27 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 			// Search the blocks for an exception handler that is capable of handling the raised value.
 			for(size_t blockIndex = 0; blockIndex < validBlocks.nextIndex; ++blockIndex)
 			{
-				XenonGuardedBlock* const pBlock = validBlocks.memory.pData[blockIndex];
+				HqGuardedBlock* const pBlock = validBlocks.memory.pData[blockIndex];
 
 				// Check each handler on the current block.
 				for(size_t handlerIndex = 0; handlerIndex < pBlock->handlers.count; ++handlerIndex)
 				{
-					XenonExceptionHandler* const pHandler = pBlock->handlers.pData[handlerIndex];
+					HqExceptionHandler* const pHandler = pBlock->handlers.pData[handlerIndex];
 
 					// Check if the general type of the handler matches the raised value.
 					if(pHandler->type == hValue->type)
 					{
 						// If the value is an object, we need to also compare the class type name to
 						// verify this handler will handle the exact object type that was raised.
-						if(hValue->type != XENON_VALUE_TYPE_OBJECT ||
+						if(hValue->type != HQ_VALUE_TYPE_OBJECT ||
 							(
-								hValue->type == XENON_VALUE_TYPE_OBJECT
-								&& XenonString::Compare(pHandler->pClassName, hValue->as.pObject->pTypeName)
+								hValue->type == HQ_VALUE_TYPE_OBJECT
+								&& HqString::Compare(pHandler->pClassName, hValue->as.pObject->pTypeName)
 							)
 						)
 						{
 							// This is the handler we'll use.
-							XenonGuardedBlock::Stack::Dispose(validBlocks);
+							HqGuardedBlock::Stack::Dispose(validBlocks);
 
 							(*pOutHandlerOffset) = pHandler->offset;
 							return true;
@@ -331,7 +331,7 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 			}
 
 			// No acceptable handler was found for this frame.
-			XenonGuardedBlock::Stack::Dispose(validBlocks);
+			HqGuardedBlock::Stack::Dispose(validBlocks);
 
 			return false;
 		};
@@ -343,7 +343,7 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 			size_t frameIndex = frameStackLength - 1;
 			for(;; --frameIndex)
 			{
-				XenonFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
+				HqFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
 
 				uint32_t handlerOffset = 0;
 
@@ -353,15 +353,15 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 					// to actually pop the frame stack until we get to that frame.
 					while(hExec->hCurrentFrame != hFrame)
 					{
-						const int popFrameResult = XenonExecution::PopFrame(hExec);
+						const int popFrameResult = HqExecution::PopFrame(hExec);
 
 						// Sanity check: There should not be any errors on popping the frame stack.
-						assert(popFrameResult == XENON_SUCCESS);
+						assert(popFrameResult == HQ_SUCCESS);
 						(void) popFrameResult;
 					}
 
 					// Sanity check: The current frame should never be null after popping the frame stack.
-					assert(hExec->hCurrentFrame != XENON_FRAME_HANDLE_NULL);
+					assert(hExec->hCurrentFrame != HQ_FRAME_HANDLE_NULL);
 
 					// Set the instruction pointer to the start of the exception handler.
 					hExec->hCurrentFrame->decoder.cachedIp = hExec->hCurrentFrame->hFunction->hProgram->code.pData + handlerOffset;
@@ -389,11 +389,11 @@ void XenonExecution::RaiseException(XenonExecutionHandle hExec, XenonValueHandle
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::RaiseOpCodeException(XenonExecutionHandle hExec, const int type, const char* const fmt, ...)
+void HqExecution::RaiseOpCodeException(HqExecutionHandle hExec, const int type, const char* const fmt, ...)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 	assert(type >= 0);
-	assert(type < XENON_STANDARD_EXCEPTION__COUNT);
+	assert(type < HQ_STANDARD_EXCEPTION__COUNT);
 	assert(fmt != nullptr);
 	
 	char msg[256];
@@ -406,82 +406,82 @@ void XenonExecution::RaiseOpCodeException(XenonExecutionHandle hExec, const int 
 		va_end(vl);
 	}
 
-	XenonValueHandle hThrowValue = XenonVm::CreateStandardException(hExec->hVm, type, msg);
+	HqValueHandle hThrowValue = HqVm::CreateStandardException(hExec->hVm, type, msg);
 
-	XenonExecution::RaiseException(hExec, hThrowValue, XENON_EXCEPTION_SEVERITY_FATAL);
-	XenonValue::SetAutoMark(hThrowValue, false);
+	HqExecution::RaiseException(hExec, hThrowValue, HQ_EXCEPTION_SEVERITY_FATAL);
+	HqValue::SetAutoMark(hThrowValue, false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::prv_runStep(XenonExecutionHandle hExec)
+void HqExecution::prv_runStep(HqExecutionHandle hExec)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
-	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
-	XenonFrameHandle hFrame = hExec->hCurrentFrame;
+	HqFrameHandle hFrame = hExec->hCurrentFrame;
 
 	// Save the current instruction pointer position at the start of the opcode that will now be executed.
 	hFrame->decoder.cachedIp = hFrame->decoder.ip;
 
-	const uint8_t opCode = XenonDecoder::LoadUint8(hFrame->decoder);
-	XenonVm::ExecuteOpCode(hExec->hVm, hExec, opCode);
+	const uint8_t opCode = HqDecoder::LoadUint8(hFrame->decoder);
+	HqVm::ExecuteOpCode(hExec->hVm, hExec, opCode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::prv_onGcDiscovery(XenonGarbageCollector& gc, void* const pOpaque)
+void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 {
-	XenonExecutionHandle hExec = reinterpret_cast<XenonExecutionHandle>(pOpaque);
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pOpaque);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Discover all active frames in the frame stack.
-	const size_t stackSize = XenonFrame::HandleStack::GetCurrentSize(hExec->frameStack);
+	const size_t stackSize = HqFrame::HandleStack::GetCurrentSize(hExec->frameStack);
 	for(size_t i = 0; i < stackSize; ++i)
 	{
-		XenonFrameHandle hFrame = hExec->frameStack.memory.pData[i];
+		HqFrameHandle hFrame = hExec->frameStack.memory.pData[i];
 
-		XenonGarbageCollector::MarkObject(gc, &hFrame->gcProxy);
+		HqGarbageCollector::MarkObject(gc, &hFrame->gcProxy);
 	}
 
 	// Discover values held in the I/O registers.
 	for(size_t i = 0; i < hExec->registers.count; ++i)
 	{
-		XenonValueHandle hValue = hExec->registers.pData[i];
+		HqValueHandle hValue = hExec->registers.pData[i];
 
-		if(XenonValue::CanBeMarked(hValue))
+		if(HqValue::CanBeMarked(hValue))
 		{
-			XenonGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+			HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::prv_onGcDestruct(void* pObject)
+void HqExecution::prv_onGcDestruct(void* pObject)
 {
-	XenonExecutionHandle hExec = reinterpret_cast<XenonExecutionHandle>(pObject);
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pObject);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
-	XenonFrame::HandleStack::Dispose(hExec->frameStack);
-	XenonValue::HandleArray::Dispose(hExec->registers);
+	HqFrame::HandleStack::Dispose(hExec->frameStack);
+	HqValue::HandleArray::Dispose(hExec->registers);
 
 	delete hExec;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonExecution::operator new(const size_t sizeInBytes)
+void* HqExecution::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonExecution::operator delete(void* const pObject)
+void HqExecution::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

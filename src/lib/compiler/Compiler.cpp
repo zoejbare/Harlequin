@@ -20,9 +20,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonCompilerHandle XenonCompiler::Create(XenonCompilerInit init)
+HqCompilerHandle HqCompiler::Create(HqCompilerInit init)
 {
-	XenonCompiler* const pOutput = new XenonCompiler();
+	HqCompiler* const pOutput = new HqCompiler();
 
 	pOutput->report.onMessageFn = init.common.report.onMessageFn;
 	pOutput->report.pUserData = init.common.report.pUserData;
@@ -33,23 +33,23 @@ XenonCompilerHandle XenonCompiler::Create(XenonCompilerInit init)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonCompiler::Dispose(XenonCompilerHandle hCompiler)
+void HqCompiler::Dispose(HqCompilerHandle hCompiler)
 {
 	delete hCompiler;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonCompiler::operator new(const size_t sizeInBytes)
+void* HqCompiler::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonCompiler::operator delete(void* const pObject)
+void HqCompiler::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

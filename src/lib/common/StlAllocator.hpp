@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include <stddef.h>
 #include <utility>
@@ -28,13 +28,13 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-class XenonStlAllocator;
+class HqStlAllocator;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 // The <void> implementation needs to be defined first since it's used in the generic implementation.
 template<>
-class XenonStlAllocator<void>
+class HqStlAllocator<void>
 {
 public:
 
@@ -45,14 +45,14 @@ public:
 	template <class U>
 	struct rebind
 	{
-		typedef XenonStlAllocator<U> other;
+		typedef HqStlAllocator<U> other;
 	};
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
 template <class T>
-class XenonStlAllocator
+class HqStlAllocator
 {
 public:
 
@@ -67,45 +67,45 @@ public:
 	template <typename U>
 	struct rebind
 	{
-		typedef XenonStlAllocator<U> other;
+		typedef HqStlAllocator<U> other;
 	};
 
-	XenonStlAllocator()
+	HqStlAllocator()
 	{
 		// Default construct allocator; do nothing.
 	}
 
-	XenonStlAllocator(const XenonStlAllocator& /*other*/)
+	HqStlAllocator(const HqStlAllocator& /*other*/)
 	{
 		// Copy construct from other allocator; do nothing.
 	}
 
 	template <class U>
-	XenonStlAllocator(const XenonStlAllocator<U>& /*other*/)
+	HqStlAllocator(const HqStlAllocator<U>& /*other*/)
 	{
 		// Copy construct from other allocator of related type; do nothing.
 	}
 
-	XenonStlAllocator& operator =(const XenonStlAllocator& /*other*/)
+	HqStlAllocator& operator =(const HqStlAllocator& /*other*/)
 	{
 		// Assign another allocator to this one; effectively does nothing.
 		return *this;
 	}
 
 	template <class U>
-	XenonStlAllocator& operator =(const XenonStlAllocator<U>& /*other*/)
+	HqStlAllocator& operator =(const HqStlAllocator<U>& /*other*/)
 	{
 		// Assign another allocator of a different type to this one; effectively does nothing.
 		return *this;
 	}
 
-	bool operator ==(const XenonStlAllocator& /*other*/) const
+	bool operator ==(const HqStlAllocator& /*other*/) const
 	{
 		// Compare equality of this allocator to another; always true.
 		return true;
 	}
 
-	bool operator !=(const XenonStlAllocator& /*other*/) const
+	bool operator !=(const HqStlAllocator& /*other*/) const
 	{
 		// Compare inequality of this allocator to another; always false.
 		return false;
@@ -123,17 +123,17 @@ public:
 		return reinterpret_cast<const value_type*>(&reinterpret_cast<const char&>(ref));
 	}
 
-	pointer allocate(size_type count, XenonStlAllocator<void>::const_pointer hint = nullptr)
+	pointer allocate(size_type count, HqStlAllocator<void>::const_pointer hint = nullptr)
 	{
 		// Allocate array of 'count' elements; ignore hint.
 		(void)(hint);
-		return reinterpret_cast<pointer>(XenonMemAlloc(sizeof(T) * count));
+		return reinterpret_cast<pointer>(HqMemAlloc(sizeof(T) * count));
 	}
 
 	void deallocate(pointer ptr, size_type /*count*/)
 	{
 		// Free memory at 'ptr'; ignore count.
-		XenonMemFree(ptr);
+		HqMemFree(ptr);
 	}
 
 	size_type max_size() const
@@ -154,7 +154,7 @@ public:
 		new(reinterpret_cast<void*>(ptr)) value_type(val);
 	}
 
-#if !defined(XENON_PLATFORM_PS3)
+#if !defined(HQ_PLATFORM_PS3)
 	template <class U, class... Args>
 	void construct(U* const p, Args&&... args)
 	{

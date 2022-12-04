@@ -37,49 +37,49 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonVm
+struct HqVm
 {
-	typedef XENON_MAP_TYPE<
+	typedef HQ_MAP_TYPE<
 		int,
-		XenonScriptObject*,
-#if XENON_MAP_IS_UNORDERED
+		HqScriptObject*,
+#if HQ_MAP_IS_UNORDERED
 		std::hash<int>,
 		std::equal_to<int>,
 #else
 		std::less<int>,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(int, XenonScriptObject*)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(int, HqScriptObject*)>
 	> EmbeddedExceptionMap;
 
 	struct OpCode
 	{
-		typedef void (*ExecuteCallback)(XenonExecutionHandle);
-		typedef void (*DisassembleCallback)(XenonDisassemble&);
+		typedef void (*ExecuteCallback)(HqExecutionHandle);
+		typedef void (*DisassembleCallback)(HqDisassemble&);
 
 		ExecuteCallback execFn;
 		DisassembleCallback disasmFn;
 	};
 
-	typedef XenonArray<OpCode> OpCodeArray;
+	typedef HqArray<OpCode> OpCodeArray;
 
-	static XenonVmHandle Create(const XenonVmInit& init);
-	static void Dispose(XenonVmHandle hVm);
+	static HqVmHandle Create(const HqVmInit& init);
+	static void Dispose(HqVmHandle hVm);
 
-	static int SetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, XenonString* const pVariableName);
+	static int SetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, HqString* const pVariableName);
 
-	static XenonProgramHandle GetProgram(XenonVmHandle hVm, XenonString* const pProgramName, int* const pOutResult);
-	static XenonFunctionHandle GetFunction(XenonVmHandle hVm, XenonString* const pFunctionSignature, int* const pOutResult);
-	static XenonValueHandle GetGlobalVariable(XenonVmHandle hVm, XenonString* const pVariableName, int* const pOutResult);
-	static XenonScriptObject* GetObjectSchema(XenonVmHandle hVm, XenonString* const pTypeName, int* const pOutResult);
+	static HqProgramHandle GetProgram(HqVmHandle hVm, HqString* const pProgramName, int* const pOutResult);
+	static HqFunctionHandle GetFunction(HqVmHandle hVm, HqString* const pFunctionSignature, int* const pOutResult);
+	static HqValueHandle GetGlobalVariable(HqVmHandle hVm, HqString* const pVariableName, int* const pOutResult);
+	static HqScriptObject* GetObjectSchema(HqVmHandle hVm, HqString* const pTypeName, int* const pOutResult);
 
-	static XenonValueHandle CreateStandardException(XenonVmHandle hVm, const int exceptionType, const char* const message);
+	static HqValueHandle CreateStandardException(HqVmHandle hVm, const int exceptionType, const char* const message);
 
-	static void ExecuteOpCode(XenonVmHandle hVm, XenonExecutionHandle hExec, const int opCode);
-	static void DisassembleOpCode(XenonVmHandle hVm, XenonDisassemble& disasm, const int opCode);
+	static void ExecuteOpCode(HqVmHandle hVm, HqExecutionHandle hExec, const int opCode);
+	static void DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const int opCode);
 
-	static void prv_setupOpCodes(XenonVmHandle);
-	static void prv_setupBuiltIns(XenonVmHandle);
-	static void prv_setupEmbeddedExceptions(XenonVmHandle);
+	static void prv_setupOpCodes(HqVmHandle);
+	static void prv_setupBuiltIns(HqVmHandle);
+	static void prv_setupEmbeddedExceptions(HqVmHandle);
 
 	static int32_t prv_gcThreadMain(void*);
 
@@ -89,16 +89,16 @@ struct XenonVm
 	OpCodeArray opCodes;
 	EmbeddedExceptionMap embeddedExceptions;
 
-	XenonProgram::StringToHandleMap programs;
-	XenonFunction::StringToHandleMap functions;
-	XenonValue::StringToHandleMap globals;
-	XenonScriptObject::StringToPtrMap objectSchemas;
-	XenonExecution::HandleToBoolMap executionContexts;
+	HqProgram::StringToHandleMap programs;
+	HqFunction::StringToHandleMap functions;
+	HqValue::StringToHandleMap globals;
+	HqScriptObject::StringToPtrMap objectSchemas;
+	HqExecution::HandleToBoolMap executionContexts;
 
-	XenonReport report;
-	XenonGarbageCollector gc;
-	XenonThread gcThread;
-	XenonRwLock gcRwLock;
+	HqReport report;
+	HqGarbageCollector gc;
+	HqThread gcThread;
+	HqRwLock gcRwLock;
 
 	bool isShuttingDown;
 };

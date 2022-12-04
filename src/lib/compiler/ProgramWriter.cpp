@@ -30,14 +30,14 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 static bool SerializeString(
-	XenonSerializerHandle hSerializer,
-	XenonReportHandle hReport,
+	HqSerializerHandle hSerializer,
+	HqReportHandle hReport,
 	const char* const stringData,
 	const size_t stringLength
 )
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
-	assert(hReport != XENON_REPORT_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+	assert(hReport != HQ_REPORT_HANDLE_NULL);
 
 	int result = 0;
 
@@ -45,14 +45,14 @@ static bool SerializeString(
 	{
 		assert(stringData != nullptr);
 
-		result = XenonSerializerWriteBuffer(hSerializer, stringLength, stringData);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerWriteBuffer(hSerializer, stringLength, stringData);
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Failed to write string data: error=\"%s\", data=\"%s\"",
 				errorString,
 				stringData
@@ -63,14 +63,14 @@ static bool SerializeString(
 	}
 
 	// Always write the null-terminator for strings.
-	result = XenonSerializerWriteUint8(hSerializer, 0);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerWriteUint8(hSerializer, 0);
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to write string null-terminator: error=\"%s\"",
 			errorString
 		);
@@ -84,24 +84,24 @@ static bool SerializeString(
 //----------------------------------------------------------------------------------------------------------------------
 
 static bool SerializeValue(
-	XenonSerializerHandle hSerializer,
-	XenonProgramWriter::ValueContainer& value,
-	XenonReportHandle hReport
+	HqSerializerHandle hSerializer,
+	HqProgramWriter::ValueContainer& value,
+	HqReportHandle hReport
 )
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
-	assert(hReport != XENON_REPORT_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+	assert(hReport != HQ_REPORT_HANDLE_NULL);
 
 	int result = 0;
 
-	result = XenonSerializerWriteUint8(hSerializer, uint8_t(value.type));
-	if(result != XENON_SUCCESS)
+	result = HqSerializerWriteUint8(hSerializer, uint8_t(value.type));
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to write value type: error=\"%s\", type=%" PRIu32,
 			errorString,
 			value.type
@@ -112,18 +112,18 @@ static bool SerializeValue(
 
 	switch(value.type)
 	{
-		case XENON_VALUE_TYPE_NULL:
+		case HQ_VALUE_TYPE_NULL:
 			break;
 
-		case XENON_VALUE_TYPE_INT8:
-			result = XenonSerializerWriteInt8(hSerializer, value.as.int8);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_INT8:
+			result = HqSerializerWriteInt8(hSerializer, value.as.int8);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int8: error=\"%s\", data=%" PRId8,
 					errorString,
 					value.as.int8
@@ -133,15 +133,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_INT16:
-			result = XenonSerializerWriteInt16(hSerializer, value.as.int16);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_INT16:
+			result = HqSerializerWriteInt16(hSerializer, value.as.int16);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int16: error=\"%s\", data=%" PRId16,
 					errorString,
 					value.as.int16
@@ -151,15 +151,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_INT32:
-			result = XenonSerializerWriteInt32(hSerializer, value.as.int32);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_INT32:
+			result = HqSerializerWriteInt32(hSerializer, value.as.int32);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int32: error=\"%s\", data=%" PRId32,
 					errorString,
 					value.as.int32
@@ -169,15 +169,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_INT64:
-			result = XenonSerializerWriteInt64(hSerializer, value.as.int64);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_INT64:
+			result = HqSerializerWriteInt64(hSerializer, value.as.int64);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as int64: error=\"%s\", data=%" PRId64,
 					errorString,
 					value.as.int64
@@ -187,15 +187,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_UINT8:
-			result = XenonSerializerWriteUint8(hSerializer, value.as.uint8);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_UINT8:
+			result = HqSerializerWriteUint8(hSerializer, value.as.uint8);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint8: error=\"%s\", data=%" PRIu8,
 					errorString,
 					value.as.uint8
@@ -205,15 +205,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_UINT16:
-			result = XenonSerializerWriteUint16(hSerializer, value.as.uint16);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_UINT16:
+			result = HqSerializerWriteUint16(hSerializer, value.as.uint16);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint16: error=\"%s\", data=%" PRIu16,
 					errorString,
 					value.as.uint16
@@ -223,15 +223,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_UINT32:
-			result = XenonSerializerWriteUint32(hSerializer, value.as.uint32);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_UINT32:
+			result = HqSerializerWriteUint32(hSerializer, value.as.uint32);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint32: error=\"%s\", data=%" PRIu32,
 					errorString,
 					value.as.uint32
@@ -241,15 +241,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_UINT64:
-			result = XenonSerializerWriteUint64(hSerializer, value.as.uint64);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_UINT64:
+			result = HqSerializerWriteUint64(hSerializer, value.as.uint64);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as uint64: error=\"%s\", data=%" PRIu64,
 					errorString,
 					value.as.uint64
@@ -259,15 +259,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_FLOAT32:
-			result = XenonSerializerWriteFloat32(hSerializer, value.as.float32);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_FLOAT32:
+			result = HqSerializerWriteFloat32(hSerializer, value.as.float32);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as float: error=\"%s\", data=%f",
 					errorString,
 					value.as.float32
@@ -277,15 +277,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_FLOAT64:
-			result = XenonSerializerWriteFloat64(hSerializer, value.as.float64);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_FLOAT64:
+			result = HqSerializerWriteFloat64(hSerializer, value.as.float64);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as double: error=\"%s\", data=%f",
 					errorString,
 					value.as.float64
@@ -295,15 +295,15 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_BOOL:
-			result = XenonSerializerWriteBool(hSerializer, value.as.boolean);
-			if(result != XENON_SUCCESS)
+		case HQ_VALUE_TYPE_BOOL:
+			result = HqSerializerWriteBool(hSerializer, value.as.boolean);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to write value data as bool: error=\"%s\", data=%s",
 					errorString,
 					value.as.boolean ? "true" : "false"
@@ -313,7 +313,7 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_STRING:
+		case HQ_VALUE_TYPE_STRING:
 			// Write out the string data.
 			if(!SerializeString(hSerializer, hReport, value.as.pString->data, value.as.pString->length))
 			{
@@ -321,18 +321,18 @@ static bool SerializeValue(
 			}
 			break;
 
-		case XENON_VALUE_TYPE_OBJECT:
-			XenonReportMessage(
+		case HQ_VALUE_TYPE_OBJECT:
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Cannot serializer object value type"
 			);
 			return false;
 
 		default:
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Cannot serialize unknown value type: type=%" PRId32,
 				value.type
 			);
@@ -344,20 +344,20 @@ static bool SerializeValue(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonProgramWriterHandle XenonProgramWriter::Create()
+HqProgramWriterHandle HqProgramWriter::Create()
 {
-	XenonProgramWriter* const pOutput = new XenonProgramWriter();
+	HqProgramWriter* const pOutput = new HqProgramWriter();
 
 	ValueContainer value;
 
 	// Add the default null value constant.
-	value.type = XENON_VALUE_TYPE_NULL;
+	value.type = HQ_VALUE_TYPE_NULL;
 	value.as.pString = nullptr;
 	pOutput->nullIndex = uint32_t(pOutput->constants.size());
 	pOutput->constants.push_back(value);
 
 	// Add the default boolean (false) constant.
-	value.type = XENON_VALUE_TYPE_BOOL;
+	value.type = HQ_VALUE_TYPE_BOOL;
 	value.as.boolean = false;
 	pOutput->boolFalseIndex = uint32_t(pOutput->constants.size());
 	pOutput->constants.push_back(value);
@@ -368,12 +368,12 @@ XenonProgramWriterHandle XenonProgramWriter::Create()
 	pOutput->constants.push_back(value);
 
 	// Serialize bytecode for the default init function bytecode just in case the high-level compiler does not supply it.
-	XenonSerializerHandle hInitSerializer = XENON_SERIALIZER_HANDLE_NULL;
-	XenonSerializerCreate(&hInitSerializer, XENON_SERIALIZER_MODE_WRITER);
-	XenonBytecodeWriteReturn(hInitSerializer);
+	HqSerializerHandle hInitSerializer = HQ_SERIALIZER_HANDLE_NULL;
+	HqSerializerCreate(&hInitSerializer, HQ_SERIALIZER_MODE_WRITER);
+	HqBytecodeWriteReturn(hInitSerializer);
 
-	const void* const pInitBytecode = XenonSerializerGetRawStreamPointer(hInitSerializer);
-	const size_t initBytecodeLength = XenonSerializerGetStreamLength(hInitSerializer);
+	const void* const pInitBytecode = HqSerializerGetRawStreamPointer(hInitSerializer);
+	const size_t initBytecodeLength = HqSerializerGetStreamLength(hInitSerializer);
 
 	if(initBytecodeLength > 0)
 	{
@@ -382,57 +382,57 @@ XenonProgramWriterHandle XenonProgramWriter::Create()
 		memcpy(pOutput->initBytecode.data(), pInitBytecode, initBytecodeLength);
 	}
 
-	XenonSerializerDispose(&hInitSerializer);
+	HqSerializerDispose(&hInitSerializer);
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
+void HqProgramWriter::Dispose(HqProgramWriterHandle hProgramWriter)
 {
-	assert(hProgramWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hProgramWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	// Dispose of all dependency names.
 	for(auto& kv : hProgramWriter->dependencies)
 	{
-		XenonString::Release(kv.first);
+		HqString::Release(kv.first);
 	}
 
 	// Dispose of all program globals.
 	for(auto& kv : hProgramWriter->globals)
 	{
-		XenonString::Release(kv.first);
+		HqString::Release(kv.first);
 	}
 
 	// Dispose of all program constants.
 	for(ValueContainer& value : hProgramWriter->constants)
 	{
-		if(value.type == XENON_VALUE_TYPE_STRING)
+		if(value.type == HQ_VALUE_TYPE_STRING)
 		{
-			XenonString::Release(value.as.pString);
+			HqString::Release(value.as.pString);
 		}
 	}
 
 	// Dispose of all functions.
 	for(auto& funcKv : hProgramWriter->functions)
 	{
-		XenonString::Release(funcKv.first);
+		HqString::Release(funcKv.first);
 
 		for(auto& valueKv : funcKv.second.locals)
 		{
-			XenonString::Release(valueKv.first);
+			HqString::Release(valueKv.first);
 		}
 
 		// Dispose of each guarded block.
-		for(XenonFunctionData::GuardedBlock& guardedBlock : funcKv.second.guardedBlocks)
+		for(HqFunctionData::GuardedBlock& guardedBlock : funcKv.second.guardedBlocks)
 		{
 			// Dispose of each exception handler registered under this guarded block.
 			for(auto& handlerKv : guardedBlock.handlers)
 			{
 				if(handlerKv.second.pClassName)
 				{
-					XenonString::Release(handlerKv.second.pClassName);
+					HqString::Release(handlerKv.second.pClassName);
 				}
 			}
 		}
@@ -441,12 +441,12 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 	// Dispose of all object types.
 	for(auto& typeKv : hProgramWriter->objectTypes)
 	{
-		XenonString::Release(typeKv.second.pTypeName);
+		HqString::Release(typeKv.second.pTypeName);
 
 		// Dispose of all members belonging to the current object type.
 		for(auto& memberKv : typeKv.second.members)
 		{
-			XenonString::Release(memberKv.first);
+			HqString::Release(memberKv.first);
 		}
 	}
 
@@ -455,42 +455,42 @@ void XenonProgramWriter::Dispose(XenonProgramWriterHandle hProgramWriter)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramWriter::Serialize(
-	XenonProgramWriterHandle hProgramWriter,
-	XenonCompilerHandle hCompiler,
-	XenonSerializerHandle hSerializer
+bool HqProgramWriter::Serialize(
+	HqProgramWriterHandle hProgramWriter,
+	HqCompilerHandle hCompiler,
+	HqSerializerHandle hSerializer
 )
 {
-	assert(hProgramWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
-	assert(hCompiler != XENON_COMPILER_HANDLE_NULL);
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hProgramWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hCompiler != HQ_COMPILER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
-	XenonReportHandle hReport = &hCompiler->report;
+	HqReportHandle hReport = &hCompiler->report;
 
-	XenonFileHeader fileHeader = {};
-	XenonProgramHeader programHeader = {};
+	HqFileHeader fileHeader = {};
+	HqProgramHeader programHeader = {};
 
-	fileHeader.magicNumber[0] = 'X';
-	fileHeader.magicNumber[1] = 'P';
-	fileHeader.magicNumber[2] = 'R';
-	fileHeader.magicNumber[3] = 'G';
-	fileHeader.magicNumber[4] = '_';
+	fileHeader.magicNumber[0] = 'H';
+	fileHeader.magicNumber[1] = 'Q';
+	fileHeader.magicNumber[2] = 'P';
+	fileHeader.magicNumber[3] = 'R';
+	fileHeader.magicNumber[4] = 'G';
 
-	const int endianness = XenonSerializerGetEndianness(hSerializer);
+	const int endianness = HqSerializerGetEndianness(hSerializer);
 
 	// Set the big endian flag.
 	switch(endianness)
 	{
-		case XENON_ENDIAN_ORDER_LITTLE:
+		case HQ_ENDIAN_ORDER_LITTLE:
 			fileHeader.bigEndianFlag = 0;
 			break;
 
-		case XENON_ENDIAN_ORDER_BIG:
+		case HQ_ENDIAN_ORDER_BIG:
 			fileHeader.bigEndianFlag = 1;
 			break;
 
 		default:
-#ifdef XENON_CPU_ENDIAN_LITTLE
+#ifdef HQ_CPU_ENDIAN_LITTLE
 			fileHeader.bigEndianFlag = 0;
 #else
 			fileHeader.bigEndianFlag = 1;
@@ -506,15 +506,15 @@ bool XenonProgramWriter::Serialize(
 
 	struct FunctionBinding
 	{
-		XenonFunctionData* pFunction;
-		XenonString* pSignature;
+		HqFunctionData* pFunction;
+		HqString* pSignature;
 
 		uint32_t offset;
 		uint32_t length;
 	};
 
 	std::deque<FunctionBinding> functionBindings;
-	XenonFunctionData::Bytecode bytecode;
+	HqFunctionData::Bytecode bytecode;
 
 	// Get the function bindings and bytecode ready to be written out.
 	{
@@ -574,33 +574,33 @@ bool XenonProgramWriter::Serialize(
 	programHeader.extensionTable.offset = 0;
 	programHeader.extensionTable.length = 0;
 
-	int result = XENON_SUCCESS;
+	int result = HQ_SUCCESS;
 
 	// Write the common header.
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[0]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[1]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[2]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[3]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.magicNumber[4]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[0]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[1]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[2]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[3]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[4]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[5]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[6]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[7]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[8]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.reserved[9]); }
-	if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint8(hSerializer, fileHeader.bigEndianFlag); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[0]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[1]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[2]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[3]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[4]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[0]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[1]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[2]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[3]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[4]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[5]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[6]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[7]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[8]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[9]); }
+	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.bigEndianFlag); }
 
-	if(result != XENON_SUCCESS)
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to write program common header: error=\"%s\"",
 			errorString
 		);
@@ -610,40 +610,40 @@ bool XenonProgramWriter::Serialize(
 
 	auto writeVersionHeader = [&hSerializer, &programHeader]() -> int
 	{
-		int result = XENON_SUCCESS;
+		int result = HQ_SUCCESS;
 
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTable.offset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.dependencyTable.length); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTable.offset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.objectTable.length); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTable.offset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.constantTable.length); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTable.offset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.globalTable.length); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTable.offset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.functionTable.length); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.extensionTable.offset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.extensionTable.length); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecode.offset); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.bytecode.length); }
-		if(result == XENON_SUCCESS) { result = XenonSerializerWriteUint32(hSerializer, programHeader.initFunctionLength); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.dependencyTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.dependencyTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.objectTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.objectTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.constantTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.constantTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.globalTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.globalTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.functionTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.functionTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.extensionTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.extensionTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.bytecode.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.bytecode.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.initFunctionLength); }
 
 		return result;
 	};
 
-	const size_t versionHeaderPosition = XenonSerializerGetStreamPosition(hSerializer);
+	const size_t versionHeaderPosition = HqSerializerGetStreamPosition(hSerializer);
 
 	// Write temporary data for the version header.
 	// We'll come back to fill it out at the end.
 	result = writeVersionHeader();
 
-	if(result != XENON_SUCCESS)
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to write program version header data: error=\"%s\"",
 			errorString
 		);
@@ -651,12 +651,12 @@ bool XenonProgramWriter::Serialize(
 		return false;
 	}
 
-	programHeader.dependencyTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.dependencyTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the dependency table.
 	for(auto& kv : hProgramWriter->dependencies)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", kv.first->data);
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", kv.first->data);
 
 		if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
 		{
@@ -664,12 +664,12 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.objectTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.objectTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the object type schemas.
 	for(auto& typeKv : hProgramWriter->objectTypes)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing object type: name=\"%s\"", typeKv.first->data);
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing object type: name=\"%s\"", typeKv.first->data);
 
 		if(!SerializeString(hSerializer, hReport, typeKv.first->data, typeKv.first->length))
 		{
@@ -679,14 +679,14 @@ bool XenonProgramWriter::Serialize(
 		const uint32_t memberCount = uint32_t(typeKv.second.orderedMemberNames.size());
 
 		// Write the number of members belonging to this object.
-		result = XenonSerializerWriteUint32(hSerializer, memberCount);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerWriteUint32(hSerializer, memberCount);
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Failed to serialize object member count: error=\"%s\", objectType=\"%s\", memberCount=%" PRIu32,
 				errorString,
 				typeKv.first->data,
@@ -698,12 +698,12 @@ bool XenonProgramWriter::Serialize(
 
 		for(size_t memberIndex = 0; memberIndex < typeKv.second.orderedMemberNames.size(); ++memberIndex)
 		{
-			XenonString* const pMemberName = typeKv.second.orderedMemberNames[memberIndex];
+			HqString* const pMemberName = typeKv.second.orderedMemberNames[memberIndex];
 			const uint8_t memberValueType = uint8_t(typeKv.second.members[pMemberName]);
 
-			const char* const memberTypeString = XenonGetValueTypeString(memberValueType);
+			const char* const memberTypeString = HqGetValueTypeString(memberValueType);
 
-			XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing object member: name=\"%s\", type=%s" , pMemberName->data, memberTypeString);
+			HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, " - Serializing object member: name=\"%s\", type=%s" , pMemberName->data, memberTypeString);
 
 			// Write the member name string.
 			if(!SerializeString(hSerializer, hReport, pMemberName->data, pMemberName->length))
@@ -712,14 +712,14 @@ bool XenonProgramWriter::Serialize(
 			}
 
 			// Write the member value type.
-			result = XenonSerializerWriteUint8(hSerializer, uint8_t(memberValueType));
-			if(result != XENON_SUCCESS)
+			result = HqSerializerWriteUint8(hSerializer, uint8_t(memberValueType));
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to serialize object member type: error=\"%s\", objectType=\"%s\", memberName=\"%s\", memberType=%s",
 					errorString,
 					typeKv.first->data,
@@ -732,12 +732,12 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.constantTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.constantTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the constant table.
 	for(size_t index = 0; index < hProgramWriter->constants.size(); ++index)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing constant: index=%" PRIuPTR, index);
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing constant: index=%" PRIuPTR, index);
 
 		if(!SerializeValue(hSerializer, hProgramWriter->constants[index], hReport))
 		{
@@ -745,12 +745,12 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.globalTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.globalTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the global variable table.
 	for(auto& kv : hProgramWriter->globals)
 	{
-		XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", kv.first->data);
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", kv.first->data);
 
 		// First, write the string key of the global.
 		if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
@@ -759,14 +759,14 @@ bool XenonProgramWriter::Serialize(
 		}
 
 		// Write the global's constant index.
-		result = XenonSerializerWriteUint32(hSerializer, kv.second);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerWriteUint32(hSerializer, kv.second);
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Failed to serialize global variable value index: error=\"%s\", name=\"%s\", index=%" PRIu32,
 				errorString,
 				kv.first->data,
@@ -777,16 +777,16 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.functionTable.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.functionTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the function table.
 	for(const FunctionBinding& binding : functionBindings)
 	{
 		if(binding.pFunction->isNative)
 		{
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_VERBOSE,
+				HQ_MESSAGE_TYPE_VERBOSE,
 				"Serializing native function: signature=\"%s\", numParams=%" PRIu16 ", numReturnValues=%" PRIu16,
 				binding.pSignature->data,
 				binding.pFunction->numParameters,
@@ -795,9 +795,9 @@ bool XenonProgramWriter::Serialize(
 		}
 		else
 		{
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_VERBOSE,
+				HQ_MESSAGE_TYPE_VERBOSE,
 				"Serializing script function: signature=\"%s\", numParams=%" PRIu16
 				", numReturnValues=%" PRIu16 ", offset=0x%" PRIX32 ", length=%" PRIu32,
 				binding.pSignature->data,
@@ -815,14 +815,14 @@ bool XenonProgramWriter::Serialize(
 		}
 
 		// Write the function's native switch into the program file.
-		result = XenonSerializerWriteBool(hSerializer, binding.pFunction->isNative);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerWriteBool(hSerializer, binding.pFunction->isNative);
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Failed to serialize function 'isNative' flag: error=\"%s\", signature=\"%s\", native=%s",
 				errorString,
 				binding.pSignature->data,
@@ -833,14 +833,14 @@ bool XenonProgramWriter::Serialize(
 		}
 
 		// Write the function's parameter count into the program file.
-		result = XenonSerializerWriteUint16(hSerializer, binding.pFunction->numParameters);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerWriteUint16(hSerializer, binding.pFunction->numParameters);
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Failed to serialize function parameter count: error=\"%s\", signature=\"%s\", count=%" PRIu16,
 				errorString,
 				binding.pSignature->data,
@@ -851,14 +851,14 @@ bool XenonProgramWriter::Serialize(
 		}
 
 		// Write the function's return value count into the program file.
-		result = XenonSerializerWriteUint16(hSerializer, binding.pFunction->numReturnValues);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerWriteUint16(hSerializer, binding.pFunction->numReturnValues);
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Failed to serialize function return value count: error=\"%s\", signature=\"%s\", count=%" PRIu16,
 				errorString,
 				binding.pSignature->data,
@@ -871,14 +871,14 @@ bool XenonProgramWriter::Serialize(
 		if(!binding.pFunction->isNative)
 		{
 			// Write the function's offset into the program file.
-			result = XenonSerializerWriteUint32(hSerializer, binding.offset);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerWriteUint32(hSerializer, binding.offset);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offset=0x%" PRIX32,
 					errorString,
 					binding.pSignature->data,
@@ -889,14 +889,14 @@ bool XenonProgramWriter::Serialize(
 			}
 
 			// Write the function's length in bytes into the program file.
-			result = XenonSerializerWriteUint32(hSerializer, binding.length);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerWriteUint32(hSerializer, binding.length);
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", length=%" PRIu32,
 					errorString,
 					binding.pSignature->data,
@@ -907,14 +907,14 @@ bool XenonProgramWriter::Serialize(
 			}
 
 			// Write the function's local variable count.
-			result = XenonSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.size()));
-			if(result != XENON_SUCCESS)
+			result = HqSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.size()));
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to serialize function local variable count: error=\"%s\", signature=\"%s\", count=%" PRIu32,
 					errorString,
 					binding.pSignature->data,
@@ -927,7 +927,7 @@ bool XenonProgramWriter::Serialize(
 			// Write the function's local variable table.
 			for(auto& kv : binding.pFunction->locals)
 			{
-				XenonReportMessage(hReport, XENON_MESSAGE_TYPE_VERBOSE, " - Serializing local variable: name=\"%s\"", kv.first->data);
+				HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, " - Serializing local variable: name=\"%s\"", kv.first->data);
 
 				// First, write the string key of the local.
 				if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
@@ -936,14 +936,14 @@ bool XenonProgramWriter::Serialize(
 				}
 
 				// Write the local's constant index.
-				result = XenonSerializerWriteUint32(hSerializer, kv.second);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerWriteUint32(hSerializer, kv.second);
+				if(result != HQ_SUCCESS)
 				{
-					const char* const errorString = XenonGetErrorCodeString(result);
+					const char* const errorString = HqGetErrorCodeString(result);
 
-					XenonReportMessage(
+					HqReportMessage(
 						hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to serialize local variable value index: error=\"%s\", name=\"%s\", index=%" PRIu32,
 						errorString,
 						kv.first->data,
@@ -957,14 +957,14 @@ bool XenonProgramWriter::Serialize(
 			const size_t guardedBlockCount = uint32_t(binding.pFunction->guardedBlocks.size());
 
 			// Write the function's guarded block count into the program file.
-			result = XenonSerializerWriteUint32(hSerializer, uint32_t(guardedBlockCount));
-			if(result != XENON_SUCCESS)
+			result = HqSerializerWriteUint32(hSerializer, uint32_t(guardedBlockCount));
+			if(result != HQ_SUCCESS)
 			{
-				const char* const errorString = XenonGetErrorCodeString(result);
+				const char* const errorString = HqGetErrorCodeString(result);
 
-				XenonReportMessage(
+				HqReportMessage(
 					hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to serialize function guarded block count: error=\"%s\", signature=\"%s\", count=%zu",
 					errorString,
 					binding.pSignature->data,
@@ -975,8 +975,8 @@ bool XenonProgramWriter::Serialize(
 			}
 
 			auto guardedBlockSortFunc = [](
-				const XenonFunctionData::GuardedBlock& left,
-				const XenonFunctionData::GuardedBlock& right
+				const HqFunctionData::GuardedBlock& left,
+				const HqFunctionData::GuardedBlock& right
 			) -> bool
 			{
 				if(left.offset < right.offset)
@@ -997,8 +997,8 @@ bool XenonProgramWriter::Serialize(
 			};
 
 			auto exceptionHandlerSortFunc = [](
-				const XenonFunctionData::ExceptionHandler& left,
-				const XenonFunctionData::ExceptionHandler& right
+				const HqFunctionData::ExceptionHandler& left,
+				const HqFunctionData::ExceptionHandler& right
 			) -> bool
 			{
 				return left.offset < right.offset;
@@ -1012,9 +1012,9 @@ bool XenonProgramWriter::Serialize(
 			);
 
 			// Serialize the guarded blocks with their exception handlers.
-			for(const XenonFunctionData::GuardedBlock& block : binding.pFunction->guardedBlocks)
+			for(const HqFunctionData::GuardedBlock& block : binding.pFunction->guardedBlocks)
 			{
-				XenonFunctionData::ExceptionHandler::Vector exceptionHandlers;
+				HqFunctionData::ExceptionHandler::Vector exceptionHandlers;
 				exceptionHandlers.reserve(block.handlers.size());
 
 				// Build a flat array of exception handlers for this guarded block.
@@ -1030,14 +1030,14 @@ bool XenonProgramWriter::Serialize(
 				const uint32_t blockOffset = binding.offset + block.offset;
 
 				// Write the guarded block bytecode offset.
-				result = XenonSerializerWriteUint32(hSerializer, blockOffset);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerWriteUint32(hSerializer, blockOffset);
+				if(result != HQ_SUCCESS)
 				{
-					const char* const errorString = XenonGetErrorCodeString(result);
+					const char* const errorString = HqGetErrorCodeString(result);
 
-					XenonReportMessage(
+					HqReportMessage(
 						hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to write guarded block bytecode offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
 						errorString,
 						binding.pSignature->data,
@@ -1048,14 +1048,14 @@ bool XenonProgramWriter::Serialize(
 				}
 
 				// Write the guarded block bytecode length.
-				result = XenonSerializerWriteUint32(hSerializer, block.length);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerWriteUint32(hSerializer, block.length);
+				if(result != HQ_SUCCESS)
 				{
-					const char* const errorString = XenonGetErrorCodeString(result);
+					const char* const errorString = HqGetErrorCodeString(result);
 
-					XenonReportMessage(
+					HqReportMessage(
 						hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to write guarded block bytecode length: error=\"%s\", signature=\"%s\", length=%" PRIu32,
 						errorString,
 						binding.pSignature->data,
@@ -1068,14 +1068,14 @@ bool XenonProgramWriter::Serialize(
 				const uint32_t exceptionHandlerCount = uint32_t(exceptionHandlers.size());
 
 				// Write the number of exception handlers contained in this guarded block.
-				result = XenonSerializerWriteUint32(hSerializer, exceptionHandlerCount);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerWriteUint32(hSerializer, exceptionHandlerCount);
+				if(result != HQ_SUCCESS)
 				{
-					const char* const errorString = XenonGetErrorCodeString(result);
+					const char* const errorString = HqGetErrorCodeString(result);
 
-					XenonReportMessage(
+					HqReportMessage(
 						hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to write guarded block exception handler count: error=\"%s\", signature=\"%s\", count=%" PRIu32,
 						errorString,
 						binding.pSignature->data,
@@ -1088,18 +1088,18 @@ bool XenonProgramWriter::Serialize(
 				// Serialize each exception handler contained by this guarded block.
 				for(uint32_t handlerIndex = 0; handlerIndex < exceptionHandlerCount; ++handlerIndex)
 				{
-					const XenonFunctionData::ExceptionHandler& handler = exceptionHandlers[handlerIndex];
+					const HqFunctionData::ExceptionHandler& handler = exceptionHandlers[handlerIndex];
 
 					// Write the value type for this exception handler.
-					result = XenonSerializerWriteUint8(hSerializer, uint8_t(handler.type));
-					if(result != XENON_SUCCESS)
+					result = HqSerializerWriteUint8(hSerializer, uint8_t(handler.type));
+					if(result != HQ_SUCCESS)
 					{
-						const char* const errorString = XenonGetErrorCodeString(result);
-						const char* const valueTypeString = XenonGetValueTypeString(handler.type);
+						const char* const errorString = HqGetErrorCodeString(result);
+						const char* const valueTypeString = HqGetValueTypeString(handler.type);
 
-						XenonReportMessage(
+						HqReportMessage(
 							hReport,
-							XENON_MESSAGE_TYPE_ERROR,
+							HQ_MESSAGE_TYPE_ERROR,
 							"Failed to write exception handler type: error=\"%s\", signature=\"%s\", type=\"%s\"",
 							errorString,
 							binding.pSignature->data,
@@ -1113,14 +1113,14 @@ bool XenonProgramWriter::Serialize(
 					const uint32_t handlerOffset = binding.offset + handler.offset;
 
 					// Write the offset where this exception handler is located.
-					result = XenonSerializerWriteUint32(hSerializer, handlerOffset);
-					if(result != XENON_SUCCESS)
+					result = HqSerializerWriteUint32(hSerializer, handlerOffset);
+					if(result != HQ_SUCCESS)
 					{
-						const char* const errorString = XenonGetErrorCodeString(result);
+						const char* const errorString = HqGetErrorCodeString(result);
 
-						XenonReportMessage(
+						HqReportMessage(
 							hReport,
-							XENON_MESSAGE_TYPE_ERROR,
+							HQ_MESSAGE_TYPE_ERROR,
 							"Failed to write exception handler offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
 							errorString,
 							binding.pSignature->data,
@@ -1130,7 +1130,7 @@ bool XenonProgramWriter::Serialize(
 						return false;
 					}
 
-					if(handler.type == XENON_VALUE_TYPE_OBJECT)
+					if(handler.type == HQ_VALUE_TYPE_OBJECT)
 					{
 						// Write the class name if this exception handler references an object type.
 						if(!SerializeString(hSerializer, hReport, handler.pClassName->data, handler.pClassName->length))
@@ -1143,19 +1143,19 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.bytecode.offset = uint32_t(XenonSerializerGetStreamPosition(hSerializer));
+	programHeader.bytecode.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	if(bytecode.size() > 0)
 	{
 		// Write the bytecode.
-		result = XenonSerializerWriteBuffer(hSerializer, bytecode.size(), bytecode.data());
-		if(result != XENON_SUCCESS)
+		result = HqSerializerWriteBuffer(hSerializer, bytecode.size(), bytecode.data());
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Failed to write program bytecode buffer: error=\"%s\"",
 				errorString
 			);
@@ -1164,17 +1164,17 @@ bool XenonProgramWriter::Serialize(
 		}
 	}
 
-	const size_t fileEndPosition = XenonSerializerGetStreamPosition(hSerializer);
+	const size_t fileEndPosition = HqSerializerGetStreamPosition(hSerializer);
 
 	// Move back to the version header so we can write the real data for it.
-	result = XenonSerializerSetStreamPosition(hSerializer, versionHeaderPosition);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerSetStreamPosition(hSerializer, versionHeaderPosition);
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to move serializer position to the start of the file version header: error=\"%s\", position=%" PRIuPTR,
 			errorString,
 			versionHeaderPosition
@@ -1186,13 +1186,13 @@ bool XenonProgramWriter::Serialize(
 	// Write the real version header now.
 	result = writeVersionHeader();
 
-	if(result != XENON_SUCCESS)
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to write program version header data (2nd pass): error=\"%s\"",
 			errorString
 		);
@@ -1200,14 +1200,14 @@ bool XenonProgramWriter::Serialize(
 		return false;
 	}
 
-	result = XenonSerializerSetStreamPosition(hSerializer, fileEndPosition);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerSetStreamPosition(hSerializer, fileEndPosition);
+	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = XenonGetErrorCodeString(result);
+		const char* const errorString = HqGetErrorCodeString(result);
 
-		XenonReportMessage(
+		HqReportMessage(
 			hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to move serializer position to the end of the file stream: error=\"%s\", position=%" PRIuPTR,
 			errorString,
 			fileEndPosition
@@ -1221,44 +1221,44 @@ bool XenonProgramWriter::Serialize(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramWriter::LookupFunction(
-	XenonProgramWriterHandle hWriter,
+int HqProgramWriter::LookupFunction(
+	HqProgramWriterHandle hWriter,
 	const char* const functionSignature,
-	XenonFunctionData** const ppOutFunction
+	HqFunctionData** const ppOutFunction
 )
 {
 	if(!hWriter || !functionSignature || functionSignature[0] == '\0')
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	XenonString* const pSignature = XenonString::Create(functionSignature);
+	HqString* const pSignature = HqString::Create(functionSignature);
 	if(!pSignature)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	// Find the desired function by checking what we currently have mapped.
 	auto kv = hWriter->functions.find(pSignature);
 	if(kv == hWriter->functions.end())
 	{
-		XenonString::Release(pSignature);
-		return XENON_ERROR_KEY_DOES_NOT_EXIST;
+		HqString::Release(pSignature);
+		return HQ_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
 	// The string object for the function signature is no longer needed.
-	XenonString::Release(pSignature);
+	HqString::Release(pSignature);
 
 	(*ppOutFunction) = &kv->second;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int8_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, int8_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapInt8.find(value);
 	if(kv != hWriter->indexMapInt8.end())
@@ -1269,7 +1269,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int8_
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_INT8;
+	container.type = HQ_VALUE_TYPE_INT8;
 	container.as.int8 = value;
 
 	hWriter->indexMapInt8.emplace(value, output);
@@ -1280,9 +1280,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int8_
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int16_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, int16_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapInt16.find(value);
 	if(kv != hWriter->indexMapInt16.end())
@@ -1293,7 +1293,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int16
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_INT16;
+	container.type = HQ_VALUE_TYPE_INT16;
 	container.as.int16 = value;
 
 	hWriter->indexMapInt16.emplace(value, output);
@@ -1304,9 +1304,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int16
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int32_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, int32_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapInt32.find(value);
 	if(kv != hWriter->indexMapInt32.end())
@@ -1317,7 +1317,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int32
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_INT32;
+	container.type = HQ_VALUE_TYPE_INT32;
 	container.as.int32 = value;
 
 	hWriter->indexMapInt32.emplace(value, output);
@@ -1328,9 +1328,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int32
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int64_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, int64_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapInt64.find(value);
 	if(kv != hWriter->indexMapInt64.end())
@@ -1341,7 +1341,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int64
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_INT64;
+	container.type = HQ_VALUE_TYPE_INT64;
 	container.as.int64 = value;
 
 	hWriter->indexMapInt64.emplace(value, output);
@@ -1352,9 +1352,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, int64
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint8_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, uint8_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapUint8.find(value);
 	if(kv != hWriter->indexMapUint8.end())
@@ -1365,7 +1365,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint8
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_UINT8;
+	container.type = HQ_VALUE_TYPE_UINT8;
 	container.as.uint8 = value;
 
 	hWriter->indexMapUint8.emplace(value, output);
@@ -1376,9 +1376,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint8
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint16_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, uint16_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapUint16.find(value);
 	if(kv != hWriter->indexMapUint16.end())
@@ -1389,7 +1389,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint1
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_UINT16;
+	container.type = HQ_VALUE_TYPE_UINT16;
 	container.as.uint16 = value;
 
 	hWriter->indexMapUint16.emplace(value, output);
@@ -1400,9 +1400,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint1
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint32_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, uint32_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapUint32.find(value);
 	if(kv != hWriter->indexMapUint32.end())
@@ -1413,7 +1413,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint3
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_UINT32;
+	container.type = HQ_VALUE_TYPE_UINT32;
 	container.as.uint32 = value;
 
 	hWriter->indexMapUint32.emplace(value, output);
@@ -1424,9 +1424,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint3
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint64_t value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, uint64_t value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	auto kv = hWriter->indexMapUint64.find(value);
 	if(kv != hWriter->indexMapUint64.end())
@@ -1437,7 +1437,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint6
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_UINT64;
+	container.type = HQ_VALUE_TYPE_UINT64;
 	container.as.uint64 = value;
 
 	hWriter->indexMapUint64.emplace(value, output);
@@ -1448,9 +1448,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, uint6
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, float value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, float value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	union
 	{
@@ -1469,7 +1469,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, float
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_FLOAT32;
+	container.type = HQ_VALUE_TYPE_FLOAT32;
 	container.as.float32 = value;
 
 	hWriter->indexMapFloat32.emplace(temp.bits, output);
@@ -1480,9 +1480,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, float
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, double value)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, double value)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 
 	union
 	{
@@ -1501,7 +1501,7 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, doubl
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_FLOAT64;
+	container.type = HQ_VALUE_TYPE_FLOAT64;
 	container.as.float64 = value;
 
 	hWriter->indexMapFloat64.emplace(temp.bits, output);
@@ -1512,9 +1512,9 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, doubl
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, XenonString* const pValue)
+uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, HqString* const pValue)
 {
-	assert(hWriter != XENON_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 	assert(pValue != nullptr);
 
 	auto kv = hWriter->indexMapString.find(pValue);
@@ -1526,10 +1526,10 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, Xenon
 	const uint32_t output = uint32_t(hWriter->constants.size());
 
 	ValueContainer container;
-	container.type = XENON_VALUE_TYPE_STRING;
+	container.type = HQ_VALUE_TYPE_STRING;
 	container.as.pString = pValue;
 
-	XenonString::AddRef(pValue);
+	HqString::AddRef(pValue);
 
 	hWriter->indexMapString.emplace(pValue, output);
 	hWriter->constants.push_back(container);
@@ -1539,16 +1539,16 @@ uint32_t XenonProgramWriter::AddConstant(XenonProgramWriterHandle hWriter, Xenon
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonProgramWriter::operator new(const size_t sizeInBytes)
+void* HqProgramWriter::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonProgramWriter::operator delete(void* const pObject)
+void HqProgramWriter::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

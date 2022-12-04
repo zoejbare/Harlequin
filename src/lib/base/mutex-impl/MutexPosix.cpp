@@ -22,7 +22,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonMutexImplCreate(XenonInternalMutex& obj)
+extern "C" void _HqMutexImplCreate(HqInternalMutex& obj)
 {
 	pthread_mutexattr_t attr;
 
@@ -34,7 +34,7 @@ extern "C" void _XenonMutexImplCreate(XenonInternalMutex& obj)
 	const int attrSetTypeResult = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 	assert(attrSetTypeResult == 0); (void) attrSetTypeResult;
 
-	XenonMutex output;
+	HqMutex output;
 
 	// Create the mutex.
 	const int mutexInitResult = pthread_mutex_init(&obj.handle, &attr);
@@ -49,7 +49,7 @@ extern "C" void _XenonMutexImplCreate(XenonInternalMutex& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonMutexImplDispose(XenonInternalMutex& obj)
+extern "C" void _HqMutexImplDispose(HqInternalMutex& obj)
 {
 	assert(obj.initialized);
 
@@ -61,7 +61,7 @@ extern "C" void _XenonMutexImplDispose(XenonInternalMutex& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool _XenonMutexImplTryLock(XenonInternalMutex& obj)
+extern "C" bool _HqMutexImplTryLock(HqInternalMutex& obj)
 {
 	assert(obj.initialized);
 
@@ -70,7 +70,7 @@ extern "C" bool _XenonMutexImplTryLock(XenonInternalMutex& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonMutexImplLock(XenonInternalMutex& obj)
+extern "C" void _HqMutexImplLock(HqInternalMutex& obj)
 {
 	assert(obj.initialized);
 
@@ -79,7 +79,7 @@ extern "C" void _XenonMutexImplLock(XenonInternalMutex& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _XenonMutexImplUnlock(XenonInternalMutex& obj)
+extern "C" void _HqMutexImplUnlock(HqInternalMutex& obj)
 {
 	assert(obj.initialized);
 

@@ -23,18 +23,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonDecoder::Initialize(XenonDecoder& output, XenonProgramHandle hProgram, uint32_t offset)
+void HqDecoder::Initialize(HqDecoder& output, HqProgramHandle hProgram, uint32_t offset)
 {
-	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
+	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
 
 	output.ip = hProgram->code.pData + offset;
 	output.cachedIp = output.ip;
-	output.sameEndian = (hProgram->endianness == XenonGetPlatformEndianMode());
+	output.sameEndian = (hProgram->endianness == HqGetPlatformEndianMode());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonDecoder::LoadInt32(XenonDecoder& decoder)
+int32_t HqDecoder::LoadInt32(HqDecoder& decoder)
 {
 	assert(decoder.ip != nullptr);
 
@@ -47,12 +47,12 @@ int32_t XenonDecoder::LoadInt32(XenonDecoder& decoder)
 	// Return the data, endian swapping it if needed.
 	return decoder.sameEndian
 		? output
-		: XenonEndianSwapInt32(output);
+		: HqEndianSwapInt32(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint8_t XenonDecoder::LoadUint8(XenonDecoder& decoder)
+uint8_t HqDecoder::LoadUint8(HqDecoder& decoder)
 {
 	assert(decoder.ip != nullptr);
 
@@ -67,7 +67,7 @@ uint8_t XenonDecoder::LoadUint8(XenonDecoder& decoder)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonDecoder::LoadUint32(XenonDecoder& decoder)
+uint32_t HqDecoder::LoadUint32(HqDecoder& decoder)
 {
 	assert(decoder.ip != nullptr);
 
@@ -80,7 +80,7 @@ uint32_t XenonDecoder::LoadUint32(XenonDecoder& decoder)
 	// Return the data, endian swapping it if needed.
 	return decoder.sameEndian
 		? output
-		: XenonEndianSwapUint32(output);
+		: HqEndianSwapUint32(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

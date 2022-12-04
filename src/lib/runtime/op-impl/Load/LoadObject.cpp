@@ -42,35 +42,35 @@
 extern "C" {
 #endif
 
-void OpCodeExec_LoadObject(XenonExecutionHandle hExec)
+void OpCodeExec_LoadObject(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t memberIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t memberIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Load the object value from the source register.
-	XenonValueHandle hSource = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hSource = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
 		// Verify the loaded value is an object type.
-		if(XenonValueIsObject(hSource))
+		if(HqValueIsObject(hSource))
 		{
-			XenonScriptObject* const pScriptObject = hSource->as.pObject;
+			HqScriptObject* const pScriptObject = hSource->as.pObject;
 
 			// Load the member variable of the object value from the source index.
-			XenonValueHandle hMember = XenonScriptObject::GetMemberValue(pScriptObject, memberIndex, &result);
-			if(result == XENON_SUCCESS)
+			HqValueHandle hMember = HqScriptObject::GetMemberValue(pScriptObject, memberIndex, &result);
+			if(result == HQ_SUCCESS)
 			{
 				// Store the variable's value in the destination register.
-				result = XenonFrame::SetGpRegister(hExec->hCurrentFrame, hMember, gpDstRegIndex);
-				if(result != XENON_SUCCESS)
+				result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hMember, gpDstRegIndex);
+				if(result != HQ_SUCCESS)
 				{
 					// Raise a fatal script exception.
-					XenonExecution::RaiseOpCodeException(
+					HqExecution::RaiseOpCodeException(
 						hExec,
-						XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to set general-purpose register: r(%" PRIu32 ")",
 						gpDstRegIndex
 					);
@@ -79,9 +79,9 @@ void OpCodeExec_LoadObject(XenonExecutionHandle hExec)
 			else
 			{
 				// Raise a fatal script exception.
-				XenonExecution::RaiseOpCodeException(
+				HqExecution::RaiseOpCodeException(
 					hExec,
-					XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Failed to retrieve object member at index: #%" PRIu32,
 					memberIndex
 				);
@@ -90,9 +90,9 @@ void OpCodeExec_LoadObject(XenonExecutionHandle hExec)
 		else
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_TYPE_ERROR,
+				HQ_STANDARD_EXCEPTION_TYPE_ERROR,
 				"Type mismatch; expected object: r(%" PRIu32 ")",
 				gpSrcRegIndex
 			);
@@ -101,9 +101,9 @@ void OpCodeExec_LoadObject(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
 			gpSrcRegIndex
 		);
@@ -112,11 +112,11 @@ void OpCodeExec_LoadObject(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadObject(XenonDisassemble& disasm)
+void OpCodeDisasm_LoadObject(HqDisassemble& disasm)
 {
-	const uint32_t gpDstRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t gpSrcRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t memberIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t memberIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
 	snprintf(str, sizeof(str), "LOAD_OBJECT r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);

@@ -20,36 +20,36 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "../common/DisposeCallback.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonGarbageCollector;
+struct HqGarbageCollector;
 
-typedef void (*XenonGcDiscoveryCallback)(XenonGarbageCollector&, void*);
+typedef void (*HqGcDiscoveryCallback)(HqGarbageCollector&, void*);
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonGcProxy
+struct HqGcProxy
 {
 	static void Initialize(
-		XenonGcProxy& output,
-		XenonGarbageCollector& gc,
-		XenonGcDiscoveryCallback onGcDiscoveryFn,
-		XenonDisposeCallback onGcDisposeFn,
+		HqGcProxy& output,
+		HqGarbageCollector& gc,
+		HqGcDiscoveryCallback onGcDiscoveryFn,
+		HqDisposeCallback onGcDisposeFn,
 		void* const pObject,
 		const bool autoMark
 	);
 
-	XenonGcDiscoveryCallback onGcDiscoveryFn;
-	XenonDisposeCallback onGcDisposeFn;
+	HqGcDiscoveryCallback onGcDiscoveryFn;
+	HqDisposeCallback onGcDisposeFn;
 
-	XenonGarbageCollector* pGc;
+	HqGarbageCollector* pGc;
 
-	XenonGcProxy* pPrev;
-	XenonGcProxy* pNext;
+	HqGcProxy* pPrev;
+	HqGcProxy* pNext;
 
 	void* pObject;
 

@@ -31,52 +31,52 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgramWriter
+struct HqProgramWriter
 {
-	static XenonProgramWriterHandle Create();
-	static void Dispose(XenonProgramWriterHandle hWriter);
+	static HqProgramWriterHandle Create();
+	static void Dispose(HqProgramWriterHandle hWriter);
 	static bool Serialize(
-		XenonProgramWriterHandle hProgramWriter,
-		XenonCompilerHandle hCompiler,
-		XenonSerializerHandle hSerializer
+		HqProgramWriterHandle hProgramWriter,
+		HqCompilerHandle hCompiler,
+		HqSerializerHandle hSerializer
 	);
 
 	static int LookupFunction(
-		XenonProgramWriterHandle hWriter,
+		HqProgramWriterHandle hWriter,
 		const char* const functionSignature,
-		XenonFunctionData** const ppOutFunction
+		HqFunctionData** const ppOutFunction
 	);
 
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int8_t value);
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int16_t value);
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int32_t value);
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const int64_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int8_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int16_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int32_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int64_t value);
 
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint8_t value);
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint16_t value);
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint32_t value);
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const uint64_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint8_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint16_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint32_t value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint64_t value);
 
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const float value);
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, const double value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const float value);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const double value);
 
-	static uint32_t AddConstant(XenonProgramWriterHandle hWriter, XenonString* const pString);
+	static uint32_t AddConstant(HqProgramWriterHandle hWriter, HqString* const pString);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	typedef std::unordered_map<
-		XenonString*,
+		HqString*,
 		bool,
-		XenonString::StlHash,
-		XenonString::StlCompare
+		HqString::StlHash,
+		HqString::StlCompare
 	> DependencySet;
 
 	typedef std::unordered_map<
-		XenonString*,
+		HqString*,
 		uint32_t,
-		XenonString::StlHash,
-		XenonString::StlCompare
+		HqString::StlHash,
+		HqString::StlCompare
 	> GlobalValueMap;
 
 	typedef std::unordered_map<int8_t, uint32_t> IndexMapInt8;
@@ -93,10 +93,10 @@ struct XenonProgramWriter
 	typedef std::unordered_map<uint64_t, uint32_t> IndexMapFloat64;
 
 	typedef std::unordered_map<
-		XenonString*,
+		HqString*,
 		uint32_t,
-		XenonString::StlHash,
-		XenonString::StlCompare
+		HqString::StlHash,
+		HqString::StlCompare
 	> IndexMapString;
 
 	struct ValueContainer
@@ -120,17 +120,17 @@ struct XenonProgramWriter
 			float float32;
 			double float64;
 
-			XenonString* pString;
-			XenonString* pObjectType;
+			HqString* pString;
+			HqString* pObjectType;
 		} as;
 	};
 
 	DependencySet dependencies;
 	GlobalValueMap globals;
-	XenonFunctionData::StringToFunctionMap functions;
-	XenonObjectData::StringToObjectMap objectTypes;
+	HqFunctionData::StringToFunctionMap functions;
+	HqObjectData::StringToObjectMap objectTypes;
 
-	XenonFunctionData::Bytecode initBytecode;
+	HqFunctionData::Bytecode initBytecode;
 
 	IndexMapInt8 indexMapInt8;
 	IndexMapInt16 indexMapInt16;

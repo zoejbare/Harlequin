@@ -26,18 +26,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonGuardedBlock
+struct HqGuardedBlock
 {
-	typedef XenonArray<XenonGuardedBlock*> Array;
-	typedef XenonStack<XenonGuardedBlock*> Stack;
+	typedef HqArray<HqGuardedBlock*> Array;
+	typedef HqStack<HqGuardedBlock*> Stack;
 
-	static XenonGuardedBlock* Create(const uint32_t offset, const uint32_t length, const size_t handlerCount);
-	static void Dispose(XenonGuardedBlock* const pGuardedBlock);
+	static HqGuardedBlock* Create(const uint32_t offset, const uint32_t length, const size_t handlerCount);
+	static void Dispose(HqGuardedBlock* const pGuardedBlock);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonExceptionHandler::Array handlers;
+	HqExceptionHandler::Array handlers;
 
 	uint32_t bytecodeOffsetStart;
 	uint32_t bytecodeOffsetEnd;

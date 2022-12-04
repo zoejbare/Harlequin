@@ -22,49 +22,49 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonGuardedBlock* XenonGuardedBlock::Create(const uint32_t offset, const uint32_t length, const size_t handlerCount)
+HqGuardedBlock* HqGuardedBlock::Create(const uint32_t offset, const uint32_t length, const size_t handlerCount)
 {
-	XenonGuardedBlock* const pOutput = new XenonGuardedBlock();
+	HqGuardedBlock* const pOutput = new HqGuardedBlock();
 	assert(pOutput != nullptr);
 
 	pOutput->bytecodeOffsetStart = offset;
 	pOutput->bytecodeOffsetEnd = offset + length;
 
 	// Initialize the array of exception handlers.
-	XenonExceptionHandler::Array::Initialize(pOutput->handlers);
-	XenonExceptionHandler::Array::Reserve(pOutput->handlers, handlerCount);
+	HqExceptionHandler::Array::Initialize(pOutput->handlers);
+	HqExceptionHandler::Array::Reserve(pOutput->handlers, handlerCount);
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGuardedBlock::Dispose(XenonGuardedBlock* const pGuardedBlock)
+void HqGuardedBlock::Dispose(HqGuardedBlock* const pGuardedBlock)
 {
 	for(size_t i = 0; i < pGuardedBlock->handlers.count; ++i)
 	{
-		XenonExceptionHandler* const pHandler = pGuardedBlock->handlers.pData[i];
+		HqExceptionHandler* const pHandler = pGuardedBlock->handlers.pData[i];
 
-		XenonExceptionHandler::Dispose(pHandler);
+		HqExceptionHandler::Dispose(pHandler);
 	}
 
-	XenonExceptionHandler::Array::Dispose(pGuardedBlock->handlers);
+	HqExceptionHandler::Array::Dispose(pGuardedBlock->handlers);
 
 	delete pGuardedBlock;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonGuardedBlock::operator new(const size_t sizeInBytes)
+void* HqGuardedBlock::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonGuardedBlock::operator delete(void* const pObject)
+void HqGuardedBlock::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

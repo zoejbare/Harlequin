@@ -20,29 +20,29 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "Decoder.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonDisassemble
+struct HqDisassemble
 {
-	XenonProgramHandle hProgram;
-	XenonCallbackOpDisasm onDisasmFn;
+	HqProgramHandle hProgram;
+	HqCallbackOpDisasm onDisasmFn;
 
 	void* pUserData;
 
 	uintptr_t opcodeOffset;
 
-	XenonDecoder decoder;
+	HqDecoder decoder;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define XENON_DECLARE_OP_CODE_FN(op_name) \
-	void OpCodeExec_ ## op_name(XenonExecutionHandle); \
-	void OpCodeDisasm_ ## op_name(XenonDisassemble&)
+#define HQ_DECLARE_OP_CODE_FN(op_name) \
+	void OpCodeExec_ ## op_name(HqExecutionHandle); \
+	void OpCodeDisasm_ ## op_name(HqDisassemble&)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -52,43 +52,43 @@ extern "C" {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XENON_DECLARE_OP_CODE_FN(Nop);
-XENON_DECLARE_OP_CODE_FN(Abort);
-XENON_DECLARE_OP_CODE_FN(Return);
-XENON_DECLARE_OP_CODE_FN(Yield);
-XENON_DECLARE_OP_CODE_FN(Call);
-XENON_DECLARE_OP_CODE_FN(CallValue);
-XENON_DECLARE_OP_CODE_FN(Raise);
+HQ_DECLARE_OP_CODE_FN(Nop);
+HQ_DECLARE_OP_CODE_FN(Abort);
+HQ_DECLARE_OP_CODE_FN(Return);
+HQ_DECLARE_OP_CODE_FN(Yield);
+HQ_DECLARE_OP_CODE_FN(Call);
+HQ_DECLARE_OP_CODE_FN(CallValue);
+HQ_DECLARE_OP_CODE_FN(Raise);
 
-XENON_DECLARE_OP_CODE_FN(LoadConstant);
-XENON_DECLARE_OP_CODE_FN(LoadGlobal);
-XENON_DECLARE_OP_CODE_FN(LoadLocal);
-XENON_DECLARE_OP_CODE_FN(LoadParam);
-XENON_DECLARE_OP_CODE_FN(LoadObject);
-XENON_DECLARE_OP_CODE_FN(LoadArray);
+HQ_DECLARE_OP_CODE_FN(LoadConstant);
+HQ_DECLARE_OP_CODE_FN(LoadGlobal);
+HQ_DECLARE_OP_CODE_FN(LoadLocal);
+HQ_DECLARE_OP_CODE_FN(LoadParam);
+HQ_DECLARE_OP_CODE_FN(LoadObject);
+HQ_DECLARE_OP_CODE_FN(LoadArray);
 
-XENON_DECLARE_OP_CODE_FN(StoreGlobal);
-XENON_DECLARE_OP_CODE_FN(StoreLocal);
-XENON_DECLARE_OP_CODE_FN(StoreParam);
-XENON_DECLARE_OP_CODE_FN(StoreObject);
-XENON_DECLARE_OP_CODE_FN(StoreArray);
+HQ_DECLARE_OP_CODE_FN(StoreGlobal);
+HQ_DECLARE_OP_CODE_FN(StoreLocal);
+HQ_DECLARE_OP_CODE_FN(StoreParam);
+HQ_DECLARE_OP_CODE_FN(StoreObject);
+HQ_DECLARE_OP_CODE_FN(StoreArray);
 
-XENON_DECLARE_OP_CODE_FN(PullGlobal);
-XENON_DECLARE_OP_CODE_FN(PullLocal);
-XENON_DECLARE_OP_CODE_FN(PullParam);
-XENON_DECLARE_OP_CODE_FN(PullObject);
-XENON_DECLARE_OP_CODE_FN(PullArray);
+HQ_DECLARE_OP_CODE_FN(PullGlobal);
+HQ_DECLARE_OP_CODE_FN(PullLocal);
+HQ_DECLARE_OP_CODE_FN(PullParam);
+HQ_DECLARE_OP_CODE_FN(PullObject);
+HQ_DECLARE_OP_CODE_FN(PullArray);
 
-XENON_DECLARE_OP_CODE_FN(Push);
-XENON_DECLARE_OP_CODE_FN(Pop);
+HQ_DECLARE_OP_CODE_FN(Push);
+HQ_DECLARE_OP_CODE_FN(Pop);
 
-XENON_DECLARE_OP_CODE_FN(InitObject);
-XENON_DECLARE_OP_CODE_FN(InitArray);
-XENON_DECLARE_OP_CODE_FN(InitFunction);
+HQ_DECLARE_OP_CODE_FN(InitObject);
+HQ_DECLARE_OP_CODE_FN(InitArray);
+HQ_DECLARE_OP_CODE_FN(InitFunction);
 
-XENON_DECLARE_OP_CODE_FN(Branch);
-XENON_DECLARE_OP_CODE_FN(BranchIfTrue);
-XENON_DECLARE_OP_CODE_FN(BranchIfFalse);
+HQ_DECLARE_OP_CODE_FN(Branch);
+HQ_DECLARE_OP_CODE_FN(BranchIfTrue);
+HQ_DECLARE_OP_CODE_FN(BranchIfFalse);
 
 //----------------------------------------------------------------------------------------------------------------------
 

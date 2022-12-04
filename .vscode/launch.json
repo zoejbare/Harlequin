@@ -5,12 +5,12 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Launch Xenon Runtime [clang/debug/x64]",
-			"program": "${config:clangOutPath}/x64/debug/xenon",
+			"name": "Launch Harlequin Runtime [clang/debug/x64]",
+			"program": "${config:clangOutPath}/x64/debug/hq",
 			"cwd": "${config:clangOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -25,12 +25,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [clang/fastdebug/x64]",
-			"program": "${config:clangOutPath}/x64/fastdebug/xenon",
+			"name": "Launch Harlequin Runtime [clang/fastdebug/x64]",
+			"program": "${config:clangOutPath}/x64/fastdebug/hq",
 			"cwd": "${config:clangOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -45,12 +45,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [clang/release/x64]",
-			"program": "${config:clangOutPath}/x64/release/xenon",
+			"name": "Launch Harlequin Runtime [clang/release/x64]",
+			"program": "${config:clangOutPath}/x64/release/hq",
 			"cwd": "${config:clangOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -65,12 +65,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [clang/debug/x86]",
-			"program": "${config:clangOutPath}/x86/debug/xenon",
+			"name": "Launch Harlequin Runtime [clang/debug/x86]",
+			"program": "${config:clangOutPath}/x86/debug/hq",
 			"cwd": "${config:clangOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -85,12 +85,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [clang/fastdebug/x86]",
-			"program": "${config:clangOutPath}/x86/fastdebug/xenon",
+			"name": "Launch Harlequin Runtime [clang/fastdebug/x86]",
+			"program": "${config:clangOutPath}/x86/fastdebug/hq",
 			"cwd": "${config:clangOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -105,12 +105,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [clang/release/x86]",
-			"program": "${config:clangOutPath}/x86/release/xenon",
+			"name": "Launch Harlequin Runtime [clang/release/x86]",
+			"program": "${config:clangOutPath}/x86/release/hq",
 			"cwd": "${config:clangOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -125,12 +125,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [gcc/debug/x64]",
-			"program": "${config:gccOutPath}/x64/debug/xenon",
+			"name": "Launch Harlequin Runtime [gcc/debug/x64]",
+			"program": "${config:gccOutPath}/x64/debug/hq",
 			"cwd": "${config:gccOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -145,12 +145,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [gcc/fastdebug/x64]",
-			"program": "${config:gccOutPath}/x64/fastdebug/xenon",
+			"name": "Launch Harlequin Runtime [gcc/fastdebug/x64]",
+			"program": "${config:gccOutPath}/x64/fastdebug/hq",
 			"cwd": "${config:gccOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -165,12 +165,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [gcc/release/x64]",
-			"program": "${config:gccOutPath}/x64/release/xenon",
+			"name": "Launch Harlequin Runtime [gcc/release/x64]",
+			"program": "${config:gccOutPath}/x64/release/hq",
 			"cwd": "${config:gccOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -185,12 +185,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [gcc/debug/x86]",
-			"program": "${config:gccOutPath}/x86/debug/xenon",
+			"name": "Launch Harlequin Runtime [gcc/debug/x86]",
+			"program": "${config:gccOutPath}/x86/debug/hq",
 			"cwd": "${config:gccOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -205,12 +205,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [gcc/fastdebug/x86]",
-			"program": "${config:gccOutPath}/x86/fastdebug/xenon",
+			"name": "Launch Harlequin Runtime [gcc/fastdebug/x86]",
+			"program": "${config:gccOutPath}/x86/fastdebug/hq",
 			"cwd": "${config:gccOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -225,12 +225,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [gcc/release/x86]",
-			"program": "${config:gccOutPath}/x86/release/xenon",
+			"name": "Launch Harlequin Runtime [gcc/release/x86]",
+			"program": "${config:gccOutPath}/x86/release/hq",
 			"cwd": "${config:gccOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"osx": {
 				"MIMode": "lldb"
 			},
@@ -245,12 +245,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [msvc/debug/x64]",
-			"program": "${config:msvcOutPath}/x64/debug/xenon.exe",
+			"name": "Launch Harlequin Runtime [msvc/debug/x64]",
+			"program": "${config:msvcOutPath}/x64/debug/hq.exe",
 			"cwd": "${config:msvcOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"windows": {
 				"MIMode": "msvc"
 			},
@@ -259,12 +259,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [msvc/fastdebug/x64]",
-			"program": "${config:msvcOutPath}/x64/fastdebug/xenon.exe",
+			"name": "Launch Harlequin Runtime [msvc/fastdebug/x64]",
+			"program": "${config:msvcOutPath}/x64/fastdebug/hq.exe",
 			"cwd": "${config:msvcOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"windows": {
 				"MIMode": "msvc"
 			},
@@ -273,12 +273,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [msvc/release/x64]",
-			"program": "${config:msvcOutPath}/x64/release/xenon.exe",
+			"name": "Launch Harlequin Runtime [msvc/release/x64]",
+			"program": "${config:msvcOutPath}/x64/release/hq.exe",
 			"cwd": "${config:msvcOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"windows": {
 				"MIMode": "msvc"
 			},
@@ -287,12 +287,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [msvc/debug/x86]",
-			"program": "${config:msvcOutPath}/x86/debug/xenon.exe",
+			"name": "Launch Harlequin Runtime [msvc/debug/x86]",
+			"program": "${config:msvcOutPath}/x86/debug/hq.exe",
 			"cwd": "${config:msvcOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"windows": {
 				"MIMode": "msvc"
 			},
@@ -301,12 +301,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [msvc/fastdebug/x86]",
-			"program": "${config:msvcOutPath}/x86/fastdebug/xenon.exe",
+			"name": "Launch Harlequin Runtime [msvc/fastdebug/x86]",
+			"program": "${config:msvcOutPath}/x86/fastdebug/hq.exe",
 			"cwd": "${config:msvcOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"windows": {
 				"MIMode": "msvc"
 			},
@@ -315,12 +315,12 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Runtime [msvc/release/x86]",
-			"program": "${config:msvcOutPath}/x86/release/xenon.exe",
+			"name": "Launch Harlequin Runtime [msvc/release/x86]",
+			"program": "${config:msvcOutPath}/x86/release/hq.exe",
 			"cwd": "${config:msvcOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
-			"args": ["test.xc"],
+			"args": ["test.bin"],
 			"windows": {
 				"MIMode": "msvc"
 			},
@@ -329,8 +329,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [clang/debug/x64]",
-			"program": "${config:clangOutPath}/x64/debug/xenonc",
+			"name": "Launch Harlequin Compiler [clang/debug/x64]",
+			"program": "${config:clangOutPath}/x64/debug/hqc",
 			"cwd": "${config:clangOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -348,8 +348,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [clang/fastdebug/x64]",
-			"program": "${config:clangOutPath}/x64/fastdebug/xenonc",
+			"name": "Launch Harlequin Compiler [clang/fastdebug/x64]",
+			"program": "${config:clangOutPath}/x64/fastdebug/hqc",
 			"cwd": "${config:clangOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -367,8 +367,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [clang/release/x64]",
-			"program": "${config:clangOutPath}/x64/release/xenonc",
+			"name": "Launch Harlequin Compiler [clang/release/x64]",
+			"program": "${config:clangOutPath}/x64/release/hqc",
 			"cwd": "${config:clangOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -386,8 +386,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [clang/debug/x86]",
-			"program": "${config:clangOutPath}/x86/debug/xenonc",
+			"name": "Launch Harlequin Compiler [clang/debug/x86]",
+			"program": "${config:clangOutPath}/x86/debug/hqc",
 			"cwd": "${config:clangOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -405,8 +405,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [clang/fastdebug/x86]",
-			"program": "${config:clangOutPath}/x86/fastdebug/xenonc",
+			"name": "Launch Harlequin Compiler [clang/fastdebug/x86]",
+			"program": "${config:clangOutPath}/x86/fastdebug/hqc",
 			"cwd": "${config:clangOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -424,8 +424,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [clang/release/x86]",
-			"program": "${config:clangOutPath}/x86/release/xenonc",
+			"name": "Launch Harlequin Compiler [clang/release/x86]",
+			"program": "${config:clangOutPath}/x86/release/hqc",
 			"cwd": "${config:clangOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -443,8 +443,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [gcc/debug/x64]",
-			"program": "${config:gccOutPath}/x64/debug/xenonc",
+			"name": "Launch Harlequin Compiler [gcc/debug/x64]",
+			"program": "${config:gccOutPath}/x64/debug/hqc",
 			"cwd": "${config:gccOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -462,8 +462,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [gcc/fastdebug/x64]",
-			"program": "${config:gccOutPath}/x64/fastdebug/xenonc",
+			"name": "Launch Harlequin Compiler [gcc/fastdebug/x64]",
+			"program": "${config:gccOutPath}/x64/fastdebug/hqc",
 			"cwd": "${config:gccOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -481,8 +481,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [gcc/release/x64]",
-			"program": "${config:gccOutPath}/x64/release/xenonc",
+			"name": "Launch Harlequin Compiler [gcc/release/x64]",
+			"program": "${config:gccOutPath}/x64/release/hqc",
 			"cwd": "${config:gccOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -500,8 +500,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [gcc/debug/x86]",
-			"program": "${config:gccOutPath}/x86/debug/xenonc",
+			"name": "Launch Harlequin Compiler [gcc/debug/x86]",
+			"program": "${config:gccOutPath}/x86/debug/hqc",
 			"cwd": "${config:gccOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -519,8 +519,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [gcc/fastdebug/x86]",
-			"program": "${config:gccOutPath}/x86/fastdebug/xenonc",
+			"name": "Launch Harlequin Compiler [gcc/fastdebug/x86]",
+			"program": "${config:gccOutPath}/x86/fastdebug/hqc",
 			"cwd": "${config:gccOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -538,8 +538,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [gcc/release/x86]",
-			"program": "${config:gccOutPath}/x86/release/xenonc",
+			"name": "Launch Harlequin Compiler [gcc/release/x86]",
+			"program": "${config:gccOutPath}/x86/release/hqc",
 			"cwd": "${config:gccOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -557,8 +557,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [msvc/debug/x64]",
-			"program": "${config:msvcOutPath}/x64/debug/xenonc.exe",
+			"name": "Launch Harlequin Compiler [msvc/debug/x64]",
+			"program": "${config:msvcOutPath}/x64/debug/hqc.exe",
 			"cwd": "${config:msvcOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -570,8 +570,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [msvc/fastdebug/x64]",
-			"program": "${config:msvcOutPath}/x64/fastdebug/xenonc.exe",
+			"name": "Launch Harlequin Compiler [msvc/fastdebug/x64]",
+			"program": "${config:msvcOutPath}/x64/fastdebug/hqc.exe",
 			"cwd": "${config:msvcOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -583,8 +583,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [msvc/release/x64]",
-			"program": "${config:msvcOutPath}/x64/release/xenonc.exe",
+			"name": "Launch Harlequin Compiler [msvc/release/x64]",
+			"program": "${config:msvcOutPath}/x64/release/hqc.exe",
 			"cwd": "${config:msvcOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -596,8 +596,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [msvc/debug/x86]",
-			"program": "${config:msvcOutPath}/x86/debug/xenonc.exe",
+			"name": "Launch Harlequin Compiler [msvc/debug/x86]",
+			"program": "${config:msvcOutPath}/x86/debug/hqc.exe",
 			"cwd": "${config:msvcOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -609,8 +609,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [msvc/fastdebug/x86]",
-			"program": "${config:msvcOutPath}/x86/fastdebug/xenonc.exe",
+			"name": "Launch Harlequin Compiler [msvc/fastdebug/x86]",
+			"program": "${config:msvcOutPath}/x86/fastdebug/hqc.exe",
 			"cwd": "${config:msvcOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -622,8 +622,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Compiler [msvc/release/x86]",
-			"program": "${config:msvcOutPath}/x86/release/xenonc.exe",
+			"name": "Launch Harlequin Compiler [msvc/release/x86]",
+			"program": "${config:msvcOutPath}/x86/release/hqc.exe",
 			"cwd": "${config:msvcOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -635,8 +635,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [clang/debug/x64]",
-			"program": "${config:clangOutPath}/x64/debug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [clang/debug/x64]",
+			"program": "${config:clangOutPath}/x64/debug/hqunittest",
 			"cwd": "${config:clangOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -654,8 +654,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [clang/fastdebug/x64]",
-			"program": "${config:clangOutPath}/x64/fastdebug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [clang/fastdebug/x64]",
+			"program": "${config:clangOutPath}/x64/fastdebug/hqunittest",
 			"cwd": "${config:clangOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -673,8 +673,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [clang/release/x64]",
-			"program": "${config:clangOutPath}/x64/release/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [clang/release/x64]",
+			"program": "${config:clangOutPath}/x64/release/hqunittest",
 			"cwd": "${config:clangOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -692,8 +692,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [clang/debug/x86]",
-			"program": "${config:clangOutPath}/x86/debug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [clang/debug/x86]",
+			"program": "${config:clangOutPath}/x86/debug/hqunittest",
 			"cwd": "${config:clangOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -711,8 +711,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [clang/fastdebug/x86]",
-			"program": "${config:clangOutPath}/x86/fastdebug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [clang/fastdebug/x86]",
+			"program": "${config:clangOutPath}/x86/fastdebug/hqunittest",
 			"cwd": "${config:clangOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -730,8 +730,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [clang/release/x86]",
-			"program": "${config:clangOutPath}/x86/release/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [clang/release/x86]",
+			"program": "${config:clangOutPath}/x86/release/hqunittest",
 			"cwd": "${config:clangOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -749,8 +749,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [gcc/debug/x64]",
-			"program": "${config:gccOutPath}/x64/debug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [gcc/debug/x64]",
+			"program": "${config:gccOutPath}/x64/debug/hqunittest",
 			"cwd": "${config:gccOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -768,8 +768,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [gcc/fastdebug/x64]",
-			"program": "${config:gccOutPath}/x64/fastdebug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [gcc/fastdebug/x64]",
+			"program": "${config:gccOutPath}/x64/fastdebug/hqunittest",
 			"cwd": "${config:gccOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -787,8 +787,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [gcc/release/x64]",
-			"program": "${config:gccOutPath}/x64/release/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [gcc/release/x64]",
+			"program": "${config:gccOutPath}/x64/release/hqunittest",
 			"cwd": "${config:gccOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -806,8 +806,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [gcc/debug/x86]",
-			"program": "${config:gccOutPath}/x86/debug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [gcc/debug/x86]",
+			"program": "${config:gccOutPath}/x86/debug/hqunittest",
 			"cwd": "${config:gccOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -825,8 +825,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [gcc/fastdebug/x86]",
-			"program": "${config:gccOutPath}/x86/fastdebug/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [gcc/fastdebug/x86]",
+			"program": "${config:gccOutPath}/x86/fastdebug/hqunittest",
 			"cwd": "${config:gccOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -844,8 +844,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [gcc/release/x86]",
-			"program": "${config:gccOutPath}/x86/release/xenonunittest",
+			"name": "Launch Harlequin Unit Tests [gcc/release/x86]",
+			"program": "${config:gccOutPath}/x86/release/hqunittest",
 			"cwd": "${config:gccOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -863,8 +863,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [msvc/debug/x64]",
-			"program": "${config:msvcOutPath}/x64/debug/xenonunittest.exe",
+			"name": "Launch Harlequin Unit Tests [msvc/debug/x64]",
+			"program": "${config:msvcOutPath}/x64/debug/hqunittest.exe",
 			"cwd": "${config:msvcOutPath}/x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -876,8 +876,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [msvc/fastdebug/x64]",
-			"program": "${config:msvcOutPath}/x64/fastdebug/xenonunittest.exe",
+			"name": "Launch Harlequin Unit Tests [msvc/fastdebug/x64]",
+			"program": "${config:msvcOutPath}/x64/fastdebug/hqunittest.exe",
 			"cwd": "${config:msvcOutPath}/x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -889,8 +889,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [msvc/release/x64]",
-			"program": "${config:msvcOutPath}/x64/release/xenonunittest.exe",
+			"name": "Launch Harlequin Unit Tests [msvc/release/x64]",
+			"program": "${config:msvcOutPath}/x64/release/hqunittest.exe",
 			"cwd": "${config:msvcOutPath}/x64/release",
 			"type": "cppdbg",
 			"request": "launch",
@@ -902,8 +902,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [msvc/debug/x86]",
-			"program": "${config:msvcOutPath}/x86/debug/xenonunittest.exe",
+			"name": "Launch Harlequin Unit Tests [msvc/debug/x86]",
+			"program": "${config:msvcOutPath}/x86/debug/hqunittest.exe",
 			"cwd": "${config:msvcOutPath}/x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -915,8 +915,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [msvc/fastdebug/x86]",
-			"program": "${config:msvcOutPath}/x86/fastdebug/xenonunittest.exe",
+			"name": "Launch Harlequin Unit Tests [msvc/fastdebug/x86]",
+			"program": "${config:msvcOutPath}/x86/fastdebug/hqunittest.exe",
 			"cwd": "${config:msvcOutPath}/x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
@@ -928,8 +928,8 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Xenon Unit Tests [msvc/release/x86]",
-			"program": "${config:msvcOutPath}/x86/release/xenonunittest.exe",
+			"name": "Launch Harlequin Unit Tests [msvc/release/x86]",
+			"program": "${config:msvcOutPath}/x86/release/hqunittest.exe",
 			"cwd": "${config:msvcOutPath}/x86/release",
 			"type": "cppdbg",
 			"request": "launch",

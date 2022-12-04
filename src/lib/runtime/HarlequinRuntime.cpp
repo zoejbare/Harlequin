@@ -16,7 +16,7 @@
 // IN THE SOFTWARE.
 //
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "../base/Mutex.hpp"
 #include "../base/String.hpp"
@@ -41,124 +41,124 @@ extern "C" {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmCreate(XenonVmHandle* phOutVm, XenonVmInit init)
+int HqVmCreate(HqVmHandle* phOutVm, HqVmInit init)
 {
 	if(!phOutVm
 		|| (*phOutVm)
-		|| init.common.report.reportLevel < XENON_MESSAGE_TYPE_VERBOSE
-		|| init.common.report.reportLevel > XENON_MESSAGE_TYPE_FATAL
-		|| init.gcThreadStackSize < XENON_VM_THREAD_MINIMUM_STACK_SIZE
+		|| init.common.report.reportLevel < HQ_MESSAGE_TYPE_VERBOSE
+		|| init.common.report.reportLevel > HQ_MESSAGE_TYPE_FATAL
+		|| init.gcThreadStackSize < HQ_VM_THREAD_MINIMUM_STACK_SIZE
 		|| init.gcMaxIterationCount == 0)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	XenonVm* const pVm = XenonVm::Create(init);
+	HqVm* const pVm = HqVm::Create(init);
 
 	// The message has to be printed *after* creating the VM state since the state is used in this function.
-	XenonReportMessage(&pVm->report, XENON_MESSAGE_TYPE_VERBOSE, "Initializing Xenon runtime");
+	HqReportMessage(&pVm->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin runtime");
 
 	(*phOutVm) = pVm;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmDispose(XenonVmHandle* phVm)
+int HqVmDispose(HqVmHandle* phVm)
 {
 	if(!phVm || !(*phVm))
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	XenonVmHandle hVm = (*phVm);
+	HqVmHandle hVm = (*phVm);
 
-	XenonReportMessage(&hVm->report, XENON_MESSAGE_TYPE_VERBOSE, "Releasing Xenon runtime");
-	XenonVm::Dispose(hVm);
+	HqReportMessage(&hVm->report, HQ_MESSAGE_TYPE_VERBOSE, "Releasing Harlequin runtime");
+	HqVm::Dispose(hVm);
 
-	(*phVm) = XENON_VM_HANDLE_NULL;
+	(*phVm) = HQ_VM_HANDLE_NULL;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetReportHandle(XenonVmHandle hVm, XenonReportHandle* phOutReport)
+int HqVmGetReportHandle(HqVmHandle hVm, HqReportHandle* phOutReport)
 {
 	if(!hVm || !phOutReport || *phOutReport)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*phOutReport) = &hVm->report;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetProgram(XenonVmHandle hVm, XenonProgramHandle* phOutProgram, const char* programName)
+int HqVmGetProgram(HqVmHandle hVm, HqProgramHandle* phOutProgram, const char* programName)
 {
 	if(!hVm || !phOutProgram || *phOutProgram || !programName || programName[0] == '\0')
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Create a string object since we need that to look up into the map.
-	XenonString* const pName = XenonString::Create(programName);
+	HqString* const pName = HqString::Create(programName);
 	if(!pName)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	int result;
-	(*phOutProgram) = XenonVm::GetProgram(hVm, pName, &result);
+	(*phOutProgram) = HqVm::GetProgram(hVm, pName, &result);
 
 	// We no longer need the string object.
-	XenonString::Release(pName);
+	HqString::Release(pName);
 
 	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetProgramCount(XenonVmHandle hVm, size_t* pOutCount)
+int HqVmGetProgramCount(HqVmHandle hVm, size_t* pOutCount)
 {
 	if(!hVm || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = XENON_MAP_FUNC_SIZE(hVm->programs);
+	(*pOutCount) = HQ_MAP_FUNC_SIZE(hVm->programs);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmListPrograms(XenonVmHandle hVm, XenonCallbackIterateProgram onIterateFn, void* pUserData)
+int HqVmListPrograms(HqVmHandle hVm, HqCallbackIterateProgram onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for each program we currently have loaded.
 	for(auto& kv : hVm->programs)
 	{
-		if(!onIterateFn(pUserData, XENON_MAP_ITER_VALUE(kv)))
+		if(!onIterateFn(pUserData, HQ_MAP_ITER_VALUE(kv)))
 		{
 			break;
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetFunction(XenonVmHandle hVm, XenonFunctionHandle* phOutFunction, const char* signature)
+int HqVmGetFunction(HqVmHandle hVm, HqFunctionHandle* phOutFunction, const char* signature)
 {
 	if(!hVm
 		|| !phOutFunction
@@ -166,151 +166,151 @@ int XenonVmGetFunction(XenonVmHandle hVm, XenonFunctionHandle* phOutFunction, co
 		|| !signature
 		|| signature[0] == '\0')
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Create a string object since we need that to look up into the map.
-	XenonString* const pSig = XenonString::Create(signature);
+	HqString* const pSig = HqString::Create(signature);
 	if(!pSig)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	int result;
-	(*phOutFunction) = XenonVm::GetFunction(hVm, pSig, &result);
+	(*phOutFunction) = HqVm::GetFunction(hVm, pSig, &result);
 
 	// We no longer need the string object.
-	XenonString::Release(pSig);
+	HqString::Release(pSig);
 
 	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetFunctionCount(XenonVmHandle hVm, size_t* pOutCount)
+int HqVmGetFunctionCount(HqVmHandle hVm, size_t* pOutCount)
 {
 	if(!hVm || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = XENON_MAP_FUNC_SIZE(hVm->functions);
+	(*pOutCount) = HQ_MAP_FUNC_SIZE(hVm->functions);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmListFunctions(XenonVmHandle hVm, XenonCallbackIterateFunction onIterateFn, void* pUserData)
+int HqVmListFunctions(HqVmHandle hVm, HqCallbackIterateFunction onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for each function we currently have loaded.
 	for(auto& kv : hVm->functions)
 	{
-		if(!onIterateFn(pUserData, XENON_MAP_ITER_VALUE(kv)))
+		if(!onIterateFn(pUserData, HQ_MAP_ITER_VALUE(kv)))
 		{
 			break;
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmSetGlobalVariable(XenonVmHandle hVm, XenonValueHandle hValue, const char* variableName)
+int HqVmSetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, const char* variableName)
 {
 	if(!hVm || !variableName || variableName[0] == '\0')
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(!hValue)
 	{
-		hValue = XenonValue::CreateNull();
+		hValue = HqValue::CreateNull();
 	}
 
-	if(hValue->type != XENON_VALUE_TYPE_NULL && hVm != hValue->hVm)
+	if(hValue->type != HQ_VALUE_TYPE_NULL && hVm != hValue->hVm)
 	{
-		return XENON_ERROR_MISMATCH;
+		return HQ_ERROR_MISMATCH;
 	}
 
 	// Create a string object to lookup into the map.
-	XenonString* const pVariableName = XenonString::Create(variableName);
+	HqString* const pVariableName = HqString::Create(variableName);
 	if(!pVariableName)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonScopedReadLock gcLock(hVm->gcRwLock);
+	HqScopedReadLock gcLock(hVm->gcRwLock);
 
-	const int result = XenonVm::SetGlobalVariable(hVm, hValue, pVariableName);
+	const int result = HqVm::SetGlobalVariable(hVm, hValue, pVariableName);
 
 	// Dispose of the string object since we no longer need it.
-	XenonString::Release(pVariableName);
+	HqString::Release(pVariableName);
 
 	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetGlobalVariable(XenonVmHandle hVm, XenonValueHandle* phOutValue, const char* variableName)
+int HqVmGetGlobalVariable(HqVmHandle hVm, HqValueHandle* phOutValue, const char* variableName)
 {
 	if(!hVm
 		|| !phOutValue
 		|| !variableName
 		|| variableName[0] == '\0')
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Create a string object in order to look up into the global map.
-	XenonString* const pGlobalName = XenonString::Create(variableName);
+	HqString* const pGlobalName = HqString::Create(variableName);
 	if(!pGlobalName)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	int result;
-	(*phOutValue) = XenonVm::GetGlobalVariable(hVm, pGlobalName, &result);
+	(*phOutValue) = HqVm::GetGlobalVariable(hVm, pGlobalName, &result);
 
-	XenonString::Release(pGlobalName);
+	HqString::Release(pGlobalName);
 
 	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmGetGlobalVariableCount(XenonVmHandle hVm, size_t* pOutCount)
+int HqVmGetGlobalVariableCount(HqVmHandle hVm, size_t* pOutCount)
 {
 	if(!hVm || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = XENON_MAP_FUNC_SIZE(hVm->globals);
+	(*pOutCount) = HQ_MAP_FUNC_SIZE(hVm->globals);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmListGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable onIterateFn, void* pUserData)
+int HqVmListGlobalVariables(HqVmHandle hVm, HqCallbackIterateVariable onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for each global variable we currently have loaded.
 	for(auto& kv : hVm->globals)
 	{
-		XenonString* const pGlobalName = XENON_MAP_ITER_KEY(kv);
-		XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+		HqString* const pGlobalName = HQ_MAP_ITER_KEY(kv);
+		HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
 
 		if(!onIterateFn(pUserData, pGlobalName->data, hValue))
 		{
@@ -318,22 +318,22 @@ int XenonVmListGlobalVariables(XenonVmHandle hVm, XenonCallbackIterateVariable o
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmListObjectSchemas(XenonVmHandle hVm, XenonCallbackIterateString onIterateFn, void* pUserData)
+int HqVmListObjectSchemas(HqVmHandle hVm, HqCallbackIterateString onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for each object schema we currently have loaded.
 	for(auto& kv : hVm->objectSchemas)
 	{
-		XenonString* const pObjectTypeName = XENON_MAP_ITER_KEY(kv);
+		HqString* const pObjectTypeName = HQ_MAP_ITER_KEY(kv);
 
 		if(!onIterateFn(pUserData, pObjectTypeName->data))
 		{
@@ -341,13 +341,13 @@ int XenonVmListObjectSchemas(XenonVmHandle hVm, XenonCallbackIterateString onIte
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmLoadProgram(
-	XenonVmHandle hVm,
+int HqVmLoadProgram(
+	HqVmHandle hVm,
 	const char* const programName,
 	const void* const pProgramFileData,
 	const size_t programFileSize
@@ -355,63 +355,63 @@ int XenonVmLoadProgram(
 {
 	if(!hVm || !programName || programName[0] == '\0' || !pProgramFileData || programFileSize == 0)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Create a string to be the key in the program map.
-	XenonString* const pProgramName = XenonString::Create(programName);
+	HqString* const pProgramName = HqString::Create(programName);
 	if(!pProgramName)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	// Check if a program with this name has already been loaded.
-	if(XENON_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
+	if(HQ_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
 	{
-		XenonString::Release(pProgramName);
-		return XENON_ERROR_KEY_ALREADY_EXISTS;
+		HqString::Release(pProgramName);
+		return HQ_ERROR_KEY_ALREADY_EXISTS;
 	}
 
 	// Attempt to load the program file.
-	XenonProgramHandle hProgram = XenonProgram::Create(hVm, pProgramName, pProgramFileData, programFileSize);
+	HqProgramHandle hProgram = HqProgram::Create(hVm, pProgramName, pProgramFileData, programFileSize);
 	if(!hProgram)
 	{
-		XenonString::Release(pProgramName);
-		return XENON_ERROR_FAILED_TO_OPEN_FILE;
+		HqString::Release(pProgramName);
+		return HQ_ERROR_FAILED_TO_OPEN_FILE;
 	}
 
 	// Map the program inside the VM state.
-	XENON_MAP_FUNC_INSERT(hVm->programs, pProgramName, hProgram);
+	HQ_MAP_FUNC_INSERT(hVm->programs, pProgramName, hProgram);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonVmInitializePrograms(XenonVmHandle hVm, XenonExecutionHandle* phOutExecution)
+int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExecution)
 {
-	if(!hVm || !phOutExecution || (*phOutExecution) != XENON_EXECUTION_HANDLE_NULL)
+	if(!hVm || !phOutExecution || (*phOutExecution) != HQ_EXECUTION_HANDLE_NULL)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	for(auto& kv : hVm->programs)
 	{
-		XenonProgramHandle hProgram = XENON_MAP_ITER_VALUE(kv);
+		HqProgramHandle hProgram = HQ_MAP_ITER_VALUE(kv);
 
 		if(hProgram->hInitFunction)
 		{
 			// Create an execution context for running the program's initialize function.
-			const int execCreateResult = XenonExecutionCreate(phOutExecution, hVm, hProgram->hInitFunction);
-			assert(execCreateResult == XENON_SUCCESS); (void) execCreateResult;
+			const int execCreateResult = HqExecutionCreate(phOutExecution, hVm, hProgram->hInitFunction);
+			assert(execCreateResult == HQ_SUCCESS); (void) execCreateResult;
 
 			// Run the initializer function to completion.
-			const int runResult = XenonExecutionRun(*phOutExecution, XENON_RUN_CONTINUOUS);
-			assert(runResult == XENON_SUCCESS); (void) runResult;
+			const int runResult = HqExecutionRun(*phOutExecution, HQ_RUN_CONTINUOUS);
+			assert(runResult == HQ_SUCCESS); (void) runResult;
 
 			// Check for any unhandled exceptions that occurred when running the initializer.
 			bool exception = false;
-			XenonExecutionHasUnhandledExceptionOccurred(*phOutExecution, &exception);
+			HqExecutionHasUnhandledExceptionOccurred(*phOutExecution, &exception);
 
 			if(exception)
 			{
@@ -421,87 +421,87 @@ int XenonVmInitializePrograms(XenonVmHandle hVm, XenonExecutionHandle* phOutExec
 			}
 
 			// We're done with the execution context.
-			XenonExecutionDispose(phOutExecution);
+			HqExecutionDispose(phOutExecution);
 
 			// Now that we've called the program's initializer function, we won't be calling it again,
 			// so we can dispose of it.
-			XenonFunction::Dispose(hProgram->hInitFunction);
-			hProgram->hInitFunction = XENON_FUNCTION_HANDLE_NULL;
+			HqFunction::Dispose(hProgram->hInitFunction);
+			hProgram->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramGetVm(XenonProgramHandle hProgram, XenonVmHandle* phOutVm)
+int HqProgramGetVm(HqProgramHandle hProgram, HqVmHandle* phOutVm)
 {
 	if(!hProgram || !phOutVm)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*phOutVm) = hProgram->hVm;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramGetName(XenonProgramHandle hProgram, const char** pOutName)
+int HqProgramGetName(HqProgramHandle hProgram, const char** pOutName)
 {
 	if(!hProgram || !pOutName)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutName) = hProgram->pName->data;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramGetEndianness(XenonProgramHandle hProgram, int* pOutEndianness)
+int HqProgramGetEndianness(HqProgramHandle hProgram, int* pOutEndianness)
 {
 	if(!hProgram || !pOutEndianness)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutEndianness) = hProgram->endianness;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramGetFunctionCount(XenonProgramHandle hProgram, size_t* pOutCount)
+int HqProgramGetFunctionCount(HqProgramHandle hProgram, size_t* pOutCount)
 {
 	if(!hProgram || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = XENON_MAP_FUNC_SIZE(hProgram->functions);
+	(*pOutCount) = HQ_MAP_FUNC_SIZE(hProgram->functions);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* const pUserData)
+int HqProgramListFunctions(HqProgramHandle hProgram, HqCallbackIterateString onIterateFn, void* const pUserData)
 {
 	if(!hProgram || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for each function signature in the program.
 	for(auto& kv : hProgram->functions)
 	{
-		XenonString* const pFunctionSignature = XENON_MAP_ITER_KEY(kv);
+		HqString* const pFunctionSignature = HQ_MAP_ITER_KEY(kv);
 
 		if(!onIterateFn(pUserData, pFunctionSignature->data))
 		{
@@ -509,40 +509,40 @@ int XenonProgramListFunctions(XenonProgramHandle hProgram, XenonCallbackIterateS
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramGetGlobalVariableCount(XenonProgramHandle hProgram, size_t* pOutCount)
+int HqProgramGetGlobalVariableCount(HqProgramHandle hProgram, size_t* pOutCount)
 {
 	if(!hProgram || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = XENON_MAP_FUNC_SIZE(hProgram->globals);
+	(*pOutCount) = HQ_MAP_FUNC_SIZE(hProgram->globals);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramListGlobalVariables(
-	XenonProgramHandle hProgram,
-	XenonCallbackIterateString onIterateFn,
+int HqProgramListGlobalVariables(
+	HqProgramHandle hProgram,
+	HqCallbackIterateString onIterateFn,
 	void* const pUserData
 )
 {
 	if(!hProgram || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for each global variable name in the program.
 	for(auto& kv : hProgram->globals)
 	{
-		XenonString* const pGlobalName = XENON_MAP_ITER_KEY(kv);
+		HqString* const pGlobalName = HQ_MAP_ITER_KEY(kv);
 
 		if(!onIterateFn(pUserData, pGlobalName->data))
 		{
@@ -550,22 +550,22 @@ int XenonProgramListGlobalVariables(
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramListDependencies(XenonProgramHandle hProgram, XenonCallbackIterateString onIterateFn, void* const pUserData)
+int HqProgramListDependencies(HqProgramHandle hProgram, HqCallbackIterateString onIterateFn, void* const pUserData)
 {
 	if(!hProgram || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for each dependency name referenced by the program.
 	for(auto& kv : hProgram->dependencies)
 	{
-		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
+		HqString* const pDependencyName = HQ_MAP_ITER_KEY(kv);
 
 		if(!onIterateFn(pUserData, pDependencyName->data))
 		{
@@ -573,29 +573,29 @@ int XenonProgramListDependencies(XenonProgramHandle hProgram, XenonCallbackItera
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonProgramListUnloadedDependencies(
-	XenonProgramHandle hProgram,
-	XenonCallbackIterateString onIterateFn,
+int HqProgramListUnloadedDependencies(
+	HqProgramHandle hProgram,
+	HqCallbackIterateString onIterateFn,
 	void* const pUserData
 )
 {
 	if(!hProgram || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Call the callback for only the dependency names referenced by the program that have not been loaded.
 	for(auto& kv : hProgram->dependencies)
 	{
-		XenonString* const pDependencyName = XENON_MAP_ITER_KEY(kv);
+		HqString* const pDependencyName = HQ_MAP_ITER_KEY(kv);
 
 		// Check the VM to see if the dependent program has been loaded.
-		if(!XENON_MAP_FUNC_CONTAINS(hProgram->hVm->programs, pDependencyName))
+		if(!HQ_MAP_FUNC_CONTAINS(hProgram->hVm->programs, pDependencyName))
 		{
 			if(!onIterateFn(pUserData, pDependencyName->data))
 			{
@@ -604,204 +604,204 @@ int XenonProgramListUnloadedDependencies(
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetProgram(XenonFunctionHandle hFunction, XenonProgramHandle* phOutProgram)
+int HqFunctionGetProgram(HqFunctionHandle hFunction, HqProgramHandle* phOutProgram)
 {
 	if(!hFunction || !phOutProgram)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*phOutProgram) = hFunction->hProgram;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetSignature(XenonFunctionHandle hFunction, const char** pOutSignature)
+int HqFunctionGetSignature(HqFunctionHandle hFunction, const char** pOutSignature)
 {
 	if(!hFunction || !pOutSignature)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutSignature) = hFunction->pSignature->data;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetIsNative(XenonFunctionHandle hFunction, bool* pOutNative)
+int HqFunctionGetIsNative(HqFunctionHandle hFunction, bool* pOutNative)
 {
 	if(!hFunction || !pOutNative)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutNative) = hFunction->isNative;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetParameterCount(XenonFunctionHandle hFunction, uint16_t* pOutCount)
+int HqFunctionGetParameterCount(HqFunctionHandle hFunction, uint16_t* pOutCount)
 {
 	if(!hFunction || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutCount) = hFunction->numParameters;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetReturnValueCount(XenonFunctionHandle hFunction, uint16_t* pOutCount)
+int HqFunctionGetReturnValueCount(HqFunctionHandle hFunction, uint16_t* pOutCount)
 {
 	if(!hFunction || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutCount) = hFunction->numReturnValues;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetBytecodeOffset(XenonFunctionHandle hFunction, uint32_t* pOutOffset)
+int HqFunctionGetBytecodeOffset(HqFunctionHandle hFunction, uint32_t* pOutOffset)
 {
 	if(!hFunction || !pOutOffset)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	(*pOutOffset) = hFunction->bytecodeOffsetStart;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction* pOutNativeFn)
+int HqFunctionGetNativeBinding(HqFunctionHandle hFunction, HqNativeFunction* pOutNativeFn)
 {
 	if(!hFunction || !pOutNativeFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(!hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	(*pOutNativeFn) = hFunction->nativeFn;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionGetNativeUserData(XenonFunctionHandle hFunction, void** ppOutUserData)
+int HqFunctionGetNativeUserData(HqFunctionHandle hFunction, void** ppOutUserData)
 {
 	if(!hFunction || !ppOutUserData)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(!hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	(*ppOutUserData) = hFunction->pNativeUserData;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionSetNativeBinding(XenonFunctionHandle hFunction, XenonNativeFunction nativeFn, void* pUserData)
+int HqFunctionSetNativeBinding(HqFunctionHandle hFunction, HqNativeFunction nativeFn, void* pUserData)
 {
 	if(!hFunction || !nativeFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(!hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	hFunction->nativeFn = nativeFn;
 	hFunction->pNativeUserData = pUserData;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFunctionDisassemble(XenonFunctionHandle hFunction, XenonCallbackOpDisasm onDisasmFn, void* pUserData)
+int HqFunctionDisassemble(HqFunctionHandle hFunction, HqCallbackOpDisasm onDisasmFn, void* pUserData)
 {
 	if(!hFunction || !onDisasmFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	XenonDisassemble disasm;
+	HqDisassemble disasm;
 
 	disasm.hProgram = hFunction->hProgram;
 	disasm.onDisasmFn = onDisasmFn;
 	disasm.pUserData = pUserData;
 
-	XenonDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
+	HqDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
 
 	// Iterate through each instruction.
 	for(;;)
 	{
 		const uintptr_t offset = uintptr_t(disasm.decoder.ip - hFunction->hProgram->code.pData);
-		const uint8_t opCode = XenonDecoder::LoadUint8(disasm.decoder);
+		const uint8_t opCode = HqDecoder::LoadUint8(disasm.decoder);
 
 		disasm.opcodeOffset = offset;
 
-		XenonVm::DisassembleOpCode(disasm.hProgram->hVm, disasm, opCode);
+		HqVm::DisassembleOpCode(disasm.hProgram->hVm, disasm, opCode);
 
-		if(opCode == XENON_OP_CODE_RETURN)
+		if(opCode == HQ_OP_CODE_RETURN)
 		{
 			// The RETURN opcode indicates the end of the function.
 			break;
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionCreate(
-	XenonExecutionHandle* phOutExecution,
-	XenonVmHandle hVm,
-	XenonFunctionHandle hEntryPoint
+int HqExecutionCreate(
+	HqExecutionHandle* phOutExecution,
+	HqVmHandle hVm,
+	HqFunctionHandle hEntryPoint
 )
 {
 	if(!phOutExecution
@@ -809,75 +809,75 @@ int XenonExecutionCreate(
 		|| !hVm
 		|| !hEntryPoint)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Create a new execution context with the provided script function as the entry point.
-	XenonExecutionHandle hExec = XenonExecution::Create(hVm, hEntryPoint);
+	HqExecutionHandle hExec = HqExecution::Create(hVm, hEntryPoint);
 	if(!hExec)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	(*phOutExecution) = hExec;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionDispose(XenonExecutionHandle* phExecution)
+int HqExecutionDispose(HqExecutionHandle* phExecution)
 {
 	if(!phExecution || !(*phExecution))
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	XenonExecutionHandle hExec = (*phExecution);
+	HqExecutionHandle hExec = (*phExecution);
 
-	XenonExecution::DetachFromVm(hExec);
+	HqExecution::DetachFromVm(hExec);
 
-	(*phExecution) = XENON_EXECUTION_HANDLE_NULL;
+	(*phExecution) = HQ_EXECUTION_HANDLE_NULL;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionRun(XenonExecutionHandle hExec, int runMode)
+int HqExecutionRun(HqExecutionHandle hExec, int runMode)
 {
-	if(!hExec || runMode < XENON_RUN_STEP || runMode > XENON_RUN_CONTINUOUS)
+	if(!hExec || runMode < HQ_RUN_STEP || runMode > HQ_RUN_CONTINUOUS)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 	else if(!hExec->hCurrentFrame)
 	{
-		return XENON_ERROR_SCRIPT_NO_FUNCTION;
+		return HQ_ERROR_SCRIPT_NO_FUNCTION;
 	}
 
-	XenonExecution::Run(hExec, runMode);
+	HqExecution::Run(hExec, runMode);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionYield(XenonExecutionHandle hExec)
+int HqExecutionYield(HqExecutionHandle hExec)
 {
 	if(!hExec)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	hExec->yield = true;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionRaiseStandardException(
-	XenonExecutionHandle hExec,
+int HqExecutionRaiseStandardException(
+	HqExecutionHandle hExec,
 	const int severity,
 	const int exceptionType,
 	const char* const message,
@@ -886,11 +886,11 @@ int XenonExecutionRaiseStandardException(
 {
 	if(!hExec
 		|| severity < 0
-		|| severity >= XENON_EXCEPTION_SEVERITY__COUNT
+		|| severity >= HQ_EXCEPTION_SEVERITY__COUNT
 		|| exceptionType < 0
-		|| exceptionType >= XENON_STANDARD_EXCEPTION__COUNT)
+		|| exceptionType >= HQ_STANDARD_EXCEPTION__COUNT)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	const char* formattedMessage = nullptr;
@@ -899,148 +899,148 @@ int XenonExecutionRaiseStandardException(
 
 		// Resolve the formatted args to a va_list.
 		va_start(vl, message);
-		formattedMessage = XenonString::RawFormatVarArgs(message, vl);
+		formattedMessage = HqString::RawFormatVarArgs(message, vl);
 		va_end(vl);
 	}
 
 	if(!formattedMessage)
 	{
 		// Failed to allocate the formatted message string.
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	// Lock the GC thread since we need to create a value for the exception and handle it in the execution context.
-	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
-	XenonValueHandle hException = XenonVm::CreateStandardException(
+	HqValueHandle hException = HqVm::CreateStandardException(
 		hExec->hVm,
 		exceptionType,
 		formattedMessage
 	);
 
 	// Free the formatted message string now that we're done with it.
-	XenonMemFree((void*)(formattedMessage));
+	HqMemFree((void*)(formattedMessage));
 
-	XenonExecution::RaiseException(hExec, hException, severity);
-	XenonValue::SetAutoMark(hException, false);
+	HqExecution::RaiseException(hExec, hException, severity);
+	HqValue::SetAutoMark(hException, false);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionRaiseException(XenonExecutionHandle hExec, XenonValueHandle hValue, int severity)
+int HqExecutionRaiseException(HqExecutionHandle hExec, HqValueHandle hValue, int severity)
 {
-	if(!hExec || severity < 0 || severity >= XENON_EXCEPTION_SEVERITY__COUNT)
+	if(!hExec || severity < 0 || severity >= HQ_EXCEPTION_SEVERITY__COUNT)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Lock the GC thread since we need to handle the exception in the execution context.
-	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
-	XenonExecution::RaiseException(hExec, hValue, severity);
+	HqExecution::RaiseException(hExec, hValue, severity);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionGetVm(XenonExecutionHandle hExec, XenonVmHandle* phOutVm)
+int HqExecutionGetVm(HqExecutionHandle hExec, HqVmHandle* phOutVm)
 {
 	if(!hExec || !phOutVm)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*phOutVm) = hExec->hVm;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionGetStatus(XenonExecutionHandle hExec, int statusType, bool* pOutStatus)
+int HqExecutionGetStatus(HqExecutionHandle hExec, int statusType, bool* pOutStatus)
 {
 	if(!hExec || !pOutStatus)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	switch(statusType)
 	{
-		case XENON_EXEC_STATUS_YIELD:
+		case HQ_EXEC_STATUS_YIELD:
 			(*pOutStatus) = hExec->yield;
 			break;
 
-		case XENON_EXEC_STATUS_RUNNING:
+		case HQ_EXEC_STATUS_RUNNING:
 			(*pOutStatus) = (hExec->started && !hExec->finished) || hExec->exception;
 			break;
 
-		case XENON_EXEC_STATUS_COMPLETE:
+		case HQ_EXEC_STATUS_COMPLETE:
 			(*pOutStatus) = hExec->finished || hExec->exception;
 			break;
 
-		case XENON_EXEC_STATUS_EXCEPTION:
+		case HQ_EXEC_STATUS_EXCEPTION:
 			(*pOutStatus) = hExec->exception;
 			break;
 
-		case XENON_EXEC_STATUS_ABORT:
+		case HQ_EXEC_STATUS_ABORT:
 			(*pOutStatus) = hExec->abort;
 			break;
 
 		default:
-			return XENON_ERROR_INVALID_TYPE;
+			return HQ_ERROR_INVALID_TYPE;
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionHasUnhandledExceptionOccurred(XenonExecutionHandle hExec, bool* pOutException)
+int HqExecutionHasUnhandledExceptionOccurred(HqExecutionHandle hExec, bool* pOutException)
 {
 	if(!hExec || !pOutException)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutException) = hExec->exception;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionGetFrameStackDepth(XenonExecutionHandle hExec, size_t* pOutDepth)
+int HqExecutionGetFrameStackDepth(HqExecutionHandle hExec, size_t* pOutDepth)
 {
 	if(!hExec || !pOutDepth)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*pOutDepth) = hExec->frameStack.nextIndex;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionResolveFrameStack(
-	XenonExecutionHandle hExec,
-	XenonCallbackIterateFrame onIterateFn,
+int HqExecutionResolveFrameStack(
+	HqExecutionHandle hExec,
+	HqCallbackIterateFrame onIterateFn,
 	void* pUserData
 )
 {
 	if(!hExec || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	for(size_t i = 0; i < hExec->frameStack.nextIndex; ++i)
 	{
 		// Traverse the frame stack in reverse.
-		XenonFrameHandle hFrame = hExec->frameStack.memory.pData[hExec->frameStack.nextIndex - i - 1];
+		HqFrameHandle hFrame = hExec->frameStack.memory.pData[hExec->frameStack.nextIndex - i - 1];
 
 		if(!onIterateFn(pUserData, hFrame))
 		{
@@ -1048,67 +1048,67 @@ int XenonExecutionResolveFrameStack(
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionGetCurrentFrame(XenonExecutionHandle hExec, XenonFrameHandle* phOutFrame)
+int HqExecutionGetCurrentFrame(HqExecutionHandle hExec, HqFrameHandle* phOutFrame)
 {
 	if(!hExec || !phOutFrame || *phOutFrame)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*phOutFrame) = hExec->hCurrentFrame;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionSetIoRegister(XenonExecutionHandle hExec, XenonValueHandle hValue, int registerIndex)
+int HqExecutionSetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, int registerIndex)
 {
 	if(!hExec
 		|| registerIndex < 0
-		|| registerIndex >= XENON_VM_IO_REGISTER_COUNT)
+		|| registerIndex >= HQ_VM_IO_REGISTER_COUNT)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(!hValue)
 	{
-		hValue = XenonValue::CreateNull();
+		hValue = HqValue::CreateNull();
 	}
 
-	if(hValue->type != XENON_VALUE_TYPE_NULL
+	if(hValue->type != HQ_VALUE_TYPE_NULL
 		&& hExec->hVm != hValue->hVm)
 	{
-		return XENON_ERROR_MISMATCH;
+		return HQ_ERROR_MISMATCH;
 	}
 
-	return XenonExecution::SetIoRegister(hExec, hValue, registerIndex);
+	return HqExecution::SetIoRegister(hExec, hValue, registerIndex);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, XenonValueHandle* phOutValue, int registerIndex)
+int HqExecutionGetIoRegister(HqExecutionHandle hExec, HqValueHandle* phOutValue, int registerIndex)
 {
 	if(!hExec
 		|| !phOutValue
 		|| registerIndex < 0
-		|| registerIndex >= XENON_VM_IO_REGISTER_COUNT)
+		|| registerIndex >= HQ_VM_IO_REGISTER_COUNT)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	XenonScopedReadLock gcLock(hExec->hVm->gcRwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gcRwLock);
 
 	int result;
-	XenonValueHandle hValue = XenonExecution::GetIoRegister(hExec, registerIndex, &result);
+	HqValueHandle hValue = HqExecution::GetIoRegister(hExec, registerIndex, &result);
 
 	// Guard the value against being garbage collected.
-	XenonValue::SetAutoMark(hValue, true);
+	HqValue::SetAutoMark(hValue, true);
 
 	(*phOutValue) = hValue;
 
@@ -1117,86 +1117,86 @@ int XenonExecutionGetIoRegister(XenonExecutionHandle hExec, XenonValueHandle* ph
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameGetFunction(XenonFrameHandle hFrame, XenonFunctionHandle* phOutFunction)
+int HqFrameGetFunction(HqFrameHandle hFrame, HqFunctionHandle* phOutFunction)
 {
 	if(!hFrame || !phOutFunction || (*phOutFunction))
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	(*phOutFunction) = hFrame->hFunction;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameGetBytecodeOffset(XenonFrameHandle hFrame, uint32_t* pOutOffset)
+int HqFrameGetBytecodeOffset(HqFrameHandle hFrame, uint32_t* pOutOffset)
 {
 	if(!hFrame || !pOutOffset)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	(*pOutOffset) = uint32_t(hFrame->decoder.cachedIp - hFrame->hFunction->hProgram->code.pData);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFramePushValue(XenonFrameHandle hFrame, XenonValueHandle hValue)
+int HqFramePushValue(HqFrameHandle hFrame, HqValueHandle hValue)
 {
 	if(!hFrame)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	if(!hValue)
 	{
-		hValue = XenonValue::CreateNull();
+		hValue = HqValue::CreateNull();
 	}
 
-	if(hValue->type != XENON_VALUE_TYPE_NULL
-		&& XenonFunction::GetVm(hFrame->hFunction) != hValue->hVm)
+	if(hValue->type != HQ_VALUE_TYPE_NULL
+		&& HqFunction::GetVm(hFrame->hFunction) != hValue->hVm)
 	{
-		return XENON_ERROR_MISMATCH;
+		return HQ_ERROR_MISMATCH;
 	}
 
-	return XenonFrame::PushValue(hFrame, hValue);
+	return HqFrame::PushValue(hFrame, hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFramePopValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue)
+int HqFramePopValue(HqFrameHandle hFrame, HqValueHandle* phOutValue)
 {
 	if(!hFrame)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
-	int result = XenonFrame::PopValue(hFrame, &hValue);
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	int result = HqFrame::PopValue(hFrame, &hValue);
 
 	if(phOutValue)
 	{
 		// Guard the value against being garbage collected.
-		XenonValue::SetAutoMark(hValue, true);
+		HqValue::SetAutoMark(hValue, true);
 
 		(*phOutValue) = hValue;
 	}
@@ -1206,93 +1206,93 @@ int XenonFramePopValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFramePeekValue(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, int stackIndex)
+int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, int stackIndex)
 {
 	if(!hFrame || !phOutValue || *phOutValue)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	XenonValueHandle hValue = XENON_VALUE_HANDLE_NULL;
-	XenonFrame::PeekValue(hFrame, &hValue, stackIndex);
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	HqFrame::PeekValue(hFrame, &hValue, stackIndex);
 
 	// Guard the value against being garbage collected.
-	XenonValue::SetAutoMark(hValue, true);
+	HqValue::SetAutoMark(hValue, true);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameSetGpRegister(XenonFrameHandle hFrame, XenonValueHandle hValue, int registerIndex)
+int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, int registerIndex)
 {
-	if(!hFrame || registerIndex < 0 || registerIndex >= XENON_VM_GP_REGISTER_COUNT)
+	if(!hFrame || registerIndex < 0 || registerIndex >= HQ_VM_GP_REGISTER_COUNT)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	if(!hValue)
 	{
-		hValue = XenonValue::CreateNull();
+		hValue = HqValue::CreateNull();
 	}
 
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
 	if(!hVm)
 	{
-		return XENON_ERROR_INVALID_DATA;
+		return HQ_ERROR_INVALID_DATA;
 	}
 
-	if(hValue->type != XENON_VALUE_TYPE_NULL
+	if(hValue->type != HQ_VALUE_TYPE_NULL
 		&& hVm != hValue->hVm)
 	{
-		return XENON_ERROR_MISMATCH;
+		return HQ_ERROR_MISMATCH;
 	}
 
-	XenonScopedReadLock gcLock(hVm->gcRwLock);
+	HqScopedReadLock gcLock(hVm->gcRwLock);
 
-	return XenonFrame::SetGpRegister(hFrame, hValue, registerIndex);
+	return HqFrame::SetGpRegister(hFrame, hValue, registerIndex);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, int registerIndex)
+int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, int registerIndex)
 {
 	if(!hFrame
 		|| !phOutValue
 		|| registerIndex < 0
-		|| registerIndex >= XENON_VM_GP_REGISTER_COUNT)
+		|| registerIndex >= HQ_VM_GP_REGISTER_COUNT)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
 	if(!hVm)
 	{
-		return XENON_ERROR_INVALID_DATA;
+		return HQ_ERROR_INVALID_DATA;
 	}
 
-	XenonScopedReadLock gcLock(hVm->gcRwLock);
+	HqScopedReadLock gcLock(hVm->gcRwLock);
 
 	int result;
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hFrame, registerIndex, &result);
+	HqValueHandle hValue = HqFrame::GetGpRegister(hFrame, registerIndex, &result);
 
 	// Guard the value against being garbage collected.
-	XenonValue::SetAutoMark(hValue, true);
+	HqValue::SetAutoMark(hValue, true);
 
 	(*phOutValue) = hValue;
 
@@ -1301,87 +1301,87 @@ int XenonFrameGetGpRegister(XenonFrameHandle hFrame, XenonValueHandle* phOutValu
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameSetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle hValue, const char* variableName)
+int HqFrameSetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, const char* variableName)
 {
 	if(!hFrame || !hValue || !variableName || variableName[0] == '\0')
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	if(!hValue)
 	{
-		hValue = XenonValue::CreateNull();
+		hValue = HqValue::CreateNull();
 	}
 
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
 	if(!hVm)
 	{
-		return XENON_ERROR_INVALID_DATA;
+		return HQ_ERROR_INVALID_DATA;
 	}
 
-	if(hValue->type != XENON_VALUE_TYPE_NULL
+	if(hValue->type != HQ_VALUE_TYPE_NULL
 		&& hVm != hValue->hVm)
 	{
-		return XENON_ERROR_MISMATCH;
+		return HQ_ERROR_MISMATCH;
 	}
 
-	XenonString* const pVarName = XenonString::Create(variableName);
+	HqString* const pVarName = HqString::Create(variableName);
 	if(!pVarName)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonScopedReadLock gcLock(hVm->gcRwLock);
+	HqScopedReadLock gcLock(hVm->gcRwLock);
 
-	const int result = XenonFrame::SetLocalVariable(hFrame, hValue, pVarName);
+	const int result = HqFrame::SetLocalVariable(hFrame, hValue, pVarName);
 
-	XenonString::Release(pVarName);
+	HqString::Release(pVarName);
 
 	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutValue, const char* variableName)
+int HqFrameGetLocalVariable(HqFrameHandle hFrame, HqValueHandle* phOutValue, const char* variableName)
 {
 	if(!hFrame || !phOutValue || !variableName || variableName[0] == '\0')
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	// Create a string object to use for the map lookup.
-	XenonString* const pVarName = XenonString::Create(variableName);
+	HqString* const pVarName = HqString::Create(variableName);
 	if(!pVarName)
 	{
-		return XENON_ERROR_BAD_ALLOCATION;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	XenonVmHandle hVm = XenonFunction::GetVm(hFrame->hFunction);
+	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
 	if(!hVm)
 	{
-		return XENON_ERROR_INVALID_DATA;
+		return HQ_ERROR_INVALID_DATA;
 	}
 
-	XenonScopedReadLock gcLock(hVm->gcRwLock);
+	HqScopedReadLock gcLock(hVm->gcRwLock);
 
 	int result;
-	XenonValueHandle hValue = XenonFrame::GetLocalVariable(hFrame, pVarName, &result);
+	HqValueHandle hValue = HqFrame::GetLocalVariable(hFrame, pVarName, &result);
 
 	// Dispose of the string object now that we no longer need it.
-	XenonString::Release(pVarName);
+	HqString::Release(pVarName);
 
 	// Guard the value against being garbage collected.
-	XenonValue::SetAutoMark(hValue, true);
+	HqValue::SetAutoMark(hValue, true);
 
 	(*phOutValue) = hValue;
 
@@ -1390,41 +1390,41 @@ int XenonFrameGetLocalVariable(XenonFrameHandle hFrame, XenonValueHandle* phOutV
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameGetLocalVariableCount(XenonFrameHandle hFrame, size_t* pOutCount)
+int HqFrameGetLocalVariableCount(HqFrameHandle hFrame, size_t* pOutCount)
 {
 	if(!hFrame || !pOutCount)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	(*pOutCount) = XENON_MAP_FUNC_SIZE(hFrame->locals);
+	(*pOutCount) = HQ_MAP_FUNC_SIZE(hFrame->locals);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVariable onIterateFn, void* pUserData)
+int HqFrameListLocalVariables(HqFrameHandle hFrame, HqCallbackIterateVariable onIterateFn, void* pUserData)
 {
 	if(!hFrame || !onIterateFn)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
 	if(hFrame->hFunction->isNative)
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	for(auto& kv : hFrame->locals)
 	{
-		XenonString* const pLocalName = XENON_MAP_ITER_KEY(kv);
-		XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+		HqString* const pLocalName = HQ_MAP_ITER_KEY(kv);
+		HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
 
 		if(!onIterateFn(pUserData, pLocalName->data, hValue))
 		{
@@ -1432,281 +1432,281 @@ int XenonFrameListLocalVariables(XenonFrameHandle hFrame, XenonCallbackIterateVa
 		}
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateBool(XenonVmHandle hVm, bool value)
+HqValueHandle HqValueCreateBool(HqVmHandle hVm, bool value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateBool(hVm, value);
+	return HqValue::CreateBool(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt8(XenonVmHandle hVm, int8_t value)
+HqValueHandle HqValueCreateInt8(HqVmHandle hVm, int8_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateInt8(hVm, value);
+	return HqValue::CreateInt8(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt16(XenonVmHandle hVm, int16_t value)
+HqValueHandle HqValueCreateInt16(HqVmHandle hVm, int16_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateInt16(hVm, value);
+	return HqValue::CreateInt16(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt32(XenonVmHandle hVm, int32_t value)
+HqValueHandle HqValueCreateInt32(HqVmHandle hVm, int32_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateInt32(hVm, value);
+	return HqValue::CreateInt32(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateInt64(XenonVmHandle hVm, int64_t value)
+HqValueHandle HqValueCreateInt64(HqVmHandle hVm, int64_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateInt64(hVm, value);
+	return HqValue::CreateInt64(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint8(XenonVmHandle hVm, uint8_t value)
+HqValueHandle HqValueCreateUint8(HqVmHandle hVm, uint8_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateUint8(hVm, value);
+	return HqValue::CreateUint8(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint16(XenonVmHandle hVm, uint16_t value)
+HqValueHandle HqValueCreateUint16(HqVmHandle hVm, uint16_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateUint16(hVm, value);
+	return HqValue::CreateUint16(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint32(XenonVmHandle hVm, uint32_t value)
+HqValueHandle HqValueCreateUint32(HqVmHandle hVm, uint32_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateUint32(hVm, value);
+	return HqValue::CreateUint32(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateUint64(XenonVmHandle hVm, uint64_t value)
+HqValueHandle HqValueCreateUint64(HqVmHandle hVm, uint64_t value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateUint64(hVm, value);
+	return HqValue::CreateUint64(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateFloat32(XenonVmHandle hVm, float value)
+HqValueHandle HqValueCreateFloat32(HqVmHandle hVm, float value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateFloat32(hVm, value);
+	return HqValue::CreateFloat32(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateFloat64(XenonVmHandle hVm, double value)
+HqValueHandle HqValueCreateFloat64(HqVmHandle hVm, double value)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateFloat64(hVm, value);
+	return HqValue::CreateFloat64(hVm, value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateNull()
+HqValueHandle HqValueCreateNull()
 {
-	return XenonValue::CreateNull();
+	return HqValue::CreateNull();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateString(XenonVmHandle hVm, const char* const string)
+HqValueHandle HqValueCreateString(HqVmHandle hVm, const char* const string)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateString(hVm, string ? string : "");
+	return HqValue::CreateString(hVm, string ? string : "");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateFunction(XenonVmHandle hVm, XenonFunctionHandle hFunction)
+HqValueHandle HqValueCreateFunction(HqVmHandle hVm, HqFunctionHandle hFunction)
 {
 	if(!hVm || !hFunction)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateFunction(hVm, hFunction);
+	return HqValue::CreateFunction(hVm, hFunction);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateObject(XenonVmHandle hVm, const char* const typeName)
+HqValueHandle HqValueCreateObject(HqVmHandle hVm, const char* const typeName)
 {
 	if(!hVm || !typeName || typeName[0] == '\0')
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	XenonString* const pTypeName = XenonString::Create(typeName);
+	HqString* const pTypeName = HqString::Create(typeName);
 
 	int result;
-	XenonScriptObject* const pSchema = XenonVm::GetObjectSchema(hVm, pTypeName, &result);
+	HqScriptObject* const pSchema = HqVm::GetObjectSchema(hVm, pTypeName, &result);
 
 	// Release the type name string now that we're done with it.
-	XenonString::Release(pTypeName);
+	HqString::Release(pTypeName);
 
 	// Make sure we were able to successfully retrieved the object template.
-	if(result != XENON_SUCCESS)
+	if(result != HQ_SUCCESS)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateObject(hVm, pSchema);
+	return HqValue::CreateObject(hVm, pSchema);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateArray(XenonVmHandle hVm, const size_t count)
+HqValueHandle HqValueCreateArray(HqVmHandle hVm, const size_t count)
 {
 	if(!hVm)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateArray(hVm, count);
+	return HqValue::CreateArray(hVm, count);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCreateNative(
-	XenonVmHandle hVm,
+HqValueHandle HqValueCreateNative(
+	HqVmHandle hVm,
 	void* pNativeObject,
-	XenonCallbackNativeValueCopy onCopy,
-	XenonCallbackNativeValueDestruct onDestruct,
-	XenonCallbackNativeValueEqual onTestEqual,
-	XenonCallbackNativeValueLessThan onTestLessThan
+	HqCallbackNativeValueCopy onCopy,
+	HqCallbackNativeValueDestruct onDestruct,
+	HqCallbackNativeValueEqual onTestEqual,
+	HqCallbackNativeValueLessThan onTestLessThan
 )
 {
 	if(!hVm || !onCopy || !onDestruct || !onTestEqual || !onTestLessThan)
 	{
-		return XENON_VALUE_HANDLE_NULL;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return XenonValue::CreateNative(hVm, pNativeObject, onCopy, onDestruct, onTestEqual, onTestLessThan);
+	return HqValue::CreateNative(hVm, pNativeObject, onCopy, onDestruct, onTestEqual, onTestLessThan);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueCopy(XenonVmHandle hVm, XenonValueHandle hValue)
+HqValueHandle HqValueCopy(HqVmHandle hVm, HqValueHandle hValue)
 {
-	return XenonValue::Copy(hVm, hValue);
+	return HqValue::Copy(hVm, hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueGcProtect(XenonValueHandle hValue)
+int HqValueGcProtect(HqValueHandle hValue)
 {
-	if(!XenonValue::CanBeMarked(hValue))
+	if(!HqValue::CanBeMarked(hValue))
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	XenonValue::SetAutoMark(hValue, true);
+	HqValue::SetAutoMark(hValue, true);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueGcExpose(XenonValueHandle hValue)
+int HqValueGcExpose(HqValueHandle hValue)
 {
-	if(!XenonValue::CanBeMarked(hValue))
+	if(!HqValue::CanBeMarked(hValue))
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	XenonValue::SetAutoMark(hValue, false);
+	HqValue::SetAutoMark(hValue, false);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsPrimitiveType(XenonValueHandle hValue)
+bool HqValueIsPrimitiveType(HqValueHandle hValue)
 {
 	switch(hValue->type)
 	{
-		case XENON_VALUE_TYPE_BOOL:
-		case XENON_VALUE_TYPE_INT8:
-		case XENON_VALUE_TYPE_INT16:
-		case XENON_VALUE_TYPE_INT32:
-		case XENON_VALUE_TYPE_INT64:
-		case XENON_VALUE_TYPE_UINT8:
-		case XENON_VALUE_TYPE_UINT16:
-		case XENON_VALUE_TYPE_UINT32:
-		case XENON_VALUE_TYPE_UINT64:
-		case XENON_VALUE_TYPE_FLOAT32:
-		case XENON_VALUE_TYPE_FLOAT64:
+		case HQ_VALUE_TYPE_BOOL:
+		case HQ_VALUE_TYPE_INT8:
+		case HQ_VALUE_TYPE_INT16:
+		case HQ_VALUE_TYPE_INT32:
+		case HQ_VALUE_TYPE_INT64:
+		case HQ_VALUE_TYPE_UINT8:
+		case HQ_VALUE_TYPE_UINT16:
+		case HQ_VALUE_TYPE_UINT32:
+		case HQ_VALUE_TYPE_UINT64:
+		case HQ_VALUE_TYPE_FLOAT32:
+		case HQ_VALUE_TYPE_FLOAT64:
 			return true;
 
 		default:
@@ -1718,128 +1718,128 @@ bool XenonValueIsPrimitiveType(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsBool(XenonValueHandle hValue)
+bool HqValueIsBool(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_BOOL);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_BOOL);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsInt8(XenonValueHandle hValue)
+bool HqValueIsInt8(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_INT8);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_INT8);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsInt16(XenonValueHandle hValue)
+bool HqValueIsInt16(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_INT16);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_INT16);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsInt32(XenonValueHandle hValue)
+bool HqValueIsInt32(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_INT32);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_INT32);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsInt64(XenonValueHandle hValue)
+bool HqValueIsInt64(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_INT64);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_INT64);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsUint8(XenonValueHandle hValue)
+bool HqValueIsUint8(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT8);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_UINT8);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsUint16(XenonValueHandle hValue)
+bool HqValueIsUint16(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT16);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_UINT16);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsUint32(XenonValueHandle hValue)
+bool HqValueIsUint32(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT32);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_UINT32);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsUint64(XenonValueHandle hValue)
+bool HqValueIsUint64(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_UINT64);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_UINT64);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsFloat32(XenonValueHandle hValue)
+bool HqValueIsFloat32(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_FLOAT32);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_FLOAT32);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsFloat64(XenonValueHandle hValue)
+bool HqValueIsFloat64(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_FLOAT64);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_FLOAT64);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsNull(XenonValueHandle hValue)
+bool HqValueIsNull(HqValueHandle hValue)
 {
-	return !hValue || (hValue->type == XENON_VALUE_TYPE_NULL);
+	return !hValue || (hValue->type == HQ_VALUE_TYPE_NULL);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsString(XenonValueHandle hValue)
+bool HqValueIsString(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_STRING);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_STRING);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsFunction(XenonValueHandle hValue)
+bool HqValueIsFunction(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_FUNCTION);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_FUNCTION);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsObject(XenonValueHandle hValue)
+bool HqValueIsObject(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_OBJECT);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_OBJECT);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsArray(XenonValueHandle hValue)
+bool HqValueIsArray(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_ARRAY);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_ARRAY);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueIsNative(XenonValueHandle hValue)
+bool HqValueIsNative(HqValueHandle hValue)
 {
-	return hValue && (hValue->type == XENON_VALUE_TYPE_NATIVE);
+	return hValue && (hValue->type == HQ_VALUE_TYPE_NATIVE);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonValueGetBool(XenonValueHandle hValue)
+bool HqValueGetBool(HqValueHandle hValue)
 {
-	if(XenonValueIsString(hValue))
+	if(HqValueIsString(hValue))
 	{
 		return hValue->as.boolean;
 	}
@@ -1849,9 +1849,9 @@ bool XenonValueGetBool(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int8_t XenonValueGetInt8(XenonValueHandle hValue)
+int8_t HqValueGetInt8(HqValueHandle hValue)
 {
-	if(XenonValueIsInt8(hValue))
+	if(HqValueIsInt8(hValue))
 	{
 		return hValue->as.int8;
 	}
@@ -1861,9 +1861,9 @@ int8_t XenonValueGetInt8(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int16_t XenonValueGetInt16(XenonValueHandle hValue)
+int16_t HqValueGetInt16(HqValueHandle hValue)
 {
-	if(XenonValueIsInt16(hValue))
+	if(HqValueIsInt16(hValue))
 	{
 		return hValue->as.int16;
 	}
@@ -1873,9 +1873,9 @@ int16_t XenonValueGetInt16(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t XenonValueGetInt32(XenonValueHandle hValue)
+int32_t HqValueGetInt32(HqValueHandle hValue)
 {
-	if(XenonValueIsInt32(hValue))
+	if(HqValueIsInt32(hValue))
 	{
 		return hValue->as.int32;
 	}
@@ -1885,9 +1885,9 @@ int32_t XenonValueGetInt32(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int64_t XenonValueGetInt64(XenonValueHandle hValue)
+int64_t HqValueGetInt64(HqValueHandle hValue)
 {
-	if(XenonValueIsInt64(hValue))
+	if(HqValueIsInt64(hValue))
 	{
 		return hValue->as.int64;
 	}
@@ -1897,9 +1897,9 @@ int64_t XenonValueGetInt64(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint8_t XenonValueGetUint8(XenonValueHandle hValue)
+uint8_t HqValueGetUint8(HqValueHandle hValue)
 {
-	if(XenonValueIsUint8(hValue))
+	if(HqValueIsUint8(hValue))
 	{
 		return hValue->as.uint8;
 	}
@@ -1909,9 +1909,9 @@ uint8_t XenonValueGetUint8(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint16_t XenonValueGetUint16(XenonValueHandle hValue)
+uint16_t HqValueGetUint16(HqValueHandle hValue)
 {
-	if(XenonValueIsUint16(hValue))
+	if(HqValueIsUint16(hValue))
 	{
 		return hValue->as.uint16;
 	}
@@ -1921,9 +1921,9 @@ uint16_t XenonValueGetUint16(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t XenonValueGetUint32(XenonValueHandle hValue)
+uint32_t HqValueGetUint32(HqValueHandle hValue)
 {
-	if(XenonValueIsUint32(hValue))
+	if(HqValueIsUint32(hValue))
 	{
 		return hValue->as.uint32;
 	}
@@ -1933,9 +1933,9 @@ uint32_t XenonValueGetUint32(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint64_t XenonValueGetUint64(XenonValueHandle hValue)
+uint64_t HqValueGetUint64(HqValueHandle hValue)
 {
-	if(XenonValueIsUint64(hValue))
+	if(HqValueIsUint64(hValue))
 	{
 		return hValue->as.uint64;
 	}
@@ -1945,9 +1945,9 @@ uint64_t XenonValueGetUint64(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-float XenonValueGetFloat32(XenonValueHandle hValue)
+float HqValueGetFloat32(HqValueHandle hValue)
 {
-	if(XenonValueIsFloat32(hValue))
+	if(HqValueIsFloat32(hValue))
 	{
 		return hValue->as.float32;
 	}
@@ -1957,9 +1957,9 @@ float XenonValueGetFloat32(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-double XenonValueGetFloat64(XenonValueHandle hValue)
+double HqValueGetFloat64(HqValueHandle hValue)
 {
-	if(XenonValueIsFloat64(hValue))
+	if(HqValueIsFloat64(hValue))
 	{
 		return hValue->as.float64;
 	}
@@ -1969,9 +1969,9 @@ double XenonValueGetFloat64(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* XenonValueGetString(XenonValueHandle hValue)
+const char* HqValueGetString(HqValueHandle hValue)
 {
-	if(XenonValueIsString(hValue))
+	if(HqValueIsString(hValue))
 	{
 		return hValue->as.pString->data ? hValue->as.pString->data : "";
 	}
@@ -1981,21 +1981,21 @@ const char* XenonValueGetString(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonValueGetFunction(XenonValueHandle hValue)
+HqFunctionHandle HqValueGetFunction(HqValueHandle hValue)
 {
-	if(XenonValueIsFunction(hValue))
+	if(HqValueIsFunction(hValue))
 	{
 		return hValue->as.hFunction;
 	}
 
-	return XENON_FUNCTION_HANDLE_NULL;
+	return HQ_FUNCTION_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonValueGetNative(XenonValueHandle hValue)
+void* HqValueGetNative(HqValueHandle hValue)
 {
-	if(XenonValueIsNative(hValue))
+	if(HqValueIsNative(hValue))
 	{
 		return hValue->as.native.pObject;
 	}
@@ -2005,9 +2005,9 @@ void* XenonValueGetNative(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonValueGetStringLength(XenonValueHandle hValue)
+size_t HqValueGetStringLength(HqValueHandle hValue)
 {
-	if(XenonValueIsString(hValue))
+	if(HqValueIsString(hValue))
 	{
 		return hValue->as.pString->length;
 	}
@@ -2017,9 +2017,9 @@ size_t XenonValueGetStringLength(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonValueGetStringHash(XenonValueHandle hValue)
+size_t HqValueGetStringHash(HqValueHandle hValue)
 {
-	if(XenonValueIsString(hValue))
+	if(HqValueIsString(hValue))
 	{
 		return hValue->as.pString->hash;
 	}
@@ -2029,9 +2029,9 @@ size_t XenonValueGetStringHash(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* XenonValueGetObjectTypeName(XenonValueHandle hValue)
+const char* HqValueGetObjectTypeName(HqValueHandle hValue)
 {
-	if(XenonValueIsObject(hValue))
+	if(HqValueIsObject(hValue))
 	{
 		return hValue->as.pObject->pTypeName->data;
 	}
@@ -2041,9 +2041,9 @@ const char* XenonValueGetObjectTypeName(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-size_t XenonValueGetObjectMemberCount(XenonValueHandle hValue)
+size_t HqValueGetObjectMemberCount(HqValueHandle hValue)
 {
-	if(XenonValueIsObject(hValue))
+	if(HqValueIsObject(hValue))
 	{
 		return hValue->as.pObject->members.count;
 	}
@@ -2053,104 +2053,104 @@ size_t XenonValueGetObjectMemberCount(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonValueHandle XenonValueGetObjectMemberValue(XenonValueHandle hValue, const char* memberName)
+HqValueHandle HqValueGetObjectMemberValue(HqValueHandle hValue, const char* memberName)
 {
-	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	if(HqValueIsObject(hValue) && memberName && memberName[0] != '\0')
 	{
-		XenonScriptObject* const pScriptObject = hValue->as.pObject;
-		XenonString* const pMemberName = XenonString::Create(memberName);
+		HqScriptObject* const pScriptObject = hValue->as.pObject;
+		HqString* const pMemberName = HqString::Create(memberName);
 
 		int result;
 
-		const XenonScriptObject::MemberDefinition memberDef = XenonScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
-		if(result != XENON_SUCCESS)
+		const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		if(result != HQ_SUCCESS)
 		{
-			return XENON_VALUE_HANDLE_NULL;
+			return HQ_VALUE_HANDLE_NULL;
 		}
 
 		// Release the member name string now that we don't need it anymore.
-		XenonString::Release(pMemberName);
+		HqString::Release(pMemberName);
 
-		XenonValueHandle hMemberValue = XenonScriptObject::GetMemberValue(pScriptObject, memberDef.bindingIndex, &result);
-		if(result != XENON_SUCCESS)
+		HqValueHandle hMemberValue = HqScriptObject::GetMemberValue(pScriptObject, memberDef.bindingIndex, &result);
+		if(result != HQ_SUCCESS)
 		{
-			return XENON_VALUE_HANDLE_NULL;
+			return HQ_VALUE_HANDLE_NULL;
 		}
 
 		// Guard the value against being garbage collected.
-		XenonValue::SetAutoMark(hMemberValue, true);
+		HqValue::SetAutoMark(hMemberValue, true);
 
 		return hMemberValue;
 	}
 
-	return XENON_VALUE_HANDLE_NULL;
+	return HQ_VALUE_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint8_t XenonValueGetObjectMemberType(XenonValueHandle hValue, const char* memberName)
+uint8_t HqValueGetObjectMemberType(HqValueHandle hValue, const char* memberName)
 {
-	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	if(HqValueIsObject(hValue) && memberName && memberName[0] != '\0')
 	{
-		XenonScriptObject* const pScriptObject = hValue->as.pObject;
-		XenonString* const pMemberName = XenonString::Create(memberName);
+		HqScriptObject* const pScriptObject = hValue->as.pObject;
+		HqString* const pMemberName = HqString::Create(memberName);
 
 		int result;
 
-		const XenonScriptObject::MemberDefinition memberDef = XenonScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
 		if(!result)
 		{
-			return XENON_VALUE_TYPE_NULL;
+			return HQ_VALUE_TYPE_NULL;
 		}
 
 		// Release the member name string now that we don't need it anymore.
-		XenonString::Release(pMemberName);
+		HqString::Release(pMemberName);
 
 		return memberDef.valueType;
 	}
 
-	return XENON_VALUE_TYPE_NULL;
+	return HQ_VALUE_TYPE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueSetObjectMemberValue(XenonValueHandle hValue, const char* memberName, XenonValueHandle hMemberValue)
+int HqValueSetObjectMemberValue(HqValueHandle hValue, const char* memberName, HqValueHandle hMemberValue)
 {
-	if(XenonValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	if(HqValueIsObject(hValue) && memberName && memberName[0] != '\0')
 	{
-		XenonScriptObject* const pScriptObject = hValue->as.pObject;
-		XenonString* const pMemberName = XenonString::Create(memberName);
+		HqScriptObject* const pScriptObject = hValue->as.pObject;
+		HqString* const pMemberName = HqString::Create(memberName);
 
 		int result;
 
-		const XenonScriptObject::MemberDefinition memberDef = XenonScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
-		if(result != XENON_SUCCESS)
+		const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+		if(result != HQ_SUCCESS)
 		{
 			return result;
 		}
 
 		// Release the member name string now that we don't need it anymore.
-		XenonString::Release(pMemberName);
+		HqString::Release(pMemberName);
 
-		XenonScriptObject::SetMemberValue(pScriptObject, memberDef.bindingIndex, hMemberValue);
+		HqScriptObject::SetMemberValue(pScriptObject, memberDef.bindingIndex, hMemberValue);
 
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
-	return XENON_ERROR_INVALID_TYPE;
+	return HQ_ERROR_INVALID_TYPE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObjectMember onIterateFn, void* pUserData)
+int HqValueListObjectMembers(HqValueHandle hValue, HqCallbackIterateObjectMember onIterateFn, void* pUserData)
 {
-	if(XenonValueIsObject(hValue))
+	if(HqValueIsObject(hValue))
 	{
 		// Iterate through each member definition on the object.
 		for(auto& kv : hValue->as.pObject->definitions)
 		{
-			XenonString* const pMemberName = XENON_MAP_ITER_KEY(kv);
-			XenonScriptObject::MemberDefinition& memberDef = XENON_MAP_ITER_VALUE(kv);
+			HqString* const pMemberName = HQ_MAP_ITER_KEY(kv);
+			HqScriptObject::MemberDefinition& memberDef = HQ_MAP_ITER_VALUE(kv);
 
 			if(!onIterateFn(pUserData, pMemberName->data, memberDef.valueType))
 			{
@@ -2158,19 +2158,19 @@ int XenonValueListObjectMembers(XenonValueHandle hValue, XenonCallbackIterateObj
 			}
 		}
 
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
-	return XENON_ERROR_INVALID_TYPE;
+	return HQ_ERROR_INVALID_TYPE;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonValueGetObjectUserData(XenonValueHandle hValue)
+void* HqValueGetObjectUserData(HqValueHandle hValue)
 {
-	if(XenonValueIsObject(hValue))
+	if(HqValueIsObject(hValue))
 	{
-		XenonScriptObject* const pScriptObject = hValue->as.pObject;
+		HqScriptObject* const pScriptObject = hValue->as.pObject;
 
 		return pScriptObject->pUserData;
 	}
@@ -2180,80 +2180,80 @@ void* XenonValueGetObjectUserData(XenonValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueSetObjectUserData(XenonValueHandle hValue, void* pUserData)
+int HqValueSetObjectUserData(HqValueHandle hValue, void* pUserData)
 {
-	if(!XenonValueIsObject(hValue))
+	if(!HqValueIsObject(hValue))
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	XenonScriptObject* const pScriptObject = hValue->as.pObject;
+	HqScriptObject* const pScriptObject = hValue->as.pObject;
 
 	pScriptObject->pUserData = pUserData;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueGetArrayLength(XenonValueHandle hValue, size_t* const pOutIndex)
+int HqValueGetArrayLength(HqValueHandle hValue, size_t* const pOutIndex)
 {
 	if(!pOutIndex)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(!XenonValueIsArray(hValue))
+	if(!HqValueIsArray(hValue))
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	(*pOutIndex) = hValue->as.array.count;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueGetArrayElement(XenonValueHandle hValue, size_t index, XenonValueHandle* phOutElementValue)
+int HqValueGetArrayElement(HqValueHandle hValue, size_t index, HqValueHandle* phOutElementValue)
 {
 	if(!phOutElementValue)
 	{
-		return XENON_ERROR_INVALID_ARG;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(!XenonValueIsArray(hValue))
+	if(!HqValueIsArray(hValue))
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	if(index >= hValue->as.array.count)
 	{
-		return XENON_ERROR_INDEX_OUT_OF_RANGE;
+		return HQ_ERROR_INDEX_OUT_OF_RANGE;
 	}
 
 	(*phOutElementValue) = hValue->as.array.pData[index];
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonValueSetArrayElement(XenonValueHandle hValue, size_t index, XenonValueHandle hElementValue)
+int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqValueHandle hElementValue)
 {
-	if(!XenonValueIsArray(hValue))
+	if(!HqValueIsArray(hValue))
 	{
-		return XENON_ERROR_INVALID_TYPE;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
 	if(index >= hValue->as.array.count)
 	{
-		return XENON_ERROR_INDEX_OUT_OF_RANGE;
+		return HQ_ERROR_INDEX_OUT_OF_RANGE;
 	}
 
 	hValue->as.array.pData[index] = hElementValue;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

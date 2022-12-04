@@ -32,69 +32,69 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonProgramLoader::XenonProgramLoader(
-	XenonProgramHandle hProgram,
-	XenonVmHandle hVm,
-	XenonSerializerHandle hSerializer
+HqProgramLoader::HqProgramLoader(
+	HqProgramHandle hProgram,
+	HqVmHandle hVm,
+	HqSerializerHandle hSerializer
 )
 	: m_hProgram(hProgram)
 	, m_hVm(hVm)
 	, m_hSerializer(hSerializer)
-	, m_hReport(XENON_REPORT_HANDLE_NULL)
+	, m_hReport(HQ_REPORT_HANDLE_NULL)
 	, m_programHeader()
 	, m_strings()
 	, m_objectSchemas()
 	, m_globalValues()
 	, m_functions()
 {
-	assert(m_hProgram != XENON_PROGRAM_HANDLE_NULL);
-	assert(m_hVm != XENON_VM_HANDLE_NULL);
-	assert(m_hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(m_hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(m_hVm != HQ_VM_HANDLE_NULL);
+	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
 	m_hReport = &m_hVm->report;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonProgramLoader::~XenonProgramLoader()
+HqProgramLoader::~HqProgramLoader()
 {
 	for(auto& kv : m_strings)
 	{
-		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+		HqString::Release(HQ_MAP_ITER_KEY(kv));
 	}
 
 	for(auto& kv : m_objectSchemas)
 	{
-		XenonScriptObject::Dispose(XENON_MAP_ITER_VALUE(kv));
+		HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
 	}
 
 	for(auto& kv : m_globalValues)
 	{
-		XenonValue::SetAutoMark(XENON_MAP_ITER_VALUE(kv), false);
+		HqValue::SetAutoMark(HQ_MAP_ITER_VALUE(kv), false);
 	}
 
 	for(auto& kv : m_functions)
 	{
-		XenonFunction::Dispose(XENON_MAP_ITER_VALUE(kv));
+		HqFunction::Dispose(HQ_MAP_ITER_VALUE(kv));
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::Load(
-	XenonProgram* const pOutProgram,
-	XenonVmHandle hVm,
-	XenonSerializerHandle hSerializer
+bool HqProgramLoader::Load(
+	HqProgram* const pOutProgram,
+	HqVmHandle hVm,
+	HqSerializerHandle hSerializer
 )
 {
-	XenonProgramLoader loader(pOutProgram, hVm, hSerializer);
+	HqProgramLoader loader(pOutProgram, hVm, hSerializer);
 
 	return loader.prv_loadFile();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_loadFile()
+bool HqProgramLoader::prv_loadFile()
 {
 	// Attempt to read the program header.
 	if(!prv_readProgramHeader())
@@ -152,310 +152,310 @@ bool XenonProgramLoader::prv_loadFile()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonProgramLoader::prv_finalize()
+void HqProgramLoader::prv_finalize()
 {
 	if(m_programHeader.initFunctionLength > 0)
 	{
 		// Create the program's initializer function.
-		m_hProgram->hInitFunction = XenonFunction::CreateInit(m_hProgram, m_programHeader.initFunctionLength);
+		m_hProgram->hInitFunction = HqFunction::CreateInit(m_hProgram, m_programHeader.initFunctionLength);
 	}
 
 	// Link the object schemas into the program and VM.
 	{
 		// Initialize the program's object table and reserve extra space in the VM's object table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
-		XENON_MAP_FUNC_RESERVE(m_hVm->objectSchemas, XENON_MAP_FUNC_SIZE(m_hVm->objectSchemas) + m_programHeader.objectTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hVm->objectSchemas, HQ_MAP_FUNC_SIZE(m_hVm->objectSchemas) + m_programHeader.objectTable.length);
 
 		// Distribute the object schemas.
 		for(auto& kv : m_objectSchemas)
 		{
-			XenonString* const pTypeName = XENON_MAP_ITER_KEY(kv);
-			XenonScriptObject* const pObjectSchema = XENON_MAP_ITER_VALUE(kv);
+			HqString* const pTypeName = HQ_MAP_ITER_KEY(kv);
+			HqScriptObject* const pObjectSchema = HQ_MAP_ITER_VALUE(kv);
 
-			if(XENON_MAP_FUNC_CONTAINS(m_hVm->objectSchemas, XENON_MAP_ITER_KEY(kv)))
+			if(HQ_MAP_FUNC_CONTAINS(m_hVm->objectSchemas, HQ_MAP_ITER_KEY(kv)))
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_WARNING,
+					HQ_MESSAGE_TYPE_WARNING,
 					"Class type conflict: program=\"%s\", className=\"%s\"",
 					m_hProgram->pName->data,
 					pTypeName->data
 				);
-				XenonScriptObject::Dispose(pObjectSchema);
+				HqScriptObject::Dispose(pObjectSchema);
 				continue;
 			}
 
 			// Track the name of the schema in the program.
-			XenonString::AddRef(pTypeName);
-			XENON_MAP_FUNC_INSERT(m_hProgram->objectSchemas, pTypeName, false);
+			HqString::AddRef(pTypeName);
+			HQ_MAP_FUNC_INSERT(m_hProgram->objectSchemas, pTypeName, false);
 
 			// Track the schema itself in the VM.
-			XenonString::AddRef(pTypeName);
-			XENON_MAP_FUNC_INSERT(m_hVm->objectSchemas, pTypeName, pObjectSchema);
+			HqString::AddRef(pTypeName);
+			HQ_MAP_FUNC_INSERT(m_hVm->objectSchemas, pTypeName, pObjectSchema);
 		}
 
-		XENON_MAP_FUNC_CLEAR(m_objectSchemas);
+		HQ_MAP_FUNC_CLEAR(m_objectSchemas);
 	}
 
 	// Link the global variables to the VM
 	{
 		// Initialize the program's global table and reserve extra space in the VM's global table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->globals, m_programHeader.globalTable.length);
-		XENON_MAP_FUNC_RESERVE(m_hVm->globals, XENON_MAP_FUNC_SIZE(m_hVm->globals) + m_programHeader.globalTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hProgram->globals, m_programHeader.globalTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hVm->globals, HQ_MAP_FUNC_SIZE(m_hVm->globals) + m_programHeader.globalTable.length);
 
 		// Map the global variables.
 		for(auto& kv : m_globalValues)
 		{
-			XenonString* const pVarName = XENON_MAP_ITER_KEY(kv);
-			XenonValueHandle hValue = XENON_MAP_ITER_VALUE(kv);
+			HqString* const pVarName = HQ_MAP_ITER_KEY(kv);
+			HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
 
-			if(XENON_MAP_FUNC_CONTAINS(m_hVm->globals, pVarName))
+			if(HQ_MAP_FUNC_CONTAINS(m_hVm->globals, pVarName))
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_WARNING,
+					HQ_MESSAGE_TYPE_WARNING,
 					"Global variable conflict: program=\"%s\", variableName=\"%s\"",
 					m_hProgram->pName->data,
 					pVarName->data
 				);
-				XenonValue::SetAutoMark(hValue, false);
+				HqValue::SetAutoMark(hValue, false);
 				continue;
 			}
 
 			// Track the name of the global in the program.
-			XenonString::AddRef(pVarName);
-			XENON_MAP_FUNC_INSERT(m_hProgram->globals, pVarName, false);
+			HqString::AddRef(pVarName);
+			HQ_MAP_FUNC_INSERT(m_hProgram->globals, pVarName, false);
 
 			// Add the global to the VM.
-			XenonString::AddRef(pVarName);
-			XENON_MAP_FUNC_INSERT(m_hVm->globals, pVarName, hValue);
+			HqString::AddRef(pVarName);
+			HQ_MAP_FUNC_INSERT(m_hVm->globals, pVarName, hValue);
 		}
 
-		XENON_MAP_FUNC_CLEAR(m_globalValues);
+		HQ_MAP_FUNC_CLEAR(m_globalValues);
 	}
 
 	// Link the functions to the VM.
 	{
 		// Initialize the program's function table and reserve extra space in the VM's function table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->functions, m_programHeader.functionTable.length);
-		XENON_MAP_FUNC_RESERVE(m_hVm->functions, XENON_MAP_FUNC_SIZE(m_hVm->functions) + m_programHeader.functionTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hProgram->functions, m_programHeader.functionTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hVm->functions, HQ_MAP_FUNC_SIZE(m_hVm->functions) + m_programHeader.functionTable.length);
 
 		for(auto& kv : m_functions)
 		{
-			XenonString* const pSignature = XENON_MAP_ITER_KEY(kv);
-			XenonFunctionHandle hFunction = XENON_MAP_ITER_VALUE(kv);
+			HqString* const pSignature = HQ_MAP_ITER_KEY(kv);
+			HqFunctionHandle hFunction = HQ_MAP_ITER_VALUE(kv);
 
 			// Check if a function with this signature has already been loaded.
-			if(XENON_MAP_FUNC_CONTAINS(m_hVm->functions, pSignature))
+			if(HQ_MAP_FUNC_CONTAINS(m_hVm->functions, pSignature))
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Function signature conflict: program=\"%s\", function=\"%s\"",
 					m_hProgram->pName->data,
 					pSignature->data
 				);
-				XenonFunction::Dispose(hFunction);
+				HqFunction::Dispose(hFunction);
 				continue;
 			}
 
 			// Map the function signature to output program.
 			// Only the name is mapped since the function itself will live in the VM.
-			XenonString::AddRef(pSignature);
-			XENON_MAP_FUNC_INSERT(m_hProgram->functions, pSignature, false);
+			HqString::AddRef(pSignature);
+			HQ_MAP_FUNC_INSERT(m_hProgram->functions, pSignature, false);
 
 			// Map the function in the load data map which will be transferred to the VM.
-			XenonString::AddRef(pSignature);
-			XENON_MAP_FUNC_INSERT(m_hVm->functions, pSignature, hFunction);
+			HqString::AddRef(pSignature);
+			HQ_MAP_FUNC_INSERT(m_hVm->functions, pSignature, hFunction);
 		}
 
-		XENON_MAP_FUNC_CLEAR(m_functions);
+		HQ_MAP_FUNC_CLEAR(m_functions);
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readProgramHeader()
+bool HqProgramLoader::prv_readProgramHeader()
 {
-	int result = XENON_SUCCESS;
+	int result = HQ_SUCCESS;
 
 	// Read the dependency table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.offset);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.offset);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file dependency table offset: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the dependency table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.length);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.length);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file dependency table length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the object table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.offset);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.offset);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file object table offset: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the object table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.length);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.length);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file object table length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the constant table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.offset);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.offset);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file constant table offset: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the constant table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.length);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.length);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file constant table length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the global table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.offset);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.offset);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file global table offset: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the global table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.length);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.length);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file global table length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the function table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.offset);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.offset);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file function table offset: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the function table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.length);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.length);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file function table length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the extension table offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.offset);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.offset);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file extension table offset: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the extension table length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.length);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.length);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file extension table length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the bytecode offset.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.offset);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.offset);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file bytecode offset: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 
@@ -463,49 +463,49 @@ bool XenonProgramLoader::prv_readProgramHeader()
 	}
 
 	// Read the bytecode length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.length);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.length);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file bytecode length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Read the initializer function bytecode length.
-	result = XenonSerializerReadUint32(m_hSerializer, &m_programHeader.initFunctionLength);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.initFunctionLength);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Error reading program file initializer function bytecode length: error=\"%s\", program=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
 	// Get the offset that indicates the end of the file header.
-	m_programHeader.headerEndPosition = uint32_t(XenonSerializerGetStreamPosition(m_hSerializer));
+	m_programHeader.headerEndPosition = uint32_t(HqSerializerGetStreamPosition(m_hSerializer));
 
 	return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_validateProgramHeader()
+bool HqProgramLoader::prv_validateProgramHeader()
 {
 	// Verify the dependency table does not start before the end of the header data.
 	if(m_programHeader.dependencyTable.offset < m_programHeader.headerEndPosition)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Invalid program file dependency table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
 			m_programHeader.dependencyTable.offset,
@@ -517,9 +517,9 @@ bool XenonProgramLoader::prv_validateProgramHeader()
 	// Verify the dependency table does not start before the end of the header data.
 	if(m_programHeader.objectTable.offset < m_programHeader.headerEndPosition)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Invalid program file object table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
 			m_programHeader.objectTable.offset,
@@ -531,9 +531,9 @@ bool XenonProgramLoader::prv_validateProgramHeader()
 	// Verify the constant table does not start before the end of the header data.
 	if(m_programHeader.constantTable.offset < m_programHeader.headerEndPosition)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Invalid program file constant table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
 			m_programHeader.constantTable.offset,
@@ -545,9 +545,9 @@ bool XenonProgramLoader::prv_validateProgramHeader()
 	// Verify the global table does not start before the end of the header data.
 	if(m_programHeader.globalTable.offset < m_programHeader.headerEndPosition)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Invalid program file global table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
 			m_programHeader.globalTable.offset,
@@ -559,9 +559,9 @@ bool XenonProgramLoader::prv_validateProgramHeader()
 	// Verify the bytecode does not start before the end of the header data.
 	if(m_programHeader.bytecode.offset < m_programHeader.headerEndPosition)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Invalid program file bytecode offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
 			m_programHeader.bytecode.offset,
@@ -577,21 +577,21 @@ bool XenonProgramLoader::prv_validateProgramHeader()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readDependencyTable()
+bool HqProgramLoader::prv_readDependencyTable()
 {
 	if(m_programHeader.dependencyTable.length > 0)
 	{
-		int result = XENON_SUCCESS;
+		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the dependency table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.dependencyTable.offset);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.dependencyTable.offset);
+		if(result != HQ_SUCCESS)
 		{
-			XenonReportMessage(
+			HqReportMessage(
 				m_hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Error setting program file stream position to the offset of the dependency table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
-				XenonGetErrorCodeString(result),
+				HqGetErrorCodeString(result),
 				m_hProgram->pName->data,
 				m_programHeader.dependencyTable.offset
 			);
@@ -599,13 +599,13 @@ bool XenonProgramLoader::prv_readDependencyTable()
 		}
 
 		// Initialize the dependency table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->dependencies, m_programHeader.dependencyTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hProgram->dependencies, m_programHeader.dependencyTable.length);
 
 		// Iterate for each dependency.
 		for(uint32_t index = 0; index < m_programHeader.dependencyTable.length; ++index)
 		{
 			// Read the name of the dependency.
-			XenonString* const pDependencyName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pDependencyName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pDependencyName)
 			{
 				return false;
@@ -615,8 +615,8 @@ bool XenonProgramLoader::prv_readDependencyTable()
 
 			// We stuff the dependency name into a map, but that's just for convenience of storing it.
 			// The value it's mapped to isn't used for anything, so it can be null.
-			XenonString::AddRef(pDependencyName);
-			XENON_MAP_FUNC_INSERT(m_hProgram->dependencies, pDependencyName, XENON_VALUE_HANDLE_NULL);
+			HqString::AddRef(pDependencyName);
+			HQ_MAP_FUNC_INSERT(m_hProgram->dependencies, pDependencyName, HQ_VALUE_HANDLE_NULL);
 		}
 	}
 
@@ -625,21 +625,21 @@ bool XenonProgramLoader::prv_readDependencyTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readObjectTable()
+bool HqProgramLoader::prv_readObjectTable()
 {
 	if(m_programHeader.objectTable.length > 0)
 	{
-		int result = XENON_SUCCESS;
+		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the constant table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.objectTable.offset);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.objectTable.offset);
+		if(result != HQ_SUCCESS)
 		{
-			XenonReportMessage(
+			HqReportMessage(
 				m_hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Error setting program file stream position to the offset of the object table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
-				XenonGetErrorCodeString(result),
+				HqGetErrorCodeString(result),
 				m_hProgram->pName->data,
 				m_programHeader.objectTable.offset
 			);
@@ -647,13 +647,13 @@ bool XenonProgramLoader::prv_readObjectTable()
 		}
 
 		// Initialize the object schema table.
-		XENON_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
+		HQ_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
 
 		// Iterate for each object type.
 		for(uint32_t objectIndex = 0; objectIndex < m_programHeader.objectTable.length; ++objectIndex)
 		{
 			// Read the name of the global variable.
-			XenonString* const pTypeName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pTypeName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pTypeName)
 			{
 				return false;
@@ -662,33 +662,33 @@ bool XenonProgramLoader::prv_readObjectTable()
 			prv_trackString(pTypeName);
 
 			uint32_t memberCount;
-			result = XenonSerializerReadUint32(m_hSerializer, &memberCount);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint32(m_hSerializer, &memberCount);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					m_programHeader.constantTable.offset
 				);
 				return false;
 			}
 
-			XenonScriptObject::MemberDefinitionMap memberDefinitions;
+			HqScriptObject::MemberDefinitionMap memberDefinitions;
 
 			// Read the member definitions for this object type.
 			for(uint32_t memberIndex = 0; memberIndex < memberCount; ++memberIndex)
 			{
-				XenonString* const pMemberName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+				HqString* const pMemberName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 				if(!pMemberName)
 				{
-					XenonReportMessage(
+					HqReportMessage(
 						m_hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Error reading object member name: error=\"%s\", program=\"%s\", objectType=\"%s\", memberIndex=\"%s\"",
-						XenonGetErrorCodeString(result),
+						HqGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pTypeName->data,
 						memberIndex
@@ -699,14 +699,14 @@ bool XenonProgramLoader::prv_readObjectTable()
 				prv_trackString(pMemberName);
 
 				uint8_t memberType;
-				result = XenonSerializerReadUint8(m_hSerializer, &memberType);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerReadUint8(m_hSerializer, &memberType);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(
+					HqReportMessage(
 						m_hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Error reading object member type: error=\"%s\", program=\"%s\", objectType=\"%s\", memberName=\"%s\"",
-						XenonGetErrorCodeString(result),
+						HqGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pTypeName->data,
 						pMemberName->data
@@ -714,18 +714,18 @@ bool XenonProgramLoader::prv_readObjectTable()
 					return false;
 				}
 
-				XenonScriptObject::MemberDefinition def;
+				HqScriptObject::MemberDefinition def;
 
 				def.valueType = memberType;
 				def.bindingIndex = memberIndex;
 
 				// We don't need to add a reference on the member name here since
 				// creating the schema will do that for us.
-				XENON_MAP_FUNC_INSERT(memberDefinitions, pMemberName, def);
+				HQ_MAP_FUNC_INSERT(memberDefinitions, pMemberName, def);
 			}
 
 			// Create the object schema from the type name and member definitions.
-			XenonScriptObject* const pObjectSchema = XenonScriptObject::CreateSchema(pTypeName, memberDefinitions);
+			HqScriptObject* const pObjectSchema = HqScriptObject::CreateSchema(pTypeName, memberDefinitions);
 
 			prv_trackObjectSchema(pTypeName, pObjectSchema);
 		}
@@ -736,21 +736,21 @@ bool XenonProgramLoader::prv_readObjectTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readConstantTable()
+bool HqProgramLoader::prv_readConstantTable()
 {
 	if(m_programHeader.constantTable.length > 0)
 	{
-		int result = XENON_SUCCESS;
+		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the constant table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.constantTable.offset);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.constantTable.offset);
+		if(result != HQ_SUCCESS)
 		{
-			XenonReportMessage(
+			HqReportMessage(
 				m_hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
-				XenonGetErrorCodeString(result),
+				HqGetErrorCodeString(result),
 				m_hProgram->pName->data,
 				m_programHeader.constantTable.offset
 			);
@@ -758,13 +758,13 @@ bool XenonProgramLoader::prv_readConstantTable()
 		}
 
 		// Make space in the constant table.
-		XenonValue::HandleArray::Reserve(m_hProgram->constants, m_programHeader.constantTable.length);
+		HqValue::HandleArray::Reserve(m_hProgram->constants, m_programHeader.constantTable.length);
 		m_hProgram->constants.count = m_programHeader.constantTable.length;
 
 		// Iterate for each constant.
 		for(uint32_t index = 0; index < m_programHeader.constantTable.length; ++index)
 		{
-			XenonValueHandle hValue = XenonProgramCommonLoader::ReadValue(m_hSerializer, m_hVm, m_hReport);
+			HqValueHandle hValue = HqProgramCommonLoader::ReadValue(m_hSerializer, m_hVm, m_hReport);
 			if(!hValue)
 			{
 				m_hProgram->constants.count = index;
@@ -780,21 +780,21 @@ bool XenonProgramLoader::prv_readConstantTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readGlobalTable()
+bool HqProgramLoader::prv_readGlobalTable()
 {
 	if(m_programHeader.globalTable.length > 0)
 	{
-		int result = XENON_SUCCESS;
+		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the global table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.globalTable.offset);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.globalTable.offset);
+		if(result != HQ_SUCCESS)
 		{
-			XenonReportMessage(
+			HqReportMessage(
 				m_hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
-				XenonGetErrorCodeString(result),
+				HqGetErrorCodeString(result),
 				m_hProgram->pName->data,
 				m_programHeader.globalTable.offset
 			);
@@ -805,7 +805,7 @@ bool XenonProgramLoader::prv_readGlobalTable()
 		for(uint32_t globalIndex = 0; globalIndex < m_programHeader.globalTable.length; ++globalIndex)
 		{
 			// Read the name of the global variable.
-			XenonString* const pVarName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pVarName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pVarName)
 			{
 				return false;
@@ -815,14 +815,14 @@ bool XenonProgramLoader::prv_readGlobalTable()
 
 			// Read the global variable value index.
 			uint32_t constantIndex = 0;
-			result = XenonSerializerReadUint32(m_hSerializer, &constantIndex);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint32(m_hSerializer, &constantIndex);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read global variable value index: error=\"%s\", program=\"%s\", variableName=\"%s\"",
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pVarName->data
 				);
@@ -830,23 +830,23 @@ bool XenonProgramLoader::prv_readGlobalTable()
 			}
 
 			// Get the value from the constant table.
-			XenonValueHandle hValue;
+			HqValueHandle hValue;
 			if(size_t(constantIndex) < m_hProgram->constants.count)
 			{
 				hValue = m_hProgram->constants.pData[constantIndex];
 			}
 			else
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_WARNING,
+					HQ_MESSAGE_TYPE_WARNING,
 					"Global variable points to invalid constant index: program=\"%s\", variableName=\"%s\", index=%" PRIu32,
 					m_hProgram->pName->data,
 					pVarName->data,
 					constantIndex
 				);
 
-				hValue = XenonValueCreateNull();
+				hValue = HqValueCreateNull();
 			}
 
 			prv_trackGlobalValue(pVarName, hValue);
@@ -858,21 +858,21 @@ bool XenonProgramLoader::prv_readGlobalTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readFunctions()
+bool HqProgramLoader::prv_readFunctions()
 {
 	if(m_programHeader.functionTable.length > 0)
 	{
-		int result = XENON_SUCCESS;
+		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the function table.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.functionTable.offset);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.functionTable.offset);
+		if(result != HQ_SUCCESS)
 		{
-			XenonReportMessage(
+			HqReportMessage(
 				m_hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
-				XenonGetErrorCodeString(result),
+				HqGetErrorCodeString(result),
 				m_hProgram->pName->data,
 				m_programHeader.globalTable.offset
 			);
@@ -883,12 +883,12 @@ bool XenonProgramLoader::prv_readFunctions()
 		for(uint32_t funcIndex = 0; funcIndex < m_programHeader.functionTable.length; ++funcIndex)
 		{
 			// Read the function signature.
-			XenonString* const pSignature = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pSignature = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pSignature)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read function signature: program=\"%s\"",
 					m_hProgram->pName->data
 				);
@@ -899,14 +899,14 @@ bool XenonProgramLoader::prv_readFunctions()
 
 			// Read the flag indicating whether or not the function uses a native binding.
 			bool isNativeFunction = false;
-			result = XenonSerializerReadBool(m_hSerializer, &isNativeFunction);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadBool(m_hSerializer, &isNativeFunction);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read function 'isNative' flag: error=\"%s\", program=\"%s\", function=\"%s\"",
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data
 				);
@@ -915,14 +915,14 @@ bool XenonProgramLoader::prv_readFunctions()
 
 			// Read the function parameter count.
 			uint16_t numParameters = 0;
-			result = XenonSerializerReadUint16(m_hSerializer, &numParameters);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint16(m_hSerializer, &numParameters);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read function parameter count: error=\"%s\", program=\"%s\", function=\"%s\"",
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data
 				);
@@ -931,39 +931,39 @@ bool XenonProgramLoader::prv_readFunctions()
 
 			// Read the function return value count.
 			uint16_t numReturnValues = 0;
-			result = XenonSerializerReadUint16(m_hSerializer, &numReturnValues);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint16(m_hSerializer, &numReturnValues);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read function return value count: error=\"%s\", program=\"%s\", function=\"%s\"",
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data
 				);
 				return false;
 			}
 
-			XenonFunctionHandle hFunction;
+			HqFunctionHandle hFunction;
 
 			if(!isNativeFunction)
 			{
-				XenonValue::StringToHandleMap locals;
-				XenonGuardedBlock::Array guardedBlocks;
+				HqValue::StringToHandleMap locals;
+				HqGuardedBlock::Array guardedBlocks;
 
 				uint32_t bytecodeOffset = 0;
 				uint32_t bytecodeLength = 0;
 
 				// Read the function's bytecode offset.
-				result = XenonSerializerReadUint32(m_hSerializer, &bytecodeOffset);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerReadUint32(m_hSerializer, &bytecodeOffset);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(
+					HqReportMessage(
 						m_hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to read function bytecode offset start: error=\"%s\", program=\"%s\", function=\"%s\"",
-						XenonGetErrorCodeString(result),
+						HqGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pSignature->data
 					);
@@ -971,14 +971,14 @@ bool XenonProgramLoader::prv_readFunctions()
 				}
 
 				// Read the function's bytecode length.
-				result = XenonSerializerReadUint32(m_hSerializer, &bytecodeLength);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerReadUint32(m_hSerializer, &bytecodeLength);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(
+					HqReportMessage(
 						m_hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to read function bytecode offset end: error=\"%s\", program=\"%s\", function=\"%s\"",
-						XenonGetErrorCodeString(result),
+						HqGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pSignature->data
 					);
@@ -991,7 +991,7 @@ bool XenonProgramLoader::prv_readFunctions()
 					// Release all the loaded local variables.
 					for(auto& kv : locals)
 					{
-						XenonValue::SetAutoMark(XENON_MAP_ITER_VALUE(kv), false);
+						HqValue::SetAutoMark(HQ_MAP_ITER_VALUE(kv), false);
 					}
 					return false;
 				}
@@ -1001,14 +1001,14 @@ bool XenonProgramLoader::prv_readFunctions()
 				{
 					for(size_t blockIndex = 0; blockIndex < guardedBlocks.count; ++blockIndex)
 					{
-						XenonGuardedBlock::Dispose(guardedBlocks.pData[blockIndex]);
+						HqGuardedBlock::Dispose(guardedBlocks.pData[blockIndex]);
 					}
 
-					XenonGuardedBlock::Array::Dispose(guardedBlocks);
+					HqGuardedBlock::Array::Dispose(guardedBlocks);
 					return false;
 				}
 
-				hFunction = XenonFunction::CreateScript(
+				hFunction = HqFunction::CreateScript(
 					m_hProgram,
 					pSignature,
 					locals,
@@ -1021,7 +1021,7 @@ bool XenonProgramLoader::prv_readFunctions()
 			}
 			else
 			{
-				hFunction = XenonFunction::CreateNative(
+				hFunction = HqFunction::CreateNative(
 					m_hProgram,
 					pSignature,
 					numParameters,
@@ -1031,9 +1031,9 @@ bool XenonProgramLoader::prv_readFunctions()
 
 			if(!hFunction)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to create function handle: program=\"%s\"",
 					m_hProgram->pName->data
 				);
@@ -1049,21 +1049,21 @@ bool XenonProgramLoader::prv_readFunctions()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readBytecode()
+bool HqProgramLoader::prv_readBytecode()
 {
 	if(m_programHeader.bytecode.length > 0)
 	{
-		int result = XENON_SUCCESS;
+		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the bytecode.
-		result = XenonSerializerSetStreamPosition(m_hSerializer, m_programHeader.bytecode.offset);
-		if(result != XENON_SUCCESS)
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.bytecode.offset);
+		if(result != HQ_SUCCESS)
 		{
-			const char* const errorString = XenonGetErrorCodeString(result);
+			const char* const errorString = HqGetErrorCodeString(result);
 
-			XenonReportMessage(
+			HqReportMessage(
 				m_hReport,
-				XENON_MESSAGE_TYPE_ERROR,
+				HQ_MESSAGE_TYPE_ERROR,
 				"Error setting program file stream position to the offset of the program bytecode: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				errorString,
 				m_hProgram->pName->data,
@@ -1074,11 +1074,11 @@ bool XenonProgramLoader::prv_readBytecode()
 		}
 
 		// Reserve space in the program's bytecode array.
-		XenonByteHelper::Array::Reserve(m_hProgram->code, m_programHeader.bytecode.length);
+		HqByteHelper::Array::Reserve(m_hProgram->code, m_programHeader.bytecode.length);
 		m_hProgram->code.count = m_programHeader.bytecode.length;
 
 		// Get the stream pointer directly to avoid having to create a staging buffer.
-		const uint8_t* const pBytecode = reinterpret_cast<const uint8_t*>(XenonSerializerGetRawStreamPointer(m_hSerializer));
+		const uint8_t* const pBytecode = reinterpret_cast<const uint8_t*>(HqSerializerGetRawStreamPointer(m_hSerializer));
 
 		// Copy the bytecode into the program.
 		memcpy(m_hProgram->code.pData, pBytecode + m_programHeader.bytecode.offset, m_programHeader.bytecode.length);
@@ -1089,20 +1089,20 @@ bool XenonProgramLoader::prv_readBytecode()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readLocalVariables(XenonString* const pSignature, XenonValue::StringToHandleMap& outLocals)
+bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqValue::StringToHandleMap& outLocals)
 {
-	int result = XENON_SUCCESS;
+	int result = HQ_SUCCESS;
 
 	// Read the local variable count.
 	uint32_t numLocalVariables = 0;
-	result = XenonSerializerReadUint32(m_hSerializer, &numLocalVariables);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &numLocalVariables);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to read function local variable count: error=\"%s\", program=\"%s\", function=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data,
 			pSignature->data
 		);
@@ -1111,13 +1111,13 @@ bool XenonProgramLoader::prv_readLocalVariables(XenonString* const pSignature, X
 
 	if(numLocalVariables > 0)
 	{
-		XENON_MAP_FUNC_RESERVE(outLocals, numLocalVariables);
+		HQ_MAP_FUNC_RESERVE(outLocals, numLocalVariables);
 
 		// Iterate for each local variable.
 		for(uint32_t localIndex = 0; localIndex < numLocalVariables; ++localIndex)
 		{
 			// Read the name of the global variable.
-			XenonString* const pVarName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pVarName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pVarName)
 			{
 				return false;
@@ -1125,11 +1125,11 @@ bool XenonProgramLoader::prv_readLocalVariables(XenonString* const pSignature, X
 
 			prv_trackString(pVarName);
 
-			if(XENON_MAP_FUNC_CONTAINS(outLocals, pVarName))
+			if(HQ_MAP_FUNC_CONTAINS(outLocals, pVarName))
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Local variable conflict: program=\"%s\", function=\"%s\", variableName=\"%s\"",
 					m_hProgram->pName->data,
 					pSignature->data,
@@ -1140,14 +1140,14 @@ bool XenonProgramLoader::prv_readLocalVariables(XenonString* const pSignature, X
 
 			// Read the local variable value index.
 			uint32_t constantIndex = 0;
-			result = XenonSerializerReadUint32(m_hSerializer, &constantIndex);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint32(m_hSerializer, &constantIndex);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read local variable value index: error=\"%s\", program=\"%s\", function=\"%s\", variableName=\"%s\"",
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data,
 					pVarName->data
@@ -1156,16 +1156,16 @@ bool XenonProgramLoader::prv_readLocalVariables(XenonString* const pSignature, X
 			}
 
 			// Get the value from the constant table.
-			XenonValueHandle hValue;
+			HqValueHandle hValue;
 			if(size_t(constantIndex) < m_hProgram->constants.count)
 			{
 				hValue = m_hProgram->constants.pData[constantIndex];
 			}
 			else
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_WARNING,
+					HQ_MESSAGE_TYPE_WARNING,
 					"Local variable points to invalid constant index: program=\"%s\", function=\"%s\", variableName=\"%s\", index=%" PRIu32,
 					m_hProgram->pName->data,
 					pSignature->data,
@@ -1173,12 +1173,12 @@ bool XenonProgramLoader::prv_readLocalVariables(XenonString* const pSignature, X
 					constantIndex
 				);
 
-				hValue = XenonValueCreateNull();
+				hValue = HqValueCreateNull();
 			}
 
 			// Map the local variable to the function.
-			XenonString::AddRef(pVarName);
-			XENON_MAP_FUNC_INSERT(outLocals, pVarName, hValue);
+			HqString::AddRef(pVarName);
+			HQ_MAP_FUNC_INSERT(outLocals, pVarName, hValue);
 		}
 	}
 
@@ -1187,20 +1187,20 @@ bool XenonProgramLoader::prv_readLocalVariables(XenonString* const pSignature, X
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, XenonGuardedBlock::Array& outBlocks)
+bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuardedBlock::Array& outBlocks)
 {
-	int result = XENON_SUCCESS;
+	int result = HQ_SUCCESS;
 
 	// Read the guarded block count.
 	uint32_t numGuardedBlocks = 0;
-	result = XenonSerializerReadUint32(m_hSerializer, &numGuardedBlocks);
-	if(result != XENON_SUCCESS)
+	result = HqSerializerReadUint32(m_hSerializer, &numGuardedBlocks);
+	if(result != HQ_SUCCESS)
 	{
-		XenonReportMessage(
+		HqReportMessage(
 			m_hReport,
-			XENON_MESSAGE_TYPE_ERROR,
+			HQ_MESSAGE_TYPE_ERROR,
 			"Failed to read function guarded block count: error=\"%s\", program=\"%s\", function=\"%s\"",
-			XenonGetErrorCodeString(result),
+			HqGetErrorCodeString(result),
 			m_hProgram->pName->data,
 			pSignature->data
 		);
@@ -1208,8 +1208,8 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 	}
 
 	// Initialize the output array of guarded blocks.
-	XenonGuardedBlock::Array::Initialize(outBlocks);
-	XenonGuardedBlock::Array::Reserve(outBlocks, numGuardedBlocks);
+	HqGuardedBlock::Array::Initialize(outBlocks);
+	HqGuardedBlock::Array::Reserve(outBlocks, numGuardedBlocks);
 
 	if(numGuardedBlocks > 0)
 	{
@@ -1217,14 +1217,14 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 		{
 			// Read the bytecode offset of the guarded block.
 			uint32_t offset = 0;
-			result = XenonSerializerReadUint32(m_hSerializer, &offset);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint32(m_hSerializer, &offset);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read guarded block's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data,
 					blockIndex
@@ -1234,14 +1234,14 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 
 			// Read the bytecode length of the guarded block.
 			uint32_t length = 0;
-			result = XenonSerializerReadUint32(m_hSerializer, &length);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint32(m_hSerializer, &length);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read guarded block's length: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data,
 					blockIndex
@@ -1251,14 +1251,14 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 
 			// Read the number of exception handlers that belong to this guarded block.
 			uint32_t numExceptionHandlers = 0;
-			result = XenonSerializerReadUint32(m_hSerializer, &numExceptionHandlers);
-			if(result != XENON_SUCCESS)
+			result = HqSerializerReadUint32(m_hSerializer, &numExceptionHandlers);
+			if(result != HQ_SUCCESS)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to read guarded block's exception handler count: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
-					XenonGetErrorCodeString(result),
+					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
 					pSignature->data,
 					blockIndex
@@ -1266,12 +1266,12 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 				return false;
 			}
 
-			XenonGuardedBlock* const pGuardedBlock = XenonGuardedBlock::Create(offset, length, numExceptionHandlers);
+			HqGuardedBlock* const pGuardedBlock = HqGuardedBlock::Create(offset, length, numExceptionHandlers);
 			if(!pGuardedBlock)
 			{
-				XenonReportMessage(
+				HqReportMessage(
 					m_hReport,
-					XENON_MESSAGE_TYPE_ERROR,
+					HQ_MESSAGE_TYPE_ERROR,
 					"Failed to allocate new guarded block: program=\"%s\", function=\"%s\", block=%" PRIu32,
 					m_hProgram->pName->data,
 					pSignature->data,
@@ -1289,14 +1289,14 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 			{
 				// Read the data type this handler will handle.
 				uint8_t handledType = 0;
-				result = XenonSerializerReadUint8(m_hSerializer, &handledType);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerReadUint8(m_hSerializer, &handledType);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(
+					HqReportMessage(
 						m_hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to read exception handler's type: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
-						XenonGetErrorCodeString(result),
+						HqGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pSignature->data,
 						blockIndex,
@@ -1307,14 +1307,14 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 
 				// Read the bytecode offset where this handler is located.
 				uint32_t handlerOffset = 0;
-				result = XenonSerializerReadUint32(m_hSerializer, &handlerOffset);
-				if(result != XENON_SUCCESS)
+				result = HqSerializerReadUint32(m_hSerializer, &handlerOffset);
+				if(result != HQ_SUCCESS)
 				{
-					XenonReportMessage(
+					HqReportMessage(
 						m_hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to read exception handler's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
-						XenonGetErrorCodeString(result),
+						HqGetErrorCodeString(result),
 						m_hProgram->pName->data,
 						pSignature->data,
 						blockIndex,
@@ -1323,21 +1323,21 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 					return false;
 				}
 
-				XenonString* pClassName = nullptr;
+				HqString* pClassName = nullptr;
 
-				if(handledType == XENON_VALUE_TYPE_OBJECT)
+				if(handledType == HQ_VALUE_TYPE_OBJECT)
 				{
 					// When an object type is used for the handler, read the class name that is handles.
-					pClassName = XenonProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+					pClassName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 					if(!pClassName)
 					{
-						if(result != XENON_SUCCESS)
+						if(result != HQ_SUCCESS)
 						{
-							XenonReportMessage(
+							HqReportMessage(
 								m_hReport,
-								XENON_MESSAGE_TYPE_ERROR,
+								HQ_MESSAGE_TYPE_ERROR,
 								"Failed to read exception handler type class name: program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
-								XenonGetErrorCodeString(result),
+								HqGetErrorCodeString(result),
 								m_hProgram->pName->data,
 								pSignature->data,
 								blockIndex,
@@ -1350,12 +1350,12 @@ bool XenonProgramLoader::prv_readGuardedBlocks(XenonString* const pSignature, Xe
 					prv_trackString(pClassName);
 				}
 
-				XenonExceptionHandler* const pExceptionHandler = XenonExceptionHandler::Create(handledType, handlerOffset, pClassName);
+				HqExceptionHandler* const pExceptionHandler = HqExceptionHandler::Create(handledType, handlerOffset, pClassName);
 				if(!pExceptionHandler)
 				{
-					XenonReportMessage(
+					HqReportMessage(
 						m_hReport,
-						XENON_MESSAGE_TYPE_ERROR,
+						HQ_MESSAGE_TYPE_ERROR,
 						"Failed to allocate new exception handler: program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 						m_hProgram->pName->data,
 						pSignature->data,

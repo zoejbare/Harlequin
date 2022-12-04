@@ -24,22 +24,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonFunction::CreateInit(
-	XenonProgramHandle hProgram,
+HqFunctionHandle HqFunction::CreateInit(
+	HqProgramHandle hProgram,
 	const uint32_t bytecodeLength
 )
 {
-	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
+	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
 	assert(bytecodeLength > 0);
 
-	XenonFunction* const pOutput = new XenonFunction();
-	assert(pOutput != XENON_FUNCTION_HANDLE_NULL);
+	HqFunction* const pOutput = new HqFunction();
+	assert(pOutput != HQ_FUNCTION_HANDLE_NULL);
 
 	char funcName[512];
 	snprintf(funcName, sizeof(funcName), "void `.init-program-'%s'()", hProgram->pName->data);
 
 	pOutput->hProgram = hProgram;
-	pOutput->pSignature = XenonString::Create(funcName);
+	pOutput->pSignature = HqString::Create(funcName);
 	pOutput->bytecodeOffsetStart = 0;
 	pOutput->bytecodeOffsetEnd = bytecodeLength;
 	pOutput->numParameters = 0;
@@ -51,22 +51,22 @@ XenonFunctionHandle XenonFunction::CreateInit(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonFunction::CreateScript(
-	XenonProgramHandle hProgram,
-	XenonString* const pSignature,
-	XenonValue::StringToHandleMap& locals,
-	XenonGuardedBlock::Array& guardedBlocks,
+HqFunctionHandle HqFunction::CreateScript(
+	HqProgramHandle hProgram,
+	HqString* const pSignature,
+	HqValue::StringToHandleMap& locals,
+	HqGuardedBlock::Array& guardedBlocks,
 	const uint32_t bytecodeOffset,
 	const uint32_t bytecodeLength,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
 {
-	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
+	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
 	assert(pSignature != nullptr);
 
-	XenonFunction* const pOutput = new XenonFunction();
-	assert(pOutput != XENON_FUNCTION_HANDLE_NULL);
+	HqFunction* const pOutput = new HqFunction();
+	assert(pOutput != HQ_FUNCTION_HANDLE_NULL);
 
 	pOutput->hProgram = hProgram;
 	pOutput->pSignature = pSignature;
@@ -78,31 +78,31 @@ XenonFunctionHandle XenonFunction::CreateScript(
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = false;
 
-	XenonString::AddRef(pOutput->pSignature);
+	HqString::AddRef(pOutput->pSignature);
 
 	// Just in case the std::move() doesn't do the trick,
 	// make sure the input locals are cleared out.
-	XENON_MAP_FUNC_CLEAR(locals);
+	HQ_MAP_FUNC_CLEAR(locals);
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonFunction::CreateNative(
-	XenonProgramHandle hProgram,
-	XenonString* const pSignature,
+HqFunctionHandle HqFunction::CreateNative(
+	HqProgramHandle hProgram,
+	HqString* const pSignature,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
 {
-	assert(hProgram != XENON_PROGRAM_HANDLE_NULL);
+	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
 	assert(pSignature != nullptr);
 
-	XenonFunction* const pOutput = new XenonFunction();
+	HqFunction* const pOutput = new HqFunction();
 	if(!pOutput)
 	{
-		return XENON_FUNCTION_HANDLE_NULL;
+		return HQ_FUNCTION_HANDLE_NULL;
 	}
 
 	pOutput->hProgram = hProgram;
@@ -112,16 +112,16 @@ XenonFunctionHandle XenonFunction::CreateNative(
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = true;
 
-	XenonString::AddRef(pOutput->pSignature);
+	HqString::AddRef(pOutput->pSignature);
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonFunctionHandle XenonFunction::CreateBuiltIn(
-	XenonString* const pSignature,
-	XenonNativeFunction nativeFn,
+HqFunctionHandle HqFunction::CreateBuiltIn(
+	HqString* const pSignature,
+	HqNativeFunction nativeFn,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
@@ -129,72 +129,72 @@ XenonFunctionHandle XenonFunction::CreateBuiltIn(
 	assert(pSignature != nullptr);
 	assert(nativeFn != nullptr);
 
-	XenonFunction* const pOutput = new XenonFunction();
+	HqFunction* const pOutput = new HqFunction();
 	if(!pOutput)
 	{
-		return XENON_FUNCTION_HANDLE_NULL;
+		return HQ_FUNCTION_HANDLE_NULL;
 	}
 
-	pOutput->hProgram = XENON_PROGRAM_HANDLE_NULL;
+	pOutput->hProgram = HQ_PROGRAM_HANDLE_NULL;
 	pOutput->pSignature = pSignature;
 	pOutput->nativeFn = nativeFn;
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = true;
 
-	XenonString::AddRef(pOutput->pSignature);
+	HqString::AddRef(pOutput->pSignature);
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonFunction::Dispose(XenonFunctionHandle hFunction)
+void HqFunction::Dispose(HqFunctionHandle hFunction)
 {
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
+	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
-	XenonString::Release(hFunction->pSignature);
+	HqString::Release(hFunction->pSignature);
 
 	// Dispose of the local variables.
 	for(auto& kv : hFunction->locals)
 	{
-		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+		HqString::Release(HQ_MAP_ITER_KEY(kv));
 	}
 
 	// Release each guarded block.
 	for(size_t blockIndex = 0; blockIndex < hFunction->guardedBlocks.count; ++blockIndex)
 	{
-		XenonGuardedBlock::Dispose(hFunction->guardedBlocks.pData[blockIndex]);
+		HqGuardedBlock::Dispose(hFunction->guardedBlocks.pData[blockIndex]);
 	}
 
-	XenonGuardedBlock::Array::Dispose(hFunction->guardedBlocks);
+	HqGuardedBlock::Array::Dispose(hFunction->guardedBlocks);
 
 	delete hFunction;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonVmHandle XenonFunction::GetVm(XenonFunctionHandle hFunction)
+HqVmHandle HqFunction::GetVm(HqFunctionHandle hFunction)
 {
-	assert(hFunction != XENON_FUNCTION_HANDLE_NULL);
+	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
 	return hFunction->hProgram
 		? hFunction->hProgram->hVm
-		: XENON_VM_HANDLE_NULL;
+		: HQ_VM_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonFunction::operator new(const size_t sizeInBytes)
+void* HqFunction::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonFunction::operator delete(void* const pObject)
+void HqFunction::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

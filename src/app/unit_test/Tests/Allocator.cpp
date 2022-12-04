@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include <XenonScript.h>
+#include <Harlequin.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -39,23 +39,23 @@ TEST(TestAllocator, SetCustomAllocator)
 		return free(pMem);
 	};
 
-	const XenonMemAllocator defaultAllocator = XenonMemGetDefaultAllocator();
+	const HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
 
-	XenonMemAllocator currentAllocator = XenonMemGetAllocator();
+	HqMemAllocator currentAllocator = HqMemGetAllocator();
 
 	// Verify the initial allocator matches the default allocator.
 	EXPECT_EQ(currentAllocator.allocFn, defaultAllocator.allocFn);
 	EXPECT_EQ(currentAllocator.reallocFn, defaultAllocator.reallocFn);
 	EXPECT_EQ(currentAllocator.freeFn, defaultAllocator.freeFn);
 
-	XenonMemAllocator customAllocator;
+	HqMemAllocator customAllocator;
 	customAllocator.allocFn = customAlloc;
 	customAllocator.reallocFn = customRealloc;
 	customAllocator.freeFn = customFree;
 
 	// Set a custom allocator.
-	XenonMemSetAllocator(customAllocator);
-	currentAllocator = XenonMemGetAllocator();
+	HqMemSetAllocator(customAllocator);
+	currentAllocator = HqMemGetAllocator();
 
 	// Verify the current allocator matches the custom allocator.
 	EXPECT_EQ(currentAllocator.allocFn, customAllocator.allocFn);
@@ -63,8 +63,8 @@ TEST(TestAllocator, SetCustomAllocator)
 	EXPECT_EQ(currentAllocator.freeFn, customAllocator.freeFn);
 
 	// Reset back to the default allocator.
-	XenonMemSetAllocator(defaultAllocator);
-	currentAllocator = XenonMemGetAllocator();
+	HqMemSetAllocator(defaultAllocator);
+	currentAllocator = HqMemGetAllocator();
 
 	// Verify the current allocator matches the default allocator.
 	EXPECT_EQ(currentAllocator.allocFn, defaultAllocator.allocFn);

@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../XenonScript.h"
+#include "../../Harlequin.h"
 
 #include "../../base/String.hpp"
 
@@ -28,19 +28,19 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgramCommonLoader
+struct HqProgramCommonLoader
 {
-	static bool CheckMagicNumber(const XenonFileHeader& fileHeader);
+	static bool CheckMagicNumber(const HqFileHeader& fileHeader);
 
-	static XenonString* ReadString(
-		XenonSerializerHandle hSerializer,
-		XenonReportHandle hReport
+	static HqString* ReadString(
+		HqSerializerHandle hSerializer,
+		HqReportHandle hReport
 	);
 
-	static XenonValue* ReadValue(
-		XenonSerializerHandle hSerializer,
-		XenonVmHandle hVm,
-		XenonReportHandle hReport
+	static HqValue* ReadValue(
+		HqSerializerHandle hSerializer,
+		HqVmHandle hVm,
+		HqReportHandle hReport
 	);
 };
 

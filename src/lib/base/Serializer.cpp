@@ -32,11 +32,11 @@ namespace SerializerUtility
 
 		switch(endianness)
 		{
-#ifndef XENON_CPU_ENDIAN_UNKNOWN
-	#ifdef XENON_CPU_ENDIAN_BIG
-			case XENON_ENDIAN_ORDER_LITTLE:
+#ifndef HQ_CPU_ENDIAN_UNKNOWN
+	#ifdef HQ_CPU_ENDIAN_BIG
+			case HQ_ENDIAN_ORDER_LITTLE:
 	#else
-			case XENON_ENDIAN_ORDER_BIG:
+			case HQ_ENDIAN_ORDER_BIG:
 	#endif
 				reverseEndian = true;
 				break;
@@ -68,46 +68,46 @@ namespace SerializerUtility
 
 //----------------------------------------------------------------------------------------------------------------------
 
-XenonSerializerHandle XenonSerializer::Create(int mode)
+HqSerializerHandle HqSerializer::Create(int mode)
 {
-	XenonSerializer* const pOutput = new XenonSerializer();
+	HqSerializer* const pOutput = new HqSerializer();
 	if(!pOutput)
 	{
-		return XENON_SERIALIZER_HANDLE_NULL;
+		return HQ_SERIALIZER_HANDLE_NULL;
 	}
 
-	XenonByteHelper::Array::Initialize(pOutput->stream);
+	HqByteHelper::Array::Initialize(pOutput->stream);
 
 	pOutput->position = 0;
 	pOutput->mode = mode;
-	pOutput->endianness = XENON_ENDIAN_ORDER_NATIVE;
+	pOutput->endianness = HQ_ENDIAN_ORDER_NATIVE;
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonSerializer::Dispose(XenonSerializerHandle hSerializer)
+void HqSerializer::Dispose(HqSerializerHandle hSerializer)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
-	XenonByteHelper::Array::Dispose(hSerializer->stream);
+	HqByteHelper::Array::Dispose(hSerializer->stream);
 
 	delete hSerializer;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::LoadFile(XenonSerializerHandle hSerializer, const char* const filePath)
+int HqSerializer::LoadFile(HqSerializerHandle hSerializer, const char* const filePath)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(filePath != nullptr);
 	assert(filePath[0] != '\0');
 
 	FILE* const pFile = fopen(filePath, "rb");
 	if(!pFile)
 	{
-		return XENON_ERROR_FAILED_TO_OPEN_FILE;
+		return HQ_ERROR_FAILED_TO_OPEN_FILE;
 	}
 
 	// Move to the end of the file, then get the position within file.  This will give us the total
@@ -117,12 +117,12 @@ int XenonSerializer::LoadFile(XenonSerializerHandle hSerializer, const char* con
 	fseek(pFile, 0, SEEK_SET);
 
 	// Discard the old stream contents.
-	XenonByteHelper::Array::Dispose(hSerializer->stream);
+	HqByteHelper::Array::Dispose(hSerializer->stream);
 
 	if(fileSize > 0)
 	{
 		// Reserve space in the stream for the new contents.
-		XenonByteHelper::Array::Reserve(hSerializer->stream, fileSize);
+		HqByteHelper::Array::Reserve(hSerializer->stream, fileSize);
 		assert(hSerializer->stream.pData != nullptr);
 
 		// Read the file data into the stream.
@@ -135,41 +135,41 @@ int XenonSerializer::LoadFile(XenonSerializerHandle hSerializer, const char* con
 		// Since we explicitly loaded new contents into the stream, we set the size of the stream
 		// and reset the serializer position based on the serializer mode.
 		hSerializer->stream.count = fileSize;
-		hSerializer->position = (hSerializer->mode == XENON_SERIALIZER_MODE_WRITER) ? fileSize : 0;
+		hSerializer->position = (hSerializer->mode == HQ_SERIALIZER_MODE_WRITER) ? fileSize : 0;
 	}
 
 	fclose(pFile);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::LoadBuffer(XenonSerializerHandle hSerializer, const void* const pBuffer, const size_t length)
+int HqSerializer::LoadBuffer(HqSerializerHandle hSerializer, const void* const pBuffer, const size_t length)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(pBuffer != nullptr);
 	assert(length > 0);
 
 	// Discard the current stream contents, then reserve space for the new contents.
-	XenonByteHelper::Array::Dispose(hSerializer->stream);
-	XenonByteHelper::Array::Reserve(hSerializer->stream, length);
+	HqByteHelper::Array::Dispose(hSerializer->stream);
+	HqByteHelper::Array::Reserve(hSerializer->stream, length);
 	assert(hSerializer->stream.pData != nullptr);
 
 	// Copy the input memory contents to the internal stream.
 	memcpy(hSerializer->stream.pData, pBuffer, length);
 
 	hSerializer->stream.count = length;
-	hSerializer->position = (hSerializer->mode == XENON_SERIALIZER_MODE_WRITER) ? length : 0;
+	hSerializer->position = (hSerializer->mode == HQ_SERIALIZER_MODE_WRITER) ? length : 0;
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::SaveFile(XenonSerializerHandle hSerializer, const char* const filePath, const bool append)
+int HqSerializer::SaveFile(HqSerializerHandle hSerializer, const char* const filePath, const bool append)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(filePath != nullptr);
 	assert(filePath[0] != '\0');
 
@@ -177,7 +177,7 @@ int XenonSerializer::SaveFile(XenonSerializerHandle hSerializer, const char* con
 	FILE* const pFile = fopen(filePath, append ? "ab" : "wb");
 	if(!pFile)
 	{
-		return XENON_ERROR_FAILED_TO_OPEN_FILE;
+		return HQ_ERROR_FAILED_TO_OPEN_FILE;
 	}
 
 	const size_t streamSize = hSerializer->stream.count;
@@ -194,21 +194,21 @@ int XenonSerializer::SaveFile(XenonSerializerHandle hSerializer, const char* con
 
 	fclose(pFile);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::SaveBuffer(XenonSerializerHandle hSerializer, void* const pOutBuffer, size_t* const pLength)
+int HqSerializer::SaveBuffer(HqSerializerHandle hSerializer, void* const pOutBuffer, size_t* const pLength)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(pOutBuffer != nullptr);
 	assert(pLength != nullptr);
 
 	if(!pOutBuffer)
 	{
 		(*pLength) = hSerializer->stream.count;
-		return XENON_SUCCESS;
+		return HQ_SUCCESS;
 	}
 
 	if(hSerializer->stream.pData)
@@ -216,21 +216,21 @@ int XenonSerializer::SaveBuffer(XenonSerializerHandle hSerializer, void* const p
 		memcpy(pOutBuffer, hSerializer->stream.pData, *pLength);
 	}
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::WriteData(XenonSerializerHandle hSerializer, const uint8_t* const pSource, const size_t length)
+int HqSerializer::WriteData(HqSerializerHandle hSerializer, const uint8_t* const pSource, const size_t length)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(pSource != nullptr);
 	assert(length > 0);
 
 	const size_t requiredSize = hSerializer->stream.count + length;
 	if(requiredSize > hSerializer->stream.capacity)
 	{
-		XenonByteHelper::Array::Reserve(hSerializer->stream, requiredSize);
+		HqByteHelper::Array::Reserve(hSerializer->stream, requiredSize);
 		assert(hSerializer->stream.pData != nullptr);
 	}
 
@@ -246,21 +246,21 @@ int XenonSerializer::WriteData(XenonSerializerHandle hSerializer, const uint8_t*
 
 	SerializerUtility::CopyData(pDest, pSource, length, hSerializer->endianness);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::WriteRawData(XenonSerializerHandle hSerializer, const void* const pSource, const size_t length)
+int HqSerializer::WriteRawData(HqSerializerHandle hSerializer, const void* const pSource, const size_t length)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(pSource != nullptr);
 	assert(length > 0);
 
 	const size_t requiredSize = hSerializer->stream.count + length;
 	if(requiredSize > hSerializer->stream.capacity)
 	{
-		XenonByteHelper::Array::Reserve(hSerializer->stream, requiredSize);
+		HqByteHelper::Array::Reserve(hSerializer->stream, requiredSize);
 		assert(hSerializer->stream.pData != nullptr);
 	}
 
@@ -277,20 +277,20 @@ int XenonSerializer::WriteRawData(XenonSerializerHandle hSerializer, const void*
 	// Copy the entire buffer as it is.
 	memcpy(pDest, pSource, length);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::ReadData(XenonSerializerHandle hSerializer, uint8_t* const pDest, const size_t length)
+int HqSerializer::ReadData(HqSerializerHandle hSerializer, uint8_t* const pDest, const size_t length)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(pDest != nullptr);
 	assert(length > 0);
 
 	if(hSerializer->stream.count < hSerializer->position + length)
 	{
-		return XENON_ERROR_STREAM_END;
+		return HQ_ERROR_STREAM_END;
 	}
 
 	const uint8_t* const pSource = hSerializer->stream.pData + hSerializer->position;
@@ -298,20 +298,20 @@ int XenonSerializer::ReadData(XenonSerializerHandle hSerializer, uint8_t* const 
 
 	SerializerUtility::CopyData(pDest, pSource, length, hSerializer->endianness);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int XenonSerializer::ReadRawData(XenonSerializerHandle hSerializer, void* const pDest, const size_t length)
+int HqSerializer::ReadRawData(HqSerializerHandle hSerializer, void* const pDest, const size_t length)
 {
-	assert(hSerializer != XENON_SERIALIZER_HANDLE_NULL);
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	assert(pDest != nullptr);
 	assert(length > 0);
 
 	if(hSerializer->stream.count < hSerializer->position + length)
 	{
-		return XENON_ERROR_STREAM_END;
+		return HQ_ERROR_STREAM_END;
 	}
 
 	const uint8_t* const pSource = hSerializer->stream.pData + hSerializer->position;
@@ -319,21 +319,21 @@ int XenonSerializer::ReadRawData(XenonSerializerHandle hSerializer, void* const 
 
 	memcpy(pDest, pSource, length);
 
-	return XENON_SUCCESS;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* XenonSerializer::operator new(const size_t sizeInBytes)
+void* HqSerializer::operator new(const size_t sizeInBytes)
 {
-	return XenonMemAlloc(sizeInBytes);
+	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonSerializer::operator delete(void* const pObject)
+void HqSerializer::operator delete(void* const pObject)
 {
-	XenonMemFree(pObject);
+	HqMemFree(pObject);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -20,21 +20,21 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 #include "../common/Report.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonCompiler
+struct HqCompiler
 {
-	static XenonCompilerHandle Create(XenonCompilerInit init);
-	static void Dispose(XenonCompilerHandle hCompiler);
+	static HqCompilerHandle Create(HqCompilerInit init);
+	static void Dispose(HqCompilerHandle hCompiler);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonReport report;
+	HqReport report;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

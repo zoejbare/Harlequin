@@ -38,22 +38,22 @@
 extern "C" {
 #endif
 
-void OpCodeExec_Push(XenonExecutionHandle hExec)
+void OpCodeExec_Push(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
-		result = XenonFrame::PushValue(hExec->hCurrentFrame, hValue);
-		if(result != XENON_SUCCESS)
+		result = HqFrame::PushValue(hExec->hCurrentFrame, hValue);
+		if(result != HQ_SUCCESS)
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to push value onto stack at frame: \"%s\", offset(0x%" PRIXPTR ")",
 				hExec->hCurrentFrame->hFunction->pSignature->data,
 				uintptr_t(hExec->hCurrentFrame->decoder.cachedIp)
@@ -63,9 +63,9 @@ void OpCodeExec_Push(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
 			registerIndex
 		);
@@ -74,9 +74,9 @@ void OpCodeExec_Push(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Push(XenonDisassemble& disasm)
+void OpCodeDisasm_Push(HqDisassemble& disasm)
 {
-	const uint32_t registerIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[16];
 	snprintf(str, sizeof(str), "PUSH r%" PRIu32, registerIndex);

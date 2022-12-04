@@ -23,399 +23,399 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddBool(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddBool(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const bool left = XenonValueGetBool(hLeft);
-	const bool right = XenonValueGetBool(hRight);
+	const bool left = HqValueGetBool(hLeft);
+	const bool right = HqValueGetBool(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateBool(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateBool(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt8(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddInt8(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const int8_t left = XenonValueGetInt8(hLeft);
-	const int8_t right = XenonValueGetInt8(hRight);
+	const int8_t left = HqValueGetInt8(hLeft);
+	const int8_t right = HqValueGetInt8(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt8(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateInt8(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt16(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddInt16(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const int16_t left = XenonValueGetInt16(hLeft);
-	const int16_t right = XenonValueGetInt16(hRight);
+	const int16_t left = HqValueGetInt16(hLeft);
+	const int16_t right = HqValueGetInt16(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt16(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateInt16(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddInt32(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const int32_t left = XenonValueGetInt32(hLeft);
-	const int32_t right = XenonValueGetInt32(hRight);
+	const int32_t left = HqValueGetInt32(hLeft);
+	const int32_t right = HqValueGetInt32(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt32(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateInt32(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddInt64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddInt64(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const int64_t left = XenonValueGetInt64(hLeft);
-	const int64_t right = XenonValueGetInt64(hRight);
+	const int64_t left = HqValueGetInt64(hLeft);
+	const int64_t right = HqValueGetInt64(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateInt64(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateInt64(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint8(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddUint8(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const uint8_t left = XenonValueGetUint8(hLeft);
-	const uint8_t right = XenonValueGetUint8(hRight);
+	const uint8_t left = HqValueGetUint8(hLeft);
+	const uint8_t right = HqValueGetUint8(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint8(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateUint8(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint16(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddUint16(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const uint16_t left = XenonValueGetUint16(hLeft);
-	const uint16_t right = XenonValueGetUint16(hRight);
+	const uint16_t left = HqValueGetUint16(hLeft);
+	const uint16_t right = HqValueGetUint16(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint16(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateUint16(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddUint32(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const uint32_t left = XenonValueGetUint32(hLeft);
-	const uint32_t right = XenonValueGetUint32(hRight);
+	const uint32_t left = HqValueGetUint32(hLeft);
+	const uint32_t right = HqValueGetUint32(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint32(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateUint32(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddUint64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddUint64(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const uint64_t left = XenonValueGetUint64(hLeft);
-	const uint64_t right = XenonValueGetUint64(hRight);
+	const uint64_t left = HqValueGetUint64(hLeft);
+	const uint64_t right = HqValueGetUint64(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateUint64(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateUint64(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddFloat32(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddFloat32(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const float left = XenonValueGetFloat32(hLeft);
-	const float right = XenonValueGetFloat32(hRight);
+	const float left = HqValueGetFloat32(hLeft);
+	const float right = HqValueGetFloat32(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateFloat32(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateFloat32(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddFloat64(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddFloat64(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const double left = XenonValueGetFloat64(hLeft);
-	const double right = XenonValueGetFloat64(hRight);
+	const double left = HqValueGetFloat64(hLeft);
+	const double right = HqValueGetFloat64(hRight);
 
 	// Release the input parameter values now that we have their data.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateFloat64(hVm, left + right);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateFloat64(hVm, left + right);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonBuiltIn::OpAddString(XenonExecutionHandle hExec, XenonFunctionHandle, void*)
+void HqBuiltIn::OpAddString(HqExecutionHandle hExec, HqFunctionHandle, void*)
 {
-	assert(hExec != XENON_EXECUTION_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	// Get the VM associated with the input execution context.
-	XenonVmHandle hVm = XENON_VM_HANDLE_NULL;
-	XenonExecutionGetVm(hExec, &hVm);
+	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+	HqExecutionGetVm(hExec, &hVm);
 
 	// Get the left operand value.
-	XenonValueHandle hLeft = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hLeft, 0);
+	HqValueHandle hLeft = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hLeft, 0);
 
 	// Get the right operand value.
-	XenonValueHandle hRight = XENON_VALUE_HANDLE_NULL;
-	XenonExecutionGetIoRegister(hExec, &hRight, 1);
+	HqValueHandle hRight = HQ_VALUE_HANDLE_NULL;
+	HqExecutionGetIoRegister(hExec, &hRight, 1);
 
 	// Extract the value data needed for the operation.
-	const char* const left = XenonValueGetString(hLeft);
-	const char* const right = XenonValueGetString(hRight);
+	const char* const left = HqValueGetString(hLeft);
+	const char* const right = HqValueGetString(hRight);
 
-	const size_t leftLength = XenonValueGetStringLength(hLeft);
-	const size_t rightLength = XenonValueGetStringLength(hRight);
+	const size_t leftLength = HqValueGetStringLength(hLeft);
+	const size_t rightLength = HqValueGetStringLength(hRight);
 	const size_t totalStringSize = leftLength + rightLength + 1;
 
 	// Allocate a temporary string to contain the result of the concatenation.
-	char* const out = reinterpret_cast<char*>(XenonMemAlloc(sizeof(char) * totalStringSize));
+	char* const out = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * totalStringSize));
 
 	// Concatenate the operand strings.
 	snprintf(out, totalStringSize, "%s%s", left, right);
 
 	// Create the output result and store it to an I/O register.
-	XenonValueHandle hOutput = XenonValueCreateString(hVm, out);
-	XenonExecutionSetIoRegister(hExec, hOutput, 0);
-	XenonValueGcExpose(hOutput);
+	HqValueHandle hOutput = HqValueCreateString(hVm, out);
+	HqExecutionSetIoRegister(hExec, hOutput, 0);
+	HqValueGcExpose(hOutput);
 
 	// Free the temporary output string.
-	XenonMemFree(out);
+	HqMemFree(out);
 
 	// Release the input parameter values.
-	XenonValueGcExpose(hLeft);
-	XenonValueGcExpose(hRight);
+	HqValueGcExpose(hLeft);
+	HqValueGcExpose(hRight);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

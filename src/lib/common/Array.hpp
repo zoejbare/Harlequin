@@ -20,30 +20,30 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../XenonScript.h"
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-struct XenonArray
+struct HqArray
 {
 	T* pData;
 
 	size_t count;
 	size_t capacity;
 
-	static void Initialize(XenonArray& output)
+	static void Initialize(HqArray& output)
 	{
 		output.pData = nullptr;
 		output.count = 0;
 		output.capacity = 0;
 	}
 
-	static void Dispose(XenonArray& array)
+	static void Dispose(HqArray& array)
 	{
 		if(array.pData)
 		{
-			XenonMemFree(array.pData);
+			HqMemFree(array.pData);
 
 			array.pData = nullptr;
 			array.count = 0;
@@ -51,7 +51,7 @@ struct XenonArray
 		}
 	}
 
-	static void Reserve(XenonArray& array, size_t desiredCapacity)
+	static void Reserve(HqArray& array, size_t desiredCapacity)
 	{
 		if(array.capacity < desiredCapacity)
 		{
@@ -69,7 +69,7 @@ struct XenonArray
 				}
 			}
 
-			array.pData = reinterpret_cast<T*>(XenonMemRealloc(array.pData, array.capacity * sizeof(T)));
+			array.pData = reinterpret_cast<T*>(HqMemRealloc(array.pData, array.capacity * sizeof(T)));
 		}
 	}
 };

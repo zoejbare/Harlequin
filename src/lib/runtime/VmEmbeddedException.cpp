@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void XenonVm::prv_setupEmbeddedExceptions(XenonVmHandle hVm)
+void HqVm::prv_setupEmbeddedExceptions(HqVmHandle hVm)
 {
 	// Can't think of a more elegant way to handle this other than manually creating object values that match the
 	// definitions of the base exception types in the standard library. As long as the type names and member definitions
@@ -30,40 +30,40 @@ void XenonVm::prv_setupEmbeddedExceptions(XenonVmHandle hVm)
 	// It's still possible for a user to implement the 'FatalError' type on their own, but as a convention, any time
 	// the runtime raises that exception, it will be additionally marked as fatal to prevent it from being caught.
 
-	XenonScriptObject::MemberDefinitionMap memberDefs;
-	XenonScriptObject::MemberDefinition def;
+	HqScriptObject::MemberDefinitionMap memberDefs;
+	HqScriptObject::MemberDefinition def;
 
-#define XENON_EXCEPTION_ADD_MEMBER(value_type, name, index) \
+#define HQ_EXCEPTION_ADD_MEMBER(value_type, name, index) \
 	{ \
 		def.bindingIndex = index; \
-		def.valueType = XENON_VALUE_TYPE_ ## value_type; \
-		XENON_MAP_FUNC_INSERT(memberDefs, XenonString::Create(name), def); \
+		def.valueType = HQ_VALUE_TYPE_ ## value_type; \
+		HQ_MAP_FUNC_INSERT(memberDefs, HqString::Create(name), def); \
 	}
 
-#define XENON_EMBEDDED_EXCEPTION(type, name) \
+#define HQ_EMBEDDED_EXCEPTION(type, name) \
 	{ \
-		XenonString* const pTypeName = XenonString::Create("Xenon.System.Exception." name); \
-		XenonScriptObject* const pSchema = XenonScriptObject::CreateSchema(pTypeName, memberDefs); \
-		XenonString::Release(pTypeName); \
-		XENON_MAP_FUNC_INSERT(hVm->embeddedExceptions, XENON_STANDARD_EXCEPTION_ ## type, pSchema); \
+		HqString* const pTypeName = HqString::Create("Harlequin.System.Exception." name); \
+		HqScriptObject* const pSchema = HqScriptObject::CreateSchema(pTypeName, memberDefs); \
+		HqString::Release(pTypeName); \
+		HQ_MAP_FUNC_INSERT(hVm->embeddedExceptions, HQ_STANDARD_EXCEPTION_ ## type, pSchema); \
 	}
 
 	// Add the object member data common to each exception type.
-	XENON_EXCEPTION_ADD_MEMBER(STRING, "_message", 0);
+	HQ_EXCEPTION_ADD_MEMBER(STRING, "_message", 0);
 
 	// Register the embedded exception types.
-	XENON_EMBEDDED_EXCEPTION(RUNTIME_ERROR, "RuntimeError");
-	XENON_EMBEDDED_EXCEPTION(TYPE_ERROR, "TypeError");
-	XENON_EMBEDDED_EXCEPTION(DIVIDE_BY_ZERO_ERROR, "DivideByZeroError");
+	HQ_EMBEDDED_EXCEPTION(RUNTIME_ERROR, "RuntimeError");
+	HQ_EMBEDDED_EXCEPTION(TYPE_ERROR, "TypeError");
+	HQ_EMBEDDED_EXCEPTION(DIVIDE_BY_ZERO_ERROR, "DivideByZeroError");
 
 	// Clean up the member names.
 	for(auto& kv : memberDefs)
 	{
-		XenonString::Release(XENON_MAP_ITER_KEY(kv));
+		HqString::Release(HQ_MAP_ITER_KEY(kv));
 	}
 
-#undef XENON_EMBEDDED_EXCEPTION
-#undef XENON_EXCEPTION_ADD_MEMBER
+#undef HQ_EMBEDDED_EXCEPTION
+#undef HQ_EXCEPTION_ADD_MEMBER
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -40,23 +40,23 @@
 extern "C" {
 #endif
 
-void OpCodeExec_StoreParam(XenonExecutionHandle hExec)
+void OpCodeExec_StoreParam(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t ioRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	XenonValueHandle hValue = XenonFrame::GetGpRegister(hExec->hCurrentFrame, gpRegIndex, &result);
-	if(result == XENON_SUCCESS)
+	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpRegIndex, &result);
+	if(result == HQ_SUCCESS)
 	{
-		result = XenonExecution::SetIoRegister(hExec, hValue, ioRegIndex);
-		if(result != XENON_SUCCESS)
+		result = HqExecution::SetIoRegister(hExec, hValue, ioRegIndex);
+		if(result != HQ_SUCCESS)
 		{
 			// Raise a fatal script exception.
-			XenonExecution::RaiseOpCodeException(
+			HqExecution::RaiseOpCodeException(
 				hExec,
-				XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to set I/O register: p(%" PRIu32 ")",
 				ioRegIndex
 			);
@@ -65,9 +65,9 @@ void OpCodeExec_StoreParam(XenonExecutionHandle hExec)
 	else
 	{
 		// Raise a fatal script exception.
-		XenonExecution::RaiseOpCodeException(
+		HqExecution::RaiseOpCodeException(
 			hExec,
-			XENON_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 			"Failed to retrieve general-purpose register: r(%" PRIu32 ")",
 			gpRegIndex
 		);
@@ -76,10 +76,10 @@ void OpCodeExec_StoreParam(XenonExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_StoreParam(XenonDisassemble& disasm)
+void OpCodeDisasm_StoreParam(HqDisassemble& disasm)
 {
-	const uint32_t ioRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
-	const uint32_t gpRegIndex = XenonDecoder::LoadUint32(disasm.decoder);
+	const uint32_t ioRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
 	snprintf(str, sizeof(str), "STORE_PARAM p%" PRIu32 ", r%" PRIu32, ioRegIndex, gpRegIndex);

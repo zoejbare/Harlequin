@@ -31,47 +31,47 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonProgram
+struct HqProgram
 {
-	typedef XENON_MAP_TYPE<
-		XenonString*,
-		XenonProgramHandle,
-#if XENON_MAP_IS_UNORDERED
-		XenonString::StlHash,
-		XenonString::StlCompare,
+	typedef HQ_MAP_TYPE<
+		HqString*,
+		HqProgramHandle,
+#if HQ_MAP_IS_UNORDERED
+		HqString::StlHash,
+		HqString::StlCompare,
 #else
-		XenonString::StlLess,
+		HqString::StlLess,
 #endif
-		XenonStlAllocator<XENON_MAP_NODE_TYPE(XenonString*, XenonProgramHandle)>
+		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqProgramHandle)>
 	> StringToHandleMap;
 
-	typedef XenonStack<XenonProgramHandle> HandleStack;
+	typedef HqStack<HqProgramHandle> HandleStack;
 
-	static XenonProgramHandle Create(XenonVmHandle hVm, XenonString* const pProgramName, const char* const filePath);
-	static XenonProgramHandle Create(
-		XenonVmHandle hVm,
-		XenonString* const pProgramName,
+	static HqProgramHandle Create(HqVmHandle hVm, HqString* const pProgramName, const char* const filePath);
+	static HqProgramHandle Create(
+		HqVmHandle hVm,
+		HqString* const pProgramName,
 		const void* const pFileData,
 		const size_t fileLength
 	);
-	static void Dispose(XenonProgramHandle hProgram);
+	static void Dispose(HqProgramHandle hProgram);
 
-	static XenonValueHandle GetConstant(XenonProgramHandle hProgram, const uint32_t index, int* const pOutResult);
+	static HqValueHandle GetConstant(HqProgramHandle hProgram, const uint32_t index, int* const pOutResult);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	XenonValue::StringToHandleMap dependencies;
-	XenonFunction::StringToBoolMap functions;
-	XenonValue::StringToBoolMap objectSchemas;
-	XenonValue::StringToBoolMap globals;
-	XenonValue::HandleArray constants;
-	XenonByteHelper::Array code;
+	HqValue::StringToHandleMap dependencies;
+	HqFunction::StringToBoolMap functions;
+	HqValue::StringToBoolMap objectSchemas;
+	HqValue::StringToBoolMap globals;
+	HqValue::HandleArray constants;
+	HqByteHelper::Array code;
 
-	XenonVmHandle hVm;
-	XenonFunctionHandle hInitFunction;
+	HqVmHandle hVm;
+	HqFunctionHandle hInitFunction;
 
-	XenonString* pName;
+	HqString* pName;
 
 	int endianness;
 };

@@ -34,14 +34,14 @@
 extern "C" {
 #endif
 
-void OpCodeExec_Nop(XenonExecutionHandle hExec)
+void OpCodeExec_Nop(HqExecutionHandle hExec)
 {
 	(void) hExec;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Nop(XenonDisassemble& disasm)
+void OpCodeDisasm_Nop(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "NOP", disasm.opcodeOffset);
 }

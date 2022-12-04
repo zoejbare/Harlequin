@@ -24,35 +24,35 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct XenonGcProxy;
-struct XenonGarbageCollector
+struct HqGcProxy;
+struct HqGarbageCollector
 {
-	static void Initialize(XenonGarbageCollector& output, XenonVmHandle hVm, const uint32_t maxIterationCount);
-	static void Dispose(XenonGarbageCollector& gc);
+	static void Initialize(HqGarbageCollector& output, HqVmHandle hVm, const uint32_t maxIterationCount);
+	static void Dispose(HqGarbageCollector& gc);
 
-	static bool RunStep(XenonGarbageCollector& gc);
-	static void RunFull(XenonGarbageCollector& gc);
+	static bool RunStep(HqGarbageCollector& gc);
+	static void RunFull(HqGarbageCollector& gc);
 
-	static void LinkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy);
-	static void MarkObject(XenonGarbageCollector& gc, XenonGcProxy* const pGcProxy);
+	static void LinkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy);
+	static void MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy);
 
-	static void prv_reset(XenonGarbageCollector&);
-	static void prv_onDisposeObject(XenonGcProxy*);
-	static void prv_proxyInsertBefore(XenonGcProxy*, XenonGcProxy*);
-	static void prv_proxyInsertAfter(XenonGcProxy*, XenonGcProxy*);
-	static void prv_proxyUnlink(XenonGcProxy*);
+	static void prv_reset(HqGarbageCollector&);
+	static void prv_onDisposeObject(HqGcProxy*);
+	static void prv_proxyInsertBefore(HqGcProxy*, HqGcProxy*);
+	static void prv_proxyInsertAfter(HqGcProxy*, HqGcProxy*);
+	static void prv_proxyUnlink(HqGcProxy*);
 
-	XenonMutex pendingLock;
+	HqMutex pendingLock;
 
-	XenonVmHandle hVm;
+	HqVmHandle hVm;
 
-	XenonGcProxy* pPendingHead;
-	XenonGcProxy* pUnmarkedHead;
-	XenonGcProxy* pMarkedHead;
-	XenonGcProxy* pMarkedTail;
+	HqGcProxy* pPendingHead;
+	HqGcProxy* pUnmarkedHead;
+	HqGcProxy* pMarkedHead;
+	HqGcProxy* pMarkedTail;
 
-	XenonGcProxy* pIterCurrent;
-	XenonGcProxy* pIterPrev;
+	HqGcProxy* pIterCurrent;
+	HqGcProxy* pIterPrev;
 
 	int phase;
 	int lastPhase;

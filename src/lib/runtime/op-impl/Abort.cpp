@@ -35,14 +35,14 @@
 extern "C" {
 #endif
 
-void OpCodeExec_Abort(XenonExecutionHandle hExec)
+void OpCodeExec_Abort(HqExecutionHandle hExec)
 {
 	hExec->abort = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Abort(XenonDisassemble& disasm)
+void OpCodeDisasm_Abort(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "ABORT", disasm.opcodeOffset);
 }
