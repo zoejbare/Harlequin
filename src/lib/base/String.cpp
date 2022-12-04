@@ -246,7 +246,7 @@ size_t HqString::RawHash(const char* const string)
 {
 	auto calculateFnv1aHash = [](const char* const string, const size_t length) -> size_t
 	{
-#ifdef HQ_CPU_WIDTH_64_BIT
+#ifdef HQ_DATA_WIDTH_64_BIT
 		const uint64_t fnvOffsetBasis = 0xCBF29CE484222325ull;
 		const uint64_t fnvPrime = 0x00000100000001B3ull;
 
@@ -276,7 +276,7 @@ size_t HqString::RawHash(const char* const string)
 	const size_t seed = calculateFnv1aHash(string, length);
 
 	return size_t(
-#ifdef HQ_CPU_WIDTH_64_BIT
+#ifdef HQ_DATA_WIDTH_64_BIT
 		XXH64
 #else
 		XXH32

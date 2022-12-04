@@ -69,13 +69,13 @@
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 #if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__) || defined(__powerpc64__) || defined(__PPC64__) || defined(__aarch64__)
-	#define HQ_CPU_WIDTH_64_BIT
+	#define HQ_DATA_WIDTH_64_BIT
 
 #elif defined(__i386__) || defined(__powerpc__) || defined(__PPC__) || defined(__arm__) || defined(_M_IX86)
-	#define HQ_CPU_WIDTH_32_BIT
+	#define HQ_DATA_WIDTH_32_BIT
 
 #else
-	#define HQ_CPU_WIDTH_UNKNOWN
+	#define HQ_DATA_WIDTH_UNKNOWN
 
 #endif
 
@@ -111,8 +111,8 @@
 		#error "Unknown CPU type"
 	#endif
 
-	#ifdef HQ_CPU_WIDTH_UNKNOWN
-		#error "Unknown CPU bit width"
+	#ifdef HQ_DATA_WIDTH_UNKNOWN
+		#error "Unknown data native bit width"
 	#endif
 
 	#ifdef HQ_CPU_ENDIAN_UNKNOWN
