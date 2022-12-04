@@ -35,10 +35,10 @@
 	#include "mutex-impl/MutexPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../support/Harlequin-PS3/lib/base/mutex/Mutex.hpp"
+	#include "../../../_support/Harlequin-PS3/lib/base/mutex/Mutex.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../support/Harlequin-PSVita/lib/base/mutex/Mutex.hpp"
+	#include "../../../_support/Harlequin-PSVita/lib/base/mutex/Mutex.hpp"
 
 #else
 	#error "HqMutex not implemented for this platform"

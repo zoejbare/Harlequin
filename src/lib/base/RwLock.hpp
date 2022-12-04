@@ -35,10 +35,10 @@
 	#include "rwlock-impl/RwLockPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../support/Harlequin-PS3/lib/base/rwlock/RwLock.hpp"
+	#include "../../../_support/Harlequin-PS3/lib/base/rwlock/RwLock.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../support/Harlequin-PSVita/lib/base/rwlock/RwLock.hpp"
+	#include "../../../_support/Harlequin-PSVita/lib/base/rwlock/RwLock.hpp"
 
 #else
 	#error "HqRwLock not implemented for this platform"

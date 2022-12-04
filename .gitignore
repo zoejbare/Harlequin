@@ -1,7 +1,3 @@
 .csbuild/*
 .vs/*
-_build/*
-_int/*
-_out/*
-_proj/*
-support/*
+_*/*

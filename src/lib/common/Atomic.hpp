@@ -35,10 +35,10 @@
 	#include "atomic-impl/AtomicPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../support/Harlequin-PS3/lib/common/atomic/Atomic.hpp"
+	#include "../../../_support/Harlequin-PS3/lib/common/atomic/Atomic.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../support/Harlequin-PSVita/lib/common/atomic/Atomic.hpp"
+	#include "../../../_support/Harlequin-PSVita/lib/common/atomic/Atomic.hpp"
 
 #else
 	#error "Atomic functions not implemented for this platform"

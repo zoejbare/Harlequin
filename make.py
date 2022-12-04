@@ -224,8 +224,10 @@ class HarlequinCommon(object):
 
 	@staticmethod
 	def setLibCommonOptions(outputName):
+		# The libraries are built as DLLs by default.
 		csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
 
+		# Consoles should always build the libraries as static libs.
 		with csbuild.Toolchain("ps3", "ps4", "ps5", "psvita"):
 			csbuild.SetOutput(outputName, csbuild.ProjectType.StaticLibrary)
 			csbuild.AddDefines("HQ_BUILD_STATIC_LIB")
@@ -296,12 +298,12 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 
 	with csbuild.Toolchain("ps3"):
 		csbuild.AddSourceFiles(
-			f"{_REPO_ROOT_PATH}/support/Harlequin-PS3/lib/base/*/*.cpp",
+			f"_support/Harlequin-PS3/lib/base/*/*.cpp",
 		)
 
 	with csbuild.Toolchain("psvita"):
 		csbuild.AddSourceFiles(
-			f"{_REPO_ROOT_PATH}/support/Harlequin-PSVita/lib/base/*/*.cpp",
+			f"_support/Harlequin-PSVita/lib/base/*/*.cpp",
 		)
 
 ###################################################################################################
