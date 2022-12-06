@@ -101,12 +101,11 @@ void OnDependencyRequested(void* const pUserData, const char* const programName)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static std::map<void*, size_t> allocations;
-
 static size_t maxAllocSize = 0;
 static size_t minAllocSize = size_t(-1);
 static size_t peakMemUsage = 0;
-static size_t allocationCount = 0;
+static size_t activeAllocCount = 0;
+static size_t totalAllocCount = 0;
 static size_t mallocCount = 0;
 static size_t reallocCount = 0;
 
@@ -130,8 +129,6 @@ static void OnAlloc(const size_t size)
 	{
 		peakMemUsage = currentTotalSize;
 	}
-
-	++allocationCount;
 };
 
 int main(int argc, char* argv[])
@@ -151,37 +148,63 @@ int main(int argc, char* argv[])
 
 	auto trackedAlloc = [](const size_t size) -> void*
 	{
-		void* const pMem = malloc(size);
+		assert(size > 0);
 
-		allocations.insert(std::pair<void*, size_t>(pMem, size));
-		OnAlloc(size);
+		size_t* const pMem = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
+		assert(pMem != nullptr);
 
+		(*pMem) = size;
+
+		++activeAllocCount;
+		++totalAllocCount;
 		++mallocCount;
 
-		return pMem;
+		OnAlloc(size);
+
+		return pMem + 1;
 	};
 
 	auto trackedRealloc = [](void* const pOldMem, const size_t newSize) -> void*
 	{
-		void* const pNewMem = realloc(pOldMem, newSize);
+		assert(newSize > 0);
 
-		currentTotalSize -= allocations[pOldMem];
+		size_t* const pAlloc = (pOldMem) ? (reinterpret_cast<size_t*>(pOldMem) - 1) : nullptr;
+		const size_t oldSize = (pAlloc) ? (*pAlloc) : 0;
 
-		allocations.erase(pOldMem);
-		allocations.insert(std::pair<void*, size_t>(pNewMem, newSize));
-		OnAlloc(newSize);
+		size_t* const pNewMem = reinterpret_cast<size_t*>(realloc(pAlloc, newSize + sizeof(size_t)));
+		assert(pNewMem != nullptr);
+
+		(*pNewMem) = newSize;
+
+		currentTotalSize -= oldSize;
+
+		if(oldSize == 0)
+		{
+			++activeAllocCount;
+			++totalAllocCount;
+		}
 
 		++reallocCount;
 
-		return pNewMem;
+		OnAlloc(newSize);
+
+		return pNewMem + 1;
 	};
 
 	auto trackedFree = [](void* const pMem)
 	{
-		currentTotalSize -= allocations[pMem];
+		size_t* const pAlloc = (pMem) ? (reinterpret_cast<size_t*>(pMem) - 1) : nullptr;
+		const size_t size = (pAlloc) ? (*pAlloc) : 0;
 
-		allocations.erase(pMem);
-		free(pMem);
+		if(pAlloc)
+		{
+			currentTotalSize -= size;
+
+			assert(activeAllocCount > 0);
+			--activeAllocCount;
+
+			free(pAlloc);
+		}
 	};
 
 	auto iterateCallstackFrame = [](void* const pUserData, HqFrameHandle hFrame) -> bool
@@ -572,10 +595,10 @@ int main(int argc, char* argv[])
 	const uint64_t disposeVmTimeEnd = HqHiResTimerGetTimestamp();
 	const uint64_t disposeVmTimeSlice = disposeVmTimeEnd - disposeVmTimeStart;
 
-	if(!allocations.empty())
+	if(activeAllocCount != 0)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", allocations.size());
+		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", activeAllocCount);
 		OnMessageReported(NULL, HQ_MESSAGE_TYPE_ERROR, msg);
 
 		applicationResult = APPLICATION_RESULT_FAILURE;
@@ -593,7 +616,7 @@ int main(int argc, char* argv[])
 		minAllocSize,
 		maxAllocSize,
 		peakMemUsage,
-		allocationCount,
+		totalAllocCount,
 		mallocCount,
 		reallocCount
 	);
