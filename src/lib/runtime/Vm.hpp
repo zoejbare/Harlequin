@@ -29,7 +29,6 @@
 #include "ScriptObject.hpp"
 #include "Value.hpp"
 
-#include "../base/RwLock.hpp"
 #include "../base/Thread.hpp"
 
 #include "../common/Dependency.hpp"
@@ -98,7 +97,6 @@ struct HqVm
 	HqReport report;
 	HqGarbageCollector gc;
 	HqThread gcThread;
-	HqRwLock gcRwLock;
 
 	bool isShuttingDown;
 };

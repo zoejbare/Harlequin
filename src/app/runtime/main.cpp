@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
 	vmInit.common.report.reportLevel = HQ_MESSAGE_TYPE_VERBOSE;
 
 	vmInit.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
-	vmInit.gcMaxIterationCount = HQ_VM_GC_DEFAULT_ITERATION_COUNT;
+	vmInit.gcMaxTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
 
 	HqMemAllocator allocator;
 	allocator.allocFn = trackedAlloc;
@@ -263,8 +263,8 @@ int main(int argc, char* argv[])
 
 	HqMemSetAllocator(allocator);
 
-	const uint64_t timerFrequency = HqHiResTimerGetFrequency();
-	const uint64_t overallTimeStart = HqHiResTimerGetTimestamp();
+	const uint64_t timerFrequency = HqClockGetFrequency();
+	const uint64_t overallTimeStart = HqClockGetTimestamp();
 
 	const uint64_t createVmTimeStart = overallTimeStart;
 
@@ -281,7 +281,7 @@ int main(int argc, char* argv[])
 	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
 	HqVmGetReportHandle(hVm, &hReport);
 
-	const uint64_t createVmTimeEnd = HqHiResTimerGetTimestamp();
+	const uint64_t createVmTimeEnd = HqClockGetTimestamp();
 	const uint64_t createVmTimeSlice = createVmTimeEnd - createVmTimeStart;
 
 	const uint64_t loadProgramTimeStart = createVmTimeEnd;
@@ -320,7 +320,7 @@ int main(int argc, char* argv[])
 		if(readProgramFileResult != HQ_SUCCESS)
 		{
 			char msg[128];
-			snprintf(msg, sizeof(msg), "Failed to create Harlequin serializer: error=\"%s\"", HqGetErrorCodeString(createFileSerializerResult));
+			snprintf(msg, sizeof(msg), "Failed to read compiled binary: error=\"%s\"", HqGetErrorCodeString(readProgramFileResult));
 			OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
 			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
 
 	const int loadProgramResult = HqVmLoadProgram(hVm, "test", &fileData[0], fileData.size());
 
-	const uint64_t loadProgramTimeEnd = HqHiResTimerGetTimestamp();
+	const uint64_t loadProgramTimeEnd = HqClockGetTimestamp();
 	const uint64_t loadProgramTimeSlice = loadProgramTimeEnd - loadProgramTimeStart;
 
 	uint64_t initProgramsTimeSlice = 0;
@@ -345,12 +345,12 @@ int main(int argc, char* argv[])
 
 	// Initialize the loaded programs.
 	{
-		const uint64_t initProgramsTimeStart = HqHiResTimerGetTimestamp();
+		const uint64_t initProgramsTimeStart = HqClockGetTimestamp();
 
 		HqExecutionHandle hInitExec = HQ_EXECUTION_HANDLE_NULL;
 		HqVmInitializePrograms(hVm, &hInitExec);
 
-		const uint64_t initProgramsTimeEnd = HqHiResTimerGetTimestamp();
+		const uint64_t initProgramsTimeEnd = HqClockGetTimestamp();
 		initProgramsTimeSlice = initProgramsTimeEnd - initProgramsTimeStart;
 
 		if(hInitExec != HQ_EXECUTION_HANDLE_NULL)
@@ -408,12 +408,12 @@ int main(int argc, char* argv[])
 
 		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
 
-		const uint64_t disassembleTimeStart = HqHiResTimerGetTimestamp();
+		const uint64_t disassembleTimeStart = HqClockGetTimestamp();
 
 		// Iterate all the programs to disassemble them.
 		HqVmListPrograms(hVm, iterateProgram, hVm);
 
-		const uint64_t disassembleTimeEnd = HqHiResTimerGetTimestamp();
+		const uint64_t disassembleTimeEnd = HqClockGetTimestamp();
 		disassembleTimeSlice = disassembleTimeEnd - disassembleTimeStart;
 
 		const char* const entryPoint = "void App.Program.Main()";
@@ -423,12 +423,12 @@ int main(int argc, char* argv[])
 
 		HqVmGetFunction(hVm, &hEntryFunc, entryPoint);
 
-		const uint64_t createExecTimeStart = HqHiResTimerGetTimestamp();
+		const uint64_t createExecTimeStart = HqClockGetTimestamp();
 
 		// Create an execution context that will run the program's entry point function.
 		bool createExecResult = HqExecutionCreate(&hExec, hVm, hEntryFunc);
 
-		const uint64_t createExecTimeEnd = HqHiResTimerGetTimestamp();
+		const uint64_t createExecTimeEnd = HqClockGetTimestamp();
 		createExecTimeSlice = createExecTimeEnd - createExecTimeStart;
 
 		if(createExecResult == HQ_SUCCESS)
@@ -503,7 +503,7 @@ int main(int argc, char* argv[])
 
 			bool status;
 
-			const uint64_t runProgramTimeStart = HqHiResTimerGetTimestamp();
+			const uint64_t runProgramTimeStart = HqClockGetTimestamp();
 			int result = HQ_SUCCESS;
 
 			// Run the script until it has completed.
@@ -565,14 +565,14 @@ int main(int argc, char* argv[])
 				}
 			}
 
-			const uint64_t runProgramTimeEnd = HqHiResTimerGetTimestamp();
+			const uint64_t runProgramTimeEnd = HqClockGetTimestamp();
 			runProgramTimeSlice = runProgramTimeEnd - runProgramTimeStart;
 
 			const uint64_t disposeExecTimeStart = runProgramTimeEnd;
 
 			HqExecutionDispose(&hExec);
 
-			const uint64_t disposeExecTimeEnd = HqHiResTimerGetTimestamp();
+			const uint64_t disposeExecTimeEnd = HqClockGetTimestamp();
 			disposeExecTimeSlice = disposeExecTimeEnd - disposeExecTimeStart;
 		}
 	}
@@ -581,7 +581,7 @@ int main(int argc, char* argv[])
 		applicationResult = APPLICATION_RESULT_FAILURE;
 	}
 
-	const uint64_t disposeVmTimeStart = HqHiResTimerGetTimestamp();
+	const uint64_t disposeVmTimeStart = HqClockGetTimestamp();
 
 	// Dispose of the VM context.
 	const int disposeVmResult = HqVmDispose(&hVm);
@@ -592,7 +592,7 @@ int main(int argc, char* argv[])
 		OnMessageReported(NULL, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 
-	const uint64_t disposeVmTimeEnd = HqHiResTimerGetTimestamp();
+	const uint64_t disposeVmTimeEnd = HqClockGetTimestamp();
 	const uint64_t disposeVmTimeSlice = disposeVmTimeEnd - disposeVmTimeStart;
 
 	if(activeAllocCount != 0)
@@ -621,7 +621,7 @@ int main(int argc, char* argv[])
 		reallocCount
 	);
 
-	const uint64_t overallTimeEnd = HqHiResTimerGetTimestamp();
+	const uint64_t overallTimeEnd = HqClockGetTimestamp();
 	const uint64_t overallTimeSlice = overallTimeEnd - overallTimeStart;
 
 	const double convertTimeToMs = 1000.0 / double(timerFrequency);

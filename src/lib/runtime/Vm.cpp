@@ -18,7 +18,7 @@
 
 #include "Vm.hpp"
 
-#include "../base/HiResTimer.hpp"
+#include "../base/Clock.hpp"
 #include "../common/OpCodeEnum.hpp"
 
 #include <assert.h>
@@ -36,7 +36,7 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	pOutput->report.level = init.common.report.reportLevel;
 
 	// Initialize the garbage collector.
-	HqGarbageCollector::Initialize(pOutput->gc, pOutput, init.gcMaxIterationCount);
+	HqGarbageCollector::Initialize(pOutput->gc, pOutput, init.gcMaxTimeSliceMs);
 
 	// Initialize the opcode array.
 	OpCodeArray::Initialize(pOutput->opCodes);
@@ -54,7 +54,6 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	threadConfig.stackSize = init.gcThreadStackSize;
 	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "HqGarbageCollector");
 
-	pOutput->gcRwLock = HqRwLock::Create();
 	pOutput->gcThread = HqThread::Create(threadConfig);
 
 	return pOutput;
@@ -82,8 +81,6 @@ void HqVm::Dispose(HqVmHandle hVm)
 			HqGetErrorCodeString(threadReturnValue)
 		);
 	}
-
-	HqRwLock::Dispose(hVm->gcRwLock);
 
 	// Clean up each loaded program.
 	for(auto& kv : hVm->programs)
@@ -290,32 +287,13 @@ int32_t HqVm::prv_gcThreadMain(void* const pArg)
 	HqVmHandle hVm = reinterpret_cast<HqVmHandle>(pArg);
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	const uint64_t gcWaitTimeMs = 50;
-
-	// Calculate the amount of time to wait between steps.
-	const uint64_t timerFrequency = HqHiResTimerGetFrequency();
-	const uint64_t timerInterval = gcWaitTimeMs * timerFrequency / 1000;
-
-	uint64_t lastUpdateTime = 0;
-
 	while(!hVm->isShuttingDown)
 	{
-		const uint64_t currentTime = HqHiResTimerGetTimestamp();
-
-		// Check if enough time has elapsed to run the GC step again.
-		if(currentTime - lastUpdateTime >= timerInterval)
-		{
-			HqScopedWriteLock writeLock(hVm->gcRwLock);
-
-			// Run a step of the garbage collector.
-			HqGarbageCollector::RunStep(hVm->gc);
-
-			// Get a new timestamp for the last update time to offset the time taken by the GC step.
-			lastUpdateTime = HqHiResTimerGetTimestamp();
-		}
-
 		// Force a very small sleep to deprioritize the GC thread.
-		HqThread::Sleep(1);
+		HqThread::Sleep(2);
+
+		// Run a step of the garbage collector.
+		HqGarbageCollector::RunPhase(hVm->gc);
 	}
 
 	return HQ_SUCCESS;

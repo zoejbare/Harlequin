@@ -46,7 +46,7 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoi
 	pOutput->finished = false;
 	pOutput->exception = false;
 
-	HqScopedWriteLock gcLock(hVm->gcRwLock);
+	HqScopedWriteLock gcLock(hVm->gc.rwLock);
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
 	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
@@ -106,7 +106,7 @@ void HqExecution::DetachFromVm(HqExecutionHandle hExec)
 	ReleaseWithNoDetach(hExec);
 
 	HqVmHandle hVm = hExec->hVm;
-	HqScopedWriteLock gcLock(hVm->gcRwLock);
+	HqScopedWriteLock gcLock(hVm->gc.rwLock);
 
 	// Unlink the execution context from the VM.
 	HQ_MAP_FUNC_REMOVE(hVm->executionContexts, hExec);
@@ -418,7 +418,7 @@ void HqExecution::prv_runStep(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
-	HqScopedReadLock gcLock(hExec->hVm->gcRwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock);
 
 	HqFrameHandle hFrame = hExec->hCurrentFrame;
 

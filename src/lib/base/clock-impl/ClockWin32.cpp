@@ -16,18 +16,29 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include <stdint.h>
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../Harlequin.h"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-extern "C"
+extern "C" uint64_t _HqClockImplGetFrequency()
 {
-	uint64_t _HqHiResTimerImplGetFrequency();
-	uint64_t _HqHiResTimerImplGetTimestamp();
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+
+	return uint64_t(frequency.QuadPart);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" uint64_t _HqClockImplGetTimestamp()
+{
+	LARGE_INTEGER timestamp;
+	QueryPerformanceCounter(&timestamp);
+
+	return uint64_t(timestamp.QuadPart);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

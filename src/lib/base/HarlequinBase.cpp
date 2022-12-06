@@ -20,7 +20,7 @@
 
 #include "../common/Report.hpp"
 
-#include "HiResTimer.hpp"
+#include "Clock.hpp"
 #include "Serializer.hpp"
 #include "String.hpp"
 
@@ -1106,16 +1106,16 @@ double HqEndianSwapFloat64(const double value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint64_t HqHiResTimerGetFrequency()
+uint64_t HqClockGetFrequency()
 {
-	return _HqHiResTimerImplGetFrequency();
+	return _HqClockImplGetFrequency();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint64_t HqHiResTimerGetTimestamp()
+uint64_t HqClockGetTimestamp()
 {
-	return _HqHiResTimerImplGetTimestamp();
+	return _HqClockImplGetTimestamp();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

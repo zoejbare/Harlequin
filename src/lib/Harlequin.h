@@ -46,7 +46,7 @@ extern "C" {
 #define HQ_VM_THREAD_MINIMUM_STACK_SIZE 262144
 #define HQ_VM_THREAD_DEFAULT_STACK_SIZE 1048576
 
-#define HQ_VM_GC_DEFAULT_ITERATION_COUNT 64
+#define HQ_VM_GC_DEFAULT_TIME_SLICE_MS 4
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -274,9 +274,9 @@ HQ_BASE_API double HqEndianSwapFloat64(double value);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_BASE_API uint64_t HqHiResTimerGetFrequency();
+HQ_BASE_API uint64_t HqClockGetFrequency();
 
-HQ_BASE_API uint64_t HqHiResTimerGetTimestamp();
+HQ_BASE_API uint64_t HqClockGetTimestamp();
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -351,7 +351,7 @@ typedef struct
 	HqCommonInit common;
 
 	uint32_t gcThreadStackSize;
-	uint32_t gcMaxIterationCount;
+	uint32_t gcMaxTimeSliceMs;
 } HqVmInit;
 
 #define HQ_VM_HANDLE_NULL        ((HqVmHandle)0)

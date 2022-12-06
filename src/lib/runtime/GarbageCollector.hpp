@@ -21,27 +21,31 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "../base/Mutex.hpp"
+#include "../base/RwLock.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct HqGcProxy;
 struct HqGarbageCollector
 {
-	static void Initialize(HqGarbageCollector& output, HqVmHandle hVm, const uint32_t maxIterationCount);
+	static void Initialize(HqGarbageCollector& output, HqVmHandle hVm, const uint32_t maxTimeSliceMs);
 	static void Dispose(HqGarbageCollector& gc);
 
-	static bool RunStep(HqGarbageCollector& gc);
+	static bool RunPhase(HqGarbageCollector& gc);
 	static void RunFull(HqGarbageCollector& gc);
 
 	static void LinkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy);
 	static void MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy);
 
+	static bool prv_runPhase(HqGarbageCollector&);
+	static bool prv_hasReachedTimeSlice(HqGarbageCollector&, uint64_t);
 	static void prv_reset(HqGarbageCollector&);
 	static void prv_onDisposeObject(HqGcProxy*);
 	static void prv_proxyInsertBefore(HqGcProxy*, HqGcProxy*);
 	static void prv_proxyInsertAfter(HqGcProxy*, HqGcProxy*);
 	static void prv_proxyUnlink(HqGcProxy*);
 
+	HqRwLock rwLock;
 	HqMutex pendingLock;
 
 	HqVmHandle hVm;
@@ -57,7 +61,7 @@ struct HqGarbageCollector
 	int phase;
 	int lastPhase;
 
-	uint32_t maxIterationCount;
+	uint64_t maxTimeSlice;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

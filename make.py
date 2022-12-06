@@ -277,7 +277,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 	else:
 		csbuild.AddSourceDirectories(f"{HarlequinCommon.libRootPath}/base")
 		csbuild.AddExcludeDirectories(
-			f"{HarlequinCommon.libRootPath}/base/hi-res-timer-impl",
+			f"{HarlequinCommon.libRootPath}/base/clock-impl",
 			f"{HarlequinCommon.libRootPath}/base/mutex-impl",
 			f"{HarlequinCommon.libRootPath}/base/rwlock-impl",
 			f"{HarlequinCommon.libRootPath}/base/thread-impl",

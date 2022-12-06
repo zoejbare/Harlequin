@@ -16,30 +16,18 @@
 // IN THE SOFTWARE.
 //
 
-#include <stdint.h>
-#include <time.h>
+#pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _HqHiResTimerImplGetFrequency()
-{
-	return 1000000000;
-}
+#include "../Harlequin.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _HqHiResTimerImplGetTimestamp()
+extern "C"
 {
-#if defined(HQ_PLATFORM_MAC_OS) || defined(HQ_PLATFORM_PS4)
-	return uint64_t(clock_gettime_nsec_np(CLOCK_UPTIME_RAW));
-
-#else
-	timespec tspec = { 0, 0 };
-	clock_gettime(CLOCK_MONOTONIC, &tspec);
-
-	return uint64_t(tspec.tv_nsec) + (uint64_t(tspec.tv_sec) * 1000000000);
-
-#endif
+	uint64_t _HqClockImplGetFrequency();
+	uint64_t _HqClockImplGetTimestamp();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

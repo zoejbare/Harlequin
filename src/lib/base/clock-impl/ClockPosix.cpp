@@ -17,28 +17,29 @@
 //
 
 #include <stdint.h>
-
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include <time.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _HqHiResTimerImplGetFrequency()
+extern "C" uint64_t _HqClockImplGetFrequency()
 {
-	LARGE_INTEGER frequency;
-	QueryPerformanceFrequency(&frequency);
-
-	return uint64_t(frequency.QuadPart);
+	return 1000000000;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" uint64_t _HqHiResTimerImplGetTimestamp()
+extern "C" uint64_t _HqClockImplGetTimestamp()
 {
-	LARGE_INTEGER timestamp;
-	QueryPerformanceCounter(&timestamp);
+#if defined(HQ_PLATFORM_MAC_OS) || defined(HQ_PLATFORM_PS4)
+	return uint64_t(clock_gettime_nsec_np(CLOCK_UPTIME_RAW));
 
-	return uint64_t(timestamp.QuadPart);
+#else
+	timespec tspec = { 0, 0 };
+	clock_gettime(CLOCK_MONOTONIC, &tspec);
+
+	return uint64_t(tspec.tv_nsec) + (uint64_t(tspec.tv_sec) * 1000000000);
+
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
