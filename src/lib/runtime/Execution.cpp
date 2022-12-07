@@ -52,6 +52,7 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoi
 	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
 
 	HqFrame::HandleStack::Initialize(pOutput->frameStack, HQ_VM_FRAME_STACK_SIZE);
+	HqFrame::HandleStack::Initialize(pOutput->framePool, HQ_VM_FRAME_STACK_SIZE);
 	HqValue::HandleArray::Initialize(pOutput->registers);
 	HqValue::HandleArray::Reserve(pOutput->registers, HQ_VM_IO_REGISTER_COUNT);
 
@@ -63,12 +64,15 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoi
 		pOutput->registers.pData[i] = HqValue::CreateNull();
 	}
 
-	// Create the first frame using the entry point function.
-	pOutput->hCurrentFrame = HqFrame::Create(pOutput, hEntryPoint);
+	// Create the first frame.
+	pOutput->hCurrentFrame = HqFrame::Create(pOutput);
 	if(!pOutput->hCurrentFrame)
 	{
 		return HQ_EXECUTION_HANDLE_NULL;
 	}
+
+	// Initialize the frame using the specified entry point function.
+	HqFrame::Initialize(pOutput->hCurrentFrame, hEntryPoint);
 
 	// Push the entry point frame to the frame stack.
 	int result = HqFrame::HandleStack::Push(pOutput->frameStack, pOutput->hCurrentFrame);
@@ -119,12 +123,22 @@ int HqExecution::PushFrame(HqExecutionHandle hExec, HqFunctionHandle hFunction)
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
-	HqFrameHandle hFrame = HqFrame::Create(hExec, hFunction);
+	// Get an unused frame.
+	HqFrameHandle hFrame;
+	if(HqFrame::HandleStack::Pop(hExec->framePool, &hFrame) != HQ_SUCCESS)
+	{
+		// There are no unused frames in the pool, so we need to create a new one.
+		hFrame = HqFrame::Create(hExec);
+	}
 	if(!hFrame)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
+	// Initialize the frame with the supplied function.
+	HqFrame::Initialize(hFrame, hFunction);
+
+	// Push the new frame onto the active frame stack.
 	int result = HqFrame::HandleStack::Push(hExec->frameStack, hFrame);
 	if(result == HQ_SUCCESS)
 	{
@@ -141,11 +155,18 @@ int HqExecution::PopFrame(HqExecutionHandle hExec)
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-	int result = hExec->frameStack.Pop(hExec->frameStack, &hFrame);
 
-	hExec->hCurrentFrame = (hExec->frameStack.nextIndex > 0)
-		? hExec->frameStack.memory.pData[hExec->frameStack.nextIndex - 1]
-		: nullptr;
+	int result = hExec->frameStack.Pop(hExec->frameStack, &hFrame);
+	if(result == HQ_SUCCESS)
+	{
+		hExec->hCurrentFrame = (hExec->frameStack.nextIndex > 0)
+			? hExec->frameStack.memory.pData[hExec->frameStack.nextIndex - 1]
+			: nullptr;
+
+		// Reset the state of the old frame, then push it to the unused frame pool.
+		HqFrame::Reset(hFrame);
+		result = hExec->framePool.Push(hExec->framePool, hFrame);
+	}
 
 	return result;
 }
@@ -436,11 +457,20 @@ void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pOpaque);
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
-	// Discover all active frames in the frame stack.
-	const size_t stackSize = HqFrame::HandleStack::GetCurrentSize(hExec->frameStack);
-	for(size_t i = 0; i < stackSize; ++i)
+	// Visit all active frames.
+	const size_t activeStackSize = HqFrame::HandleStack::GetCurrentSize(hExec->frameStack);
+	for(size_t i = 0; i < activeStackSize; ++i)
 	{
 		HqFrameHandle hFrame = hExec->frameStack.memory.pData[i];
+
+		HqGarbageCollector::MarkObject(gc, &hFrame->gcProxy);
+	}
+
+	// Visit all unused frames.
+	const size_t unusedStackSize = HqFrame::HandleStack::GetCurrentSize(hExec->framePool);
+	for(size_t i = 0; i < unusedStackSize; ++i)
+	{
+		HqFrameHandle hFrame = hExec->framePool.memory.pData[i];
 
 		HqGarbageCollector::MarkObject(gc, &hFrame->gcProxy);
 	}
@@ -465,6 +495,7 @@ void HqExecution::prv_onGcDestruct(void* pObject)
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	HqFrame::HandleStack::Dispose(hExec->frameStack);
+	HqFrame::HandleStack::Dispose(hExec->framePool);
 	HqValue::HandleArray::Dispose(hExec->registers);
 
 	delete hExec;

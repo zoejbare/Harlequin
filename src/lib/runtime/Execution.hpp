@@ -77,6 +77,8 @@ struct HqExecution
 	HqFrameHandle hCurrentFrame;
 
 	HqFrame::HandleStack frameStack;
+	HqFrame::HandleStack framePool;
+
 	HqValue::HandleArray registers;
 
 	uint8_t* pExceptionLocation;

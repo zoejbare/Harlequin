@@ -26,43 +26,48 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqFrameHandle HqFrame::Create(HqExecutionHandle hExec, HqFunctionHandle hFunction)
+HqFrame* HqFrame::Create(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
-	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
 	HqFrame* const pOutput = new HqFrame();
-	assert(pOutput != HQ_FRAME_HANDLE_NULL);
+	assert(pOutput != nullptr);
 
 	// No need to lock the garbage collector here since only the execution context is allowed to create frames
 	// and it will be handling the lock for us.
 	HqGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
 
 	pOutput->hExec = hExec;
-	pOutput->hFunction = hFunction;
 
-	if(hFunction->isNative)
+	// Initialize the value stack and registers.
+	HqValue::HandleStack::Initialize(pOutput->stack, HQ_VM_FRAME_STACK_SIZE);
+	HqValue::HandleArray::Initialize(pOutput->registers);
+
+	// Reserve enough space for all the registers.
+	HqValue::HandleArray::Reserve(pOutput->registers, HQ_VM_GP_REGISTER_COUNT);
+
+	pOutput->stack.nextIndex = 0;
+	pOutput->registers.count = HQ_VM_GP_REGISTER_COUNT;
+
+	// Reset the state of the value stack and registers.
+	Reset(pOutput);
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
+{
+	assert(hFrame != HQ_FRAME_HANDLE_NULL);
+	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
+
+	hFrame->hFunction = hFunction;
+
+	// Native functions are effectively represented as dummy frames, so they need no other initialization.
+	if(!hFunction->isNative)
 	{
-		// Initialize the value structures to avoid deleting garbage memory on clean up.
-		// No other work needs to be done for native functions since this is intended to
-		// be just a dummy frame.
-		HqValue::HandleStack::Initialize(pOutput->stack, 0);
-		HqValue::HandleArray::Initialize(pOutput->registers);
-	}
-	else
-	{
-		// Setup the register array.
-		HqValue::HandleStack::Initialize(pOutput->stack, HQ_VM_FRAME_STACK_SIZE);
-		HqValue::HandleArray::Initialize(pOutput->registers);
-		HqValue::HandleArray::Reserve(pOutput->registers, HQ_VM_GP_REGISTER_COUNT);
-
-		pOutput->registers.count = HQ_VM_GP_REGISTER_COUNT;
-
-		// Initialize each register value.
-		for(size_t i = 0; i < pOutput->registers.count; ++i)
-		{
-			pOutput->registers.pData[i] = HqValue::CreateNull();
-		}
+		HqVmHandle hVm = hFrame->hExec->hVm;
 
 		// Build the local table for the new frame. This will intentionally copy each value from the function's local table
 		// so any changes made the variables in the frame will not affect the prototypes in the function.
@@ -71,13 +76,29 @@ HqFrameHandle HqFrame::Create(HqExecutionHandle hExec, HqFunctionHandle hFunctio
 			HqString* const pKey = HQ_MAP_ITER_KEY(kv);
 			HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
 
-			HQ_MAP_FUNC_INSERT(pOutput->locals, pKey, HqValueCopy(hExec->hVm, hValue));
+			HQ_MAP_FUNC_INSERT(hFrame->locals, pKey, HqValueCopy(hVm, hValue));
 		}
 
-		HqDecoder::Initialize(pOutput->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
+		HqDecoder::Initialize(hFrame->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFrame::Reset(HqFrameHandle hFrame)
+{
+	assert(hFrame != HQ_FRAME_HANDLE_NULL);
+
+	hFrame->hFunction = HQ_FUNCTION_HANDLE_NULL;
+
+	// Initialize each register value.
+	for(size_t i = 0; i < hFrame->registers.count; ++i)
+	{
+		hFrame->registers.pData[i] = HqValue::CreateNull();
 	}
 
-	return pOutput;
+	// Remove all local variables.
+	hFrame->locals.Clear();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -243,6 +264,7 @@ void HqFrame::prv_onGcDestruct(void* const pOpaque)
 	HqFrameHandle hFrame = reinterpret_cast<HqFrameHandle>(pOpaque);
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
 
+	// Dispose of the value stack and registers.
 	HqValue::HandleStack::Dispose(hFrame->stack);
 	HqValue::HandleArray::Dispose(hFrame->registers);
 

@@ -35,7 +35,10 @@ struct HqFrame
 	typedef HqArray<HqFrameHandle> HandleArray;
 	typedef HqStack<HqFrameHandle> HandleStack;
 
-	static HqFrameHandle Create(HqExecutionHandle hExec, HqFunctionHandle hFunction);
+	static HqFrameHandle Create(HqExecutionHandle hExec);
+
+	static void Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction);
+	static void Reset(HqFrameHandle hFrame);
 
 	static int PushValue(HqFrameHandle hFrame, HqValueHandle hValue);
 	static int PopValue(HqFrameHandle hFrame, HqValueHandle* const phOutValue);
