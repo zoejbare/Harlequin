@@ -137,8 +137,8 @@ void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 
 	// To minimize the number of steps that need to be run, we cache the maximum time slice allowed for a single GC phase,
 	// then override it with an absurdly large number. This will allow us to run each phase as a single step.
-	const uint32_t oldMaxTimeSlice = gc.maxTimeSlice;
-	gc.maxTimeSlice = ~uint32_t(0);
+	const uint64_t oldMaxTimeSlice = gc.maxTimeSlice;
+	gc.maxTimeSlice = ~uint64_t(0);
 
 	while(!prv_runPhase(gc))
 	{
