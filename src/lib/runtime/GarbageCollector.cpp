@@ -47,8 +47,9 @@ void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, 
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	output.rwLock = HqRwLock::Create();
-	output.pendingLock = HqMutex::Create();
+	HqRwLock::Create(output.rwLock);
+	HqMutex::Create(output.pendingLock);
+
 	output.hVm = hVm;
 	output.pPendingHead = nullptr;
 	output.pUnmarkedHead = nullptr;
@@ -264,7 +265,7 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 				// For the start of the phase, set the current proxy pointer to the head of the active list.
 				gc.pIterCurrent = gc.pUnmarkedHead;
 			}
-			
+
 			// Iterate until the end of the list has been reached.
 			while(gc.pIterCurrent)
 			{
@@ -297,7 +298,7 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 				// For the start of the phase, set the current proxy pointer to the head of the active list.
 				gc.pIterCurrent = gc.pUnmarkedHead;
 			}
-			
+
 			// Iterate until the end of the list has been reached.
 			while(gc.pIterCurrent)
 			{

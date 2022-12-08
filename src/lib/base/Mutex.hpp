@@ -60,11 +60,9 @@ extern "C"
 
 struct HQ_BASE_API HqMutex
 {
-	static HqMutex Create()
+	static void Create(HqMutex& mutex)
 	{
-		HqMutex output;
-		_HqMutexImplCreate(output.obj);
-		return output;
+		_HqMutexImplCreate(mutex.obj);
 	}
 
 	static void Dispose(HqMutex& mutex)

@@ -79,11 +79,9 @@ extern "C"
 
 struct HQ_BASE_API HqThread
 {
-	static HqThread Create(const HqThreadConfig& threadConfig)
+	static void Create(HqThread& thread, const HqThreadConfig& threadConfig)
 	{
-		HqThread output;
-		_HqThreadImplCreate(output.obj, threadConfig);
-		return output;
+		_HqThreadImplCreate(thread.obj, threadConfig);
 	}
 
 	static HqThread GetCurrentThread()

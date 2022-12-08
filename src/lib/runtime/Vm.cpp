@@ -51,18 +51,18 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	prv_setupBuiltIns(pOutput);
 	prv_setupEmbeddedExceptions(pOutput);
 
+	HqMutex::Create(pOutput->lock);
+
 	HqThreadConfig threadConfig;
 	threadConfig.mainFn = prv_gcThreadMain;
 	threadConfig.pArg = pOutput;
 	threadConfig.stackSize = init.gcThreadStackSize;
 	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "HqGarbageCollector");
 
-	pOutput->lock = HqMutex::Create();
-
 	if(pOutput->gc.maxTimeSlice > 0)
 	{
 		// Setting the GC time slice to 0 is the same as disabling garbage collection on a separate thread.
-		pOutput->gcThread = HqThread::Create(threadConfig);
+		HqThread::Create(pOutput->gcThread, threadConfig);
 	}
 
 	return pOutput;
@@ -80,7 +80,7 @@ void HqVm::Dispose(HqVmHandle hVm)
 
 		hVm->isShuttingDown = true;
 
-		if(hVm->gc.maxTimeSlice)
+		if(hVm->gc.maxTimeSlice > 0)
 		{
 			int32_t threadReturnValue = 0;
 

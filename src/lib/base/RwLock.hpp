@@ -65,11 +65,9 @@ extern "C"
 
 struct HQ_BASE_API HqRwLock
 {
-	static HqRwLock Create()
+	static void Create(HqRwLock& rwLock)
 	{
-		HqRwLock output;
-		_HqRwLockImplCreate(output.obj);
-		return output;
+		_HqRwLockImplCreate(rwLock.obj);
 	}
 
 	static void Dispose(HqRwLock& rwlock)
