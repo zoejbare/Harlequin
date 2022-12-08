@@ -78,6 +78,8 @@ struct HqValue
 
 	static HqValue NullValue;
 
+	static HqValueHandle Resolve(HqValueHandle hValue);
+
 	static HqValueHandle CreateBool(HqVmHandle hVm, const bool value);
 	static HqValueHandle CreateInt8(HqVmHandle hVm, const int8_t value);
 	static HqValueHandle CreateInt16(HqVmHandle hVm, const int16_t value);

@@ -46,7 +46,7 @@ extern "C" {
 #define HQ_VM_THREAD_MINIMUM_STACK_SIZE 262144
 #define HQ_VM_THREAD_DEFAULT_STACK_SIZE 1048576
 
-#define HQ_VM_GC_DEFAULT_TIME_SLICE_MS 4
+#define HQ_VM_GC_DEFAULT_TIME_SLICE_MS 8
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

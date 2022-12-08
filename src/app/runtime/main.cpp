@@ -286,6 +286,7 @@ int main(int argc, char* argv[])
 
 	vmInit.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
 	vmInit.gcMaxTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
+	//vmInit.gcMaxTimeSliceMs = 0;
 
 	HqMemAllocator allocator;
 	allocator.allocFn = trackedAlloc;
@@ -316,6 +317,8 @@ int main(int argc, char* argv[])
 	const uint64_t createVmTimeSlice = createVmTimeEnd - createVmTimeStart;
 
 	const uint64_t loadProgramTimeStart = createVmTimeEnd;
+
+	uint64_t totalGcRunTime = 0;
 
 	std::vector<uint8_t> fileData;
 
@@ -449,162 +452,175 @@ int main(int argc, char* argv[])
 
 		const char* const entryPoint = "void App.Program.Main()";
 
-		HqFunctionHandle hEntryFunc = HQ_FUNCTION_HANDLE_NULL;
-		HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
-
-		HqVmGetFunction(hVm, &hEntryFunc, entryPoint);
-
-		const uint64_t createExecTimeStart = HqClockGetTimestamp();
-
-		// Create an execution context that will run the program's entry point function.
-		bool createExecResult = HqExecutionCreate(&hExec, hVm, hEntryFunc);
-
-		const uint64_t createExecTimeEnd = HqClockGetTimestamp();
-		createExecTimeSlice = createExecTimeEnd - createExecTimeStart;
-
-		if(createExecResult == HQ_SUCCESS)
+		// Run the test script.
 		{
-			HqFunctionHandle hNativePrintFunc = HQ_FUNCTION_HANDLE_NULL;
-			HqVmGetFunction(hVm, &hNativePrintFunc, "void App.Program.PrintString(string)");
+			HqFunctionHandle hEntryFunc = HQ_FUNCTION_HANDLE_NULL;
+			HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
 
-			if(hNativePrintFunc != HQ_FUNCTION_HANDLE_NULL)
+			HqVmGetFunction(hVm, &hEntryFunc, entryPoint);
+
+			const uint64_t createExecTimeStart = HqClockGetTimestamp();
+
+			// Create an execution context that will run the program's entry point function.
+			bool createExecResult = HqExecutionCreate(&hExec, hVm, hEntryFunc);
+
+			const uint64_t createExecTimeEnd = HqClockGetTimestamp();
+			createExecTimeSlice = createExecTimeEnd - createExecTimeStart;
+
+			if(createExecResult == HQ_SUCCESS)
 			{
-				auto printString = [](HqExecutionHandle hExec, HqFunctionHandle, void*)
+				HqFunctionHandle hNativePrintFunc = HQ_FUNCTION_HANDLE_NULL;
+				HqVmGetFunction(hVm, &hNativePrintFunc, "void App.Program.PrintString(string)");
+
+				if(hNativePrintFunc != HQ_FUNCTION_HANDLE_NULL)
 				{
-					HqValueHandle hInputParam = HQ_VALUE_HANDLE_NULL;
-					HqExecutionGetIoRegister(hExec, &hInputParam, 0);
-
-					const char* const inputParam = HqValueGetString(hInputParam);
-
-					printf("> \"%s\"\n", inputParam);
-					HqValueGcExpose(hInputParam);
-				};
-
-				HqFunctionSetNativeBinding(hNativePrintFunc, printString, nullptr);
-			}
-
-			HqFunctionHandle hNativeDecrementFunc = HQ_FUNCTION_HANDLE_NULL;
-			HqVmGetFunction(hVm, &hNativeDecrementFunc, "(int32, bool) App.Program.Decrement(int32)");
-
-			if(hNativeDecrementFunc != HQ_FUNCTION_HANDLE_NULL)
-			{
-				auto decrement = [](HqExecutionHandle hExec, HqFunctionHandle, void*)
-				{
-					HqVmHandle hVm = HQ_VM_HANDLE_NULL;
-					HqExecutionGetVm(hExec, &hVm);
-
-					HqValueHandle hInputParam = HQ_VALUE_HANDLE_NULL;
-					HqExecutionGetIoRegister(hExec, &hInputParam, 0);
-
-					if(HqValueIsInt32(hInputParam))
+					auto printString = [](HqExecutionHandle hExec, HqFunctionHandle, void*)
 					{
-						const int32_t output = HqValueGetInt32(hInputParam) - 1;
+						HqValueHandle hInputParam = HQ_VALUE_HANDLE_NULL;
+						HqExecutionGetIoRegister(hExec, &hInputParam, 0);
 
-						HqValueHandle hOutputParam = HqValueCreateInt32(hVm, output);
-						HqExecutionSetIoRegister(hExec, hOutputParam, 0);
-						HqValueGcExpose(hOutputParam);
+						const char* const inputParam = HqValueGetString(hInputParam);
 
-						if(output <= 0)
+						printf("> \"%s\"\n", inputParam);
+						HqValueGcExpose(hInputParam);
+					};
+
+					HqFunctionSetNativeBinding(hNativePrintFunc, printString, nullptr);
+				}
+
+				HqFunctionHandle hNativeDecrementFunc = HQ_FUNCTION_HANDLE_NULL;
+				HqVmGetFunction(hVm, &hNativeDecrementFunc, "(int32, bool) App.Program.Decrement(int32)");
+
+				if(hNativeDecrementFunc != HQ_FUNCTION_HANDLE_NULL)
+				{
+					auto decrement = [](HqExecutionHandle hExec, HqFunctionHandle, void*)
+					{
+						HqVmHandle hVm = HQ_VM_HANDLE_NULL;
+						HqExecutionGetVm(hExec, &hVm);
+
+						HqValueHandle hInputParam = HQ_VALUE_HANDLE_NULL;
+						HqExecutionGetIoRegister(hExec, &hInputParam, 0);
+
+						if(HqValueIsInt32(hInputParam))
 						{
-							hOutputParam = HqValueCreateBool(hVm, true);
+							const int32_t output = HqValueGetInt32(hInputParam) - 1;
+
+							HqValueHandle hOutputParam = HqValueCreateInt32(hVm, output);
+
+							HqExecutionSetIoRegister(hExec, hOutputParam, 0);
+							HqValueGcExpose(hOutputParam);
+
+							if(output <= 0)
+							{
+								hOutputParam = HqValueCreateBool(hVm, true);
+							}
+							else
+							{
+								hOutputParam = HqValueCreateNull();
+							}
+
+							HqExecutionSetIoRegister(hExec, hOutputParam, 1);
+							HqValueGcExpose(hOutputParam);
 						}
 						else
 						{
-							hOutputParam = HqValueCreateNull();
+							HqExecutionRaiseStandardException(
+								hExec,
+								HQ_EXCEPTION_SEVERITY_NORMAL,
+								HQ_STANDARD_EXCEPTION_TYPE_ERROR,
+								"Type mismatch; expected int32"
+							);
 						}
+					};
 
-						HqExecutionSetIoRegister(hExec, hOutputParam, 1);
-						HqValueGcExpose(hOutputParam);
-					}
-					else
+					HqFunctionSetNativeBinding(hNativeDecrementFunc, decrement, nullptr);
+				}
+
+				HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Executing script function: \"%s\"", entryPoint);
+
+				bool status;
+
+				const uint64_t runProgramTimeStart = HqClockGetTimestamp();
+				int result = HQ_SUCCESS;
+
+				// Run the script until it has completed.
+				for(;;)
+				{
+					result = HqExecutionRun(hExec, HQ_RUN_CONTINUOUS);
+					if(result != HQ_SUCCESS)
 					{
-						HqExecutionRaiseStandardException(
-							hExec,
-							HQ_EXCEPTION_SEVERITY_NORMAL,
-							HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-							"Type mismatch; expected int32"
-						);
+						HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while executing script: \"%s\"", HqGetErrorCodeString(result));
+						break;
 					}
-				};
 
-				HqFunctionSetNativeBinding(hNativeDecrementFunc, decrement, nullptr);
+					// Check if there was an unhandled exception raised.
+					result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &status);
+					if(result != HQ_SUCCESS)
+					{
+						HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving exception status: \"%s\"", HqGetErrorCodeString(result));
+						break;
+					}
+					if(status)
+					{
+						HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
+
+						printf("\n<Callstack>\n");
+
+						bool isTopFrame = true;
+						HqExecutionResolveFrameStack(hExec, iterateCallstackFrame, &isTopFrame);
+
+						printf("\n");
+
+						applicationResult = APPLICATION_RESULT_FAILURE;
+						break;
+					}
+
+					// Check if the script has finished running.
+					result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &status);
+					if(result != HQ_SUCCESS)
+					{
+						HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving completion status: \"%s\"", HqGetErrorCodeString(result));
+						break;
+					}
+					if(status)
+					{
+						HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Finished executing script");
+						break;
+					}
+
+					// Check if the script has been aborted.
+					result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &status);
+					if(result != HQ_SUCCESS)
+					{
+						HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving abort status: \"%s\"", HqGetErrorCodeString(result));
+						break;
+					}
+					if(status)
+					{
+						HqReportMessage(hReport, HQ_MESSAGE_TYPE_WARNING, "Script execution aborted");
+						break;
+					}
+				}
+
+				const uint64_t runProgramTimeEnd = HqClockGetTimestamp();
+				runProgramTimeSlice = runProgramTimeEnd - runProgramTimeStart;
+
+				const uint64_t disposeExecTimeStart = runProgramTimeEnd;
+
+				HqExecutionDispose(&hExec);
+
+				const uint64_t disposeExecTimeEnd = HqClockGetTimestamp();
+				disposeExecTimeSlice = disposeExecTimeEnd - disposeExecTimeStart;
 			}
 
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Executing script function: \"%s\"", entryPoint);
-
-			bool status;
-
-			const uint64_t runProgramTimeStart = HqClockGetTimestamp();
-			int result = HQ_SUCCESS;
-
-			// Run the script until it has completed.
-			for(;;)
+			if(vmInit.gcMaxTimeSliceMs == 0)
 			{
-				result = HqExecutionRun(hExec, HQ_RUN_CONTINUOUS);
-				if(result != HQ_SUCCESS)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while executing script: \"%s\"", HqGetErrorCodeString(result));
-					break;
-				}
+				const uint64_t gcRunTimeStart = HqClockGetTimestamp();
+				HqVmRunGarbageCollector(hVm);
+				const uint64_t gcRunTimeEnd = HqClockGetTimestamp();
 
-				// Check if there was an unhandled exception raised.
-				result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &status);
-				if(result != HQ_SUCCESS)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving exception status: \"%s\"", HqGetErrorCodeString(result));
-					break;
-				}
-				if(status)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Unhandled exception occurred");
-
-					printf("\n<Callstack>\n");
-
-					bool isTopFrame = true;
-					HqExecutionResolveFrameStack(hExec, iterateCallstackFrame, &isTopFrame);
-
-					printf("\n");
-
-					applicationResult = APPLICATION_RESULT_FAILURE;
-					break;
-				}
-
-				// Check if the script has finished running.
-				result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &status);
-				if(result != HQ_SUCCESS)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving completion status: \"%s\"", HqGetErrorCodeString(result));
-					break;
-				}
-				if(status)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Finished executing script");
-					break;
-				}
-
-				// Check if the script has been aborted.
-				result = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &status);
-				if(result != HQ_SUCCESS)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while retrieving abort status: \"%s\"", HqGetErrorCodeString(result));
-					break;
-				}
-				if(status)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_WARNING, "Script execution aborted");
-					break;
-				}
+				totalGcRunTime += gcRunTimeEnd - gcRunTimeStart;
 			}
-
-			const uint64_t runProgramTimeEnd = HqClockGetTimestamp();
-			runProgramTimeSlice = runProgramTimeEnd - runProgramTimeStart;
-
-			const uint64_t disposeExecTimeStart = runProgramTimeEnd;
-
-			HqExecutionDispose(&hExec);
-
-			const uint64_t disposeExecTimeEnd = HqClockGetTimestamp();
-			disposeExecTimeSlice = disposeExecTimeEnd - disposeExecTimeStart;
 		}
 	}
 	else
@@ -670,7 +686,8 @@ int main(int argc, char* argv[])
 		"\tDispose exec-context time: %f ms\n"
 		"\tLoad program time: %f ms\n"
 		"\tRun program time: %f ms\n"
-		"\tDisassemble time: %f ms\n",
+		"\tDisassemble time: %f ms\n"
+		"\tManual GC run time: %f ms\n",
 		double(overallTimeSlice) * convertTimeToMs,
 		double(createVmTimeSlice) * convertTimeToMs,
 		double(disposeVmTimeSlice) * convertTimeToMs,
@@ -679,7 +696,8 @@ int main(int argc, char* argv[])
 		double(disposeExecTimeSlice) * convertTimeToMs,
 		double(loadProgramTimeSlice) * convertTimeToMs,
 		double(runProgramTimeSlice) * convertTimeToMs,
-		double(disassembleTimeSlice) * convertTimeToMs
+		double(disassembleTimeSlice) * convertTimeToMs,
+		double(totalGcRunTime) * convertTimeToMs
 	);
 
 	return applicationResult;

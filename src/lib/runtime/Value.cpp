@@ -42,6 +42,13 @@ HqValue HqValue::NullValue =
 
 //----------------------------------------------------------------------------------------------------------------------
 
+HqValueHandle HqValue::Resolve(HqValueHandle hValue)
+{
+	return hValue ? hValue : &NullValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 HqValueHandle HqValue::CreateBool(HqVmHandle hVm, const bool value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
@@ -475,6 +482,11 @@ HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 			delete pOutput;
 			return &NullValue;
 	}
+
+	// Any uses of this function internally will not want copied values to be auto-marked.
+	// The only case where they should be auto-marked is when values are copied using the
+	// high level API function that calls into this one.
+	SetAutoMark(pOutput, false);
 
 	return pOutput;
 }

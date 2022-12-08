@@ -47,8 +47,7 @@ int HqVmCreate(HqVmHandle* phOutVm, HqVmInit init)
 		|| (*phOutVm)
 		|| init.common.report.reportLevel < HQ_MESSAGE_TYPE_VERBOSE
 		|| init.common.report.reportLevel > HQ_MESSAGE_TYPE_FATAL
-		|| init.gcThreadStackSize < HQ_VM_THREAD_MINIMUM_STACK_SIZE
-		|| init.gcMaxTimeSliceMs == 0)
+		|| init.gcThreadStackSize < HQ_VM_THREAD_MINIMUM_STACK_SIZE)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -1135,9 +1134,6 @@ int HqExecutionGetIoRegister(HqExecutionHandle hExec, HqValueHandle* phOutValue,
 	int result;
 	HqValueHandle hValue = HqExecution::GetIoRegister(hExec, registerIndex, &result);
 
-	// Guard the value against being garbage collected.
-	HqValue::SetAutoMark(hValue, true);
-
 	(*phOutValue) = hValue;
 
 	return result;
@@ -1318,9 +1314,6 @@ int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, int re
 
 	int result;
 	HqValueHandle hValue = HqFrame::GetGpRegister(hFrame, registerIndex, &result);
-
-	// Guard the value against being garbage collected.
-	HqValue::SetAutoMark(hValue, true);
 
 	(*phOutValue) = hValue;
 
@@ -1687,7 +1680,12 @@ HqValueHandle HqValueCreateNative(
 
 HqValueHandle HqValueCopy(HqVmHandle hVm, HqValueHandle hValue)
 {
-	return HqValue::Copy(hVm, hValue);
+	HqValueHandle hValueCopy = HqValue::Copy(hVm, hValue);
+
+	// Protect the new value from the garbage collector.
+	HqValue::SetAutoMark(hValueCopy, true);
+
+	return hValueCopy;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

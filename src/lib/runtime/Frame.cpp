@@ -76,7 +76,7 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 			HqString* const pKey = HQ_MAP_ITER_KEY(kv);
 			HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
 
-			HQ_MAP_FUNC_INSERT(hFrame->locals, pKey, HqValueCopy(hVm, hValue));
+			HQ_MAP_FUNC_INSERT(hFrame->locals, pKey, HqValue::Copy(hVm, hValue));
 		}
 
 		HqDecoder::Initialize(hFrame->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
@@ -106,9 +106,10 @@ void HqFrame::Reset(HqFrameHandle hFrame)
 int HqFrame::PushValue(HqFrameHandle hFrame, HqValueHandle hValue)
 {
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-	assert(hValue != HQ_VALUE_HANDLE_NULL);
 
-	return HqValue::HandleStack::Push(hFrame->stack, hValue);
+	HqValueHandle hValueToPush = HqValue::Resolve(hValue);
+
+	return HqValue::HandleStack::Push(hFrame->stack, hValueToPush);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -153,10 +154,9 @@ int HqFrame::PeekValue(
 int HqFrame::SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uint32_t index)
 {
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-	assert(hValue != HQ_VALUE_HANDLE_NULL);
 	assert(index < HQ_VM_GP_REGISTER_COUNT);
 
-	hFrame->registers.pData[index] = hValue;
+	hFrame->registers.pData[index] = HqValue::Resolve(hValue);
 
 	return HQ_SUCCESS;
 }
@@ -166,7 +166,6 @@ int HqFrame::SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uin
 int HqFrame::SetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, HqString* const pVariableName)
 {
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-	assert(hValue != HQ_VALUE_HANDLE_NULL);
 	assert(pVariableName != nullptr);
 
 	auto kv = hFrame->locals.find(pVariableName);
@@ -175,7 +174,7 @@ int HqFrame::SetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, HqStri
 		return HQ_ERROR_KEY_DOES_NOT_EXIST;
 	}
 
-	HQ_MAP_ITER_PTR_VALUE(kv) = hValue;
+	HQ_MAP_ITER_PTR_VALUE(kv) = HqValue::Resolve(hValue);
 
 	return HQ_SUCCESS;
 }

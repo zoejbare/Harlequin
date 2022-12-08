@@ -51,18 +51,32 @@ void OpCodeExec_LoadConstant(HqExecutionHandle hExec)
 	HqValueHandle hValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
 	if(result == HQ_SUCCESS)
 	{
-		// Make a copy of the value, then upload that copy to the register.
-		// A copy must be made to avoid accidentally changing the underlying
-		// data of the constant.
-		result = HqFrame::SetGpRegister(hExec->hCurrentFrame, HqValue::Copy(hExec->hVm, hValue), registerIndex);
-		if(result != HQ_SUCCESS)
+		HqValueHandle hValueCopy = HqValue::Copy(hExec->hVm, hValue);
+		if(hValueCopy)
+		{
+			// Make a copy of the value, then upload that copy to the register.
+			// A copy must be made to avoid accidentally changing the underlying
+			// data of the constant.
+			result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hValueCopy, registerIndex);
+			if(result != HQ_SUCCESS)
+			{
+				// Raise a fatal script exception.
+				HqExecution::RaiseOpCodeException(
+					hExec,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to set general-purpose register: r(%" PRIu32 ")",
+					registerIndex
+				);
+			}
+		}
+		else
 		{
 			// Raise a fatal script exception.
 			HqExecution::RaiseOpCodeException(
 				hExec,
 				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-				"Failed to set general-purpose register: r(%" PRIu32 ")",
-				registerIndex
+				"Failed to create copy of constant value: c(%" PRIu32 ")",
+				constantIndex
 			);
 		}
 	}

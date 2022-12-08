@@ -168,7 +168,7 @@ int HqExecution::SetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, co
 		return HQ_ERROR_INDEX_OUT_OF_RANGE;
 	}
 
-	hExec->registers.pData[index] = hValue;
+	hExec->registers.pData[index] = HqValue::Resolve(hValue);
 
 	return HQ_SUCCESS;
 }

@@ -57,8 +57,13 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	threadConfig.stackSize = init.gcThreadStackSize;
 	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "HqGarbageCollector");
 
-	pOutput->gcThread = HqThread::Create(threadConfig);
 	pOutput->lock = HqMutex::Create();
+
+	if(pOutput->gc.maxTimeSlice > 0)
+	{
+		// Setting the GC time slice to 0 is the same as disabling garbage collection on a separate thread.
+		pOutput->gcThread = HqThread::Create(threadConfig);
+	}
 
 	return pOutput;
 }
@@ -75,19 +80,22 @@ void HqVm::Dispose(HqVmHandle hVm)
 
 		hVm->isShuttingDown = true;
 
-		int32_t threadReturnValue = 0;
-
-		// Wait for the GC thread to exit.
-		HqThread::Join(hVm->gcThread, &threadReturnValue);
-
-		if(threadReturnValue != HQ_SUCCESS)
+		if(hVm->gc.maxTimeSlice)
 		{
-			HqReportMessage(
-				&hVm->report,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Garbage collection thread exited abnormally: error=\"%s\"",
-				HqGetErrorCodeString(threadReturnValue)
-			);
+			int32_t threadReturnValue = 0;
+
+			// Wait for the GC thread to exit.
+			HqThread::Join(hVm->gcThread, &threadReturnValue);
+
+			if(threadReturnValue != HQ_SUCCESS)
+			{
+				HqReportMessage(
+					&hVm->report,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Garbage collection thread exited abnormally: error=\"%s\"",
+					HqGetErrorCodeString(threadReturnValue)
+				);
+			}
 		}
 
 		// Clean up each loaded program.

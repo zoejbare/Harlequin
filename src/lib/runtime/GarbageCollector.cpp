@@ -46,7 +46,6 @@ enum HqGcPhase
 void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, const uint32_t maxTimeSliceMs)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
-	assert(maxTimeSliceMs > 0);
 
 	output.rwLock = HqRwLock::Create();
 	output.pendingLock = HqMutex::Create();
@@ -136,16 +135,16 @@ void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 	prv_reset(gc);
 
 	// To minimize the number of steps that need to be run, we cache the maximum time slice allowed for a single GC phase,
-	// then override it with an absurdly large number. This will allow us to run each phase as a single step.
+	// then override it to 0, effectively disabling the timeout. This will allow us to run each phase as a single step.
 	const uint64_t oldMaxTimeSlice = gc.maxTimeSlice;
-	gc.maxTimeSlice = ~uint64_t(0);
+	gc.maxTimeSlice = 0;
 
 	while(!prv_runPhase(gc))
 	{
 		// Run the garbage collector until all phases have been run.
 	}
 
-	// Restore the maximum iteration count.
+	// Restore the maximum time slice.
 	gc.maxTimeSlice = oldMaxTimeSlice;
 }
 
@@ -441,7 +440,7 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 
 bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc, const uint64_t startTime)
 {
-	return (HqClockGetTimestamp() - startTime) >= gc.maxTimeSlice;
+	return (gc.maxTimeSlice > 0) && ((HqClockGetTimestamp() - startTime) >= gc.maxTimeSlice);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
