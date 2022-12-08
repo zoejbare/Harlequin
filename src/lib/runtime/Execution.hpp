@@ -24,8 +24,7 @@
 #include "GcProxy.hpp"
 #include "Value.hpp"
 
-#include "../common/Map.hpp"
-#include "../common/Stack.hpp"
+#include "../common/Array.hpp"
 #include "../common/StlAllocator.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -34,23 +33,11 @@ struct HqProgram;
 
 struct HqExecution
 {
-	typedef HqStack<HqExecutionHandle> HandleStack;
-
-	typedef HQ_MAP_TYPE<
-		HqExecutionHandle,
-		bool,
-#if HQ_MAP_IS_UNORDERED
-		std::hash<HqExecutionHandle>,
-		std::equal_to<HqExecutionHandle>,
-#else
-		std::less<HqExecutionHandle>,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqExecutionHandle, bool)>
-	> HandleToBoolMap;
+	typedef HqArray<HqExecutionHandle> HandleArray;
 
 	static HqExecutionHandle Create(HqVmHandle hVm, HqFunctionHandle hEntryPoint);
-	static void ReleaseWithNoDetach(HqExecutionHandle hExec);
-	static void DetachFromVm(HqExecutionHandle hExec);
+
+	static void Dispose(HqExecutionHandle hExec);
 
 	static int PushFrame(HqExecutionHandle hExec, HqFunctionHandle hFunction);
 	static int PopFrame(HqExecutionHandle hExec);

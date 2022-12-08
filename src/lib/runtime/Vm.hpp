@@ -29,6 +29,7 @@
 #include "ScriptObject.hpp"
 #include "Value.hpp"
 
+#include "../base/Mutex.hpp"
 #include "../base/Thread.hpp"
 
 #include "../common/Dependency.hpp"
@@ -62,7 +63,11 @@ struct HqVm
 	typedef HqArray<OpCode> OpCodeArray;
 
 	static HqVmHandle Create(const HqVmInit& init);
+
 	static void Dispose(HqVmHandle hVm);
+
+	static bool AttachExec(HqVmHandle hVm, HqExecutionHandle hExec);
+	static void DetachExec(HqVmHandle hVm, HqExecutionHandle hExec);
 
 	static int SetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, HqString* const pVariableName);
 
@@ -92,11 +97,12 @@ struct HqVm
 	HqFunction::StringToHandleMap functions;
 	HqValue::StringToHandleMap globals;
 	HqScriptObject::StringToPtrMap objectSchemas;
-	HqExecution::HandleToBoolMap executionContexts;
+	HqExecution::HandleArray executionContexts;
 
 	HqReport report;
 	HqGarbageCollector gc;
 	HqThread gcThread;
+	HqMutex lock;
 
 	bool isShuttingDown;
 };

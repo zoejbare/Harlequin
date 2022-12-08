@@ -44,6 +44,9 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 
 	pOutput->opCodes.count = HQ_OP_CODE__TOTAL_COUNT;
 
+	// Initialize the execution context array.
+	HqExecution::HandleArray::Initialize(pOutput->executionContexts);
+
 	prv_setupOpCodes(pOutput);
 	prv_setupBuiltIns(pOutput);
 	prv_setupEmbeddedExceptions(pOutput);
@@ -55,6 +58,7 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "HqGarbageCollector");
 
 	pOutput->gcThread = HqThread::Create(threadConfig);
+	pOutput->lock = HqMutex::Create();
 
 	return pOutput;
 }
@@ -65,73 +69,129 @@ void HqVm::Dispose(HqVmHandle hVm)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	hVm->isShuttingDown = true;
-
-	int32_t threadReturnValue = 0;
-
-	// Wait for the GC thread to exit.
-	HqThread::Join(hVm->gcThread, &threadReturnValue);
-
-	if(threadReturnValue != HQ_SUCCESS)
+	// Dispose of VM resources while locked.
 	{
-		HqReportMessage(
-			&hVm->report,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Garbage collection thread exited abnormally: error=\"%s\"",
-			HqGetErrorCodeString(threadReturnValue)
-		);
+		HqScopedMutex vmLock(hVm->lock);
+
+		hVm->isShuttingDown = true;
+
+		int32_t threadReturnValue = 0;
+
+		// Wait for the GC thread to exit.
+		HqThread::Join(hVm->gcThread, &threadReturnValue);
+
+		if(threadReturnValue != HQ_SUCCESS)
+		{
+			HqReportMessage(
+				&hVm->report,
+				HQ_MESSAGE_TYPE_ERROR,
+				"Garbage collection thread exited abnormally: error=\"%s\"",
+				HqGetErrorCodeString(threadReturnValue)
+			);
+		}
+
+		// Clean up each loaded program.
+		for(auto& kv : hVm->programs)
+		{
+			HqString::Release(HQ_MAP_ITER_KEY(kv));
+			HqProgram::Dispose(HQ_MAP_ITER_VALUE(kv));
+		}
+
+		// Clean up each loaded function.
+		for(auto& kv : hVm->functions)
+		{
+			HqString::Release(HQ_MAP_ITER_KEY(kv));
+			HqFunction::Dispose(HQ_MAP_ITER_VALUE(kv));
+		}
+
+		// Clean up each loaded global.
+		for(auto& kv : hVm->globals)
+		{
+			HqString::Release(HQ_MAP_ITER_KEY(kv));
+		}
+
+		// Clean up each loaded object schema.
+		for(auto& kv : hVm->objectSchemas)
+		{
+			HqString::Release(HQ_MAP_ITER_KEY(kv));
+			HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
+		}
+
+		// Dispose of each embedded exception.
+		for(auto& kv : hVm->embeddedExceptions)
+		{
+			HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
+		}
+
+		// Clean up each active execution context.
+		for(size_t i = 0; i < hVm->executionContexts.count; ++i)
+		{
+			HqExecution::Dispose(hVm->executionContexts.pData[i]);
+		}
+
+		HQ_MAP_FUNC_CLEAR(hVm->programs);
+		HQ_MAP_FUNC_CLEAR(hVm->functions);
+		HQ_MAP_FUNC_CLEAR(hVm->globals);
+		HQ_MAP_FUNC_CLEAR(hVm->objectSchemas);
+		HQ_MAP_FUNC_CLEAR(hVm->embeddedExceptions);
+
+		OpCodeArray::Dispose(hVm->opCodes);
+		HqExecution::HandleArray::Dispose(hVm->executionContexts);
+		HqGarbageCollector::Dispose(hVm->gc);
 	}
 
-	// Clean up each loaded program.
-	for(auto& kv : hVm->programs)
-	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
-		HqProgram::Dispose(HQ_MAP_ITER_VALUE(kv));
-	}
-
-	// Clean up each loaded function.
-	for(auto& kv : hVm->functions)
-	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
-		HqFunction::Dispose(HQ_MAP_ITER_VALUE(kv));
-	}
-
-	// Clean up each loaded global.
-	for(auto& kv : hVm->globals)
-	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
-	}
-
-	// Clean up each loaded object schema.
-	for(auto& kv : hVm->objectSchemas)
-	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
-		HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
-	}
-
-	// Clean up each active execution context.
-	for(auto& kv : hVm->executionContexts)
-	{
-		HqExecution::ReleaseWithNoDetach(HQ_MAP_ITER_KEY(kv));
-	}
-
-	// Dispose of each embedded exception.
-	for(auto& kv : hVm->embeddedExceptions)
-	{
-		HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
-	}
-
-	HQ_MAP_FUNC_CLEAR(hVm->programs);
-	HQ_MAP_FUNC_CLEAR(hVm->functions);
-	HQ_MAP_FUNC_CLEAR(hVm->globals);
-	HQ_MAP_FUNC_CLEAR(hVm->objectSchemas);
-	HQ_MAP_FUNC_CLEAR(hVm->executionContexts);
-	HQ_MAP_FUNC_CLEAR(hVm->embeddedExceptions);
-
-	HqGarbageCollector::Dispose(hVm->gc);
-	OpCodeArray::Dispose(hVm->opCodes);
+	// Dispose of the VM mutex after it has been unlocked.
+	HqMutex::Dispose(hVm->lock);
 
 	delete hVm;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool HqVm::AttachExec(HqVmHandle hVm, HqExecutionHandle hExec)
+{
+	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+
+	const size_t insertIndex = hVm->executionContexts.count;
+
+	HqExecution::HandleArray::Reserve(hVm->executionContexts, insertIndex + 1);
+	if(!hVm->executionContexts.pData)
+	{
+		return false;
+	}
+
+	hVm->executionContexts.pData[insertIndex] = hExec;
+	++hVm->executionContexts.count;
+
+	return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqVm::DetachExec(HqVmHandle hVm, HqExecutionHandle hExec)
+{
+	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+
+	for(size_t i = 0; i < hVm->executionContexts.count; ++i)
+	{
+		if(hVm->executionContexts.pData[i] == hExec)
+		{
+			const size_t finalIndex = hVm->executionContexts.count - 1;
+
+			if((hVm->executionContexts.count > 1) && (finalIndex > i))
+			{
+				// Keep the array of execution contexts tightly packed by swapping
+				// into the current index the context at the very end of the array.
+				hVm->executionContexts.pData[i] = hVm->executionContexts.pData[finalIndex];
+			}
+
+			--hVm->executionContexts.count;
+
+			break;
+		}
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------

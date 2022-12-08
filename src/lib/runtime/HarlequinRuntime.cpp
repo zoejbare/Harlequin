@@ -84,6 +84,21 @@ int HqVmDispose(HqVmHandle* phVm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqVmRunGarbageCollector(HqVmHandle hVm)
+{
+	if(!hVm)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	// Do a full run of the garbage collector from start to end.
+	HqGarbageCollector::RunFull(hVm->gc);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqVmGetReportHandle(HqVmHandle hVm, HqReportHandle* phOutReport)
 {
 	if(!hVm || !phOutReport || *phOutReport)
@@ -812,9 +827,12 @@ int HqExecutionCreate(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
+	HqScopedMutex vmLock(hVm->lock);
+	HqScopedReadLock gcLock(hVm->gc.rwLock);
+
 	// Create a new execution context with the provided script function as the entry point.
 	HqExecutionHandle hExec = HqExecution::Create(hVm, hEntryPoint);
-	if(!hExec)
+	if(!hExec || !HqVm::AttachExec(hVm, hExec))
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
@@ -834,8 +852,18 @@ int HqExecutionDispose(HqExecutionHandle* phExecution)
 	}
 
 	HqExecutionHandle hExec = (*phExecution);
+	HqVmHandle hVm = hExec->hVm;
 
-	HqExecution::DetachFromVm(hExec);
+	if(!hVm)
+	{
+		return HQ_ERROR_INVALID_OPERATION;
+	}
+
+	HqScopedMutex vmLock(hVm->lock);
+
+	// Remove the execution context from the VM, then dispose of it.
+	HqVm::DetachExec(hVm, hExec);
+	HqExecution::Dispose(hExec);
 
 	(*phExecution) = HQ_EXECUTION_HANDLE_NULL;
 

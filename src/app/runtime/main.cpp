@@ -34,6 +34,7 @@
 
 #include <deque>
 #include <map>
+#include <mutex>
 #include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -101,6 +102,10 @@ void OnDependencyRequested(void* const pUserData, const char* const programName)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+// Enabling memory tracking will track memory metrics, but it will also slow things down a bit.
+#define _TRACK_MEM_USAGE 1
+
+#if _TRACK_MEM_USAGE
 static size_t maxAllocSize = 0;
 static size_t minAllocSize = size_t(-1);
 static size_t peakMemUsage = 0;
@@ -110,6 +115,8 @@ static size_t mallocCount = 0;
 static size_t reallocCount = 0;
 
 static size_t currentTotalSize = 0;
+
+static std::mutex allocMtx;
 
 static void OnAlloc(const size_t size)
 {
@@ -130,6 +137,9 @@ static void OnAlloc(const size_t size)
 		peakMemUsage = currentTotalSize;
 	}
 };
+#endif
+
+//----------------------------------------------------------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
@@ -155,11 +165,18 @@ int main(int argc, char* argv[])
 
 		(*pMem) = size;
 
-		++activeAllocCount;
-		++totalAllocCount;
-		++mallocCount;
+#if _TRACK_MEM_USAGE
+		// Update stats.
+		{
+			std::scoped_lock lock(allocMtx);
 
-		OnAlloc(size);
+			++activeAllocCount;
+			++totalAllocCount;
+			++mallocCount;
+
+			OnAlloc(size);
+		}
+#endif
 
 		return pMem + 1;
 	};
@@ -176,17 +193,24 @@ int main(int argc, char* argv[])
 
 		(*pNewMem) = newSize;
 
-		currentTotalSize -= oldSize;
-
-		if(oldSize == 0)
+#if _TRACK_MEM_USAGE
+		// Update stats.
 		{
-			++activeAllocCount;
-			++totalAllocCount;
+			std::scoped_lock lock(allocMtx);
+
+			currentTotalSize -= oldSize;
+
+			if(oldSize == 0)
+			{
+				++activeAllocCount;
+				++totalAllocCount;
+			}
+
+			++reallocCount;
+
+			OnAlloc(newSize);
 		}
-
-		++reallocCount;
-
-		OnAlloc(newSize);
+#endif
 
 		return pNewMem + 1;
 	};
@@ -198,10 +222,17 @@ int main(int argc, char* argv[])
 
 		if(pAlloc)
 		{
-			currentTotalSize -= size;
+#if _TRACK_MEM_USAGE
+			// Update stats.
+			{
+				std::scoped_lock lock(allocMtx);
 
-			assert(activeAllocCount > 0);
-			--activeAllocCount;
+				currentTotalSize -= size;
+
+				assert(activeAllocCount > 0);
+				--activeAllocCount;
+			}
+#endif
 
 			free(pAlloc);
 		}
@@ -595,6 +626,7 @@ int main(int argc, char* argv[])
 	const uint64_t disposeVmTimeEnd = HqClockGetTimestamp();
 	const uint64_t disposeVmTimeSlice = disposeVmTimeEnd - disposeVmTimeStart;
 
+#if _TRACK_MEM_USAGE
 	if(activeAllocCount != 0)
 	{
 		char msg[128];
@@ -620,6 +652,7 @@ int main(int argc, char* argv[])
 		mallocCount,
 		reallocCount
 	);
+#endif
 
 	const uint64_t overallTimeEnd = HqClockGetTimestamp();
 	const uint64_t overallTimeSlice = overallTimeEnd - overallTimeStart;

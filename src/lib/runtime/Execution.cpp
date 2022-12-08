@@ -45,8 +45,7 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoi
 	pOutput->started = false;
 	pOutput->finished = false;
 	pOutput->exception = false;
-
-	HqScopedWriteLock gcLock(hVm->gc.rwLock);
+	pOutput->abort = false;
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
 	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
@@ -81,9 +80,6 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoi
 		return HQ_EXECUTION_HANDLE_NULL;
 	}
 
-	// Map the execution context to the VM used to create it.
-	HQ_MAP_FUNC_INSERT(hVm->executionContexts, pOutput, false);
-
 	// Keep the execution context alive indefinitely until we're ready to dispose of it.
 	pOutput->gcProxy.autoMark = true;
 
@@ -92,28 +88,17 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoi
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqExecution::ReleaseWithNoDetach(HqExecutionHandle hExec)
+void HqExecution::Dispose(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
-
+	
 	// Clearing the 'auto-mark' flag will allow the garbage
 	// collector to destruct the execution context.
 	hExec->gcProxy.autoMark = false;
-}
 
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqExecution::DetachFromVm(HqExecutionHandle hExec)
-{
-	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
-
-	ReleaseWithNoDetach(hExec);
-
-	HqVmHandle hVm = hExec->hVm;
-	HqScopedWriteLock gcLock(hVm->gc.rwLock);
-
-	// Unlink the execution context from the VM.
-	HQ_MAP_FUNC_REMOVE(hVm->executionContexts, hExec);
+	// Clearing the VM from the execution context will
+	// indicate that the context is no longer in use.
+	hExec->hVm = HQ_VM_HANDLE_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

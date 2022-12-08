@@ -222,7 +222,8 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 	// This load block needs to lock the garbage collector since we'll be manipulating
 	// the VM and adding garbage collected resources.
 	{
-		HqScopedWriteLock gcLock(hVm->gc.rwLock);
+		HqScopedMutex vmLock(hVm->lock);
+		HqScopedReadLock gcLock(hVm->gc.rwLock);
 
 		// Attempt to load the program.
 		if(ProgramLoad(pOutput, hVm, hSerializer))
@@ -326,7 +327,8 @@ HqProgramHandle HqProgram::Create(
 	// This load block needs to lock the garbage collector since we'll be manipulating
 	// the VM and adding garbage collected resources.
 	{
-		HqScopedWriteLock gcLock(hVm->gc.rwLock);
+		HqScopedMutex vmLock(hVm->lock);
+		HqScopedReadLock gcLock(hVm->gc.rwLock);
 
 		// Attempt to load the program.
 		if(ProgramLoad(pOutput, hVm, hSerializer))

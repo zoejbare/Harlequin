@@ -59,18 +59,19 @@ enum HqErrorCodeEnum
 	HQ_ERROR_INVALID_TYPE = -3,
 	HQ_ERROR_INVALID_DATA = -4,
 	HQ_ERROR_INVALID_RANGE = -5,
-	HQ_ERROR_BAD_ALLOCATION = -6,
-	HQ_ERROR_KEY_ALREADY_EXISTS = -7,
-	HQ_ERROR_KEY_DOES_NOT_EXIST = -8,
-	HQ_ERROR_FAILED_TO_OPEN_FILE = -9,
-	HQ_ERROR_STREAM_END = -10,
-	HQ_ERROR_STACK_EMPTY = -11,
-	HQ_ERROR_STACK_FULL = -12,
-	HQ_ERROR_INDEX_OUT_OF_RANGE = -13,
-	HQ_ERROR_SCRIPT_NO_FUNCTION = -14,
-	HQ_ERROR_MISMATCH = -15,
-	HQ_ERROR_UNKNOWN_ID = -16,
-	HQ_ERROR_NO_WRITE = -17,
+	HQ_ERROR_INVALID_OPERATION = -6,
+	HQ_ERROR_BAD_ALLOCATION = -7,
+	HQ_ERROR_KEY_ALREADY_EXISTS = -8,
+	HQ_ERROR_KEY_DOES_NOT_EXIST = -9,
+	HQ_ERROR_FAILED_TO_OPEN_FILE = -10,
+	HQ_ERROR_STREAM_END = -11,
+	HQ_ERROR_STACK_EMPTY = -12,
+	HQ_ERROR_STACK_FULL = -13,
+	HQ_ERROR_INDEX_OUT_OF_RANGE = -14,
+	HQ_ERROR_SCRIPT_NO_FUNCTION = -15,
+	HQ_ERROR_MISMATCH = -16,
+	HQ_ERROR_UNKNOWN_ID = -17,
+	HQ_ERROR_NO_WRITE = -18,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------*/
@@ -366,6 +367,8 @@ typedef struct
 HQ_MAIN_API int HqVmCreate(HqVmHandle* phOutVm, HqVmInit init);
 
 HQ_MAIN_API int HqVmDispose(HqVmHandle* phVm);
+
+HQ_MAIN_API int HqVmRunGarbageCollector(HqVmHandle hVm);
 
 HQ_MAIN_API int HqVmGetReportHandle(HqVmHandle hVm, HqReportHandle* phOutReport);
 
