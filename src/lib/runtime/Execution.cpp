@@ -31,21 +31,17 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoint)
+HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
-	assert(hEntryPoint != HQ_FUNCTION_HANDLE_NULL);
 
 	HqExecution* const pOutput = new HqExecution();
 	assert(pOutput != HQ_EXECUTION_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
+	pOutput->hFunction = HQ_FUNCTION_HANDLE_NULL;
+	pOutput->hCurrentFrame = HQ_FRAME_HANDLE_NULL;
 	pOutput->endianness = HqGetPlatformEndianMode();
-	pOutput->yield = false;
-	pOutput->started = false;
-	pOutput->finished = false;
-	pOutput->exception = false;
-	pOutput->abort = false;
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
 	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
@@ -57,28 +53,8 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm, HqFunctionHandle hEntryPoi
 
 	pOutput->registers.count = HQ_VM_IO_REGISTER_COUNT;
 
-	// Initialize each value in the I/O register set.
-	for(size_t i = 0; i < pOutput->registers.count; ++i)
-	{
-		pOutput->registers.pData[i] = HqValue::CreateNull();
-	}
-
-	// Create the first frame.
-	pOutput->hCurrentFrame = HqFrame::Create(pOutput);
-	if(!pOutput->hCurrentFrame)
-	{
-		return HQ_EXECUTION_HANDLE_NULL;
-	}
-
-	// Initialize the frame using the specified entry point function.
-	HqFrame::Initialize(pOutput->hCurrentFrame, hEntryPoint);
-
-	// Push the entry point frame to the frame stack.
-	int result = HqFrame::HandleStack::Push(pOutput->frameStack, pOutput->hCurrentFrame);
-	if(result != HQ_SUCCESS)
-	{
-		return HQ_EXECUTION_HANDLE_NULL;
-	}
+	// Reset the state of the execution context.
+	Reset(pOutput);
 
 	// Keep the execution context alive indefinitely until we're ready to dispose of it.
 	pOutput->gcProxy.autoMark = true;
@@ -99,6 +75,58 @@ void HqExecution::Dispose(HqExecutionHandle hExec)
 	// Clearing the VM from the execution context will
 	// indicate that the context is no longer in use.
 	hExec->hVm = HQ_VM_HANDLE_NULL;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqExecution::Initialize(HqExecutionHandle hExec, HqFunctionHandle hEntryPoint)
+{
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+	assert(hEntryPoint != HQ_FUNCTION_HANDLE_NULL);
+
+	hExec->hFunction = hEntryPoint;
+
+	return Reset(hExec);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqExecution::Reset(HqExecutionHandle hExec)
+{
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+
+	hExec->pExceptionLocation = nullptr;
+	hExec->yield = false;
+	hExec->started = false;
+	hExec->finished = false;
+	hExec->exception = false;
+	hExec->abort = false;
+
+	// Initialize each value in the I/O register set.
+	for(size_t i = 0; i < hExec->registers.count; ++i)
+	{
+		hExec->registers.pData[i] = HqValue::CreateNull();
+	}
+
+	// Clear the entire frame stack.
+	while(PopFrame(hExec) == HQ_SUCCESS) {}
+
+	if(hExec->hFunction)
+	{
+		// Push the entry point frame to the frame stack.
+		int pushEntryFrameResult = PushFrame(hExec, hExec->hFunction);
+		if(pushEntryFrameResult == HQ_ERROR_BAD_ALLOCATION)
+		{
+			return HQ_ERROR_BAD_ALLOCATION;
+		}
+		else
+		{
+			// We expect only success by this point.
+			assert(pushEntryFrameResult == HQ_SUCCESS);
+		}
+	}
+
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -415,7 +443,6 @@ void HqExecution::RaiseOpCodeException(HqExecutionHandle hExec, const int type, 
 	HqValueHandle hThrowValue = HqVm::CreateStandardException(hExec->hVm, type, msg);
 
 	HqExecution::RaiseException(hExec, hThrowValue, HQ_EXCEPTION_SEVERITY_FATAL);
-	HqValue::SetAutoMark(hThrowValue, false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

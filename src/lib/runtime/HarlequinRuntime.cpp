@@ -402,12 +402,21 @@ int HqVmLoadProgram(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExecution)
+int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 {
-	if(!hVm || !phOutExecution || (*phOutExecution) != HQ_EXECUTION_HANDLE_NULL)
+	if(!hVm || !phOutExec || (*phOutExec) != HQ_EXECUTION_HANDLE_NULL)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
+
+	// Create an execution context for running the initialize function for each program.
+	HqExecutionHandle hExec = HqExecution::Create(hVm);
+	if(!hExec)
+	{
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	bool scriptError = false;
 
 	for(auto& kv : hVm->programs)
 	{
@@ -415,27 +424,36 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExecution)
 
 		if(hProgram->hInitFunction)
 		{
-			// Create an execution context for running the program's initialize function.
-			const int execCreateResult = HqExecutionCreate(phOutExecution, hVm, hProgram->hInitFunction);
-			assert(execCreateResult == HQ_SUCCESS); (void) execCreateResult;
-
-			// Run the initializer function to completion.
-			const int runResult = HqExecutionRun(*phOutExecution, HQ_RUN_CONTINUOUS);
-			assert(runResult == HQ_SUCCESS); (void) runResult;
-
-			// Check for any unhandled exceptions that occurred when running the initializer.
-			bool exception = false;
-			HqExecutionHasUnhandledExceptionOccurred(*phOutExecution, &exception);
-
-			if(exception)
+			// Initialize the execution context with the current program's initialize function (this should never fail).
+			const int execInitResult = HqExecution::Initialize(hExec, hProgram->hInitFunction);
+			if(execInitResult == HQ_ERROR_BAD_ALLOCATION)
 			{
-				// When script exceptions do occur, return immediately to allow the user code to
-				// query the execution context for more details on what went wrong.
-				break;
+				// We ran out of memory.
+				HqExecution::Dispose(hExec);
+				return HQ_ERROR_BAD_ALLOCATION;
+			}
+			else
+			{
+				// We should only expect success at this point.
+				assert(execInitResult == HQ_SUCCESS);
 			}
 
-			// We're done with the execution context.
-			HqExecutionDispose(phOutExecution);
+			// Run the current initializer function in a loop until it's finished just in case any of its code yields.
+			// This will effectively cause script continuations to be silently ignored in the initializer functions.
+			while(!hExec->finished && !hExec->exception && !hExec->abort)
+			{
+				// Run the initializer function to completion.
+				HqExecution::Run(hExec, HQ_RUN_CONTINUOUS);
+			}
+
+			// Check for any unhandled exceptions that occurred when running the initializer.
+			if(hExec->exception || hExec->abort)
+			{
+				// When fatal script errors do occur, return immediately to allow the user code to
+				// query the execution context for more details on what went wrong.
+				scriptError = true;
+				break;
+			}
 
 			// Now that we've called the program's initializer function, we won't be calling it again,
 			// so we can dispose of it.
@@ -444,7 +462,16 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExecution)
 		}
 	}
 
-	return HQ_SUCCESS;
+	// We only skip disposal of the execution context when a script error occurs.
+	// Otherwise, it needs to be returned to the user.
+	if(!scriptError)
+	{
+		HqExecution::Dispose(hExec);
+	}
+
+	return scriptError 
+		? HQ_ERROR_UNSPECIFIED_FAILURE 
+		: HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -812,16 +839,9 @@ int HqFunctionDisassemble(HqFunctionHandle hFunction, HqCallbackOpDisasm onDisas
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqExecutionCreate(
-	HqExecutionHandle* phOutExecution,
-	HqVmHandle hVm,
-	HqFunctionHandle hEntryPoint
-)
+int HqExecutionCreate(HqExecutionHandle* phOutExecution, HqVmHandle hVm)
 {
-	if(!phOutExecution
-		|| (*phOutExecution)
-		|| !hVm
-		|| !hEntryPoint)
+	if(!phOutExecution || (*phOutExecution) || !hVm)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -830,7 +850,7 @@ int HqExecutionCreate(
 	HqScopedReadLock gcLock(hVm->gc.rwLock);
 
 	// Create a new execution context with the provided script function as the entry point.
-	HqExecutionHandle hExec = HqExecution::Create(hVm, hEntryPoint);
+	HqExecutionHandle hExec = HqExecution::Create(hVm);
 	if(!hExec || !HqVm::AttachExec(hVm, hExec))
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
@@ -867,6 +887,38 @@ int HqExecutionDispose(HqExecutionHandle* phExecution)
 	(*phExecution) = HQ_EXECUTION_HANDLE_NULL;
 
 	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqExecutionInitialize(HqExecutionHandle hExec, HqFunctionHandle hEntryPoint)
+{
+	if(!hExec || !hEntryPoint)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+	if(!hExec->hVm)
+	{
+		return HQ_ERROR_INVALID_OPERATION;
+	}
+
+	return HqExecution::Initialize(hExec, hEntryPoint);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqExecutionReset(HqExecutionHandle hExec)
+{
+	if(!hExec)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+	if(!hExec->hVm)
+	{
+		return HQ_ERROR_INVALID_OPERATION;
+	}
+
+	return HqExecution::Reset(hExec);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

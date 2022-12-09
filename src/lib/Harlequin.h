@@ -401,7 +401,7 @@ HQ_MAIN_API int HqVmLoadProgram(
 	size_t programFileSize
 );
 
-HQ_MAIN_API int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExecution);
+HQ_MAIN_API int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -471,13 +471,13 @@ HQ_MAIN_API int HqFunctionDisassemble(
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqExecutionCreate(
-	HqExecutionHandle* phOutExecution,
-	HqVmHandle hVm,
-	HqFunctionHandle hEntryPoint
-);
+HQ_MAIN_API int HqExecutionCreate(HqExecutionHandle* phOutExec, HqVmHandle hVm);
 
-HQ_MAIN_API int HqExecutionDispose(HqExecutionHandle* phExecution);
+HQ_MAIN_API int HqExecutionDispose(HqExecutionHandle* phExec);
+
+HQ_MAIN_API int HqExecutionInitialize(HqExecutionHandle hExec, HqFunctionHandle hEntryPoint);
+
+HQ_MAIN_API int HqExecutionReset(HqExecutionHandle hExec);
 
 HQ_MAIN_API int HqExecutionRun(HqExecutionHandle hExec, int runMode);
 

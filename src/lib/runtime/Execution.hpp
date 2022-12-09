@@ -35,9 +35,12 @@ struct HqExecution
 {
 	typedef HqArray<HqExecutionHandle> HandleArray;
 
-	static HqExecutionHandle Create(HqVmHandle hVm, HqFunctionHandle hEntryPoint);
+	static HqExecutionHandle Create(HqVmHandle hVm);
 
 	static void Dispose(HqExecutionHandle hExec);
+
+	static int Initialize(HqExecutionHandle hExec, HqFunctionHandle hEntryPoint);
+	static int Reset(HqExecutionHandle hExec);
 
 	static int PushFrame(HqExecutionHandle hExec, HqFunctionHandle hFunction);
 	static int PopFrame(HqExecutionHandle hExec);
@@ -61,6 +64,7 @@ struct HqExecution
 	HqGcProxy gcProxy;
 
 	HqVmHandle hVm;
+	HqFunctionHandle hFunction;
 	HqFrameHandle hCurrentFrame;
 
 	HqFrame::HandleStack frameStack;
