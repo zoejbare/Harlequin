@@ -32,9 +32,9 @@
 //
 // Call into a function.
 //
-// 0x: CALL c#
+// 0x: CALL s#
 //
-//   c# = Constant index to the name of the function to be called.
+//   s# = String table index to the name of the function to be called.
 //
 // 0x: CALL_VALUE r#
 //
@@ -96,12 +96,12 @@ void OpCodeExec_Call(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t constIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex, &result);
-	if(HqValueIsString(hValue))
+	HqString* const pFuncName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pFuncName)
 	{
-		HqFunctionHandle hFunction = HqVm::GetFunction(hExec->hVm, hValue->as.pString, &result);
+		HqFunctionHandle hFunction = HqVm::GetFunction(hExec->hVm, pFuncName, &result);
 		if(hFunction)
 		{
 			CallScriptFunction(hExec, hFunction);
@@ -113,7 +113,7 @@ void OpCodeExec_Call(HqExecutionHandle hExec)
 				hExec,
 				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Script function does not exist: \"%s\"",
-				hValue->as.pString->data
+				pFuncName->data
 			);
 		}
 	}
@@ -123,8 +123,8 @@ void OpCodeExec_Call(HqExecutionHandle hExec)
 		HqExecution::RaiseOpCodeException(
 			hExec,
 			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-			"Type mismatch; expected string value: c(%" PRIu32 ")",
-			constIndex
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -135,16 +135,13 @@ void OpCodeDisasm_Call(HqDisassemble& disasm)
 {
 	int result;
 
-	const uint32_t constIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hValue);
+	HqString* const pString = HqProgram::GetString(disasm.hProgram, stringIndex, &result);
 
 	char str[256];
-	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", constIndex, pValueData->data);
+	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", stringIndex, pString->data);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

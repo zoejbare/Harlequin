@@ -120,8 +120,8 @@ bool HqProgramLoader::prv_loadFile()
 		return false;
 	}
 
-	// Read the program constants.
-	if(!prv_readConstantTable())
+	// Read the program strings.
+	if(!prv_readStringTable())
 	{
 		return false;
 	}
@@ -335,28 +335,28 @@ bool HqProgramLoader::prv_readProgramHeader()
 		return false;
 	}
 
-	// Read the constant table offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.offset);
+	// Read the string table offset.
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.stringTable.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file constant table offset: error=\"%s\", program=\"%s\"",
+			"Error reading program file string table offset: error=\"%s\", program=\"%s\"",
 			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
 		return false;
 	}
 
-	// Read the constant table length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.constantTable.length);
+	// Read the string table length.
+	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.stringTable.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file constant table length: error=\"%s\", program=\"%s\"",
+			"Error reading program file string table length: error=\"%s\", program=\"%s\"",
 			HqGetErrorCodeString(result),
 			m_hProgram->pName->data
 		);
@@ -529,14 +529,14 @@ bool HqProgramLoader::prv_validateProgramHeader()
 	}
 
 	// Verify the constant table does not start before the end of the header data.
-	if(m_programHeader.constantTable.offset < m_programHeader.headerEndPosition)
+	if(m_programHeader.stringTable.offset < m_programHeader.headerEndPosition)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid program file constant table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			"Invalid program file string table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
 			m_hProgram->pName->data,
-			m_programHeader.constantTable.offset,
+			m_programHeader.stringTable.offset,
 			m_programHeader.headerEndPosition
 		);
 		return false;
@@ -668,10 +668,10 @@ bool HqProgramLoader::prv_readObjectTable()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+					"Error setting program file stream position to the offset of the string table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 					HqGetErrorCodeString(result),
 					m_hProgram->pName->data,
-					m_programHeader.constantTable.offset
+					m_programHeader.stringTable.offset
 				);
 				return false;
 			}
@@ -736,42 +736,42 @@ bool HqProgramLoader::prv_readObjectTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readConstantTable()
+bool HqProgramLoader::prv_readStringTable()
 {
-	if(m_programHeader.constantTable.length > 0)
+	if(m_programHeader.stringTable.length > 0)
 	{
 		int result = HQ_SUCCESS;
 
-		// Move the stream position to the start of the constant table.
-		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.constantTable.offset);
+		// Move the stream position to the start of the string table.
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.stringTable.offset);
 		if(result != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				m_hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the constant table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				"Error setting program file stream position to the offset of the string table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
 				HqGetErrorCodeString(result),
 				m_hProgram->pName->data,
-				m_programHeader.constantTable.offset
+				m_programHeader.stringTable.offset
 			);
 			return false;
 		}
 
-		// Make space in the constant table.
-		HqValue::HandleArray::Reserve(m_hProgram->constants, m_programHeader.constantTable.length);
-		m_hProgram->constants.count = m_programHeader.constantTable.length;
+		// Make space in the string table.
+		HqProgram::StringArray::Reserve(m_hProgram->strings, m_programHeader.stringTable.length);
+		m_hProgram->strings.count = m_programHeader.stringTable.length;
 
-		// Iterate for each constant.
-		for(uint32_t index = 0; index < m_programHeader.constantTable.length; ++index)
+		// Iterate for each string.
+		for(uint32_t index = 0; index < m_programHeader.stringTable.length; ++index)
 		{
-			HqValueHandle hValue = HqProgramCommonLoader::ReadValue(m_hSerializer, m_hVm, m_hReport);
-			if(!hValue)
+			HqString* const pString = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			if(!pString)
 			{
-				m_hProgram->constants.count = index;
+				m_hProgram->strings.count = index;
 				return false;
 			}
 
-			m_hProgram->constants.pData[index] = hValue;
+			m_hProgram->strings.pData[index] = pString;
 		}
 	}
 
@@ -812,44 +812,7 @@ bool HqProgramLoader::prv_readGlobalTable()
 			}
 
 			prv_trackString(pVarName);
-
-			// Read the global variable value index.
-			uint32_t constantIndex = 0;
-			result = HqSerializerReadUint32(m_hSerializer, &constantIndex);
-			if(result != HQ_SUCCESS)
-			{
-				HqReportMessage(
-					m_hReport,
-					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read global variable value index: error=\"%s\", program=\"%s\", variableName=\"%s\"",
-					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
-					pVarName->data
-				);
-				return false;
-			}
-
-			// Get the value from the constant table.
-			HqValueHandle hValue;
-			if(size_t(constantIndex) < m_hProgram->constants.count)
-			{
-				hValue = m_hProgram->constants.pData[constantIndex];
-			}
-			else
-			{
-				HqReportMessage(
-					m_hReport,
-					HQ_MESSAGE_TYPE_WARNING,
-					"Global variable points to invalid constant index: program=\"%s\", variableName=\"%s\", index=%" PRIu32,
-					m_hProgram->pName->data,
-					pVarName->data,
-					constantIndex
-				);
-
-				hValue = HqValueCreateNull();
-			}
-
-			prv_trackGlobalValue(pVarName, hValue);
+			prv_trackGlobalValue(pVarName, HqValue::CreateNull());
 		}
 	}
 

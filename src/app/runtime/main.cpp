@@ -449,11 +449,24 @@ int main(int argc, char* argv[])
 
 	auto iterateProgram = [](void* const pUserData, HqProgramHandle hProgram) -> bool
 	{
+		auto iterateString = [](void*, const char* const string, const size_t index) -> bool
+		{
+			const size_t length = strlen(string);
+
+			printf(
+				"        s(%" PRIuPTR "): \"%.48s\"%s\n",
+				index,
+				string,
+				(length > 48) ? " ..." : ""
+			);
+			return true;
+		};
+
 		auto iterateFunction = [](void* const pUserData, const char* const signature) -> bool
 		{
 			auto onDisasm = [](void*, const char* const asmLine, const uintptr_t offset)
 			{
-				printf("\t\t0x%08" PRIXPTR ": %s\n", offset, asmLine);
+				printf("            0x%08" PRIXPTR ": %s\n", offset, asmLine);
 			};
 
 			HqVmHandle hVm = reinterpret_cast<HqVmHandle>(pUserData);
@@ -462,14 +475,14 @@ int main(int argc, char* argv[])
 			HqVmGetFunction(hVm, &hFunction, signature);
 
 			assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
-			printf("\t%s\n", signature);
+			printf("        %s\n", signature);
 
 			bool isNative = false;
 			HqFunctionGetIsNative(hFunction, &isNative);
 
 			if(isNative)
 			{
-				printf("\t\t<native call>\n");
+				printf("            <native call>\n");
 			}
 			else
 			{
@@ -484,6 +497,11 @@ int main(int argc, char* argv[])
 		HqProgramGetName(hProgram, &programName);
 
 		printf("[Program: \"%s\"]\n", programName);
+		printf("    [strings]\n");
+
+		HqProgramListStrings(hProgram, iterateString, pUserData);
+
+		printf("\n    [code]\n");
 
 		// Iterate each function within in the program.
 		HqProgramListFunctions(hProgram, iterateFunction, pUserData);

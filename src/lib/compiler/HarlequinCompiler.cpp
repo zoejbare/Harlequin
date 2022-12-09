@@ -152,7 +152,7 @@ int HqProgramWriterAddDependency(HqProgramWriterHandle hProgramWriter, const cha
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddConstantString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutputIndex)
+int HqProgramWriterAddString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutputIndex)
 {
 	if(!hProgramWriter || !value || !pOutputIndex)
 	{
@@ -165,7 +165,7 @@ int HqProgramWriterAddConstantString(HqProgramWriterHandle hProgramWriter, const
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, pString);
+	(*pOutputIndex) = HqProgramWriter::AddString(hProgramWriter, pString);
 
 	HqString::Release(pString);
 
@@ -267,15 +267,9 @@ int HqProgramWriterAddObjectMember(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* variableName, uint32_t constantIndex)
+int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* variableName)
 {
 	if(!hProgramWriter || !variableName || variableName[0] == '\0')
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	// Verify the input constant table index is within the correct range.
-	if(uint32_t(hProgramWriter->constants.size()) <= constantIndex)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -287,15 +281,15 @@ int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* v
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	// Verify a value mapped to the input name doesn't already exist.
+	// Verify the input name doesn't already exist.
 	if(hProgramWriter->globals.count(pKey))
 	{
 		HqString::Release(pKey);
 		return HQ_ERROR_KEY_ALREADY_EXISTS;
 	}
 
-	// Map the global variable name to the constant table index.
-	hProgramWriter->globals.emplace(pKey, constantIndex);
+	// Track the name of the global variable.
+	hProgramWriter->globals.insert(pKey);
 
 	return HQ_SUCCESS;
 }
@@ -721,7 +715,7 @@ int HqBytecodeWriteYield(HqSerializerHandle hSerializer)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCall(HqSerializerHandle hSerializer, const uint32_t constantIndex)
+int HqBytecodeWriteCall(HqSerializerHandle hSerializer, const uint32_t stringIndex)
 {
 	if(!hSerializer)
 	{
@@ -729,7 +723,7 @@ int HqBytecodeWriteCall(HqSerializerHandle hSerializer, const uint32_t constantI
 	}
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CALL);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -760,26 +754,6 @@ int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, const uint32_t gpRegInd
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_RAISE);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqBytecodeWriteLoadConst(
-	HqSerializerHandle hSerializer,
-	const uint32_t gpRegIndex,
-	const uint32_t constantIndex
-)
-{
-	if(!hSerializer)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1021,10 +995,30 @@ int HqBytecodeWriteLoadConstF64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqBytecodeWriteLoadConstStr(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint32_t stringIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_STR);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqBytecodeWriteLoadGlobal(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
-	const uint32_t constantIndex
+	const uint32_t stringIndex
 )
 {
 	if(!hSerializer)
@@ -1034,7 +1028,7 @@ int HqBytecodeWriteLoadGlobal(
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_GLOBAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1044,7 +1038,7 @@ int HqBytecodeWriteLoadGlobal(
 int HqBytecodeWriteLoadLocal(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
-	const uint32_t constantIndex
+	const uint32_t stringIndex
 )
 {
 	if(!hSerializer)
@@ -1054,7 +1048,7 @@ int HqBytecodeWriteLoadLocal(
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_LOCAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1127,7 +1121,7 @@ int HqBytecodeWriteLoadArray(
 
 int HqBytecodeWriteStoreGlobal(
 	HqSerializerHandle hSerializer,
-	const uint32_t constantIndex,
+	const uint32_t stringIndex,
 	const uint32_t gpRegIndex
 )
 {
@@ -1137,7 +1131,7 @@ int HqBytecodeWriteStoreGlobal(
 	}
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_GLOBAL);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
@@ -1147,7 +1141,7 @@ int HqBytecodeWriteStoreGlobal(
 
 int HqBytecodeWriteStoreLocal(
 	HqSerializerHandle hSerializer,
-	const uint32_t constantIndex,
+	const uint32_t stringIndex,
 	const uint32_t gpRegIndex
 )
 {
@@ -1157,7 +1151,7 @@ int HqBytecodeWriteStoreLocal(
 	}
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_LOCAL);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
@@ -1232,7 +1226,7 @@ int HqBytecodeWriteStoreArray(
 int HqBytecodeWritePullGlobal(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
-	const uint32_t constantIndex
+	const uint32_t stringIndex
 )
 {
 	if(!hSerializer)
@@ -1242,7 +1236,7 @@ int HqBytecodeWritePullGlobal(
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_GLOBAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1252,7 +1246,7 @@ int HqBytecodeWritePullGlobal(
 int HqBytecodeWritePullLocal(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
-	const uint32_t constantIndex
+	const uint32_t stringIndex
 )
 {
 	if(!hSerializer)
@@ -1262,7 +1256,7 @@ int HqBytecodeWritePullLocal(
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_LOCAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1366,7 +1360,7 @@ int HqBytecodeWritePop(HqSerializerHandle hSerializer, const uint32_t gpRegIndex
 int HqBytecodeWriteInitObject(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
-	const uint32_t constantIndex
+	const uint32_t stringIndex
 )
 {
 	if(!hSerializer)
@@ -1376,7 +1370,7 @@ int HqBytecodeWriteInitObject(
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_OBJECT);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1406,7 +1400,7 @@ int HqBytecodeWriteInitArray(
 int HqBytecodeWriteInitFunction(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
-	const uint32_t constantIndex
+	const uint32_t stringIndex
 )
 {
 	if(!hSerializer)
@@ -1416,7 +1410,7 @@ int HqBytecodeWriteInitFunction(
 
 	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_FUNCTION);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(constantIndex);
+	_HQ_WRITE_OP_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }

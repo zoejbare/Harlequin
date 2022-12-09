@@ -31,10 +31,10 @@
 //
 // Load a global variable into a general-purpose register.
 //
-// 0x: LOAD_GLOBAL r#, c#
+// 0x: LOAD_GLOBAL r#, s#
 //
 //   r# = General-purpose register index
-//   c# = Constant index of the name of the global variable
+//   s# = String table index of the name of the global variable
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,36 +47,23 @@ void OpCodeExec_LoadGlobal(HqExecutionHandle hExec)
 	int result;
 
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hNameValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(result == HQ_SUCCESS)
+	HqString* const pVarName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pVarName)
 	{
-		if(HqValueIsString(hNameValue))
+		HqValueHandle hGlobalVariable = HqVm::GetGlobalVariable(hExec->hVm, pVarName, &result);
+		if(result == HQ_SUCCESS)
 		{
-			HqValueHandle hGlobalVariable = HqVm::GetGlobalVariable(hExec->hVm, hNameValue->as.pString, &result);
-			if(result == HQ_SUCCESS)
-			{
-				result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
-				if(result != HQ_SUCCESS)
-				{
-					// Raise a fatal script exception.
-					HqExecution::RaiseOpCodeException(
-						hExec,
-						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-						"Failed to set general-purpose register: r(%" PRIu32 ")",
-						registerIndex
-					);
-				}
-			}
-			else
+			result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hGlobalVariable, registerIndex);
+			if(result != HQ_SUCCESS)
 			{
 				// Raise a fatal script exception.
 				HqExecution::RaiseOpCodeException(
 					hExec,
 					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-					"Failed to retrieve global variable: %s",
-					hNameValue->as.pString->data
+					"Failed to set general-purpose register: r(%" PRIu32 ")",
+					registerIndex
 				);
 			}
 		}
@@ -85,9 +72,9 @@ void OpCodeExec_LoadGlobal(HqExecutionHandle hExec)
 			// Raise a fatal script exception.
 			HqExecution::RaiseOpCodeException(
 				hExec,
-				HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-				"Type mismatch; expected string: c(%" PRIu32 ")",
-				constantIndex
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to retrieve global variable: %s",
+				pVarName->data
 			);
 		}
 	}
@@ -96,9 +83,9 @@ void OpCodeExec_LoadGlobal(HqExecutionHandle hExec)
 		// Raise a fatal script exception.
 		HqExecution::RaiseOpCodeException(
 			hExec,
-			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve constant value: c(%" PRIu32 ")",
-			constantIndex
+			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -107,19 +94,12 @@ void OpCodeExec_LoadGlobal(HqExecutionHandle hExec)
 
 void OpCodeDisasm_LoadGlobal(HqDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
-
-	HqValueHandle hNameValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hNameValue);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "LOAD_GLOBAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
+	snprintf(str, sizeof(str), "LOAD_GLOBAL r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

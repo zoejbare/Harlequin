@@ -31,10 +31,10 @@
 //
 // Initialize a new object by type name, storing it in a general-purpose register.
 //
-// 0x: INIT_OBJECT r#, c#
+// 0x: INIT_OBJECT r#, s#
 //
 //   r# = General-purpose register where the new object will be stored.
-//   c# = Constant index to the name of the object type to create.
+//   s# = String table index to the name of the object type to create.
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,56 +47,42 @@ void OpCodeExec_InitObject(HqExecutionHandle hExec)
 	int result;
 
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hObjectTypeName= HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(result == HQ_SUCCESS)
+	HqString* const pObjectTypeName= HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pObjectTypeName)
 	{
-		// Verify the loaded value is a string.
-		if(HqValueIsString(hObjectTypeName))
+		// Get the object schema matching the type name.
+		HqScriptObject* const pObjectSchema = HqVm::GetObjectSchema(hExec->hVm, pObjectTypeName, &result);
+		if(result == HQ_SUCCESS)
 		{
-			// Get the object schema matching the type name.
-			HqScriptObject* const pObjectSchema = HqVm::GetObjectSchema(hExec->hVm, hObjectTypeName->as.pString, &result);
-			if(result == HQ_SUCCESS)
+			// Create a new object from the schema.
+			HqValueHandle hObject = HqValue::CreateObject(hExec->hVm, pObjectSchema);
+
+			// Verify the created value is an object.
+			if(HqValueIsObject(hObject))
 			{
-				// Create a new object from the schema.
-				HqValueHandle hObject = HqValue::CreateObject(hExec->hVm, pObjectSchema);
-
-				// Verify the created value is an object.
-				if(HqValueIsObject(hObject))
-				{
-					result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hObject, registerIndex);
-					if(result != HQ_SUCCESS)
-					{
-						// Raise a fatal script exception.
-						HqExecution::RaiseOpCodeException(
-							hExec, 
-							HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-							"Failed to set general-purpose register: r(%" PRIu32 ")", 
-							registerIndex
-						);
-					}
-
-					HqValue::SetAutoMark(hObject, false);
-				}
-				else
+				result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hObject, registerIndex);
+				if(result != HQ_SUCCESS)
 				{
 					// Raise a fatal script exception.
 					HqExecution::RaiseOpCodeException(
-						hExec,
-						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-						"Failed to create object value"
+						hExec, 
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+						"Failed to set general-purpose register: r(%" PRIu32 ")", 
+						registerIndex
 					);
 				}
+
+				HqValue::SetAutoMark(hObject, false);
 			}
 			else
 			{
 				// Raise a fatal script exception.
 				HqExecution::RaiseOpCodeException(
-					hExec, 
-					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-					"Failed to find object schema: type=%s",
-					hObjectTypeName->as.pString->data
+					hExec,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to create object value"
 				);
 			}
 		}
@@ -105,9 +91,9 @@ void OpCodeExec_InitObject(HqExecutionHandle hExec)
 			// Raise a fatal script exception.
 			HqExecution::RaiseOpCodeException(
 				hExec, 
-				HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
-				"Type mismatch; expected string: c(%" PRIu32 ")",
-				constantIndex
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+				"Failed to find object schema: type=%s",
+				pObjectTypeName->data
 			);
 		}
 	}
@@ -117,8 +103,8 @@ void OpCodeExec_InitObject(HqExecutionHandle hExec)
 		HqExecution::RaiseOpCodeException(
 			hExec, 
 			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-			"Failed to retrieve constant value: c(%" PRIu32 ")",
-			constantIndex
+			"String does not exist at index: c(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -127,19 +113,12 @@ void OpCodeExec_InitObject(HqExecutionHandle hExec)
 
 void OpCodeDisasm_InitObject(HqDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
-
-	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hValue);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "INIT_OBJECT r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
+	snprintf(instr, sizeof(instr), "INIT_OBJECT r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

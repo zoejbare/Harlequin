@@ -31,10 +31,10 @@
 //
 // Dual operation to load a global variable into a general-purpose register, then clear the variable.
 //
-// 0x: PULL_GLOBAL r#, c#
+// 0x: PULL_GLOBAL r#, s#
 //
 //   r# = General-purpose register index
-//   c# = Constant index of the name of the global variable
+//   s# = String table index of the name of the global variable
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,14 +47,14 @@ void OpCodeExec_PullGlobal(HqExecutionHandle hExec)
 	int result;
 
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Get the constant containing the name of the variable.
-	HqValueHandle hNameValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(HqValueIsString(hNameValue))
+	HqString* const pVarName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pVarName)
 	{
 		// Load the value from the variable.
-		HqValueHandle hGlobalVariable = HqVm::GetGlobalVariable(hExec->hVm, hNameValue->as.pString, &result);
+		HqValueHandle hGlobalVariable = HqVm::GetGlobalVariable(hExec->hVm, pVarName, &result);
 		if(hGlobalVariable)
 		{
 			// Store the loaded value in the general-purpose register.
@@ -62,7 +62,7 @@ void OpCodeExec_PullGlobal(HqExecutionHandle hExec)
 			if(result == HQ_SUCCESS)
 			{
 				// Clear the variable.
-				result = HqVm::SetGlobalVariable(hExec->hVm, HQ_VALUE_HANDLE_NULL, hNameValue->as.pString);
+				result = HqVm::SetGlobalVariable(hExec->hVm, HQ_VALUE_HANDLE_NULL, pVarName);
 				if(result != HQ_SUCCESS)
 				{
 					// Raise a fatal script exception.
@@ -70,7 +70,7 @@ void OpCodeExec_PullGlobal(HqExecutionHandle hExec)
 						hExec,
 						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to clear global variable: %s",
-						hNameValue->as.pString->data
+						pVarName->data
 					);
 				}
 			}
@@ -92,7 +92,7 @@ void OpCodeExec_PullGlobal(HqExecutionHandle hExec)
 				hExec,
 				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to retrieve global variable: %s",
-				hNameValue->as.pString->data
+				pVarName->data
 			);
 		}
 	}
@@ -102,8 +102,8 @@ void OpCodeExec_PullGlobal(HqExecutionHandle hExec)
 		HqExecution::RaiseOpCodeException(
 			hExec,
 			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-			"Type mismatch; expected string: c(%" PRIu32 ")",
-			constantIndex
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -112,19 +112,12 @@ void OpCodeExec_PullGlobal(HqExecutionHandle hExec)
 
 void OpCodeDisasm_PullGlobal(HqDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
-
-	HqValueHandle hNameValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hNameValue);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "PULL_GLOBAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
+	snprintf(str, sizeof(str), "PULL_GLOBAL r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

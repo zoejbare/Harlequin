@@ -34,7 +34,7 @@ struct HqProgramHeader
 
 	Section dependencyTable;
 	Section objectTable;
-	Section constantTable;
+	Section stringTable;
 	Section globalTable;
 	Section functionTable;
 	Section extensionTable;

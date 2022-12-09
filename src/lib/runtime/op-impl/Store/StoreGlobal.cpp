@@ -31,9 +31,9 @@
 //
 // Load a global variable to a general-purpose register in the current frame.
 //
-// 0x: STORE_GLOBAL c#, r#
+// 0x: STORE_GLOBAL s#, r#
 //
-//   c# = Constant index of the name of the global variable
+//   s# = String table index of the name of the global variable
 //   r# = General-purpose register index
 //
 //----------------------------------------------------------------------------------------------------------------------
@@ -46,16 +46,16 @@ void OpCodeExec_StoreGlobal(HqExecutionHandle hExec)
 {
 	int result;
 
-	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hNameValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(HqValueIsString(hNameValue))
+	HqString* const pVarName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pVarName)
 	{
 		HqValueHandle hRegisterValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
 		if(result == HQ_SUCCESS)
 		{
-			result = HqVm::SetGlobalVariable(hExec->hVm, hRegisterValue, hNameValue->as.pString);
+			result = HqVm::SetGlobalVariable(hExec->hVm, hRegisterValue, pVarName);
 			if(result != HQ_SUCCESS)
 			{
 				// Raise a fatal script exception.
@@ -63,7 +63,7 @@ void OpCodeExec_StoreGlobal(HqExecutionHandle hExec)
 					hExec,
 					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 					"Failed to set global variable: %s",
-					hNameValue->as.pString->data
+					pVarName->data
 				);
 			}
 		}
@@ -84,8 +84,8 @@ void OpCodeExec_StoreGlobal(HqExecutionHandle hExec)
 		HqExecution::RaiseOpCodeException(
 			hExec,
 			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-			"Type mismatch; expected string: c(%" PRIu32 ")",
-			constantIndex
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -94,19 +94,12 @@ void OpCodeExec_StoreGlobal(HqExecutionHandle hExec)
 
 void OpCodeDisasm_StoreGlobal(HqDisassemble& disasm)
 {
-	int result;
-
-	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	HqValueHandle hNameValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hNameValue);
-
 	char str[256];
-	snprintf(str, sizeof(str), "STORE_GLOBAL c%" PRIu32 " %s, r%" PRIu32, constantIndex, pValueData->data, registerIndex);
+	snprintf(str, sizeof(str), "STORE_GLOBAL c%" PRIu32 ", r%" PRIu32, stringIndex, registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

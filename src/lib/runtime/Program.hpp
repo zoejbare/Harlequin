@@ -46,6 +46,7 @@ struct HqProgram
 	> StringToHandleMap;
 
 	typedef HqStack<HqProgramHandle> HandleStack;
+	typedef HqArray<HqString*> StringArray;
 
 	static HqProgramHandle Create(HqVmHandle hVm, HqString* const pProgramName, const char* const filePath);
 	static HqProgramHandle Create(
@@ -56,7 +57,7 @@ struct HqProgram
 	);
 	static void Dispose(HqProgramHandle hProgram);
 
-	static HqValueHandle GetConstant(HqProgramHandle hProgram, const uint32_t index, int* const pOutResult);
+	static HqString* GetString(HqProgramHandle hProgram, const uint32_t index, int* const pOutResult);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
@@ -65,7 +66,7 @@ struct HqProgram
 	HqFunction::StringToBoolMap functions;
 	HqValue::StringToBoolMap objectSchemas;
 	HqValue::StringToBoolMap globals;
-	HqValue::HandleArray constants;
+	StringArray strings;
 	HqByteHelper::Array code;
 
 	HqVmHandle hVm;

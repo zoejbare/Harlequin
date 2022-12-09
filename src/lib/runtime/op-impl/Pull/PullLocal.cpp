@@ -31,10 +31,10 @@
 //
 // Dual operation to load a local variable into a general-purpose register, then clear the variable.
 //
-// 0x: PULL_LOCAL r#, c#
+// 0x: PULL_LOCAL r#, s#
 //
 //   r# = General-purpose register index
-//   c# = Constant index of the name string of the local variable
+//   s# = String table index of the name string of the local variable
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,14 +47,14 @@ void OpCodeExec_PullLocal(HqExecutionHandle hExec)
 	int result;
 
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Get the constant containing the name of the variable.
-	HqValueHandle hNameValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(HqValueIsString(hNameValue))
+	HqString* const pVarName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pVarName)
 	{
 		// Load the value from the variable.
-		HqValueHandle hLocalVariable = HqFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString, &result);
+		HqValueHandle hLocalVariable = HqFrame::GetLocalVariable(hExec->hCurrentFrame, pVarName, &result);
 		if(hLocalVariable)
 		{
 			// Store the loaded value in the general-purpose register.
@@ -62,7 +62,7 @@ void OpCodeExec_PullLocal(HqExecutionHandle hExec)
 			if(result == HQ_SUCCESS)
 			{
 				// Clear the variable.
-				result = HqFrame::SetLocalVariable(hExec->hCurrentFrame, HQ_VALUE_HANDLE_NULL, hNameValue->as.pString);
+				result = HqFrame::SetLocalVariable(hExec->hCurrentFrame, HQ_VALUE_HANDLE_NULL, pVarName);
 				if(result != HQ_SUCCESS)
 				{
 					// Raise a fatal script exception.
@@ -70,7 +70,7 @@ void OpCodeExec_PullLocal(HqExecutionHandle hExec)
 						hExec,
 						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 						"Failed to clear local variable: %s",
-						hNameValue->as.pString->data
+						pVarName->data
 					);
 				}
 			}
@@ -92,7 +92,7 @@ void OpCodeExec_PullLocal(HqExecutionHandle hExec)
 				hExec,
 				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to retrieve local variable: %s",
-				hNameValue->as.pString->data
+				pVarName->data
 			);
 		}
 	}
@@ -102,8 +102,8 @@ void OpCodeExec_PullLocal(HqExecutionHandle hExec)
 		HqExecution::RaiseOpCodeException(
 			hExec,
 			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-			"Type mismatch; expected string: c(%" PRIu32 ")",
-			constantIndex
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -112,19 +112,12 @@ void OpCodeExec_PullLocal(HqExecutionHandle hExec)
 
 void OpCodeDisasm_PullLocal(HqDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
-
-	HqValueHandle hNameValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hNameValue);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "PULL_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
+	snprintf(str, sizeof(str), "PULL_LOCAL r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

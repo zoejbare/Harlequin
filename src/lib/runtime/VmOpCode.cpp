@@ -38,7 +38,6 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	HQ_BIND_OP_CODE(CALL_VALUE, CallValue);
 	HQ_BIND_OP_CODE(RAISE, Raise);
 
-	HQ_BIND_OP_CODE(LOAD_CONST, LoadConst);
 	HQ_BIND_OP_CODE(LOAD_CONST_NULL, LoadConstNull);
 	HQ_BIND_OP_CODE(LOAD_CONST_BOOL, LoadConstBool);
 	HQ_BIND_OP_CODE(LOAD_CONST_I8, LoadConstI8);
@@ -51,6 +50,8 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	HQ_BIND_OP_CODE(LOAD_CONST_U64, LoadConstU64);
 	HQ_BIND_OP_CODE(LOAD_CONST_F32, LoadConstF32);
 	HQ_BIND_OP_CODE(LOAD_CONST_F64, LoadConstF64);
+	HQ_BIND_OP_CODE(LOAD_CONST_STR, LoadConstStr);
+
 	HQ_BIND_OP_CODE(LOAD_GLOBAL, LoadGlobal);
 	HQ_BIND_OP_CODE(LOAD_LOCAL, LoadLocal);
 	HQ_BIND_OP_CODE(LOAD_PARAM, LoadParam);

@@ -278,6 +278,8 @@ HqValueHandle HqValue::CreateString(HqVmHandle hVm, HqString* const pString)
 
 	pOutput->as.pString = pString;
 
+	HqString::AddRef(pString);
+
 	return pOutput;
 }
 

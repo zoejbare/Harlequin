@@ -36,12 +36,6 @@ struct HqProgramCommonLoader
 		HqSerializerHandle hSerializer,
 		HqReportHandle hReport
 	);
-
-	static HqValue* ReadValue(
-		HqSerializerHandle hSerializer,
-		HqVmHandle hVm,
-		HqReportHandle hReport
-	);
 };
 
 //----------------------------------------------------------------------------------------------------------------------

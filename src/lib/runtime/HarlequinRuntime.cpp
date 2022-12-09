@@ -555,6 +555,47 @@ int HqProgramListFunctions(HqProgramHandle hProgram, HqCallbackIterateString onI
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqProgramGetStringCount(HqProgramHandle hProgram, size_t* pOutCount)
+{
+	if(!hProgram || !pOutCount)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*pOutCount) = hProgram->strings.count;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProgramListStrings(
+	HqProgramHandle hProgram,
+	HqCallbackIterateStringWithIndex onIterateFn,
+	void* const pUserData
+)
+{
+	if(!hProgram || !onIterateFn)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	// Call the callback for each string in the program.
+	for(size_t i = 0; i < hProgram->strings.count; ++i)
+	{
+		HqString* const pString = hProgram->strings.pData[i];
+
+		if(!onIterateFn(pUserData, pString->data, i))
+		{
+			break;
+		}
+	}
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqProgramGetGlobalVariableCount(HqProgramHandle hProgram, size_t* pOutCount)
 {
 	if(!hProgram || !pOutCount)
@@ -583,9 +624,9 @@ int HqProgramListGlobalVariables(
 	// Call the callback for each global variable name in the program.
 	for(auto& kv : hProgram->globals)
 	{
-		HqString* const pGlobalName = HQ_MAP_ITER_KEY(kv);
+		HqString* const pVarName = HQ_MAP_ITER_KEY(kv);
 
-		if(!onIterateFn(pUserData, pGlobalName->data))
+		if(!onIterateFn(pUserData, pVarName->data))
 		{
 			break;
 		}
@@ -1496,10 +1537,10 @@ int HqFrameListLocalVariables(HqFrameHandle hFrame, HqCallbackIterateVariable on
 
 	for(auto& kv : hFrame->locals)
 	{
-		HqString* const pLocalName = HQ_MAP_ITER_KEY(kv);
+		HqString* const pVarName = HQ_MAP_ITER_KEY(kv);
 		HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
 
-		if(!onIterateFn(pUserData, pLocalName->data, hValue))
+		if(!onIterateFn(pUserData, pVarName->data, hValue))
 		{
 			break;
 		}

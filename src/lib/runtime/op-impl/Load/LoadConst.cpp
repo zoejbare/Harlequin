@@ -28,12 +28,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Load a constant to a general-purpose register in the current frame.
-//
-// 0x: LOAD_CONST r#, c#
-//
-//   r# = General-purpose register index
-//   c# = Constant table index
+// Load a constant value into a general-purpose register in the current frame.
 //
 // 0x: LOAD_CONST_NULL r#
 //
@@ -54,83 +49,16 @@
 //   r# = General-purpose register index
 //   ## = Constant value to directly load
 //
+// 0x: LOAD_CONST_STR r#, s#
+//
+//   r# = General-purpose register index
+//   s# = String table index
+//
 //----------------------------------------------------------------------------------------------------------------------
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-void OpCodeExec_LoadConst(HqExecutionHandle hExec)
-{
-	int result;
-
-	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-
-	HqValueHandle hValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(result == HQ_SUCCESS)
-	{
-		HqValueHandle hValueCopy = HqValue::Copy(hExec->hVm, hValue);
-		if(hValueCopy)
-		{
-			// Make a copy of the value, then upload that copy to the register.
-			// A copy must be made to avoid accidentally changing the underlying
-			// data of the constant.
-			result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hValueCopy, registerIndex);
-			if(result != HQ_SUCCESS)
-			{
-				// Raise a fatal script exception.
-				HqExecution::RaiseOpCodeException(
-					hExec,
-					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-					"Failed to set general-purpose register: r(%" PRIu32 ")",
-					registerIndex
-				);
-			}
-		}
-		else
-		{
-			// Raise a fatal script exception.
-			HqExecution::RaiseOpCodeException(
-				hExec,
-				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-				"Failed to create copy of constant value: c(%" PRIu32 ")",
-				constantIndex
-			);
-		}
-	}
-	else
-	{
-		// Raise a fatal script exception.
-		HqExecution::RaiseOpCodeException(
-			hExec,
-			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-			"Failed to retrieve constant value: c(%" PRIu32 ")",
-			constantIndex
-		);
-	}
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void OpCodeDisasm_LoadConst(HqDisassemble& disasm)
-{
-	int result;
-
-	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
-
-	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hValue);
-
-	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_CONST r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
-	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 
 void OpCodeExec_LoadConstNull(HqExecutionHandle hExec)
 {
@@ -712,6 +640,71 @@ void OpCodeDisasm_LoadConstF64(HqDisassemble& disasm)
 
 	char instr[512];
 	snprintf(instr, sizeof(instr), "LOAD_CONST_F64 r%" PRIu32 ", %f", registerIndex, rawValue);
+	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeExec_LoadConstStr(HqExecutionHandle hExec)
+{
+	int result;
+
+	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+
+	HqString* const pString = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pString)
+	{
+		HqValueHandle hValue = HqValue::CreateString(hExec->hVm, pString);
+		if(hValue)
+		{
+			HqValue::SetAutoMark(hValue, false);
+
+			// Set the new value to the register.
+			result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+			if(result != HQ_SUCCESS)
+			{
+				// Raise a fatal script exception.
+				HqExecution::RaiseOpCodeException(
+					hExec,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to set general-purpose register: r(%" PRIu32 ")",
+					registerIndex
+				);
+			}
+		}
+		else
+		{
+			// Raise a fatal script exception.
+			HqExecution::RaiseOpCodeException(
+				hExec,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to create value for string: s(%" PRIu32 ")",
+				stringIndex
+			);
+		}
+	}
+	else
+	{
+		// Raise a fatal script exception.
+		HqExecution::RaiseOpCodeException(
+			hExec,
+			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
+		);
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void OpCodeDisasm_LoadConstStr(HqDisassemble& disasm)
+{
+	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
+
+	char instr[512];
+	snprintf(instr, sizeof(instr), "LOAD_CONST_STR r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 

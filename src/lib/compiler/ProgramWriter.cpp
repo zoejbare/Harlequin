@@ -83,66 +83,6 @@ static bool SerializeString(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static bool SerializeValue(
-	HqSerializerHandle hSerializer,
-	HqProgramWriter::ValueContainer& value,
-	HqReportHandle hReport
-)
-{
-	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
-	assert(hReport != HQ_REPORT_HANDLE_NULL);
-
-	int result = 0;
-
-	result = HqSerializerWriteUint8(hSerializer, uint8_t(value.type));
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write value type: error=\"%s\", type=%" PRIu32,
-			errorString,
-			value.type
-		);
-
-		return false;
-	}
-
-	switch(value.type)
-	{
-		case HQ_VALUE_TYPE_STRING:
-			// Write out the string data.
-			if(!SerializeString(hSerializer, hReport, value.as.pString->data, value.as.pString->length))
-			{
-				return false;
-			}
-			break;
-
-		case HQ_VALUE_TYPE_OBJECT:
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Cannot serializer object value type"
-			);
-			return false;
-
-		default:
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Cannot serialize unknown value type: type=%" PRId32,
-				value.type
-			);
-			return false;
-	}
-
-	return true;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 HqProgramWriterHandle HqProgramWriter::Create()
 {
 	HqProgramWriter* const pOutput = new HqProgramWriter();
@@ -180,18 +120,15 @@ void HqProgramWriter::Dispose(HqProgramWriterHandle hProgramWriter)
 	}
 
 	// Dispose of all program globals.
-	for(auto& kv : hProgramWriter->globals)
+	for(HqString* const pVarName : hProgramWriter->globals)
 	{
-		HqString::Release(kv.first);
+		HqString::Release(pVarName);
 	}
 
-	// Dispose of all program constants.
-	for(ValueContainer& value : hProgramWriter->constants)
+	// Dispose of all program strings.
+	for(auto& kv : hProgramWriter->stringIndexMap)
 	{
-		if(value.type == HQ_VALUE_TYPE_STRING)
-		{
-			HqString::Release(value.as.pString);
-		}
+		HqString::Release(kv.first);
 	}
 
 	// Dispose of all functions.
@@ -344,7 +281,7 @@ bool HqProgramWriter::Serialize(
 
 	programHeader.dependencyTable.length = uint32_t(hProgramWriter->dependencies.size());
 	programHeader.objectTable.length = uint32_t(hProgramWriter->objectTypes.size());
-	programHeader.constantTable.length = uint32_t(hProgramWriter->constants.size());
+	programHeader.stringTable.length = uint32_t(hProgramWriter->strings.size());
 	programHeader.globalTable.length = uint32_t(hProgramWriter->globals.size());
 	programHeader.bytecode.length = uint32_t(bytecode.size());
 	programHeader.functionTable.length = uint32_t(functionBindings.size());
@@ -396,8 +333,8 @@ bool HqProgramWriter::Serialize(
 		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.dependencyTable.length); }
 		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.objectTable.offset); }
 		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.objectTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.constantTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.constantTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.stringTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.stringTable.length); }
 		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.globalTable.offset); }
 		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.globalTable.length); }
 		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.functionTable.offset); }
@@ -512,14 +449,16 @@ bool HqProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.constantTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+	programHeader.stringTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the constant table.
-	for(size_t index = 0; index < hProgramWriter->constants.size(); ++index)
+	for(size_t index = 0; index < hProgramWriter->strings.size(); ++index)
 	{
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing constant: index=%" PRIuPTR, index);
+		HqString* const pString = hProgramWriter->strings[index];
 
-		if(!SerializeValue(hSerializer, hProgramWriter->constants[index], hReport))
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing string: index=%" PRIuPTR ", data=\"%s\"", index, pString->data);
+		
+		if(!SerializeString(hSerializer, hReport, pString->data, pString->length))
 		{
 			return false;
 		}
@@ -528,31 +467,13 @@ bool HqProgramWriter::Serialize(
 	programHeader.globalTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the global variable table.
-	for(auto& kv : hProgramWriter->globals)
+	for(HqString* const pVarName : hProgramWriter->globals)
 	{
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", kv.first->data);
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", pVarName->data);
 
 		// First, write the string key of the global.
-		if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
+		if(!SerializeString(hSerializer, hReport, pVarName->data, pVarName->length))
 		{
-			return false;
-		}
-
-		// Write the global's constant index.
-		result = HqSerializerWriteUint32(hSerializer, kv.second);
-		if(result != HQ_SUCCESS)
-		{
-			const char* const errorString = HqGetErrorCodeString(result);
-
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to serialize global variable value index: error=\"%s\", name=\"%s\", index=%" PRIu32,
-				errorString,
-				kv.first->data,
-				kv.second
-			);
-
 			return false;
 		}
 	}
@@ -1018,27 +939,23 @@ int HqProgramWriter::LookupFunction(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t HqProgramWriter::AddConstant(HqProgramWriterHandle hWriter, HqString* const pValue)
+uint32_t HqProgramWriter::AddString(HqProgramWriterHandle hWriter, HqString* const pValue)
 {
 	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
 	assert(pValue != nullptr);
 
-	auto kv = hWriter->indexMapString.find(pValue);
-	if(kv != hWriter->indexMapString.end())
+	auto kv = hWriter->stringIndexMap.find(pValue);
+	if(kv != hWriter->stringIndexMap.end())
 	{
 		return kv->second;
 	}
 
-	const uint32_t output = uint32_t(hWriter->constants.size());
-
-	ValueContainer container;
-	container.type = HQ_VALUE_TYPE_STRING;
-	container.as.pString = pValue;
+	const uint32_t output = uint32_t(hWriter->strings.size());
 
 	HqString::AddRef(pValue);
 
-	hWriter->indexMapString.emplace(pValue, output);
-	hWriter->constants.push_back(container);
+	hWriter->stringIndexMap.emplace(pValue, output);
+	hWriter->strings.push_back(pValue);
 
 	return output;
 }

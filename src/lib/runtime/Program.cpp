@@ -216,7 +216,7 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 	pOutput->pName = pProgramName;
 
 	// Initialize the program data.
-	HqValue::HandleArray::Initialize(pOutput->constants);
+	StringArray::Initialize(pOutput->strings);
 	HqByteHelper::Array::Initialize(pOutput->code);
 
 	// This load block needs to lock the garbage collector since we'll be manipulating
@@ -321,7 +321,7 @@ HqProgramHandle HqProgram::Create(
 	pOutput->pName = pProgramName;
 
 	// Initialize the program data.
-	HqValue::HandleArray::Initialize(pOutput->constants);
+	StringArray::Initialize(pOutput->strings);
 	HqByteHelper::Array::Initialize(pOutput->code);
 
 	// This load block needs to lock the garbage collector since we'll be manipulating
@@ -392,14 +392,14 @@ void HqProgram::Dispose(HqProgramHandle hProgram)
 		HqString::Release(HQ_MAP_ITER_KEY(kv));
 	}
 
-	// Release all constant values.
-	for(size_t i = 0; i < hProgram->constants.count; ++i)
+	// Release all strings values.
+	for(size_t i = 0; i < hProgram->strings.count; ++i)
 	{
-		HqValueGcExpose(hProgram->constants.pData[i]);
+		HqString::Release(hProgram->strings.pData[i]);
 	}
 
 	// Clean up the data structures.
-	HqValue::HandleArray::Dispose(hProgram->constants);
+	StringArray::Dispose(hProgram->strings);
 	HqByteHelper::Array::Dispose(hProgram->code);
 
 	if(hProgram->hInitFunction)
@@ -416,20 +416,20 @@ void HqProgram::Dispose(HqProgramHandle hProgram)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqValueHandle HqProgram::GetConstant(HqProgramHandle hProgram, const uint32_t index, int* const pOutResult)
+HqString* HqProgram::GetString(HqProgramHandle hProgram, const uint32_t index, int* const pOutResult)
 {
 	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
 	assert(pOutResult != nullptr);
 
-	if(index >= hProgram->constants.count)
+	if(index >= hProgram->strings.count)
 	{
 		(*pOutResult) = HQ_ERROR_INDEX_OUT_OF_RANGE;
-		return HQ_VALUE_HANDLE_NULL;
+		return nullptr;
 	}
 
 	(*pOutResult) = HQ_SUCCESS;
 
-	return hProgram->constants.pData[index];
+	return hProgram->strings.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------

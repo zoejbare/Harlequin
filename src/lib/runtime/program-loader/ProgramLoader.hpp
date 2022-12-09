@@ -81,7 +81,7 @@ private:
 
 	bool prv_readDependencyTable();
 	bool prv_readObjectTable();
-	bool prv_readConstantTable();
+	bool prv_readStringTable();
 	bool prv_readGlobalTable();
 	bool prv_readFunctions();
 	bool prv_readBytecode();

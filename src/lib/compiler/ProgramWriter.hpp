@@ -47,7 +47,7 @@ struct HqProgramWriter
 		HqFunctionData** const ppOutFunction
 	);
 
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, HqString* const pString);
+	static uint32_t AddString(HqProgramWriterHandle hWriter, HqString* const pString);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
@@ -59,41 +59,28 @@ struct HqProgramWriter
 		HqString::StlCompare
 	> DependencySet;
 
+	typedef std::unordered_set<
+		HqString*,
+		HqString::StlHash,
+		HqString::StlCompare
+	> GlobalValueSet;
+
 	typedef std::unordered_map<
 		HqString*,
 		uint32_t,
 		HqString::StlHash,
 		HqString::StlCompare
-	> GlobalValueMap;
-
-	typedef std::unordered_map<
-		HqString*,
-		uint32_t,
-		HqString::StlHash,
-		HqString::StlCompare
-	> IndexMapString;
-
-	struct ValueContainer
-	{
-		int type;
-
-		union
-		{
-			HqString* pString;
-			HqString* pObjectType;
-		} as;
-	};
+	> StringIndexMap;
 
 	DependencySet dependencies;
-	GlobalValueMap globals;
+	GlobalValueSet globals;
 	HqFunctionData::StringToFunctionMap functions;
 	HqObjectData::StringToObjectMap objectTypes;
 
 	HqFunctionData::Bytecode initBytecode;
 
-	IndexMapString indexMapString;
-
-	std::deque<ValueContainer> constants;
+	StringIndexMap stringIndexMap;
+	std::deque<HqString*> strings;
 
 	uint32_t nullIndex;
 	uint32_t boolTrueIndex;

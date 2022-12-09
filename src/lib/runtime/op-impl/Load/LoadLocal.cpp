@@ -31,10 +31,10 @@
 //
 // Load a local variable into a general-purpose register.
 //
-// 0x: LOAD_LOCAL r#, c#
+// 0x: LOAD_LOCAL r#, s#
 //
 //   r# = General-purpose register index
-//   c# = Constant index of the name string of the local variable
+//   s# = String table index of the name string of the local variable
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,12 +47,12 @@ void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
 	int result;
 
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hNameValue = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constantIndex, &result);
-	if(HqValueIsString(hNameValue))
+	HqString* const pVarName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pVarName)
 	{
-		HqValueHandle hLocalVariable = HqFrame::GetLocalVariable(hExec->hCurrentFrame, hNameValue->as.pString, &result);
+		HqValueHandle hLocalVariable = HqFrame::GetLocalVariable(hExec->hCurrentFrame, pVarName, &result);
 		if(hLocalVariable)
 		{
 			result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hLocalVariable, registerIndex);
@@ -74,7 +74,7 @@ void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
 				hExec,
 				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Failed to retrieve local variable: %s",
-				hNameValue->as.pString->data
+				pVarName->data
 			);
 		}
 	}
@@ -84,8 +84,8 @@ void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
 		HqExecution::RaiseOpCodeException(
 			hExec,
 			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-			"Type mismatch; expected string: c(%" PRIu32 ")",
-			constantIndex
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -94,19 +94,12 @@ void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
 
 void OpCodeDisasm_LoadLocal(HqDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constantIndex = HqDecoder::LoadUint32(disasm.decoder);
-
-	HqValueHandle hNameValue = HqProgram::GetConstant(disasm.hProgram, constantIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hNameValue);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constantIndex, pValueData->data);
+	snprintf(str, sizeof(str), "LOAD_LOCAL r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus

@@ -339,6 +339,7 @@ typedef bool (*HqCallbackIterateProgram)(void*, HqProgramHandle);
 typedef bool (*HqCallbackIterateFunction)(void*, HqFunctionHandle);
 typedef bool (*HqCallbackIterateVariable)(void*, const char*, HqValueHandle);
 typedef bool (*HqCallbackIterateString)(void*, const char*);
+typedef bool (*HqCallbackIterateStringWithIndex)(void*, const char*, size_t);
 typedef bool (*HqCallbackIterateObjectMember)(void*, const char*, int);
 
 typedef struct
@@ -416,6 +417,14 @@ HQ_MAIN_API int HqProgramGetFunctionCount(HqProgramHandle hProgram, size_t* pOut
 HQ_MAIN_API int HqProgramListFunctions(
 	HqProgramHandle hProgram,
 	HqCallbackIterateString onIterateFn,
+	void* pUserData
+);
+
+HQ_MAIN_API int HqProgramGetStringCount(HqProgramHandle hProgram, size_t* pOutCount);
+
+HQ_MAIN_API int HqProgramListStrings(
+	HqProgramHandle hProgram,
+	HqCallbackIterateStringWithIndex onIterateFn,
 	void* pUserData
 );
 
@@ -715,7 +724,7 @@ HQ_MAIN_API int HqProgramWriterDispose(HqProgramWriterHandle* phProgramWriter);
 
 HQ_MAIN_API int HqProgramWriterAddDependency(HqProgramWriterHandle hProgramWriter, const char* programName);
 
-HQ_MAIN_API int HqProgramWriterAddConstantString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutIndex);
+HQ_MAIN_API int HqProgramWriterAddString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutIndex);
 
 HQ_MAIN_API int HqProgramWriterAddObjectType(HqProgramWriterHandle hProgramWriter, const char* objectTypeName);
 
@@ -727,7 +736,7 @@ HQ_MAIN_API int HqProgramWriterAddObjectMember(
 	uint32_t* pOutIndex
 );
 
-HQ_MAIN_API int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* variableName, uint32_t constantIndex);
+HQ_MAIN_API int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* variableName);
 
 HQ_MAIN_API int HqProgramWriterSetProgramInitFunction(
 	HqProgramWriterHandle hProgramWriter,
@@ -790,7 +799,7 @@ HQ_MAIN_API int HqBytecodeWriteReturn(HqSerializerHandle hSerializer);
 
 HQ_MAIN_API int HqBytecodeWriteYield(HqSerializerHandle hSerializer);
 
-HQ_MAIN_API int HqBytecodeWriteCall(HqSerializerHandle hSerializer, uint32_t constantIndex);
+HQ_MAIN_API int HqBytecodeWriteCall(HqSerializerHandle hSerializer, uint32_t stringIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
@@ -864,22 +873,22 @@ HQ_MAIN_API int HqBytecodeWriteLoadConstF64(
 	double value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConst(
+HQ_MAIN_API int HqBytecodeWriteLoadConstStr(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t constantIndex
+	uint32_t stringIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteLoadGlobal(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t constantIndex
+	uint32_t stringIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteLoadLocal(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t constantIndex
+	uint32_t stringIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteLoadParam(
@@ -904,13 +913,13 @@ HQ_MAIN_API int HqBytecodeWriteLoadArray(
 
 HQ_MAIN_API int HqBytecodeWriteStoreGlobal(
 	HqSerializerHandle hSerializer,
-	uint32_t constantIndex,
+	uint32_t stringIndex,
 	uint32_t gpRegIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteStoreLocal(
 	HqSerializerHandle hSerializer,
-	uint32_t constantIndex,
+	uint32_t stringIndex,
 	uint32_t gpRegIndex
 );
 
@@ -937,13 +946,13 @@ HQ_MAIN_API int HqBytecodeWriteStoreArray(
 HQ_MAIN_API int HqBytecodeWritePullGlobal(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t constantIndex
+	uint32_t stringIndex
 );
 
 HQ_MAIN_API int HqBytecodeWritePullLocal(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t constantIndex
+	uint32_t stringIndex
 );
 
 HQ_MAIN_API int HqBytecodeWritePullParam(
@@ -973,7 +982,7 @@ HQ_MAIN_API int HqBytecodeWritePop(HqSerializerHandle hSerializer, uint32_t gpRe
 HQ_MAIN_API int HqBytecodeWriteInitObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t constantIndex
+	uint32_t stringIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteInitArray(
@@ -985,7 +994,7 @@ HQ_MAIN_API int HqBytecodeWriteInitArray(
 HQ_MAIN_API int HqBytecodeWriteInitFunction(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t constantIndex
+	uint32_t stringIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteBranch(HqSerializerHandle hSerializer, int32_t offset);

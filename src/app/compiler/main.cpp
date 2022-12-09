@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 	const char* const nativeDecrementFuncSignature = "(int32, bool) App.Program.Decrement(int32)";
 	const char* const globalVariableName = "globalTestVar";
 	const char* const localVariableName = "localTestVar";
-	const char* const objectTypeName = "App.ClassType";
+	const char* const objectTypeName = "App.TestClass";
 	const char* const objectMemberName = "memberTest";
 
 	const char* const opAddStringSignature = HqGetBuiltInFunctionSignature(HQ_BUILT_IN_OP_ADD_STRING);
@@ -144,26 +144,26 @@ int main(int argc, char* argv[])
 	const char* const opLenStringSignature = HqGetBuiltInFunctionSignature(HQ_BUILT_IN_OP_LEN_STRING);
 	const char* const opLenArraySignature = HqGetBuiltInFunctionSignature(HQ_BUILT_IN_OP_LEN_ARRAY);
 
-	uint32_t constIndex0; HqProgramWriterAddConstantString(hProgramWriter, "this is ", &constIndex0);
-	uint32_t constIndex1; HqProgramWriterAddConstantString(hProgramWriter, "a test string", &constIndex1);
-	uint32_t constIndex2; HqProgramWriterAddConstantString(hProgramWriter, globalVariableName, &constIndex2);
-	uint32_t constIndex3; HqProgramWriterAddConstantString(hProgramWriter, subFuncSignature, &constIndex3);
-	uint32_t constIndex4; HqProgramWriterAddConstantString(hProgramWriter, nativePrintFuncSignature, &constIndex4);
-	uint32_t constIndex5; HqProgramWriterAddConstantString(hProgramWriter, localVariableName, &constIndex5);
-	uint32_t constIndex6; HqProgramWriterAddConstantString(hProgramWriter, opAddStringSignature, &constIndex6);
-	uint32_t constIndex7; HqProgramWriterAddConstantString(hProgramWriter, opCastInt32ToStringSignature, &constIndex7);
-	uint32_t constIndex8; HqProgramWriterAddConstantString(hProgramWriter, objectTypeName, &constIndex8);
-	uint32_t constIndex9; HqProgramWriterAddConstantString(hProgramWriter, objectMemberName, &constIndex9);
-	uint32_t constIndex10; HqProgramWriterAddConstantString(hProgramWriter, nativeDecrementFuncSignature, &constIndex10);
-	uint32_t constIndex11; HqProgramWriterAddConstantString(hProgramWriter, opCastInt64ToStringSignature, &constIndex11);
-	uint32_t constIndex12; HqProgramWriterAddConstantString(hProgramWriter, opLenStringSignature, &constIndex12);
-	uint32_t constIndex13; HqProgramWriterAddConstantString(hProgramWriter, excFuncSignature, &constIndex13);
-	uint32_t constIndex14; HqProgramWriterAddConstantString(hProgramWriter, "This is an exception string", &constIndex14);
-	uint32_t constIndex15; HqProgramWriterAddConstantString(hProgramWriter, "The exception was handled successfully!", &constIndex15);
-	uint32_t constIndex16; HqProgramWriterAddConstantString(hProgramWriter, opLenArraySignature, &constIndex16);
+	uint32_t stringIndex0; HqProgramWriterAddString(hProgramWriter, "this is ", &stringIndex0);
+	uint32_t stringIndex1; HqProgramWriterAddString(hProgramWriter, "a test string", &stringIndex1);
+	uint32_t stringIndex2; HqProgramWriterAddString(hProgramWriter, globalVariableName, &stringIndex2);
+	uint32_t stringIndex3; HqProgramWriterAddString(hProgramWriter, subFuncSignature, &stringIndex3);
+	uint32_t stringIndex4; HqProgramWriterAddString(hProgramWriter, nativePrintFuncSignature, &stringIndex4);
+	uint32_t stringIndex5; HqProgramWriterAddString(hProgramWriter, localVariableName, &stringIndex5);
+	uint32_t stringIndex6; HqProgramWriterAddString(hProgramWriter, opAddStringSignature, &stringIndex6);
+	uint32_t stringIndex7; HqProgramWriterAddString(hProgramWriter, opCastInt32ToStringSignature, &stringIndex7);
+	uint32_t stringIndex8; HqProgramWriterAddString(hProgramWriter, objectTypeName, &stringIndex8);
+	uint32_t stringIndex9; HqProgramWriterAddString(hProgramWriter, objectMemberName, &stringIndex9);
+	uint32_t stringIndex10; HqProgramWriterAddString(hProgramWriter, nativeDecrementFuncSignature, &stringIndex10);
+	uint32_t stringIndex11; HqProgramWriterAddString(hProgramWriter, opCastInt64ToStringSignature, &stringIndex11);
+	uint32_t stringIndex12; HqProgramWriterAddString(hProgramWriter, opLenStringSignature, &stringIndex12);
+	uint32_t stringIndex13; HqProgramWriterAddString(hProgramWriter, excFuncSignature, &stringIndex13);
+	uint32_t stringIndex14; HqProgramWriterAddString(hProgramWriter, "This is an exception string", &stringIndex14);
+	uint32_t stringIndex15; HqProgramWriterAddString(hProgramWriter, "The exception was handled successfully!", &stringIndex15);
+	uint32_t stringIndex16; HqProgramWriterAddString(hProgramWriter, opLenArraySignature, &stringIndex16);
 
 	// Add the program globals.
-	HqProgramWriterAddGlobal(hProgramWriter, globalVariableName, constIndex0);
+	HqProgramWriterAddGlobal(hProgramWriter, globalVariableName);
 
 	// Write the program object types.
 	HqProgramWriterAddObjectType(hProgramWriter, objectTypeName);
@@ -190,19 +190,19 @@ int main(int argc, char* argv[])
 		HqBytecodeWriteLoadConstF32(hMainFuncSerializer, 9, 3.1419f);
 		HqBytecodeWriteLoadConstF64(hMainFuncSerializer, 10, 1.2345);
 		HqBytecodeWriteLoadConstF64(hMainFuncSerializer, 11, 2.3456);
-		HqBytecodeWriteLoadConst(hMainFuncSerializer, 12, constIndex0);
-		HqBytecodeWriteLoadConst(hMainFuncSerializer, 13, constIndex1);
-		HqBytecodeWriteLoadConst(hMainFuncSerializer, 14, constIndex2);
+		HqBytecodeWriteLoadConstStr(hMainFuncSerializer, 12, stringIndex0);
+		HqBytecodeWriteLoadConstStr(hMainFuncSerializer, 13, stringIndex1);
+		HqBytecodeWriteLoadConstStr(hMainFuncSerializer, 14, stringIndex2);
 		HqBytecodeWriteNop(hMainFuncSerializer);
 
-		HqBytecodeWriteLoadGlobal(hMainFuncSerializer, 15, constIndex2);
-		HqBytecodeWriteStoreGlobal(hMainFuncSerializer, constIndex2, 13);
+		HqBytecodeWriteLoadGlobal(hMainFuncSerializer, 15, stringIndex2);
+		HqBytecodeWriteStoreGlobal(hMainFuncSerializer, stringIndex2, 13);
 
 		HqBytecodeWriteStoreParam(hMainFuncSerializer, 0, 11);
-		HqBytecodeWriteCall(hMainFuncSerializer, constIndex3);
+		HqBytecodeWriteCall(hMainFuncSerializer, stringIndex3);
 		HqBytecodeWritePullParam(hMainFuncSerializer, 8, 0);
 
-		HqBytecodeWriteInitFunction(hMainFuncSerializer, 0, constIndex13);
+		HqBytecodeWriteInitFunction(hMainFuncSerializer, 0, stringIndex13);
 		HqBytecodeWriteCallValue(hMainFuncSerializer, 0);
 
 		HqBytecodeWriteReturn(hMainFuncSerializer);
@@ -218,31 +218,31 @@ int main(int argc, char* argv[])
 		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 0);
 
 		HqBytecodeWriteLoadConstF64(hSubFuncSerializer, 0, 1.2345);
-		HqBytecodeWriteStoreLocal(hSubFuncSerializer, constIndex5, 0);
-		HqBytecodeWriteLoadLocal(hSubFuncSerializer, 1, constIndex5);
+		HqBytecodeWriteStoreLocal(hSubFuncSerializer, stringIndex5, 0);
+		HqBytecodeWriteLoadLocal(hSubFuncSerializer, 1, stringIndex5);
 
 		HqBytecodeWritePush(hSubFuncSerializer, 0);
 		HqBytecodeWriteYield(hSubFuncSerializer);
 		HqBytecodeWritePop(hSubFuncSerializer, 1);
 
-		HqBytecodeWriteInitObject(hSubFuncSerializer, 2, constIndex8);
+		HqBytecodeWriteInitObject(hSubFuncSerializer, 2, stringIndex8);
 		HqBytecodeWriteLoadConstI32(hSubFuncSerializer, 1, 5);
 		HqBytecodeWriteStoreObject(hSubFuncSerializer, 2, 1, 0);
 
-		HqBytecodeWriteLoadConst(hSubFuncSerializer, 0, constIndex0);
+		HqBytecodeWriteLoadConstStr(hSubFuncSerializer, 0, stringIndex0);
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
 
-		HqBytecodeWriteLoadConst(hSubFuncSerializer, 1, constIndex1);
+		HqBytecodeWriteLoadConstStr(hSubFuncSerializer, 1, stringIndex1);
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 1, 1);
 
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex6);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex6);
 		HqBytecodeWriteLoadParam(hSubFuncSerializer, 3, 0);
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex4);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex4);
 
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 3);
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex12);
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex11);
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex4);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex12);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex11);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex4);
 
 		HqBytecodeWriteLoadConstI32(hSubFuncSerializer, 0, 5);
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
@@ -253,11 +253,11 @@ int main(int argc, char* argv[])
 		HqBytecodeWriteLoadObject(hSubFuncSerializer, 0, 2, 0);
 
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex7);
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex4);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex7);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex4);
 
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
-		HqBytecodeWriteCall(hSubFuncSerializer, constIndex10);
+		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex10);
 		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 0);
 		HqBytecodeWriteStoreObject(hSubFuncSerializer, 2, 0, 0);
 
@@ -304,15 +304,15 @@ int main(int argc, char* argv[])
 			tryBlockStart = HqSerializerGetStreamPosition(hExcFuncSerializer);
 
 			HqBytecodeWriteInitArray(hExcFuncSerializer, 0, 4);
-			HqBytecodeWriteLoadConst(hExcFuncSerializer, 1, constIndex14);
-			HqBytecodeWriteLoadConst(hExcFuncSerializer, 2, constIndex8);
+			HqBytecodeWriteLoadConstStr(hExcFuncSerializer, 1, stringIndex14);
+			HqBytecodeWriteLoadConstStr(hExcFuncSerializer, 2, stringIndex8);
 			HqBytecodeWriteStoreArray(hExcFuncSerializer, 0, 1, 1);
 			HqBytecodeWriteStoreArray(hExcFuncSerializer, 0, 2, 3);
 			HqBytecodeWriteLoadConstNull(hExcFuncSerializer, 1);
 			HqBytecodeWriteLoadConstNull(hExcFuncSerializer, 2);
 
 			HqBytecodeWriteStoreParam(hExcFuncSerializer, 0, 0);
-			HqBytecodeWriteCall(hExcFuncSerializer, constIndex16);
+			HqBytecodeWriteCall(hExcFuncSerializer, stringIndex16);
 
 			HqBytecodeWriteLoadArray(hExcFuncSerializer, 0, 0, 1);
 			HqBytecodeWriteRaise(hExcFuncSerializer, 0);
@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
 		{
 			exceptionHandlerStart = HqSerializerGetStreamPosition(hExcFuncSerializer);
 
-			HqBytecodeWriteCall(hExcFuncSerializer, constIndex4);
+			HqBytecodeWriteCall(hExcFuncSerializer, stringIndex4);
 			HqBytecodeWriteBranch(hExcFuncSerializer, 8);
 		}
 
@@ -337,9 +337,9 @@ int main(int argc, char* argv[])
 		HqBytecodeWriteNop(hExcFuncSerializer);
 		HqBytecodeWriteNop(hExcFuncSerializer);
 
-		HqBytecodeWriteLoadConst(hExcFuncSerializer, 0, constIndex15);
+		HqBytecodeWriteLoadConstStr(hExcFuncSerializer, 0, stringIndex15);
 		HqBytecodeWriteStoreParam(hExcFuncSerializer, 0, 0);
-		HqBytecodeWriteCall(hExcFuncSerializer, constIndex4);
+		HqBytecodeWriteCall(hExcFuncSerializer, stringIndex4);
 
 		HqBytecodeWriteReturn(hExcFuncSerializer);
 

@@ -31,10 +31,10 @@
 //
 // Initialize a new array, storing it in a general-purpose register.
 //
-// 0x: INIT_FUNC r#, c#
+// 0x: INIT_FUNC r#, s#
 //
 //   r# = General-purpose register where the new array will be stored
-//   ## = Constant index containing the signature of the function to store in the destination value
+//   s# = String table index containing the signature of the function to store in the destination value
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,12 +47,12 @@ void OpCodeExec_InitFunction(HqExecutionHandle hExec)
 	int result;
 
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t constIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hFuncName = HqProgram::GetConstant(hExec->hCurrentFrame->hFunction->hProgram, constIndex, &result);
-	if(HqValueIsString(hFuncName))
+	HqString* const pFuncName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	if(pFuncName)
 	{
-		HqFunctionHandle hFunction = HqVm::GetFunction(hExec->hVm, hFuncName->as.pString, &result);
+		HqFunctionHandle hFunction = HqVm::GetFunction(hExec->hVm, pFuncName, &result);
 		if(hFunction)
 		{
 			HqValueHandle hFuncValue = HqValue::CreateFunction(hExec->hVm, hFunction);
@@ -80,7 +80,7 @@ void OpCodeExec_InitFunction(HqExecutionHandle hExec)
 				hExec,
 				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
 				"Invalid function signature: %s",
-				hFuncName->as.pString->data
+				pFuncName->data
 			);
 		}
 	}
@@ -90,8 +90,8 @@ void OpCodeExec_InitFunction(HqExecutionHandle hExec)
 		HqExecution::RaiseOpCodeException(
 			hExec,
 			HQ_STANDARD_EXCEPTION_TYPE_ERROR,
-			"Type mismatch; expected string value: c(%" PRIu32 ")",
-			constIndex
+			"String does not exist at index: s(%" PRIu32 ")",
+			stringIndex
 		);
 	}
 }
@@ -100,19 +100,12 @@ void OpCodeExec_InitFunction(HqExecutionHandle hExec)
 
 void OpCodeDisasm_InitFunction(HqDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t constIndex = HqDecoder::LoadUint32(disasm.decoder);
-
-	HqValueHandle hValue = HqProgram::GetConstant(disasm.hProgram, constIndex, &result);
-	HqString* const pValueData = HqValue::GetDebugString(hValue);
+	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "INIT_FUNC r%" PRIu32 ", c%" PRIu32 " %s", registerIndex, constIndex, pValueData->data);
+	snprintf(instr, sizeof(instr), "INIT_FUNC r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
-
-	HqString::Release(pValueData);
 }
 
 #ifdef __cplusplus
