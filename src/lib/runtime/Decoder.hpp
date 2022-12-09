@@ -28,9 +28,20 @@ struct HqDecoder
 {
 	static void Initialize(HqDecoder& output, HqProgramHandle hProgram, uint32_t offset);
 
+	static bool LoadBool(HqDecoder& decoder);
+
+	static int8_t LoadInt8(HqDecoder& decoder);
+	static int16_t LoadInt16(HqDecoder& decoder);
 	static int32_t LoadInt32(HqDecoder& decoder);
+	static int64_t LoadInt64(HqDecoder& decoder);
+
 	static uint8_t LoadUint8(HqDecoder& decoder);
+	static uint16_t LoadUint16(HqDecoder& decoder);
 	static uint32_t LoadUint32(HqDecoder& decoder);
+	static uint64_t LoadUint64(HqDecoder& decoder);
+
+	static float LoadFloat32(HqDecoder& decoder);
+	static double LoadFloat64(HqDecoder& decoder);
 
 	uint8_t* ip;
 	uint8_t* cachedIp;

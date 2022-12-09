@@ -54,7 +54,7 @@ HqFunctionHandle HqFunction::CreateInit(
 HqFunctionHandle HqFunction::CreateScript(
 	HqProgramHandle hProgram,
 	HqString* const pSignature,
-	HqValue::StringToHandleMap& locals,
+	StringToBoolMap& locals,
 	HqGuardedBlock::Array& guardedBlocks,
 	const uint32_t bytecodeOffset,
 	const uint32_t bytecodeLength,

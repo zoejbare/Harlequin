@@ -64,7 +64,7 @@ struct HqFunction
 	static HqFunctionHandle CreateScript(
 		HqProgramHandle hProgram,
 		HqString* pSignature,
-		HqValue::StringToHandleMap& locals,
+		StringToBoolMap& locals,
 		HqGuardedBlock::Array& guardedBlocks,
 		uint32_t bytecodeOffsetStart,
 		uint32_t bytecodeOffsetEnd,
@@ -97,7 +97,7 @@ struct HqFunction
 	void* pNativeUserData;
 
 	HqGuardedBlock::Array guardedBlocks;
-	HqValue::StringToHandleMap locals;
+	StringToBoolMap locals;
 
 	uint32_t bytecodeOffsetStart;
 	uint32_t bytecodeOffsetEnd;

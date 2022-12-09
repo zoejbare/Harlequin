@@ -949,7 +949,7 @@ bool HqProgramLoader::prv_readFunctions()
 
 			if(!isNativeFunction)
 			{
-				HqValue::StringToHandleMap locals;
+				HqFunction::StringToBoolMap locals;
 				HqGuardedBlock::Array guardedBlocks;
 
 				uint32_t bytecodeOffset = 0;
@@ -988,11 +988,6 @@ bool HqProgramLoader::prv_readFunctions()
 				// Read the function's local variables.
 				if(!prv_readLocalVariables(pSignature, locals))
 				{
-					// Release all the loaded local variables.
-					for(auto& kv : locals)
-					{
-						HqValue::SetAutoMark(HQ_MAP_ITER_VALUE(kv), false);
-					}
 					return false;
 				}
 
@@ -1089,7 +1084,7 @@ bool HqProgramLoader::prv_readBytecode()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqValue::StringToHandleMap& outLocals)
+bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunction::StringToBoolMap& outLocals)
 {
 	int result = HQ_SUCCESS;
 
@@ -1138,47 +1133,9 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqValue
 				return false;
 			}
 
-			// Read the local variable value index.
-			uint32_t constantIndex = 0;
-			result = HqSerializerReadUint32(m_hSerializer, &constantIndex);
-			if(result != HQ_SUCCESS)
-			{
-				HqReportMessage(
-					m_hReport,
-					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read local variable value index: error=\"%s\", program=\"%s\", function=\"%s\", variableName=\"%s\"",
-					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
-					pSignature->data,
-					pVarName->data
-				);
-				return false;
-			}
-
-			// Get the value from the constant table.
-			HqValueHandle hValue;
-			if(size_t(constantIndex) < m_hProgram->constants.count)
-			{
-				hValue = m_hProgram->constants.pData[constantIndex];
-			}
-			else
-			{
-				HqReportMessage(
-					m_hReport,
-					HQ_MESSAGE_TYPE_WARNING,
-					"Local variable points to invalid constant index: program=\"%s\", function=\"%s\", variableName=\"%s\", index=%" PRIu32,
-					m_hProgram->pName->data,
-					pSignature->data,
-					pVarName->data,
-					constantIndex
-				);
-
-				hValue = HqValueCreateNull();
-			}
-
 			// Map the local variable to the function.
 			HqString::AddRef(pVarName);
-			HQ_MAP_FUNC_INSERT(outLocals, pVarName, hValue);
+			HQ_MAP_FUNC_INSERT(outLocals, pVarName, false);
 		}
 	}
 

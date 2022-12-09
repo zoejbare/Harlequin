@@ -715,30 +715,6 @@ HQ_MAIN_API int HqProgramWriterDispose(HqProgramWriterHandle* phProgramWriter);
 
 HQ_MAIN_API int HqProgramWriterAddDependency(HqProgramWriterHandle hProgramWriter, const char* programName);
 
-HQ_MAIN_API int HqProgramWriterAddConstantNull(HqProgramWriterHandle hProgramWriter, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantBool(HqProgramWriterHandle hProgramWriter, bool value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantInt8(HqProgramWriterHandle hProgramWriter, int8_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantInt16(HqProgramWriterHandle hProgramWriter, int16_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantInt32(HqProgramWriterHandle hProgramWriter, int32_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantInt64(HqProgramWriterHandle hProgramWriter, int64_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantUint8(HqProgramWriterHandle hProgramWriter, uint8_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantUint16(HqProgramWriterHandle hProgramWriter, uint16_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantUint32(HqProgramWriterHandle hProgramWriter, uint32_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantUint64(HqProgramWriterHandle hProgramWriter, uint64_t value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantFloat32(HqProgramWriterHandle hProgramWriter, float value, uint32_t* pOutIndex);
-
-HQ_MAIN_API int HqProgramWriterAddConstantFloat64(HqProgramWriterHandle hProgramWriter, double value, uint32_t* pOutIndex);
-
 HQ_MAIN_API int HqProgramWriterAddConstantString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutIndex);
 
 HQ_MAIN_API int HqProgramWriterAddObjectType(HqProgramWriterHandle hProgramWriter, const char* objectTypeName);
@@ -778,8 +754,7 @@ HQ_MAIN_API int HqProgramWriterAddNativeFunction(
 HQ_MAIN_API int HqProgramWriterAddLocalVariable(
 	HqProgramWriterHandle hProgramWriter,
 	const char* functionSignature,
-	const char* variableName,
-	uint32_t constantIndex
+	const char* variableName
 );
 
 HQ_MAIN_API int HqProgramWriterAddGuardedBlock(
@@ -821,7 +796,75 @@ HQ_MAIN_API int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, uint32_
 
 HQ_MAIN_API int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstant(
+HQ_MAIN_API int HqBytecodeWriteLoadConstNull(HqSerializerHandle hSerializer,uint32_t gpRegIndex);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstBool(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	bool value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstI8(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	int8_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstI16(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	int16_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstI32(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	int32_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstI64(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	int64_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstU8(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint8_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstU16(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint16_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstU32(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstU64(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint64_t value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstF32(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	float value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConstF64(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	double value
+);
+
+HQ_MAIN_API int HqBytecodeWriteLoadConst(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t constantIndex

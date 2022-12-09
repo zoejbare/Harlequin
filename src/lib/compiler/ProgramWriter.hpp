@@ -47,19 +47,6 @@ struct HqProgramWriter
 		HqFunctionData** const ppOutFunction
 	);
 
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int8_t value);
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int16_t value);
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int32_t value);
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const int64_t value);
-
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint8_t value);
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint16_t value);
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint32_t value);
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const uint64_t value);
-
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const float value);
-	static uint32_t AddConstant(HqProgramWriterHandle hWriter, const double value);
-
 	static uint32_t AddConstant(HqProgramWriterHandle hWriter, HqString* const pString);
 
 	void* operator new(const size_t sizeInBytes);
@@ -79,19 +66,6 @@ struct HqProgramWriter
 		HqString::StlCompare
 	> GlobalValueMap;
 
-	typedef std::unordered_map<int8_t, uint32_t> IndexMapInt8;
-	typedef std::unordered_map<int16_t, uint32_t> IndexMapInt16;
-	typedef std::unordered_map<int32_t, uint32_t> IndexMapInt32;
-	typedef std::unordered_map<int64_t, uint32_t> IndexMapInt64;
-
-	typedef std::unordered_map<uint8_t, uint32_t> IndexMapUint8;
-	typedef std::unordered_map<uint16_t, uint32_t> IndexMapUint16;
-	typedef std::unordered_map<uint32_t, uint32_t> IndexMapUint32;
-	typedef std::unordered_map<uint64_t, uint32_t> IndexMapUint64;
-
-	typedef std::unordered_map<uint32_t, uint32_t> IndexMapFloat32;
-	typedef std::unordered_map<uint64_t, uint32_t> IndexMapFloat64;
-
 	typedef std::unordered_map<
 		HqString*,
 		uint32_t,
@@ -105,21 +79,6 @@ struct HqProgramWriter
 
 		union
 		{
-			bool boolean;
-
-			int8_t int8;
-			int16_t int16;
-			int32_t int32;
-			int64_t int64;
-
-			uint8_t uint8;
-			uint16_t uint16;
-			uint32_t uint32;
-			uint64_t uint64;
-
-			float float32;
-			double float64;
-
 			HqString* pString;
 			HqString* pObjectType;
 		} as;
@@ -131,19 +90,6 @@ struct HqProgramWriter
 	HqObjectData::StringToObjectMap objectTypes;
 
 	HqFunctionData::Bytecode initBytecode;
-
-	IndexMapInt8 indexMapInt8;
-	IndexMapInt16 indexMapInt16;
-	IndexMapInt32 indexMapInt32;
-	IndexMapInt64 indexMapInt64;
-
-	IndexMapUint8 indexMapUint8;
-	IndexMapUint16 indexMapUint16;
-	IndexMapUint32 indexMapUint32;
-	IndexMapUint64 indexMapUint64;
-
-	IndexMapFloat32 indexMapFloat32;
-	IndexMapFloat64 indexMapFloat64;
 
 	IndexMapString indexMapString;
 

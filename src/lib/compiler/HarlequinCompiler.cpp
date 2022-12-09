@@ -152,174 +152,6 @@ int HqProgramWriterAddDependency(HqProgramWriterHandle hProgramWriter, const cha
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddConstantNull(HqProgramWriterHandle hProgramWriter, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = hProgramWriter->nullIndex;
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantBool(HqProgramWriterHandle hProgramWriter, bool value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = value ? hProgramWriter->boolTrueIndex : hProgramWriter->boolFalseIndex;
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantInt8(HqProgramWriterHandle hProgramWriter, int8_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantInt16(HqProgramWriterHandle hProgramWriter, int16_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantInt32(HqProgramWriterHandle hProgramWriter, int32_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantInt64(HqProgramWriterHandle hProgramWriter, int64_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantUint8(HqProgramWriterHandle hProgramWriter, uint8_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantUint16(HqProgramWriterHandle hProgramWriter, uint16_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantUint32(HqProgramWriterHandle hProgramWriter, uint32_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantUint64(HqProgramWriterHandle hProgramWriter, uint64_t value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantFloat32(HqProgramWriterHandle hProgramWriter, float value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProgramWriterAddConstantFloat64(HqProgramWriterHandle hProgramWriter, double value, uint32_t* pOutputIndex)
-{
-	if(!hProgramWriter || !pOutputIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutputIndex) = HqProgramWriter::AddConstant(hProgramWriter, value);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int HqProgramWriterAddConstantString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutputIndex)
 {
 	if(!hProgramWriter || !value || !pOutputIndex)
@@ -576,16 +408,14 @@ int HqProgramWriterAddNativeFunction(
 int HqProgramWriterAddLocalVariable(
 	HqProgramWriterHandle hProgramWriter,
 	const char* functionSignature,
-	const char* variableName,
-	uint32_t constantIndex
+	const char* variableName
 )
 {
 	if(!hProgramWriter
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
 		|| !variableName
-		|| variableName[0] == '\0'
-		|| constantIndex >= hProgramWriter->constants.size())
+		|| variableName[0] == '\0')
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -619,7 +449,7 @@ int HqProgramWriterAddLocalVariable(
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	kv->second.locals.emplace(pVariableName, constantIndex);
+	kv->second.locals.insert(pVariableName);
 
 	return HQ_SUCCESS;
 }
@@ -783,16 +613,53 @@ int HqProgramWriterSerialize(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define _HQ_WRITE_OP_BYTE(x) \
-	if(HqSerializerWriteUint8(hSerializer, x) != HQ_SUCCESS) { \
+#define _HQ_WRITE_OP_BOOL(x) \
+	if(HqSerializerWriteUint32(hSerializer, (x) ? 1 : 0) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
+
+#define _HQ_WRITE_OP_UBYTE(x) \
+	if(HqSerializerWriteUint32(hSerializer, uint32_t(x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+#define _HQ_WRITE_OP_SBYTE(x) \
+	if(HqSerializerWriteInt32(hSerializer, int32_t(x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+
+#define _HQ_WRITE_OP_UWORD(x) \
+	if(HqSerializerWriteUint32(hSerializer, uint32_t(x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+#define _HQ_WRITE_OP_SWORD(x) \
+	if(HqSerializerWriteInt32(hSerializer, int32_t(x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+
 #define _HQ_WRITE_OP_UDWORD(x) \
-	if(HqSerializerWriteUint32(hSerializer, x) != HQ_SUCCESS) { \
+	if(HqSerializerWriteUint32(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
 #define _HQ_WRITE_OP_SDWORD(x) \
-	if(HqSerializerWriteInt32(hSerializer, x) != HQ_SUCCESS) { \
+	if(HqSerializerWriteInt32(hSerializer, (x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+
+#define _HQ_WRITE_OP_UQWORD(x) \
+	if(HqSerializerWriteUint64(hSerializer, (x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+#define _HQ_WRITE_OP_SQWORD(x) \
+	if(HqSerializerWriteInt64(hSerializer, (x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+
+#define _HQ_WRITE_OP_FLOAT(x) \
+	if(HqSerializerWriteFloat32(hSerializer, (x)) != HQ_SUCCESS) { \
+		return HQ_ERROR_NO_WRITE; \
+	}
+#define _HQ_WRITE_OP_DOUBLE(x) \
+	if(HqSerializerWriteFloat64(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
 
@@ -805,7 +672,7 @@ int HqBytecodeWriteNop(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_NOP);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_NOP);
 
 	return HQ_SUCCESS;
 }
@@ -819,7 +686,7 @@ int HqBytecodeWriteAbort(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_ABORT);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_ABORT);
 
 	return HQ_SUCCESS;
 }
@@ -833,7 +700,7 @@ int HqBytecodeWriteReturn(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_RETURN);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_RETURN);
 
 	return HQ_SUCCESS;
 }
@@ -847,7 +714,7 @@ int HqBytecodeWriteYield(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_YIELD);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_YIELD);
 
 	return HQ_SUCCESS;
 }
@@ -861,7 +728,7 @@ int HqBytecodeWriteCall(HqSerializerHandle hSerializer, const uint32_t constantI
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_CALL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CALL);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 
 	return HQ_SUCCESS;
@@ -876,7 +743,7 @@ int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, const uint32_t gpRe
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_CALL_VALUE);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CALL_VALUE);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
@@ -891,7 +758,7 @@ int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, const uint32_t gpRegInd
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_RAISE);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_RAISE);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
@@ -899,7 +766,7 @@ int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, const uint32_t gpRegInd
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstant(
+int HqBytecodeWriteLoadConst(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t constantIndex
@@ -910,9 +777,244 @@ int HqBytecodeWriteLoadConstant(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_LOAD_CONSTANT);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstNull(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_NULL);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstBool(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const bool value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_BOOL);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_BOOL(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstI8(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const int8_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I8);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_SBYTE(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstI16(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const int16_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I16);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_SWORD(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstI32(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const int32_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I32);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_SDWORD(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstI64(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const int64_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I64);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_SQWORD(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstU8(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint8_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U8);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_UBYTE(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstU16(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint16_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U16);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_UWORD(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstU32(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint32_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U32);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_UDWORD(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstU64(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint64_t value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U64);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_UQWORD(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstF32(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const float value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_F32);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_FLOAT(value);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLoadConstF64(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const double value
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_F64);
+	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_WRITE_OP_DOUBLE(value);
 
 	return HQ_SUCCESS;
 }
@@ -930,7 +1032,7 @@ int HqBytecodeWriteLoadGlobal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_LOAD_GLOBAL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_GLOBAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 
@@ -950,7 +1052,7 @@ int HqBytecodeWriteLoadLocal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_LOAD_LOCAL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_LOCAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 
@@ -970,7 +1072,7 @@ int HqBytecodeWriteLoadParam(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_LOAD_PARAM);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_PARAM);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(ioRegIndex);
 
@@ -991,7 +1093,7 @@ int HqBytecodeWriteLoadObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_LOAD_OBJECT);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_OBJECT);
 	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
 	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
 	_HQ_WRITE_OP_UDWORD(memberIndex);
@@ -1013,7 +1115,7 @@ int HqBytecodeWriteLoadArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_LOAD_ARRAY);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_ARRAY);
 	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
 	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
 	_HQ_WRITE_OP_UDWORD(arrayIndex);
@@ -1034,7 +1136,7 @@ int HqBytecodeWriteStoreGlobal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_STORE_GLOBAL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_GLOBAL);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
@@ -1054,7 +1156,7 @@ int HqBytecodeWriteStoreLocal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_STORE_LOCAL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_LOCAL);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
@@ -1074,7 +1176,7 @@ int HqBytecodeWriteStoreParam(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_STORE_PARAM);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_PARAM);
 	_HQ_WRITE_OP_UDWORD(ioRegIndex);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
@@ -1095,7 +1197,7 @@ int HqBytecodeWriteStoreObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_STORE_OBJECT);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_OBJECT);
 	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
 	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
 	_HQ_WRITE_OP_UDWORD(memberIndex);
@@ -1117,7 +1219,7 @@ int HqBytecodeWriteStoreArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_STORE_ARRAY);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_ARRAY);
 	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
 	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
 	_HQ_WRITE_OP_UDWORD(arrayIndex);
@@ -1138,7 +1240,7 @@ int HqBytecodeWritePullGlobal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_PULL_GLOBAL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_GLOBAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 
@@ -1158,7 +1260,7 @@ int HqBytecodeWritePullLocal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_PULL_LOCAL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_LOCAL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 
@@ -1178,7 +1280,7 @@ int HqBytecodeWritePullParam(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_PULL_PARAM);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_PARAM);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(ioRegIndex);
 
@@ -1199,7 +1301,7 @@ int HqBytecodeWritePullObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_PULL_OBJECT);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_OBJECT);
 	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
 	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
 	_HQ_WRITE_OP_UDWORD(memberIndex);
@@ -1221,7 +1323,7 @@ int HqBytecodeWritePullArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_PULL_ARRAY);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_ARRAY);
 	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
 	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
 	_HQ_WRITE_OP_UDWORD(arrayIndex);
@@ -1238,7 +1340,7 @@ int HqBytecodeWritePush(HqSerializerHandle hSerializer, const uint32_t gpRegInde
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_PUSH);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PUSH);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
@@ -1253,7 +1355,7 @@ int HqBytecodeWritePop(HqSerializerHandle hSerializer, const uint32_t gpRegIndex
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_POP);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_POP);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
@@ -1272,7 +1374,7 @@ int HqBytecodeWriteInitObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_INIT_OBJECT);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_OBJECT);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 
@@ -1292,7 +1394,7 @@ int HqBytecodeWriteInitArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_INIT_ARRAY);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_ARRAY);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(initialCount);
 
@@ -1312,7 +1414,7 @@ int HqBytecodeWriteInitFunction(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_INIT_FUNCTION);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_FUNCTION);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(constantIndex);
 
@@ -1328,7 +1430,7 @@ int HqBytecodeWriteBranch(HqSerializerHandle hSerializer, const int32_t offset)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_BRANCH);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_BRANCH);
 	_HQ_WRITE_OP_SDWORD(offset);
 
 	return HQ_SUCCESS;
@@ -1347,7 +1449,7 @@ int HqBytecodeWriteBranchIfTrue(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_BRANCH_IF_TRUE);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_BRANCH_IF_TRUE);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SDWORD(offset);
 
@@ -1367,7 +1469,7 @@ int HqBytecodeWriteBranchIfFalse(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_BYTE(HQ_OP_CODE_BRANCH_IF_FALSE);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_BRANCH_IF_FALSE);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SDWORD(offset);
 
@@ -1376,9 +1478,20 @@ int HqBytecodeWriteBranchIfFalse(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#undef _HQ_WRITE_OP_BYTE
+#undef _HQ_WRITE_OP_UBYTE
+#undef _HQ_WRITE_OP_SBYTE
+
+#undef _HQ_WRITE_OP_UWORD
+#undef _HQ_WRITE_OP_SWORD
+
 #undef _HQ_WRITE_OP_UDWORD
 #undef _HQ_WRITE_OP_SDWORD
+
+#undef _HQ_WRITE_OP_UQWORD
+#undef _HQ_WRITE_OP_SQWORD
+
+#undef _HQ_WRITE_OP_FLOAT
+#undef _HQ_WRITE_OP_DOUBLE
 
 //----------------------------------------------------------------------------------------------------------------------
 

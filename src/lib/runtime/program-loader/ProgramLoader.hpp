@@ -86,7 +86,7 @@ private:
 	bool prv_readFunctions();
 	bool prv_readBytecode();
 
-	bool prv_readLocalVariables(HqString*, HqValue::StringToHandleMap&);
+	bool prv_readLocalVariables(HqString*, HqFunction::StringToBoolMap&);
 	bool prv_readGuardedBlocks(HqString*, HqGuardedBlock::Array&);
 
 	void prv_trackString(HqString*);
