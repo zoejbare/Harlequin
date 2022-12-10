@@ -170,6 +170,22 @@ with csbuild.Toolchain("msvc"):
 		"/wd4804", # 'operation' : unsafe use of type 'bool' in operation
 	)
 
+###################################################################################################
+
+### Console platform defines; these must be defined in applications that link
+### against the Harlequin libraries in order to build for these platforms.
+
+with csbuild.Toolchain("ps3"):
+	csbuild.AddDefines("_HQ_BUILD_FOR_PS3_")
+
+with csbuild.Toolchain("ps4"):
+	csbuild.AddDefines("_HQ_BUILD_FOR_PS4_")
+
+with csbuild.Toolchain("ps5"):
+	csbuild.AddDefines("_HQ_BUILD_FOR_PS5_")
+
+with csbuild.Toolchain("psvita"):
+	csbuild.AddDefines("_HQ_BUILD_FOR_PSVITA_")
 
 ###################################################################################################
 

@@ -24,18 +24,6 @@
 #if defined(__ANDROID__)
 	#define HQ_PLATFORM_ANDROID
 
-#elif defined(__PROSPERO__)
-	#define HQ_PLATFORM_PS5
-
-#elif defined(__ORBIS__)
-	#define HQ_PLATFORM_PS4
-
-#elif defined(__PS3__)
-	#define HQ_PLATFORM_PS3
-
-#elif defined(__psp2__)
-	#define HQ_PLATFORM_PSVITA
-
 #elif defined(__APPLE__)
 	#define HQ_PLATFORM_MAC_OS
 
@@ -44,6 +32,18 @@
 
 #elif defined(_WIN32)
 	#define HQ_PLATFORM_WINDOWS
+
+#elif defined(_HQ_BUILD_FOR_PS3_)
+	#define HQ_PLATFORM_PS3
+
+#elif defined(_HQ_BUILD_FOR_PS4_)
+	#define HQ_PLATFORM_PS4
+
+#elif defined(_HQ_BUILD_FOR_PS5_)
+	#define HQ_PLATFORM_PS5
+
+#elif defined(_HQ_BUILD_FOR_PSVITA_)
+	#define HQ_PLATFORM_PSVITA
 
 #else
 	#define HQ_PLATFORM_UNKNOWN
