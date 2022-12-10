@@ -121,7 +121,7 @@ void HqGarbageCollector::Dispose(HqGarbageCollector& gc)
 
 bool HqGarbageCollector::RunPhase(HqGarbageCollector& gc)
 {
-	HqScopedWriteLock writeLock(gc.rwLock);
+	HqScopedWriteLock writeLock(gc.rwLock, gc.hVm->isGcThreadEnabled);
 
 	return prv_runPhase(gc);
 }
@@ -130,7 +130,7 @@ bool HqGarbageCollector::RunPhase(HqGarbageCollector& gc)
 
 void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 {
-	HqScopedWriteLock writeLock(gc.rwLock);
+	HqScopedWriteLock writeLock(gc.rwLock, gc.hVm->isGcThreadEnabled);
 
 	// Reset the garbage collector state so that running it again starts at the beginning of the 1st phase.
 	prv_reset(gc);
@@ -442,7 +442,7 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 
 bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc, const uint64_t startTime)
 {
-	return (gc.maxTimeSlice > 0) && ((HqClockGetTimestamp() - startTime) >= gc.maxTimeSlice);
+	return (gc.hVm->isGcThreadEnabled) && ((HqClockGetTimestamp() - startTime) >= gc.maxTimeSlice);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

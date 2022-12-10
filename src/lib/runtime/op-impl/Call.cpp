@@ -58,13 +58,22 @@ static void CallScriptFunction(HqExecutionHandle hExec, HqFunctionHandle hFuncti
 		// Native functions are called immediately.
 		if(hFunction->nativeFn)
 		{
-			// We can't predict what native calls are going to do and since recursive locks on RwLocks
-			// are not allowed, we unlock the GC RwLock here to prevent possible deadlocks. We'll put
-			// a lock back on it immediately after it's finished, but during this time, the garbage
-			// collector will likely be running.
-			HqRwLock::ReadUnlock(hExec->hVm->gc.rwLock);
+			if(hExec->hVm->isGcThreadEnabled)
+			{
+				// We can't predict what native calls are going to do and since recursive locks on RwLocks
+				// are not allowed, we unlock the GC RwLock here to prevent possible deadlocks. We'll put
+				// the lock back on it immediately after the call is finished, but during this time, the
+				// garbage collector will likely be running.
+				HqRwLock::ReadUnlock(hExec->hVm->gc.rwLock);
+			}
+
+			// Call the native function.
 			hFunction->nativeFn(hExec, hFunction, hFunction->pNativeUserData);
-			HqRwLock::ReadLock(hExec->hVm->gc.rwLock);
+
+			if(hExec->hVm->isGcThreadEnabled)
+			{
+				HqRwLock::ReadLock(hExec->hVm->gc.rwLock);
+			}
 
 			if(!hExec->exception)
 			{

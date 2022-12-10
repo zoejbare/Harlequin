@@ -451,7 +451,7 @@ void HqExecution::prv_runStep(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
-	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock, hExec->hVm->isGcThreadEnabled);
 
 	HqFrameHandle hFrame = hExec->hCurrentFrame;
 

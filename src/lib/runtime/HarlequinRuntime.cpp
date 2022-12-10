@@ -262,7 +262,7 @@ int HqVmSetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, const char* vari
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	HqScopedReadLock gcLock(hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 	const int result = HqVm::SetGlobalVariable(hVm, hValue, pVariableName);
 
@@ -884,7 +884,7 @@ int HqExecutionCreate(HqExecutionHandle* phOutExecution, HqVmHandle hVm)
 	}
 
 	HqScopedMutex vmLock(hVm->lock);
-	HqScopedReadLock gcLock(hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 	// Create a new execution context with the provided script function as the entry point.
 	HqExecutionHandle hExec = HqExecution::Create(hVm);
@@ -1026,7 +1026,7 @@ int HqExecutionRaiseStandardException(
 	}
 
 	// Lock the GC thread since we need to create a value for the exception and handle it in the execution context.
-	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock, hExec->hVm->isGcThreadEnabled);
 
 	HqValueHandle hException = HqVm::CreateStandardException(
 		hExec->hVm,
@@ -1053,7 +1053,7 @@ int HqExecutionRaiseException(HqExecutionHandle hExec, HqValueHandle hValue, int
 	}
 
 	// Lock the GC thread since we need to handle the exception in the execution context.
-	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock, hExec->hVm->isGcThreadEnabled);
 
 	HqExecution::RaiseException(hExec, hValue, severity);
 
@@ -1218,7 +1218,7 @@ int HqExecutionGetIoRegister(HqExecutionHandle hExec, HqValueHandle* phOutValue,
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock, hExec->hVm->isGcThreadEnabled);
 
 	int result;
 	HqValueHandle hValue = HqExecution::GetIoRegister(hExec, registerIndex, &result);
@@ -1371,7 +1371,7 @@ int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, int registe
 		return HQ_ERROR_MISMATCH;
 	}
 
-	HqScopedReadLock gcLock(hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 	return HqFrame::SetGpRegister(hFrame, hValue, registerIndex);
 }
@@ -1399,7 +1399,7 @@ int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, int re
 		return HQ_ERROR_INVALID_DATA;
 	}
 
-	HqScopedReadLock gcLock(hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 	int result;
 	HqValueHandle hValue = HqFrame::GetGpRegister(hFrame, registerIndex, &result);
@@ -1446,7 +1446,7 @@ int HqFrameSetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, const ch
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	HqScopedReadLock gcLock(hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 	const int result = HqFrame::SetLocalVariable(hFrame, hValue, pVarName);
 
@@ -1482,7 +1482,7 @@ int HqFrameGetLocalVariable(HqFrameHandle hFrame, HqValueHandle* phOutValue, con
 		return HQ_ERROR_INVALID_DATA;
 	}
 
-	HqScopedReadLock gcLock(hVm->gc.rwLock);
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 	int result;
 	HqValueHandle hValue = HqFrame::GetLocalVariable(hFrame, pVarName, &result);

@@ -98,6 +98,7 @@ struct HqVm
 	HqThread gcThread;
 	HqMutex lock;
 
+	bool isGcThreadEnabled;
 	bool isShuttingDown;
 };
 
