@@ -115,7 +115,7 @@ void OnDependencyRequested(void* const pUserData, const char* const programName)
 
 #if _MEM_STATS_ENABLED
 static size_t maxAllocSize = 0;
-static size_t minAllocSize = size_t(-1);
+static size_t minAllocSize = ~size_t(0);
 static size_t peakMemUsage = 0;
 static size_t activeAllocCount = 0;
 static size_t totalAllocCount = 0;
@@ -810,6 +810,16 @@ int main(int argc, char* argv[])
 		disposeVmTimeSlice = timeEnd - timeStart;
 	}
 
+	OnMessageReported(
+		nullptr,
+		HQ_MESSAGE_TYPE_VERBOSE,
+#ifdef HQ_BUILD_STATIC_LIB
+		"=== Static library build ==="
+#else
+		"=== Dynamic library build ==="
+#endif
+	);
+
 	int applicationResult = APPLICATION_RESULT_SUCCESS;
 
 #if _MEM_STATS_ENABLED
@@ -824,13 +834,15 @@ int main(int argc, char* argv[])
 
 	// Output memory allocation stats.
 	printf(
-		"Memory Stats:\n"
-		"  Min allocation size:    %zu\n"
-		"  Max allocation size:    %zu\n"
-		"  Peak memory usage:      %zu\n"
-		"  Total allocation count: %zu\n"
-		"  Malloc() call count:    %zu\n"
-		"  Realloc() call count:   %zu\n",
+		"\nMemory Stats:\n"
+		"  [Size]\n"
+		"    Min:  %zu\n"
+		"    Max:  %zu\n"
+		"    Peak: %zu\n"
+		"  [Count]\n"
+		"    Total:     %zu\n"
+		"    Malloc():  %zu\n"
+		"    Realloc(): %zu\n",
 		minAllocSize,
 		maxAllocSize,
 		peakMemUsage,
@@ -847,23 +859,23 @@ int main(int argc, char* argv[])
 
 	// Output the timing metrics.
 	printf(
-		"Timing metrics:\n"
+		"\nTiming metrics:\n"
 		"  [VM]\n"
-		"    Create time:  %f ms\n"
-		"    Dispose time: %f ms\n"
+		"    Create:  %f ms\n"
+		"    Dispose: %f ms\n"
 		"  [Exec]\n"
-		"    Create time:  %f ms\n"
-		"    Init time:    %f ms\n"
-		"    Reset time:   %f ms\n"
-		"    Dispose time: %f ms\n"
+		"    Create:  %f ms\n"
+		"    Init:    %f ms\n"
+		"    Reset:   %f ms\n"
+		"    Dispose: %f ms\n"
 		"  [Program]\n"
-		"    Init time: %f ms\n"
-		"    Load time: %f ms\n"
-		"    Run time:  %f ms\n"
+		"    Init: %f ms\n"
+		"    Load: %f ms\n"
+		"    Run:  %f ms\n"
 		"  [Misc]\n"
-		"    Total application time: %f ms\n"
-		"    Total disassemble time: %f ms\n"
-		"    Total manual GC time:   %f ms\n",
+		"    Total application: %f ms\n"
+		"    Total disassemble: %f ms\n"
+		"    Total manual GC:   %f ms\n",
 
 		double(createVmTimeSlice) * convertTimeToMs,
 		double(disposeVmTimeSlice) * convertTimeToMs,
