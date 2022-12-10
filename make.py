@@ -235,12 +235,17 @@ class HarlequinCommon(object):
 
 	@staticmethod
 	def setLibCommonOptions(outputName):
-		# The libraries are built as DLLs by default.
-		csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
-
-		# Consoles should always build with static libs.
-		with csbuild.Toolchain("ps3", "ps4", "ps5", "psvita"):
+		if os.getenv("HQ_FORCE_BUILD_STATIC"):
+			# Detecting the environment override will force all platforms to build static libs.
 			HarlequinCommon.applyStaticBuildOptions(outputName)
+
+		else:
+			# The libraries are built as DLLs by default.
+			csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
+
+			# Consoles should always build with static libs.
+			with csbuild.Toolchain("ps3", "ps4", "ps5", "psvita"):
+				HarlequinCommon.applyStaticBuildOptions(outputName)
 
 		with csbuild.Scope(csbuild.ScopeDef.All):
 			csbuild.AddIncludeDirectories(HarlequinCommon.libRootPath)
