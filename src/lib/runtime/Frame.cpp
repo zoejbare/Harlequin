@@ -203,7 +203,7 @@ HqValueHandle HqFrame::GetLocalVariable(HqFrameHandle hFrame, HqString* const pV
 	assert(pVariableName != nullptr);
 	assert(pOutResult != nullptr);
 
-	HqValueHandle hOutput;
+	HqValueHandle hOutput = HQ_VALUE_HANDLE_NULL;
 	if(!HqValue::StringToHandleMap::Get(hFrame->locals, pVariableName, hOutput))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;

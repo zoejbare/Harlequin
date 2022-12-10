@@ -137,7 +137,7 @@ int HqExecution::PushFrame(HqExecutionHandle hExec, HqFunctionHandle hFunction)
 	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
 	// Get an unused frame.
-	HqFrameHandle hFrame;
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
 	if(HqFrame::HandleStack::Pop(hExec->framePool, &hFrame) != HQ_SUCCESS)
 	{
 		// There are no unused frames in the pool, so we need to create a new one.
