@@ -133,14 +133,10 @@ void OpCodeExec_Call(HqExecutionHandle hExec)
 
 void OpCodeDisasm_Call(HqDisassemble& disasm)
 {
-	int result;
-
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	HqString* const pString = HqProgram::GetString(disasm.hProgram, stringIndex, &result);
-
 	char str[256];
-	snprintf(str, sizeof(str), "CALL c%" PRIu32 " %s", stringIndex, pString->data);
+	snprintf(str, sizeof(str), "CALL s%" PRIu32, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
