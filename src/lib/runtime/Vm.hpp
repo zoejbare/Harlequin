@@ -33,22 +33,16 @@
 #include "../base/Thread.hpp"
 
 #include "../common/Dependency.hpp"
+#include "../common/HashMap.hpp"
 #include "../common/Report.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct HqVm
 {
-	typedef HQ_MAP_TYPE<
+	typedef HqHashMap<
 		int,
-		HqScriptObject*,
-#if HQ_MAP_IS_UNORDERED
-		std::hash<int>,
-		std::equal_to<int>,
-#else
-		std::less<int>,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(int, HqScriptObject*)>
+		HqScriptObject*
 	> EmbeddedExceptionMap;
 
 	struct OpCode

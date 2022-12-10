@@ -32,9 +32,9 @@ void HqVm::prv_setupBuiltIns(HqVmHandle hVm)
 			HqString* const pSignature = HqString::Create(signature); \
 			HqMemFree((void*)(signature)); \
 			assert(pSignature != nullptr); \
-			assert(!HQ_MAP_FUNC_CONTAINS(hVm->functions, pSignature)); \
+			assert(!HqFunction::StringToHandleMap::Contains(hVm->functions, pSignature)); \
 			HqFunctionHandle hFunction = HqFunction::CreateBuiltIn(pSignature, HqBuiltIn::func, numParams, numRetVals); \
-			HQ_MAP_FUNC_INSERT(hVm->functions, pSignature, hFunction); \
+			HqFunction::StringToHandleMap::Insert(hVm->functions, pSignature, hFunction); \
 		}
 
 	HQ_BUILT_IN(OP_ADD_BOOL,    OpAddBool,    2, 1);

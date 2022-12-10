@@ -31,17 +31,23 @@ HqScriptObject* HqScriptObject::CreateSchema(HqString* const pTypeName, const Me
 
 	pOutput->pTypeName = pTypeName;
 	pOutput->pSchema = nullptr;
-	pOutput->definitions = definitions;
+
+	MemberDefinitionMap::Initialize(pOutput->definitions);
+	MemberDefinitionMap::Copy(pOutput->definitions, definitions);
 
 	// Track string references.
 	HqString::AddRef(pOutput->pTypeName);
 
-	for(auto& kv : pOutput->definitions)
+	// Track the member name string references.
 	{
-		HqString::AddRef(HQ_MAP_ITER_KEY(kv));
+		MemberDefinitionMap::Iterator iter;
+		while(MemberDefinitionMap::IterateNext(pOutput->definitions, iter))
+		{
+			HqString::AddRef(iter.pData->key);
+		}
 	}
 
-	const size_t defCount = HQ_MAP_FUNC_SIZE(definitions);
+	const size_t defCount = definitions.count;
 
 	// Initialize the members array and reserve enough space for each of them.
 	HqValue::HandleArray::Initialize(pOutput->members);
@@ -92,9 +98,15 @@ void HqScriptObject::Dispose(HqScriptObject* const pObject)
 	assert(pObject != nullptr);
 
 	// Release all the member names from the definition table.
-	for(auto& kv : pObject->definitions)
+	if(!pObject->pSchema)
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		MemberDefinitionMap::Iterator iter;
+		while(MemberDefinitionMap::IterateNext(pObject->definitions, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		MemberDefinitionMap::Dispose(pObject->definitions);
 	}
 
 	HqValue::HandleArray::Dispose(pObject->members);
@@ -133,18 +145,22 @@ HqScriptObject::MemberDefinition HqScriptObject::GetMemberDefinition(
 	assert(pMemberName != nullptr);
 	assert(pOutResult != nullptr);
 
-	auto kv = pObject->definitions.find(pMemberName);
-	if(kv == pObject->definitions.end())
+	// If the input object has a schema, we should use it's definition map since that will be the real one.
+	HqScriptObject::MemberDefinitionMap& definitions = (pObject->pSchema) 
+		? pObject->pSchema->definitions 
+		: pObject->definitions;
+
+	HqScriptObject::MemberDefinition def = { 0, 0 };
+	if(!HqScriptObject::MemberDefinitionMap::Get(definitions, pMemberName, def))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
-
-		MemberDefinition dummyDef = { 0, 0 };
-		return dummyDef;
+	}
+	else
+	{
+		(*pOutResult) = HQ_SUCCESS;
 	}
 
-	(*pOutResult) = HQ_SUCCESS;
-
-	return HQ_MAP_ITER_PTR_VALUE(kv);
+	return def;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -173,19 +189,15 @@ HqScriptObject* HqScriptObject::prv_createObject(HqScriptObject* const pOriginal
 	assert(pOutput != nullptr);
 
 	pOutput->pTypeName = pOriginalObject->pTypeName;
-	pOutput->definitions = pOriginalObject->definitions;
+
+	// The schema's definition map will be used instead to save memory.
+	MemberDefinitionMap::Initialize(pOutput->definitions);
 
 	// Object user data should always start out as null.
 	pOutput->pUserData = nullptr;
 
 	// Add a reference for the type name.
 	HqString::AddRef(pOutput->pTypeName);
-
-	// Add a reference for each member name.
-	for(auto& kv : pOutput->definitions)
-	{
-		HqString::AddRef(HQ_MAP_ITER_KEY(kv));
-	}
 
 	// Initialize the members array and reserve enough space for each of them.
 	HqValue::HandleArray::Initialize(pOutput->members);

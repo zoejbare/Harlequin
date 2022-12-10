@@ -144,7 +144,7 @@ int HqVmGetProgramCount(HqVmHandle hVm, size_t* pOutCount)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = HQ_MAP_FUNC_SIZE(hVm->programs);
+	(*pOutCount) = hVm->programs.count;
 
 	return HQ_SUCCESS;
 }
@@ -159,9 +159,10 @@ int HqVmListPrograms(HqVmHandle hVm, HqCallbackIterateProgram onIterateFn, void*
 	}
 
 	// Call the callback for each program we currently have loaded.
-	for(auto& kv : hVm->programs)
+	HqProgram::StringToHandleMap::Iterator iter;
+	while(HqProgram::StringToHandleMap::IterateNext(hVm->programs, iter))
 	{
-		if(!onIterateFn(pUserData, HQ_MAP_ITER_VALUE(kv)))
+		if(!onIterateFn(pUserData, iter.pData->value))
 		{
 			break;
 		}
@@ -208,7 +209,7 @@ int HqVmGetFunctionCount(HqVmHandle hVm, size_t* pOutCount)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = HQ_MAP_FUNC_SIZE(hVm->functions);
+	(*pOutCount) = hVm->functions.count;
 
 	return HQ_SUCCESS;
 }
@@ -223,9 +224,10 @@ int HqVmListFunctions(HqVmHandle hVm, HqCallbackIterateFunction onIterateFn, voi
 	}
 
 	// Call the callback for each function we currently have loaded.
-	for(auto& kv : hVm->functions)
+	HqFunction::StringToHandleMap::Iterator iter;
+	while(HqFunction::StringToHandleMap::IterateNext(hVm->functions, iter))
 	{
-		if(!onIterateFn(pUserData, HQ_MAP_ITER_VALUE(kv)))
+		if(!onIterateFn(pUserData, iter.pData->value))
 		{
 			break;
 		}
@@ -306,7 +308,7 @@ int HqVmGetGlobalVariableCount(HqVmHandle hVm, size_t* pOutCount)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = HQ_MAP_FUNC_SIZE(hVm->globals);
+	(*pOutCount) = hVm->globals.count;
 
 	return HQ_SUCCESS;
 }
@@ -321,12 +323,10 @@ int HqVmListGlobalVariables(HqVmHandle hVm, HqCallbackIterateVariable onIterateF
 	}
 
 	// Call the callback for each global variable we currently have loaded.
-	for(auto& kv : hVm->globals)
+	HqValue::StringToHandleMap::Iterator iter;
+	while(HqValue::StringToHandleMap::IterateNext(hVm->globals, iter))
 	{
-		HqString* const pGlobalName = HQ_MAP_ITER_KEY(kv);
-		HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
-
-		if(!onIterateFn(pUserData, pGlobalName->data, hValue))
+		if(!onIterateFn(pUserData, iter.pData->key->data, iter.pData->value))
 		{
 			break;
 		}
@@ -345,11 +345,10 @@ int HqVmListObjectSchemas(HqVmHandle hVm, HqCallbackIterateString onIterateFn, v
 	}
 
 	// Call the callback for each object schema we currently have loaded.
-	for(auto& kv : hVm->objectSchemas)
+	HqScriptObject::StringToPtrMap::Iterator iter;
+	while(HqScriptObject::StringToPtrMap::IterateNext(hVm->objectSchemas, iter))
 	{
-		HqString* const pObjectTypeName = HQ_MAP_ITER_KEY(kv);
-
-		if(!onIterateFn(pUserData, pObjectTypeName->data))
+		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
 			break;
 		}
@@ -380,7 +379,7 @@ int HqVmLoadProgram(
 	}
 
 	// Check if a program with this name has already been loaded.
-	if(HQ_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
+	if(HqProgram::StringToHandleMap::Contains(hVm->programs, pProgramName))
 	{
 		HqString::Release(pProgramName);
 		return HQ_ERROR_KEY_ALREADY_EXISTS;
@@ -395,7 +394,7 @@ int HqVmLoadProgram(
 	}
 
 	// Map the program inside the VM state.
-	HQ_MAP_FUNC_INSERT(hVm->programs, pProgramName, hProgram);
+	HqProgram::StringToHandleMap::Insert(hVm->programs, pProgramName, hProgram);
 
 	return HQ_SUCCESS;
 }
@@ -418,9 +417,10 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 
 	bool scriptError = false;
 
-	for(auto& kv : hVm->programs)
+	HqProgram::StringToHandleMap::Iterator iter;
+	while(HqProgram::StringToHandleMap::IterateNext(hVm->programs, iter))
 	{
-		HqProgramHandle hProgram = HQ_MAP_ITER_VALUE(kv);
+		HqProgramHandle hProgram = iter.pData->value;
 
 		if(hProgram->hInitFunction)
 		{
@@ -525,7 +525,7 @@ int HqProgramGetFunctionCount(HqProgramHandle hProgram, size_t* pOutCount)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = HQ_MAP_FUNC_SIZE(hProgram->functions);
+	(*pOutCount) = hProgram->functions.count;
 
 	return HQ_SUCCESS;
 }
@@ -540,11 +540,10 @@ int HqProgramListFunctions(HqProgramHandle hProgram, HqCallbackIterateString onI
 	}
 
 	// Call the callback for each function signature in the program.
-	for(auto& kv : hProgram->functions)
+	HqFunction::StringToBoolMap::Iterator iter;
+	while(HqFunction::StringToBoolMap::IterateNext(hProgram->functions, iter))
 	{
-		HqString* const pFunctionSignature = HQ_MAP_ITER_KEY(kv);
-
-		if(!onIterateFn(pUserData, pFunctionSignature->data))
+		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
 			break;
 		}
@@ -603,7 +602,7 @@ int HqProgramGetGlobalVariableCount(HqProgramHandle hProgram, size_t* pOutCount)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = HQ_MAP_FUNC_SIZE(hProgram->globals);
+	(*pOutCount) = hProgram->globals.count;
 
 	return HQ_SUCCESS;
 }
@@ -622,11 +621,10 @@ int HqProgramListGlobalVariables(
 	}
 
 	// Call the callback for each global variable name in the program.
-	for(auto& kv : hProgram->globals)
+	HqValue::StringToBoolMap::Iterator iter;
+	while(HqValue::StringToBoolMap::IterateNext(hProgram->globals, iter))
 	{
-		HqString* const pVarName = HQ_MAP_ITER_KEY(kv);
-
-		if(!onIterateFn(pUserData, pVarName->data))
+		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
 			break;
 		}
@@ -645,11 +643,10 @@ int HqProgramListDependencies(HqProgramHandle hProgram, HqCallbackIterateString 
 	}
 
 	// Call the callback for each dependency name referenced by the program.
-	for(auto& kv : hProgram->dependencies)
+	HqValue::StringToBoolMap::Iterator iter;
+	while(HqValue::StringToBoolMap::IterateNext(hProgram->dependencies, iter))
 	{
-		HqString* const pDependencyName = HQ_MAP_ITER_KEY(kv);
-
-		if(!onIterateFn(pUserData, pDependencyName->data))
+		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
 			break;
 		}
@@ -672,14 +669,13 @@ int HqProgramListUnloadedDependencies(
 	}
 
 	// Call the callback for only the dependency names referenced by the program that have not been loaded.
-	for(auto& kv : hProgram->dependencies)
+	HqValue::StringToBoolMap::Iterator iter;
+	while(HqValue::StringToBoolMap::IterateNext(hProgram->dependencies, iter))
 	{
-		HqString* const pDependencyName = HQ_MAP_ITER_KEY(kv);
-
 		// Check the VM to see if the dependent program has been loaded.
-		if(!HQ_MAP_FUNC_CONTAINS(hProgram->hVm->programs, pDependencyName))
+		if(!HqProgram::StringToHandleMap::Contains(hProgram->hVm->programs, iter.pData->key))
 		{
-			if(!onIterateFn(pUserData, pDependencyName->data))
+			if(!onIterateFn(pUserData, iter.pData->key->data))
 			{
 				break;
 			}
@@ -1516,7 +1512,7 @@ int HqFrameGetLocalVariableCount(HqFrameHandle hFrame, size_t* pOutCount)
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	(*pOutCount) = HQ_MAP_FUNC_SIZE(hFrame->locals);
+	(*pOutCount) = hFrame->locals.count;
 
 	return HQ_SUCCESS;
 }
@@ -1535,12 +1531,10 @@ int HqFrameListLocalVariables(HqFrameHandle hFrame, HqCallbackIterateVariable on
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	for(auto& kv : hFrame->locals)
+	HqValue::StringToHandleMap::Iterator iter;
+	while(HqValue::StringToHandleMap::IterateNext(hFrame->locals, iter))
 	{
-		HqString* const pVarName = HQ_MAP_ITER_KEY(kv);
-		HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
-
-		if(!onIterateFn(pUserData, pVarName->data, hValue))
+		if(!onIterateFn(pUserData, iter.pData->key->data, iter.pData->value))
 		{
 			break;
 		}
@@ -2265,13 +2259,17 @@ int HqValueListObjectMembers(HqValueHandle hValue, HqCallbackIterateObjectMember
 {
 	if(HqValueIsObject(hValue))
 	{
-		// Iterate through each member definition on the object.
-		for(auto& kv : hValue->as.pObject->definitions)
-		{
-			HqString* const pMemberName = HQ_MAP_ITER_KEY(kv);
-			HqScriptObject::MemberDefinition& memberDef = HQ_MAP_ITER_VALUE(kv);
+		HqScriptObject* const pObject = hValue->as.pObject;
 
-			if(!onIterateFn(pUserData, pMemberName->data, memberDef.valueType))
+		HqScriptObject::MemberDefinitionMap& definitions = (pObject->pSchema)
+			? pObject->pSchema->definitions
+			: pObject->definitions;
+
+		// Iterate through each member definition on the object.
+		HqScriptObject::MemberDefinitionMap::Iterator iter;
+		while(HqScriptObject::MemberDefinitionMap::IterateNext(definitions, iter))
+		{
+			if(!onIterateFn(pUserData, iter.pData->key->data, iter.pData->value.valueType))
 			{
 				break;
 			}

@@ -337,9 +337,10 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// globals can change what values they point to. Since we're just enqueuing proxies, it shouldn't
 			// be too bad to loop over all the globals at once. This may only become problematic if a script
 			// program contains many hundreds of globals or more. We'll cross that bridge when we come to it.
-			for(auto& kv : gc.hVm->globals)
+			HqValue::StringToHandleMap::Iterator iter;
+			while(HqValue::StringToHandleMap::IterateNext(gc.hVm->globals, iter))
 			{
-				HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
+				HqValueHandle hValue = iter.pData->value;
 
 				if(HqValue::CanBeMarked(hValue))
 				{

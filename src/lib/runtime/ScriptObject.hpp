@@ -24,8 +24,7 @@
 
 #include "../base/String.hpp"
 
-#include "../common/Map.hpp"
-#include "../common/StlAllocator.hpp"
+#include "../common/HashMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,28 +36,18 @@ struct HqScriptObject
 		uint8_t valueType;
 	};
 
-	typedef HQ_MAP_TYPE<
+	typedef HqHashMap<
 		HqString*,
 		MemberDefinition,
-#if HQ_MAP_IS_UNORDERED
 		HqString::StlHash,
-		HqString::StlCompare,
-#else
-		HqString::StlLess,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, MemberDefinition)>
+		HqString::StlCompare
 	> MemberDefinitionMap;
 
-	typedef HQ_MAP_TYPE<
+	typedef HqHashMap<
 		HqString*,
 		HqScriptObject*,
-#if HQ_MAP_IS_UNORDERED
 		HqString::StlHash,
-		HqString::StlCompare,
-#else
-		HqString::StlLess,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqScriptObject*)>
+		HqString::StlCompare
 	> StringToPtrMap;
 
 	static HqScriptObject* CreateSchema(HqString* pTypeName, const MemberDefinitionMap& definitions);

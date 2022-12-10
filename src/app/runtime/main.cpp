@@ -42,7 +42,6 @@
 #define APPLICATION_RESULT_SUCCESS 0
 #define APPLICATION_RESULT_FAILURE 1
 
-// Needed by some of the Playstation platforms so we can use malloc without running out of memory.
 size_t sceLibcHeapSize = 10 * 1024 * 1024;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -177,13 +176,14 @@ int main(int argc, char* argv[])
 #if _MEM_STATS_ENABLED
 		// Update stats.
 		{
-			std::scoped_lock lock(allocMtx);
+			allocMtx.lock();
 
 			++activeAllocCount;
 			++totalAllocCount;
 			++mallocCount;
 
 			OnAlloc(size);
+			allocMtx.unlock();
 		}
 #endif
 
@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
 		{
 			const size_t oldSize = (pAlloc) ? (*pAlloc) : 0;
 
-			std::scoped_lock lock(allocMtx);
+			allocMtx.lock();
 
 			currentTotalSize -= oldSize;
 
@@ -222,6 +222,7 @@ int main(int argc, char* argv[])
 			}
 
 			OnAlloc(newSize);
+			allocMtx.unlock();
 		}
 #endif
 
@@ -239,12 +240,14 @@ int main(int argc, char* argv[])
 			{
 				const size_t size = (pAlloc) ? (*pAlloc) : 0;
 
-				std::scoped_lock lock(allocMtx);
+				allocMtx.lock();
 
 				currentTotalSize -= size;
 
 				assert(activeAllocCount > 0);
 				--activeAllocCount;
+
+				allocMtx.unlock();
 			}
 #endif
 

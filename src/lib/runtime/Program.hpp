@@ -26,23 +26,18 @@
 #include "../base/String.hpp"
 
 #include "../common/ByteHelper.hpp"
-#include "../common/Map.hpp"
+#include "../common/HashMap.hpp"
 #include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct HqProgram
 {
-	typedef HQ_MAP_TYPE<
+	typedef HqHashMap<
 		HqString*,
 		HqProgramHandle,
-#if HQ_MAP_IS_UNORDERED
 		HqString::StlHash,
-		HqString::StlCompare,
-#else
-		HqString::StlLess,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqProgramHandle)>
+		HqString::StlCompare
 	> StringToHandleMap;
 
 	typedef HqStack<HqProgramHandle> HandleStack;
@@ -62,10 +57,11 @@ struct HqProgram
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	HqValue::StringToHandleMap dependencies;
+	HqValue::StringToBoolMap dependencies;
 	HqFunction::StringToBoolMap functions;
 	HqValue::StringToBoolMap objectSchemas;
 	HqValue::StringToBoolMap globals;
+
 	StringArray strings;
 	HqByteHelper::Array code;
 

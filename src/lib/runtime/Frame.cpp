@@ -49,6 +49,9 @@ HqFrame* HqFrame::Create(HqExecutionHandle hExec)
 	pOutput->stack.nextIndex = 0;
 	pOutput->registers.count = HQ_VM_GP_REGISTER_COUNT;
 
+	// Allocate the local variable map.
+	HqValue::StringToHandleMap::Allocate(pOutput->locals);
+
 	// Reset the state of the value stack and registers.
 	Reset(pOutput);
 
@@ -69,12 +72,13 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 	{
 		// Build the local table for the new frame. This will intentionally copy each value from the function's local table
 		// so any changes made the variables in the frame will not affect the prototypes in the function.
-		for(auto& kv : hFunction->locals)
+		HqFunction::StringToBoolMap::Iterator iter;
+		while(HqFunction::StringToBoolMap::IterateNext(hFunction->locals, iter))
 		{
-			HqString* const pKey = HQ_MAP_ITER_KEY(kv);
+			HqString* const pKey = iter.pData->key;
 			HqValueHandle hValue = HqValue::CreateNull();
 
-			HQ_MAP_FUNC_INSERT(hFrame->locals, pKey, hValue);
+			HqValue::StringToHandleMap::Insert(hFrame->locals, pKey, hValue);
 		}
 
 		HqDecoder::Initialize(hFrame->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
@@ -96,7 +100,7 @@ void HqFrame::Reset(HqFrameHandle hFrame)
 	}
 
 	// Remove all local variables.
-	hFrame->locals.Clear();
+	HqValue::StringToHandleMap::Clear(hFrame->locals);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -166,13 +170,10 @@ int HqFrame::SetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, HqStri
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
 	assert(pVariableName != nullptr);
 
-	auto kv = hFrame->locals.find(pVariableName);
-	if(kv == hFrame->locals.end())
+	if(!HqValue::StringToHandleMap::Set(hFrame->locals, pVariableName, HqValue::Resolve(hValue)))
 	{
 		return HQ_ERROR_KEY_DOES_NOT_EXIST;
 	}
-
-	HQ_MAP_ITER_PTR_VALUE(kv) = HqValue::Resolve(hValue);
 
 	return HQ_SUCCESS;
 }
@@ -202,14 +203,15 @@ HqValueHandle HqFrame::GetLocalVariable(HqFrameHandle hFrame, HqString* const pV
 	assert(pVariableName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!HQ_MAP_FUNC_CONTAINS(hFrame->locals, pVariableName))
+	HqValueHandle hOutput;
+	if(!HqValue::StringToHandleMap::Get(hFrame->locals, pVariableName, hOutput))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
 		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	(*pOutResult) = HQ_SUCCESS;
-	return HQ_MAP_FUNC_GET(hFrame->locals, pVariableName);
+	return hOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -243,13 +245,16 @@ void HqFrame::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 	}
 
 	// Discover the local variable values.
-	for(auto& kv : hFrame->locals)
 	{
-		HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
-
-		if(HqValue::CanBeMarked(hValue))
+		HqValue::StringToHandleMap::Iterator iter;
+		while(HqValue::StringToHandleMap::IterateNext(hFrame->locals, iter))
 		{
-			HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+			HqValueHandle hValue = iter.pData->value;
+
+			if(HqValue::CanBeMarked(hValue))
+			{
+				HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+			}
 		}
 	}
 }
@@ -264,6 +269,9 @@ void HqFrame::prv_onGcDestruct(void* const pOpaque)
 	// Dispose of the value stack and registers.
 	HqValue::HandleStack::Dispose(hFrame->stack);
 	HqValue::HandleArray::Dispose(hFrame->registers);
+
+	// Dispose of the local variable map.
+	HqValue::StringToHandleMap::Dispose(hFrame->locals);
 
 	delete hFrame;
 }

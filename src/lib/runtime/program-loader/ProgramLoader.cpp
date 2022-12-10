@@ -51,6 +51,11 @@ HqProgramLoader::HqProgramLoader(
 	assert(m_hVm != HQ_VM_HANDLE_NULL);
 	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
+	StringResources::Allocate(m_strings);
+	HqScriptObject::StringToPtrMap::Allocate(m_objectSchemas);
+	HqValue::StringToHandleMap::Allocate(m_globalValues);
+	HqFunction::StringToHandleMap::Allocate(m_functions);
+
 	m_hReport = &m_hVm->report;
 }
 
@@ -58,24 +63,57 @@ HqProgramLoader::HqProgramLoader(
 
 HqProgramLoader::~HqProgramLoader()
 {
-	for(auto& kv : m_strings)
+	// Release all tracked strings.
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		StringResources::Iterator iter;
+		while(StringResources::IterateNext(m_strings, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		StringResources::Dispose(m_strings);
 	}
 
-	for(auto& kv : m_objectSchemas)
+	// Dispose of the loaded object schema data.
 	{
-		HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
+		HqScriptObject::StringToPtrMap::Iterator iter;
+		while(HqScriptObject::StringToPtrMap::IterateNext(m_objectSchemas, iter))
+		{
+			if(iter.pData->value)
+			{
+				HqScriptObject::Dispose(iter.pData->value);
+			}
+		}
+
+		HqScriptObject::StringToPtrMap::Dispose(m_objectSchemas);
 	}
 
-	for(auto& kv : m_globalValues)
+	// Release all global variable names.
 	{
-		HqValue::SetAutoMark(HQ_MAP_ITER_VALUE(kv), false);
+		HqValue::StringToHandleMap::Iterator iter;
+		while(HqValue::StringToHandleMap::IterateNext(m_globalValues, iter))
+		{
+			if(iter.pData->value)
+			{
+				HqString::Release(iter.pData->key);
+			}
+		}
+
+		HqValue::StringToHandleMap::Dispose(m_globalValues);
 	}
 
-	for(auto& kv : m_functions)
+	// Dispose of the loaded function data
 	{
-		HqFunction::Dispose(HQ_MAP_ITER_VALUE(kv));
+		HqFunction::StringToHandleMap::Iterator iter;
+		while(HqFunction::StringToHandleMap::IterateNext(m_functions, iter))
+		{
+			if(iter.pData->value)
+			{
+				HqFunction::Dispose(iter.pData->value);
+			}
+		}
+
+		HqFunction::StringToHandleMap::Dispose(m_functions);
 	}
 }
 
@@ -162,17 +200,14 @@ void HqProgramLoader::prv_finalize()
 
 	// Link the object schemas into the program and VM.
 	{
-		// Initialize the program's object table and reserve extra space in the VM's object table.
-		HQ_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
-		HQ_MAP_FUNC_RESERVE(m_hVm->objectSchemas, HQ_MAP_FUNC_SIZE(m_hVm->objectSchemas) + m_programHeader.objectTable.length);
-
 		// Distribute the object schemas.
-		for(auto& kv : m_objectSchemas)
+		HqScriptObject::StringToPtrMap::Iterator iter;
+		while(HqScriptObject::StringToPtrMap::IterateNext(m_objectSchemas, iter))
 		{
-			HqString* const pTypeName = HQ_MAP_ITER_KEY(kv);
-			HqScriptObject* const pObjectSchema = HQ_MAP_ITER_VALUE(kv);
+			HqString* const pTypeName = iter.pData->key;
+			HqScriptObject* const pObjectSchema = iter.pData->value;
 
-			if(HQ_MAP_FUNC_CONTAINS(m_hVm->objectSchemas, HQ_MAP_ITER_KEY(kv)))
+			if(HqScriptObject::StringToPtrMap::Contains(m_hVm->objectSchemas, pTypeName))
 			{
 				HqReportMessage(
 					m_hReport,
@@ -181,35 +216,32 @@ void HqProgramLoader::prv_finalize()
 					m_hProgram->pName->data,
 					pTypeName->data
 				);
-				HqScriptObject::Dispose(pObjectSchema);
 				continue;
 			}
 
 			// Track the name of the schema in the program.
 			HqString::AddRef(pTypeName);
-			HQ_MAP_FUNC_INSERT(m_hProgram->objectSchemas, pTypeName, false);
+			HqValue::StringToBoolMap::Insert(m_hProgram->objectSchemas, pTypeName, false);
 
 			// Track the schema itself in the VM.
 			HqString::AddRef(pTypeName);
-			HQ_MAP_FUNC_INSERT(m_hVm->objectSchemas, pTypeName, pObjectSchema);
-		}
+			HqScriptObject::StringToPtrMap::Insert(m_hVm->objectSchemas, pTypeName, pObjectSchema);
 
-		HQ_MAP_FUNC_CLEAR(m_objectSchemas);
+			// Clear the object schema so it doesn't get disposed after loading has completed.
+			iter.pData->value = nullptr;
+		}
 	}
 
 	// Link the global variables to the VM
 	{
-		// Initialize the program's global table and reserve extra space in the VM's global table.
-		HQ_MAP_FUNC_RESERVE(m_hProgram->globals, m_programHeader.globalTable.length);
-		HQ_MAP_FUNC_RESERVE(m_hVm->globals, HQ_MAP_FUNC_SIZE(m_hVm->globals) + m_programHeader.globalTable.length);
-
 		// Map the global variables.
-		for(auto& kv : m_globalValues)
+		HqValue::StringToHandleMap::Iterator iter;
+		while(HqValue::StringToHandleMap::IterateNext(m_globalValues, iter))
 		{
-			HqString* const pVarName = HQ_MAP_ITER_KEY(kv);
-			HqValueHandle hValue = HQ_MAP_ITER_VALUE(kv);
+			HqString* const pVarName = iter.pData->key;
+			HqValueHandle hValue = iter.pData->value;
 
-			if(HQ_MAP_FUNC_CONTAINS(m_hVm->globals, pVarName))
+			if(HqValue::StringToHandleMap::Contains(m_hVm->globals, pVarName))
 			{
 				HqReportMessage(
 					m_hReport,
@@ -224,29 +256,27 @@ void HqProgramLoader::prv_finalize()
 
 			// Track the name of the global in the program.
 			HqString::AddRef(pVarName);
-			HQ_MAP_FUNC_INSERT(m_hProgram->globals, pVarName, false);
+			HqValue::StringToBoolMap::Insert(m_hProgram->globals, pVarName, false);
 
 			// Add the global to the VM.
 			HqString::AddRef(pVarName);
-			HQ_MAP_FUNC_INSERT(m_hVm->globals, pVarName, hValue);
+			HqValue::StringToHandleMap::Insert(m_hVm->globals, pVarName, hValue);
 		}
-
-		HQ_MAP_FUNC_CLEAR(m_globalValues);
 	}
 
 	// Link the functions to the VM.
 	{
-		// Initialize the program's function table and reserve extra space in the VM's function table.
-		HQ_MAP_FUNC_RESERVE(m_hProgram->functions, m_programHeader.functionTable.length);
-		HQ_MAP_FUNC_RESERVE(m_hVm->functions, HQ_MAP_FUNC_SIZE(m_hVm->functions) + m_programHeader.functionTable.length);
-
-		for(auto& kv : m_functions)
+		HqFunction::StringToHandleMap::Iterator iter;
+		while(HqFunction::StringToHandleMap::IterateNext(m_functions, iter))
 		{
-			HqString* const pSignature = HQ_MAP_ITER_KEY(kv);
-			HqFunctionHandle hFunction = HQ_MAP_ITER_VALUE(kv);
+			HqString* const pSignature = iter.pData->key;
+			HqFunctionHandle hFunction = iter.pData->value;
+
+			// Clear the function handle in the map so it doesn't get destroyed after the script load has completed.
+			iter.pData->value = HQ_FUNCTION_HANDLE_NULL;
 
 			// Check if a function with this signature has already been loaded.
-			if(HQ_MAP_FUNC_CONTAINS(m_hVm->functions, pSignature))
+			if(HqFunction::StringToHandleMap::Contains(m_hVm->functions, pSignature))
 			{
 				HqReportMessage(
 					m_hReport,
@@ -262,14 +292,12 @@ void HqProgramLoader::prv_finalize()
 			// Map the function signature to output program.
 			// Only the name is mapped since the function itself will live in the VM.
 			HqString::AddRef(pSignature);
-			HQ_MAP_FUNC_INSERT(m_hProgram->functions, pSignature, false);
+			HqFunction::StringToBoolMap::Insert(m_hProgram->functions, pSignature, false);
 
 			// Map the function in the load data map which will be transferred to the VM.
 			HqString::AddRef(pSignature);
-			HQ_MAP_FUNC_INSERT(m_hVm->functions, pSignature, hFunction);
+			HqFunction::StringToHandleMap::Insert(m_hVm->functions, pSignature, hFunction);
 		}
-
-		HQ_MAP_FUNC_CLEAR(m_functions);
 	}
 }
 
@@ -598,9 +626,6 @@ bool HqProgramLoader::prv_readDependencyTable()
 			return false;
 		}
 
-		// Initialize the dependency table.
-		HQ_MAP_FUNC_RESERVE(m_hProgram->dependencies, m_programHeader.dependencyTable.length);
-
 		// Iterate for each dependency.
 		for(uint32_t index = 0; index < m_programHeader.dependencyTable.length; ++index)
 		{
@@ -613,10 +638,9 @@ bool HqProgramLoader::prv_readDependencyTable()
 
 			prv_trackString(pDependencyName);
 
-			// We stuff the dependency name into a map, but that's just for convenience of storing it.
-			// The value it's mapped to isn't used for anything, so it can be null.
+			// Add the dependency to the program.
 			HqString::AddRef(pDependencyName);
-			HQ_MAP_FUNC_INSERT(m_hProgram->dependencies, pDependencyName, HQ_VALUE_HANDLE_NULL);
+			HqValue::StringToBoolMap::Insert(m_hProgram->dependencies, pDependencyName, false);
 		}
 	}
 
@@ -646,9 +670,6 @@ bool HqProgramLoader::prv_readObjectTable()
 			return false;
 		}
 
-		// Initialize the object schema table.
-		HQ_MAP_FUNC_RESERVE(m_hProgram->objectSchemas, m_programHeader.objectTable.length);
-
 		// Iterate for each object type.
 		for(uint32_t objectIndex = 0; objectIndex < m_programHeader.objectTable.length; ++objectIndex)
 		{
@@ -677,6 +698,7 @@ bool HqProgramLoader::prv_readObjectTable()
 			}
 
 			HqScriptObject::MemberDefinitionMap memberDefinitions;
+			HqScriptObject::MemberDefinitionMap::Allocate(memberDefinitions);
 
 			// Read the member definitions for this object type.
 			for(uint32_t memberIndex = 0; memberIndex < memberCount; ++memberIndex)
@@ -684,6 +706,7 @@ bool HqProgramLoader::prv_readObjectTable()
 				HqString* const pMemberName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
 				if(!pMemberName)
 				{
+					HqScriptObject::MemberDefinitionMap::Dispose(memberDefinitions);
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
@@ -702,6 +725,7 @@ bool HqProgramLoader::prv_readObjectTable()
 				result = HqSerializerReadUint8(m_hSerializer, &memberType);
 				if(result != HQ_SUCCESS)
 				{
+					HqScriptObject::MemberDefinitionMap::Dispose(memberDefinitions);
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
@@ -718,16 +742,26 @@ bool HqProgramLoader::prv_readObjectTable()
 
 				def.valueType = memberType;
 				def.bindingIndex = memberIndex;
-
-				// We don't need to add a reference on the member name here since
-				// creating the schema will do that for us.
-				HQ_MAP_FUNC_INSERT(memberDefinitions, pMemberName, def);
+				
+				// We don't need to add a reference on the member name here since creating the schema will do that for us.
+				HqScriptObject::MemberDefinitionMap::Insert(memberDefinitions, pMemberName, def);
 			}
 
 			// Create the object schema from the type name and member definitions.
 			HqScriptObject* const pObjectSchema = HqScriptObject::CreateSchema(pTypeName, memberDefinitions);
 
 			prv_trackObjectSchema(pTypeName, pObjectSchema);
+
+			// Dispose of the member definitions.
+			{
+				HqScriptObject::MemberDefinitionMap::Iterator iter;
+				while(HqScriptObject::MemberDefinitionMap::IterateNext(memberDefinitions, iter))
+				{
+					HqString::Release(iter.pData->key);
+				}
+
+				HqScriptObject::MemberDefinitionMap::Dispose(memberDefinitions);
+			}
 		}
 	}
 
@@ -948,9 +982,25 @@ bool HqProgramLoader::prv_readFunctions()
 					return false;
 				}
 
+				HqFunction::StringToBoolMap::Allocate(locals);
+				auto freeLocals = [&locals]()
+				{
+					// Dispose of the temporary local variable map.
+					{
+						HqFunction::StringToBoolMap::Iterator iter;
+						while(HqFunction::StringToBoolMap::IterateNext(locals, iter))
+						{
+							HqString::Release(iter.pData->key);
+						}
+
+						HqFunction::StringToBoolMap::Dispose(locals);
+					}
+				};
+
 				// Read the function's local variables.
 				if(!prv_readLocalVariables(pSignature, locals))
 				{
+					freeLocals();
 					return false;
 				}
 
@@ -963,9 +1013,12 @@ bool HqProgramLoader::prv_readFunctions()
 					}
 
 					HqGuardedBlock::Array::Dispose(guardedBlocks);
+					freeLocals();
+
 					return false;
 				}
 
+				// Create a script function.
 				hFunction = HqFunction::CreateScript(
 					m_hProgram,
 					pSignature,
@@ -976,9 +1029,12 @@ bool HqProgramLoader::prv_readFunctions()
 					numParameters,
 					numReturnValues
 				);
+
+				freeLocals();
 			}
 			else
 			{
+				// Create a native function.
 				hFunction = HqFunction::CreateNative(
 					m_hProgram,
 					pSignature,
@@ -1069,8 +1125,6 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 
 	if(numLocalVariables > 0)
 	{
-		HQ_MAP_FUNC_RESERVE(outLocals, numLocalVariables);
-
 		// Iterate for each local variable.
 		for(uint32_t localIndex = 0; localIndex < numLocalVariables; ++localIndex)
 		{
@@ -1083,7 +1137,7 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 
 			prv_trackString(pVarName);
 
-			if(HQ_MAP_FUNC_CONTAINS(outLocals, pVarName))
+			if(HqFunction::StringToBoolMap::Contains(outLocals, pVarName))
 			{
 				HqReportMessage(
 					m_hReport,
@@ -1098,7 +1152,7 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 
 			// Map the local variable to the function.
 			HqString::AddRef(pVarName);
-			HQ_MAP_FUNC_INSERT(outLocals, pVarName, false);
+			HqFunction::StringToBoolMap::Insert(outLocals, pVarName, false);
 		}
 	}
 

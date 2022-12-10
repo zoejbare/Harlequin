@@ -46,6 +46,8 @@ HqFunctionHandle HqFunction::CreateInit(
 	pOutput->numReturnValues = 0;
 	pOutput->isNative = false;
 
+	StringToBoolMap::Initialize(pOutput->locals);
+
 	return pOutput;
 }
 
@@ -80,9 +82,18 @@ HqFunctionHandle HqFunction::CreateScript(
 
 	HqString::AddRef(pOutput->pSignature);
 
-	// Just in case the std::move() doesn't do the trick,
-	// make sure the input locals are cleared out.
-	HQ_MAP_FUNC_CLEAR(locals);
+	// Make a copy of the input local variable map to store on this function.
+	HqFunction::StringToBoolMap::Initialize(pOutput->locals);
+	HqFunction::StringToBoolMap::Copy(pOutput->locals, locals);
+
+	// Track the name strings in the local variables map.
+	{
+		HqFunction::StringToBoolMap::Iterator iter;
+		while(HqFunction::StringToBoolMap::IterateNext(pOutput->locals, iter))
+		{
+			HqString::AddRef(iter.pData->key);
+		}
+	}
 
 	return pOutput;
 }
@@ -112,6 +123,7 @@ HqFunctionHandle HqFunction::CreateNative(
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = true;
 
+	StringToBoolMap::Initialize(pOutput->locals);
 	HqString::AddRef(pOutput->pSignature);
 
 	return pOutput;
@@ -142,6 +154,7 @@ HqFunctionHandle HqFunction::CreateBuiltIn(
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = true;
 
+	StringToBoolMap::Initialize(pOutput->locals);
 	HqString::AddRef(pOutput->pSignature);
 
 	return pOutput;
@@ -153,12 +166,15 @@ void HqFunction::Dispose(HqFunctionHandle hFunction)
 {
 	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
-	HqString::Release(hFunction->pSignature);
-
 	// Dispose of the local variables.
-	for(auto& kv : hFunction->locals)
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		StringToBoolMap::Iterator iter;
+		while(StringToBoolMap::IterateNext(hFunction->locals, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		StringToBoolMap::Dispose(hFunction->locals);
 	}
 
 	// Release each guarded block.
@@ -168,6 +184,7 @@ void HqFunction::Dispose(HqFunctionHandle hFunction)
 	}
 
 	HqGuardedBlock::Array::Dispose(hFunction->guardedBlocks);
+	HqString::Release(hFunction->pSignature);
 
 	delete hFunction;
 }

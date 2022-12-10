@@ -27,9 +27,8 @@
 #include "../base/String.hpp"
 
 #include "../common/Array.hpp"
-#include "../common/Map.hpp"
+#include "../common/HashMap.hpp"
 #include "../common/Stack.hpp"
-#include "../common/StlAllocator.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -52,28 +51,18 @@ struct HqValue
 	typedef HqArray<HqValueHandle> HandleArray;
 	typedef HqStack<HqValueHandle> HandleStack;
 
-	typedef HQ_MAP_TYPE<
+	typedef HqHashMap<
 		HqString*,
 		HqValueHandle,
-#if HQ_MAP_IS_UNORDERED
 		HqString::StlHash,
-		HqString::StlCompare,
-#else
-		HqString::StlLess,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqValueHandle)>
+		HqString::StlCompare
 	> StringToHandleMap;
 
-	typedef HQ_MAP_TYPE<
+	typedef HqHashMap<
 		HqString*,
 		bool,
-#if HQ_MAP_IS_UNORDERED
 		HqString::StlHash,
-		HqString::StlCompare,
-#else
-		HqString::StlLess,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)>
+		HqString::StlCompare
 	> StringToBoolMap;
 
 	static HqValue NullValue;

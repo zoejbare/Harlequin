@@ -25,7 +25,7 @@
 
 #include "../base/String.hpp"
 
-#include "../common/Map.hpp"
+#include "../common/HashMap.hpp"
 #include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -34,28 +34,18 @@ struct HqProgram;
 
 struct HqFunction
 {
-	typedef HQ_MAP_TYPE<
-		HqString*,
-		HqFunctionHandle,
-#if HQ_MAP_IS_UNORDERED
-		HqString::StlHash,
-		HqString::StlCompare,
-#else
-		HqString::StlLess,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, HqFunctionHandle)>
+	typedef HqHashMap<
+		HqString*, 
+		HqFunctionHandle, 
+		HqString::StlHash, 
+		HqString::StlCompare
 	> StringToHandleMap;
 
-	typedef HQ_MAP_TYPE<
-		HqString*,
-		bool,
-#if HQ_MAP_IS_UNORDERED
-		HqString::StlHash,
-		HqString::StlCompare,
-#else
-		HqString::StlLess,
-#endif
-		HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)>
+	typedef HqHashMap<
+		HqString*, 
+		bool, 
+		HqString::StlHash, 
+		HqString::StlCompare
 	> StringToBoolMap;
 
 	typedef HqStack<HqFunctionHandle> HandleStack;

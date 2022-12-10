@@ -61,7 +61,7 @@ struct HqArray
 
 				if(array.capacity >= lowCount)
 				{
-					array.capacity = array.capacity * 3 / 2;
+					array.capacity = array.capacity * 2;
 				}
 				else
 				{

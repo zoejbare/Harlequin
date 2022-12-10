@@ -37,7 +37,7 @@ void HqVm::prv_setupEmbeddedExceptions(HqVmHandle hVm)
 	{ \
 		def.bindingIndex = index; \
 		def.valueType = HQ_VALUE_TYPE_ ## value_type; \
-		HQ_MAP_FUNC_INSERT(memberDefs, HqString::Create(name), def); \
+		HqScriptObject::MemberDefinitionMap::Insert(memberDefs, HqString::Create(name), def); \
 	}
 
 #define HQ_EMBEDDED_EXCEPTION(type, name) \
@@ -45,8 +45,10 @@ void HqVm::prv_setupEmbeddedExceptions(HqVmHandle hVm)
 		HqString* const pTypeName = HqString::Create("Harlequin.System.Exception." name); \
 		HqScriptObject* const pSchema = HqScriptObject::CreateSchema(pTypeName, memberDefs); \
 		HqString::Release(pTypeName); \
-		HQ_MAP_FUNC_INSERT(hVm->embeddedExceptions, HQ_STANDARD_EXCEPTION_ ## type, pSchema); \
+		EmbeddedExceptionMap::Insert(hVm->embeddedExceptions, HQ_STANDARD_EXCEPTION_ ## type, pSchema); \
 	}
+
+	HqScriptObject::MemberDefinitionMap::Allocate(memberDefs);
 
 	// Add the object member data common to each exception type.
 	HQ_EXCEPTION_ADD_MEMBER(STRING, "_message", 0);
@@ -57,9 +59,14 @@ void HqVm::prv_setupEmbeddedExceptions(HqVmHandle hVm)
 	HQ_EMBEDDED_EXCEPTION(DIVIDE_BY_ZERO_ERROR, "DivideByZeroError");
 
 	// Clean up the member names.
-	for(auto& kv : memberDefs)
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		HqScriptObject::MemberDefinitionMap::Iterator iter;
+		while(HqScriptObject::MemberDefinitionMap::IterateNext(memberDefs, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		HqScriptObject::MemberDefinitionMap::Dispose(memberDefs);
 	}
 
 #undef HQ_EMBEDDED_EXCEPTION

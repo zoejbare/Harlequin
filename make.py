@@ -194,18 +194,6 @@ with csbuild.Project(ExtGoogleTest.projectName, ExtGoogleTest.path, autoDiscover
 
 ###################################################################################################
 
-class ExtSkipProbe(object):
-	projectName = "external_skipprobe"
-	path = "external/SkipProbe/include"
-
-with csbuild.Project(ExtSkipProbe.projectName, ExtSkipProbe.path, autoDiscoverSourceFiles=False):
-	csbuild.SetOutput("{name}", csbuild.ProjectType.Stub)
-
-	with csbuild.Scope(csbuild.ScopeDef.Children):
-		csbuild.AddIncludeDirectories(ExtSkipProbe.path)
-
-###################################################################################################
-
 class ExtXxHash(object):
 	projectName = "external_xxhash"
 	path = "external/xxHash"
@@ -262,7 +250,6 @@ class LibHarlequinBase(object):
 	projectName = "LibHarlequinBase"
 	outputName = "libhqbase"
 	dependencies = [
-		ExtSkipProbe.projectName,
 		ExtXxHash.projectName,
 	]
 

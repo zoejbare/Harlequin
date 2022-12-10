@@ -41,30 +41,12 @@ public:
 
 private:
 
-#if HQ_MAP_IS_UNORDERED
-	#define _HQ_RES_PTR_SET(type) \
-		HQ_MAP_TYPE< \
-			type, \
-			bool, \
-			std::hash<type>, \
-			std::equal_to<type>, \
-			HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)> \
-		>
-
-#else
-	#define _HQ_RES_PTR_SET(type) \
-		HQ_MAP_TYPE< \
-			type, \
-			bool, \
-			std::less<type>, \
-			HqStlAllocator<HQ_MAP_NODE_TYPE(HqString*, bool)> \
-		>
-
-#endif
-
-	typedef _HQ_RES_PTR_SET(HqString*) StringResources;
-
-#undef _HQ_RES_PTR_SET
+	typedef HqHashMap<
+		HqString*, 
+		bool, 
+		HqString::StlHash, 
+		HqString::StlCompare
+	> StringResources;
 
 	HqProgramLoader(
 		HqProgramHandle hProgram,
@@ -112,28 +94,28 @@ private:
 
 inline void HqProgramLoader::prv_trackString(HqString* const pString)
 {
-	HQ_MAP_FUNC_INSERT(m_strings, pString, false);
+	StringResources::Insert(m_strings, pString, false);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 inline void HqProgramLoader::prv_trackObjectSchema(HqString* const pTypeName, HqScriptObject* const pSchema)
 {
-	HQ_MAP_FUNC_INSERT(m_objectSchemas, pTypeName, pSchema);
+	HqScriptObject::StringToPtrMap::Insert(m_objectSchemas, pTypeName, pSchema);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 inline void HqProgramLoader::prv_trackGlobalValue(HqString* const pGlobalName, HqValueHandle hValue)
 {
-	HQ_MAP_FUNC_INSERT(m_globalValues, pGlobalName, hValue);
+	HqValue::StringToHandleMap::Insert(m_globalValues, pGlobalName, hValue);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 inline void HqProgramLoader::prv_trackFunction(HqString* const pSignature, HqFunctionHandle hFunction)
 {
-	HQ_MAP_FUNC_INSERT(m_functions, pSignature, hFunction);
+	HqFunction::StringToHandleMap::Insert(m_functions, pSignature, hFunction);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -47,6 +47,13 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	// Initialize the execution context array.
 	HqExecution::HandleArray::Initialize(pOutput->executionContexts);
 
+	// Allocate the VM data maps.
+	EmbeddedExceptionMap::Allocate(pOutput->embeddedExceptions);
+	HqProgram::StringToHandleMap::Allocate(pOutput->programs);
+	HqFunction::StringToHandleMap::Allocate(pOutput->functions);
+	HqValue::StringToHandleMap::Allocate(pOutput->globals);
+	HqScriptObject::StringToPtrMap::Allocate(pOutput->objectSchemas);
+
 	prv_setupOpCodes(pOutput);
 	prv_setupBuiltIns(pOutput);
 	prv_setupEmbeddedExceptions(pOutput);
@@ -99,36 +106,61 @@ void HqVm::Dispose(HqVmHandle hVm)
 		}
 
 		// Clean up each loaded program.
-		for(auto& kv : hVm->programs)
 		{
-			HqString::Release(HQ_MAP_ITER_KEY(kv));
-			HqProgram::Dispose(HQ_MAP_ITER_VALUE(kv));
+			HqProgram::StringToHandleMap::Iterator iter;
+			while(HqProgram::StringToHandleMap::IterateNext(hVm->programs, iter))
+			{
+				HqString::Release(iter.pData->key);
+				HqProgram::Dispose(iter.pData->value);
+			}
+
+			HqProgram::StringToHandleMap::Dispose(hVm->programs);
 		}
 
 		// Clean up each loaded function.
-		for(auto& kv : hVm->functions)
 		{
-			HqString::Release(HQ_MAP_ITER_KEY(kv));
-			HqFunction::Dispose(HQ_MAP_ITER_VALUE(kv));
+			HqFunction::StringToHandleMap::Iterator iter;
+			while(HqFunction::StringToHandleMap::IterateNext(hVm->functions, iter))
+			{
+				HqString::Release(iter.pData->key);
+				HqFunction::Dispose(iter.pData->value);
+			}
+
+			HqFunction::StringToHandleMap::Dispose(hVm->functions);
 		}
 
 		// Clean up each loaded global.
-		for(auto& kv : hVm->globals)
 		{
-			HqString::Release(HQ_MAP_ITER_KEY(kv));
+			HqValue::StringToHandleMap::Iterator iter;
+			while(HqValue::StringToHandleMap::IterateNext(hVm->globals, iter))
+			{
+				HqString::Release(iter.pData->key);
+			}
+
+			HqValue::StringToHandleMap::Dispose(hVm->globals);
 		}
 
 		// Clean up each loaded object schema.
-		for(auto& kv : hVm->objectSchemas)
 		{
-			HqString::Release(HQ_MAP_ITER_KEY(kv));
-			HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
+			HqScriptObject::StringToPtrMap::Iterator iter;
+			while(HqScriptObject::StringToPtrMap::IterateNext(hVm->objectSchemas, iter))
+			{
+				HqString::Release(iter.pData->key);
+				HqScriptObject::Dispose(iter.pData->value);
+			}
+
+			HqScriptObject::StringToPtrMap::Dispose(hVm->objectSchemas);
 		}
 
 		// Dispose of each embedded exception.
-		for(auto& kv : hVm->embeddedExceptions)
 		{
-			HqScriptObject::Dispose(HQ_MAP_ITER_VALUE(kv));
+			EmbeddedExceptionMap::Iterator iter;
+			while(EmbeddedExceptionMap::IterateNext(hVm->embeddedExceptions, iter))
+			{
+				HqScriptObject::Dispose(iter.pData->value);
+			}
+
+			EmbeddedExceptionMap::Dispose(hVm->embeddedExceptions);
 		}
 
 		// Clean up each active execution context.
@@ -136,12 +168,6 @@ void HqVm::Dispose(HqVmHandle hVm)
 		{
 			HqExecution::Dispose(hVm->executionContexts.pData[i]);
 		}
-
-		HQ_MAP_FUNC_CLEAR(hVm->programs);
-		HQ_MAP_FUNC_CLEAR(hVm->functions);
-		HQ_MAP_FUNC_CLEAR(hVm->globals);
-		HQ_MAP_FUNC_CLEAR(hVm->objectSchemas);
-		HQ_MAP_FUNC_CLEAR(hVm->embeddedExceptions);
 
 		OpCodeArray::Dispose(hVm->opCodes);
 		HqExecution::HandleArray::Dispose(hVm->executionContexts);
@@ -210,13 +236,10 @@ int HqVm::SetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, HqString* cons
 	assert(hValue != HQ_VALUE_HANDLE_NULL);
 	assert(pVariableName != nullptr);
 
-	auto kv = hVm->globals.find(pVariableName);
-	if(kv == hVm->globals.end())
+	if(!HqValue::StringToHandleMap::Set(hVm->globals, pVariableName, hValue))
 	{
 		return HQ_ERROR_KEY_DOES_NOT_EXIST;
 	}
-
-	HQ_MAP_ITER_PTR_VALUE(kv) = hValue;
 
 	return HQ_SUCCESS;
 }
@@ -229,14 +252,15 @@ HqProgramHandle HqVm::GetProgram(HqVmHandle hVm, HqString* const pProgramName, i
 	assert(pProgramName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!HQ_MAP_FUNC_CONTAINS(hVm->programs, pProgramName))
+	HqProgramHandle hOutput = HQ_PROGRAM_HANDLE_NULL;
+	if(!HqProgram::StringToHandleMap::Get(hVm->programs, pProgramName, hOutput))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
 		return HQ_PROGRAM_HANDLE_NULL;
 	}
 
 	(*pOutResult) = HQ_SUCCESS;
-	return HQ_MAP_FUNC_GET(hVm->programs, pProgramName);
+	return hOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -247,14 +271,15 @@ HqFunctionHandle HqVm::GetFunction(HqVmHandle hVm, HqString* const pFunctionSign
 	assert(pFunctionSignature != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!HQ_MAP_FUNC_CONTAINS(hVm->functions, pFunctionSignature))
+	HqFunctionHandle hOutput = HQ_FUNCTION_HANDLE_NULL;
+	if(!HqFunction::StringToHandleMap::Get(hVm->functions, pFunctionSignature, hOutput))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
 		return HQ_FUNCTION_HANDLE_NULL;
 	}
 
 	(*pOutResult) = HQ_SUCCESS;
-	return HQ_MAP_FUNC_GET(hVm->functions, pFunctionSignature);
+	return hOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -265,14 +290,15 @@ HqValueHandle HqVm::GetGlobalVariable(HqVmHandle hVm, HqString* const pVariableN
 	assert(pVariableName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!HQ_MAP_FUNC_CONTAINS(hVm->globals, pVariableName))
+	HqValueHandle hOutput = HQ_VALUE_HANDLE_NULL;
+	if(!HqValue::StringToHandleMap::Get(hVm->globals, pVariableName, hOutput))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
 		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	(*pOutResult) = HQ_SUCCESS;
-	return HQ_MAP_FUNC_GET(hVm->globals, pVariableName);
+	return hOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -283,14 +309,15 @@ HqScriptObject* HqVm::GetObjectSchema(HqVmHandle hVm, HqString* const pTypeName,
 	assert(pTypeName != nullptr);
 	assert(pOutResult != nullptr);
 
-	if(!HQ_MAP_FUNC_CONTAINS(hVm->objectSchemas, pTypeName))
+	HqScriptObject* pOutput = nullptr;
+	if(!HqScriptObject::StringToPtrMap::Get(hVm->objectSchemas, pTypeName, pOutput))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
 		return nullptr;
 	}
 
 	(*pOutResult) = HQ_SUCCESS;
-	return HQ_MAP_FUNC_GET(hVm->objectSchemas, pTypeName);
+	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -301,12 +328,11 @@ HqValueHandle HqVm::CreateStandardException(HqVmHandle hVm, const int exceptionT
 	assert(exceptionType >= 0);
 	assert(exceptionType < HQ_STANDARD_EXCEPTION__COUNT);
 
-	if(!HQ_MAP_FUNC_CONTAINS(hVm->embeddedExceptions, exceptionType))
+	HqScriptObject* pSchema = nullptr;
+	if(!EmbeddedExceptionMap::Get(hVm->embeddedExceptions, exceptionType, pSchema))
 	{
 		return nullptr;
 	}
-
-	HqScriptObject* const pSchema = HQ_MAP_FUNC_GET(hVm->embeddedExceptions, exceptionType);
 
 	HqValueHandle hExceptionValue = HqValue::CreateObject(hVm, pSchema);
 	HqValueHandle hMessageValue = HqValue::CreateString(hVm, message);

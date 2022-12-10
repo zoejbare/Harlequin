@@ -216,6 +216,10 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 	pOutput->pName = pProgramName;
 
 	// Initialize the program data.
+	HqValue::StringToBoolMap::Allocate(pOutput->dependencies);
+	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
+	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
+	HqValue::StringToBoolMap::Allocate(pOutput->globals);
 	StringArray::Initialize(pOutput->strings);
 	HqByteHelper::Array::Initialize(pOutput->code);
 
@@ -229,7 +233,7 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 		if(ProgramLoad(pOutput, hVm, hSerializer))
 		{
 			// Map the program to the VM.
-			HQ_MAP_FUNC_INSERT(hVm->programs, pProgramName, pOutput);
+			HqProgram::StringToHandleMap::Insert(hVm->programs, pProgramName, pOutput);
 		}
 		else
 		{
@@ -321,6 +325,9 @@ HqProgramHandle HqProgram::Create(
 	pOutput->pName = pProgramName;
 
 	// Initialize the program data.
+	HqValue::StringToBoolMap::Allocate(pOutput->dependencies);
+	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
+	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
 	StringArray::Initialize(pOutput->strings);
 	HqByteHelper::Array::Initialize(pOutput->code);
 
@@ -334,7 +341,7 @@ HqProgramHandle HqProgram::Create(
 		if(ProgramLoad(pOutput, hVm, hSerializer))
 		{
 			// Map the program to the VM.
-			HQ_MAP_FUNC_INSERT(hVm->programs, pProgramName, pOutput);
+			HqProgram::StringToHandleMap::Insert(hVm->programs, pProgramName, pOutput);
 		}
 		else
 		{
@@ -369,27 +376,47 @@ void HqProgram::Dispose(HqProgramHandle hProgram)
 	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
 
 	// Dispose of all program dependencies.
-	for(auto& kv : hProgram->dependencies)
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		HqValue::StringToBoolMap::Iterator iter;
+		while(HqValue::StringToBoolMap::IterateNext(hProgram->dependencies, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		HqValue::StringToBoolMap::Dispose(hProgram->dependencies);
 	}
 
 	// Release the function signature keys.
-	for(auto& kv : hProgram->functions)
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		HqFunction::StringToBoolMap::Iterator iter;
+		while(HqFunction::StringToBoolMap::IterateNext(hProgram->functions, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		HqFunction::StringToBoolMap::Dispose(hProgram->functions);
 	}
 
-	// Release the object schemas and their type names.
-	for(auto& kv : hProgram->objectSchemas)
+	// Release the object schema type names.
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		HqValue::StringToBoolMap::Iterator iter;
+		while(HqValue::StringToBoolMap::IterateNext(hProgram->objectSchemas, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		HqValue::StringToBoolMap::Dispose(hProgram->objectSchemas);
 	}
 
-	// Release the global variable name keys.
-	for(auto& kv : hProgram->globals)
+	// Release the global variable names.
 	{
-		HqString::Release(HQ_MAP_ITER_KEY(kv));
+		HqValue::StringToBoolMap::Iterator iter;
+		while(HqValue::StringToBoolMap::IterateNext(hProgram->globals, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		HqValue::StringToBoolMap::Dispose(hProgram->globals);
 	}
 
 	// Release all strings values.
