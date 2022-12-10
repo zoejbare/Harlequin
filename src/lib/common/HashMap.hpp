@@ -21,6 +21,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "Array.hpp"
+#include "Hash.hpp"
 
 #include <assert.h>
 #include <functional>
@@ -31,7 +32,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-template <typename TKey, typename TValue, typename FHasher = std::hash<TKey>, typename FCompare = std::equal_to<TKey>>
+template <typename TKey, typename TValue, typename FHasher = HqStd::Hash<TKey>, typename FCompare = std::equal_to<TKey>>
 struct HqHashMap
 {
 	struct NodeData

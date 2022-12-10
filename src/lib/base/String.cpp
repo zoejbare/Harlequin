@@ -18,6 +18,8 @@
 
 #include "String.hpp"
 
+#include "../common/Hash.hpp"
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -244,36 +246,10 @@ bool HqString::RawCompare(const char* left, const char* right)
 
 size_t HqString::RawHash(const char* const string)
 {
-	auto calculateFnv1aHash = [](const char* const string, const size_t length) -> size_t
-	{
-#ifdef HQ_DATA_WIDTH_64_BIT
-		const uint64_t fnvOffsetBasis = 0xCBF29CE484222325ull;
-		const uint64_t fnvPrime = 0x00000100000001B3ull;
-
-		uint64_t output = fnvOffsetBasis;
-
-#else
-		const uint32_t fnvOffsetBasis = 0x811C9DC5ul;
-		const uint32_t fnvPrime = 0x01000193ul;
-
-		uint32_t output = fnvOffsetBasis;
-
-#endif
-
-		// Calculate the FNV1a hash from the input data.
-		for(size_t i = 0; i < length; ++i)
-		{
-			output ^= string[i];
-			output *= fnvPrime;
-		}
-
-		return size_t(output);
-	};
-
 	assert(string != nullptr);
 
 	const size_t length = strlen(string);
-	const size_t seed = calculateFnv1aHash(string, length);
+	const size_t seed = HqStd::Fnv1aHash(reinterpret_cast<const uint8_t*>(string), length);
 
 	return size_t(
 #ifdef HQ_DATA_WIDTH_64_BIT

@@ -34,8 +34,11 @@
 
 #include <deque>
 #include <map>
-#include <mutex>
 #include <vector>
+
+#if !defined(HQ_PLATFORM_PS3)
+	#include <mutex>
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -124,7 +127,9 @@ static size_t reallocCount = 0;
 
 static size_t currentTotalSize = 0;
 
+#if !defined(HQ_PLATFORM_PS3)
 static std::mutex allocMtx;
+#endif
 
 static void OnAlloc(const size_t size)
 {
@@ -176,14 +181,18 @@ int main(int argc, char* argv[])
 #if _MEM_STATS_ENABLED
 		// Update stats.
 		{
+	#if !defined(HQ_PLATFORM_PS3)
 			allocMtx.lock();
+	#endif
 
 			++activeAllocCount;
 			++totalAllocCount;
 			++mallocCount;
 
 			OnAlloc(size);
+	#if !defined(HQ_PLATFORM_PS3)
 			allocMtx.unlock();
+	#endif
 		}
 #endif
 
@@ -206,7 +215,9 @@ int main(int argc, char* argv[])
 		{
 			const size_t oldSize = (pAlloc) ? (*pAlloc) : 0;
 
+	#if !defined(HQ_PLATFORM_PS3)
 			allocMtx.lock();
+	#endif
 
 			currentTotalSize -= oldSize;
 
@@ -222,7 +233,10 @@ int main(int argc, char* argv[])
 			}
 
 			OnAlloc(newSize);
+
+	#if !defined(HQ_PLATFORM_PS3)
 			allocMtx.unlock();
+	#endif
 		}
 #endif
 
@@ -240,14 +254,18 @@ int main(int argc, char* argv[])
 			{
 				const size_t size = (pAlloc) ? (*pAlloc) : 0;
 
+	#if !defined(HQ_PLATFORM_PS3)
 				allocMtx.lock();
+	#endif
 
 				currentTotalSize -= size;
 
 				assert(activeAllocCount > 0);
 				--activeAllocCount;
 
+	#if !defined(HQ_PLATFORM_PS3)
 				allocMtx.unlock();
+	#endif
 			}
 #endif
 
