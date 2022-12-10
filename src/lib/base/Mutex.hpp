@@ -98,21 +98,29 @@ public:
 	HqScopedMutex(const HqScopedMutex&) = delete;
 	HqScopedMutex(HqScopedMutex&&) = delete;
 
-	explicit inline HqScopedMutex(HqMutex& mutex)
+	explicit inline HqScopedMutex(HqMutex& mutex, const bool condition = true)
 		: m_pMutex(&mutex)
+		, m_condition(condition)
 	{
-		HqMutex::Lock(*m_pMutex);
+		if(m_condition)
+		{
+			HqMutex::Lock(*m_pMutex);
+		}
 	}
 
 	inline ~HqScopedMutex()
 	{
-		HqMutex::Unlock(*m_pMutex);
+		if(m_condition)
+		{
+			HqMutex::Unlock(*m_pMutex);
+		}
 	}
 
 
 private:
 
 	HqMutex* m_pMutex;
+	bool m_condition;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

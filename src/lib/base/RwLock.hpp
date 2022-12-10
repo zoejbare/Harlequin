@@ -118,21 +118,29 @@ public:
 	HqScopedReadLock(const HqScopedReadLock&) = delete;
 	HqScopedReadLock(HqScopedReadLock&&) = delete;
 
-	explicit HqScopedReadLock(HqRwLock& rwlock)
+	explicit HqScopedReadLock(HqRwLock& rwlock, const bool condition = true)
 		: m_pRwLock(&rwlock)
+		, m_condition(condition)
 	{
-		HqRwLock::ReadLock(*m_pRwLock);
+		if(m_condition)
+		{
+			HqRwLock::ReadLock(*m_pRwLock);
+		}
 	}
 
 	~HqScopedReadLock()
 	{
-		HqRwLock::ReadUnlock(*m_pRwLock);
+		if(m_condition)
+		{
+			HqRwLock::ReadUnlock(*m_pRwLock);
+		}
 	}
 
 
 private:
 
 	HqRwLock* m_pRwLock;
+	bool m_condition;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -145,21 +153,29 @@ public:
 	HqScopedWriteLock(const HqScopedWriteLock&) = delete;
 	HqScopedWriteLock(HqScopedWriteLock&&) = delete;
 
-	explicit HqScopedWriteLock(HqRwLock& rwlock)
+	explicit HqScopedWriteLock(HqRwLock& rwlock, const bool condition = true)
 		: m_pRwLock(&rwlock)
+		, m_condition(condition)
 	{
-		HqRwLock::WriteLock(*m_pRwLock);
+		if(m_condition)
+		{
+			HqRwLock::WriteLock(*m_pRwLock);
+		}
 	}
 
 	~HqScopedWriteLock()
 	{
-		HqRwLock::WriteUnlock(*m_pRwLock);
+		if(m_condition)
+		{
+			HqRwLock::WriteUnlock(*m_pRwLock);
+		}
 	}
 
 
 private:
 
 	HqRwLock* m_pRwLock;
+	bool m_condition;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
