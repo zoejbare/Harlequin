@@ -86,24 +86,6 @@ static bool SerializeString(
 HqProgramWriterHandle HqProgramWriter::Create()
 {
 	HqProgramWriter* const pOutput = new HqProgramWriter();
-
-	// Serialize bytecode for the default init function bytecode just in case the high-level compiler does not supply it.
-	HqSerializerHandle hInitSerializer = HQ_SERIALIZER_HANDLE_NULL;
-	HqSerializerCreate(&hInitSerializer, HQ_SERIALIZER_MODE_WRITER);
-	HqBytecodeWriteReturn(hInitSerializer);
-
-	const void* const pInitBytecode = HqSerializerGetRawStreamPointer(hInitSerializer);
-	const size_t initBytecodeLength = HqSerializerGetStreamLength(hInitSerializer);
-
-	if(initBytecodeLength > 0)
-	{
-		// Copy the default init bytecode into the program writer.
-		pOutput->initBytecode.resize(initBytecodeLength);
-		memcpy(pOutput->initBytecode.data(), pInitBytecode, initBytecodeLength);
-	}
-
-	HqSerializerDispose(&hInitSerializer);
-
 	return pOutput;
 }
 
@@ -263,10 +245,8 @@ bool HqProgramWriter::Serialize(
 		memset(pProgramBytecode, 0, bytecode.size());
 
 		// Copy the program's init function to the start of the bytecode.
-		if(hProgramWriter->initBytecode.size() > 0)
-		{
-			memcpy(bytecode.data(), hProgramWriter->initBytecode.data(), hProgramWriter->initBytecode.size());
-		}
+		memcpy(bytecode.data(), hProgramWriter->initBytecode.data(), hProgramWriter->initBytecode.size());
+
 
 		// Fill out the full program bytecode from each function's individual bytecode.
 		for(const FunctionBinding& binding : functionBindings)

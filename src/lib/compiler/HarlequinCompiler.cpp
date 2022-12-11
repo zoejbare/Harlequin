@@ -22,9 +22,11 @@
 #include "FunctionData.hpp"
 #include "ProgramWriter.hpp"
 
+#include "../base/Serializer.hpp"
 #include "../base/String.hpp"
 #include "../common/OpCodeEnum.hpp"
 
+#include <assert.h>
 #include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -594,6 +596,27 @@ int HqProgramWriterSerialize(
 		|| HqSerializerGetMode(hSerializer) != HQ_SERIALIZER_MODE_WRITER)
 	{
 		return HQ_ERROR_INVALID_ARG;
+	}
+
+	if(hProgramWriter->initBytecode.size() == 0)
+	{
+		// Serialize bytecode for the default init function bytecode when the high-level compiler does not supply it.
+		HqSerializerHandle hInitSerializer = HQ_SERIALIZER_HANDLE_NULL;
+		HqSerializerCreate(&hInitSerializer, HQ_SERIALIZER_MODE_WRITER);
+		HqSerializerSetEndianness(hInitSerializer, hSerializer->endianness);
+
+		// The default init function just returns.
+		HqBytecodeWriteReturn(hInitSerializer);
+
+		const void* const pInitBytecode = HqSerializerGetRawStreamPointer(hInitSerializer);
+		const size_t initBytecodeLength = HqSerializerGetStreamLength(hInitSerializer);
+		assert(initBytecodeLength > 0);
+
+		// Copy the bytecode into the program writer.
+		hProgramWriter->initBytecode.resize(initBytecodeLength);
+		memcpy(hProgramWriter->initBytecode.data(), pInitBytecode, initBytecodeLength);
+
+		HqSerializerDispose(&hInitSerializer);
 	}
 
 	// Write the program to the serializer.

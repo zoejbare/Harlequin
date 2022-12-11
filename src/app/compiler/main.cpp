@@ -128,6 +128,10 @@ int main(int argc, char* argv[])
 	HqSerializerSetEndianness(hSubFuncSerializer, endianness);
 	HqSerializerSetEndianness(hExcFuncSerializer, endianness);
 
+	assert(HqSerializerGetEndianness(hFileSerializer) == HqSerializerGetEndianness(hSubFuncSerializer));
+	assert(HqSerializerGetEndianness(hFileSerializer) == HqSerializerGetEndianness(hMainFuncSerializer));
+	assert(HqSerializerGetEndianness(hFileSerializer) == HqSerializerGetEndianness(hExcFuncSerializer));
+
 	const char* const mainFuncSignature = "void App.Program.Main()";
 	const char* const subFuncSignature = "int32 App.Program.DoWork(float64)";
 	const char* const excFuncSignature = "void App.Program.ExceptionHandlingTest()";
