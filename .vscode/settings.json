@@ -1,9 +1,9 @@
 {
 	"C_Cpp.errorSquiggles": "Enabled",
 
-	"clangOutPath": "${workspaceFolder}/_out/clang",
-	"gccOutPath": "${workspaceFolder}/_out/gcc",
-	"msvcOutPath": "${workspaceFolder}/_out/msvc",
+	"buildEnvPath": "${workspaceFolder}/_buildenv",
+	"outputRootPath": "${workspaceFolder}/_out",
+
 	"cmake.configureOnOpen": false,
 	"files.associations": {
 		"__config": "cpp",

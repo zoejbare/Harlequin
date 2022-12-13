@@ -5,9 +5,9 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Launch Harlequin Runtime [clang/debug/x64]",
-			"program": "${config:clangOutPath}/x64/debug/hq",
-			"cwd": "${config:clangOutPath}/x64/debug",
+			"name": "Launch Harlequin Runtime [darwin-clang-arm64/debug]",
+			"program": "${config:outputRootPath}/darwin-clang-arm64/debug/hq",
+			"cwd": "${config:outputRootPath}/darwin-clang-arm64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -25,9 +25,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [clang/fastdebug/x64]",
-			"program": "${config:clangOutPath}/x64/fastdebug/hq",
-			"cwd": "${config:clangOutPath}/x64/fastdebug",
+			"name": "Launch Harlequin Runtime [darwin-clang-arm64/fastdebug]",
+			"program": "${config:outputRootPath}/darwin-clang-arm64/fastdebug/hq",
+			"cwd": "${config:outputRootPath}/darwin-clang-arm64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -45,9 +45,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [clang/release/x64]",
-			"program": "${config:clangOutPath}/x64/release/hq",
-			"cwd": "${config:clangOutPath}/x64/release",
+			"name": "Launch Harlequin Runtime [darwin-clang-arm64/release]",
+			"program": "${config:outputRootPath}/darwin-clang-arm64/release/hq",
+			"cwd": "${config:outputRootPath}/darwin-clang-arm64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -65,9 +65,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [clang/debug/x86]",
-			"program": "${config:clangOutPath}/x86/debug/hq",
-			"cwd": "${config:clangOutPath}/x86/debug",
+			"name": "Launch Harlequin Runtime [darwin-clang-x64/debug]",
+			"program": "${config:outputRootPath}/darwin-clang-x64/debug/hq",
+			"cwd": "${config:outputRootPath}/darwin-clang-x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -85,9 +85,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [clang/fastdebug/x86]",
-			"program": "${config:clangOutPath}/x86/fastdebug/hq",
-			"cwd": "${config:clangOutPath}/x86/fastdebug",
+			"name": "Launch Harlequin Runtime [darwin-clang-x64/fastdebug]",
+			"program": "${config:outputRootPath}/darwin-clang-x64/fastdebug/hq",
+			"cwd": "${config:outputRootPath}/darwin-clang-x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -105,9 +105,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [clang/release/x86]",
-			"program": "${config:clangOutPath}/x86/release/hq",
-			"cwd": "${config:clangOutPath}/x86/release",
+			"name": "Launch Harlequin Runtime [darwin-clang-x64/release]",
+			"program": "${config:outputRootPath}/darwin-clang-x64/release/hq",
+			"cwd": "${config:outputRootPath}/darwin-clang-x64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -125,9 +125,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [gcc/debug/x64]",
-			"program": "${config:gccOutPath}/x64/debug/hq",
-			"cwd": "${config:gccOutPath}/x64/debug",
+			"name": "Launch Harlequin Runtime [linux-clang-x64/debug]",
+			"program": "${config:outputRootPath}/linux-clang-x64/debug/hq",
+			"cwd": "${config:outputRootPath}/linux-clang-x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -145,9 +145,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [gcc/fastdebug/x64]",
-			"program": "${config:gccOutPath}/x64/fastdebug/hq",
-			"cwd": "${config:gccOutPath}/x64/fastdebug",
+			"name": "Launch Harlequin Runtime [linux-clang-x64/fastdebug]",
+			"program": "${config:outputRootPath}/linux-clang-x64/fastdebug/hq",
+			"cwd": "${config:outputRootPath}/linux-clang-x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -165,9 +165,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [gcc/release/x64]",
-			"program": "${config:gccOutPath}/x64/release/hq",
-			"cwd": "${config:gccOutPath}/x64/release",
+			"name": "Launch Harlequin Runtime [linux-clang-x64/release]",
+			"program": "${config:outputRootPath}/linux-clang-x64/release/hq",
+			"cwd": "${config:outputRootPath}/linux-clang-x64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -185,9 +185,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [gcc/debug/x86]",
-			"program": "${config:gccOutPath}/x86/debug/hq",
-			"cwd": "${config:gccOutPath}/x86/debug",
+			"name": "Launch Harlequin Runtime [linux-clang-x86/debug]",
+			"program": "${config:outputRootPath}/linux-clang-x86/debug/hq",
+			"cwd": "${config:outputRootPath}/linux-clang-x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -205,9 +205,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [gcc/fastdebug/x86]",
-			"program": "${config:gccOutPath}/x86/fastdebug/hq",
-			"cwd": "${config:gccOutPath}/x86/fastdebug",
+			"name": "Launch Harlequin Runtime [linux-clang-x86/fastdebug]",
+			"program": "${config:outputRootPath}/linux-clang-x86/fastdebug/hq",
+			"cwd": "${config:outputRootPath}/linux-clang-x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -225,9 +225,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [gcc/release/x86]",
-			"program": "${config:gccOutPath}/x86/release/hq",
-			"cwd": "${config:gccOutPath}/x86/release",
+			"name": "Launch Harlequin Runtime [linux-clang-x86/release]",
+			"program": "${config:outputRootPath}/linux-clang-x86/release/hq",
+			"cwd": "${config:outputRootPath}/linux-clang-x86/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -245,9 +245,129 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [msvc/debug/x64]",
-			"program": "${config:msvcOutPath}/x64/debug/hq.exe",
-			"cwd": "${config:msvcOutPath}/x64/debug",
+			"name": "Launch Harlequin Runtime [linux-gcc-x64/debug]",
+			"program": "${config:outputRootPath}/linux-gcc-x64/debug/hq",
+			"cwd": "${config:outputRootPath}/linux-gcc-x64/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"args": ["test.bin"],
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Harlequin Runtime [linux-gcc-x64/fastdebug]",
+			"program": "${config:outputRootPath}/linux-gcc-x64/fastdebug/hq",
+			"cwd": "${config:outputRootPath}/linux-gcc-x64/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"args": ["test.bin"],
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Harlequin Runtime [linux-gcc-x64/release]",
+			"program": "${config:outputRootPath}/linux-gcc-x64/release/hq",
+			"cwd": "${config:outputRootPath}/linux-gcc-x64/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"args": ["test.bin"],
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Harlequin Runtime [linux-gcc-x86/debug]",
+			"program": "${config:outputRootPath}/linux-gcc-x86/debug/hq",
+			"cwd": "${config:outputRootPath}/linux-gcc-x86/debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"args": ["test.bin"],
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Harlequin Runtime [linux-gcc-x86/fastdebug]",
+			"program": "${config:outputRootPath}/linux-gcc-x86/fastdebug/hq",
+			"cwd": "${config:outputRootPath}/linux-gcc-x86/fastdebug",
+			"type": "cppdbg",
+			"request": "launch",
+			"args": ["test.bin"],
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Harlequin Runtime [linux-gcc-x86/release]",
+			"program": "${config:outputRootPath}/linux-gcc-x86/release/hq",
+			"cwd": "${config:outputRootPath}/linux-gcc-x86/release",
+			"type": "cppdbg",
+			"request": "launch",
+			"args": ["test.bin"],
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"linux": {
+				"MIMode": "gdb"
+			},
+			"windows": {
+				"MIMode": "msvc"
+			},
+			"stopAtEntry": false,
+			"environment": [],
+			"externalConsole": false,
+		},
+		{
+			"name": "Launch Harlequin Runtime [windows-msvc-x64/debug]",
+			"program": "${config:outputRootPath}/windows-msvc-x64/debug/hq.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -259,9 +379,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [msvc/fastdebug/x64]",
-			"program": "${config:msvcOutPath}/x64/fastdebug/hq.exe",
-			"cwd": "${config:msvcOutPath}/x64/fastdebug",
+			"name": "Launch Harlequin Runtime [windows-msvc-x64/fastdebug]",
+			"program": "${config:outputRootPath}/windows-msvc-x64/fastdebug/hq.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -273,9 +393,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [msvc/release/x64]",
-			"program": "${config:msvcOutPath}/x64/release/hq.exe",
-			"cwd": "${config:msvcOutPath}/x64/release",
+			"name": "Launch Harlequin Runtime [windows-msvc-x64/release]",
+			"program": "${config:outputRootPath}/windows-msvc-x64/release/hq.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -287,9 +407,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [msvc/debug/x86]",
-			"program": "${config:msvcOutPath}/x86/debug/hq.exe",
-			"cwd": "${config:msvcOutPath}/x86/debug",
+			"name": "Launch Harlequin Runtime [windows-msvc-x86/debug]",
+			"program": "${config:outputRootPath}/windows-msvc-x86/debug/hq.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -301,9 +421,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [msvc/fastdebug/x86]",
-			"program": "${config:msvcOutPath}/x86/fastdebug/hq.exe",
-			"cwd": "${config:msvcOutPath}/x86/fastdebug",
+			"name": "Launch Harlequin Runtime [windows-msvc-x86/fastdebug]",
+			"program": "${config:outputRootPath}/windows-msvc-x86/fastdebug/hq.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -315,9 +435,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Runtime [msvc/release/x86]",
-			"program": "${config:msvcOutPath}/x86/release/hq.exe",
-			"cwd": "${config:msvcOutPath}/x86/release",
+			"name": "Launch Harlequin Runtime [windows-msvc-x86/release]",
+			"program": "${config:outputRootPath}/windows-msvc-x86/release/hq.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x86/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"args": ["test.bin"],
@@ -329,9 +449,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [clang/debug/x64]",
-			"program": "${config:clangOutPath}/x64/debug/hqc",
-			"cwd": "${config:clangOutPath}/x64/debug",
+			"name": "Launch Harlequin Compiler [darwin-clang-arm64/debug]",
+			"program": "${config:outputRootPath}/darwin-clang-arm64/debug/hqc",
+			"cwd": "${config:outputRootPath}/darwin-clang-arm64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -348,9 +468,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [clang/fastdebug/x64]",
-			"program": "${config:clangOutPath}/x64/fastdebug/hqc",
-			"cwd": "${config:clangOutPath}/x64/fastdebug",
+			"name": "Launch Harlequin Compiler [darwin-clang-arm64/fastdebug]",
+			"program": "${config:outputRootPath}/darwin-clang-arm64/fastdebug/hqc",
+			"cwd": "${config:outputRootPath}/darwin-clang-arm64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -367,9 +487,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [clang/release/x64]",
-			"program": "${config:clangOutPath}/x64/release/hqc",
-			"cwd": "${config:clangOutPath}/x64/release",
+			"name": "Launch Harlequin Compiler [darwin-clang-arm64/release]",
+			"program": "${config:outputRootPath}/darwin-clang-arm64/release/hqc",
+			"cwd": "${config:outputRootPath}/darwin-clang-arm64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -386,9 +506,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [clang/debug/x86]",
-			"program": "${config:clangOutPath}/x86/debug/hqc",
-			"cwd": "${config:clangOutPath}/x86/debug",
+			"name": "Launch Harlequin Compiler [darwin-clang-x64/debug]",
+			"program": "${config:outputRootPath}/darwin-clang-x64/debug/hqc",
+			"cwd": "${config:outputRootPath}/darwin-clang-x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -405,9 +525,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [clang/fastdebug/x86]",
-			"program": "${config:clangOutPath}/x86/fastdebug/hqc",
-			"cwd": "${config:clangOutPath}/x86/fastdebug",
+			"name": "Launch Harlequin Compiler [darwin-clang-x64/fastdebug]",
+			"program": "${config:outputRootPath}/darwin-clang-x64/fastdebug/hqc",
+			"cwd": "${config:outputRootPath}/darwin-clang-x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -424,9 +544,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [clang/release/x86]",
-			"program": "${config:clangOutPath}/x86/release/hqc",
-			"cwd": "${config:clangOutPath}/x86/release",
+			"name": "Launch Harlequin Compiler [darwin-clang-x64/release]",
+			"program": "${config:outputRootPath}/darwin-clang-x64/release/hqc",
+			"cwd": "${config:outputRootPath}/darwin-clang-x64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -443,9 +563,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [gcc/debug/x64]",
-			"program": "${config:gccOutPath}/x64/debug/hqc",
-			"cwd": "${config:gccOutPath}/x64/debug",
+			"name": "Launch Harlequin Compiler [linux-clang-x64/debug]",
+			"program": "${config:outputRootPath}/linux-clang-x64/debug/hqc",
+			"cwd": "${config:outputRootPath}/linux-clang-x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -462,9 +582,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [gcc/fastdebug/x64]",
-			"program": "${config:gccOutPath}/x64/fastdebug/hqc",
-			"cwd": "${config:gccOutPath}/x64/fastdebug",
+			"name": "Launch Harlequin Compiler [linux-clang-x64/fastdebug]",
+			"program": "${config:outputRootPath}/linux-clang-x64/fastdebug/hqc",
+			"cwd": "${config:outputRootPath}/linux-clang-x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -481,9 +601,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [gcc/release/x64]",
-			"program": "${config:gccOutPath}/x64/release/hqc",
-			"cwd": "${config:gccOutPath}/x64/release",
+			"name": "Launch Harlequin Compiler [linux-clang-x64/release]",
+			"program": "${config:outputRootPath}/linux-clang-x64/release/hqc",
+			"cwd": "${config:outputRootPath}/linux-clang-x64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -500,9 +620,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [gcc/debug/x86]",
-			"program": "${config:gccOutPath}/x86/debug/hqc",
-			"cwd": "${config:gccOutPath}/x86/debug",
+			"name": "Launch Harlequin Compiler [linux-clang-x86/debug]",
+			"program": "${config:outputRootPath}/linux-clang-x86/debug/hqc",
+			"cwd": "${config:outputRootPath}/linux-clang-x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -519,9 +639,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [gcc/fastdebug/x86]",
-			"program": "${config:gccOutPath}/x86/fastdebug/hqc",
-			"cwd": "${config:gccOutPath}/x86/fastdebug",
+			"name": "Launch Harlequin Compiler [linux-clang-x86/fastdebug]",
+			"program": "${config:outputRootPath}/linux-clang-x86/fastdebug/hqc",
+			"cwd": "${config:outputRootPath}/linux-clang-x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -538,9 +658,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [gcc/release/x86]",
-			"program": "${config:gccOutPath}/x86/release/hqc",
-			"cwd": "${config:gccOutPath}/x86/release",
+			"name": "Launch Harlequin Compiler [linux-clang-x86/release]",
+			"program": "${config:outputRootPath}/linux-clang-x86/release/hqc",
+			"cwd": "${config:outputRootPath}/linux-clang-x86/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -557,87 +677,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Compiler [msvc/debug/x64]",
-			"program": "${config:msvcOutPath}/x64/debug/hqc.exe",
-			"cwd": "${config:msvcOutPath}/x64/debug",
-			"type": "cppdbg",
-			"request": "launch",
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Compiler [msvc/fastdebug/x64]",
-			"program": "${config:msvcOutPath}/x64/fastdebug/hqc.exe",
-			"cwd": "${config:msvcOutPath}/x64/fastdebug",
-			"type": "cppdbg",
-			"request": "launch",
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Compiler [msvc/release/x64]",
-			"program": "${config:msvcOutPath}/x64/release/hqc.exe",
-			"cwd": "${config:msvcOutPath}/x64/release",
-			"type": "cppdbg",
-			"request": "launch",
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Compiler [msvc/debug/x86]",
-			"program": "${config:msvcOutPath}/x86/debug/hqc.exe",
-			"cwd": "${config:msvcOutPath}/x86/debug",
-			"type": "cppdbg",
-			"request": "launch",
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Compiler [msvc/fastdebug/x86]",
-			"program": "${config:msvcOutPath}/x86/fastdebug/hqc.exe",
-			"cwd": "${config:msvcOutPath}/x86/fastdebug",
-			"type": "cppdbg",
-			"request": "launch",
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Compiler [msvc/release/x86]",
-			"program": "${config:msvcOutPath}/x86/release/hqc.exe",
-			"cwd": "${config:msvcOutPath}/x86/release",
-			"type": "cppdbg",
-			"request": "launch",
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Unit Tests [clang/debug/x64]",
-			"program": "${config:clangOutPath}/x64/debug/hqunittest",
-			"cwd": "${config:clangOutPath}/x64/debug",
+			"name": "Launch Harlequin Compiler [linux-gcc-x64/debug]",
+			"program": "${config:outputRootPath}/linux-gcc-x64/debug/hqc",
+			"cwd": "${config:outputRootPath}/linux-gcc-x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -654,9 +696,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [clang/fastdebug/x64]",
-			"program": "${config:clangOutPath}/x64/fastdebug/hqunittest",
-			"cwd": "${config:clangOutPath}/x64/fastdebug",
+			"name": "Launch Harlequin Compiler [linux-gcc-x64/fastdebug]",
+			"program": "${config:outputRootPath}/linux-gcc-x64/fastdebug/hqc",
+			"cwd": "${config:outputRootPath}/linux-gcc-x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -673,9 +715,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [clang/release/x64]",
-			"program": "${config:clangOutPath}/x64/release/hqunittest",
-			"cwd": "${config:clangOutPath}/x64/release",
+			"name": "Launch Harlequin Compiler [linux-gcc-x64/release]",
+			"program": "${config:outputRootPath}/linux-gcc-x64/release/hqc",
+			"cwd": "${config:outputRootPath}/linux-gcc-x64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -692,9 +734,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [clang/debug/x86]",
-			"program": "${config:clangOutPath}/x86/debug/hqunittest",
-			"cwd": "${config:clangOutPath}/x86/debug",
+			"name": "Launch Harlequin Compiler [linux-gcc-x86/debug]",
+			"program": "${config:outputRootPath}/linux-gcc-x86/debug/hqc",
+			"cwd": "${config:outputRootPath}/linux-gcc-x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -711,9 +753,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [clang/fastdebug/x86]",
-			"program": "${config:clangOutPath}/x86/fastdebug/hqunittest",
-			"cwd": "${config:clangOutPath}/x86/fastdebug",
+			"name": "Launch Harlequin Compiler [linux-gcc-x86/fastdebug]",
+			"program": "${config:outputRootPath}/linux-gcc-x86/fastdebug/hqc",
+			"cwd": "${config:outputRootPath}/linux-gcc-x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -730,9 +772,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [clang/release/x86]",
-			"program": "${config:clangOutPath}/x86/release/hqunittest",
-			"cwd": "${config:clangOutPath}/x86/release",
+			"name": "Launch Harlequin Compiler [linux-gcc-x86/release]",
+			"program": "${config:outputRootPath}/linux-gcc-x86/release/hqc",
+			"cwd": "${config:outputRootPath}/linux-gcc-x86/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"osx": {
@@ -749,123 +791,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [gcc/debug/x64]",
-			"program": "${config:gccOutPath}/x64/debug/hqunittest",
-			"cwd": "${config:gccOutPath}/x64/debug",
-			"type": "cppdbg",
-			"request": "launch",
-			"osx": {
-				"MIMode": "lldb"
-			},
-			"linux": {
-				"MIMode": "gdb"
-			},
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Unit Tests [gcc/fastdebug/x64]",
-			"program": "${config:gccOutPath}/x64/fastdebug/hqunittest",
-			"cwd": "${config:gccOutPath}/x64/fastdebug",
-			"type": "cppdbg",
-			"request": "launch",
-			"osx": {
-				"MIMode": "lldb"
-			},
-			"linux": {
-				"MIMode": "gdb"
-			},
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Unit Tests [gcc/release/x64]",
-			"program": "${config:gccOutPath}/x64/release/hqunittest",
-			"cwd": "${config:gccOutPath}/x64/release",
-			"type": "cppdbg",
-			"request": "launch",
-			"osx": {
-				"MIMode": "lldb"
-			},
-			"linux": {
-				"MIMode": "gdb"
-			},
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Unit Tests [gcc/debug/x86]",
-			"program": "${config:gccOutPath}/x86/debug/hqunittest",
-			"cwd": "${config:gccOutPath}/x86/debug",
-			"type": "cppdbg",
-			"request": "launch",
-			"osx": {
-				"MIMode": "lldb"
-			},
-			"linux": {
-				"MIMode": "gdb"
-			},
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Unit Tests [gcc/fastdebug/x86]",
-			"program": "${config:gccOutPath}/x86/fastdebug/hqunittest",
-			"cwd": "${config:gccOutPath}/x86/fastdebug",
-			"type": "cppdbg",
-			"request": "launch",
-			"osx": {
-				"MIMode": "lldb"
-			},
-			"linux": {
-				"MIMode": "gdb"
-			},
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Unit Tests [gcc/release/x86]",
-			"program": "${config:gccOutPath}/x86/release/hqunittest",
-			"cwd": "${config:gccOutPath}/x86/release",
-			"type": "cppdbg",
-			"request": "launch",
-			"osx": {
-				"MIMode": "lldb"
-			},
-			"linux": {
-				"MIMode": "gdb"
-			},
-			"windows": {
-				"MIMode": "msvc"
-			},
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
-		},
-		{
-			"name": "Launch Harlequin Unit Tests [msvc/debug/x64]",
-			"program": "${config:msvcOutPath}/x64/debug/hqunittest.exe",
-			"cwd": "${config:msvcOutPath}/x64/debug",
+			"name": "Launch Harlequin Compiler [windows-msvc-x64/debug]",
+			"program": "${config:outputRootPath}/windows-msvc-x64/debug/hqc.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x64/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"windows": {
@@ -876,9 +804,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [msvc/fastdebug/x64]",
-			"program": "${config:msvcOutPath}/x64/fastdebug/hqunittest.exe",
-			"cwd": "${config:msvcOutPath}/x64/fastdebug",
+			"name": "Launch Harlequin Compiler [windows-msvc-x64/fastdebug]",
+			"program": "${config:outputRootPath}/windows-msvc-x64/fastdebug/hqc.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x64/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"windows": {
@@ -889,9 +817,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [msvc/release/x64]",
-			"program": "${config:msvcOutPath}/x64/release/hqunittest.exe",
-			"cwd": "${config:msvcOutPath}/x64/release",
+			"name": "Launch Harlequin Compiler [windows-msvc-x64/release]",
+			"program": "${config:outputRootPath}/windows-msvc-x64/release/hqc.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x64/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"windows": {
@@ -902,9 +830,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [msvc/debug/x86]",
-			"program": "${config:msvcOutPath}/x86/debug/hqunittest.exe",
-			"cwd": "${config:msvcOutPath}/x86/debug",
+			"name": "Launch Harlequin Compiler [windows-msvc-x86/debug]",
+			"program": "${config:outputRootPath}/windows-msvc-x86/debug/hqc.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x86/debug",
 			"type": "cppdbg",
 			"request": "launch",
 			"windows": {
@@ -915,9 +843,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [msvc/fastdebug/x86]",
-			"program": "${config:msvcOutPath}/x86/fastdebug/hqunittest.exe",
-			"cwd": "${config:msvcOutPath}/x86/fastdebug",
+			"name": "Launch Harlequin Compiler [windows-msvc-x86/fastdebug]",
+			"program": "${config:outputRootPath}/windows-msvc-x86/fastdebug/hqc.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x86/fastdebug",
 			"type": "cppdbg",
 			"request": "launch",
 			"windows": {
@@ -928,9 +856,9 @@
 			"externalConsole": false,
 		},
 		{
-			"name": "Launch Harlequin Unit Tests [msvc/release/x86]",
-			"program": "${config:msvcOutPath}/x86/release/hqunittest.exe",
-			"cwd": "${config:msvcOutPath}/x86/release",
+			"name": "Launch Harlequin Compiler [windows-msvc-x86/release]",
+			"program": "${config:outputRootPath}/windows-msvc-x86/release/hqc.exe",
+			"cwd": "${config:outputRootPath}/windows-msvc-x86/release",
 			"type": "cppdbg",
 			"request": "launch",
 			"windows": {

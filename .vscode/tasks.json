@@ -16,7 +16,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
@@ -24,7 +24,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -41,7 +41,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
@@ -49,7 +49,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -66,7 +66,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
@@ -74,7 +74,7 @@
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -91,7 +91,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
@@ -99,7 +99,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -116,7 +116,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
@@ -124,7 +124,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -141,7 +141,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
@@ -149,8 +149,68 @@
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [clang/debug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-t", "debug", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Build [clang/fastdebug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Build [clang/release/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-t", "release", "-o", "clang"]
 			}
 		},
 		{
@@ -166,7 +226,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
@@ -174,7 +234,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -191,7 +251,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
@@ -199,7 +259,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -216,7 +276,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
@@ -224,7 +284,7 @@
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -241,7 +301,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
@@ -249,7 +309,7 @@
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -266,7 +326,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
@@ -274,7 +334,7 @@
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -291,7 +351,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
@@ -299,8 +359,68 @@
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Build [gcc/debug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-t", "debug", "-o", "gcc"]
+			}
+		},
+		{
+			"label": "Build [gcc/fastdebug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc"]
+			}
+		},
+		{
+			"label": "Build [gcc/release/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-t", "release", "-o", "gcc"]
 			}
 		},
 		{
@@ -319,7 +439,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -339,7 +459,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -359,7 +479,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -379,7 +499,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -399,7 +519,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -419,7 +539,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -459,7 +579,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "psvita"]
 			}
 		},
@@ -479,7 +599,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "psvita"]
 			}
 		},
@@ -499,7 +619,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "ps3"]
 			}
 		},
@@ -519,7 +639,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "ps3"]
 			}
 		},
@@ -539,7 +659,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "ps3"]
 			}
 		},
@@ -559,7 +679,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "debug", "-o", "ps4"]
 			}
 		},
@@ -579,7 +699,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "fastdebug", "-o", "ps4"]
 			}
 		},
@@ -599,7 +719,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-t", "release", "-o", "ps4"]
 			}
 		},
@@ -616,7 +736,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
@@ -624,7 +744,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -641,7 +761,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
@@ -649,7 +769,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -666,7 +786,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
@@ -674,7 +794,7 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -691,7 +811,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
@@ -699,7 +819,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -716,7 +836,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
@@ -724,7 +844,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -741,7 +861,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
@@ -749,8 +869,68 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/debug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/fastdebug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/release/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang"]
 			}
 		},
 		{
@@ -766,7 +946,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
@@ -774,7 +954,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -791,7 +971,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
@@ -799,7 +979,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -816,7 +996,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
@@ -824,7 +1004,7 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -841,7 +1021,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
@@ -849,7 +1029,7 @@
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -866,7 +1046,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
@@ -874,7 +1054,7 @@
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -891,7 +1071,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
@@ -899,7 +1079,7 @@
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -919,8 +1099,68 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x64"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/debug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/fastdebug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/release/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc"]
 			}
 		},
 		{
@@ -939,7 +1179,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -959,7 +1199,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -979,7 +1219,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -999,7 +1239,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1019,7 +1259,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1039,7 +1279,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "psvita", "-j1", "--show-commands"]
 			}
 		},
@@ -1059,7 +1299,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "psvita"]
 			}
 		},
@@ -1079,7 +1319,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "psvita"]
 			}
 		},
@@ -1099,7 +1339,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "ps3"]
 			}
 		},
@@ -1119,7 +1359,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "ps3"]
 			}
 		},
@@ -1139,7 +1379,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "ps3"]
 			}
 		},
@@ -1159,7 +1399,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "debug", "-o", "ps4"]
 			}
 		},
@@ -1179,7 +1419,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "ps4"]
 			}
 		},
@@ -1199,7 +1439,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "ps4"]
 			}
 		},
@@ -1216,7 +1456,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
@@ -1224,7 +1464,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -1241,7 +1481,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
@@ -1249,7 +1489,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -1266,7 +1506,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
@@ -1274,7 +1514,7 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x64"]
 			}
 		},
@@ -1291,7 +1531,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
@@ -1299,7 +1539,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -1316,7 +1556,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
@@ -1324,7 +1564,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "x86"]
 			}
 		},
@@ -1341,7 +1581,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
@@ -1349,8 +1589,68 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [clang/debug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Clean [clang/fastdebug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Clean [clang/release/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang"]
 			}
 		},
 		{
@@ -1366,7 +1666,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
@@ -1374,7 +1674,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -1391,7 +1691,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
@@ -1399,7 +1699,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -1416,7 +1716,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
@@ -1424,7 +1724,7 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x64"]
 			}
 		},
@@ -1441,7 +1741,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
@@ -1449,7 +1749,7 @@
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -1466,7 +1766,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
@@ -1474,7 +1774,7 @@
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "x86"]
 			}
 		},
@@ -1491,7 +1791,7 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"command": "${workspaceFolder}/_build/bin/python",
+			"command": "${config:buildEnvPath}/bin/python",
 			"osx": {
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
@@ -1499,8 +1799,68 @@
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
 			},
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "x86"]
+			}
+		},
+		{
+			"label": "Clean [gcc/debug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc"]
+			}
+		},
+		{
+			"label": "Clean [gcc/fastdebug/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc"]
+			}
+		},
+		{
+			"label": "Clean [gcc/release/WSL]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: This build task is only supported from the WSL environment"],
+			"linux": {
+				"command": "${config:buildEnvPath}-wsl/bin/python",
+				"args": ["make.py", "-t", "release", "-o", "gcc"]
 			}
 		},
 		{
@@ -1519,7 +1879,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1539,7 +1899,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1559,7 +1919,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x64"]
 			}
 		},
@@ -1579,7 +1939,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1599,7 +1959,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1619,7 +1979,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "msvc", "-a", "x86"]
 			}
 		},
@@ -1639,7 +1999,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "psvita"]
 			}
 		},
@@ -1659,7 +2019,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "psvita"]
 			}
 		},
@@ -1679,7 +2039,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "psvita"]
 			}
 		},
@@ -1699,7 +2059,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "ps3"]
 			}
 		},
@@ -1719,7 +2079,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "ps3"]
 			}
 		},
@@ -1739,7 +2099,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "ps3"]
 			}
 		},
@@ -1759,7 +2119,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "debug", "-o", "ps4"]
 			}
 		},
@@ -1779,7 +2139,7 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "ps4"]
 			}
 		},
@@ -1799,8 +2159,68 @@
 			"command": "echo",
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
-				"command": "${workspaceFolder}/_build/Scripts/python.exe",
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-c", "-t", "release", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Clean [ps5/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Clean [ps5/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Clean [ps5/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "release", "-o", "ps5"]
 			}
 		}
 	]
