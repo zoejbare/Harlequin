@@ -49,10 +49,18 @@ struct _HqInternalFiberConfig
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _HqFiberEntryPoint(void* const pOpaqueConfig)
+extern "C" void _HqFiberEntryPoint(void* const pArgLsb, void* const pArgMsb)
 {
+	const uintptr_t address =
+#ifdef HQ_DATA_WIDTH_64_BIT
+		// Reassemble the input address.
+		reinterpret_cast<uintptr_t>(pArgLsb) | (reinterpret_cast<uintptr_t>(pArgMsb) << 32);
+#else
+		reinterpret_cast<uintptr_t>(pArgLsb); (void) pArgMsg;
+#endif
+
 	// Copy internal fiber config.
-	_HqInternalFiberConfig config = *reinterpret_cast<_HqInternalFiberConfig*>(pOpaqueConfig);
+	_HqInternalFiberConfig config = *reinterpret_cast<_HqInternalFiberConfig*>(address);
 
 	// Now that the fiber context has been established, we can go back to finish out the initialization call.
 	// The next time the fiber is run, it will resume from this point.
@@ -130,10 +138,22 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 	// Save our position in the current context so we can return here after setting up the fiber context.
 	if(_setjmp(obj.returnJump) == 0)
 	{
+		const uintptr_t argAddress = reinterpret_cast<uintptr_t>(&internalConfig);
+
+#ifdef HQ_DATA_WIDTH_64_BIT
+		// The makecontext spec states that arguments passed to the target function should be no larger than 32-bit integers
+		// for portability since some platforms will only pass up to 32-bits per argument. Some Linux platforms will be fine
+		// passing 64-bit arguments, but others won't (e.g., macOS targeting specifically the M1 architecture).
+		const uint32_t argLsb = argAddress & 0xFFFFFFFFul;
+		const uint32_t argMsb = (argAddress >> 32) & 0xFFFFFFFFul;
+#else
+		const uint32_t argLsb = uint32_t(argAddress);
+		const uint32_t argMsg = 0;
+#endif
 		// Bootstrap the fiber context to get it going. After the fiber context is running,
 		// we won't be using the ucontext API again. The reason is that it is extremely slow,
 		// though the setjmp+longjmp APIs are much faster.
-		makecontext(&tempContext, reinterpret_cast<void(*)()>(_HqFiberEntryPoint), 1, &internalConfig);
+		makecontext(&tempContext, reinterpret_cast<void(*)()>(_HqFiberEntryPoint), 2, argLsb, argMsb);
 		setcontext(&tempContext);
 	}
 
