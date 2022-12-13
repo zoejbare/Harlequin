@@ -27,11 +27,6 @@
 
 HqVmInit ConstructInitObject(void* const pUserData, const int reportLevel, HqMessageCallback onMessageFn)
 {
-	auto onDependencyRequested = [](void*, const char*)
-	{
-		// Don't need this right now, just stubbing it in to keep the context creation from failing.
-	};
-
 	HqVmInit output;
 	output.common.report.onMessageFn = onMessageFn;
 	output.common.report.pUserData = pUserData;
