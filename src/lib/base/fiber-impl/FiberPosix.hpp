@@ -20,10 +20,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __APPLE__
-	#define _XOPEN_SOURCE
-#endif
-
 #pragma push_macro("_FORTIFY_SOURCE")
 #pragma push_macro("__USE_FORTIFY_LEVEL")
 

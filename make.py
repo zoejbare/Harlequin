@@ -321,6 +321,9 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 			f"_support/Harlequin-PSVita/lib/base/*/*.cpp",
 		)
 
+	with csbuild.Platform("Darwin"):
+		csbuild.AddDefines("_XOPEN_SOURCE=1")
+
 ###################################################################################################
 
 class LibHarlequinCompiler(object):

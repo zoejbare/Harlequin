@@ -116,6 +116,9 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 	obj.usableStackSize = usableStackSize;
 	obj.totalStackSize = totalStackSize;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 	// Get the current context for the sake of setting up the fiber context.
 	ucontext_t tempContext;
 	getcontext(&tempContext);
@@ -133,6 +136,8 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 		makecontext(&tempContext, reinterpret_cast<void(*)()>(_HqFiberEntryPoint), 1, &internalConfig);
 		setcontext(&tempContext);
 	}
+
+#pragma GCC diagnostic pop
 
 #ifdef _HQ_ENABLE_VALGRIND
 	obj.valgrindStackId = VALGRIND_STACK_REGISTER(obj.pUsableStack, reinterpret_cast<uint8_t*>(obj.pUsableStack) + usableStackSize);
