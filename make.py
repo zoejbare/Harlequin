@@ -292,6 +292,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 		csbuild.AddSourceDirectories(f"{HarlequinCommon.libRootPath}/base")
 		csbuild.AddExcludeDirectories(
 			f"{HarlequinCommon.libRootPath}/base/clock-impl",
+			f"{HarlequinCommon.libRootPath}/base/fiber-impl",
 			f"{HarlequinCommon.libRootPath}/base/mutex-impl",
 			f"{HarlequinCommon.libRootPath}/base/rwlock-impl",
 			f"{HarlequinCommon.libRootPath}/base/thread-impl",
