@@ -4,6 +4,81 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Build [clang/debug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Build [clang/fastdebug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Build [clang/release/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "release", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
 			"label": "Build [clang/debug/x64]",
 			"type": "shell",
 			"group": "build",
@@ -211,6 +286,81 @@
 			"linux": {
 				"command": "${config:buildEnvPath}-wsl/bin/python",
 				"args": ["make.py", "-t", "release", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Build [gcc/debug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Build [gcc/fastdebug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Build [gcc/release/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "release", "-o", "gcc", "-a", "arm64"]
 			}
 		},
 		{
@@ -724,6 +874,141 @@
 			}
 		},
 		{
+			"label": "Build [ps5/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "debug", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Build [ps5/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "fastdebug", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Build [ps5/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-t", "release", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/debug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/fastdebug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Rebuild [clang/release/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "release", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
 			"label": "Rebuild [clang/debug/x64]",
 			"type": "shell",
 			"group": "build",
@@ -931,6 +1216,81 @@
 			"linux": {
 				"command": "${config:buildEnvPath}-wsl/bin/python",
 				"args": ["make.py", "-r", "-t", "release", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/debug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/fastdebug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Rebuild [gcc/release/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "release", "-o", "gcc", "-a", "arm64"]
 			}
 		},
 		{
@@ -1280,7 +1640,7 @@
 			"args": ["ERROR: Unsupported build platform"],
 			"windows":{
 				"command": "${config:buildEnvPath}/Scripts/python.exe",
-				"args": ["make.py", "-r", "-t", "debug", "-o", "psvita", "-j1", "--show-commands"]
+				"args": ["make.py", "-r", "-t", "debug", "-o", "psvita"]
 			}
 		},
 		{
@@ -1441,6 +1801,141 @@
 			"windows":{
 				"command": "${config:buildEnvPath}/Scripts/python.exe",
 				"args": ["make.py", "-r", "-t", "release", "-o", "ps4"]
+			}
+		},
+		{
+			"label": "Rebuild [ps5/debug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "debug", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Rebuild [ps5/fastdebug]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "fastdebug", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Rebuild [ps5/release]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$msCompile"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "echo",
+			"args": ["ERROR: Unsupported build platform"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-r", "-t", "release", "-o", "ps5"]
+			}
+		},
+		{
+			"label": "Clean [clang/debug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Clean [clang/fastdebug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "clang", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Clean [clang/release/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "release", "-o", "clang", "-a", "arm64"]
 			}
 		},
 		{
@@ -1651,6 +2146,81 @@
 			"linux": {
 				"command": "${config:buildEnvPath}-wsl/bin/python",
 				"args": ["make.py", "-c", "-t", "release", "-o", "clang"]
+			}
+		},
+		{
+			"label": "Clean [gcc/debug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "debug", "-o", "gcc", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Clean [gcc/fastdebug/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "fastdebug", "-o", "gcc", "-a", "arm64"]
+			}
+		},
+		{
+			"label": "Clean [gcc/release/arm64]",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": ["$gcc"],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"osx": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "arm64"]
+			},
+			"linux": {
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "arm64"]
+			},
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe",
+				"args": ["make.py", "-c", "-t", "release", "-o", "gcc", "-a", "arm64"]
 			}
 		},
 		{
