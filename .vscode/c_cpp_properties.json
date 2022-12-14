@@ -64,13 +64,16 @@
                 "${defaultIncludePaths}",
                 "C:/Program Files (x86)/SCE/PSP2 SDKs/3.570/target/include_common",
                 "C:/Program Files (x86)/SCE/PSP2 SDKs/3.570/target/include",
+                "C:/Program Files (x86)/SCE/PSP2 SDKs/3.570/host_tools/include",
                 "C:/Program Files (x86)/SCE/PSP2 SDKs/3.570/host_tools/build/include"
             ],
             "forcedInclude": [
                 "C:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/V140/Platforms/PSVita/PlatformToolsets/SNC/psvita_intellisense.h"
             ],
             "defines": [
-                "HQ_LIB_RUNTIME"
+                "__STDC_FORMAT_MACROS",
+                "HQ_LIB_RUNTIME",
+                "_HQ_BUILD_FOR_PSVITA_"
             ],
             "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
             "cStandard": "c99",
@@ -80,13 +83,17 @@
         {
             "name": "PS3",
             "includePath": [
-                "${defaultIncludePaths}"
+                "${defaultIncludePaths}",
+                "C:/usr/local/cell/target/common/include",
+                "C:/usr/local/cell/target/ppu/include",
+                "C:/usr/local/cell/target/spu/include"
             ],
             "forcedInclude": [
                 "C:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/Platforms/PS3/PlatformToolsets/SNC/ps3snc_intellisense.h"
             ],
             "defines": [
-                "HQ_LIB_RUNTIME"
+                "HQ_LIB_RUNTIME",
+                "_HQ_BUILD_FOR_PS3_"
             ],
             "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
             "cStandard": "c99",
@@ -96,13 +103,17 @@
         {
             "name": "PS4",
             "includePath": [
-                "${defaultIncludePaths}"
+                "${defaultIncludePaths}",
+                "C:/Program Files (x86)/SCE/ORBIS SDKs/10.000/target/include_common",
+                "C:/Program Files (x86)/SCE/ORBIS SDKs/10.000/target/include",
+                "C:/Program Files (x86)/SCE/ORBIS SDKs/10.000/host_tools/include"
             ],
             "forcedInclude": [
                 "C:/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSBuild/Microsoft/VC/v160/Platforms/ORBIS/PlatformToolsets/Clang/orbisclang_intellisense.h"
             ],
             "defines": [
-                "HQ_LIB_RUNTIME"
+                "HQ_LIB_RUNTIME",
+                "_HQ_BUILD_FOR_PS4_"
             ],
             "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
             "cStandard": "c99",
@@ -112,13 +123,17 @@
         {
             "name": "PS5",
             "includePath": [
-                "${defaultIncludePaths}"
+                "${defaultIncludePaths}",
+                "C:/Program Files (x86)/SCE/ORBIS SDKs/6.000/target/include_common",
+                "C:/Program Files (x86)/SCE/ORBIS SDKs/6.000/target/include",
+                "C:/Program Files (x86)/SCE/ORBIS SDKs/6.000/host_tools/include"
             ],
             "forcedInclude": [
                 "C:/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSBuild/Microsoft/VC/v160/Platforms/Prospero/PlatformToolsets/Clang/prosperoclang_intellisense.h"
             ],
             "defines": [
-                "HQ_LIB_RUNTIME"
+                "HQ_LIB_RUNTIME",
+                "_HQ_BUILD_FOR_PS5_"
             ],
             "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
             "cStandard": "c99",
