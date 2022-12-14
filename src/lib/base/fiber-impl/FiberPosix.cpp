@@ -38,9 +38,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-
-//----------------------------------------------------------------------------------------------------------------------
-
 struct _HqInternalFiberConfig
 {
 	HqInternalFiber* pObj;
@@ -49,14 +46,14 @@ struct _HqInternalFiberConfig
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _HqFiberEntryPoint(void* const pArgLsb, void* const pArgMsb)
+extern "C" void _HqFiberEntryPoint(const uint32_t argLsb, const uint32_t argMsb)
 {
 	const uintptr_t address =
 #ifdef HQ_DATA_WIDTH_64_BIT
 		// Reassemble the input address.
-		reinterpret_cast<uintptr_t>(pArgLsb) | (reinterpret_cast<uintptr_t>(pArgMsb) << 32);
+		static_cast<uintptr_t>(argLsb) | (static_cast<uintptr_t>(argMsb) << 32);
 #else
-		reinterpret_cast<uintptr_t>(pArgLsb); (void) pArgMsg;
+		static_cast<uintptr_t>(argLsb); (void) argMsb;
 #endif
 
 	// Copy internal fiber config.
@@ -223,6 +220,15 @@ extern "C" void _HqFiberImplWait(HqInternalFiber& obj)
 			_longjmp(obj.returnJump, 1);
 		}
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _HqFiberImplIsRunning(HqInternalFiber& obj)
+{
+	assert(obj.pStack != nullptr);
+
+	return obj.running;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

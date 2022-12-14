@@ -25,8 +25,8 @@
 
 // Remove fortification for the setjump/longjmp calls because they'll raise SIGABRT incorrectly.
 // The reason is because they think the stack gets messed up by jumping around between contexts
-// like we do, however this is a false positive for us because the fiber context already has its
-// own dedicated stack allocated on the heap.
+// the way we do, however this is a false positive for us because the fiber context already has
+// its own dedicated stack allocated on the heap.
 #undef _FORTIFY_SOURCE
 #undef __USE_FORTIFY_LEVEL
 #define __USE_FORTIFY_LEVEL 0

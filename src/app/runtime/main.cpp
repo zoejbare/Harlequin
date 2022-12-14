@@ -45,7 +45,20 @@
 #define APPLICATION_RESULT_SUCCESS 0
 #define APPLICATION_RESULT_FAILURE 1
 
-size_t sceLibcHeapSize = 10 * 1024 * 1024;
+//----------------------------------------------------------------------------------------------------------------------
+
+// Some platforms need the heap size set explicitly because it's too small by default.
+#ifdef _HQ_LIBC_HEAP_SIZE_VAR
+	size_t _HQ_LIBC_HEAP_SIZE_VAR = 10 * 1024 * 1024;
+#endif
+
+#ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS
+extern "C"
+{
+	void _HqRuntimeAppPlatformInitialize();
+	void _HqRuntimeAppPlatformShutdown();
+}
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -167,6 +180,10 @@ int main(int argc, char* argv[])
 	// Visual Studio output window on application exit.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	//_CrtSetBreakAlloc(2659); // Uncomment this with the allocation order number when debugging a specific allocation.
+#endif
+
+#ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS
+	_HqRuntimeAppPlatformInitialize();
 #endif
 
 	auto trackedAlloc = [](const size_t size) -> void*
@@ -911,6 +928,10 @@ int main(int argc, char* argv[])
 		double(totalDisassembleTime) * convertTimeToMs,
 		double(totalManualGcTime) * convertTimeToMs
 	);
+
+#ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS
+	_HqRuntimeAppPlatformShutdown();
+#endif
 
 	return applicationResult;
 }

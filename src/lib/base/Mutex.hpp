@@ -29,16 +29,17 @@
 
 #elif defined(HQ_PLATFORM_LINUX) \
 	|| defined(HQ_PLATFORM_MAC_OS) \
-	|| defined(HQ_PLATFORM_ANDROID) \
-	|| defined(HQ_PLATFORM_PS4) \
-	|| defined(HQ_PLATFORM_PS5)
+	|| defined(HQ_PLATFORM_ANDROID)
 	#include "mutex-impl/MutexPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../_support/Harlequin-PS3/lib/base/mutex/Mutex.hpp"
+	#include "../../../_support/ps3/lib/base/Mutex.hpp"
+
+#elif defined(HQ_PLATFORM_PS4) || defined(HQ_PLATFORM_PS5)
+	#include "../../../_support/ps4/lib/base/Mutex.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../_support/Harlequin-PSVita/lib/base/mutex/Mutex.hpp"
+	#include "../../../_support/psvita/lib/base/Mutex.hpp"
 
 #else
 	#error "HqMutex not implemented for this platform"

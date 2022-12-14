@@ -31,16 +31,17 @@
 
 #elif defined(HQ_PLATFORM_LINUX) \
 	|| defined(HQ_PLATFORM_MAC_OS) \
-	|| defined(HQ_PLATFORM_ANDROID) \
-	|| defined(HQ_PLATFORM_PS4) \
-	|| defined(HQ_PLATFORM_PS5)
+	|| defined(HQ_PLATFORM_ANDROID)
 	#include "fiber-impl/FiberPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../_support/Harlequin-PS3/lib/base/fiber/Fiber.hpp"
+	#include "../../../_support/ps3/lib/base/Fiber.hpp"
+
+#elif defined(HQ_PLATFORM_PS4) || defined(HQ_PLATFORM_PS5)
+	#include "../../../_support/ps4/lib/base/Fiber.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../_support/Harlequin-PSVita/lib/base/fiber/Fiber.hpp"
+	#include "../../../_support/psvita/lib/base/Fiber.hpp"
 
 #else
 	#error "HqFiber not implemented for this platform"
@@ -55,7 +56,8 @@ struct HqFiberConfig
 
 	void* pArg;
 
-	uint32_t stackSize;
+	size_t stackSize;
+	char name[64];
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -66,6 +68,7 @@ extern "C"
 	void _HqFiberImplDispose(HqInternalFiber&);
 	void _HqFiberImplRun(HqInternalFiber&);
 	void _HqFiberImplWait(HqInternalFiber&);
+	bool _HqFiberImplIsRunning(HqInternalFiber&);
 	bool _HqFiberImplIsComplete(HqInternalFiber&);
 }
 
@@ -91,6 +94,11 @@ struct HQ_BASE_API HqFiber
 	static void Wait(HqFiber& fiber)
 	{
 		_HqFiberImplWait(fiber.obj);
+	}
+
+	static bool IsRunning(HqFiber& fiber)
+	{
+		return _HqFiberImplIsRunning(fiber.obj);
 	}
 
 	static bool IsComplete(HqFiber& fiber)

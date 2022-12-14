@@ -22,11 +22,18 @@
 
 struct HQ_BASE_API HqInternalFiber
 {
-	HqInternalFiber() : pFiber(nullptr), pReturnPoint(nullptr), completed(false) {}
+	HqInternalFiber() 
+		: pFiberContext(nullptr)
+		, pReturnContext(nullptr)
+		, running(false) 
+		, completed(false) 
+	{
+	}
 
-	void* pFiber;
-	void* pReturnPoint;
+	void* pFiberContext;
+	void* pReturnContext;
 
+	bool running;
 	bool completed;
 };
 

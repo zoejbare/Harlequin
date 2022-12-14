@@ -24,6 +24,7 @@ import platform
 import os
 import shutil
 import stat
+import sys
 
 from csbuild.tools.common.android_tool_base import AndroidStlLibType
 from csbuild.tools.project_generators import visual_studio
@@ -39,6 +40,54 @@ visual_studio.SetEnableFileTypeFolders(False)
 ###################################################################################################
 
 _REPO_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+
+###################################################################################################
+
+_SUPPORT_PLATFORM_PATHS = [
+	os.path.join(_REPO_ROOT_PATH, "_support", "ps3"),
+	os.path.join(_REPO_ROOT_PATH, "_support", "ps4"),
+	os.path.join(_REPO_ROOT_PATH, "_support", "ps5"),
+	os.path.join(_REPO_ROOT_PATH, "_support", "psvita"),
+]
+_SUPPORT_PLATFORM_PATHS = [x for x in _SUPPORT_PLATFORM_PATHS if os.access(x, os.F_OK)]
+
+# Patch the sys path so we can search for modules in the platform support directories.
+sys.path = _SUPPORT_PLATFORM_PATHS + sys.path
+
+###################################################################################################
+
+class _MissingSetupLibModule(object):
+	@staticmethod
+	def setupHqGlobalOptions():
+		pass
+
+	@staticmethod
+	def setupHqBaseLib():
+		pass
+
+	@staticmethod
+	def setupHqRuntimeApp():
+		pass
+
+try:
+	import _hq_setup_ps3
+except:
+	_hq_setup_ps3 = _MissingSetupLibModule
+
+try:
+	import _hq_setup_ps4
+except:
+	_hq_setup_ps4 = _MissingSetupLibModule
+
+try:
+	import _hq_setup_ps5
+except:
+	_hq_setup_ps5 = _MissingSetupLibModule
+
+try:
+	import _hq_setup_psvita
+except:
+	_hq_setup_psvita = _MissingSetupLibModule
 
 ###################################################################################################
 
@@ -73,20 +122,8 @@ with csbuild.Target("release"):
 
 ###################################################################################################
 
-csbuild.SetCcLanguageStandard("c99")
-csbuild.SetCxxLanguageStandard("c++17")
-
-with csbuild.Toolchain("psvita"):
-	# PSVita needs "__STDC_FORMAT_MACROS" defined in order
-	# to see the integer type format macros in <inttypes.h>.
-	csbuild.AddDefines("__STDC_FORMAT_MACROS")
-	csbuild.AddCompilerFlags("-Xthumb=1")
-
-with csbuild.Toolchain("ps3", "psvita"):
-	csbuild.SetCxxLanguageStandard("cpp11")
-
 with csbuild.Platform("Windows"):
-	with csbuild.Toolchain("gcc", "clang", "ps4", "ps5", "android-gcc", "android-clang"):
+	with csbuild.Toolchain("gcc", "clang", "android-gcc", "android-clang"):
 		csbuild.AddCompilerFlags("-fdiagnostics-format=msvc")
 
 with csbuild.Platform("Linux"):
@@ -97,16 +134,22 @@ with csbuild.Platform("Darwin"):
 	with csbuild.Toolchain("clang"):
 		csbuild.AddLinkerFlags("-stdlib=libc++")
 
+with csbuild.Toolchain("msvc", "gcc", "clang", "android-gcc", "android-clang"):
+	csbuild.SetCcLanguageStandard("c99")
+	csbuild.SetCxxLanguageStandard("c++17")
+
 with csbuild.Toolchain("android-gcc", "android-clang"):
 	csbuild.SetAndroidTargetSdkVersion(26) # Android 7.0
 	csbuild.SetAndroidStlLibType(AndroidStlLibType.LibCpp)
 
-with csbuild.Toolchain("gcc", "clang", "ps4", "ps5", "android-gcc", "android-clang"):
+with csbuild.Toolchain("gcc", "clang", "android-gcc", "android-clang"):
 	with csbuild.Architecture("x86", "x64"):
 		csbuild.AddCompilerCxxFlags("-msse4.1")
 
-	csbuild.AddCompilerFlags("-fexceptions")
-	csbuild.AddCompilerCcFlags("-fPIC")
+	csbuild.AddCompilerFlags(
+		"-fexceptions",
+		"-fPIC",
+	)
 
 with csbuild.Toolchain("gcc", "android-gcc"):
 	csbuild.AddCompilerCxxFlags(
@@ -122,8 +165,8 @@ with csbuild.Toolchain("gcc", "android-gcc"):
 		"-Wno-nonnull-compare",
 	)
 
-with csbuild.Toolchain("clang", "ps4", "ps5", "android-clang"):
-	csbuild.AddCompilerCxxFlags(
+with csbuild.Toolchain("clang", "android-clang"):
+	csbuild.AddCompilerFlags(
 		# Enabled warnings.
 		"-Wall",
 		"-Wextra",
@@ -170,22 +213,10 @@ with csbuild.Toolchain("msvc"):
 		"/wd4804", # 'operation' : unsafe use of type 'bool' in operation
 	)
 
-###################################################################################################
-
-### Console platform defines; these must be defined in applications that link
-### against the Harlequin libraries in order to build for these platforms.
-
-with csbuild.Toolchain("ps3"):
-	csbuild.AddDefines("_HQ_BUILD_FOR_PS3_")
-
-with csbuild.Toolchain("ps4"):
-	csbuild.AddDefines("_HQ_BUILD_FOR_PS4_")
-
-with csbuild.Toolchain("ps5"):
-	csbuild.AddDefines("_HQ_BUILD_FOR_PS5_")
-
-with csbuild.Toolchain("psvita"):
-	csbuild.AddDefines("_HQ_BUILD_FOR_PSVITA_")
+_hq_setup_ps3.setupHqGlobalOptions()
+_hq_setup_ps4.setupHqGlobalOptions()
+_hq_setup_ps5.setupHqGlobalOptions()
+_hq_setup_psvita.setupHqGlobalOptions()
 
 ###################################################################################################
 
@@ -266,11 +297,6 @@ class HarlequinCommon(object):
 					"pthread",
 				)
 
-		with csbuild.Toolchain("ps4", "ps5", "blup"):
-			csbuild.AddLibraries(
-				"ScePosix_stub_weak",
-			)
-
 ###################################################################################################
 
 class LibHarlequinBase(object):
@@ -282,6 +308,11 @@ class LibHarlequinBase(object):
 
 with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, LibHarlequinBase.dependencies, autoDiscoverSourceFiles=False):
 	HarlequinCommon.setLibCommonOptions(LibHarlequinBase.outputName)
+
+	_hq_setup_ps3.setupHqBaseLib()
+	_hq_setup_ps4.setupHqBaseLib()
+	_hq_setup_ps5.setupHqBaseLib()
+	_hq_setup_psvita.setupHqBaseLib()
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
@@ -306,19 +337,9 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 			f"{HarlequinCommon.libRootPath}/base/*-impl/*Win32.cpp",
 		)
 
-	with csbuild.Toolchain("gcc", "clang", "ps4", "ps5"):
+	with csbuild.Toolchain("gcc", "clang"):
 		csbuild.AddSourceFiles(
 			f"{HarlequinCommon.libRootPath}/base/*-impl/*Posix.cpp",
-		)
-
-	with csbuild.Toolchain("ps3"):
-		csbuild.AddSourceFiles(
-			f"_support/Harlequin-PS3/lib/base/*/*.cpp",
-		)
-
-	with csbuild.Toolchain("psvita"):
-		csbuild.AddSourceFiles(
-			f"_support/Harlequin-PSVita/lib/base/*/*.cpp",
 		)
 
 	with csbuild.Platform("Darwin"):
@@ -413,6 +434,11 @@ class HarlequinRuntime(object):
 
 with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, HarlequinRuntime.dependencies):
 	HarlequinCommon.setAppCommonOptions(HarlequinRuntime.outputName)
+
+	_hq_setup_ps3.setupHqRuntimeApp()
+	_hq_setup_ps4.setupHqRuntimeApp()
+	_hq_setup_ps5.setupHqRuntimeApp()
+	_hq_setup_psvita.setupHqRuntimeApp()
 
 ###################################################################################################
 

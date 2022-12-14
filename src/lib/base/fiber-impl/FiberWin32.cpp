@@ -40,51 +40,93 @@ struct _HqInternalFiberConfig
 
 //----------------------------------------------------------------------------------------------------------------------
 
+extern "C" __forceinline void* _HqWin32FiberGetSelf()
+{
+	void* pContext = ConvertThreadToFiber(nullptr);
+	if(!pContext)
+	{
+		// The calling context has already been converted to a fiber.
+		pContext = GetCurrentFiber();
+	}
+
+	return pContext;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" __declspec(noreturn) void WINAPI _HqWin32FiberEntryPoint(void* const pArg)
+{
+	// Copy internal fiber config.
+	_HqInternalFiberConfig config = *reinterpret_cast<_HqInternalFiberConfig*>(pArg);
+
+	// Bootstrapping is complete, return to finish initialization.
+	assert(config.pObj->pReturnContext != nullptr);
+	SwitchToFiber(config.pObj->pReturnContext);
+
+	// Call the fiber function.
+	config.data.mainFn(config.data.pArg);
+
+	void* const pReturnContext = config.pObj->pReturnContext;
+	assert(pReturnContext != nullptr);
+
+	config.pObj->pReturnContext = nullptr;
+	config.pObj->running = true;
+	config.pObj->completed = true;
+
+	// Yield fiber execution to the context that ran it.
+	SwitchToFiber(pReturnContext);
+	abort();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fiberConfig)
 {
-	assert(obj.pFiber == nullptr);
+	assert(obj.pFiberContext == nullptr);
 
-	auto fiberEntryPoint = [](void* const pOpaqueConfig)
+	SYSTEM_INFO sysInfo;
+	GetSystemInfo(&sysInfo);
+
+	const size_t minStackSize = sysInfo.dwPageSize;
+	const size_t stackSizeModPageSize = fiberConfig.stackSize % sysInfo.dwPageSize;
+
+	// Round the stack size up to the nearest page (unless the input stack size is already aligned to the page size).
+	size_t usableStackSize = (stackSizeModPageSize != 0)
+		? fiberConfig.stackSize - stackSizeModPageSize + sysInfo.dwPageSize
+		: fiberConfig.stackSize;
+
+	if(usableStackSize < minStackSize)
 	{
-		// Copy internal fiber config.
-		_HqInternalFiberConfig config = *reinterpret_cast<_HqInternalFiberConfig*>(pOpaqueConfig);
-
-		// Free the config's original backing memory now that we have a local copy.
-		HqMemFree(pOpaqueConfig);
-
-		// Call the fiber function.
-		config.data.mainFn(config.data.pArg);
-
-		void* const pReturnPoint = config.pObj->pReturnPoint;
-		assert(pReturnPoint != nullptr);
-
-		config.pObj->pReturnPoint = nullptr;
-		config.pObj->completed = true;
-
-		// Yield fiber execution to the context that ran it.
-		SwitchToFiber(pReturnPoint);
-	};
+		// Cap the page size so it doesn't fall below a minimum threshold.
+		usableStackSize = minStackSize;
+	}
 
 	// Make a copy of the input config data for the fiber.
-	_HqInternalFiberConfig* const pConfigMem =
-		reinterpret_cast<_HqInternalFiberConfig*>(HqMemAlloc(sizeof(_HqInternalFiberConfig)));
+	_HqInternalFiberConfig internalConfig;
 
-	pConfigMem->pObj = &obj;
-	pConfigMem->data = fiberConfig;
+	internalConfig.pObj = &obj;
+	internalConfig.data = fiberConfig;
+	internalConfig.data.stackSize = usableStackSize;
 
 	// Create the native fiber.
-	obj.pFiber = CreateFiber(fiberConfig.stackSize, fiberEntryPoint, pConfigMem);
-	assert(obj.pFiber != nullptr);
+	obj.pFiberContext = CreateFiber(usableStackSize, _HqWin32FiberEntryPoint, &internalConfig);
+	assert(obj.pFiberContext != nullptr);
+
+	// Bootstrap the fiber by running the first few lines of its entry point function.
+	obj.pReturnContext = _HqWin32FiberGetSelf();
+	SwitchToFiber(obj.pFiberContext);
+
+	obj.pReturnContext = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 extern "C" void _HqFiberImplDispose(HqInternalFiber& obj)
 {
-	assert(obj.pFiber != nullptr);
+	assert(obj.pFiberContext != nullptr);
 
 	// Clean up the internal fiber resources.
-	DeleteFiber(obj.pFiber);
+	DeleteFiber(obj.pFiberContext);
 
 	obj = HqInternalFiber();
 }
@@ -93,23 +135,19 @@ extern "C" void _HqFiberImplDispose(HqInternalFiber& obj)
 
 extern "C" void _HqFiberImplRun(HqInternalFiber& obj)
 {
-	assert(obj.pFiber != nullptr);
+	assert(obj.pFiberContext != nullptr);
 
 	if(!obj.completed)
 	{
-		assert(obj.pReturnPoint == nullptr);
+		assert(!obj.running);
+		assert(obj.pReturnContext == nullptr);
 
 		// Save the point where we'll return to once the fiber yields.
-		obj.pReturnPoint = ConvertThreadToFiber(nullptr);
-
-		if(!obj.pReturnPoint)
-		{
-			// The return point has already been converted to a fiber.
-			obj.pReturnPoint = GetCurrentFiber();
-		}
+		obj.pReturnContext = _HqWin32FiberGetSelf();
+		obj.running = true;
 
 		// Switch the active context to running the fiber.
-		SwitchToFiber(obj.pFiber);
+		SwitchToFiber(obj.pFiberContext);
 	}
 }
 
@@ -117,26 +155,38 @@ extern "C" void _HqFiberImplRun(HqInternalFiber& obj)
 
 extern "C" void _HqFiberImplWait(HqInternalFiber& obj)
 {
-	assert(obj.pFiber != nullptr);
+	assert(obj.pFiberContext != nullptr);
 
 	if(!obj.completed)
 	{
-		assert(obj.pReturnPoint != nullptr);
+		assert(obj.running);
+		assert(obj.pReturnContext != nullptr);
 
-		// Cache the return point, then clear it in the input container.
-		void* const pReturnPoint = obj.pReturnPoint;
-		obj.pReturnPoint = nullptr;
+		// Cache the return context.
+		void* const pReturnContext = obj.pReturnContext;
+
+		obj.pReturnContext = nullptr;
+		obj.running = false;
 
 		// Yield fiber execution back to the context that ran it.
-		SwitchToFiber(pReturnPoint);
+		SwitchToFiber(pReturnContext);
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" bool _HqFiberImplIsRunning(HqInternalFiber& obj)
+{
+	assert(obj.pFiberContext != nullptr);
+
+	return obj.running;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 extern "C" bool _HqFiberImplIsComplete(HqInternalFiber& obj)
 {
-	assert(obj.pFiber != nullptr);
+	assert(obj.pFiberContext != nullptr);
 
 	return obj.completed;
 }

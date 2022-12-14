@@ -32,16 +32,17 @@
 
 #elif defined(HQ_PLATFORM_LINUX) \
 	|| defined(HQ_PLATFORM_MAC_OS) \
-	|| defined(HQ_PLATFORM_ANDROID) \
-	|| defined(HQ_PLATFORM_PS4) \
-	|| defined(HQ_PLATFORM_PS5)
+	|| defined(HQ_PLATFORM_ANDROID)
 	#include "thread-impl/ThreadPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../_support/Harlequin-PS3/lib/base/thread/Thread.hpp"
+	#include "../../../_support/ps3/lib/base/Thread.hpp"
+
+#elif defined(HQ_PLATFORM_PS4) || defined(HQ_PLATFORM_PS5)
+	#include "../../../_support/ps4/lib/base/Thread.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../_support/Harlequin-PSVita/lib/base/thread/Thread.hpp"
+	#include "../../../_support/psvita/lib/base/Thread.hpp"
 
 #else
 	#error "HqThread not implemented for this platform"
