@@ -146,8 +146,9 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 		const uint32_t argMsb = (argAddress >> 32) & 0xFFFFFFFFul;
 #else
 		const uint32_t argLsb = uint32_t(argAddress);
-		const uint32_t argMsg = 0;
+		const uint32_t argMsb = 0;
 #endif
+
 		// Bootstrap the fiber context to get it going. After the fiber context is running,
 		// we won't be using the ucontext API again. The reason is that it is extremely slow,
 		// whereas _setjmp() & _longjmp() are much faster (likely due to not saving/restoring
