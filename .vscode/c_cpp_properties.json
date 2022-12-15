@@ -36,6 +36,7 @@
                 "${defaultIncludePaths}"
             ],
             "defines": [
+                "_XOPEN_SOURCE",
                 "HQ_LIB_COMPILER",
                 "HQ_LIB_RUNTIME"
             ],
