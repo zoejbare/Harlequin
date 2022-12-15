@@ -84,7 +84,7 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 	assert(obj.pStack == nullptr);
 
 	const size_t pageSize = getpagesize();
-	const size_t minStackSize = (MINSIGSTKSZ > pageSize) ? MINSIGSTKSZ : pageSize;
+	const size_t minStackSize = (size_t(MINSIGSTKSZ) > pageSize) ? size_t(MINSIGSTKSZ) : pageSize;
 	const size_t stackSizeModPageSize = fiberConfig.stackSize % pageSize;
 
 	// Round the stack size up to the nearest page (unless the input stack size is already aligned to the page size).
@@ -95,7 +95,7 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 	if(usableStackSize < minStackSize)
 	{
 		// Cap the page size so it doesn't fall below a minimum threshold.
-		usableStackSize = MINSIGSTKSZ;
+		usableStackSize = minStackSize;
 	}
 
 	// Extend the stack size by two full pages so we can do some memory protection on both ends of the stack.
