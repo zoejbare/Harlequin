@@ -46,7 +46,7 @@ struct _HqInternalFiberConfig
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _HqFiberEntryPoint(const uint32_t argLsb, const uint32_t argMsb)
+extern "C" void __attribute__((noreturn)) _HqFiberEntryPoint(const uint32_t argLsb, const uint32_t argMsb)
 {
 	const uintptr_t address =
 #ifdef HQ_DATA_WIDTH_64_BIT
@@ -74,6 +74,7 @@ extern "C" void _HqFiberEntryPoint(const uint32_t argLsb, const uint32_t argMsb)
 
 	// Yield fiber execution to the context that ran it.
 	_longjmp(config.pObj->returnJump, 1);
+	abort();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -140,7 +141,7 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 #ifdef HQ_DATA_WIDTH_64_BIT
 		// The makecontext spec states that arguments passed to the target function should be no larger than 32-bit integers
 		// for portability since some platforms will only pass up to 32-bits per argument. Some Linux platforms will be fine
-		// passing 64-bit arguments, but others won't (e.g., macOS targeting specifically the M1 architecture).
+		// passing 64-bit arguments, but some other platforms won't (e.g., macOS targeting specifically the M1 architecture).
 		const uint32_t argLsb = argAddress & 0xFFFFFFFFul;
 		const uint32_t argMsb = (argAddress >> 32) & 0xFFFFFFFFul;
 #else
@@ -149,7 +150,8 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 #endif
 		// Bootstrap the fiber context to get it going. After the fiber context is running,
 		// we won't be using the ucontext API again. The reason is that it is extremely slow,
-		// though the setjmp+longjmp APIs are much faster.
+		// whereas _setjmp() & _longjmp() are much faster (likely due to not saving/restoring
+		// signal handler states).
 		makecontext(&tempContext, reinterpret_cast<void(*)()>(_HqFiberEntryPoint), 2, argLsb, argMsb);
 		setcontext(&tempContext);
 	}

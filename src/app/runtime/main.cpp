@@ -359,10 +359,12 @@ int main(int argc, char* argv[])
 	uint64_t initProgramsTimeSlice = 0;
 	uint64_t createExecTimeSlice = 0;
 	uint64_t initExecTimeSlice = 0;
-	uint64_t resetExecTimeSlice = 0;
-	uint64_t runProgramTimeSlice = 0;
 	uint64_t disposeExecTimeSlice = 0;
 	uint64_t disposeVmTimeSlice = 0;
+
+	uint64_t runProgramTotalTime = 0;
+	uint64_t resetExecTotalTime = 0;
+
 	uint64_t totalApplicationTime = 0;
 	uint64_t totalDisassembleTime = 0;
 	uint64_t totalManualGcTime = 0;
@@ -722,7 +724,7 @@ int main(int argc, char* argv[])
 			}
 
 			const uint64_t timeEnd = HqClockGetTimestamp();
-			resetExecTimeSlice = timeEnd - timeStart;
+			resetExecTotalTime += timeEnd - timeStart;
 		}
 
 		bool status;
@@ -795,7 +797,7 @@ int main(int argc, char* argv[])
 			}
 
 			const uint64_t timeEnd = HqClockGetTimestamp();
-			runProgramTimeSlice = timeEnd - timeStart;
+			runProgramTotalTime += timeEnd - timeStart;
 		}
 
 #if !_INCREMENTAL_GC_ENABLED
@@ -917,12 +919,12 @@ int main(int argc, char* argv[])
 
 		double(createExecTimeSlice) * convertTimeToMs,
 		double(initExecTimeSlice) * convertTimeToMs,
-		double(resetExecTimeSlice) * convertTimeToMs,
+		double(resetExecTotalTime) * convertTimeToMs,
 		double(disposeExecTimeSlice) * convertTimeToMs,
 
 		double(initProgramsTimeSlice) * convertTimeToMs,
 		double(loadProgramTimeSlice) * convertTimeToMs,
-		double(runProgramTimeSlice) * convertTimeToMs,
+		double(runProgramTotalTime) * convertTimeToMs,
 
 		double(totalApplicationTime) * convertTimeToMs,
 		double(totalDisassembleTime) * convertTimeToMs,
