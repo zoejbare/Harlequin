@@ -23,6 +23,7 @@
 #include "../base/Mutex.hpp"
 
 #include <assert.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -94,10 +95,7 @@ void HqFrame::Reset(HqFrameHandle hFrame)
 	hFrame->hFunction = HQ_FUNCTION_HANDLE_NULL;
 
 	// Initialize each register value.
-	for(size_t i = 0; i < hFrame->registers.count; ++i)
-	{
-		hFrame->registers.pData[i] = HqValue::CreateNull();
-	}
+	memset(hFrame->registers.pData, 0, sizeof(HqValueHandle) * hFrame->registers.count);
 
 	// Remove all local variables.
 	HqValue::StringToHandleMap::Clear(hFrame->locals);

@@ -22,12 +22,14 @@
 #include "Vm.hpp"
 
 #include "../base/Mutex.hpp"
+#include "../common/OpCodeEnum.hpp"
 
 #include <algorithm>
 
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -42,6 +44,10 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 	pOutput->hFunction = HQ_FUNCTION_HANDLE_NULL;
 	pOutput->hCurrentFrame = HQ_FRAME_HANDLE_NULL;
 	pOutput->endianness = HqGetPlatformEndianMode();
+	pOutput->lastOpCode = UINT_MAX;
+	pOutput->runMode = HQ_RUN_STEP;
+	pOutput->frameStackDirty = false;
+	pOutput->created = false;
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
 	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
@@ -53,11 +59,21 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 
 	pOutput->registers.count = HQ_VM_IO_REGISTER_COUNT;
 
+	// Unset the 'firstRun' flag to trick the reset call into doing some extra initialization for us.
+	// The flag will be cleared when the reset occurs.
+	pOutput->firstRun = false;
+
 	// Reset the state of the execution context.
 	Reset(pOutput);
 
+	// Create the main execution fiber.
+	prv_createMainFiber(pOutput);
+
 	// Keep the execution context alive indefinitely until we're ready to dispose of it.
 	pOutput->gcProxy.autoMark = true;
+
+	// The execution context has finished being created.
+	pOutput->created = true;
 
 	return pOutput;
 }
@@ -84,6 +100,13 @@ int HqExecution::Initialize(HqExecutionHandle hExec, HqFunctionHandle hEntryPoin
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 	assert(hEntryPoint != HQ_FUNCTION_HANDLE_NULL);
 
+	if(hExec->hFunction != hEntryPoint)
+	{
+		// Make sure the 'frameStackDirty' flag is set so the reset that follows will
+		// clear the existing frame stack to re-initialize it with the new function.
+		hExec->frameStackDirty = true;
+	}
+
 	hExec->hFunction = hEntryPoint;
 
 	return Reset(hExec);
@@ -95,36 +118,53 @@ int HqExecution::Reset(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
+	if(!hExec->firstRun)
+	{
+		// Initialize each value in the I/O register set.
+		memset(hExec->registers.pData, 0, sizeof(HqValueHandle) * hExec->registers.count);
+
+		for(size_t i = 0; i < hExec->registers.count; ++i)
+		{
+			hExec->registers.pData[i] = HqValue::CreateNull();
+		}
+
+		// Only re-create the main fiber if execution was stopped somewhere in an instruction.
+		if(hExec->state.exception || hExec->state.abort || hExec->state.yield)
+		{
+			// Dispose of the existing fiber before re-creating it.
+			HqFiber::Dispose(hExec->mainFiber);
+
+			prv_createMainFiber(hExec);
+		}
+
+		hExec->firstRun = true;
+	}
+
+	if(hExec->frameStackDirty)
+	{
+		// Clear the entire frame stack.
+		while(PopFrame(hExec) == HQ_SUCCESS) {}
+
+		if(hExec->hFunction)
+		{
+			// Push the entry point frame to the frame stack.
+			int pushEntryFrameResult = PushFrame(hExec, hExec->hFunction);
+			if(pushEntryFrameResult == HQ_ERROR_BAD_ALLOCATION)
+			{
+				return HQ_ERROR_BAD_ALLOCATION;
+			}
+			else
+			{
+				// We expect only success by this point.
+				assert(pushEntryFrameResult == HQ_SUCCESS);
+			}
+		}
+
+		hExec->frameStackDirty = false;
+	}
+
 	hExec->pExceptionLocation = nullptr;
-	hExec->yield = false;
-	hExec->started = false;
-	hExec->finished = false;
-	hExec->exception = false;
-	hExec->abort = false;
-
-	// Initialize each value in the I/O register set.
-	for(size_t i = 0; i < hExec->registers.count; ++i)
-	{
-		hExec->registers.pData[i] = HqValue::CreateNull();
-	}
-
-	// Clear the entire frame stack.
-	while(PopFrame(hExec) == HQ_SUCCESS) {}
-
-	if(hExec->hFunction)
-	{
-		// Push the entry point frame to the frame stack.
-		int pushEntryFrameResult = PushFrame(hExec, hExec->hFunction);
-		if(pushEntryFrameResult == HQ_ERROR_BAD_ALLOCATION)
-		{
-			return HQ_ERROR_BAD_ALLOCATION;
-		}
-		else
-		{
-			// We expect only success by this point.
-			assert(pushEntryFrameResult == HQ_SUCCESS);
-		}
-	}
+	hExec->stateBits = 0;
 
 	return HQ_SUCCESS;
 }
@@ -158,6 +198,8 @@ int HqExecution::PushFrame(HqExecutionHandle hExec, HqFunctionHandle hFunction)
 		hExec->hCurrentFrame = hFrame;
 	}
 
+	hExec->frameStackDirty = true;
+
 	return result;
 }
 
@@ -180,6 +222,8 @@ int HqExecution::PopFrame(HqExecutionHandle hExec)
 		HqFrame::Reset(hFrame);
 		result = hExec->framePool.Push(hExec->framePool, hFrame);
 	}
+
+	hExec->frameStackDirty = true;
 
 	return result;
 }
@@ -225,40 +269,37 @@ void HqExecution::Run(HqExecutionHandle hExec, const int runMode)
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 	assert(runMode == HQ_RUN_STEP || runMode == HQ_RUN_CONTINUOUS);
 
-	if(hExec->finished || hExec->exception || hExec->abort)
+	if(hExec->state.finished || hExec->state.exception || hExec->state.abort)
 	{
 		// Do nothing if the script is no longer executing.
 		return;
 	}
 
+	// Set the run mode so the fiber context knows how many instructions
+	// it needs to process in this iteration.
+	hExec->runMode = runMode;
+
 	// Set the 'started' flag to indicate that execution has started.
 	// We also reset the 'yield' flag here since it's only useful for
-	// pausing execution and we no longer need it paused until the
-	// next yield.
-	hExec->started = true;
-	hExec->yield = false;
+	// indicating that execution was halted on a YIELD instruction the
+	// last time around.
+	hExec->state.started = true;
+	hExec->state.yield = false;
 
-	switch(runMode)
-	{
-		case HQ_RUN_STEP:
-		{
-			prv_runStep(hExec);
-			break;
-		}
+	hExec->firstRun = false;
+	hExec->frameStackDirty = true;
 
-		case HQ_RUN_CONTINUOUS:
-		{
-			while(!hExec->finished && !hExec->exception && !hExec->yield && !hExec->abort)
-			{
-				prv_runStep(hExec);
-			}
-			break;
-		}
+	// Run an iteration of the instruction processing fiber context.
+	HqFiber::Run(hExec->mainFiber);
+}
 
-		default:
-			// This should never happen.
-			assert(false);
-	}
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqExecution::Pause(HqExecutionHandle hExec)
+{
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+
+	HqFiber::Wait(hExec->mainFiber);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -275,7 +316,10 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 	if(severity == HQ_EXCEPTION_SEVERITY_FATAL)
 	{
 		// Force this exception to be unhandled.
-		hExec->exception = true;
+		hExec->state.exception = true;
+
+		// Yield execution when a fatal exception is raised.
+		HqExecution::Pause(hExec);
 	}
 	else
 	{
@@ -387,7 +431,7 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 					// to actually pop the frame stack until we get to that frame.
 					while(hExec->hCurrentFrame != hFrame)
 					{
-						const int popFrameResult = HqExecution::PopFrame(hExec);
+						const int popFrameResult = PopFrame(hExec);
 
 						// Sanity check: There should not be any errors on popping the frame stack.
 						assert(popFrameResult == HQ_SUCCESS);
@@ -408,7 +452,10 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 				{
 					// There are either no exception handlers in the frame stack
 					// or none capable of handling this exception.
-					hExec->exception = true;
+					hExec->state.exception = true;
+
+					// Yield execution for unhandled exceptions.
+					Pause(hExec);
 					break;
 				}
 			}
@@ -416,7 +463,9 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 		else
 		{
 			// There are no frames on the stack, so there is nothing that can catch this exception.
-			hExec->exception = true;
+			hExec->state.exception = true;
+
+			Pause(hExec);
 		}
 	}
 }
@@ -442,7 +491,61 @@ void HqExecution::RaiseOpCodeException(HqExecutionHandle hExec, const int type, 
 
 	HqValueHandle hThrowValue = HqVm::CreateStandardException(hExec->hVm, type, msg);
 
-	HqExecution::RaiseException(hExec, hThrowValue, HQ_EXCEPTION_SEVERITY_FATAL);
+	RaiseException(hExec, hThrowValue, HQ_EXCEPTION_SEVERITY_FATAL);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqExecution::prv_createMainFiber(HqExecutionHandle hExec)
+{
+	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+
+	HqFiberConfig runFiberConfig;
+	runFiberConfig.mainFn = prv_runFiberLoop;
+	runFiberConfig.pArg = hExec;
+	runFiberConfig.stackSize = HQ_VM_THREAD_MINIMUM_STACK_SIZE;
+	strncpy(runFiberConfig.name, "ExecMainFiber", sizeof(runFiberConfig.name) - 1);
+
+	// Create the fiber context that will be used for running scripts.
+	HqFiber::Create(hExec->mainFiber, runFiberConfig);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqExecution::prv_runFiberLoop(void* const pArg)
+{
+	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pArg);
+
+	// We can loop forever here since execution will be yielded to the calling thread/fiber.
+	// When a yield occurs, this will stop executing in-place.
+	for(;;)
+	{
+		// Cache the run mode to decrease access time in a continuous run loop.
+		const uint32_t runMode = hExec->runMode;
+
+		// We only need to check if the execution has finished because when a fatal error
+		// occurs or a script aborts, they'll immediately yield the fiber and the execution
+		// context won't be able to run it again.
+		while(!hExec->state.finished)
+		{
+			prv_runStep(hExec);
+
+			if(runMode == HQ_RUN_STEP)
+			{
+				// When manually stepping instructions, we should only process a single
+				// instruction per iteration.
+				break;
+			}
+		}
+
+		if(hExec->lastOpCode != HQ_OP_CODE_YIELD)
+		{
+			// Force the fiber context to yield if we've run out of script instructions to process for this iteration.
+			// However, we only do this when the last opcode was NOT a yield itself, otherwise the moment the script
+			// execution is resumed, it would immediately yield again when we instead want to go to the next opcode.
+			Pause(hExec);
+		}
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -458,7 +561,11 @@ void HqExecution::prv_runStep(HqExecutionHandle hExec)
 	// Save the current instruction pointer position at the start of the opcode that will now be executed.
 	hFrame->decoder.cachedIp = hFrame->decoder.ip;
 
-	const uint8_t opCode = HqDecoder::LoadUint8(hFrame->decoder);
+	const uint32_t opCode = HqDecoder::LoadUint32(hFrame->decoder);
+
+	// Cache the opcode prior to executing it so we can query it in the event of a fiber yield.
+	hExec->lastOpCode = opCode;
+
 	HqVm::ExecuteOpCode(hExec->hVm, hExec, opCode);
 }
 

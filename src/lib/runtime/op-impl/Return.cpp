@@ -53,7 +53,7 @@ void OpCodeExec_Return(HqExecutionHandle hExec)
 	else if(!hExec->hCurrentFrame)
 	{
 		// The entry point function was popped from the frame stack meaning execution is complete.
-		hExec->finished = true;
+		hExec->state.finished = true;
 	}
 }
 

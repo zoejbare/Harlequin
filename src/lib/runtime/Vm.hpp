@@ -72,8 +72,8 @@ struct HqVm
 
 	static HqValueHandle CreateStandardException(HqVmHandle hVm, const int exceptionType, const char* const message);
 
-	static void ExecuteOpCode(HqVmHandle hVm, HqExecutionHandle hExec, const int opCode);
-	static void DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const int opCode);
+	static void ExecuteOpCode(HqVmHandle hVm, HqExecutionHandle hExec, const uint32_t opCode);
+	static void DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const uint32_t opCode);
 
 	static void prv_setupOpCodes(HqVmHandle);
 	static void prv_setupBuiltIns(HqVmHandle);

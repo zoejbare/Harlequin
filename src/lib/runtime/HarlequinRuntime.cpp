@@ -440,14 +440,14 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 
 			// Run the current initializer function in a loop until it's finished just in case any of its code yields.
 			// This will effectively cause script continuations to be silently ignored in the initializer functions.
-			while(!hExec->finished && !hExec->exception && !hExec->abort)
+			while(!hExec->state.finished && !hExec->state.exception && !hExec->state.abort)
 			{
 				// Run the initializer function to completion.
 				HqExecution::Run(hExec, HQ_RUN_CONTINUOUS);
 			}
 
 			// Check for any unhandled exceptions that occurred when running the initializer.
-			if(hExec->exception || hExec->abort)
+			if(hExec->state.exception || hExec->state.abort)
 			{
 				// When fatal script errors do occur, return immediately to allow the user code to
 				// query the execution context for more details on what went wrong.
@@ -985,7 +985,9 @@ int HqExecutionYield(HqExecutionHandle hExec)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	hExec->yield = true;
+	hExec->state.yield = true;
+
+	HqExecution::Pause(hExec);
 
 	return HQ_SUCCESS;
 }
@@ -1086,23 +1088,23 @@ int HqExecutionGetStatus(HqExecutionHandle hExec, int statusType, bool* pOutStat
 	switch(statusType)
 	{
 		case HQ_EXEC_STATUS_YIELD:
-			(*pOutStatus) = hExec->yield;
+			(*pOutStatus) = hExec->state.yield;
 			break;
 
 		case HQ_EXEC_STATUS_RUNNING:
-			(*pOutStatus) = (hExec->started && !hExec->finished) || hExec->exception;
+			(*pOutStatus) = (hExec->state.started && !hExec->state.finished) || hExec->state.exception;
 			break;
 
 		case HQ_EXEC_STATUS_COMPLETE:
-			(*pOutStatus) = hExec->finished || hExec->exception;
+			(*pOutStatus) = hExec->state.finished || hExec->state.exception;
 			break;
 
 		case HQ_EXEC_STATUS_EXCEPTION:
-			(*pOutStatus) = hExec->exception;
+			(*pOutStatus) = hExec->state.exception;
 			break;
 
 		case HQ_EXEC_STATUS_ABORT:
-			(*pOutStatus) = hExec->abort;
+			(*pOutStatus) = hExec->state.abort;
 			break;
 
 		default:
@@ -1121,7 +1123,7 @@ int HqExecutionHasUnhandledExceptionOccurred(HqExecutionHandle hExec, bool* pOut
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutException) = hExec->exception;
+	(*pOutException) = hExec->state.exception;
 
 	return HQ_SUCCESS;
 }

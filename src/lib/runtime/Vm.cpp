@@ -352,11 +352,10 @@ HqValueHandle HqVm::CreateStandardException(HqVmHandle hVm, const int exceptionT
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqVm::ExecuteOpCode(HqVmHandle hVm, HqExecutionHandle hExec, const int opCode)
+void HqVm::ExecuteOpCode(HqVmHandle hVm, HqExecutionHandle hExec, const uint32_t opCode)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
-	assert(opCode >= 0);
 	assert(opCode < HQ_OP_CODE__TOTAL_COUNT);
 
 	const OpCode& opCodeData = hVm->opCodes.pData[opCode];
@@ -366,12 +365,11 @@ void HqVm::ExecuteOpCode(HqVmHandle hVm, HqExecutionHandle hExec, const int opCo
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqVm::DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const int opCode)
+void HqVm::DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const uint32_t opCode)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(disasm.decoder.ip != nullptr);
 	assert(disasm.onDisasmFn != nullptr);
-	assert(opCode >= 0);
 	assert(opCode < HQ_OP_CODE__TOTAL_COUNT);
 
 	const OpCode& opCodeData = hVm->opCodes.pData[opCode];

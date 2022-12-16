@@ -38,7 +38,10 @@ extern "C" {
 void OpCodeExec_Yield(HqExecutionHandle hExec)
 {
 	// Set the trigger that says we're yielding execution.
-	hExec->yield = true;
+	hExec->state.yield = true;
+
+	// Yield the main fiber so execution stops immediately.
+	HqExecution::Pause(hExec);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

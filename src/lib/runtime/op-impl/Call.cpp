@@ -75,12 +75,8 @@ static void CallScriptFunction(HqExecutionHandle hExec, HqFunctionHandle hFuncti
 				HqRwLock::ReadLock(hExec->hVm->gc.rwLock);
 			}
 
-			if(!hExec->exception)
-			{
-				// If no script exception occurred within the native function,
-				// we can pop the dummy frame from the frame stack.
-				HqExecution::PopFrame(hExec);
-			}
+			// Pop the dummy frame from the frame stack now that it's no longer needed.
+			HqExecution::PopFrame(hExec);
 		}
 		else
 		{

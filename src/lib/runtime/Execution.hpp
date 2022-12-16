@@ -24,6 +24,7 @@
 #include "GcProxy.hpp"
 #include "Value.hpp"
 
+#include "../base/Fiber.hpp"
 #include "../common/Array.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -49,10 +50,13 @@ struct HqExecution
 	static HqValueHandle GetIoRegister(HqExecutionHandle hExec, const size_t index, int* const pOutResult);
 
 	static void Run(HqExecutionHandle hExec, const int runMode);
+	static void Pause(HqExecutionHandle hExec);
 
 	static void RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, const int severity);
 	static void RaiseOpCodeException(HqExecutionHandle hExec, const int type, const char* const fmt, ...);
 
+	static void prv_createMainFiber(HqExecutionHandle);
+	static void prv_runFiberLoop(void*);
 	static void prv_runStep(HqExecutionHandle);
 	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
 	static void prv_onGcDestruct(void*);
@@ -71,15 +75,34 @@ struct HqExecution
 
 	HqValue::HandleArray registers;
 
+	HqFiber mainFiber;
+
 	uint8_t* pExceptionLocation;
 
-	int endianness;
+	uint32_t endianness;
+	uint32_t lastOpCode;
 
-	bool yield;
-	bool started;
-	bool finished;
-	bool exception;
-	bool abort;
+	volatile uint32_t runMode;
+	
+	struct InternalState
+	{
+		bool yield;
+		bool started;
+		bool finished;
+		bool exception;
+		bool abort;
+	};
+
+	union
+	{
+		volatile InternalState state;
+		volatile uint32_t stateBits;
+	};
+
+	bool firstRun;
+	bool frameStackDirty;
+
+	bool created;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

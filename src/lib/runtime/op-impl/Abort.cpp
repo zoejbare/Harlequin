@@ -25,9 +25,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Perform no operation (idle runtime cycle).
+// Abort script execution without raising an exception.
 //
-// 0x: NOP
+// 0x: ABORT
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37,7 +37,11 @@ extern "C" {
 
 void OpCodeExec_Abort(HqExecutionHandle hExec)
 {
-	hExec->abort = true;
+	// Set the trigger that says we're aborting execution.
+	hExec->state.abort = true;
+
+	// Yield the main fiber so execution stops immediately.
+	HqExecution::Pause(hExec);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
