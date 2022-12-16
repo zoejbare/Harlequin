@@ -66,8 +66,8 @@ extern "C"
 {
 	void _HqFiberImplCreate(HqInternalFiber&, const HqFiberConfig&);
 	void _HqFiberImplDispose(HqInternalFiber&);
-	void _HqFiberImplRun(HqInternalFiber&);
-	void _HqFiberImplWait(HqInternalFiber&);
+	bool _HqFiberImplRun(HqInternalFiber&);
+	bool _HqFiberImplWait(HqInternalFiber&);
 	bool _HqFiberImplIsRunning(HqInternalFiber&);
 	bool _HqFiberImplIsComplete(HqInternalFiber&);
 }
@@ -86,14 +86,14 @@ struct HQ_BASE_API HqFiber
 		_HqFiberImplDispose(fiber.obj);
 	}
 
-	static void Run(HqFiber& fiber)
+	static bool Run(HqFiber& fiber)
 	{
-		_HqFiberImplRun(fiber.obj);
+		return _HqFiberImplRun(fiber.obj);
 	}
 
-	static void Wait(HqFiber& fiber)
+	static bool Wait(HqFiber& fiber)
 	{
-		_HqFiberImplWait(fiber.obj);
+		return _HqFiberImplWait(fiber.obj);
 	}
 
 	static bool IsRunning(HqFiber& fiber)

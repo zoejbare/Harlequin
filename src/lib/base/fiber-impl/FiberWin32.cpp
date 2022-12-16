@@ -133,13 +133,12 @@ extern "C" void _HqFiberImplDispose(HqInternalFiber& obj)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _HqFiberImplRun(HqInternalFiber& obj)
+extern "C" bool _HqFiberImplRun(HqInternalFiber& obj)
 {
 	assert(obj.pFiberContext != nullptr);
 
-	if(!obj.completed)
+	if(!obj.completed && !obj.running)
 	{
-		assert(!obj.running);
 		assert(obj.pReturnContext == nullptr);
 
 		// Save the point where we'll return to once the fiber yields.
@@ -148,18 +147,21 @@ extern "C" void _HqFiberImplRun(HqInternalFiber& obj)
 
 		// Switch the active context to running the fiber.
 		SwitchToFiber(obj.pFiberContext);
+
+		return true;
 	}
+
+	return false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void _HqFiberImplWait(HqInternalFiber& obj)
+extern "C" bool _HqFiberImplWait(HqInternalFiber& obj)
 {
 	assert(obj.pFiberContext != nullptr);
 
-	if(!obj.completed)
+	if(!obj.completed && obj.running)
 	{
-		assert(obj.running);
 		assert(obj.pReturnContext != nullptr);
 
 		// Cache the return context.
@@ -170,7 +172,11 @@ extern "C" void _HqFiberImplWait(HqInternalFiber& obj)
 
 		// Yield fiber execution back to the context that ran it.
 		SwitchToFiber(pReturnContext);
+
+		return true;
 	}
+
+	return false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -33,8 +33,8 @@ struct HQ_BASE_API HqInternalFiber
 	void* pFiberContext;
 	void* pReturnContext;
 
-	bool running;
-	bool completed;
+	volatile bool running;
+	volatile bool completed;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
