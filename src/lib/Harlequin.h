@@ -566,8 +566,6 @@ HQ_MAIN_API HqValueHandle HqValueCreateFloat32(HqVmHandle hVm, float value);
 
 HQ_MAIN_API HqValueHandle HqValueCreateFloat64(HqVmHandle hVm, double value);
 
-HQ_MAIN_API HqValueHandle HqValueCreateNull();
-
 HQ_MAIN_API HqValueHandle HqValueCreateString(HqVmHandle hVm, const char* const string);
 
 HQ_MAIN_API HqValueHandle HqValueCreateFunction(HqVmHandle hVm, HqFunctionHandle hFunction);
@@ -614,8 +612,6 @@ HQ_MAIN_API bool HqValueIsUint64(HqValueHandle hValue);
 HQ_MAIN_API bool HqValueIsFloat32(HqValueHandle hValue);
 
 HQ_MAIN_API bool HqValueIsFloat64(HqValueHandle hValue);
-
-HQ_MAIN_API bool HqValueIsNull(HqValueHandle hValue);
 
 HQ_MAIN_API bool HqValueIsString(HqValueHandle hValue);
 
@@ -665,7 +661,7 @@ HQ_MAIN_API size_t HqValueGetObjectMemberCount(HqValueHandle hValue);
 
 HQ_MAIN_API HqValueHandle HqValueGetObjectMemberValue(HqValueHandle hValue, const char* memberName);
 
-HQ_MAIN_API uint8_t HqValueGetObjectMemberType(HqValueHandle hValue, const char* memberName);
+HQ_MAIN_API int HqValueGetObjectMemberType(HqValueHandle hValue, const char* memberName, uint8_t* pOutType);
 
 HQ_MAIN_API int HqValueSetObjectMemberValue(HqValueHandle hValue, const char* memberName, HqValueHandle hMemberValue);
 
@@ -1015,8 +1011,6 @@ HQ_MAIN_API int HqBytecodeWriteBranchIfFalse(
 
 enum HqValueType
 {
-	HQ_VALUE_TYPE_NULL,
-
 	HQ_VALUE_TYPE_INT8,
 	HQ_VALUE_TYPE_INT16,
 	HQ_VALUE_TYPE_INT32,

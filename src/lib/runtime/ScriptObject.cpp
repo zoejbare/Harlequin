@@ -19,6 +19,7 @@
 #include "ScriptObject.hpp"
 
 #include <assert.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -55,10 +56,7 @@ HqScriptObject* HqScriptObject::CreateSchema(HqString* const pTypeName, const Me
 	pOutput->members.count = defCount;
 
 	// Initialize the members to null values.
-	for(size_t i = 0; i < defCount; ++i)
-	{
-		pOutput->members.pData[i] = HqValue::CreateNull();
-	}
+	memset(pOutput->members.pData, 0, sizeof(HqValueHandle) * defCount);
 
 	return pOutput;
 }

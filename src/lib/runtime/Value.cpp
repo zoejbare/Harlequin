@@ -32,23 +32,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqValue HqValue::NullValue =
-{
-	HQ_VM_HANDLE_NULL,
-	{},
-	{},
-	HQ_VALUE_TYPE_NULL,
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-HqValueHandle HqValue::Resolve(HqValueHandle hValue)
-{
-	return hValue ? hValue : &NullValue;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 HqValueHandle HqValue::CreateBool(HqVmHandle hVm, const bool value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
@@ -56,7 +39,7 @@ HqValueHandle HqValue::CreateBool(HqVmHandle hVm, const bool value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_BOOL, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.boolean = value;
@@ -73,7 +56,7 @@ HqValueHandle HqValue::CreateInt8(HqVmHandle hVm, const int8_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT8, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.int8 = value;
@@ -90,7 +73,7 @@ HqValueHandle HqValue::CreateInt16(HqVmHandle hVm, const int16_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT16, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.int16 = value;
@@ -107,7 +90,7 @@ HqValueHandle HqValue::CreateInt32(HqVmHandle hVm, const int32_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT32, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.int32 = value;
@@ -124,7 +107,7 @@ HqValueHandle HqValue::CreateInt64(HqVmHandle hVm, const int64_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT64, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.int64 = value;
@@ -141,7 +124,7 @@ HqValueHandle HqValue::CreateUint8(HqVmHandle hVm, const uint8_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT8, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.uint8 = value;
@@ -158,7 +141,7 @@ HqValueHandle HqValue::CreateUint16(HqVmHandle hVm, const uint16_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT16, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.uint16 = value;
@@ -175,7 +158,7 @@ HqValueHandle HqValue::CreateUint32(HqVmHandle hVm, const uint32_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT32, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.uint32 = value;
@@ -192,7 +175,7 @@ HqValueHandle HqValue::CreateUint64(HqVmHandle hVm, const uint64_t value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT64, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.uint64 = value;
@@ -208,7 +191,7 @@ HqValueHandle HqValue::CreateFloat32(HqVmHandle hVm, const float value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_FLOAT32, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.float32 = value;
@@ -225,19 +208,12 @@ HqValueHandle HqValue::CreateFloat64(HqVmHandle hVm, const double value)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_FLOAT64, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.float64 = value;
 
 	return pOutput;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-HqValueHandle HqValue::CreateNull()
-{
-	return &NullValue;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -250,14 +226,14 @@ HqValueHandle HqValue::CreateString(HqVmHandle hVm, const char* const string)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_STRING, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.pString = HqString::Create(string);
 	if(!pOutput->as.pString)
 	{
 		delete pOutput;
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	return pOutput;
@@ -273,7 +249,7 @@ HqValueHandle HqValue::CreateString(HqVmHandle hVm, HqString* const pString)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_STRING, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.pString = pString;
@@ -293,7 +269,7 @@ HqValueHandle HqValue::CreateObject(HqVmHandle hVm, HqScriptObject* const pObjec
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_OBJECT, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	// Make a copy of the input object template for this value.
@@ -312,7 +288,7 @@ HqValueHandle HqValue::CreateFunction(HqVmHandle hVm, HqFunctionHandle hFunction
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_FUNCTION, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.hFunction = hFunction;
@@ -329,7 +305,7 @@ HqValueHandle HqValue::CreateArray(HqVmHandle hVm, const size_t count)
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_ARRAY, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	const size_t capacity = (count > _HQ_ARRAY_DEFAULT_CAPACITY) ? count : _HQ_ARRAY_DEFAULT_CAPACITY;
@@ -369,7 +345,7 @@ HqValueHandle HqValue::CreateNative(
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_NATIVE, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	pOutput->as.native.pObject = pNativeObject;
@@ -385,15 +361,15 @@ HqValueHandle HqValue::CreateNative(
 
 HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 {
-	if(!hValue || hValue->type == HQ_VALUE_TYPE_NULL)
+	if(!hValue)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	HqValue* pOutput = prv_onCreate(hValue->type, hVm);
 	if(!pOutput)
 	{
-		return &NullValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
 	switch(pOutput->type)
@@ -446,6 +422,10 @@ HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 			pOutput->as.pString = HqString::Create(hValue->as.pString->data);
 			break;
 
+		case HQ_VALUE_TYPE_FUNCTION:
+			pOutput->as.hFunction = hValue->as.hFunction;
+			break;
+
 		case HQ_VALUE_TYPE_OBJECT:
 			pOutput->as.pObject = HqScriptObject::CreateCopy(hValue->as.pObject->pSchema);
 			break;
@@ -482,7 +462,7 @@ HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 			// This should never happen. If it does, it indicates an unimplemented type here.
 			assert(false);
 			delete pOutput;
-			return &NullValue;
+			return HQ_VALUE_HANDLE_NULL;
 	}
 
 	// Any uses of this function internally will not want copied values to be auto-marked.
@@ -506,10 +486,6 @@ HqString* HqValue::GetDebugString(HqValueHandle hValue)
 	{
 		switch(hValue->type)
 		{
-			case HQ_VALUE_TYPE_NULL:
-				// Break here to use the same string value you would get from a null value handle.
-				break;
-
 			case HQ_VALUE_TYPE_INT8:
 				snprintf(str, sizeof(str), "<int8: %" PRId8 ">", hValue->as.int8);
 				break;
@@ -608,15 +584,14 @@ HqString* HqValue::GetDebugString(HqValueHandle hValue)
 
 bool HqValue::CanBeMarked(HqValueHandle hValue)
 {
-	return hValue
-		&& hValue->type != HQ_VALUE_TYPE_NULL;
+	return hValue != nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void HqValue::SetAutoMark(HqValueHandle hValue, const bool autoMark)
 {
-	if(hValue && hValue->type != HQ_VALUE_TYPE_NULL)
+	if(hValue)
 	{
 		hValue->gcProxy.autoMark = autoMark;
 	}
@@ -659,7 +634,6 @@ void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 			for(size_t i = 0; i < pScriptObject->members.count; ++i)
 			{
 				HqValueHandle hMemberValue = pScriptObject->members.pData[i];
-
 				if(CanBeMarked(hMemberValue))
 				{
 					HqGarbageCollector::MarkObject(gc, &hMemberValue->gcProxy);
@@ -677,7 +651,6 @@ void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 			for(size_t i = 0; i < array.count; ++i)
 			{
 				HqValueHandle hIndexValue = array.pData[i];
-
 				if(CanBeMarked(hIndexValue))
 				{
 					HqGarbageCollector::MarkObject(gc, &hIndexValue->gcProxy);
@@ -702,11 +675,6 @@ void HqValue::prv_onGcDestruct(void* const pOpaqueValue)
 
 	switch(hValue->type)
 	{
-		case HQ_VALUE_TYPE_NULL:
-			// The null value should never be destructed since it isn't dynamic.
-			assert(false);
-			return;
-
 		case HQ_VALUE_TYPE_NATIVE:
 			hValue->as.native.onDestruct(hValue->as.native.pObject);
 			break;

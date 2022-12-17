@@ -122,11 +122,6 @@ int HqExecution::Reset(HqExecutionHandle hExec)
 		// Initialize each value in the I/O register set.
 		memset(hExec->registers.pData, 0, sizeof(HqValueHandle) * hExec->registers.count);
 
-		for(size_t i = 0; i < hExec->registers.count; ++i)
-		{
-			hExec->registers.pData[i] = HqValue::CreateNull();
-		}
-
 		// Only re-create the main fiber if execution was stopped somewhere in an instruction.
 		if(hExec->state.exception || hExec->state.abort || hExec->state.yield)
 		{
@@ -239,7 +234,7 @@ int HqExecution::SetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, co
 		return HQ_ERROR_INDEX_OUT_OF_RANGE;
 	}
 
-	hExec->registers.pData[index] = HqValue::Resolve(hValue);
+	hExec->registers.pData[index] = hValue;
 
 	return HQ_SUCCESS;
 }
@@ -349,6 +344,10 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 			uint32_t* pOutHandlerOffset
 		) -> bool
 		{
+			const uint8_t valueType = hValue 
+				? uint8_t(hValue->type) 
+				: uint8_t(HQ_VALUE_TYPE_OBJECT);
+
 			uint32_t currentOffset = 0;
 			if(HqFrameGetBytecodeOffset(hFrame, &currentOffset) != HQ_SUCCESS)
 			{
@@ -386,14 +385,14 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 					HqExceptionHandler* const pHandler = pBlock->handlers.pData[handlerIndex];
 
 					// Check if the general type of the handler matches the raised value.
-					if(pHandler->type == hValue->type)
+					if(pHandler->type == valueType)
 					{
 						// If the value is an object, we need to also compare the class type name to
 						// verify this handler will handle the exact object type that was raised.
-						if(hValue->type != HQ_VALUE_TYPE_OBJECT ||
+						if(valueType != HQ_VALUE_TYPE_OBJECT ||
 							(
-								hValue->type == HQ_VALUE_TYPE_OBJECT
-								&& HqString::Compare(pHandler->pClassName, hValue->as.pObject->pTypeName)
+								valueType == HQ_VALUE_TYPE_OBJECT
+									&& (!hValue || HqString::Compare(pHandler->pClassName, hValue->as.pObject->pTypeName))
 							)
 						)
 						{

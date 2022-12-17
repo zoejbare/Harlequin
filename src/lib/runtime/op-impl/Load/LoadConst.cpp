@@ -66,10 +66,8 @@ void OpCodeExec_LoadConstNull(HqExecutionHandle hExec)
 
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hValue = HqValue::CreateNull();
-
 	// Upload the constant to the destination register.
-	result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hValue, registerIndex);
+	result = HqFrame::SetGpRegister(hExec->hCurrentFrame, HQ_VALUE_HANDLE_NULL, registerIndex);
 	if(result != HQ_SUCCESS)
 	{
 		// Raise a fatal script exception.

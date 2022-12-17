@@ -94,6 +94,7 @@ private:
 
 inline void HqProgramLoader::prv_trackString(HqString* const pString)
 {
+	HqString::AddRef(pString);
 	StringResources::Insert(m_strings, pString, false);
 }
 
@@ -101,6 +102,7 @@ inline void HqProgramLoader::prv_trackString(HqString* const pString)
 
 inline void HqProgramLoader::prv_trackObjectSchema(HqString* const pTypeName, HqScriptObject* const pSchema)
 {
+	HqString::AddRef(pTypeName);
 	HqScriptObject::StringToPtrMap::Insert(m_objectSchemas, pTypeName, pSchema);
 }
 
@@ -108,6 +110,7 @@ inline void HqProgramLoader::prv_trackObjectSchema(HqString* const pTypeName, Hq
 
 inline void HqProgramLoader::prv_trackGlobalValue(HqString* const pGlobalName, HqValueHandle hValue)
 {
+	HqString::AddRef(pGlobalName);
 	HqValue::StringToHandleMap::Insert(m_globalValues, pGlobalName, hValue);
 }
 
@@ -115,6 +118,7 @@ inline void HqProgramLoader::prv_trackGlobalValue(HqString* const pGlobalName, H
 
 inline void HqProgramLoader::prv_trackFunction(HqString* const pSignature, HqFunctionHandle hFunction)
 {
+	HqString::AddRef(pSignature);
 	HqFunction::StringToHandleMap::Insert(m_functions, pSignature, hFunction);
 }
 

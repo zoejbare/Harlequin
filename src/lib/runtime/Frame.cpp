@@ -77,7 +77,7 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 		while(HqFunction::StringToBoolMap::IterateNext(hFunction->locals, iter))
 		{
 			HqString* const pKey = iter.pData->key;
-			HqValueHandle hValue = HqValue::CreateNull();
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
 
 			HqValue::StringToHandleMap::Insert(hFrame->locals, pKey, hValue);
 		}
@@ -107,7 +107,7 @@ int HqFrame::PushValue(HqFrameHandle hFrame, HqValueHandle hValue)
 {
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
 
-	HqValueHandle hValueToPush = HqValue::Resolve(hValue);
+	HqValueHandle hValueToPush = hValue;
 
 	return HqValue::HandleStack::Push(hFrame->stack, hValueToPush);
 }
@@ -156,7 +156,7 @@ int HqFrame::SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uin
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
 	assert(index < HQ_VM_GP_REGISTER_COUNT);
 
-	hFrame->registers.pData[index] = HqValue::Resolve(hValue);
+	hFrame->registers.pData[index] = hValue;
 
 	return HQ_SUCCESS;
 }
@@ -168,7 +168,7 @@ int HqFrame::SetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, HqStri
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
 	assert(pVariableName != nullptr);
 
-	if(!HqValue::StringToHandleMap::Set(hFrame->locals, pVariableName, HqValue::Resolve(hValue)))
+	if(!HqValue::StringToHandleMap::Set(hFrame->locals, pVariableName, hValue))
 	{
 		return HQ_ERROR_KEY_DOES_NOT_EXIST;
 	}

@@ -244,12 +244,7 @@ int HqVmSetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, const char* vari
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(!hValue)
-	{
-		hValue = HqValue::CreateNull();
-	}
-
-	if(hValue->type != HQ_VALUE_TYPE_NULL && hVm != hValue->hVm)
+	if(hValue && hVm != hValue->hVm)
 	{
 		return HQ_ERROR_MISMATCH;
 	}
@@ -1193,13 +1188,7 @@ int HqExecutionSetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, int 
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(!hValue)
-	{
-		hValue = HqValue::CreateNull();
-	}
-
-	if(hValue->type != HQ_VALUE_TYPE_NULL
-		&& hExec->hVm != hValue->hVm)
+	if(hValue && hExec->hVm != hValue->hVm)
 	{
 		return HQ_ERROR_MISMATCH;
 	}
@@ -1276,13 +1265,7 @@ int HqFramePushValue(HqFrameHandle hFrame, HqValueHandle hValue)
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	if(!hValue)
-	{
-		hValue = HqValue::CreateNull();
-	}
-
-	if(hValue->type != HQ_VALUE_TYPE_NULL
-		&& HqFunction::GetVm(hFrame->hFunction) != hValue->hVm)
+	if(hValue && HqFunction::GetVm(hFrame->hFunction) != hValue->hVm)
 	{
 		return HQ_ERROR_MISMATCH;
 	}
@@ -1355,19 +1338,13 @@ int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, int registe
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	if(!hValue)
-	{
-		hValue = HqValue::CreateNull();
-	}
-
 	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
 	if(!hVm)
 	{
 		return HQ_ERROR_INVALID_DATA;
 	}
 
-	if(hValue->type != HQ_VALUE_TYPE_NULL
-		&& hVm != hValue->hVm)
+	if(hValue && hVm != hValue->hVm)
 	{
 		return HQ_ERROR_MISMATCH;
 	}
@@ -1414,7 +1391,7 @@ int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, int re
 
 int HqFrameSetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, const char* variableName)
 {
-	if(!hFrame || !hValue || !variableName || variableName[0] == '\0')
+	if(!hFrame || !variableName || variableName[0] == '\0')
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -1424,19 +1401,13 @@ int HqFrameSetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, const ch
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	if(!hValue)
-	{
-		hValue = HqValue::CreateNull();
-	}
-
 	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
 	if(!hVm)
 	{
 		return HQ_ERROR_INVALID_DATA;
 	}
 
-	if(hValue->type != HQ_VALUE_TYPE_NULL
-		&& hVm != hValue->hVm)
+	if(hValue && hVm != hValue->hVm)
 	{
 		return HQ_ERROR_MISMATCH;
 	}
@@ -1678,13 +1649,6 @@ HqValueHandle HqValueCreateFloat64(HqVmHandle hVm, double value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqValueHandle HqValueCreateNull()
-{
-	return HqValue::CreateNull();
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 HqValueHandle HqValueCreateString(HqVmHandle hVm, const char* const string)
 {
 	if(!hVm)
@@ -1808,23 +1772,26 @@ int HqValueGcExpose(HqValueHandle hValue)
 
 bool HqValueIsPrimitiveType(HqValueHandle hValue)
 {
-	switch(hValue->type)
+	if(hValue)
 	{
-		case HQ_VALUE_TYPE_BOOL:
-		case HQ_VALUE_TYPE_INT8:
-		case HQ_VALUE_TYPE_INT16:
-		case HQ_VALUE_TYPE_INT32:
-		case HQ_VALUE_TYPE_INT64:
-		case HQ_VALUE_TYPE_UINT8:
-		case HQ_VALUE_TYPE_UINT16:
-		case HQ_VALUE_TYPE_UINT32:
-		case HQ_VALUE_TYPE_UINT64:
-		case HQ_VALUE_TYPE_FLOAT32:
-		case HQ_VALUE_TYPE_FLOAT64:
-			return true;
+		switch(hValue->type)
+		{
+			case HQ_VALUE_TYPE_BOOL:
+			case HQ_VALUE_TYPE_INT8:
+			case HQ_VALUE_TYPE_INT16:
+			case HQ_VALUE_TYPE_INT32:
+			case HQ_VALUE_TYPE_INT64:
+			case HQ_VALUE_TYPE_UINT8:
+			case HQ_VALUE_TYPE_UINT16:
+			case HQ_VALUE_TYPE_UINT32:
+			case HQ_VALUE_TYPE_UINT64:
+			case HQ_VALUE_TYPE_FLOAT32:
+			case HQ_VALUE_TYPE_FLOAT64:
+				return true;
 
-		default:
-			break;
+			default:
+				break;
+		}
 	}
 
 	return false;
@@ -1905,13 +1872,6 @@ bool HqValueIsFloat32(HqValueHandle hValue)
 bool HqValueIsFloat64(HqValueHandle hValue)
 {
 	return hValue && (hValue->type == HQ_VALUE_TYPE_FLOAT64);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqValueIsNull(HqValueHandle hValue)
-{
-	return !hValue || (hValue->type == HQ_VALUE_TYPE_NULL);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2202,28 +2162,30 @@ HqValueHandle HqValueGetObjectMemberValue(HqValueHandle hValue, const char* memb
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint8_t HqValueGetObjectMemberType(HqValueHandle hValue, const char* memberName)
+int HqValueGetObjectMemberType(HqValueHandle hValue, const char* memberName, uint8_t* pOutType)
 {
-	if(HqValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	if(HqValueIsObject(hValue) || !memberName || memberName[0] == '\0' || !pOutType)
 	{
-		HqScriptObject* const pScriptObject = hValue->as.pObject;
-		HqString* const pMemberName = HqString::Create(memberName);
-
-		int result;
-
-		const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
-		if(!result)
-		{
-			return HQ_VALUE_TYPE_NULL;
-		}
-
-		// Release the member name string now that we don't need it anymore.
-		HqString::Release(pMemberName);
-
-		return memberDef.valueType;
+		return HQ_ERROR_INVALID_ARG;
 	}
 
-	return HQ_VALUE_TYPE_NULL;
+	HqScriptObject* const pScriptObject = hValue->as.pObject;
+	HqString* const pMemberName = HqString::Create(memberName);
+
+	int result;
+
+	const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+	if(result != HQ_SUCCESS)
+	{
+		return HQ_ERROR_KEY_DOES_NOT_EXIST;
+	}
+
+	// Release the member name string now that we don't need it anymore.
+	HqString::Release(pMemberName);
+
+	(*pOutType) = memberDef.valueType;
+
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

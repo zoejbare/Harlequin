@@ -87,9 +87,6 @@ static bool EvaluateValue(HqValueHandle hValue)
 
 	switch(hValue->type)
 	{
-		case HQ_VALUE_TYPE_NULL:
-			return false;
-
 		case HQ_VALUE_TYPE_INT8:
 			return hValue->as.int8 != 0;
 

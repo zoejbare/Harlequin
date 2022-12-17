@@ -389,7 +389,6 @@ int main(int argc, char* argv[])
 	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
 	HqVmGetReportHandle(hVm, &hReport);
 
-
 	std::vector<uint8_t> fileData;
 
 	const char* const scriptFilePath = argv[1];
@@ -616,7 +615,7 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						hOutputParam = HqValueCreateNull();
+						hOutputParam = HQ_VALUE_HANDLE_NULL;
 					}
 
 					HqExecutionSetIoRegister(hExec, hOutputParam, 1);

@@ -65,10 +65,6 @@ struct HqValue
 		HqString::StlCompare
 	> StringToBoolMap;
 
-	static HqValue NullValue;
-
-	static HqValueHandle Resolve(HqValueHandle hValue);
-
 	static HqValueHandle CreateBool(HqVmHandle hVm, const bool value);
 	static HqValueHandle CreateInt8(HqVmHandle hVm, const int8_t value);
 	static HqValueHandle CreateInt16(HqVmHandle hVm, const int16_t value);
@@ -80,7 +76,6 @@ struct HqValue
 	static HqValueHandle CreateUint64(HqVmHandle hVm, const uint64_t value);
 	static HqValueHandle CreateFloat32(HqVmHandle hVm, const float value);
 	static HqValueHandle CreateFloat64(HqVmHandle hVm, const double value);
-	static HqValueHandle CreateNull();
 	static HqValueHandle CreateString(HqVmHandle hVm, const char* const string);
 	static HqValueHandle CreateString(HqVmHandle hVm, HqString* const pString);
 	static HqValueHandle CreateObject(HqVmHandle hVm, HqScriptObject* const pObjectSchema);

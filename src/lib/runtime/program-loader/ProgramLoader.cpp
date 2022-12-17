@@ -79,6 +79,8 @@ HqProgramLoader::~HqProgramLoader()
 		HqScriptObject::StringToPtrMap::Iterator iter;
 		while(HqScriptObject::StringToPtrMap::IterateNext(m_objectSchemas, iter))
 		{
+			HqString::Release(iter.pData->key);
+
 			if(iter.pData->value)
 			{
 				HqScriptObject::Dispose(iter.pData->value);
@@ -93,10 +95,7 @@ HqProgramLoader::~HqProgramLoader()
 		HqValue::StringToHandleMap::Iterator iter;
 		while(HqValue::StringToHandleMap::IterateNext(m_globalValues, iter))
 		{
-			if(iter.pData->value)
-			{
-				HqString::Release(iter.pData->key);
-			}
+			HqString::Release(iter.pData->key);
 		}
 
 		HqValue::StringToHandleMap::Dispose(m_globalValues);
@@ -107,6 +106,8 @@ HqProgramLoader::~HqProgramLoader()
 		HqFunction::StringToHandleMap::Iterator iter;
 		while(HqFunction::StringToHandleMap::IterateNext(m_functions, iter))
 		{
+			HqString::Release(iter.pData->key);
+
 			if(iter.pData->value)
 			{
 				HqFunction::Dispose(iter.pData->value);
@@ -641,6 +642,9 @@ bool HqProgramLoader::prv_readDependencyTable()
 			// Add the dependency to the program.
 			HqString::AddRef(pDependencyName);
 			HqValue::StringToBoolMap::Insert(m_hProgram->dependencies, pDependencyName, false);
+
+			// Release the extra string reference.
+			HqString::Release(pDependencyName);
 		}
 	}
 
@@ -682,6 +686,9 @@ bool HqProgramLoader::prv_readObjectTable()
 
 			prv_trackString(pTypeName);
 
+			// Release the extra string reference.
+			HqString::Release(pTypeName);
+
 			uint32_t memberCount;
 			result = HqSerializerReadUint32(m_hSerializer, &memberCount);
 			if(result != HQ_SUCCESS)
@@ -720,6 +727,9 @@ bool HqProgramLoader::prv_readObjectTable()
 				}
 
 				prv_trackString(pMemberName);
+
+				// Release the extra string reference.
+				HqString::Release(pMemberName);
 
 				uint8_t memberType;
 				result = HqSerializerReadUint8(m_hSerializer, &memberType);
@@ -846,7 +856,10 @@ bool HqProgramLoader::prv_readGlobalTable()
 			}
 
 			prv_trackString(pVarName);
-			prv_trackGlobalValue(pVarName, HqValue::CreateNull());
+			prv_trackGlobalValue(pVarName, HQ_VALUE_HANDLE_NULL);
+
+			// Release the extra string reference.
+			HqString::Release(pVarName);
 		}
 	}
 
@@ -893,6 +906,9 @@ bool HqProgramLoader::prv_readFunctions()
 			}
 
 			prv_trackString(pSignature);
+
+			// Release the extra string reference.
+			HqString::Release(pSignature);
 
 			// Read the flag indicating whether or not the function uses a native binding.
 			bool isNativeFunction = false;
@@ -983,7 +999,7 @@ bool HqProgramLoader::prv_readFunctions()
 				}
 
 				HqFunction::StringToBoolMap::Allocate(locals);
-				auto freeLocals = [&locals]()
+				auto freeFunctionLocals = [&locals]()
 				{
 					// Dispose of the temporary local variable map.
 					{
@@ -1000,7 +1016,7 @@ bool HqProgramLoader::prv_readFunctions()
 				// Read the function's local variables.
 				if(!prv_readLocalVariables(pSignature, locals))
 				{
-					freeLocals();
+					freeFunctionLocals();
 					return false;
 				}
 
@@ -1013,7 +1029,7 @@ bool HqProgramLoader::prv_readFunctions()
 					}
 
 					HqGuardedBlock::Array::Dispose(guardedBlocks);
-					freeLocals();
+					freeFunctionLocals();
 
 					return false;
 				}
@@ -1030,7 +1046,7 @@ bool HqProgramLoader::prv_readFunctions()
 					numReturnValues
 				);
 
-				freeLocals();
+				freeFunctionLocals();
 			}
 			else
 			{
@@ -1136,6 +1152,9 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 			}
 
 			prv_trackString(pVarName);
+
+			// Release the extra string reference.
+			HqString::Release(pVarName);
 
 			if(HqFunction::StringToBoolMap::Contains(outLocals, pVarName))
 			{
@@ -1322,6 +1341,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 					}
 
 					prv_trackString(pClassName);
+
+					// Release the extra string reference.
+					HqString::Release(pClassName);
 				}
 
 				HqExceptionHandler* const pExceptionHandler = HqExceptionHandler::Create(handledType, handlerOffset, pClassName);
