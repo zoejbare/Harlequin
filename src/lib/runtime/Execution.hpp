@@ -86,11 +86,11 @@ struct HqExecution
 	
 	struct InternalState
 	{
-		bool yield;
-		bool started;
-		bool finished;
-		bool exception;
-		bool abort;
+		bool yield : 1;
+		bool started : 1;
+		bool finished : 1;
+		bool exception : 1;
+		bool abort : 1;
 	};
 
 	union

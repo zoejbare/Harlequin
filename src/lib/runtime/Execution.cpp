@@ -42,10 +42,13 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 	pOutput->hVm = hVm;
 	pOutput->hFunction = HQ_FUNCTION_HANDLE_NULL;
 	pOutput->hCurrentFrame = HQ_FRAME_HANDLE_NULL;
+	pOutput->pExceptionLocation = nullptr;
 	pOutput->endianness = HqGetPlatformEndianMode();
 	pOutput->lastOpCode = UINT_MAX;
 	pOutput->runMode = HQ_RUN_STEP;
 	pOutput->frameStackDirty = false;
+	pOutput->stateBits = 0;
+	pOutput->firstRun = true;
 	pOutput->created = false;
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
@@ -58,12 +61,8 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 
 	pOutput->registers.count = HQ_VM_IO_REGISTER_COUNT;
 
-	// Unset the 'firstRun' flag to trick the reset call into doing some extra initialization for us.
-	// The flag will be cleared when the reset occurs.
-	pOutput->firstRun = false;
-
-	// Reset the state of the execution context.
-	Reset(pOutput);
+	// Initialize each value in the I/O register set.
+	memset(pOutput->registers.pData, 0, sizeof(HqValueHandle) * pOutput->registers.count);
 
 	// Create the main execution fiber.
 	prv_createMainFiber(pOutput);
