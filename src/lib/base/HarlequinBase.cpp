@@ -143,7 +143,7 @@ const char* HqGetValueTypeString(int valueType)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqGetPlatformEndianMode()
+int HqGetPlatformEndianness()
 {
 #ifdef HQ_CPU_ENDIAN_LITTLE
 	return HQ_ENDIAN_ORDER_LITTLE;

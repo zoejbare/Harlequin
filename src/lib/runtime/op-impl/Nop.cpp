@@ -30,24 +30,22 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_Nop(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_Nop(HqExecutionHandle hExec)
 {
 	(void) hExec;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Nop(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_Nop(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "NOP", disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_Nop(HqDecoder& /*decoder*/)
+{
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

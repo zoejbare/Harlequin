@@ -49,9 +49,11 @@ struct HqVm
 	{
 		typedef void (*ExecuteCallback)(HqExecutionHandle);
 		typedef void (*DisassembleCallback)(HqDisassemble&);
+		typedef void (*EndianSwapCallback)(HqDecoder&);
 
 		ExecuteCallback execFn;
 		DisassembleCallback disasmFn;
+		EndianSwapCallback endianFn;
 	};
 
 	typedef HqArray<OpCode> OpCodeArray;
@@ -74,6 +76,7 @@ struct HqVm
 
 	static void ExecuteOpCode(HqVmHandle hVm, HqExecutionHandle hExec, const uint32_t opCode);
 	static void DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const uint32_t opCode);
+	static void EndianSwapOpCode(HqVmHandle hVm, HqDecoder& decoder, const uint32_t opCode);
 
 	static void prv_setupOpCodes(HqVmHandle);
 	static void prv_setupBuiltIns(HqVmHandle);

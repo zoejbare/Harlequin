@@ -25,63 +25,64 @@
 
 void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 {
-	#define HQ_BIND_OP_CODE(opCode, name) \
-		hVm->opCodes.pData[HQ_OP_CODE_ ## opCode].execFn = OpCodeExec_ ## name; \
-		hVm->opCodes.pData[HQ_OP_CODE_ ## opCode].disasmFn = OpCodeDisasm_ ## name
+	#define _HQ_BIND_OP_CODE(op_code, name) \
+		hVm->opCodes.pData[HQ_OP_CODE_ ## op_code].execFn = OpCodeExec_ ## name; \
+		hVm->opCodes.pData[HQ_OP_CODE_ ## op_code].disasmFn = OpCodeDisasm_ ## name; \
+		hVm->opCodes.pData[HQ_OP_CODE_ ## op_code].endianFn = OpCodeEndian_ ## name
 
-	HQ_BIND_OP_CODE(NOP, Nop);
-	HQ_BIND_OP_CODE(ABORT, Abort);
-	HQ_BIND_OP_CODE(RETURN, Return);
-	HQ_BIND_OP_CODE(YIELD, Yield);
+	_HQ_BIND_OP_CODE(NOP, Nop);
+	_HQ_BIND_OP_CODE(ABORT, Abort);
+	_HQ_BIND_OP_CODE(RETURN, Return);
+	_HQ_BIND_OP_CODE(YIELD, Yield);
 
-	HQ_BIND_OP_CODE(CALL, Call);
-	HQ_BIND_OP_CODE(CALL_VALUE, CallValue);
-	HQ_BIND_OP_CODE(RAISE, Raise);
+	_HQ_BIND_OP_CODE(CALL, Call);
+	_HQ_BIND_OP_CODE(CALL_VALUE, CallValue);
+	_HQ_BIND_OP_CODE(RAISE, Raise);
 
-	HQ_BIND_OP_CODE(LOAD_CONST_NULL, LoadConstNull);
-	HQ_BIND_OP_CODE(LOAD_CONST_BOOL, LoadConstBool);
-	HQ_BIND_OP_CODE(LOAD_CONST_I8, LoadConstI8);
-	HQ_BIND_OP_CODE(LOAD_CONST_I16, LoadConstI16);
-	HQ_BIND_OP_CODE(LOAD_CONST_I32, LoadConstI32);
-	HQ_BIND_OP_CODE(LOAD_CONST_I64, LoadConstI64);
-	HQ_BIND_OP_CODE(LOAD_CONST_U8, LoadConstU8);
-	HQ_BIND_OP_CODE(LOAD_CONST_U16, LoadConstU16);
-	HQ_BIND_OP_CODE(LOAD_CONST_U32, LoadConstU32);
-	HQ_BIND_OP_CODE(LOAD_CONST_U64, LoadConstU64);
-	HQ_BIND_OP_CODE(LOAD_CONST_F32, LoadConstF32);
-	HQ_BIND_OP_CODE(LOAD_CONST_F64, LoadConstF64);
-	HQ_BIND_OP_CODE(LOAD_CONST_STR, LoadConstStr);
+	_HQ_BIND_OP_CODE(LOAD_CONST_NULL, LoadConstNull);
+	_HQ_BIND_OP_CODE(LOAD_CONST_BOOL, LoadConstBool);
+	_HQ_BIND_OP_CODE(LOAD_CONST_I8, LoadConstI8);
+	_HQ_BIND_OP_CODE(LOAD_CONST_I16, LoadConstI16);
+	_HQ_BIND_OP_CODE(LOAD_CONST_I32, LoadConstI32);
+	_HQ_BIND_OP_CODE(LOAD_CONST_I64, LoadConstI64);
+	_HQ_BIND_OP_CODE(LOAD_CONST_U8, LoadConstU8);
+	_HQ_BIND_OP_CODE(LOAD_CONST_U16, LoadConstU16);
+	_HQ_BIND_OP_CODE(LOAD_CONST_U32, LoadConstU32);
+	_HQ_BIND_OP_CODE(LOAD_CONST_U64, LoadConstU64);
+	_HQ_BIND_OP_CODE(LOAD_CONST_F32, LoadConstF32);
+	_HQ_BIND_OP_CODE(LOAD_CONST_F64, LoadConstF64);
+	_HQ_BIND_OP_CODE(LOAD_CONST_STR, LoadConstStr);
 
-	HQ_BIND_OP_CODE(LOAD_GLOBAL, LoadGlobal);
-	HQ_BIND_OP_CODE(LOAD_LOCAL, LoadLocal);
-	HQ_BIND_OP_CODE(LOAD_PARAM, LoadParam);
-	HQ_BIND_OP_CODE(LOAD_OBJECT, LoadObject);
-	HQ_BIND_OP_CODE(LOAD_ARRAY, LoadArray);
+	_HQ_BIND_OP_CODE(LOAD_GLOBAL, LoadGlobal);
+	_HQ_BIND_OP_CODE(LOAD_LOCAL, LoadLocal);
+	_HQ_BIND_OP_CODE(LOAD_PARAM, LoadParam);
+	_HQ_BIND_OP_CODE(LOAD_OBJECT, LoadObject);
+	_HQ_BIND_OP_CODE(LOAD_ARRAY, LoadArray);
 
-	HQ_BIND_OP_CODE(STORE_GLOBAL, StoreGlobal);
-	HQ_BIND_OP_CODE(STORE_LOCAL, StoreLocal);
-	HQ_BIND_OP_CODE(STORE_PARAM, StoreParam);
-	HQ_BIND_OP_CODE(STORE_OBJECT, StoreObject);
-	HQ_BIND_OP_CODE(STORE_ARRAY, StoreArray);
+	_HQ_BIND_OP_CODE(STORE_GLOBAL, StoreGlobal);
+	_HQ_BIND_OP_CODE(STORE_LOCAL, StoreLocal);
+	_HQ_BIND_OP_CODE(STORE_PARAM, StoreParam);
+	_HQ_BIND_OP_CODE(STORE_OBJECT, StoreObject);
+	_HQ_BIND_OP_CODE(STORE_ARRAY, StoreArray);
 
-	HQ_BIND_OP_CODE(PULL_GLOBAL, PullGlobal);
-	HQ_BIND_OP_CODE(PULL_LOCAL, PullLocal);
-	HQ_BIND_OP_CODE(PULL_PARAM, PullParam);
-	HQ_BIND_OP_CODE(PULL_OBJECT, PullObject);
-	HQ_BIND_OP_CODE(PULL_ARRAY, PullArray);
+	_HQ_BIND_OP_CODE(PULL_GLOBAL, PullGlobal);
+	_HQ_BIND_OP_CODE(PULL_LOCAL, PullLocal);
+	_HQ_BIND_OP_CODE(PULL_PARAM, PullParam);
+	_HQ_BIND_OP_CODE(PULL_OBJECT, PullObject);
+	_HQ_BIND_OP_CODE(PULL_ARRAY, PullArray);
 
-	HQ_BIND_OP_CODE(PUSH, Push);
-	HQ_BIND_OP_CODE(POP, Pop);
+	_HQ_BIND_OP_CODE(PUSH, Push);
+	_HQ_BIND_OP_CODE(POP, Pop);
 
-	HQ_BIND_OP_CODE(INIT_OBJECT, InitObject);
-	HQ_BIND_OP_CODE(INIT_ARRAY, InitArray);
-	HQ_BIND_OP_CODE(INIT_FUNCTION, InitFunction);
+	_HQ_BIND_OP_CODE(INIT_OBJECT, InitObject);
+	_HQ_BIND_OP_CODE(INIT_ARRAY, InitArray);
+	_HQ_BIND_OP_CODE(INIT_FUNCTION, InitFunction);
 
-	HQ_BIND_OP_CODE(BRANCH, Branch);
-	HQ_BIND_OP_CODE(BRANCH_IF_TRUE, BranchIfTrue);
-	HQ_BIND_OP_CODE(BRANCH_IF_FALSE, BranchIfFalse);
+	_HQ_BIND_OP_CODE(BRANCH, Branch);
+	_HQ_BIND_OP_CODE(BRANCH_IF_TRUE, BranchIfTrue);
+	_HQ_BIND_OP_CODE(BRANCH_IF_FALSE, BranchIfFalse);
 
-	#undef HQ_BIND_OP_CODE
+	#undef _HQ_BIND_OP_CODE
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -31,11 +31,7 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_Yield(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_Yield(HqExecutionHandle hExec)
 {
 	// Set the trigger that says we're yielding execution.
 	hExec->state.yield = true;
@@ -46,13 +42,15 @@ void OpCodeExec_Yield(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Yield(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_Yield(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "YIELD", disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_Yield(HqDecoder& /*decoder*/)
+{
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

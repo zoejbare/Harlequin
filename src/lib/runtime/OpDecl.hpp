@@ -42,13 +42,12 @@ struct HqDisassemble
 
 #define HQ_DECLARE_OP_CODE_FN(op_name) \
 	void OpCodeExec_ ## op_name(HqExecutionHandle); \
-	void OpCodeDisasm_ ## op_name(HqDisassemble&)
+	void OpCodeDisasm_ ## op_name(HqDisassemble&); \
+	void OpCodeEndian_ ## op_name(HqDecoder&)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -105,8 +104,6 @@ HQ_DECLARE_OP_CODE_FN(BranchIfFalse);
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -79,7 +79,6 @@ struct HqExecution
 
 	uint8_t* pExceptionLocation;
 
-	uint32_t endianness;
 	uint32_t lastOpCode;
 
 	volatile uint32_t runMode;

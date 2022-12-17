@@ -38,11 +38,7 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_InitArray(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_InitArray(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -80,7 +76,7 @@ void OpCodeExec_InitArray(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_InitArray(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_InitArray(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint32_t initialCount = HqDecoder::LoadUint32(disasm.decoder);
@@ -90,8 +86,12 @@ void OpCodeDisasm_InitArray(HqDisassemble& disasm)
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_InitArray(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapUint32(decoder); // ##
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

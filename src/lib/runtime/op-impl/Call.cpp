@@ -93,11 +93,7 @@ static void CallScriptFunction(HqExecutionHandle hExec, HqFunctionHandle hFuncti
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_Call(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_Call(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -136,7 +132,7 @@ void OpCodeExec_Call(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Call(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_Call(HqDisassemble& disasm)
 {
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
@@ -147,7 +143,14 @@ void OpCodeDisasm_Call(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_CallValue(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_Call(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_CallValue(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -172,7 +175,7 @@ void OpCodeExec_CallValue(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_CallValue(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_CallValue(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
@@ -181,8 +184,11 @@ void OpCodeDisasm_CallValue(HqDisassemble& disasm)
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_CallValue(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder);
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -32,11 +32,7 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_Return(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_Return(HqExecutionHandle hExec)
 {
 	const int result = HqExecution::PopFrame(hExec);
 
@@ -59,13 +55,15 @@ void OpCodeExec_Return(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Return(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_Return(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "RETURN", disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_Return(HqDecoder& /*decoder*/)
+{
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -43,10 +43,23 @@ struct HqDecoder
 	static float LoadFloat32(HqDecoder& decoder);
 	static double LoadFloat64(HqDecoder& decoder);
 
+	static bool EndianSwapBool(HqDecoder& decoder);
+
+	static int8_t EndianSwapInt8(HqDecoder& decoder);
+	static int16_t EndianSwapInt16(HqDecoder& decoder);
+	static int32_t EndianSwapInt32(HqDecoder& decoder);
+	static int64_t EndianSwapInt64(HqDecoder& decoder);
+
+	static uint8_t EndianSwapUint8(HqDecoder& decoder);
+	static uint16_t EndianSwapUint16(HqDecoder& decoder);
+	static uint32_t EndianSwapUint32(HqDecoder& decoder);
+	static uint64_t EndianSwapUint64(HqDecoder& decoder);
+
+	static float EndianSwapFloat32(HqDecoder& decoder);
+	static double EndianSwapFloat64(HqDecoder& decoder);
+
 	uint8_t* ip;
 	uint8_t* cachedIp;
-
-	bool sameEndian;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -69,8 +69,6 @@ struct HqProgram
 	HqFunctionHandle hInitFunction;
 
 	HqString* pName;
-
-	int endianness;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

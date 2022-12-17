@@ -498,20 +498,6 @@ int HqProgramGetName(HqProgramHandle hProgram, const char** pOutName)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramGetEndianness(HqProgramHandle hProgram, int* pOutEndianness)
-{
-	if(!hProgram || !pOutEndianness)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	(*pOutEndianness) = hProgram->endianness;
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int HqProgramGetFunctionCount(HqProgramHandle hProgram, size_t* pOutCount)
 {
 	if(!hProgram || !pOutCount)

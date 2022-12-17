@@ -135,20 +135,20 @@ static bool ProgramLoad(
 
 	// Save the endianness value to the output program since we'll need
 	// that when dispatching bytecode data.
-	pOutProgram->endianness = (fileHeader.bigEndianFlag > 0)
+	const int endianness = (fileHeader.bigEndianFlag > 0)
 		? HQ_ENDIAN_ORDER_BIG
 		: HQ_ENDIAN_ORDER_LITTLE;
 
 	// Now that we know the endianness, we can set it on the serializer.
-	result = HqSerializerSetEndianness(hSerializer, pOutProgram->endianness);
+	result = HqSerializerSetEndianness(hSerializer, endianness);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error setting endian mode on the program file serializer: error=\"%s\", endianMode=\"%s\"",
+			"Error setting endian mode on the program file serializer: error=\"%s\", endianness=\"%s\"",
 			HqGetErrorCodeString(result),
-			HqGetEndianModeString(pOutProgram->endianness)
+			HqGetEndianModeString(endianness)
 		);
 		return false;
 	}

@@ -43,7 +43,6 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 	pOutput->hFunction = HQ_FUNCTION_HANDLE_NULL;
 	pOutput->hCurrentFrame = HQ_FRAME_HANDLE_NULL;
 	pOutput->pExceptionLocation = nullptr;
-	pOutput->endianness = HqGetPlatformEndianMode();
 	pOutput->lastOpCode = UINT_MAX;
 	pOutput->runMode = HQ_RUN_STEP;
 	pOutput->frameStackDirty = false;

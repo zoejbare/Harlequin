@@ -19,12 +19,14 @@
 #include "ProgramLoader.hpp"
 #include "CommonLoader.hpp"
 
+#include "../Decoder.hpp"
 #include "../Function.hpp"
 #include "../Program.hpp"
 #include "../ScriptObject.hpp"
+#include "../Value.hpp"
 #include "../Vm.hpp"
 
-#include "../Value.hpp"
+#include "../../common/OpCodeEnum.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -193,10 +195,40 @@ bool HqProgramLoader::prv_loadFile()
 
 void HqProgramLoader::prv_finalize()
 {
+	auto endianSwapFunctionBytecode = [](HqFunctionHandle hFunc)
+	{
+		assert(hFunc != nullptr);
+		assert(!hFunc->isNative);
+
+		HqDecoder decoder;
+		HqDecoder::Initialize(decoder, hFunc->hProgram, hFunc->bytecodeOffsetStart);
+
+		// Iterate through each instruction.
+		for(;;)
+		{
+			const uint8_t opCode = HqDecoder::EndianSwapUint8(decoder);
+
+			HqVm::EndianSwapOpCode(hFunc->hProgram->hVm, decoder, opCode);
+
+			if(opCode == HQ_OP_CODE_RETURN)
+			{
+				// The RETURN opcode indicates the end of the function.
+				break;
+			}
+		}
+	};
+
+	const bool needEndianSwap = HqSerializerGetEndianness(m_hSerializer) != HqGetPlatformEndianness();
+
 	if(m_programHeader.initFunctionLength > 0)
 	{
 		// Create the program's initializer function.
 		m_hProgram->hInitFunction = HqFunction::CreateInit(m_hProgram, m_programHeader.initFunctionLength);
+
+		if(needEndianSwap)
+		{
+			endianSwapFunctionBytecode(m_hProgram->hInitFunction);
+		}
 	}
 
 	// Link the object schemas into the program and VM.
@@ -290,6 +322,13 @@ void HqProgramLoader::prv_finalize()
 				continue;
 			}
 
+			// Endian swap all script function bytecode when the endianness of
+			// the program file does not match the endianness of the platform.
+			if(!hFunction->isNative && needEndianSwap)
+			{
+				endianSwapFunctionBytecode(hFunction);
+			}
+
 			// Map the function signature to output program.
 			// Only the name is mapped since the function itself will live in the VM.
 			HqString::AddRef(pSignature);
@@ -300,6 +339,7 @@ void HqProgramLoader::prv_finalize()
 			HqFunction::StringToHandleMap::Insert(m_hVm->functions, pSignature, hFunction);
 		}
 	}
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------

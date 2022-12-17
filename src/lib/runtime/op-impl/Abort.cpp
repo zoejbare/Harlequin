@@ -31,11 +31,7 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_Abort(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_Abort(HqExecutionHandle hExec)
 {
 	// Set the trigger that says we're aborting execution.
 	hExec->state.abort = true;
@@ -46,13 +42,15 @@ void OpCodeExec_Abort(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Abort(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_Abort(HqDisassemble& disasm)
 {
 	disasm.onDisasmFn(disasm.pUserData, "ABORT", disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_Abort(HqDecoder& /*decoder*/)
+{
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

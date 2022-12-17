@@ -56,11 +56,7 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_LoadConstNull(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_LoadConstNull(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -82,7 +78,7 @@ void OpCodeExec_LoadConstNull(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstNull(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstNull(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
@@ -93,7 +89,14 @@ void OpCodeDisasm_LoadConstNull(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstBool(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstNull(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstBool(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -131,7 +134,7 @@ void OpCodeExec_LoadConstBool(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstBool(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstBool(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const bool rawValue = HqDecoder::LoadBool(disasm.decoder);
@@ -143,7 +146,15 @@ void OpCodeDisasm_LoadConstBool(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstI8(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstBool(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapBool(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstI8(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -181,7 +192,7 @@ void OpCodeExec_LoadConstI8(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstI8(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstI8(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int8_t rawValue = HqDecoder::LoadInt8(disasm.decoder);
@@ -193,7 +204,15 @@ void OpCodeDisasm_LoadConstI8(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstI16(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstI8(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapInt8(decoder); // r#
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstI16(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -231,7 +250,7 @@ void OpCodeExec_LoadConstI16(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstI16(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstI16(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int16_t rawValue = HqDecoder::LoadInt16(disasm.decoder);
@@ -243,7 +262,15 @@ void OpCodeDisasm_LoadConstI16(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstI32(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstI16(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapInt16(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstI32(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -281,7 +308,7 @@ void OpCodeExec_LoadConstI32(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstI32(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstI32(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int32_t rawValue = HqDecoder::LoadInt32(disasm.decoder);
@@ -293,7 +320,15 @@ void OpCodeDisasm_LoadConstI32(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstI64(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstI32(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapInt32(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstI64(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -331,7 +366,7 @@ void OpCodeExec_LoadConstI64(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstI64(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstI64(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int64_t rawValue = HqDecoder::LoadInt64(disasm.decoder);
@@ -343,7 +378,15 @@ void OpCodeDisasm_LoadConstI64(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstU8(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstI64(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapInt64(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstU8(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -381,7 +424,7 @@ void OpCodeExec_LoadConstU8(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstU8(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstU8(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint8_t rawValue = HqDecoder::LoadUint8(disasm.decoder);
@@ -393,7 +436,15 @@ void OpCodeDisasm_LoadConstU8(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstU16(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstU8(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapUint8(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstU16(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -431,7 +482,7 @@ void OpCodeExec_LoadConstU16(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstU16(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstU16(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint16_t rawValue = HqDecoder::LoadUint16(disasm.decoder);
@@ -443,7 +494,15 @@ void OpCodeDisasm_LoadConstU16(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstU32(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstU16(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapUint16(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstU32(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -481,7 +540,7 @@ void OpCodeExec_LoadConstU32(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstU32(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstU32(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint32_t rawValue = HqDecoder::LoadUint32(disasm.decoder);
@@ -493,7 +552,15 @@ void OpCodeDisasm_LoadConstU32(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstU64(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstU32(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapUint32(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstU64(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -531,7 +598,7 @@ void OpCodeExec_LoadConstU64(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstU64(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstU64(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint64_t rawValue = HqDecoder::LoadUint64(disasm.decoder);
@@ -543,7 +610,15 @@ void OpCodeDisasm_LoadConstU64(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstF32(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstU64(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapUint64(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstF32(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -581,7 +656,7 @@ void OpCodeExec_LoadConstF32(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstF32(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstF32(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const float rawValue = HqDecoder::LoadFloat32(disasm.decoder);
@@ -593,7 +668,15 @@ void OpCodeDisasm_LoadConstF32(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstF64(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstF32(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapFloat32(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstF64(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -631,7 +714,7 @@ void OpCodeExec_LoadConstF64(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstF64(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstF64(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const double rawValue = HqDecoder::LoadFloat64(disasm.decoder);
@@ -643,7 +726,15 @@ void OpCodeDisasm_LoadConstF64(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_LoadConstStr(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_LoadConstF64(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapFloat64(decoder); // ##
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_LoadConstStr(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -696,7 +787,7 @@ void OpCodeExec_LoadConstStr(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadConstStr(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadConstStr(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
@@ -706,8 +797,12 @@ void OpCodeDisasm_LoadConstStr(HqDisassemble& disasm)
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_LoadConstStr(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapUint32(decoder); // s#
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

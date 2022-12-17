@@ -88,7 +88,7 @@ HQ_BASE_API const char* HqGetEndianModeString(int endianness);
 
 HQ_BASE_API const char* HqGetValueTypeString(int valueType);
 
-HQ_BASE_API int HqGetPlatformEndianMode();
+HQ_BASE_API int HqGetPlatformEndianness();
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -405,8 +405,6 @@ HQ_MAIN_API int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutE
 HQ_MAIN_API int HqProgramGetVm(HqProgramHandle hProgram, HqVmHandle* phOutVm);
 
 HQ_MAIN_API int HqProgramGetName(HqProgramHandle hProgram, const char** pOutName);
-
-HQ_MAIN_API int HqProgramGetEndianness(HqProgramHandle hProgram, int* pOutEndianness);
 
 HQ_MAIN_API int HqProgramGetFunctionCount(HqProgramHandle hProgram, size_t* pOutCount);
 

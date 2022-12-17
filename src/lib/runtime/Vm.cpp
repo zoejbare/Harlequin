@@ -379,6 +379,19 @@ void HqVm::DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const uint32
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void HqVm::EndianSwapOpCode(HqVmHandle hVm, HqDecoder& decoder, const uint32_t opCode)
+{
+	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(decoder.ip != nullptr);
+	assert(opCode < HQ_OP_CODE__TOTAL_COUNT);
+
+	const OpCode& opCodeData = hVm->opCodes.pData[opCode];
+
+	opCodeData.endianFn(decoder);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int32_t HqVm::prv_gcThreadMain(void* const pArg)
 {
 	HqVmHandle hVm = reinterpret_cast<HqVmHandle>(pArg);

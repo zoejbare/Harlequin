@@ -29,7 +29,6 @@ void HqDecoder::Initialize(HqDecoder& output, HqProgramHandle hProgram, uint32_t
 
 	output.ip = hProgram->code.pData + offset;
 	output.cachedIp = output.ip;
-	output.sameEndian = (hProgram->endianness == HqGetPlatformEndianMode());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -44,10 +43,8 @@ bool HqDecoder::LoadBool(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(int32_t);
 
-	// Return the data, endian swapping it if needed.
-	return (decoder.sameEndian
-		? output
-		: HqEndianSwapInt32(output)) != 0;
+	// Return the data.
+	return output != 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -62,10 +59,8 @@ int8_t HqDecoder::LoadInt8(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(int32_t);
 
-	// Return the data, endian swapping it if needed.
-	return int8_t(decoder.sameEndian
-		? output
-		: HqEndianSwapInt32(output));
+	// Return the data.
+	return int8_t(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -80,10 +75,8 @@ int16_t HqDecoder::LoadInt16(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(int32_t);
 
-	// Return the data, endian swapping it if needed.
-	return int16_t(decoder.sameEndian
-		? output
-		: HqEndianSwapInt32(output));
+	// Return the data.
+	return int16_t(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -98,10 +91,8 @@ int32_t HqDecoder::LoadInt32(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(int32_t);
 
-	// Return the data, endian swapping it if needed.
-	return decoder.sameEndian
-		? output
-		: HqEndianSwapInt32(output);
+	// Return the data.
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -116,10 +107,8 @@ int64_t HqDecoder::LoadInt64(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(int64_t);
 
-	// Return the data, endian swapping it if needed.
-	return decoder.sameEndian
-		? output
-		: HqEndianSwapInt64(output);
+	// Return the data.
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -134,10 +123,8 @@ uint8_t HqDecoder::LoadUint8(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(uint32_t);
 
-	// Return the data, endian swapping it if needed.
-	return uint8_t(decoder.sameEndian
-		? output
-		: HqEndianSwapUint32(output));
+	// Return the data.
+	return uint8_t(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -152,10 +139,8 @@ uint16_t HqDecoder::LoadUint16(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(uint32_t);
 
-	// Return the data, endian swapping it if needed.
-	return uint16_t(decoder.sameEndian
-		? output
-		: HqEndianSwapUint32(output));
+	// Return the data.
+	return uint16_t(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -170,10 +155,8 @@ uint32_t HqDecoder::LoadUint32(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(uint32_t);
 
-	// Return the data, endian swapping it if needed.
-	return decoder.sameEndian
-		? output
-		: HqEndianSwapUint32(output);
+	// Return the data.
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -188,10 +171,8 @@ uint64_t HqDecoder::LoadUint64(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(uint64_t);
 
-	// Return the data, endian swapping it if needed.
-	return decoder.sameEndian
-		? output
-		: HqEndianSwapUint64(output);
+	// Return the data.
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -206,10 +187,8 @@ float HqDecoder::LoadFloat32(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(float);
 
-	// Return the data, endian swapping it if needed.
-	return decoder.sameEndian
-		? output
-		: HqEndianSwapFloat32(output);
+	// Return the data.
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -224,10 +203,228 @@ double HqDecoder::LoadFloat64(HqDecoder& decoder)
 	// Move the instruction pointer.
 	decoder.ip += sizeof(double);
 
-	// Return the data, endian swapping it if needed.
-	return decoder.sameEndian
-		? output
-		: HqEndianSwapFloat64(output);
+	// Return the data.
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool HqDecoder::EndianSwapBool(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	int32_t* const pData = reinterpret_cast<int32_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const bool output = HqEndianSwapInt32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(int32_t);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int8_t HqDecoder::EndianSwapInt8(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	int32_t* const pData = reinterpret_cast<int32_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const int32_t output = HqEndianSwapInt32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(int32_t);
+
+	return int8_t(output);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int16_t HqDecoder::EndianSwapInt16(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	int32_t* const pData = reinterpret_cast<int32_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const int32_t output = HqEndianSwapInt32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(int32_t);
+
+	return int16_t(output);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int32_t HqDecoder::EndianSwapInt32(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	int32_t* const pData = reinterpret_cast<int32_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const int32_t output = HqEndianSwapInt32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(int32_t);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int64_t HqDecoder::EndianSwapInt64(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	int64_t* const pData = reinterpret_cast<int64_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const int64_t output = HqEndianSwapInt64(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(int64_t);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint8_t HqDecoder::EndianSwapUint8(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	uint32_t* const pData = reinterpret_cast<uint32_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const uint32_t output = HqEndianSwapUint32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(uint32_t);
+
+	return uint8_t(output);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint16_t HqDecoder::EndianSwapUint16(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	uint32_t* const pData = reinterpret_cast<uint32_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const uint32_t output = HqEndianSwapUint32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(uint32_t);
+
+	return uint16_t(output);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint32_t HqDecoder::EndianSwapUint32(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	uint32_t* const pData = reinterpret_cast<uint32_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const uint32_t output = HqEndianSwapUint32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(uint32_t);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+uint64_t HqDecoder::EndianSwapUint64(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	uint64_t* const pData = reinterpret_cast<uint64_t*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const uint64_t output = HqEndianSwapUint64(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(uint64_t);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+float HqDecoder::EndianSwapFloat32(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	float* const pData = reinterpret_cast<float*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const float output = HqEndianSwapFloat32(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(float);
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+double HqDecoder::EndianSwapFloat64(HqDecoder& decoder)
+{
+	assert(decoder.ip != nullptr);
+
+	double* const pData = reinterpret_cast<double*>(decoder.ip);
+
+	// Endian swap the current bytecode data.
+	const double output = HqEndianSwapFloat64(*pData);
+
+	// Store the endian swapped data back to the bytecode.
+	(*pData) = output;
+
+	// Move the instruction pointer.
+	decoder.ip += sizeof(double);
+
+	return output;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

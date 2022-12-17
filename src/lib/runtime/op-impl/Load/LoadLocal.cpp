@@ -38,11 +38,7 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -92,7 +88,7 @@ void OpCodeExec_LoadLocal(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_LoadLocal(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_LoadLocal(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
@@ -102,8 +98,12 @@ void OpCodeDisasm_LoadLocal(HqDisassemble& disasm)
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_LoadLocal(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder); // r#
+	HqDecoder::EndianSwapUint32(decoder); // s#
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------

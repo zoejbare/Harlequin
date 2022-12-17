@@ -157,11 +157,7 @@ static void RaiseFatalException_NoValueAtGpRegister(HqExecutionHandle hExec, con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void OpCodeExec_Branch(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_Branch(HqExecutionHandle hExec)
 {
 	const int32_t offset = HqDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
 
@@ -171,7 +167,7 @@ void OpCodeExec_Branch(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_Branch(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_Branch(HqDisassemble& disasm)
 {
 	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
@@ -183,7 +179,14 @@ void OpCodeDisasm_Branch(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_BranchIfTrue(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_Branch(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapInt32(decoder);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_BranchIfTrue(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -218,7 +221,7 @@ void OpCodeExec_BranchIfTrue(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_BranchIfTrue(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_BranchIfTrue(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
@@ -231,7 +234,15 @@ void OpCodeDisasm_BranchIfTrue(HqDisassemble& disasm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeExec_BranchIfFalse(HqExecutionHandle hExec)
+extern "C" void OpCodeEndian_BranchIfTrue(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder);
+	HqDecoder::EndianSwapInt32(decoder);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeExec_BranchIfFalse(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -266,7 +277,7 @@ void OpCodeExec_BranchIfFalse(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OpCodeDisasm_BranchIfFalse(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_BranchIfFalse(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
@@ -277,8 +288,12 @@ void OpCodeDisasm_BranchIfFalse(HqDisassemble& disasm)
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
-#ifdef __cplusplus
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void OpCodeEndian_BranchIfFalse(HqDecoder& decoder)
+{
+	HqDecoder::EndianSwapUint32(decoder);
+	HqDecoder::EndianSwapInt32(decoder);
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------
