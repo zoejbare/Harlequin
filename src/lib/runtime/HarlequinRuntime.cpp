@@ -30,7 +30,6 @@
 #include "Value.hpp"
 
 #include <assert.h>
-#include <inttypes.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -469,8 +468,8 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 		HqExecution::Dispose(hExec);
 	}
 
-	return scriptError 
-		? HQ_ERROR_UNSPECIFIED_FAILURE 
+	return scriptError
+		? HQ_ERROR_UNSPECIFIED_FAILURE
 		: HQ_SUCCESS;
 }
 

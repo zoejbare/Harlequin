@@ -21,19 +21,13 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#if defined(__ANDROID__)
-	#define HQ_PLATFORM_ANDROID
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-#elif defined(__APPLE__)
-	#define HQ_PLATFORM_MAC_OS
+/*---------------------------------------------------------------------------------------------------------------------*/
 
-#elif defined(__linux__)
-	#define HQ_PLATFORM_LINUX
-
-#elif defined(_WIN32)
-	#define HQ_PLATFORM_WINDOWS
-
-#elif defined(_HQ_BUILD_FOR_PS3_)
+#if defined(_HQ_BUILD_FOR_PS3_)
 	#define HQ_PLATFORM_PS3
 
 #elif defined(_HQ_BUILD_FOR_PS4_)
@@ -45,6 +39,18 @@
 #elif defined(_HQ_BUILD_FOR_PSVITA_)
 	#define HQ_PLATFORM_PSVITA
 
+#elif defined(__ANDROID__)
+	#define HQ_PLATFORM_ANDROID
+
+#elif defined(__APPLE__)
+	#define HQ_PLATFORM_MAC_OS
+
+#elif defined(__linux__)
+	#define HQ_PLATFORM_LINUX
+
+#elif defined(_WIN32)
+	#define HQ_PLATFORM_WINDOWS
+
 #else
 	#define HQ_PLATFORM_UNKNOWN
 
@@ -52,7 +58,7 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#if defined(__powerpc__) || defined(__powerpc64__) || defined(__PPC__) || defined(__PPC64__)
+#if defined(__powerpc__) || defined(__powerpc64__) || defined(__PPC__) || defined(__PPC64__) || defined(_M_PPC) || defined(_M_PPCBE)
 	#define HQ_CPU_TYPE_PPC
 
 #elif defined(__i386__) || defined(__x86_64__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_X64) || defined(_M_AMD64)
@@ -68,7 +74,8 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__) || defined(__powerpc64__) || defined(__PPC64__) || defined(__aarch64__)
+#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__) || defined(__powerpc64__) || defined(__PPC64__) \
+	|| defined(__aarch64__) || defined(_M_PPC) || defined(_M_PPCBE)
 	#define HQ_DATA_WIDTH_64_BIT
 
 	#if (UINTPTR_MAX == UINT_MAX)
@@ -94,7 +101,7 @@
 
 #elif defined(__BIG_ENDIAN__) || defined(__ARMEB__) || defined(__THUMBEB__) || defined(__AARCH64EB__) || defined(_MIPSEB) \
 	|| defined(__MIPSEB) || defined(__MIPSEB__) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)) \
-	|| (defined(__FLOAT_WORD_ORDER__) && (__FLOAT_WORD_ORDER__ == __ORDER_BIG_ENDIAN__))
+	|| (defined(__FLOAT_WORD_ORDER__) && (__FLOAT_WORD_ORDER__ == __ORDER_BIG_ENDIAN__)) || defined(_M_PPCBE)
 	#define HQ_CPU_ENDIAN_BIG
 
 #else

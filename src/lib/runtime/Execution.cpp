@@ -27,7 +27,6 @@
 #include <algorithm>
 
 #include <assert.h>
-#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -83,7 +82,7 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 void HqExecution::Dispose(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
-	
+
 	// Clearing the 'auto-mark' flag will allow the garbage
 	// collector to destruct the execution context.
 	hExec->gcProxy.autoMark = false;
@@ -478,7 +477,7 @@ void HqExecution::RaiseOpCodeException(HqExecutionHandle hExec, const int type, 
 	assert(type >= 0);
 	assert(type < HQ_STANDARD_EXCEPTION__COUNT);
 	assert(fmt != nullptr);
-	
+
 	char msg[256];
 	{
 		va_list vl;
