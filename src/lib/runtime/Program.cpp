@@ -220,6 +220,7 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
 	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
 	HqValue::StringToBoolMap::Allocate(pOutput->globals);
+
 	StringArray::Initialize(pOutput->strings);
 	HqByteHelper::Array::Initialize(pOutput->code);
 
@@ -328,6 +329,8 @@ HqProgramHandle HqProgram::Create(
 	HqValue::StringToBoolMap::Allocate(pOutput->dependencies);
 	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
 	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
+	HqValue::StringToBoolMap::Allocate(pOutput->globals);
+
 	StringArray::Initialize(pOutput->strings);
 	HqByteHelper::Array::Initialize(pOutput->code);
 
