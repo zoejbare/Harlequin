@@ -51,7 +51,7 @@ static bool ProgramLoad(
 	if(result != HQ_SUCCESS)
 	{
 		const char* const errorString = HqGetErrorCodeString(result);
-		const char* const endianString = HqGetEndianModeString(HQ_ENDIAN_ORDER_NATIVE);
+		const char* const endianString = HqGetEndiannessString(HQ_ENDIAN_ORDER_NATIVE);
 
 		HqReportMessage(
 			hReport,
@@ -148,7 +148,7 @@ static bool ProgramLoad(
 			HQ_MESSAGE_TYPE_ERROR,
 			"Error setting endian mode on the program file serializer: error=\"%s\", endianness=\"%s\"",
 			HqGetErrorCodeString(result),
-			HqGetEndianModeString(endianness)
+			HqGetEndiannessString(endianness)
 		);
 		return false;
 	}

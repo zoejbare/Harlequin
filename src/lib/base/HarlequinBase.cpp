@@ -98,7 +98,7 @@ const char* HqGetErrorCodeString(int errorCode)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* HqGetEndianModeString(int endianness)
+const char* HqGetEndiannessString(int endianness)
 {
 	switch(endianness)
 	{

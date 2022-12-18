@@ -84,7 +84,7 @@ enum HqEndianOrderEnum
 
 HQ_BASE_API const char* HqGetErrorCodeString(int errorCode);
 
-HQ_BASE_API const char* HqGetEndianModeString(int endianness);
+HQ_BASE_API const char* HqGetEndiannessString(int endianness);
 
 HQ_BASE_API const char* HqGetValueTypeString(int valueType);
 
