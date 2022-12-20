@@ -30,7 +30,6 @@
 enum HqGcPhase
 {
 	HQ_GC_PHASE_LINK_PENDING,
-	HQ_GC_PHASE_RESET_STATE,
 	HQ_GC_PHASE_AUTO_MARK_DISCOVERY,
 	HQ_GC_PHASE_GLOBAL_DISCOVERY,
 	HQ_GC_PHASE_MARK_RECURSIVE,
@@ -57,9 +56,11 @@ void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, 
 	output.pMarkedTail = nullptr;
 	output.pIterCurrent = nullptr;
 	output.pIterPrev = nullptr;
+	output.maxTimeSlice = maxTimeSliceMs * HqClockGetFrequency() / 1000;
+	output.currentMarkId = 0;
+	output.lastMarkId = 0;
 	output.phase = 0;
 	output.lastPhase = 0;
-	output.maxTimeSlice = maxTimeSliceMs * HqClockGetFrequency() / 1000;
 
 	// Reset the garbage collector so we're guaranteed to kick things off in a good state.
 	prv_reset(output);
@@ -175,15 +176,19 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 	assert(pGcProxy != nullptr);
 	assert(pGcProxy->pObject != nullptr);
 
-	if(!pGcProxy->marked && !pGcProxy->pending)
+	// Only mark proxies that we detect being unmarked and the ones we know are already in an active list.
+	if(pGcProxy->markId != gc.currentMarkId && !pGcProxy->pending)
 	{
-		pGcProxy->marked = true;
+		// Update the proxy's mark ID.
+		pGcProxy->markId = gc.currentMarkId;
 
 		if(gc.pUnmarkedHead == pGcProxy)
 		{
+			// If the current proxy is the head of the unmarked list, we reassign the head to the next proxy.
 			gc.pUnmarkedHead = pGcProxy->pNext;
 		}
 
+		// Unlink the current proxy from it's current list.
 		prv_proxyUnlink(pGcProxy);
 
 		if(!gc.pMarkedHead)
@@ -194,8 +199,10 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 		}
 		else
 		{
+			// Append this proxy to the end of the marked list.
 			prv_proxyInsertAfter(gc.pMarkedTail, pGcProxy);
 
+			// This proxy becomes the new tail of the marked list.
 			gc.pMarkedTail = pGcProxy;
 		}
 	}
@@ -244,6 +251,10 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 				// Clear the proxy's 'pending' state.
 				pCurrent->pending = false;
 
+				// Initialize the proxy's mark ID so there's no chance an object going into an active list
+				// will overlap with the current ID.
+				pCurrent->markId = gc.lastMarkId;
+
 				// Update the heads of the unmarked and pending lists.
 				gc.pUnmarkedHead = pCurrent;
 				gc.pPendingHead = pNext;
@@ -252,39 +263,6 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			if(!gc.pPendingHead)
 			{
 				// We have reached the end of the phase when there are no more proxies in the pending list.
-				endOfPhase = true;
-			}
-			break;
-		}
-
-		// Reset the 'marked' state for each active proxy.
-		case HQ_GC_PHASE_RESET_STATE:
-		{
-			if(isPhaseStart)
-			{
-				// For the start of the phase, set the current proxy pointer to the head of the active list.
-				gc.pIterCurrent = gc.pUnmarkedHead;
-			}
-
-			// Iterate until the end of the list has been reached.
-			while(gc.pIterCurrent)
-			{
-				if(prv_hasReachedTimeSlice(gc, startTime))
-				{
-					// We ran out of time.
-					break;
-				}
-
-				// Reset the proxy state.
-				gc.pIterCurrent->marked = false;
-
-				// Move to the next proxy in the list.
-				gc.pIterCurrent = gc.pIterCurrent->pNext;
-			}
-
-			if(!gc.pIterCurrent)
-			{
-				// We have reached the end of the phase once all proxies in the list have been checked.
 				endOfPhase = true;
 			}
 			break;
@@ -342,7 +320,7 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			{
 				HqValueHandle hValue = iter.pData->value;
 
-				if(HqValue::CanBeMarked(hValue))
+				if(hValue)
 				{
 					MarkObject(gc, &(hValue->gcProxy));
 				}
@@ -467,6 +445,9 @@ void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
 
 	gc.pMarkedHead = nullptr;
 	gc.pMarkedTail = nullptr;
+
+	gc.lastMarkId = gc.currentMarkId;
+	++gc.currentMarkId;
 
 	gc.phase = HQ_GC_PHASE__START;
 	gc.lastPhase = HQ_GC_PHASE__END;

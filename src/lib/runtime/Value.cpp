@@ -582,13 +582,6 @@ HqString* HqValue::GetDebugString(HqValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqValue::CanBeMarked(HqValueHandle hValue)
-{
-	return hValue != nullptr;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 void HqValue::SetAutoMark(HqValueHandle hValue, const bool autoMark)
 {
 	if(hValue)
@@ -634,7 +627,7 @@ void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 			for(size_t i = 0; i < pScriptObject->members.count; ++i)
 			{
 				HqValueHandle hMemberValue = pScriptObject->members.pData[i];
-				if(CanBeMarked(hMemberValue))
+				if(hMemberValue)
 				{
 					HqGarbageCollector::MarkObject(gc, &hMemberValue->gcProxy);
 				}
@@ -651,7 +644,7 @@ void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 			for(size_t i = 0; i < array.count; ++i)
 			{
 				HqValueHandle hIndexValue = array.pData[i];
-				if(CanBeMarked(hIndexValue))
+				if(hIndexValue)
 				{
 					HqGarbageCollector::MarkObject(gc, &hIndexValue->gcProxy);
 				}

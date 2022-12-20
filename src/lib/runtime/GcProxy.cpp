@@ -44,8 +44,8 @@ void HqGcProxy::Initialize(
 	output.pPrev = nullptr;
 	output.pNext = nullptr;
 	output.pObject = pObject;
+	output.markId = 0;
 	output.pending = false;
-	output.marked = false;
 	output.autoMark = autoMark;
 
 	HqGarbageCollector::LinkObject(gc, &output);

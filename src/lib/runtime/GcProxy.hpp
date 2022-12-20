@@ -53,8 +53,9 @@ struct HqGcProxy
 
 	void* pObject;
 
+	uint32_t markId;
+
 	bool pending;
-	bool marked;
 	bool autoMark;
 };
 

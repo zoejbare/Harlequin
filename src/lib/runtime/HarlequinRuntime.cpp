@@ -1730,7 +1730,7 @@ HqValueHandle HqValueCopy(HqVmHandle hVm, HqValueHandle hValue)
 
 int HqValueGcProtect(HqValueHandle hValue)
 {
-	if(!HqValue::CanBeMarked(hValue))
+	if(!hValue)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -1744,7 +1744,7 @@ int HqValueGcProtect(HqValueHandle hValue)
 
 int HqValueGcExpose(HqValueHandle hValue)
 {
-	if(!HqValue::CanBeMarked(hValue))
+	if(!hValue)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}

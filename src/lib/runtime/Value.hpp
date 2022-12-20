@@ -93,7 +93,6 @@ struct HqValue
 
 	static HqString* GetDebugString(HqValueHandle hValue);
 
-	static bool CanBeMarked(HqValueHandle hValue);
 	static void SetAutoMark(HqValueHandle hValue, const bool autoMark);
 
 	static HqValue* prv_onCreate(int, HqVmHandle);

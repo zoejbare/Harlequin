@@ -595,7 +595,7 @@ void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 	{
 		HqValueHandle hValue = hExec->registers.pData[i];
 
-		if(HqValue::CanBeMarked(hValue))
+		if(hValue)
 		{
 			HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}

@@ -58,10 +58,13 @@ struct HqGarbageCollector
 	HqGcProxy* pIterCurrent;
 	HqGcProxy* pIterPrev;
 
+	uint64_t maxTimeSlice;
+
+	uint32_t currentMarkId;
+	uint32_t lastMarkId;
+
 	int phase;
 	int lastPhase;
-
-	uint64_t maxTimeSlice;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

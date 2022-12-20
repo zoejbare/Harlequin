@@ -225,7 +225,7 @@ void HqFrame::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 	{
 		HqValueHandle hValue = hFrame->stack.memory.pData[i];
 
-		if(HqValue::CanBeMarked(hValue))
+		if(hValue)
 		{
 			HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}
@@ -236,7 +236,7 @@ void HqFrame::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 	{
 		HqValueHandle hValue = hFrame->registers.pData[i];
 
-		if(HqValue::CanBeMarked(hValue))
+		if(hValue)
 		{
 			HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 		}
@@ -249,7 +249,7 @@ void HqFrame::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 		{
 			HqValueHandle hValue = iter.pData->value;
 
-			if(HqValue::CanBeMarked(hValue))
+			if(hValue)
 			{
 				HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 			}
