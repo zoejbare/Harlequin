@@ -598,9 +598,18 @@ HqValue* HqValue::prv_onCreate(const int valueType, HqVmHandle hVm)
 	pOutput->hVm = hVm;
 	pOutput->type = valueType;
 
-	// All values will auto-mark initially, until they are 'disposed' of.
-	// This will allow values to be kept alive outside of script execution.
-	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, true);
+	const bool needsDiscovery = (valueType == HQ_VALUE_TYPE_OBJECT || valueType == HQ_VALUE_TYPE_ARRAY);
+
+	// All values will auto-mark initially. This will allow values to be kept alive outside of script execution.
+	HqGcProxy::Initialize(
+		pOutput->gcProxy,
+		hVm->gc,
+		prv_onGcDiscovery,
+		prv_onGcDestruct,
+		pOutput,
+		true,
+		needsDiscovery
+	);
 
 	return pOutput;
 }
@@ -649,6 +658,9 @@ void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 		}
 
 		default:
+			// This should never happen since discovery should be disabled
+			// on all value types without dependent GC data references.
+			assert(false);
 			break;
 	}
 }

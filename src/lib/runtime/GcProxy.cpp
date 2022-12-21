@@ -31,7 +31,8 @@ void HqGcProxy::Initialize(
 	HqGcDiscoveryCallback onGcDiscoveryFn,
 	HqDisposeCallback onGcDisposeFn,
 	void* const pObject,
-	const bool autoMark
+	const bool autoMark,
+	const bool discover
 )
 {
 	assert(onGcDiscoveryFn != nullptr);
@@ -47,6 +48,7 @@ void HqGcProxy::Initialize(
 	output.markId = 0;
 	output.pending = false;
 	output.autoMark = autoMark;
+	output.discover = discover;
 
 	HqGarbageCollector::LinkObject(gc, &output);
 }

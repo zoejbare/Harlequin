@@ -30,9 +30,9 @@
 enum HqGcPhase
 {
 	HQ_GC_PHASE_LINK_PENDING,
-	HQ_GC_PHASE_AUTO_MARK_DISCOVERY,
-	HQ_GC_PHASE_GLOBAL_DISCOVERY,
-	HQ_GC_PHASE_MARK_RECURSIVE,
+	HQ_GC_PHASE_AUTO_MARK,
+	HQ_GC_PHASE_GLOBAL_MARK,
+	HQ_GC_PHASE_DISCOVERY,
 	HQ_GC_PHASE_DISPOSE,
 
 	HQ_GC_PHASE__COUNT,
@@ -52,6 +52,8 @@ void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, 
 	output.hVm = hVm;
 	output.pPendingHead = nullptr;
 	output.pUnmarkedHead = nullptr;
+	output.pMarkedLeafHead = nullptr;
+	output.pMarkedLeafTail = nullptr;
 	output.pMarkedHead = nullptr;
 	output.pMarkedTail = nullptr;
 	output.pIterCurrent = nullptr;
@@ -90,6 +92,7 @@ void HqGarbageCollector::Dispose(HqGarbageCollector& gc)
 	// object types might still have auto-mark enabled.
 	disableAutoMark(gc.pPendingHead);
 	disableAutoMark(gc.pUnmarkedHead);
+	disableAutoMark(gc.pMarkedLeafHead);
 	disableAutoMark(gc.pMarkedHead);
 
 	// Continue running the garbage collector until everything has been released.
@@ -97,7 +100,7 @@ void HqGarbageCollector::Dispose(HqGarbageCollector& gc)
 	{
 		RunFull(gc);
 
-		if(!gc.pPendingHead && !gc.pUnmarkedHead && !gc.pMarkedHead)
+		if(!gc.pPendingHead && !gc.pMarkedLeafHead && !gc.pUnmarkedHead && !gc.pMarkedHead)
 		{
 			break;
 		}
@@ -109,6 +112,8 @@ void HqGarbageCollector::Dispose(HqGarbageCollector& gc)
 	gc.hVm = HQ_VM_HANDLE_NULL;
 	gc.pPendingHead = nullptr;
 	gc.pUnmarkedHead = nullptr;
+	gc.pMarkedLeafHead = nullptr;
+	gc.pMarkedLeafTail = nullptr;
 	gc.pMarkedHead = nullptr;
 	gc.pMarkedTail = nullptr;
 	gc.pIterCurrent = nullptr;
@@ -181,36 +186,59 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 	{
 		// Update the proxy's mark ID.
 		pGcProxy->markId = gc.currentMarkId;
-
 		if(gc.pUnmarkedHead == pGcProxy)
 		{
 			// If the current proxy is the head of the unmarked list, we reassign the head to the next proxy.
 			gc.pUnmarkedHead = pGcProxy->pNext;
 		}
 
-		// Unlink the current proxy from it's current list.
+		// Unlink the current proxy from its current list.
 		prv_proxyUnlink(pGcProxy);
 
-		if(!gc.pMarkedHead)
+		if(pGcProxy->discover)
 		{
-			// Nothing in the marked list current, so the input proxy becomes the new marked list.
-			gc.pMarkedHead = pGcProxy;
-			gc.pMarkedTail = pGcProxy;
+			// This proxy has dependencies that need to be discovered, so it goes in the normal marked list.
+			if(!gc.pMarkedHead)
+			{
+				// Nothing in the marked list currently, so the input proxy becomes the new marked list.
+				gc.pMarkedHead = pGcProxy;
+				gc.pMarkedTail = pGcProxy;
+			}
+			else
+			{
+				// Append this proxy to the end of the marked list.
+				prv_proxyInsertAfter(gc.pMarkedTail, pGcProxy);
+
+				// This proxy becomes the new tail of the marked list.
+				gc.pMarkedTail = pGcProxy;
+			}
 		}
 		else
 		{
-			// Append this proxy to the end of the marked list.
-			prv_proxyInsertAfter(gc.pMarkedTail, pGcProxy);
+			// This proxy has no dependencies, so we can move it to the marked leaf list.
+			// The marked leaf list receives no discovery phase of its own which means
+			// it's removed from the unmarked list just so it doesn't get deleted.
+			if(!gc.pMarkedLeafHead)
+			{
+				// Nothing in the marked leaf list currently, so the input proxy becomes the new marked leaf list.
+				gc.pMarkedLeafHead = pGcProxy;
+				gc.pMarkedLeafTail = pGcProxy;
+			}
+			else
+			{
+				// Append this proxy to the end of the marked leaf list.
+				prv_proxyInsertAfter(gc.pMarkedLeafTail, pGcProxy);
 
-			// This proxy becomes the new tail of the marked list.
-			gc.pMarkedTail = pGcProxy;
+				// This proxy becomes the new tail of the marked leaf list.
+				gc.pMarkedLeafTail = pGcProxy;
+			}
 		}
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
+inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 {
 	const bool isPhaseStart = (gc.lastPhase != gc.phase);
 
@@ -226,12 +254,10 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 		{
 			HqScopedMutex lock(gc.pendingLock);
 
-			const uint64_t pendingStartTime = HqClockGetTimestamp();
-
 			// Iterate until the end of the list has been reached.
 			while(gc.pPendingHead)
 			{
-				if(prv_hasReachedTimeSlice(gc, pendingStartTime))
+				if(prv_hasReachedTimeSlice(gc, startTime))
 				{
 					// We ran out of time.
 					break;
@@ -268,8 +294,8 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			break;
 		}
 
-		// Discover anything that is set to auto-mark.
-		case HQ_GC_PHASE_AUTO_MARK_DISCOVERY:
+		// Mark anything that is set to auto-mark.
+		case HQ_GC_PHASE_AUTO_MARK:
 		{
 			if(isPhaseStart)
 			{
@@ -307,8 +333,8 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			break;
 		}
 
-		// Discover all global variables.
-		case HQ_GC_PHASE_GLOBAL_DISCOVERY:
+		// Mark all global variables.
+		case HQ_GC_PHASE_GLOBAL_MARK:
 		{
 			// There's no good way to go over the globals incrementally since the map can hypothetically
 			// change between steps of the garbage collector. We also can't rely on auto-marking because
@@ -330,8 +356,8 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			break;
 		}
 
-		// Recursively mark all active objects.
-		case HQ_GC_PHASE_MARK_RECURSIVE:
+		// Mark any dependent proxies referenced by the current marked list.
+		case HQ_GC_PHASE_DISCOVERY:
 		{
 			if(isPhaseStart)
 			{
@@ -418,15 +444,34 @@ bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc, const uint64_t startTime)
+inline bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc, const uint64_t startTime)
 {
 	return (gc.hVm->isGcThreadEnabled) && ((HqClockGetTimestamp() - startTime) >= gc.maxTimeSlice);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
+inline void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
 {
+	if(gc.pMarkedLeafHead)
+	{
+		// The easiest way to concatenate the marked leaf list into everything else is to
+		// just make it part of the marked list.
+		if(gc.pMarkedHead)
+		{
+			// Link the marked list and the marked leaf list directly to each other.
+			gc.pMarkedLeafHead->pPrev = gc.pMarkedTail;
+			gc.pMarkedTail->pNext = gc.pMarkedLeafHead;
+			gc.pMarkedTail = gc.pMarkedLeafTail;
+		}
+		else
+		{
+			// The marked leaf list becomes the marked list.
+			gc.pMarkedHead = gc.pMarkedLeafHead;
+			gc.pMarkedTail = gc.pMarkedLeafTail;
+		}
+	}
+
 	if(gc.pMarkedHead)
 	{
 		if(gc.pUnmarkedHead)
@@ -443,6 +488,9 @@ void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
 		gc.pUnmarkedHead = gc.pMarkedHead;
 	}
 
+	gc.pMarkedLeafHead = nullptr;
+	gc.pMarkedLeafTail = nullptr;
+
 	gc.pMarkedHead = nullptr;
 	gc.pMarkedTail = nullptr;
 
@@ -455,7 +503,7 @@ void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqGarbageCollector::prv_onDisposeObject(HqGcProxy* const pGcProxy)
+inline void HqGarbageCollector::prv_onDisposeObject(HqGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 
@@ -464,7 +512,7 @@ void HqGarbageCollector::prv_onDisposeObject(HqGcProxy* const pGcProxy)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqGarbageCollector::prv_proxyInsertBefore(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
+inline void HqGarbageCollector::prv_proxyInsertBefore(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
 {
 	assert(pGcListProxy != nullptr);
 	assert(pGcInsertProxy != nullptr);
@@ -484,7 +532,7 @@ void HqGarbageCollector::prv_proxyInsertBefore(HqGcProxy* const pGcListProxy, Hq
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqGarbageCollector::prv_proxyInsertAfter(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
+inline void HqGarbageCollector::prv_proxyInsertAfter(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
 {
 	assert(pGcListProxy != nullptr);
 	assert(pGcInsertProxy != nullptr);
@@ -504,7 +552,7 @@ void HqGarbageCollector::prv_proxyInsertAfter(HqGcProxy* const pGcListProxy, HqG
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqGarbageCollector::prv_proxyUnlink(HqGcProxy* const pGcProxy)
+inline void HqGarbageCollector::prv_proxyUnlink(HqGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 

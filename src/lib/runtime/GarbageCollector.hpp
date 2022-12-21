@@ -52,6 +52,8 @@ struct HqGarbageCollector
 
 	HqGcProxy* pPendingHead;
 	HqGcProxy* pUnmarkedHead;
+	HqGcProxy* pMarkedLeafHead;
+	HqGcProxy* pMarkedLeafTail;
 	HqGcProxy* pMarkedHead;
 	HqGcProxy* pMarkedTail;
 

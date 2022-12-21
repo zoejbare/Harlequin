@@ -35,8 +35,9 @@ HqFrame* HqFrame::Create(HqExecutionHandle hExec)
 	assert(pOutput != nullptr);
 
 	// No need to lock the garbage collector here since only the execution context is allowed to create frames
-	// and it will be handling the lock for us.
-	HqGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
+	// and it will be handling the lock for us. The frame also starts in a non-discovery state since it can't
+	// have dependent GC data until it's initialized.
+	HqGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false, false);
 
 	pOutput->hExec = hExec;
 
@@ -83,6 +84,9 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 		}
 
 		HqDecoder::Initialize(hFrame->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
+
+		// The frame is now active, so we need to assume it can have GC data references at any time.
+		hFrame->gcProxy.discover = true;
 	}
 }
 
@@ -99,6 +103,9 @@ void HqFrame::Reset(HqFrameHandle hFrame)
 
 	// Remove all local variables.
 	HqValue::StringToHandleMap::Clear(hFrame->locals);
+
+	// When the frame has been reset, it implicitly references no GC data.
+	hFrame->gcProxy.discover = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

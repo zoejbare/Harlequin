@@ -52,7 +52,7 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
 	// Keep the execution context alive indefinitely until we're ready to dispose of it.
-	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, true);
+	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, true, true);
 
 	HqFrame::HandleStack::Initialize(pOutput->frameStack, HQ_VM_FRAME_STACK_SIZE);
 	HqFrame::HandleStack::Initialize(pOutput->framePool, HQ_VM_FRAME_STACK_SIZE);

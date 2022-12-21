@@ -39,8 +39,9 @@ struct HqGcProxy
 		HqGarbageCollector& gc,
 		HqGcDiscoveryCallback onGcDiscoveryFn,
 		HqDisposeCallback onGcDisposeFn,
-		void* const pObject,
-		const bool autoMark
+		void* pObject,
+		bool autoMark,
+		bool discover
 	);
 
 	HqGcDiscoveryCallback onGcDiscoveryFn;
@@ -57,6 +58,7 @@ struct HqGcProxy
 
 	bool pending;
 	bool autoMark;
+	bool discover;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
