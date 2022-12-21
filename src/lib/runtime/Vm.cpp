@@ -344,7 +344,7 @@ HqValueHandle HqVm::CreateStandardException(HqVmHandle hVm, const int exceptionT
 
 	HqScriptObject::SetMemberValue(hExceptionValue->as.pObject, 0, hMessageValue);
 
-	HqValue::SetAutoMark(hExceptionValue, false);
+	// We can remove auto-mark from the message value now that it's attached to the exception object.
 	HqValue::SetAutoMark(hMessageValue, false);
 
 	return hExceptionValue;

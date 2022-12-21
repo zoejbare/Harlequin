@@ -465,11 +465,6 @@ HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 			return HQ_VALUE_HANDLE_NULL;
 	}
 
-	// Any uses of this function internally will not want copied values to be auto-marked.
-	// The only case where they should be auto-marked is when values are copied using the
-	// high level API function that calls into this one.
-	SetAutoMark(pOutput, false);
-
 	return pOutput;
 }
 

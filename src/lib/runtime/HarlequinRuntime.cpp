@@ -1020,6 +1020,8 @@ int HqExecutionRaiseStandardException(
 	HqMemFree((void*)(formattedMessage));
 
 	HqExecution::RaiseException(hExec, hException, severity);
+
+	// The exception object is now being tracked by the execution context, so it no longer needs to be auto-marked.
 	HqValue::SetAutoMark(hException, false);
 
 	return HQ_SUCCESS;
@@ -1273,6 +1275,10 @@ int HqFramePopValue(HqFrameHandle hFrame, HqValueHandle* phOutValue)
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
+	// We need to lock the GC because it can potentially be running on another
+	// thread and clean up the popped value before it can be auto-marked.
+	HqScopedWriteLock gcLock(hFrame->hExec->hVm->gc.rwLock, hFrame->hExec->hVm->isGcThreadEnabled);
+
 	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
 	int result = HqFrame::PopValue(hFrame, &hValue);
 
@@ -1439,8 +1445,6 @@ int HqFrameGetLocalVariable(HqFrameHandle hFrame, HqValueHandle* phOutValue, con
 	{
 		return HQ_ERROR_INVALID_DATA;
 	}
-
-	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 	int result;
 	HqValueHandle hValue = HqFrame::GetLocalVariable(hFrame, pVarName, &result);
@@ -1719,9 +1723,6 @@ HqValueHandle HqValueCreateNative(
 HqValueHandle HqValueCopy(HqVmHandle hVm, HqValueHandle hValue)
 {
 	HqValueHandle hValueCopy = HqValue::Copy(hVm, hValue);
-
-	// Protect the new value from the garbage collector.
-	HqValue::SetAutoMark(hValueCopy, true);
 
 	return hValueCopy;
 }

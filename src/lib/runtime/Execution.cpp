@@ -51,7 +51,8 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 	pOutput->created = false;
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
-	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false);
+	// Keep the execution context alive indefinitely until we're ready to dispose of it.
+	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, true);
 
 	HqFrame::HandleStack::Initialize(pOutput->frameStack, HQ_VM_FRAME_STACK_SIZE);
 	HqFrame::HandleStack::Initialize(pOutput->framePool, HQ_VM_FRAME_STACK_SIZE);
@@ -65,9 +66,6 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 
 	// Create the main execution fiber.
 	prv_createMainFiber(pOutput);
-
-	// Keep the execution context alive indefinitely until we're ready to dispose of it.
-	pOutput->gcProxy.autoMark = true;
 
 	// The execution context has finished being created.
 	pOutput->created = true;
