@@ -32,7 +32,9 @@ HqVmInit ConstructInitObject(void* const pUserData, const int reportLevel, HqMes
 	output.common.report.pUserData = pUserData;
 	output.common.report.reportLevel = reportLevel;
 	output.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
-	output.gcMaxTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
+	output.gcTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
+	output.gcTimeWaitMs = HQ_VM_GC_DEFAULT_TIME_WAIT_MS;
+	output.gcEnableThread = false;
 
 	return output;
 }

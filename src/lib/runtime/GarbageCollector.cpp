@@ -40,11 +40,19 @@ enum HqGcPhase
 	HQ_GC_PHASE__END = HQ_GC_PHASE_DISPOSE,
 };
 
+enum HqGcRunResult
+{
+	HQ_GC_RUN_MORE_WORK,
+	HQ_GC_RUN_TIME_OUT,
+	HQ_GC_RUN_COMPLETE,
+};
+
 //----------------------------------------------------------------------------------------------------------------------
 
 void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, const uint32_t maxTimeSliceMs)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(maxTimeSliceMs > 0);
 
 	HqRwLock::Create(output.rwLock);
 	HqMutex::Create(output.pendingLock);
@@ -125,11 +133,26 @@ void HqGarbageCollector::Dispose(HqGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqGarbageCollector::RunPhase(HqGarbageCollector& gc)
+void HqGarbageCollector::RunStep(HqGarbageCollector& gc)
 {
 	HqScopedWriteLock writeLock(gc.rwLock, gc.hVm->isGcThreadEnabled);
 
-	return prv_runPhase(gc);
+	gc.startTime = HqClockGetTimestamp();
+
+	for(;;)
+	{
+		const int result = prv_runPhase(gc);
+		switch(result)
+		{
+			case HQ_GC_RUN_TIME_OUT:
+			case HQ_GC_RUN_COMPLETE:
+				return;
+
+			default:
+				// Keep running phases while the GC reports there is more work that can be done right now.
+				break;
+		}
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -146,9 +169,16 @@ void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 	const uint64_t oldMaxTimeSlice = gc.maxTimeSlice;
 	gc.maxTimeSlice = 0;
 
-	while(!prv_runPhase(gc))
+	// Run the garbage collector until all phases have been run.
+	for(;;)
 	{
-		// Run the garbage collector until all phases have been run.
+		const int result = prv_runPhase(gc);
+		assert(result != HQ_GC_RUN_TIME_OUT);
+
+		if(result == HQ_GC_RUN_COMPLETE)
+		{
+			break;
+		}
 	}
 
 	// Restore the maximum time slice.
@@ -238,14 +268,13 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
+inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 {
 	const bool isPhaseStart = (gc.lastPhase != gc.phase);
 
 	bool endOfAllPhases = false;
 	bool endOfPhase = false;
-
-	const uint64_t startTime = HqClockGetTimestamp();
+	bool timeOut = false;
 
 	switch(gc.phase)
 	{
@@ -257,9 +286,10 @@ inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pPendingHead)
 			{
-				if(prv_hasReachedTimeSlice(gc, startTime))
+				if(prv_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
+					timeOut = true;
 					break;
 				}
 
@@ -306,9 +336,10 @@ inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pIterCurrent)
 			{
-				if(prv_hasReachedTimeSlice(gc, startTime))
+				if(prv_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
+					timeOut = true;
 					break;
 				}
 
@@ -336,6 +367,16 @@ inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 		// Mark all global variables.
 		case HQ_GC_PHASE_GLOBAL_MARK:
 		{
+			// If we managed to reach this point right as we run out of time, it's better to signal the timeout now.
+			// Doing this will allow the global marking phase longer to run without potentially exceeding the time
+			// allowed for a single GC step.
+			if(prv_hasReachedTimeSlice(gc))
+			{
+				// We ran out of time.
+				timeOut = true;
+				break;
+			}
+
 			// There's no good way to go over the globals incrementally since the map can hypothetically
 			// change between steps of the garbage collector. We also can't rely on auto-marking because
 			// globals can change what values they point to. Since we're just enqueuing proxies, it shouldn't
@@ -369,9 +410,10 @@ inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pIterCurrent)
 			{
-				if(prv_hasReachedTimeSlice(gc, startTime))
+				if(prv_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
+					timeOut = true;
 					break;
 				}
 
@@ -396,9 +438,10 @@ inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pUnmarkedHead)
 			{
-				if(prv_hasReachedTimeSlice(gc, startTime))
+				if(prv_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
+					timeOut = true;
 					break;
 				}
 
@@ -439,14 +482,26 @@ inline bool HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 		endOfAllPhases = (gc.phase == HQ_GC_PHASE__START);
 	}
 
-	return endOfAllPhases;
+	return endOfAllPhases
+		? HQ_GC_RUN_COMPLETE
+		: timeOut
+			? HQ_GC_RUN_TIME_OUT
+			: HQ_GC_RUN_MORE_WORK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc, const uint64_t startTime)
+inline bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc)
 {
-	return (gc.hVm->isGcThreadEnabled) && ((HqClockGetTimestamp() - startTime) >= gc.maxTimeSlice);
+	if(gc.maxTimeSlice == 0)
+	{
+		return false;
+	}
+
+	const uint64_t deltaTime = HqClockGetTimestamp() - gc.startTime;
+
+	return deltaTime >= gc.maxTimeSlice;
+	//return (gc.maxTimeSlice > 0) && ((HqClockGetTimestamp() - gc.startTime) >= gc.maxTimeSlice);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -46,7 +46,8 @@ int HqVmCreate(HqVmHandle* phOutVm, HqVmInit init)
 		|| (*phOutVm)
 		|| init.common.report.reportLevel < HQ_MESSAGE_TYPE_VERBOSE
 		|| init.common.report.reportLevel > HQ_MESSAGE_TYPE_FATAL
-		|| init.gcThreadStackSize < HQ_VM_THREAD_MINIMUM_STACK_SIZE)
+		|| init.gcThreadStackSize < HQ_VM_THREAD_MINIMUM_STACK_SIZE
+		|| init.gcTimeSliceMs == 0)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -82,15 +83,30 @@ int HqVmDispose(HqVmHandle* phVm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqVmRunGarbageCollector(HqVmHandle hVm)
+int HqVmRunGarbageCollector(HqVmHandle hVm, const int runMode)
 {
-	if(!hVm)
+	if(!hVm || runMode < HQ_RUN_STEP || runMode > HQ_RUN_FULL)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Do a full run of the garbage collector from start to end.
-	HqGarbageCollector::RunFull(hVm->gc);
+	switch(runMode)
+	{
+		case HQ_RUN_STEP:
+			// Run a single step of the garbage collector from its current increment.
+			HqGarbageCollector::RunStep(hVm->gc);
+			break;
+
+		case HQ_RUN_FULL:
+			// Do a full run of the garbage collector from start to end.
+			HqGarbageCollector::RunFull(hVm->gc);
+			break;
+
+		default:
+			// This should never happen.
+			assert(false);
+			break;
+	}
 
 	return HQ_SUCCESS;
 }
@@ -436,8 +452,10 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 			// This will effectively cause script continuations to be silently ignored in the initializer functions.
 			while(!hExec->state.finished && !hExec->state.exception && !hExec->state.abort)
 			{
+				HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
+
 				// Run the initializer function to completion.
-				HqExecution::Run(hExec, HQ_RUN_CONTINUOUS);
+				HqExecution::Run(hExec, HQ_RUN_FULL);
 			}
 
 			// Check for any unhandled exceptions that occurred when running the initializer.
@@ -942,7 +960,7 @@ int HqExecutionReset(HqExecutionHandle hExec)
 
 int HqExecutionRun(HqExecutionHandle hExec, int runMode)
 {
-	if(!hExec || runMode < HQ_RUN_STEP || runMode > HQ_RUN_CONTINUOUS)
+	if(!hExec || runMode < HQ_RUN_STEP || runMode > HQ_RUN_FULL)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -950,6 +968,8 @@ int HqExecutionRun(HqExecutionHandle hExec, int runMode)
 	{
 		return HQ_ERROR_SCRIPT_NO_FUNCTION;
 	}
+
+	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock, hExec->hVm->isGcThreadEnabled);
 
 	HqExecution::Run(hExec, runMode);
 

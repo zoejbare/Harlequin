@@ -257,7 +257,7 @@ HqValueHandle HqExecution::GetIoRegister(HqExecutionHandle hExec, const size_t i
 void HqExecution::Run(HqExecutionHandle hExec, const int runMode)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
-	assert(runMode == HQ_RUN_STEP || runMode == HQ_RUN_CONTINUOUS);
+	assert(runMode == HQ_RUN_STEP || runMode == HQ_RUN_FULL);
 
 	if(hExec->state.finished || hExec->state.exception || hExec->state.abort)
 	{
@@ -522,6 +522,13 @@ void HqExecution::prv_runFiberLoop(void* const pArg)
 		// context won't be able to run it again.
 		while(!hExec->state.finished)
 		{
+			if(hExec->hVm->isGcThreadEnabled)
+			{
+				// Allow the GC to interrupt between each instruction in case it has work that it needs to do.
+				HqRwLock::ReadUnlock(hExec->hVm->gc.rwLock);
+				HqRwLock::ReadLock(hExec->hVm->gc.rwLock);
+			}
+
 			prv_runStep(hExec);
 
 			if(runMode == HQ_RUN_STEP)
@@ -547,8 +554,6 @@ void HqExecution::prv_runFiberLoop(void* const pArg)
 void HqExecution::prv_runStep(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
-
-	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock, hExec->hVm->isGcThreadEnabled);
 
 	HqFrameHandle hFrame = hExec->hCurrentFrame;
 

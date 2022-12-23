@@ -62,8 +62,8 @@ extern "C"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// Disabling the incremental GC thread requires user code to manually all the API function for invoking the GC.
-#define _INCREMENTAL_GC_ENABLED 1
+// Disabling the GC thread requires user code to manually all the API function for invoking the GC.
+#define _GC_THREAD_ENABLED 1
 
 // Setting the test iterations to anything above 1 will do special logic to add an iteration loop and remove some log prints.
 #define _STRESS_TEST_ITERATIONS 1
@@ -337,12 +337,9 @@ int main(int argc, char* argv[])
 	vmInit.common.report.reportLevel = HQ_MESSAGE_TYPE_VERBOSE;
 
 	vmInit.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
-
-#if _INCREMENTAL_GC_ENABLED
-	vmInit.gcMaxTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
-#else
-	vmInit.gcMaxTimeSliceMs = 0;
-#endif
+	vmInit.gcTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
+	vmInit.gcTimeWaitMs = HQ_VM_GC_DEFAULT_TIME_WAIT_MS;
+	vmInit.gcEnableThread = _GC_THREAD_ENABLED;
 
 	HqMemAllocator allocator;
 	allocator.allocFn = trackedAlloc;
@@ -737,7 +734,7 @@ int main(int argc, char* argv[])
 			// Keep the script running until it has completed.
 			for(;;)
 			{
-				result = HqExecutionRun(hExec, HQ_RUN_CONTINUOUS);
+				result = HqExecutionRun(hExec, HQ_RUN_FULL);
 				if(result != HQ_SUCCESS)
 				{
 					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Error occurred while executing script: \"%s\"", HqGetErrorCodeString(result));
@@ -799,11 +796,11 @@ int main(int argc, char* argv[])
 			runProgramTotalTime += timeEnd - timeStart;
 		}
 
-#if !_INCREMENTAL_GC_ENABLED
+#if !_GC_THREAD_ENABLED
 		// Run the garbage collector.
 		{
 			const uint64_t timeStart = HqClockGetTimestamp();
-			HqVmRunGarbageCollector(hVm);
+			HqVmRunGarbageCollector(hVm, HQ_RUN_STEP);
 			const uint64_t timeEnd = HqClockGetTimestamp();
 
 			totalManualGcTime += timeEnd - timeStart;

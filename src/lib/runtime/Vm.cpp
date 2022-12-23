@@ -36,7 +36,7 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	pOutput->report.level = init.common.report.reportLevel;
 
 	// Initialize the garbage collector.
-	HqGarbageCollector::Initialize(pOutput->gc, pOutput, init.gcMaxTimeSliceMs);
+	HqGarbageCollector::Initialize(pOutput->gc, pOutput, init.gcTimeSliceMs);
 
 	// Initialize the opcode array.
 	OpCodeArray::Initialize(pOutput->opCodes);
@@ -60,7 +60,8 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 
 	HqMutex::Create(pOutput->lock);
 
-	pOutput->isGcThreadEnabled = (pOutput->gc.maxTimeSlice > 0);
+	pOutput->gcTimeWaitMs = init.gcTimeWaitMs;
+	pOutput->isGcThreadEnabled = init.gcEnableThread;
 	pOutput->isShuttingDown = false;
 
 	HqThreadConfig threadConfig;
@@ -400,10 +401,10 @@ int32_t HqVm::prv_gcThreadMain(void* const pArg)
 	while(!hVm->isShuttingDown)
 	{
 		// Force a very small sleep to deprioritize the GC thread.
-		HqThread::Sleep(2);
+		HqThread::Sleep(hVm->gcTimeWaitMs);
 
 		// Run a step of the garbage collector.
-		HqGarbageCollector::RunPhase(hVm->gc);
+		HqGarbageCollector::RunStep(hVm->gc);
 	}
 
 	return HQ_SUCCESS;
