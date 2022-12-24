@@ -35,9 +35,8 @@ HqFrame* HqFrame::Create(HqExecutionHandle hExec)
 	assert(pOutput != nullptr);
 
 	// No need to lock the garbage collector here since only the execution context is allowed to create frames
-	// and it will be handling the lock for us. The frame also starts in a non-discovery state since it can't
-	// have dependent GC data until it's initialized.
-	HqGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false, false);
+	// and it will be handling the lock for us.
+	HqGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false, true);
 
 	pOutput->hExec = hExec;
 
@@ -86,7 +85,7 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 		HqDecoder::Initialize(hFrame->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
 
 		// The frame is now active, so we need to assume it can have GC data references at any time.
-		hFrame->gcProxy.discover = true;
+		hFrame->active = true;
 	}
 }
 
@@ -105,7 +104,7 @@ void HqFrame::Reset(HqFrameHandle hFrame)
 	HqValue::StringToHandleMap::Clear(hFrame->locals);
 
 	// When the frame has been reset, it implicitly references no GC data.
-	hFrame->gcProxy.discover = false;
+	hFrame->active = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -225,40 +224,43 @@ void HqFrame::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 {
 	HqFrameHandle hFrame = reinterpret_cast<HqFrameHandle>(pOpaque);
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-
-	// Discover values in the stack.
-	size_t stackSize = HqValue::HandleStack::GetCurrentSize(hFrame->stack);
-	for(size_t i = 0; i < stackSize; ++i)
+	
+	if(hFrame->active)
 	{
-		HqValueHandle hValue = hFrame->stack.memory.pData[i];
-
-		if(hValue)
+		// Discover values in the stack.
+		size_t stackSize = HqValue::HandleStack::GetCurrentSize(hFrame->stack);
+		for(size_t i = 0; i < stackSize; ++i)
 		{
-			HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
-		}
-	}
-
-	// Discover values held in the general purpose registers.
-	for(size_t i = 0; i < hFrame->registers.count; ++i)
-	{
-		HqValueHandle hValue = hFrame->registers.pData[i];
-
-		if(hValue)
-		{
-			HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
-		}
-	}
-
-	// Discover the local variable values.
-	{
-		HqValue::StringToHandleMap::Iterator iter;
-		while(HqValue::StringToHandleMap::IterateNext(hFrame->locals, iter))
-		{
-			HqValueHandle hValue = iter.pData->value;
+			HqValueHandle hValue = hFrame->stack.memory.pData[i];
 
 			if(hValue)
 			{
 				HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+			}
+		}
+
+		// Discover values held in the general purpose registers.
+		for(size_t i = 0; i < hFrame->registers.count; ++i)
+		{
+			HqValueHandle hValue = hFrame->registers.pData[i];
+
+			if(hValue)
+			{
+				HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+			}
+		}
+
+		// Discover the local variable values.
+		{
+			HqValue::StringToHandleMap::Iterator iter;
+			while(HqValue::StringToHandleMap::IterateNext(hFrame->locals, iter))
+			{
+				HqValueHandle hValue = iter.pData->value;
+
+				if(hValue)
+				{
+					HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+				}
 			}
 		}
 	}

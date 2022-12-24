@@ -66,6 +66,8 @@ struct HqFrame
 	HqFunctionHandle hFunction;
 
 	HqDecoder decoder;
+
+	bool active;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
