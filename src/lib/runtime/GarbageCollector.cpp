@@ -211,18 +211,34 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 	assert(pGcProxy->pObject != nullptr);
 
 	// Only mark proxies that we detect being unmarked and the ones we know are already in an active list.
-	if(pGcProxy->markId != gc.currentMarkId && !pGcProxy->pending)
+	if(pGcProxy->markId != gc.currentMarkId)
 	{
 		// Update the proxy's mark ID.
 		pGcProxy->markId = gc.currentMarkId;
+
 		if(gc.pUnmarkedHead == pGcProxy)
 		{
 			// If the current proxy is the head of the unmarked list, we reassign the head to the next proxy.
 			gc.pUnmarkedHead = pGcProxy->pNext;
 		}
 
+		if(gc.pPendingHead == pGcProxy)
+		{
+			// If the current proxy is the head of the pending list, we reassign the head to the next proxy.
+			gc.pPendingHead = pGcProxy->pNext;
+		}
+
 		// Unlink the current proxy from its current list.
 		prv_proxyUnlink(pGcProxy);
+
+		if(pGcProxy->pending)
+		{
+			// Clear the 'pending' flag if it had not yet been linked into an active list.
+			// Pending proxies need to be allowed normal marking behavior in case they have
+			// dependent proxies that are already in an active list. Otherwise, discovery
+			// will not happen, so the dependent proxies would get destructed.
+			pGcProxy->pending = false;
+		}
 
 		if(pGcProxy->discover)
 		{
@@ -395,6 +411,10 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 					MarkObject(gc, &(hValue->gcProxy));
 				}
 			}
+
+			// Reset the time check counter at the end of all this to guarantee
+			// a time check is done at the start of the next phase.
+			gc.timeCheck = _HQ_GC_TIME_CHECK_INTERVAL;
 
 			endOfPhase = true;
 			break;
