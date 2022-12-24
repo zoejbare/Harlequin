@@ -40,7 +40,6 @@ struct HqGarbageCollector
 	static int prv_runPhase(HqGarbageCollector&);
 	static bool prv_hasReachedTimeSlice(HqGarbageCollector&);
 	static void prv_reset(HqGarbageCollector&);
-	static void prv_onDisposeObject(HqGcProxy*);
 	static void prv_proxyInsertBefore(HqGcProxy*, HqGcProxy*);
 	static void prv_proxyInsertAfter(HqGcProxy*, HqGcProxy*);
 	static void prv_proxyUnlink(HqGcProxy*);
@@ -62,6 +61,7 @@ struct HqGarbageCollector
 
 	uint64_t maxTimeSlice;
 	uint64_t startTime;
+	uint32_t timeCheck;
 
 	uint32_t currentMarkId;
 	uint32_t lastMarkId;

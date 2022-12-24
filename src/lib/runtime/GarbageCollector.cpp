@@ -27,24 +27,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#define _HQ_GC_TIME_CHECK_INTERVAL 10
+
+//----------------------------------------------------------------------------------------------------------------------
+
 enum HqGcPhase
 {
-	HQ_GC_PHASE_LINK_PENDING,
-	HQ_GC_PHASE_AUTO_MARK,
-	HQ_GC_PHASE_GLOBAL_MARK,
-	HQ_GC_PHASE_DISCOVERY,
-	HQ_GC_PHASE_DISPOSE,
+	_HQ_GC_PHASE_LINK_PENDING,
+	_HQ_GC_PHASE_AUTO_MARK,
+	_HQ_GC_PHASE_GLOBAL_MARK,
+	_HQ_GC_PHASE_DISCOVERY,
+	_HQ_GC_PHASE_DISPOSE,
 
-	HQ_GC_PHASE__COUNT,
-	HQ_GC_PHASE__START = HQ_GC_PHASE_LINK_PENDING,
-	HQ_GC_PHASE__END = HQ_GC_PHASE_DISPOSE,
+	_HQ_GC_PHASE__COUNT,
+	_HQ_GC_PHASE__START = _HQ_GC_PHASE_LINK_PENDING,
+	_HQ_GC_PHASE__END = _HQ_GC_PHASE_DISPOSE,
 };
 
 enum HqGcRunResult
 {
-	HQ_GC_RUN_MORE_WORK,
-	HQ_GC_RUN_TIME_OUT,
-	HQ_GC_RUN_COMPLETE,
+	_HQ_GC_RUN_MORE_WORK,
+	_HQ_GC_RUN_TIME_OUT,
+	_HQ_GC_RUN_COMPLETE,
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -67,6 +71,8 @@ void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, 
 	output.pIterCurrent = nullptr;
 	output.pIterPrev = nullptr;
 	output.maxTimeSlice = maxTimeSliceMs * HqClockGetFrequency() / 1000;
+	output.startTime = 0;
+	output.timeCheck = 0;
 	output.currentMarkId = 0;
 	output.lastMarkId = 0;
 	output.phase = 0;
@@ -126,9 +132,11 @@ void HqGarbageCollector::Dispose(HqGarbageCollector& gc)
 	gc.pMarkedTail = nullptr;
 	gc.pIterCurrent = nullptr;
 	gc.pIterPrev = nullptr;
+	gc.maxTimeSlice = 0;
+	gc.startTime = 0;
+	gc.timeCheck = 0;
 	gc.phase = 0;
 	gc.lastPhase = 0;
-	gc.maxTimeSlice = 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -138,20 +146,11 @@ void HqGarbageCollector::RunStep(HqGarbageCollector& gc)
 	HqScopedWriteLock writeLock(gc.rwLock, gc.hVm->isGcThreadEnabled);
 
 	gc.startTime = HqClockGetTimestamp();
+	gc.timeCheck = 0;
 
-	for(;;)
+	// Keep running phases while the GC reports there is more work that can be done right now.
+	while(prv_runPhase(gc) == _HQ_GC_RUN_MORE_WORK)
 	{
-		const int result = prv_runPhase(gc);
-		switch(result)
-		{
-			case HQ_GC_RUN_TIME_OUT:
-			case HQ_GC_RUN_COMPLETE:
-				return;
-
-			default:
-				// Keep running phases while the GC reports there is more work that can be done right now.
-				break;
-		}
 	}
 }
 
@@ -173,9 +172,9 @@ void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 	for(;;)
 	{
 		const int result = prv_runPhase(gc);
-		assert(result != HQ_GC_RUN_TIME_OUT);
+		assert(result != _HQ_GC_RUN_TIME_OUT);
 
-		if(result == HQ_GC_RUN_COMPLETE)
+		if(result == _HQ_GC_RUN_COMPLETE)
 		{
 			break;
 		}
@@ -279,7 +278,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 	switch(gc.phase)
 	{
 		// Transfer all pending proxies to the active list.
-		case HQ_GC_PHASE_LINK_PENDING:
+		case _HQ_GC_PHASE_LINK_PENDING:
 		{
 			HqScopedMutex lock(gc.pendingLock);
 
@@ -325,7 +324,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 		}
 
 		// Mark anything that is set to auto-mark.
-		case HQ_GC_PHASE_AUTO_MARK:
+		case _HQ_GC_PHASE_AUTO_MARK:
 		{
 			if(isPhaseStart)
 			{
@@ -365,8 +364,12 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 		}
 
 		// Mark all global variables.
-		case HQ_GC_PHASE_GLOBAL_MARK:
+		case _HQ_GC_PHASE_GLOBAL_MARK:
 		{
+			// Force the time check counter so the timestamp is actually checked here.
+			// We need this since the time check can only happen once in this phase.
+			gc.timeCheck = _HQ_GC_TIME_CHECK_INTERVAL;
+
 			// If we managed to reach this point right as we run out of time, it's better to signal the timeout now.
 			// Doing this will allow the global marking phase longer to run without potentially exceeding the time
 			// allowed for a single GC step.
@@ -398,7 +401,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 		}
 
 		// Mark any dependent proxies referenced by the current marked list.
-		case HQ_GC_PHASE_DISCOVERY:
+		case _HQ_GC_PHASE_DISCOVERY:
 		{
 			if(isPhaseStart)
 			{
@@ -433,7 +436,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 		}
 
 		// Dispose of any objects that are no longer in use.
-		case HQ_GC_PHASE_DISPOSE:
+		case _HQ_GC_PHASE_DISPOSE:
 		{
 			// Iterate until the end of the list has been reached.
 			while(gc.pUnmarkedHead)
@@ -449,7 +452,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 				HqGcProxy* const pNext = gc.pUnmarkedHead->pNext;
 
 				// Dispose of the current proxy.
-				prv_onDisposeObject(gc.pUnmarkedHead);
+				gc.pUnmarkedHead->onGcDisposeFn(gc.pUnmarkedHead->pObject);
 
 				// Update the head of the unmarked list.
 				gc.pUnmarkedHead = pNext;
@@ -476,17 +479,17 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 	if(endOfPhase)
 	{
 		// Move to the next phase.
-		gc.phase = (gc.phase + 1) % HQ_GC_PHASE__COUNT;
+		gc.phase = (gc.phase + 1) % _HQ_GC_PHASE__COUNT;
 
 		// The end of all phases is triggered when we have looped back to the first phase.
-		endOfAllPhases = (gc.phase == HQ_GC_PHASE__START);
+		endOfAllPhases = (gc.phase == _HQ_GC_PHASE__START);
 	}
 
 	return endOfAllPhases
-		? HQ_GC_RUN_COMPLETE
+		? _HQ_GC_RUN_COMPLETE
 		: timeOut
-			? HQ_GC_RUN_TIME_OUT
-			: HQ_GC_RUN_MORE_WORK;
+			? _HQ_GC_RUN_TIME_OUT
+			: _HQ_GC_RUN_MORE_WORK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -498,10 +501,15 @@ inline bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc)
 		return false;
 	}
 
-	const uint64_t deltaTime = HqClockGetTimestamp() - gc.startTime;
+	// Limit the number of times we're allowed to do the time slice check. Getting the current timestamp
+	// isn't terribly expensive by itself, but it will add up when called in rapid succession.
+	++gc.timeCheck;
+	if((gc.timeCheck % _HQ_GC_TIME_CHECK_INTERVAL) != 0)
+	{
+		return false;
+	}
 
-	return deltaTime >= gc.maxTimeSlice;
-	//return (gc.maxTimeSlice > 0) && ((HqClockGetTimestamp() - gc.startTime) >= gc.maxTimeSlice);
+	return (HqClockGetTimestamp() - gc.startTime) >= gc.maxTimeSlice;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -552,17 +560,8 @@ inline void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
 	gc.lastMarkId = gc.currentMarkId;
 	++gc.currentMarkId;
 
-	gc.phase = HQ_GC_PHASE__START;
-	gc.lastPhase = HQ_GC_PHASE__END;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void HqGarbageCollector::prv_onDisposeObject(HqGcProxy* const pGcProxy)
-{
-	assert(pGcProxy != nullptr);
-
-	pGcProxy->onGcDisposeFn(pGcProxy->pObject);
+	gc.phase = _HQ_GC_PHASE__START;
+	gc.lastPhase = _HQ_GC_PHASE__END;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -627,5 +626,9 @@ inline void HqGarbageCollector::prv_proxyUnlink(HqGcProxy* const pGcProxy)
 	pGcProxy->pPrev = nullptr;
 	pGcProxy->pNext = nullptr;
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#undef _HQ_GC_TIME_CHECK_INTERVAL
 
 //----------------------------------------------------------------------------------------------------------------------

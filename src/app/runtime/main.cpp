@@ -800,7 +800,7 @@ int main(int argc, char* argv[])
 		// Run the garbage collector.
 		{
 			const uint64_t timeStart = HqClockGetTimestamp();
-			HqVmRunGarbageCollector(hVm, HQ_RUN_STEP);
+			HqVmRunGarbageCollector(hVm, HQ_RUN_FULL);
 			const uint64_t timeEnd = HqClockGetTimestamp();
 
 			totalManualGcTime += timeEnd - timeStart;
