@@ -17,17 +17,17 @@
 //
 
 #include "Decoder.hpp"
-#include "Program.hpp"
+#include "Module.hpp"
 
 #include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqDecoder::Initialize(HqDecoder& output, HqProgramHandle hProgram, uint32_t offset)
+void HqDecoder::Initialize(HqDecoder& output, HqModuleHandle hModule, uint32_t offset)
 {
-	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(hModule != HQ_MODULE_HANDLE_NULL);
 
-	output.ip = hProgram->code.pData + offset;
+	output.ip = hModule->code.pData + offset;
 	output.cachedIp = output.ip;
 }
 

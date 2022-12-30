@@ -16,12 +16,13 @@
 // IN THE SOFTWARE.
 //
 
-#include "Program.hpp"
+#include "Module.hpp"
+
 #include "BuiltInDecl.hpp"
 #include "Vm.hpp"
 
-#include "program-loader/CommonLoader.hpp"
-#include "program-loader/ProgramLoader.hpp"
+#include "module-loader/CommonLoader.hpp"
+#include "module-loader/ModuleLoader.hpp"
 
 #include "../base/Mutex.hpp"
 
@@ -31,13 +32,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static bool ProgramLoad(
-	HqProgram* const pOutProgram,
+static bool LoadModule(
+	HqModule* const pOutModule,
 	HqVmHandle hVm,
 	HqSerializerHandle hSerializer
 )
 {
-	assert(pOutProgram != nullptr);
+	assert(pOutModule != nullptr);
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -56,7 +57,7 @@ static bool ProgramLoad(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error setting endian mode on the program file serializer: error=\"%s\", endiaMode=\"%s\"",
+			"Error setting endian mode on the module file serializer: error=\"%s\", endiaMode=\"%s\"",
 			errorString,
 			endianString
 		);
@@ -76,7 +77,7 @@ static bool ProgramLoad(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file magic number: error=\"%s\"",
+			"Error reading module file magic number: error=\"%s\"",
 			errorString
 		);
 
@@ -84,12 +85,12 @@ static bool ProgramLoad(
 	}
 
 	// Validate the magic number.
-	if(!HqProgramCommonLoader::CheckMagicNumber(fileHeader))
+	if(!HqModuleCommonLoader::CheckMagicNumber(fileHeader))
 	{
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid program file magic number: magicNumber=\"%c%c%c%c%c\", expected=\"HQPRG\"",
+			"Invalid module file magic number: magicNumber=\"%c%c%c%c%c\", expected=\"HQPRG\"",
 			fileHeader.magicNumber[0],
 			fileHeader.magicNumber[1],
 			fileHeader.magicNumber[2],
@@ -107,7 +108,7 @@ static bool ProgramLoad(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file reserved section: error=\"%s\"",
+			"Error reading module file reserved section: error=\"%s\"",
 			HqGetErrorCodeString(result)
 		);
 		return false;
@@ -120,7 +121,7 @@ static bool ProgramLoad(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file big endian flag: error=\"%s\"",
+			"Error reading module file big endian flag: error=\"%s\"",
 			HqGetErrorCodeString(result)
 		);
 		return false;
@@ -129,11 +130,11 @@ static bool ProgramLoad(
 	HqReportMessage(
 		hReport,
 		HQ_MESSAGE_TYPE_VERBOSE,
-		"Detected program file endianness: bigEndian=%d",
+		"Detected module file endianness: bigEndian=%d",
 		fileHeader.bigEndianFlag
 	);
 
-	// Save the endianness value to the output program since we'll need
+	// Save the endianness value to the output module since we'll need
 	// that when dispatching bytecode data.
 	const int endianness = (fileHeader.bigEndianFlag > 0)
 		? HQ_ENDIAN_ORDER_BIG
@@ -146,28 +147,28 @@ static bool ProgramLoad(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error setting endian mode on the program file serializer: error=\"%s\", endianness=\"%s\"",
+			"Error setting endian mode on the module file serializer: error=\"%s\", endianness=\"%s\"",
 			HqGetErrorCodeString(result),
 			HqGetEndiannessString(endianness)
 		);
 		return false;
 	}
 
-	return HqProgramLoader::Load(pOutProgram, hVm, hSerializer);
+	return HqModuleLoader::Load(pOutModule, hVm, hSerializer);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, const char* const filePath)
+HqModuleHandle HqModule::Create(HqVmHandle hVm, HqString* const pModuleName, const char* const filePath)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
-	assert(pProgramName != nullptr);
+	assert(pModuleName != nullptr);
 	assert(filePath != nullptr);
 
 	HqReportHandle hReport = &hVm->report;
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from file: \"%s\"", pProgramName->data, filePath);
+	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Loading module \"%s\" from file: \"%s\"", pModuleName->data, filePath);
 
 	int result;
 
@@ -181,7 +182,7 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to create program serializer: error=\"%s\"",
+			"Failed to create module serializer: error=\"%s\"",
 			errorString
 		);
 
@@ -198,7 +199,7 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to load program stream: error=\"%s\"",
+			"Failed to load module stream: error=\"%s\"",
 			errorString
 		);
 
@@ -206,16 +207,16 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 		return nullptr;
 	}
 
-	HqString::AddRef(pProgramName);
+	HqString::AddRef(pModuleName);
 
-	HqProgram* pOutput = new HqProgram();
-	assert(pOutput != HQ_PROGRAM_HANDLE_NULL);
+	HqModule* pOutput = new HqModule();
+	assert(pOutput != HQ_MODULE_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
 	pOutput->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
-	pOutput->pName = pProgramName;
+	pOutput->pName = pModuleName;
 
-	// Initialize the program data.
+	// Initialize the module data.
 	HqValue::StringToBoolMap::Allocate(pOutput->dependencies);
 	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
 	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
@@ -230,16 +231,16 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 		HqScopedMutex vmLock(hVm->lock);
 		HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
-		// Attempt to load the program.
-		if(ProgramLoad(pOutput, hVm, hSerializer))
+		// Attempt to load the module.
+		if(LoadModule(pOutput, hVm, hSerializer))
 		{
-			// Map the program to the VM.
-			HqProgram::StringToHandleMap::Insert(hVm->programs, pProgramName, pOutput);
+			// Map the module to the VM.
+			HqModule::StringToHandleMap::Insert(hVm->modules, pModuleName, pOutput);
 		}
 		else
 		{
-			HqString::Release(pProgramName);
-			HqProgram::Dispose(pOutput);
+			HqString::Release(pModuleName);
+			HqModule::Dispose(pOutput);
 
 			pOutput = nullptr;
 		}
@@ -254,7 +255,7 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_WARNING,
-			"Failed to dispose of program serializer: error=\"%s\"",
+			"Failed to dispose of module serializer: error=\"%s\"",
 			errorString
 		);
 	}
@@ -264,22 +265,22 @@ HqProgramHandle HqProgram::Create(HqVmHandle hVm, HqString* const pProgramName, 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProgramHandle HqProgram::Create(
+HqModuleHandle HqModule::Create(
 	HqVmHandle hVm,
-	HqString* const pProgramName,
+	HqString* const pModuleName,
 	const void* const pFileData,
 	const size_t fileLength
 )
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
-	assert(pProgramName != nullptr);
+	assert(pModuleName != nullptr);
 	assert(pFileData != nullptr);
 	assert(fileLength > 0);
 
 	HqReportHandle hReport = &hVm->report;
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Loading program \"%s\" from data buffer", pProgramName->data);
+	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Loading module \"%s\" from data buffer", pModuleName->data);
 
 	int result;
 
@@ -293,7 +294,7 @@ HqProgramHandle HqProgram::Create(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to create program serializer: error=\"%s\"",
+			"Failed to create module serializer: error=\"%s\"",
 			errorString
 		);
 
@@ -310,22 +311,22 @@ HqProgramHandle HqProgram::Create(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to load program stream: error=\"%s\"",
+			"Failed to load module stream: error=\"%s\"",
 			errorString
 		);
 
 		return nullptr;
 	}
 
-	HqString::AddRef(pProgramName);
+	HqString::AddRef(pModuleName);
 
-	HqProgram* pOutput = new HqProgram();
-	assert(pOutput != HQ_PROGRAM_HANDLE_NULL);
+	HqModule* pOutput = new HqModule();
+	assert(pOutput != HQ_MODULE_HANDLE_NULL);
 
 	pOutput->hVm = hVm;
-	pOutput->pName = pProgramName;
+	pOutput->pName = pModuleName;
 
-	// Initialize the program data.
+	// Initialize the module data.
 	HqValue::StringToBoolMap::Allocate(pOutput->dependencies);
 	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
 	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
@@ -340,16 +341,16 @@ HqProgramHandle HqProgram::Create(
 		HqScopedMutex vmLock(hVm->lock);
 		HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
-		// Attempt to load the program.
-		if(ProgramLoad(pOutput, hVm, hSerializer))
+		// Attempt to load the module.
+		if(LoadModule(pOutput, hVm, hSerializer))
 		{
-			// Map the program to the VM.
-			HqProgram::StringToHandleMap::Insert(hVm->programs, pProgramName, pOutput);
+			// Map the module to the VM.
+			HqModule::StringToHandleMap::Insert(hVm->modules, pModuleName, pOutput);
 		}
 		else
 		{
-			HqString::Release(pProgramName);
-			HqProgram::Dispose(pOutput);
+			HqString::Release(pModuleName);
+			HqModule::Dispose(pOutput);
 
 			pOutput = nullptr;
 		}
@@ -364,7 +365,7 @@ HqProgramHandle HqProgram::Create(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_WARNING,
-			"Failed to dispose of program serializer: error=\"%s\"",
+			"Failed to dispose of module serializer: error=\"%s\"",
 			errorString
 		);
 	}
@@ -374,84 +375,84 @@ HqProgramHandle HqProgram::Create(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqProgram::Dispose(HqProgramHandle hProgram)
+void HqModule::Dispose(HqModuleHandle hModule)
 {
-	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(hModule != HQ_MODULE_HANDLE_NULL);
 
-	// Dispose of all program dependencies.
+	// Dispose of all module dependencies.
 	{
 		HqValue::StringToBoolMap::Iterator iter;
-		while(HqValue::StringToBoolMap::IterateNext(hProgram->dependencies, iter))
+		while(HqValue::StringToBoolMap::IterateNext(hModule->dependencies, iter))
 		{
 			HqString::Release(iter.pData->key);
 		}
 
-		HqValue::StringToBoolMap::Dispose(hProgram->dependencies);
+		HqValue::StringToBoolMap::Dispose(hModule->dependencies);
 	}
 
 	// Release the function signature keys.
 	{
 		HqFunction::StringToBoolMap::Iterator iter;
-		while(HqFunction::StringToBoolMap::IterateNext(hProgram->functions, iter))
+		while(HqFunction::StringToBoolMap::IterateNext(hModule->functions, iter))
 		{
 			HqString::Release(iter.pData->key);
 		}
 
-		HqFunction::StringToBoolMap::Dispose(hProgram->functions);
+		HqFunction::StringToBoolMap::Dispose(hModule->functions);
 	}
 
 	// Release the object schema type names.
 	{
 		HqValue::StringToBoolMap::Iterator iter;
-		while(HqValue::StringToBoolMap::IterateNext(hProgram->objectSchemas, iter))
+		while(HqValue::StringToBoolMap::IterateNext(hModule->objectSchemas, iter))
 		{
 			HqString::Release(iter.pData->key);
 		}
 
-		HqValue::StringToBoolMap::Dispose(hProgram->objectSchemas);
+		HqValue::StringToBoolMap::Dispose(hModule->objectSchemas);
 	}
 
 	// Release the global variable names.
 	{
 		HqValue::StringToBoolMap::Iterator iter;
-		while(HqValue::StringToBoolMap::IterateNext(hProgram->globals, iter))
+		while(HqValue::StringToBoolMap::IterateNext(hModule->globals, iter))
 		{
 			HqString::Release(iter.pData->key);
 		}
 
-		HqValue::StringToBoolMap::Dispose(hProgram->globals);
+		HqValue::StringToBoolMap::Dispose(hModule->globals);
 	}
 
 	// Release all strings values.
-	for(size_t i = 0; i < hProgram->strings.count; ++i)
+	for(size_t i = 0; i < hModule->strings.count; ++i)
 	{
-		HqString::Release(hProgram->strings.pData[i]);
+		HqString::Release(hModule->strings.pData[i]);
 	}
 
 	// Clean up the data structures.
-	StringArray::Dispose(hProgram->strings);
-	HqByteHelper::Array::Dispose(hProgram->code);
+	StringArray::Dispose(hModule->strings);
+	HqByteHelper::Array::Dispose(hModule->code);
 
-	if(hProgram->hInitFunction)
+	if(hModule->hInitFunction)
 	{
 		// Dispose of the initializer function.
-		HqFunction::Dispose(hProgram->hInitFunction);
-		hProgram->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
+		HqFunction::Dispose(hModule->hInitFunction);
+		hModule->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
 	}
 
-	HqString::Release(hProgram->pName);
+	HqString::Release(hModule->pName);
 
-	delete hProgram;
+	delete hModule;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqString* HqProgram::GetString(HqProgramHandle hProgram, const uint32_t index, int* const pOutResult)
+HqString* HqModule::GetString(HqModuleHandle hModule, const uint32_t index, int* const pOutResult)
 {
-	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(hModule != HQ_MODULE_HANDLE_NULL);
 	assert(pOutResult != nullptr);
 
-	if(index >= hProgram->strings.count)
+	if(index >= hModule->strings.count)
 	{
 		(*pOutResult) = HQ_ERROR_INDEX_OUT_OF_RANGE;
 		return nullptr;
@@ -459,19 +460,19 @@ HqString* HqProgram::GetString(HqProgramHandle hProgram, const uint32_t index, i
 
 	(*pOutResult) = HQ_SUCCESS;
 
-	return hProgram->strings.pData[index];
+	return hModule->strings.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* HqProgram::operator new(const size_t sizeInBytes)
+void* HqModule::operator new(const size_t sizeInBytes)
 {
 	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqProgram::operator delete(void* const pObject)
+void HqModule::operator delete(void* const pObject)
 {
 	HqMemFree(pObject);
 }

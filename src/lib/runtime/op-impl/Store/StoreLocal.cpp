@@ -21,7 +21,7 @@
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Function.hpp"
-#include "../../Program.hpp"
+#include "../../Module.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -45,7 +45,7 @@ extern "C" void OpCodeExec_StoreLocal(HqExecutionHandle hExec)
 	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqString* const pVarName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	HqString* const pVarName = HqModule::GetString(hExec->hCurrentFrame->hFunction->hModule, stringIndex, &result);
 	if(pVarName)
 	{
 		HqValueHandle hRegisterValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);

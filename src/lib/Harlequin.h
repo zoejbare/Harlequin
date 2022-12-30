@@ -315,7 +315,7 @@ enum HqExceptionSeverity
 };
 
 typedef struct HqVm* HqVmHandle;
-typedef struct HqProgram* HqProgramHandle;
+typedef struct HqModule* HqModuleHandle;
 typedef struct HqFunction* HqFunctionHandle;
 typedef struct HqExecution* HqExecutionHandle;
 typedef struct HqFrame* HqFrameHandle;
@@ -323,7 +323,6 @@ typedef struct HqValue* HqValueHandle;
 
 typedef void (*HqNativeFunction)(HqExecutionHandle, HqFunctionHandle, void*);
 
-typedef void (*HqCallbackProgramDependency)(void*, const char*);
 typedef void (*HqCallbackOpDisasm)(void*, const char*, uintptr_t);
 
 typedef void (*HqCallbackNativeValueCopy)(void**, const void*);
@@ -332,18 +331,12 @@ typedef bool (*HqCallbackNativeValueEqual)(const void*, const void*);
 typedef bool (*HqCallbackNativeValueLessThan)(const void*, const void*);
 
 typedef bool (*HqCallbackIterateFrame)(void*, HqFrameHandle);
-typedef bool (*HqCallbackIterateProgram)(void*, HqProgramHandle);
+typedef bool (*HqCallbackIterateModule)(void*, HqModuleHandle);
 typedef bool (*HqCallbackIterateFunction)(void*, HqFunctionHandle);
 typedef bool (*HqCallbackIterateVariable)(void*, const char*, HqValueHandle);
 typedef bool (*HqCallbackIterateString)(void*, const char*);
 typedef bool (*HqCallbackIterateStringWithIndex)(void*, const char*, size_t);
 typedef bool (*HqCallbackIterateObjectMember)(void*, const char*, int);
-
-typedef struct
-{
-	HqCallbackProgramDependency onRequestFn;
-	void* pUserData;
-} HqDependencyInit;
 
 typedef struct
 {
@@ -357,7 +350,7 @@ typedef struct
 } HqVmInit;
 
 #define HQ_VM_HANDLE_NULL        ((HqVmHandle)0)
-#define HQ_PROGRAM_HANDLE_NULL   ((HqProgramHandle)0)
+#define HQ_MODULE_HANDLE_NULL   ((HqModuleHandle)0)
 #define HQ_FUNCTION_HANDLE_NULL  ((HqFunctionHandle)0)
 #define HQ_EXECUTION_HANDLE_NULL ((HqExecutionHandle)0)
 #define HQ_FRAME_HANDLE_NULL     ((HqFrameHandle)0)
@@ -373,11 +366,11 @@ HQ_MAIN_API int HqVmRunGarbageCollector(HqVmHandle hVm, int runMode);
 
 HQ_MAIN_API int HqVmGetReportHandle(HqVmHandle hVm, HqReportHandle* phOutReport);
 
-HQ_MAIN_API int HqVmGetProgram(HqVmHandle hVm, HqProgramHandle* phOutProgram, const char* programName);
+HQ_MAIN_API int HqVmGetModule(HqVmHandle hVm, HqModuleHandle* phOutModule, const char* moduleName);
 
-HQ_MAIN_API int HqVmGetProgramCount(HqVmHandle hVm, size_t* pOutCount);
+HQ_MAIN_API int HqVmGetModuleCount(HqVmHandle hVm, size_t* pOutCount);
 
-HQ_MAIN_API int HqVmListPrograms(HqVmHandle hVm, HqCallbackIterateProgram onIterateFn, void* pUserData);
+HQ_MAIN_API int HqVmListModules(HqVmHandle hVm, HqCallbackIterateModule onIterateFn, void* pUserData);
 
 HQ_MAIN_API int HqVmGetFunction(HqVmHandle hVm, HqFunctionHandle* phOutFunction, const char* signature);
 
@@ -395,60 +388,60 @@ HQ_MAIN_API int HqVmListGlobalVariables(HqVmHandle hVm, HqCallbackIterateVariabl
 
 HQ_MAIN_API int HqVmListObjectSchemas(HqVmHandle hVm, HqCallbackIterateString onIterateFn, void* pUserData);
 
-HQ_MAIN_API int HqVmLoadProgram(
+HQ_MAIN_API int HqVmLoadModule(
 	HqVmHandle hVm,
-	const char* programName,
-	const void* pProgramFileData,
-	size_t programFileSize
+	const char* moduleName,
+	const void* pModuleFileData,
+	size_t moduleFileSize
 );
 
-HQ_MAIN_API int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec);
+HQ_MAIN_API int HqVmInitializeModules(HqVmHandle hVm, HqExecutionHandle* phOutExec);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqProgramGetVm(HqProgramHandle hProgram, HqVmHandle* phOutVm);
+HQ_MAIN_API int HqModuleGetVm(HqModuleHandle hModule, HqVmHandle* phOutVm);
 
-HQ_MAIN_API int HqProgramGetName(HqProgramHandle hProgram, const char** pOutName);
+HQ_MAIN_API int HqModuleGetName(HqModuleHandle hModule, const char** pOutName);
 
-HQ_MAIN_API int HqProgramGetFunctionCount(HqProgramHandle hProgram, size_t* pOutCount);
+HQ_MAIN_API int HqModuleGetFunctionCount(HqModuleHandle hModule, size_t* pOutCount);
 
-HQ_MAIN_API int HqProgramListFunctions(
-	HqProgramHandle hProgram,
+HQ_MAIN_API int HqModuleListFunctions(
+	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
-HQ_MAIN_API int HqProgramGetStringCount(HqProgramHandle hProgram, size_t* pOutCount);
+HQ_MAIN_API int HqModuleGetStringCount(HqModuleHandle hModule, size_t* pOutCount);
 
-HQ_MAIN_API int HqProgramListStrings(
-	HqProgramHandle hProgram,
+HQ_MAIN_API int HqModuleListStrings(
+	HqModuleHandle hModule,
 	HqCallbackIterateStringWithIndex onIterateFn,
 	void* pUserData
 );
 
-HQ_MAIN_API int HqProgramGetGlobalVariableCount(HqProgramHandle hProgram, size_t* pOutCount);
+HQ_MAIN_API int HqModuleGetGlobalVariableCount(HqModuleHandle hModule, size_t* pOutCount);
 
-HQ_MAIN_API int HqProgramListGlobalVariables(
-	HqProgramHandle hProgram,
+HQ_MAIN_API int HqModuleListGlobalVariables(
+	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
-HQ_MAIN_API int HqProgramListDependencies(
-	HqProgramHandle hProgram,
+HQ_MAIN_API int HqModuleListDependencies(
+	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
-HQ_MAIN_API int HqProgramListUnloadedDependencies(
-	HqProgramHandle hProgram,
+HQ_MAIN_API int HqModuleListUnloadedDependencies(
+	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
 	void* pUserData
 );
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqFunctionGetProgram(HqFunctionHandle hFunction, HqProgramHandle* phOutProgram);
+HQ_MAIN_API int HqFunctionGetModule(HqFunctionHandle hFunction, HqModuleHandle* phOutModule);
 
 HQ_MAIN_API int HqFunctionGetSignature(HqFunctionHandle hFunction, const char** pOutSignature);
 
@@ -690,7 +683,7 @@ HQ_MAIN_API int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqVal
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 typedef struct HqCompiler* HqCompilerHandle;
-typedef struct HqProgramWriter* HqProgramWriterHandle;
+typedef struct HqModuleWriter* HqModuleWriterHandle;
 
 typedef struct
 {
@@ -700,7 +693,7 @@ typedef struct
 typedef bool (*HqCallbackIterateBuiltInFunction)(void*, int, const char*);
 
 #define HQ_COMPILER_HANDLE_NULL       ((HqCompilerHandle)0)
-#define HQ_PROGRAM_WRITER_HANDLE_NULL ((HqProgramWriterHandle)0)
+#define HQ_MODULE_WRITER_HANDLE_NULL ((HqModuleWriterHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -712,34 +705,34 @@ HQ_MAIN_API int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHa
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqProgramWriterCreate(HqProgramWriterHandle* phOutProgramWriter, HqCompilerHandle hCompiler);
+HQ_MAIN_API int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqCompilerHandle hCompiler);
 
-HQ_MAIN_API int HqProgramWriterDispose(HqProgramWriterHandle* phProgramWriter);
+HQ_MAIN_API int HqModuleWriterDispose(HqModuleWriterHandle* phModuleWriter);
 
-HQ_MAIN_API int HqProgramWriterAddDependency(HqProgramWriterHandle hProgramWriter, const char* programName);
+HQ_MAIN_API int HqModuleWriterAddDependency(HqModuleWriterHandle hModuleWriter, const char* moduleName);
 
-HQ_MAIN_API int HqProgramWriterAddString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutIndex);
+HQ_MAIN_API int HqModuleWriterAddString(HqModuleWriterHandle hModuleWriter, const char* value, uint32_t* pOutIndex);
 
-HQ_MAIN_API int HqProgramWriterAddObjectType(HqProgramWriterHandle hProgramWriter, const char* objectTypeName);
+HQ_MAIN_API int HqModuleWriterAddObjectType(HqModuleWriterHandle hModuleWriter, const char* objectTypeName);
 
-HQ_MAIN_API int HqProgramWriterAddObjectMember(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterAddObjectMember(
+	HqModuleWriterHandle hModuleWriter,
 	const char* objectTypeName,
 	const char* memberName,
 	uint8_t memberValueType,
 	uint32_t* pOutIndex
 );
 
-HQ_MAIN_API int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* variableName);
+HQ_MAIN_API int HqModuleWriterAddGlobal(HqModuleWriterHandle hModuleWriter, const char* variableName);
 
-HQ_MAIN_API int HqProgramWriterSetProgramInitFunction(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterSetModuleInitFunction(
+	HqModuleWriterHandle hModuleWriter,
 	const void* pBytecode,
 	size_t bytecodeLength
 );
 
-HQ_MAIN_API int HqProgramWriterAddFunction(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterAddFunction(
+	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	const void* pFunctionBytecode,
 	size_t bytecodeLength,
@@ -747,29 +740,29 @@ HQ_MAIN_API int HqProgramWriterAddFunction(
 	uint16_t numReturnValues
 );
 
-HQ_MAIN_API int HqProgramWriterAddNativeFunction(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterAddNativeFunction(
+	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	uint16_t numParameters,
 	uint16_t numReturnValues
 );
 
-HQ_MAIN_API int HqProgramWriterAddLocalVariable(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterAddLocalVariable(
+	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	const char* variableName
 );
 
-HQ_MAIN_API int HqProgramWriterAddGuardedBlock(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterAddGuardedBlock(
+	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	size_t bytecodeOffset,
 	size_t bytecodeLength,
 	uint32_t* pOutBlockId
 );
 
-HQ_MAIN_API int HqProgramWriterAddExceptionHandler(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterAddExceptionHandler(
+	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	uint32_t blockId,
 	size_t bytecodeOffset,
@@ -777,8 +770,8 @@ HQ_MAIN_API int HqProgramWriterAddExceptionHandler(
 	const char* className
 );
 
-HQ_MAIN_API int HqProgramWriterSerialize(
-	HqProgramWriterHandle hProgramWriter,
+HQ_MAIN_API int HqModuleWriterSerialize(
+	HqModuleWriterHandle hModuleWriter,
 	HqCompilerHandle hCompiler,
 	HqSerializerHandle hSerializer
 );

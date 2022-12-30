@@ -16,11 +16,12 @@
 // IN THE SOFTWARE.
 //
 
-#include "ProgramWriter.hpp"
+#include "ModuleWriter.hpp"
+
 #include "Compiler.hpp"
 
-#include "../common/program-format/FileHeader.hpp"
-#include "../common/program-format/ProgramHeader.hpp"
+#include "../common/module-format/FileHeader.hpp"
+#include "../common/module-format/ModuleHeader.hpp"
 
 #include <algorithm>
 #include <assert.h>
@@ -83,38 +84,38 @@ static bool SerializeString(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProgramWriterHandle HqProgramWriter::Create()
+HqModuleWriterHandle HqModuleWriter::Create()
 {
-	HqProgramWriter* const pOutput = new HqProgramWriter();
+	HqModuleWriter* const pOutput = new HqModuleWriter();
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqProgramWriter::Dispose(HqProgramWriterHandle hProgramWriter)
+void HqModuleWriter::Dispose(HqModuleWriterHandle hModuleWriter)
 {
-	assert(hProgramWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hModuleWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 
 	// Dispose of all dependency names.
-	for(auto& kv : hProgramWriter->dependencies)
+	for(auto& kv : hModuleWriter->dependencies)
 	{
 		HqString::Release(kv.first);
 	}
 
-	// Dispose of all program globals.
-	for(HqString* const pVarName : hProgramWriter->globals)
+	// Dispose of all module globals.
+	for(HqString* const pVarName : hModuleWriter->globals)
 	{
 		HqString::Release(pVarName);
 	}
 
-	// Dispose of all program strings.
-	for(auto& kv : hProgramWriter->stringIndexMap)
+	// Dispose of all module strings.
+	for(auto& kv : hModuleWriter->stringIndexMap)
 	{
 		HqString::Release(kv.first);
 	}
 
 	// Dispose of all functions.
-	for(auto& funcKv : hProgramWriter->functions)
+	for(auto& funcKv : hModuleWriter->functions)
 	{
 		HqString::Release(funcKv.first);
 
@@ -138,7 +139,7 @@ void HqProgramWriter::Dispose(HqProgramWriterHandle hProgramWriter)
 	}
 
 	// Dispose of all object types.
-	for(auto& typeKv : hProgramWriter->objectTypes)
+	for(auto& typeKv : hModuleWriter->objectTypes)
 	{
 		HqString::Release(typeKv.second.pTypeName);
 
@@ -149,25 +150,25 @@ void HqProgramWriter::Dispose(HqProgramWriterHandle hProgramWriter)
 		}
 	}
 
-	delete hProgramWriter;
+	delete hModuleWriter;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramWriter::Serialize(
-	HqProgramWriterHandle hProgramWriter,
+bool HqModuleWriter::Serialize(
+	HqModuleWriterHandle hModuleWriter,
 	HqCompilerHandle hCompiler,
 	HqSerializerHandle hSerializer
 )
 {
-	assert(hProgramWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hModuleWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 	assert(hCompiler != HQ_COMPILER_HANDLE_NULL);
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
 	HqReportHandle hReport = &hCompiler->report;
 
 	HqFileHeader fileHeader = {};
-	HqProgramHeader programHeader = {};
+	HqModuleHeader moduleHeader = {};
 
 	fileHeader.magicNumber[0] = 'H';
 	fileHeader.magicNumber[1] = 'Q';
@@ -217,12 +218,12 @@ bool HqProgramWriter::Serialize(
 
 	// Get the function bindings and bytecode ready to be written out.
 	{
-		// The program's init function will always be at the start of the bytecode.
+		// The module's init function will always be at the start of the bytecode.
 		// All other functions will be defined after it.
-		uint32_t bytecodeLength = uint32_t(getAlignedSize(hProgramWriter->initBytecode.size()));
+		uint32_t bytecodeLength = uint32_t(getAlignedSize(hModuleWriter->initBytecode.size()));
 
 		// Build the binding data for each function while calculating total length of the bytecode.
-		for(auto& kv : hProgramWriter->functions)
+		for(auto& kv : hModuleWriter->functions)
 		{
 			FunctionBinding binding;
 
@@ -237,39 +238,39 @@ bool HqProgramWriter::Serialize(
 			functionBindings.push_back(binding);
 		}
 
-		// Allocate space for the entire block of bytecode for the program.
+		// Allocate space for the entire block of bytecode for the module.
 		bytecode.resize(bytecodeLength);
 
 		// Clear the bytecode buffer.
-		uint8_t* const pProgramBytecode = bytecode.data();
-		memset(pProgramBytecode, 0, bytecode.size());
+		uint8_t* const pModuleBytecode = bytecode.data();
+		memset(pModuleBytecode, 0, bytecode.size());
 
-		// Copy the program's init function to the start of the bytecode.
-		memcpy(bytecode.data(), hProgramWriter->initBytecode.data(), hProgramWriter->initBytecode.size());
+		// Copy the module's init function to the start of the bytecode.
+		memcpy(bytecode.data(), hModuleWriter->initBytecode.data(), hModuleWriter->initBytecode.size());
 
 
-		// Fill out the full program bytecode from each function's individual bytecode.
+		// Fill out the full module bytecode from each function's individual bytecode.
 		for(const FunctionBinding& binding : functionBindings)
 		{
 			memcpy(
-				pProgramBytecode + binding.offset,
+				pModuleBytecode + binding.offset,
 				binding.pFunction->bytecode.data(),
 				binding.pFunction->bytecode.size()
 			);
 		}
 	}
 
-	programHeader.dependencyTable.length = uint32_t(hProgramWriter->dependencies.size());
-	programHeader.objectTable.length = uint32_t(hProgramWriter->objectTypes.size());
-	programHeader.stringTable.length = uint32_t(hProgramWriter->strings.size());
-	programHeader.globalTable.length = uint32_t(hProgramWriter->globals.size());
-	programHeader.bytecode.length = uint32_t(bytecode.size());
-	programHeader.functionTable.length = uint32_t(functionBindings.size());
-	programHeader.initFunctionLength = uint32_t(hProgramWriter->initBytecode.size());
+	moduleHeader.dependencyTable.length = uint32_t(hModuleWriter->dependencies.size());
+	moduleHeader.objectTable.length = uint32_t(hModuleWriter->objectTypes.size());
+	moduleHeader.stringTable.length = uint32_t(hModuleWriter->strings.size());
+	moduleHeader.globalTable.length = uint32_t(hModuleWriter->globals.size());
+	moduleHeader.bytecode.length = uint32_t(bytecode.size());
+	moduleHeader.functionTable.length = uint32_t(functionBindings.size());
+	moduleHeader.initFunctionLength = uint32_t(hModuleWriter->initBytecode.size());
 
-	// TODO: Add support for program extensions.
-	programHeader.extensionTable.offset = 0;
-	programHeader.extensionTable.length = 0;
+	// TODO: Add support for module extensions.
+	moduleHeader.extensionTable.offset = 0;
+	moduleHeader.extensionTable.length = 0;
 
 	int result = HQ_SUCCESS;
 
@@ -298,32 +299,32 @@ bool HqProgramWriter::Serialize(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write program common header: error=\"%s\"",
+			"Failed to write module common header: error=\"%s\"",
 			errorString
 		);
 
 		return false;
 	}
 
-	auto writeVersionHeader = [&hSerializer, &programHeader]() -> int
+	auto writeVersionHeader = [&hSerializer, &moduleHeader]() -> int
 	{
 		int result = HQ_SUCCESS;
 
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.dependencyTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.dependencyTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.objectTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.objectTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.stringTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.stringTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.globalTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.globalTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.functionTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.functionTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.extensionTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.extensionTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.bytecode.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.bytecode.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, programHeader.initFunctionLength); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.dependencyTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.dependencyTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.objectTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.objectTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.stringTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.stringTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.globalTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.globalTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.functionTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.functionTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.extensionTable.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.extensionTable.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.bytecode.offset); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.bytecode.length); }
+		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.initFunctionLength); }
 
 		return result;
 	};
@@ -341,17 +342,17 @@ bool HqProgramWriter::Serialize(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write program version header data: error=\"%s\"",
+			"Failed to write module version header data: error=\"%s\"",
 			errorString
 		);
 
 		return false;
 	}
 
-	programHeader.dependencyTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+	moduleHeader.dependencyTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the dependency table.
-	for(auto& kv : hProgramWriter->dependencies)
+	for(auto& kv : hModuleWriter->dependencies)
 	{
 		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", kv.first->data);
 
@@ -361,10 +362,10 @@ bool HqProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.objectTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+	moduleHeader.objectTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the object type schemas.
-	for(auto& typeKv : hProgramWriter->objectTypes)
+	for(auto& typeKv : hModuleWriter->objectTypes)
 	{
 		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing object type: name=\"%s\"", typeKv.first->data);
 
@@ -429,12 +430,12 @@ bool HqProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.stringTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+	moduleHeader.stringTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the constant table.
-	for(size_t index = 0; index < hProgramWriter->strings.size(); ++index)
+	for(size_t index = 0; index < hModuleWriter->strings.size(); ++index)
 	{
-		HqString* const pString = hProgramWriter->strings[index];
+		HqString* const pString = hModuleWriter->strings[index];
 
 		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing string: index=%" PRIuPTR ", data=\"%s\"", index, pString->data);
 		
@@ -444,10 +445,10 @@ bool HqProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.globalTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+	moduleHeader.globalTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the global variable table.
-	for(HqString* const pVarName : hProgramWriter->globals)
+	for(HqString* const pVarName : hModuleWriter->globals)
 	{
 		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", pVarName->data);
 
@@ -458,7 +459,7 @@ bool HqProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.functionTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+	moduleHeader.functionTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	// Write the function table.
 	for(const FunctionBinding& binding : functionBindings)
@@ -495,7 +496,7 @@ bool HqProgramWriter::Serialize(
 			return false;
 		}
 
-		// Write the function's native switch into the program file.
+		// Write the function's native switch into the module file.
 		result = HqSerializerWriteBool(hSerializer, binding.pFunction->isNative);
 		if(result != HQ_SUCCESS)
 		{
@@ -513,7 +514,7 @@ bool HqProgramWriter::Serialize(
 			return false;
 		}
 
-		// Write the function's parameter count into the program file.
+		// Write the function's parameter count into the module file.
 		result = HqSerializerWriteUint16(hSerializer, binding.pFunction->numParameters);
 		if(result != HQ_SUCCESS)
 		{
@@ -531,7 +532,7 @@ bool HqProgramWriter::Serialize(
 			return false;
 		}
 
-		// Write the function's return value count into the program file.
+		// Write the function's return value count into the module file.
 		result = HqSerializerWriteUint16(hSerializer, binding.pFunction->numReturnValues);
 		if(result != HQ_SUCCESS)
 		{
@@ -551,7 +552,7 @@ bool HqProgramWriter::Serialize(
 
 		if(!binding.pFunction->isNative)
 		{
-			// Write the function's offset into the program file.
+			// Write the function's offset into the module file.
 			result = HqSerializerWriteUint32(hSerializer, binding.offset);
 			if(result != HQ_SUCCESS)
 			{
@@ -569,7 +570,7 @@ bool HqProgramWriter::Serialize(
 				return false;
 			}
 
-			// Write the function's length in bytes into the program file.
+			// Write the function's length in bytes into the module file.
 			result = HqSerializerWriteUint32(hSerializer, binding.length);
 			if(result != HQ_SUCCESS)
 			{
@@ -619,7 +620,7 @@ bool HqProgramWriter::Serialize(
 
 			const size_t guardedBlockCount = uint32_t(binding.pFunction->guardedBlocks.size());
 
-			// Write the function's guarded block count into the program file.
+			// Write the function's guarded block count into the module file.
 			result = HqSerializerWriteUint32(hSerializer, uint32_t(guardedBlockCount));
 			if(result != HQ_SUCCESS)
 			{
@@ -806,7 +807,7 @@ bool HqProgramWriter::Serialize(
 		}
 	}
 
-	programHeader.bytecode.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+	moduleHeader.bytecode.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
 	if(bytecode.size() > 0)
 	{
@@ -819,7 +820,7 @@ bool HqProgramWriter::Serialize(
 			HqReportMessage(
 				hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to write program bytecode buffer: error=\"%s\"",
+				"Failed to write module bytecode buffer: error=\"%s\"",
 				errorString
 			);
 
@@ -856,7 +857,7 @@ bool HqProgramWriter::Serialize(
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write program version header data (2nd pass): error=\"%s\"",
+			"Failed to write module version header data (2nd pass): error=\"%s\"",
 			errorString
 		);
 
@@ -884,8 +885,8 @@ bool HqProgramWriter::Serialize(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriter::LookupFunction(
-	HqProgramWriterHandle hWriter,
+int HqModuleWriter::LookupFunction(
+	HqModuleWriterHandle hWriter,
 	const char* const functionSignature,
 	HqFunctionData** const ppOutFunction
 )
@@ -919,9 +920,9 @@ int HqProgramWriter::LookupFunction(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-uint32_t HqProgramWriter::AddString(HqProgramWriterHandle hWriter, HqString* const pValue)
+uint32_t HqModuleWriter::AddString(HqModuleWriterHandle hWriter, HqString* const pValue)
 {
-	assert(hWriter != HQ_PROGRAM_WRITER_HANDLE_NULL);
+	assert(hWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 	assert(pValue != nullptr);
 
 	auto kv = hWriter->stringIndexMap.find(pValue);
@@ -942,14 +943,14 @@ uint32_t HqProgramWriter::AddString(HqProgramWriterHandle hWriter, HqString* con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* HqProgramWriter::operator new(const size_t sizeInBytes)
+void* HqModuleWriter::operator new(const size_t sizeInBytes)
 {
 	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqProgramWriter::operator delete(void* const pObject)
+void HqModuleWriter::operator delete(void* const pObject)
 {
 	HqMemFree(pObject);
 }

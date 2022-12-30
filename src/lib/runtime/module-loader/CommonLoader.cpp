@@ -25,7 +25,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramCommonLoader::CheckMagicNumber(const HqFileHeader& fileHeader)
+bool HqModuleCommonLoader::CheckMagicNumber(const HqFileHeader& fileHeader)
 {
 	return fileHeader.magicNumber[0] == 'H'
 		|| fileHeader.magicNumber[1] == 'Q'
@@ -36,7 +36,7 @@ bool HqProgramCommonLoader::CheckMagicNumber(const HqFileHeader& fileHeader)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqString* HqProgramCommonLoader::ReadString(
+HqString* HqModuleCommonLoader::ReadString(
 	HqSerializerHandle hSerializer,
 	HqReportHandle hReport
 )

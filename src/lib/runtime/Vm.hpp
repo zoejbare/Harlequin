@@ -25,14 +25,13 @@
 #include "Function.hpp"
 #include "GarbageCollector.hpp"
 #include "OpDecl.hpp"
-#include "Program.hpp"
+#include "Module.hpp"
 #include "ScriptObject.hpp"
 #include "Value.hpp"
 
 #include "../base/Mutex.hpp"
 #include "../base/Thread.hpp"
 
-#include "../common/Dependency.hpp"
 #include "../common/HashMap.hpp"
 #include "../common/Report.hpp"
 
@@ -67,7 +66,7 @@ struct HqVm
 
 	static int SetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, HqString* const pVariableName);
 
-	static HqProgramHandle GetProgram(HqVmHandle hVm, HqString* const pProgramName, int* const pOutResult);
+	static HqModuleHandle GetModule(HqVmHandle hVm, HqString* const pModuleName, int* const pOutResult);
 	static HqFunctionHandle GetFunction(HqVmHandle hVm, HqString* const pFunctionSignature, int* const pOutResult);
 	static HqValueHandle GetGlobalVariable(HqVmHandle hVm, HqString* const pVariableName, int* const pOutResult);
 	static HqScriptObject* GetObjectSchema(HqVmHandle hVm, HqString* const pTypeName, int* const pOutResult);
@@ -90,7 +89,7 @@ struct HqVm
 	OpCodeArray opCodes;
 	EmbeddedExceptionMap embeddedExceptions;
 
-	HqProgram::StringToHandleMap programs;
+	HqModule::StringToHandleMap modules;
 	HqFunction::StringToHandleMap functions;
 	HqValue::StringToHandleMap globals;
 	HqScriptObject::StringToPtrMap objectSchemas;

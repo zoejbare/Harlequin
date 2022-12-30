@@ -24,7 +24,7 @@
 #include "../common/OpCodeEnum.hpp"
 
 #include "Execution.hpp"
-#include "Program.hpp"
+#include "Module.hpp"
 #include "ScriptObject.hpp"
 #include "Vm.hpp"
 #include "Value.hpp"
@@ -127,22 +127,22 @@ int HqVmGetReportHandle(HqVmHandle hVm, HqReportHandle* phOutReport)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqVmGetProgram(HqVmHandle hVm, HqProgramHandle* phOutProgram, const char* programName)
+int HqVmGetModule(HqVmHandle hVm, HqModuleHandle* phOutModule, const char* moduleName)
 {
-	if(!hVm || !phOutProgram || *phOutProgram || !programName || programName[0] == '\0')
+	if(!hVm || !phOutModule || *phOutModule || !moduleName || moduleName[0] == '\0')
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
 	// Create a string object since we need that to look up into the map.
-	HqString* const pName = HqString::Create(programName);
+	HqString* const pName = HqString::Create(moduleName);
 	if(!pName)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	int result;
-	(*phOutProgram) = HqVm::GetProgram(hVm, pName, &result);
+	(*phOutModule) = HqVm::GetModule(hVm, pName, &result);
 
 	// We no longer need the string object.
 	HqString::Release(pName);
@@ -152,30 +152,30 @@ int HqVmGetProgram(HqVmHandle hVm, HqProgramHandle* phOutProgram, const char* pr
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqVmGetProgramCount(HqVmHandle hVm, size_t* pOutCount)
+int HqVmGetModuleCount(HqVmHandle hVm, size_t* pOutCount)
 {
 	if(!hVm || !pOutCount)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hVm->programs.count;
+	(*pOutCount) = hVm->modules.count;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqVmListPrograms(HqVmHandle hVm, HqCallbackIterateProgram onIterateFn, void* pUserData)
+int HqVmListModules(HqVmHandle hVm, HqCallbackIterateModule onIterateFn, void* pUserData)
 {
 	if(!hVm || !onIterateFn)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Call the callback for each program we currently have loaded.
-	HqProgram::StringToHandleMap::Iterator iter;
-	while(HqProgram::StringToHandleMap::IterateNext(hVm->programs, iter))
+	// Call the callback for each module we currently have loaded.
+	HqModule::StringToHandleMap::Iterator iter;
+	while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
 	{
 		if(!onIterateFn(pUserData, iter.pData->value))
 		{
@@ -369,56 +369,56 @@ int HqVmListObjectSchemas(HqVmHandle hVm, HqCallbackIterateString onIterateFn, v
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqVmLoadProgram(
+int HqVmLoadModule(
 	HqVmHandle hVm,
-	const char* const programName,
-	const void* const pProgramFileData,
-	const size_t programFileSize
+	const char* const moduleName,
+	const void* const pModuleFileData,
+	const size_t moduleFileSize
 )
 {
-	if(!hVm || !programName || programName[0] == '\0' || !pProgramFileData || programFileSize == 0)
+	if(!hVm || !moduleName || moduleName[0] == '\0' || !pModuleFileData || moduleFileSize == 0)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Create a string to be the key in the program map.
-	HqString* const pProgramName = HqString::Create(programName);
-	if(!pProgramName)
+	// Create a string to be the key in the module map.
+	HqString* const pModuleName = HqString::Create(moduleName);
+	if(!pModuleName)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	// Check if a program with this name has already been loaded.
-	if(HqProgram::StringToHandleMap::Contains(hVm->programs, pProgramName))
+	// Check if a module with this name has already been loaded.
+	if(HqModule::StringToHandleMap::Contains(hVm->modules, pModuleName))
 	{
-		HqString::Release(pProgramName);
+		HqString::Release(pModuleName);
 		return HQ_ERROR_KEY_ALREADY_EXISTS;
 	}
 
-	// Attempt to load the program file.
-	HqProgramHandle hProgram = HqProgram::Create(hVm, pProgramName, pProgramFileData, programFileSize);
-	if(!hProgram)
+	// Attempt to load the module file.
+	HqModuleHandle hModule = HqModule::Create(hVm, pModuleName, pModuleFileData, moduleFileSize);
+	if(!hModule)
 	{
-		HqString::Release(pProgramName);
+		HqString::Release(pModuleName);
 		return HQ_ERROR_FAILED_TO_OPEN_FILE;
 	}
 
-	// Map the program inside the VM state.
-	HqProgram::StringToHandleMap::Insert(hVm->programs, pProgramName, hProgram);
+	// Map the module inside the VM state.
+	HqModule::StringToHandleMap::Insert(hVm->modules, pModuleName, hModule);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
+int HqVmInitializeModules(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 {
 	if(!hVm || !phOutExec || (*phOutExec) != HQ_EXECUTION_HANDLE_NULL)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Create an execution context for running the initialize function for each program.
+	// Create an execution context for running the initialize function for each module.
 	HqExecutionHandle hExec = HqExecution::Create(hVm);
 	if(!hExec)
 	{
@@ -427,15 +427,15 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 
 	bool scriptError = false;
 
-	HqProgram::StringToHandleMap::Iterator iter;
-	while(HqProgram::StringToHandleMap::IterateNext(hVm->programs, iter))
+	HqModule::StringToHandleMap::Iterator iter;
+	while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
 	{
-		HqProgramHandle hProgram = iter.pData->value;
+		HqModuleHandle hModule = iter.pData->value;
 
-		if(hProgram->hInitFunction)
+		if(hModule->hInitFunction)
 		{
-			// Initialize the execution context with the current program's initialize function (this should never fail).
-			const int execInitResult = HqExecution::Initialize(hExec, hProgram->hInitFunction);
+			// Initialize the execution context with the current module's initialize function (this should never fail).
+			const int execInitResult = HqExecution::Initialize(hExec, hModule->hInitFunction);
 			if(execInitResult == HQ_ERROR_BAD_ALLOCATION)
 			{
 				// We ran out of memory.
@@ -467,10 +467,10 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 				break;
 			}
 
-			// Now that we've called the program's initializer function, we won't be calling it again,
+			// Now that we've called the module's initializer function, we won't be calling it again,
 			// so we can dispose of it.
-			HqFunction::Dispose(hProgram->hInitFunction);
-			hProgram->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
+			HqFunction::Dispose(hModule->hInitFunction);
+			hModule->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
 		}
 	}
 
@@ -488,58 +488,58 @@ int HqVmInitializePrograms(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramGetVm(HqProgramHandle hProgram, HqVmHandle* phOutVm)
+int HqModuleGetVm(HqModuleHandle hModule, HqVmHandle* phOutVm)
 {
-	if(!hProgram || !phOutVm)
+	if(!hModule || !phOutVm)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutVm) = hProgram->hVm;
+	(*phOutVm) = hModule->hVm;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramGetName(HqProgramHandle hProgram, const char** pOutName)
+int HqModuleGetName(HqModuleHandle hModule, const char** pOutName)
 {
-	if(!hProgram || !pOutName)
+	if(!hModule || !pOutName)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutName) = hProgram->pName->data;
+	(*pOutName) = hModule->pName->data;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramGetFunctionCount(HqProgramHandle hProgram, size_t* pOutCount)
+int HqModuleGetFunctionCount(HqModuleHandle hModule, size_t* pOutCount)
 {
-	if(!hProgram || !pOutCount)
+	if(!hModule || !pOutCount)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hProgram->functions.count;
+	(*pOutCount) = hModule->functions.count;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramListFunctions(HqProgramHandle hProgram, HqCallbackIterateString onIterateFn, void* const pUserData)
+int HqModuleListFunctions(HqModuleHandle hModule, HqCallbackIterateString onIterateFn, void* const pUserData)
 {
-	if(!hProgram || !onIterateFn)
+	if(!hModule || !onIterateFn)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Call the callback for each function signature in the program.
+	// Call the callback for each function signature in the module.
 	HqFunction::StringToBoolMap::Iterator iter;
-	while(HqFunction::StringToBoolMap::IterateNext(hProgram->functions, iter))
+	while(HqFunction::StringToBoolMap::IterateNext(hModule->functions, iter))
 	{
 		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
@@ -552,35 +552,35 @@ int HqProgramListFunctions(HqProgramHandle hProgram, HqCallbackIterateString onI
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramGetStringCount(HqProgramHandle hProgram, size_t* pOutCount)
+int HqModuleGetStringCount(HqModuleHandle hModule, size_t* pOutCount)
 {
-	if(!hProgram || !pOutCount)
+	if(!hModule || !pOutCount)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hProgram->strings.count;
+	(*pOutCount) = hModule->strings.count;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramListStrings(
-	HqProgramHandle hProgram,
+int HqModuleListStrings(
+	HqModuleHandle hModule,
 	HqCallbackIterateStringWithIndex onIterateFn,
 	void* const pUserData
 )
 {
-	if(!hProgram || !onIterateFn)
+	if(!hModule || !onIterateFn)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Call the callback for each string in the program.
-	for(size_t i = 0; i < hProgram->strings.count; ++i)
+	// Call the callback for each string in the module.
+	for(size_t i = 0; i < hModule->strings.count; ++i)
 	{
-		HqString* const pString = hProgram->strings.pData[i];
+		HqString* const pString = hModule->strings.pData[i];
 
 		if(!onIterateFn(pUserData, pString->data, i))
 		{
@@ -593,34 +593,34 @@ int HqProgramListStrings(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramGetGlobalVariableCount(HqProgramHandle hProgram, size_t* pOutCount)
+int HqModuleGetGlobalVariableCount(HqModuleHandle hModule, size_t* pOutCount)
 {
-	if(!hProgram || !pOutCount)
+	if(!hModule || !pOutCount)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutCount) = hProgram->globals.count;
+	(*pOutCount) = hModule->globals.count;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramListGlobalVariables(
-	HqProgramHandle hProgram,
+int HqModuleListGlobalVariables(
+	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
 	void* const pUserData
 )
 {
-	if(!hProgram || !onIterateFn)
+	if(!hModule || !onIterateFn)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Call the callback for each global variable name in the program.
+	// Call the callback for each global variable name in the module.
 	HqValue::StringToBoolMap::Iterator iter;
-	while(HqValue::StringToBoolMap::IterateNext(hProgram->globals, iter))
+	while(HqValue::StringToBoolMap::IterateNext(hModule->globals, iter))
 	{
 		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
@@ -633,16 +633,16 @@ int HqProgramListGlobalVariables(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramListDependencies(HqProgramHandle hProgram, HqCallbackIterateString onIterateFn, void* const pUserData)
+int HqModuleListDependencies(HqModuleHandle hModule, HqCallbackIterateString onIterateFn, void* const pUserData)
 {
-	if(!hProgram || !onIterateFn)
+	if(!hModule || !onIterateFn)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Call the callback for each dependency name referenced by the program.
+	// Call the callback for each dependency name referenced by the module.
 	HqValue::StringToBoolMap::Iterator iter;
-	while(HqValue::StringToBoolMap::IterateNext(hProgram->dependencies, iter))
+	while(HqValue::StringToBoolMap::IterateNext(hModule->dependencies, iter))
 	{
 		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
@@ -655,23 +655,23 @@ int HqProgramListDependencies(HqProgramHandle hProgram, HqCallbackIterateString 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramListUnloadedDependencies(
-	HqProgramHandle hProgram,
+int HqModuleListUnloadedDependencies(
+	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
 	void* const pUserData
 )
 {
-	if(!hProgram || !onIterateFn)
+	if(!hModule || !onIterateFn)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Call the callback for only the dependency names referenced by the program that have not been loaded.
+	// Call the callback for only the dependency names referenced by the module that have not been loaded.
 	HqValue::StringToBoolMap::Iterator iter;
-	while(HqValue::StringToBoolMap::IterateNext(hProgram->dependencies, iter))
+	while(HqValue::StringToBoolMap::IterateNext(hModule->dependencies, iter))
 	{
-		// Check the VM to see if the dependent program has been loaded.
-		if(!HqProgram::StringToHandleMap::Contains(hProgram->hVm->programs, iter.pData->key))
+		// Check the VM to see if the dependent module has been loaded.
+		if(!HqModule::StringToHandleMap::Contains(hModule->hVm->modules, iter.pData->key))
 		{
 			if(!onIterateFn(pUserData, iter.pData->key->data))
 			{
@@ -685,14 +685,14 @@ int HqProgramListUnloadedDependencies(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqFunctionGetProgram(HqFunctionHandle hFunction, HqProgramHandle* phOutProgram)
+int HqFunctionGetModule(HqFunctionHandle hFunction, HqModuleHandle* phOutModule)
 {
-	if(!hFunction || !phOutProgram)
+	if(!hFunction || !phOutModule)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutProgram) = hFunction->hProgram;
+	(*phOutModule) = hFunction->hModule;
 
 	return HQ_SUCCESS;
 }
@@ -846,21 +846,21 @@ int HqFunctionDisassemble(HqFunctionHandle hFunction, HqCallbackOpDisasm onDisas
 
 	HqDisassemble disasm;
 
-	disasm.hProgram = hFunction->hProgram;
+	disasm.hModule = hFunction->hModule;
 	disasm.onDisasmFn = onDisasmFn;
 	disasm.pUserData = pUserData;
 
-	HqDecoder::Initialize(disasm.decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
+	HqDecoder::Initialize(disasm.decoder, hFunction->hModule, hFunction->bytecodeOffsetStart);
 
 	// Iterate through each instruction.
 	for(;;)
 	{
-		const uintptr_t offset = uintptr_t(disasm.decoder.ip - hFunction->hProgram->code.pData);
+		const uintptr_t offset = uintptr_t(disasm.decoder.ip - hFunction->hModule->code.pData);
 		const uint8_t opCode = HqDecoder::LoadUint8(disasm.decoder);
 
 		disasm.opcodeOffset = offset;
 
-		HqVm::DisassembleOpCode(disasm.hProgram->hVm, disasm, opCode);
+		HqVm::DisassembleOpCode(disasm.hModule->hVm, disasm, opCode);
 
 		if(opCode == HQ_OP_CODE_RETURN)
 		{
@@ -1254,7 +1254,7 @@ int HqFrameGetBytecodeOffset(HqFrameHandle hFrame, uint32_t* pOutOffset)
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	(*pOutOffset) = uint32_t(hFrame->decoder.cachedIp - hFrame->hFunction->hProgram->code.pData);
+	(*pOutOffset) = uint32_t(hFrame->decoder.cachedIp - hFrame->hFunction->hModule->code.pData);
 
 	return HQ_SUCCESS;
 }

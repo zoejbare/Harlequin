@@ -20,20 +20,20 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../Program.hpp"
+#include "../Module.hpp"
 #include "../ScriptObject.hpp"
 
-#include "../../common/program-format/FileHeader.hpp"
-#include "../../common/program-format/ProgramHeader.hpp"
+#include "../../common/module-format/FileHeader.hpp"
+#include "../../common/module-format/ModuleHeader.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class HqProgramLoader
+class HqModuleLoader
 {
 public:
 
 	static bool Load(
-		HqProgramHandle hProgram,
+		HqModuleHandle hModule,
 		HqVmHandle hVm,
 		HqSerializerHandle hSerializer
 	);
@@ -48,18 +48,18 @@ private:
 		HqString::StlCompare
 	> StringResources;
 
-	HqProgramLoader(
-		HqProgramHandle hProgram,
+	HqModuleLoader(
+		HqModuleHandle hModule,
 		HqVmHandle hVm,
 		HqSerializerHandle hSerializer
 	);
-	~HqProgramLoader();
+	~HqModuleLoader();
 
 	bool prv_loadFile();
 	void prv_finalize();
 
-	bool prv_readProgramHeader();
-	bool prv_validateProgramHeader();
+	bool prv_readModuleHeader();
+	bool prv_validateModuleHeader();
 
 	bool prv_readDependencyTable();
 	bool prv_readObjectTable();
@@ -76,12 +76,12 @@ private:
 	void prv_trackGlobalValue(HqString*, HqValueHandle);
 	void prv_trackFunction(HqString*, HqFunctionHandle);
 
-	HqProgramHandle m_hProgram;
+	HqModuleHandle m_hModule;
 	HqVmHandle m_hVm;
 	HqSerializerHandle m_hSerializer;
 	HqReportHandle m_hReport;
 
-	HqProgramHeader m_programHeader;
+	HqModuleHeader m_moduleHeader;
 
 	StringResources m_strings;
 
@@ -92,7 +92,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqProgramLoader::prv_trackString(HqString* const pString)
+inline void HqModuleLoader::prv_trackString(HqString* const pString)
 {
 	HqString::AddRef(pString);
 	StringResources::Insert(m_strings, pString, false);
@@ -100,7 +100,7 @@ inline void HqProgramLoader::prv_trackString(HqString* const pString)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqProgramLoader::prv_trackObjectSchema(HqString* const pTypeName, HqScriptObject* const pSchema)
+inline void HqModuleLoader::prv_trackObjectSchema(HqString* const pTypeName, HqScriptObject* const pSchema)
 {
 	HqString::AddRef(pTypeName);
 	HqScriptObject::StringToPtrMap::Insert(m_objectSchemas, pTypeName, pSchema);
@@ -108,7 +108,7 @@ inline void HqProgramLoader::prv_trackObjectSchema(HqString* const pTypeName, Hq
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqProgramLoader::prv_trackGlobalValue(HqString* const pGlobalName, HqValueHandle hValue)
+inline void HqModuleLoader::prv_trackGlobalValue(HqString* const pGlobalName, HqValueHandle hValue)
 {
 	HqString::AddRef(pGlobalName);
 	HqValue::StringToHandleMap::Insert(m_globalValues, pGlobalName, hValue);
@@ -116,7 +116,7 @@ inline void HqProgramLoader::prv_trackGlobalValue(HqString* const pGlobalName, H
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqProgramLoader::prv_trackFunction(HqString* const pSignature, HqFunctionHandle hFunction)
+inline void HqModuleLoader::prv_trackFunction(HqString* const pSignature, HqFunctionHandle hFunction)
 {
 	HqString::AddRef(pSignature);
 	HqFunction::StringToHandleMap::Insert(m_functions, pSignature, hFunction);

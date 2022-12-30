@@ -17,7 +17,7 @@
 //
 
 #include "Frame.hpp"
-#include "Program.hpp"
+#include "Module.hpp"
 #include "Vm.hpp"
 
 #include "../base/Mutex.hpp"
@@ -82,7 +82,7 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 			HqValue::StringToHandleMap::Insert(hFrame->locals, pKey, hValue);
 		}
 
-		HqDecoder::Initialize(hFrame->decoder, hFunction->hProgram, hFunction->bytecodeOffsetStart);
+		HqDecoder::Initialize(hFrame->decoder, hFunction->hModule, hFunction->bytecodeOffsetStart);
 
 		// The frame is now active, so we need to assume it can have GC data references at any time.
 		hFrame->active = true;

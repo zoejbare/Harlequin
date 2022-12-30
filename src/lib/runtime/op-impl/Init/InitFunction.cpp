@@ -21,7 +21,7 @@
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Frame.hpp"
-#include "../../Program.hpp"
+#include "../../Module.hpp"
 #include "../../Vm.hpp"
 
 #include <stdio.h>
@@ -45,7 +45,7 @@ extern "C" void OpCodeExec_InitFunction(HqExecutionHandle hExec)
 	const uint32_t registerIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqString* const pFuncName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	HqString* const pFuncName = HqModule::GetString(hExec->hCurrentFrame->hFunction->hModule, stringIndex, &result);
 	if(pFuncName)
 	{
 		HqFunctionHandle hFunction = HqVm::GetFunction(hExec->hVm, pFuncName, &result);

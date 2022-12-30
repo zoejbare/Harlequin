@@ -17,7 +17,7 @@
 //
 
 #include "Function.hpp"
-#include "Program.hpp"
+#include "Module.hpp"
 
 #include <assert.h>
 #include <stdio.h>
@@ -25,20 +25,20 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 HqFunctionHandle HqFunction::CreateInit(
-	HqProgramHandle hProgram,
+	HqModuleHandle hModule,
 	const uint32_t bytecodeLength
 )
 {
-	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(hModule != HQ_MODULE_HANDLE_NULL);
 	assert(bytecodeLength > 0);
 
 	HqFunction* const pOutput = new HqFunction();
 	assert(pOutput != HQ_FUNCTION_HANDLE_NULL);
 
 	char funcName[512];
-	snprintf(funcName, sizeof(funcName), "void `.init-program-'%s'()", hProgram->pName->data);
+	snprintf(funcName, sizeof(funcName), "void `.init-module-'%s'()", hModule->pName->data);
 
-	pOutput->hProgram = hProgram;
+	pOutput->hModule = hModule;
 	pOutput->pSignature = HqString::Create(funcName);
 	pOutput->bytecodeOffsetStart = 0;
 	pOutput->bytecodeOffsetEnd = bytecodeLength;
@@ -54,7 +54,7 @@ HqFunctionHandle HqFunction::CreateInit(
 //----------------------------------------------------------------------------------------------------------------------
 
 HqFunctionHandle HqFunction::CreateScript(
-	HqProgramHandle hProgram,
+	HqModuleHandle hModule,
 	HqString* const pSignature,
 	StringToBoolMap& locals,
 	HqGuardedBlock::Array& guardedBlocks,
@@ -64,13 +64,13 @@ HqFunctionHandle HqFunction::CreateScript(
 	const uint16_t numReturnValues
 )
 {
-	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(hModule != HQ_MODULE_HANDLE_NULL);
 	assert(pSignature != nullptr);
 
 	HqFunction* const pOutput = new HqFunction();
 	assert(pOutput != HQ_FUNCTION_HANDLE_NULL);
 
-	pOutput->hProgram = hProgram;
+	pOutput->hModule = hModule;
 	pOutput->pSignature = pSignature;
 	pOutput->locals = locals;
 	pOutput->guardedBlocks = guardedBlocks;
@@ -101,13 +101,13 @@ HqFunctionHandle HqFunction::CreateScript(
 //----------------------------------------------------------------------------------------------------------------------
 
 HqFunctionHandle HqFunction::CreateNative(
-	HqProgramHandle hProgram,
+	HqModuleHandle hModule,
 	HqString* const pSignature,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
 {
-	assert(hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(hModule != HQ_MODULE_HANDLE_NULL);
 	assert(pSignature != nullptr);
 
 	HqFunction* const pOutput = new HqFunction();
@@ -116,7 +116,7 @@ HqFunctionHandle HqFunction::CreateNative(
 		return HQ_FUNCTION_HANDLE_NULL;
 	}
 
-	pOutput->hProgram = hProgram;
+	pOutput->hModule = hModule;
 	pOutput->pSignature = pSignature;
 	pOutput->nativeFn = nullptr; // The callback will be provided externally.
 	pOutput->numParameters = numParameters;
@@ -147,7 +147,7 @@ HqFunctionHandle HqFunction::CreateBuiltIn(
 		return HQ_FUNCTION_HANDLE_NULL;
 	}
 
-	pOutput->hProgram = HQ_PROGRAM_HANDLE_NULL;
+	pOutput->hModule = HQ_MODULE_HANDLE_NULL;
 	pOutput->pSignature = pSignature;
 	pOutput->nativeFn = nativeFn;
 	pOutput->numParameters = numParameters;
@@ -195,8 +195,8 @@ HqVmHandle HqFunction::GetVm(HqFunctionHandle hFunction)
 {
 	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
-	return hFunction->hProgram
-		? hFunction->hProgram->hVm
+	return hFunction->hModule
+		? hFunction->hModule->hVm
 		: HQ_VM_HANDLE_NULL;
 }
 

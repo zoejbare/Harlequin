@@ -20,71 +20,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "FunctionData.hpp"
-#include "ObjectData.hpp"
-
-#include "../base/String.hpp"
-#include "../common/Array.hpp"
-
-#include <deque>
-#include <unordered_map>
+#include <stdint.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqProgramWriter
+struct HqModuleHeader
 {
-	static HqProgramWriterHandle Create();
-	static void Dispose(HqProgramWriterHandle hWriter);
-	static bool Serialize(
-		HqProgramWriterHandle hProgramWriter,
-		HqCompilerHandle hCompiler,
-		HqSerializerHandle hSerializer
-	);
+	struct Section
+	{
+		uint32_t offset;
+		uint32_t length;
+	};
 
-	static int LookupFunction(
-		HqProgramWriterHandle hWriter,
-		const char* const functionSignature,
-		HqFunctionData** const ppOutFunction
-	);
+	Section dependencyTable;
+	Section objectTable;
+	Section stringTable;
+	Section globalTable;
+	Section functionTable;
+	Section extensionTable;
+	Section bytecode;
 
-	static uint32_t AddString(HqProgramWriterHandle hWriter, HqString* const pString);
-
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
-
-	typedef std::unordered_map<
-		HqString*,
-		bool,
-		HqString::StlHash,
-		HqString::StlCompare
-	> DependencySet;
-
-	typedef std::unordered_set<
-		HqString*,
-		HqString::StlHash,
-		HqString::StlCompare
-	> GlobalValueSet;
-
-	typedef std::unordered_map<
-		HqString*,
-		uint32_t,
-		HqString::StlHash,
-		HqString::StlCompare
-	> StringIndexMap;
-
-	DependencySet dependencies;
-	GlobalValueSet globals;
-	HqFunctionData::StringToFunctionMap functions;
-	HqObjectData::StringToObjectMap objectTypes;
-
-	HqFunctionData::Bytecode initBytecode;
-
-	StringIndexMap stringIndexMap;
-	std::deque<HqString*> strings;
-
-	uint32_t nullIndex;
-	uint32_t boolTrueIndex;
-	uint32_t boolFalseIndex;
+	uint32_t initFunctionLength;
+	uint32_t headerEndPosition;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

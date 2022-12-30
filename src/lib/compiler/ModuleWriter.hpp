@@ -20,55 +20,71 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "Function.hpp"
-#include "Value.hpp"
+#include "FunctionData.hpp"
+#include "ObjectData.hpp"
 
 #include "../base/String.hpp"
+#include "../common/Array.hpp"
 
-#include "../common/ByteHelper.hpp"
-#include "../common/HashMap.hpp"
-#include "../common/Stack.hpp"
+#include <deque>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqProgram
+struct HqModuleWriter
 {
-	typedef HqHashMap<
-		HqString*,
-		HqProgramHandle,
-		HqString::StlHash,
-		HqString::StlCompare
-	> StringToHandleMap;
-
-	typedef HqStack<HqProgramHandle> HandleStack;
-	typedef HqArray<HqString*> StringArray;
-
-	static HqProgramHandle Create(HqVmHandle hVm, HqString* const pProgramName, const char* const filePath);
-	static HqProgramHandle Create(
-		HqVmHandle hVm,
-		HqString* const pProgramName,
-		const void* const pFileData,
-		const size_t fileLength
+	static HqModuleWriterHandle Create();
+	static void Dispose(HqModuleWriterHandle hWriter);
+	static bool Serialize(
+		HqModuleWriterHandle hModuleWriter,
+		HqCompilerHandle hCompiler,
+		HqSerializerHandle hSerializer
 	);
-	static void Dispose(HqProgramHandle hProgram);
 
-	static HqString* GetString(HqProgramHandle hProgram, const uint32_t index, int* const pOutResult);
+	static int LookupFunction(
+		HqModuleWriterHandle hWriter,
+		const char* const functionSignature,
+		HqFunctionData** const ppOutFunction
+	);
+
+	static uint32_t AddString(HqModuleWriterHandle hWriter, HqString* const pString);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	HqValue::StringToBoolMap dependencies;
-	HqFunction::StringToBoolMap functions;
-	HqValue::StringToBoolMap objectSchemas;
-	HqValue::StringToBoolMap globals;
+	typedef std::unordered_map<
+		HqString*,
+		bool,
+		HqString::StlHash,
+		HqString::StlCompare
+	> DependencySet;
 
-	StringArray strings;
-	HqByteHelper::Array code;
+	typedef std::unordered_set<
+		HqString*,
+		HqString::StlHash,
+		HqString::StlCompare
+	> GlobalValueSet;
 
-	HqVmHandle hVm;
-	HqFunctionHandle hInitFunction;
+	typedef std::unordered_map<
+		HqString*,
+		uint32_t,
+		HqString::StlHash,
+		HqString::StlCompare
+	> StringIndexMap;
 
-	HqString* pName;
+	DependencySet dependencies;
+	GlobalValueSet globals;
+	HqFunctionData::StringToFunctionMap functions;
+	HqObjectData::StringToObjectMap objectTypes;
+
+	HqFunctionData::Bytecode initBytecode;
+
+	StringIndexMap stringIndexMap;
+	std::deque<HqString*> strings;
+
+	uint32_t nullIndex;
+	uint32_t boolTrueIndex;
+	uint32_t boolFalseIndex;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

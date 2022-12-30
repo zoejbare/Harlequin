@@ -21,7 +21,7 @@
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Function.hpp"
-#include "../../Program.hpp"
+#include "../../Module.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -46,7 +46,7 @@ extern "C" void OpCodeExec_PullLocal(HqExecutionHandle hExec)
 	const uint32_t stringIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Get the constant containing the name of the variable.
-	HqString* const pVarName = HqProgram::GetString(hExec->hCurrentFrame->hFunction->hProgram, stringIndex, &result);
+	HqString* const pVarName = HqModule::GetString(hExec->hCurrentFrame->hFunction->hModule, stringIndex, &result);
 	if(pVarName)
 	{
 		// Load the value from the variable.

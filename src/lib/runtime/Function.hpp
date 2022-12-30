@@ -30,7 +30,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqProgram;
+struct HqModule;
 
 struct HqFunction
 {
@@ -50,9 +50,9 @@ struct HqFunction
 
 	typedef HqStack<HqFunctionHandle> HandleStack;
 
-	static HqFunctionHandle CreateInit(HqProgramHandle hProgram, uint32_t bytecodeLength);
+	static HqFunctionHandle CreateInit(HqModuleHandle hModule, uint32_t bytecodeLength);
 	static HqFunctionHandle CreateScript(
-		HqProgramHandle hProgram,
+		HqModuleHandle hModule,
 		HqString* pSignature,
 		StringToBoolMap& locals,
 		HqGuardedBlock::Array& guardedBlocks,
@@ -62,7 +62,7 @@ struct HqFunction
 		uint16_t numReturnValues
 	);
 	static HqFunctionHandle CreateNative(
-		HqProgramHandle hProgram,
+		HqModuleHandle hModule,
 		HqString* pSignature,
 		uint16_t numParameters,
 		uint16_t numReturnValues
@@ -80,7 +80,7 @@ struct HqFunction
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	HqProgramHandle hProgram;
+	HqModuleHandle hModule;
 	HqNativeFunction nativeFn;
 
 	HqString* pSignature;

@@ -16,12 +16,12 @@
 // IN THE SOFTWARE.
 //
 
-#include "ProgramLoader.hpp"
+#include "ModuleLoader.hpp"
 #include "CommonLoader.hpp"
 
 #include "../Decoder.hpp"
 #include "../Function.hpp"
-#include "../Program.hpp"
+#include "../Module.hpp"
 #include "../ScriptObject.hpp"
 #include "../Value.hpp"
 #include "../Vm.hpp"
@@ -34,22 +34,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProgramLoader::HqProgramLoader(
-	HqProgramHandle hProgram,
+HqModuleLoader::HqModuleLoader(
+	HqModuleHandle hModule,
 	HqVmHandle hVm,
 	HqSerializerHandle hSerializer
 )
-	: m_hProgram(hProgram)
+	: m_hModule(hModule)
 	, m_hVm(hVm)
 	, m_hSerializer(hSerializer)
 	, m_hReport(HQ_REPORT_HANDLE_NULL)
-	, m_programHeader()
+	, m_moduleHeader()
 	, m_strings()
 	, m_objectSchemas()
 	, m_globalValues()
 	, m_functions()
 {
-	assert(m_hProgram != HQ_PROGRAM_HANDLE_NULL);
+	assert(m_hModule != HQ_MODULE_HANDLE_NULL);
 	assert(m_hVm != HQ_VM_HANDLE_NULL);
 	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -63,7 +63,7 @@ HqProgramLoader::HqProgramLoader(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProgramLoader::~HqProgramLoader()
+HqModuleLoader::~HqModuleLoader()
 {
 	// Release all tracked strings.
 	{
@@ -122,70 +122,70 @@ HqProgramLoader::~HqProgramLoader()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::Load(
-	HqProgram* const pOutProgram,
+bool HqModuleLoader::Load(
+	HqModule* const pOutModule,
 	HqVmHandle hVm,
 	HqSerializerHandle hSerializer
 )
 {
-	HqProgramLoader loader(pOutProgram, hVm, hSerializer);
+	HqModuleLoader loader(pOutModule, hVm, hSerializer);
 
 	return loader.prv_loadFile();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_loadFile()
+bool HqModuleLoader::prv_loadFile()
 {
-	// Attempt to read the program header.
-	if(!prv_readProgramHeader())
+	// Attempt to read the module header.
+	if(!prv_readModuleHeader())
 	{
 		return false;
 	}
 
-	// Validated the data read into the program header.
-	if(!prv_validateProgramHeader())
+	// Validated the data read into the module header.
+	if(!prv_validateModuleHeader())
 	{
 		return false;
 	}
 
-	// Read the program dependency table.
+	// Read the module dependency table.
 	if(!prv_readDependencyTable())
 	{
 		return false;
 	}
 
-	// Read the object schemas defined in this program.
+	// Read the object schemas defined in this module.
 	if(!prv_readObjectTable())
 	{
 		return false;
 	}
 
-	// Read the program strings.
+	// Read the module strings.
 	if(!prv_readStringTable())
 	{
 		return false;
 	}
 
-	// Read the program globals variables.
+	// Read the module globals variables.
 	if(!prv_readGlobalTable())
 	{
 		return false;
 	}
 
-	// Read the program functions.
+	// Read the module functions.
 	if(!prv_readFunctions())
 	{
 		return false;
 	}
 
-	// Read the program bytecode.
+	// Read the module bytecode.
 	if(!prv_readBytecode())
 	{
 		return false;
 	}
 
-	// Finalize the loaded program data. No load failure past this point or things are likely to fall apart!
+	// Finalize the loaded module data. No load failure past this point or things are likely to fall apart!
 	prv_finalize();
 
 	return true;
@@ -193,7 +193,7 @@ bool HqProgramLoader::prv_loadFile()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqProgramLoader::prv_finalize()
+void HqModuleLoader::prv_finalize()
 {
 	auto endianSwapFunctionBytecode = [](HqFunctionHandle hFunc)
 	{
@@ -201,14 +201,14 @@ void HqProgramLoader::prv_finalize()
 		assert(!hFunc->isNative);
 
 		HqDecoder decoder;
-		HqDecoder::Initialize(decoder, hFunc->hProgram, hFunc->bytecodeOffsetStart);
+		HqDecoder::Initialize(decoder, hFunc->hModule, hFunc->bytecodeOffsetStart);
 
 		// Iterate through each instruction.
 		for(;;)
 		{
 			const uint8_t opCode = HqDecoder::EndianSwapUint8(decoder);
 
-			HqVm::EndianSwapOpCode(hFunc->hProgram->hVm, decoder, opCode);
+			HqVm::EndianSwapOpCode(hFunc->hModule->hVm, decoder, opCode);
 
 			if(opCode == HQ_OP_CODE_RETURN)
 			{
@@ -220,18 +220,18 @@ void HqProgramLoader::prv_finalize()
 
 	const bool needEndianSwap = HqSerializerGetEndianness(m_hSerializer) != HqGetPlatformEndianness();
 
-	if(m_programHeader.initFunctionLength > 0)
+	if(m_moduleHeader.initFunctionLength > 0)
 	{
-		// Create the program's initializer function.
-		m_hProgram->hInitFunction = HqFunction::CreateInit(m_hProgram, m_programHeader.initFunctionLength);
+		// Create the module's initializer function.
+		m_hModule->hInitFunction = HqFunction::CreateInit(m_hModule, m_moduleHeader.initFunctionLength);
 
 		if(needEndianSwap)
 		{
-			endianSwapFunctionBytecode(m_hProgram->hInitFunction);
+			endianSwapFunctionBytecode(m_hModule->hInitFunction);
 		}
 	}
 
-	// Link the object schemas into the program and VM.
+	// Link the object schemas into the module and VM.
 	{
 		// Distribute the object schemas.
 		HqScriptObject::StringToPtrMap::Iterator iter;
@@ -245,16 +245,16 @@ void HqProgramLoader::prv_finalize()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_WARNING,
-					"Class type conflict: program=\"%s\", className=\"%s\"",
-					m_hProgram->pName->data,
+					"Class type conflict: module=\"%s\", className=\"%s\"",
+					m_hModule->pName->data,
 					pTypeName->data
 				);
 				continue;
 			}
 
-			// Track the name of the schema in the program.
+			// Track the name of the schema in the module.
 			HqString::AddRef(pTypeName);
-			HqValue::StringToBoolMap::Insert(m_hProgram->objectSchemas, pTypeName, false);
+			HqValue::StringToBoolMap::Insert(m_hModule->objectSchemas, pTypeName, false);
 
 			// Track the schema itself in the VM.
 			HqString::AddRef(pTypeName);
@@ -279,17 +279,17 @@ void HqProgramLoader::prv_finalize()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_WARNING,
-					"Global variable conflict: program=\"%s\", variableName=\"%s\"",
-					m_hProgram->pName->data,
+					"Global variable conflict: module=\"%s\", variableName=\"%s\"",
+					m_hModule->pName->data,
 					pVarName->data
 				);
 				HqValue::SetAutoMark(hValue, false);
 				continue;
 			}
 
-			// Track the name of the global in the program.
+			// Track the name of the global in the module.
 			HqString::AddRef(pVarName);
-			HqValue::StringToBoolMap::Insert(m_hProgram->globals, pVarName, false);
+			HqValue::StringToBoolMap::Insert(m_hModule->globals, pVarName, false);
 
 			// Add the global to the VM.
 			HqString::AddRef(pVarName);
@@ -314,8 +314,8 @@ void HqProgramLoader::prv_finalize()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Function signature conflict: program=\"%s\", function=\"%s\"",
-					m_hProgram->pName->data,
+					"Function signature conflict: module=\"%s\", function=\"%s\"",
+					m_hModule->pName->data,
 					pSignature->data
 				);
 				HqFunction::Dispose(hFunction);
@@ -323,16 +323,16 @@ void HqProgramLoader::prv_finalize()
 			}
 
 			// Endian swap all script function bytecode when the endianness of
-			// the program file does not match the endianness of the platform.
+			// the module file does not match the endianness of the platform.
 			if(!hFunction->isNative && needEndianSwap)
 			{
 				endianSwapFunctionBytecode(hFunction);
 			}
 
-			// Map the function signature to output program.
+			// Map the function signature to output module.
 			// Only the name is mapped since the function itself will live in the VM.
 			HqString::AddRef(pSignature);
-			HqFunction::StringToBoolMap::Insert(m_hProgram->functions, pSignature, false);
+			HqFunction::StringToBoolMap::Insert(m_hModule->functions, pSignature, false);
 
 			// Map the function in the load data map which will be transferred to the VM.
 			HqString::AddRef(pSignature);
@@ -344,297 +344,297 @@ void HqProgramLoader::prv_finalize()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readProgramHeader()
+bool HqModuleLoader::prv_readModuleHeader()
 {
 	int result = HQ_SUCCESS;
 
 	// Read the dependency table offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.offset);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.dependencyTable.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file dependency table offset: error=\"%s\", program=\"%s\"",
+			"Error reading module file dependency table offset: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the dependency table length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.dependencyTable.length);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.dependencyTable.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file dependency table length: error=\"%s\", program=\"%s\"",
+			"Error reading module file dependency table length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the object table offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.offset);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.objectTable.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file object table offset: error=\"%s\", program=\"%s\"",
+			"Error reading module file object table offset: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the object table length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.objectTable.length);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.objectTable.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file object table length: error=\"%s\", program=\"%s\"",
+			"Error reading module file object table length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the string table offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.stringTable.offset);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.stringTable.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file string table offset: error=\"%s\", program=\"%s\"",
+			"Error reading module file string table offset: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the string table length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.stringTable.length);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.stringTable.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file string table length: error=\"%s\", program=\"%s\"",
+			"Error reading module file string table length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the global table offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.offset);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.globalTable.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file global table offset: error=\"%s\", program=\"%s\"",
+			"Error reading module file global table offset: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the global table length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.globalTable.length);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.globalTable.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file global table length: error=\"%s\", program=\"%s\"",
+			"Error reading module file global table length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the function table offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.offset);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.functionTable.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file function table offset: error=\"%s\", program=\"%s\"",
+			"Error reading module file function table offset: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the function table length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.functionTable.length);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.functionTable.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file function table length: error=\"%s\", program=\"%s\"",
+			"Error reading module file function table length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the extension table offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.offset);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.extensionTable.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file extension table offset: error=\"%s\", program=\"%s\"",
+			"Error reading module file extension table offset: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the extension table length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.extensionTable.length);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.extensionTable.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file extension table length: error=\"%s\", program=\"%s\"",
+			"Error reading module file extension table length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the bytecode offset.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.offset);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.bytecode.offset);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file bytecode offset: error=\"%s\", program=\"%s\"",
+			"Error reading module file bytecode offset: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 
 		return false;
 	}
 
 	// Read the bytecode length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.bytecode.length);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.bytecode.length);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file bytecode length: error=\"%s\", program=\"%s\"",
+			"Error reading module file bytecode length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Read the initializer function bytecode length.
-	result = HqSerializerReadUint32(m_hSerializer, &m_programHeader.initFunctionLength);
+	result = HqSerializerReadUint32(m_hSerializer, &m_moduleHeader.initFunctionLength);
 	if(result != HQ_SUCCESS)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading program file initializer function bytecode length: error=\"%s\", program=\"%s\"",
+			"Error reading module file initializer function bytecode length: error=\"%s\", module=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data
+			m_hModule->pName->data
 		);
 		return false;
 	}
 
 	// Get the offset that indicates the end of the file header.
-	m_programHeader.headerEndPosition = uint32_t(HqSerializerGetStreamPosition(m_hSerializer));
+	m_moduleHeader.headerEndPosition = uint32_t(HqSerializerGetStreamPosition(m_hSerializer));
 
 	return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_validateProgramHeader()
+bool HqModuleLoader::prv_validateModuleHeader()
 {
 	// Verify the dependency table does not start before the end of the header data.
-	if(m_programHeader.dependencyTable.offset < m_programHeader.headerEndPosition)
+	if(m_moduleHeader.dependencyTable.offset < m_moduleHeader.headerEndPosition)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid program file dependency table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
-			m_hProgram->pName->data,
-			m_programHeader.dependencyTable.offset,
-			m_programHeader.headerEndPosition
+			"Invalid module file dependency table offset: module=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			m_hModule->pName->data,
+			m_moduleHeader.dependencyTable.offset,
+			m_moduleHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the dependency table does not start before the end of the header data.
-	if(m_programHeader.objectTable.offset < m_programHeader.headerEndPosition)
+	if(m_moduleHeader.objectTable.offset < m_moduleHeader.headerEndPosition)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid program file object table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
-			m_hProgram->pName->data,
-			m_programHeader.objectTable.offset,
-			m_programHeader.headerEndPosition
+			"Invalid module file object table offset: module=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			m_hModule->pName->data,
+			m_moduleHeader.objectTable.offset,
+			m_moduleHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the constant table does not start before the end of the header data.
-	if(m_programHeader.stringTable.offset < m_programHeader.headerEndPosition)
+	if(m_moduleHeader.stringTable.offset < m_moduleHeader.headerEndPosition)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid program file string table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
-			m_hProgram->pName->data,
-			m_programHeader.stringTable.offset,
-			m_programHeader.headerEndPosition
+			"Invalid module file string table offset: module=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			m_hModule->pName->data,
+			m_moduleHeader.stringTable.offset,
+			m_moduleHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the global table does not start before the end of the header data.
-	if(m_programHeader.globalTable.offset < m_programHeader.headerEndPosition)
+	if(m_moduleHeader.globalTable.offset < m_moduleHeader.headerEndPosition)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid program file global table offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
-			m_hProgram->pName->data,
-			m_programHeader.globalTable.offset,
-			m_programHeader.headerEndPosition
+			"Invalid module file global table offset: module=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			m_hModule->pName->data,
+			m_moduleHeader.globalTable.offset,
+			m_moduleHeader.headerEndPosition
 		);
 		return false;
 	}
 
 	// Verify the bytecode does not start before the end of the header data.
-	if(m_programHeader.bytecode.offset < m_programHeader.headerEndPosition)
+	if(m_moduleHeader.bytecode.offset < m_moduleHeader.headerEndPosition)
 	{
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid program file bytecode offset: program=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
-			m_hProgram->pName->data,
-			m_programHeader.bytecode.offset,
-			m_programHeader.headerEndPosition
+			"Invalid module file bytecode offset: module=\"%s\", offset=%" PRIu32 ", expectedMinimum=%" PRIu32,
+			m_hModule->pName->data,
+			m_moduleHeader.bytecode.offset,
+			m_moduleHeader.headerEndPosition
 		);
 		return false;
 	}
@@ -646,32 +646,32 @@ bool HqProgramLoader::prv_validateProgramHeader()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readDependencyTable()
+bool HqModuleLoader::prv_readDependencyTable()
 {
-	if(m_programHeader.dependencyTable.length > 0)
+	if(m_moduleHeader.dependencyTable.length > 0)
 	{
 		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the dependency table.
-		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.dependencyTable.offset);
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_moduleHeader.dependencyTable.offset);
 		if(result != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				m_hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the dependency table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				"Error setting module file stream position to the offset of the dependency table: error=\"%s\", module=\"%s\", offset=%" PRIu32,
 				HqGetErrorCodeString(result),
-				m_hProgram->pName->data,
-				m_programHeader.dependencyTable.offset
+				m_hModule->pName->data,
+				m_moduleHeader.dependencyTable.offset
 			);
 			return false;
 		}
 
 		// Iterate for each dependency.
-		for(uint32_t index = 0; index < m_programHeader.dependencyTable.length; ++index)
+		for(uint32_t index = 0; index < m_moduleHeader.dependencyTable.length; ++index)
 		{
 			// Read the name of the dependency.
-			HqString* const pDependencyName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pDependencyName = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pDependencyName)
 			{
 				return false;
@@ -679,9 +679,9 @@ bool HqProgramLoader::prv_readDependencyTable()
 
 			prv_trackString(pDependencyName);
 
-			// Add the dependency to the program.
+			// Add the dependency to the module.
 			HqString::AddRef(pDependencyName);
-			HqValue::StringToBoolMap::Insert(m_hProgram->dependencies, pDependencyName, false);
+			HqValue::StringToBoolMap::Insert(m_hModule->dependencies, pDependencyName, false);
 
 			// Release the extra string reference.
 			HqString::Release(pDependencyName);
@@ -693,32 +693,32 @@ bool HqProgramLoader::prv_readDependencyTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readObjectTable()
+bool HqModuleLoader::prv_readObjectTable()
 {
-	if(m_programHeader.objectTable.length > 0)
+	if(m_moduleHeader.objectTable.length > 0)
 	{
 		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the constant table.
-		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.objectTable.offset);
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_moduleHeader.objectTable.offset);
 		if(result != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				m_hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the object table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				"Error setting module file stream position to the offset of the object table: error=\"%s\", module=\"%s\", offset=%" PRIu32,
 				HqGetErrorCodeString(result),
-				m_hProgram->pName->data,
-				m_programHeader.objectTable.offset
+				m_hModule->pName->data,
+				m_moduleHeader.objectTable.offset
 			);
 			return false;
 		}
 
 		// Iterate for each object type.
-		for(uint32_t objectIndex = 0; objectIndex < m_programHeader.objectTable.length; ++objectIndex)
+		for(uint32_t objectIndex = 0; objectIndex < m_moduleHeader.objectTable.length; ++objectIndex)
 		{
 			// Read the name of the global variable.
-			HqString* const pTypeName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pTypeName = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pTypeName)
 			{
 				return false;
@@ -736,10 +736,10 @@ bool HqProgramLoader::prv_readObjectTable()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Error setting program file stream position to the offset of the string table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+					"Error setting module file stream position to the offset of the string table: error=\"%s\", module=\"%s\", offset=%" PRIu32,
 					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
-					m_programHeader.stringTable.offset
+					m_hModule->pName->data,
+					m_moduleHeader.stringTable.offset
 				);
 				return false;
 			}
@@ -750,16 +750,16 @@ bool HqProgramLoader::prv_readObjectTable()
 			// Read the member definitions for this object type.
 			for(uint32_t memberIndex = 0; memberIndex < memberCount; ++memberIndex)
 			{
-				HqString* const pMemberName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+				HqString* const pMemberName = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 				if(!pMemberName)
 				{
 					HqScriptObject::MemberDefinitionMap::Dispose(memberDefinitions);
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Error reading object member name: error=\"%s\", program=\"%s\", objectType=\"%s\", memberIndex=\"%s\"",
+						"Error reading object member name: error=\"%s\", module=\"%s\", objectType=\"%s\", memberIndex=\"%s\"",
 						HqGetErrorCodeString(result),
-						m_hProgram->pName->data,
+						m_hModule->pName->data,
 						pTypeName->data,
 						memberIndex
 					);
@@ -779,9 +779,9 @@ bool HqProgramLoader::prv_readObjectTable()
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Error reading object member type: error=\"%s\", program=\"%s\", objectType=\"%s\", memberName=\"%s\"",
+						"Error reading object member type: error=\"%s\", module=\"%s\", objectType=\"%s\", memberName=\"%s\"",
 						HqGetErrorCodeString(result),
-						m_hProgram->pName->data,
+						m_hModule->pName->data,
 						pTypeName->data,
 						pMemberName->data
 					);
@@ -820,42 +820,42 @@ bool HqProgramLoader::prv_readObjectTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readStringTable()
+bool HqModuleLoader::prv_readStringTable()
 {
-	if(m_programHeader.stringTable.length > 0)
+	if(m_moduleHeader.stringTable.length > 0)
 	{
 		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the string table.
-		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.stringTable.offset);
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_moduleHeader.stringTable.offset);
 		if(result != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				m_hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the string table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				"Error setting module file stream position to the offset of the string table: error=\"%s\", module=\"%s\", offset=%" PRIu32,
 				HqGetErrorCodeString(result),
-				m_hProgram->pName->data,
-				m_programHeader.stringTable.offset
+				m_hModule->pName->data,
+				m_moduleHeader.stringTable.offset
 			);
 			return false;
 		}
 
 		// Make space in the string table.
-		HqProgram::StringArray::Reserve(m_hProgram->strings, m_programHeader.stringTable.length);
-		m_hProgram->strings.count = m_programHeader.stringTable.length;
+		HqModule::StringArray::Reserve(m_hModule->strings, m_moduleHeader.stringTable.length);
+		m_hModule->strings.count = m_moduleHeader.stringTable.length;
 
 		// Iterate for each string.
-		for(uint32_t index = 0; index < m_programHeader.stringTable.length; ++index)
+		for(uint32_t index = 0; index < m_moduleHeader.stringTable.length; ++index)
 		{
-			HqString* const pString = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pString = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pString)
 			{
-				m_hProgram->strings.count = index;
+				m_hModule->strings.count = index;
 				return false;
 			}
 
-			m_hProgram->strings.pData[index] = pString;
+			m_hModule->strings.pData[index] = pString;
 		}
 	}
 
@@ -864,32 +864,32 @@ bool HqProgramLoader::prv_readStringTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readGlobalTable()
+bool HqModuleLoader::prv_readGlobalTable()
 {
-	if(m_programHeader.globalTable.length > 0)
+	if(m_moduleHeader.globalTable.length > 0)
 	{
 		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the global table.
-		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.globalTable.offset);
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_moduleHeader.globalTable.offset);
 		if(result != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				m_hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				"Error setting module file stream position to the offset of the global variable table: error=\"%s\", module=\"%s\", offset=%" PRIu32,
 				HqGetErrorCodeString(result),
-				m_hProgram->pName->data,
-				m_programHeader.globalTable.offset
+				m_hModule->pName->data,
+				m_moduleHeader.globalTable.offset
 			);
 			return false;
 		}
 
 		// Iterate for each global variable.
-		for(uint32_t globalIndex = 0; globalIndex < m_programHeader.globalTable.length; ++globalIndex)
+		for(uint32_t globalIndex = 0; globalIndex < m_moduleHeader.globalTable.length; ++globalIndex)
 		{
 			// Read the name of the global variable.
-			HqString* const pVarName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pVarName = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pVarName)
 			{
 				return false;
@@ -908,39 +908,39 @@ bool HqProgramLoader::prv_readGlobalTable()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readFunctions()
+bool HqModuleLoader::prv_readFunctions()
 {
-	if(m_programHeader.functionTable.length > 0)
+	if(m_moduleHeader.functionTable.length > 0)
 	{
 		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the function table.
-		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.functionTable.offset);
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_moduleHeader.functionTable.offset);
 		if(result != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				m_hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the global variable table: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				"Error setting module file stream position to the offset of the global variable table: error=\"%s\", module=\"%s\", offset=%" PRIu32,
 				HqGetErrorCodeString(result),
-				m_hProgram->pName->data,
-				m_programHeader.globalTable.offset
+				m_hModule->pName->data,
+				m_moduleHeader.globalTable.offset
 			);
 			return false;
 		}
 
 		// Iterate for each function.
-		for(uint32_t funcIndex = 0; funcIndex < m_programHeader.functionTable.length; ++funcIndex)
+		for(uint32_t funcIndex = 0; funcIndex < m_moduleHeader.functionTable.length; ++funcIndex)
 		{
 			// Read the function signature.
-			HqString* const pSignature = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pSignature = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pSignature)
 			{
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read function signature: program=\"%s\"",
-					m_hProgram->pName->data
+					"Failed to read function signature: module=\"%s\"",
+					m_hModule->pName->data
 				);
 				return false;
 			}
@@ -958,9 +958,9 @@ bool HqProgramLoader::prv_readFunctions()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read function 'isNative' flag: error=\"%s\", program=\"%s\", function=\"%s\"",
+					"Failed to read function 'isNative' flag: error=\"%s\", module=\"%s\", function=\"%s\"",
 					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
+					m_hModule->pName->data,
 					pSignature->data
 				);
 				return false;
@@ -974,9 +974,9 @@ bool HqProgramLoader::prv_readFunctions()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read function parameter count: error=\"%s\", program=\"%s\", function=\"%s\"",
+					"Failed to read function parameter count: error=\"%s\", module=\"%s\", function=\"%s\"",
 					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
+					m_hModule->pName->data,
 					pSignature->data
 				);
 				return false;
@@ -990,9 +990,9 @@ bool HqProgramLoader::prv_readFunctions()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read function return value count: error=\"%s\", program=\"%s\", function=\"%s\"",
+					"Failed to read function return value count: error=\"%s\", module=\"%s\", function=\"%s\"",
 					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
+					m_hModule->pName->data,
 					pSignature->data
 				);
 				return false;
@@ -1015,9 +1015,9 @@ bool HqProgramLoader::prv_readFunctions()
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to read function bytecode offset start: error=\"%s\", program=\"%s\", function=\"%s\"",
+						"Failed to read function bytecode offset start: error=\"%s\", module=\"%s\", function=\"%s\"",
 						HqGetErrorCodeString(result),
-						m_hProgram->pName->data,
+						m_hModule->pName->data,
 						pSignature->data
 					);
 					return false;
@@ -1030,9 +1030,9 @@ bool HqProgramLoader::prv_readFunctions()
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to read function bytecode offset end: error=\"%s\", program=\"%s\", function=\"%s\"",
+						"Failed to read function bytecode offset end: error=\"%s\", module=\"%s\", function=\"%s\"",
 						HqGetErrorCodeString(result),
-						m_hProgram->pName->data,
+						m_hModule->pName->data,
 						pSignature->data
 					);
 					return false;
@@ -1076,7 +1076,7 @@ bool HqProgramLoader::prv_readFunctions()
 
 				// Create a script function.
 				hFunction = HqFunction::CreateScript(
-					m_hProgram,
+					m_hModule,
 					pSignature,
 					locals,
 					guardedBlocks,
@@ -1092,7 +1092,7 @@ bool HqProgramLoader::prv_readFunctions()
 			{
 				// Create a native function.
 				hFunction = HqFunction::CreateNative(
-					m_hProgram,
+					m_hModule,
 					pSignature,
 					numParameters,
 					numReturnValues
@@ -1104,8 +1104,8 @@ bool HqProgramLoader::prv_readFunctions()
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to create function handle: program=\"%s\"",
-					m_hProgram->pName->data
+					"Failed to create function handle: module=\"%s\"",
+					m_hModule->pName->data
 				);
 				return false;
 			}
@@ -1119,14 +1119,14 @@ bool HqProgramLoader::prv_readFunctions()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readBytecode()
+bool HqModuleLoader::prv_readBytecode()
 {
-	if(m_programHeader.bytecode.length > 0)
+	if(m_moduleHeader.bytecode.length > 0)
 	{
 		int result = HQ_SUCCESS;
 
 		// Move the stream position to the start of the bytecode.
-		result = HqSerializerSetStreamPosition(m_hSerializer, m_programHeader.bytecode.offset);
+		result = HqSerializerSetStreamPosition(m_hSerializer, m_moduleHeader.bytecode.offset);
 		if(result != HQ_SUCCESS)
 		{
 			const char* const errorString = HqGetErrorCodeString(result);
@@ -1134,24 +1134,24 @@ bool HqProgramLoader::prv_readBytecode()
 			HqReportMessage(
 				m_hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Error setting program file stream position to the offset of the program bytecode: error=\"%s\", program=\"%s\", offset=%" PRIu32,
+				"Error setting module file stream position to the offset of the module bytecode: error=\"%s\", module=\"%s\", offset=%" PRIu32,
 				errorString,
-				m_hProgram->pName->data,
-				m_programHeader.bytecode.offset
+				m_hModule->pName->data,
+				m_moduleHeader.bytecode.offset
 			);
 
 			return false;
 		}
 
-		// Reserve space in the program's bytecode array.
-		HqByteHelper::Array::Reserve(m_hProgram->code, m_programHeader.bytecode.length);
-		m_hProgram->code.count = m_programHeader.bytecode.length;
+		// Reserve space in the module's bytecode array.
+		HqByteHelper::Array::Reserve(m_hModule->code, m_moduleHeader.bytecode.length);
+		m_hModule->code.count = m_moduleHeader.bytecode.length;
 
 		// Get the stream pointer directly to avoid having to create a staging buffer.
 		const uint8_t* const pBytecode = reinterpret_cast<const uint8_t*>(HqSerializerGetRawStreamPointer(m_hSerializer));
 
-		// Copy the bytecode into the program.
-		memcpy(m_hProgram->code.pData, pBytecode + m_programHeader.bytecode.offset, m_programHeader.bytecode.length);
+		// Copy the bytecode into the module.
+		memcpy(m_hModule->code.pData, pBytecode + m_moduleHeader.bytecode.offset, m_moduleHeader.bytecode.length);
 	}
 
 	return true;
@@ -1159,7 +1159,7 @@ bool HqProgramLoader::prv_readBytecode()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunction::StringToBoolMap& outLocals)
+bool HqModuleLoader::prv_readLocalVariables(HqString* const pSignature, HqFunction::StringToBoolMap& outLocals)
 {
 	int result = HQ_SUCCESS;
 
@@ -1171,9 +1171,9 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to read function local variable count: error=\"%s\", program=\"%s\", function=\"%s\"",
+			"Failed to read function local variable count: error=\"%s\", module=\"%s\", function=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data,
+			m_hModule->pName->data,
 			pSignature->data
 		);
 		return false;
@@ -1185,7 +1185,7 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 		for(uint32_t localIndex = 0; localIndex < numLocalVariables; ++localIndex)
 		{
 			// Read the name of the global variable.
-			HqString* const pVarName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+			HqString* const pVarName = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 			if(!pVarName)
 			{
 				return false;
@@ -1201,8 +1201,8 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Local variable conflict: program=\"%s\", function=\"%s\", variableName=\"%s\"",
-					m_hProgram->pName->data,
+					"Local variable conflict: module=\"%s\", function=\"%s\", variableName=\"%s\"",
+					m_hModule->pName->data,
 					pSignature->data,
 					pVarName->data
 				);
@@ -1220,7 +1220,7 @@ bool HqProgramLoader::prv_readLocalVariables(HqString* const pSignature, HqFunct
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuardedBlock::Array& outBlocks)
+bool HqModuleLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuardedBlock::Array& outBlocks)
 {
 	int result = HQ_SUCCESS;
 
@@ -1232,9 +1232,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 		HqReportMessage(
 			m_hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to read function guarded block count: error=\"%s\", program=\"%s\", function=\"%s\"",
+			"Failed to read function guarded block count: error=\"%s\", module=\"%s\", function=\"%s\"",
 			HqGetErrorCodeString(result),
-			m_hProgram->pName->data,
+			m_hModule->pName->data,
 			pSignature->data
 		);
 		return false;
@@ -1256,9 +1256,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read guarded block's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
+					"Failed to read guarded block's offset: error=\"%s\", module=\"%s\", function=\"%s\", block=%" PRIu32,
 					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
+					m_hModule->pName->data,
 					pSignature->data,
 					blockIndex
 				);
@@ -1273,9 +1273,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read guarded block's length: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
+					"Failed to read guarded block's length: error=\"%s\", module=\"%s\", function=\"%s\", block=%" PRIu32,
 					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
+					m_hModule->pName->data,
 					pSignature->data,
 					blockIndex
 				);
@@ -1290,9 +1290,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to read guarded block's exception handler count: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32,
+					"Failed to read guarded block's exception handler count: error=\"%s\", module=\"%s\", function=\"%s\", block=%" PRIu32,
 					HqGetErrorCodeString(result),
-					m_hProgram->pName->data,
+					m_hModule->pName->data,
 					pSignature->data,
 					blockIndex
 				);
@@ -1305,8 +1305,8 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 				HqReportMessage(
 					m_hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to allocate new guarded block: program=\"%s\", function=\"%s\", block=%" PRIu32,
-					m_hProgram->pName->data,
+					"Failed to allocate new guarded block: module=\"%s\", function=\"%s\", block=%" PRIu32,
+					m_hModule->pName->data,
 					pSignature->data,
 					blockIndex
 				);
@@ -1328,9 +1328,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to read exception handler's type: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
+						"Failed to read exception handler's type: error=\"%s\", module=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 						HqGetErrorCodeString(result),
-						m_hProgram->pName->data,
+						m_hModule->pName->data,
 						pSignature->data,
 						blockIndex,
 						handlerIndex
@@ -1346,9 +1346,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to read exception handler's offset: error=\"%s\", program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
+						"Failed to read exception handler's offset: error=\"%s\", module=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 						HqGetErrorCodeString(result),
-						m_hProgram->pName->data,
+						m_hModule->pName->data,
 						pSignature->data,
 						blockIndex,
 						handlerIndex
@@ -1361,7 +1361,7 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 				if(handledType == HQ_VALUE_TYPE_OBJECT)
 				{
 					// When an object type is used for the handler, read the class name that is handles.
-					pClassName = HqProgramCommonLoader::ReadString(m_hSerializer, m_hReport);
+					pClassName = HqModuleCommonLoader::ReadString(m_hSerializer, m_hReport);
 					if(!pClassName)
 					{
 						if(result != HQ_SUCCESS)
@@ -1369,9 +1369,9 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 							HqReportMessage(
 								m_hReport,
 								HQ_MESSAGE_TYPE_ERROR,
-								"Failed to read exception handler type class name: program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
+								"Failed to read exception handler type class name: module=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
 								HqGetErrorCodeString(result),
-								m_hProgram->pName->data,
+								m_hModule->pName->data,
 								pSignature->data,
 								blockIndex,
 								handlerIndex
@@ -1392,8 +1392,8 @@ bool HqProgramLoader::prv_readGuardedBlocks(HqString* const pSignature, HqGuarde
 					HqReportMessage(
 						m_hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to allocate new exception handler: program=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
-						m_hProgram->pName->data,
+						"Failed to allocate new exception handler: module=\"%s\", function=\"%s\", block=%" PRIu32 ", handler=%" PRIu32,
+						m_hModule->pName->data,
 						pSignature->data,
 						blockIndex,
 						handlerIndex

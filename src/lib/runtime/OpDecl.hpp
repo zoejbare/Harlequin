@@ -28,7 +28,7 @@
 
 struct HqDisassemble
 {
-	HqProgramHandle hProgram;
+	HqModuleHandle hModule;
 	HqCallbackOpDisasm onDisasmFn;
 
 	void* pUserData;

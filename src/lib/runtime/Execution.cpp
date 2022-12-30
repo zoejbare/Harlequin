@@ -18,7 +18,7 @@
 
 #include "Execution.hpp"
 #include "Function.hpp"
-#include "Program.hpp"
+#include "Module.hpp"
 #include "Vm.hpp"
 
 #include "../base/Mutex.hpp"
@@ -436,7 +436,7 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 					assert(hExec->hCurrentFrame != HQ_FRAME_HANDLE_NULL);
 
 					// Set the instruction pointer to the start of the exception handler.
-					hExec->hCurrentFrame->decoder.cachedIp = hExec->hCurrentFrame->hFunction->hProgram->code.pData + handlerOffset;
+					hExec->hCurrentFrame->decoder.cachedIp = hExec->hCurrentFrame->hFunction->hModule->code.pData + handlerOffset;
 					hExec->hCurrentFrame->decoder.ip = hExec->hCurrentFrame->decoder.cachedIp;
 
 					break;

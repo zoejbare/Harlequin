@@ -62,7 +62,7 @@ extern "C"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// Disabling the GC thread requires user code to manually all the API function for invoking the GC.
+// Disabling the GC thread requires user code to manually call the API function for invoking the GC.
 #define _GC_THREAD_ENABLED 1
 
 // Setting the test iterations to anything above 1 will do special logic to add an iteration loop and remove some log prints.
@@ -120,11 +120,11 @@ void OnMessageReported(void* const pUserData, const int messageType, const char*
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void OnDependencyRequested(void* const pUserData, const char* const programName)
+void OnDependencyRequested(void* const pUserData, const char* const moduleName)
 {
 	std::deque<const char*>* pDependencies = reinterpret_cast<std::deque<const char*>*>(pUserData);
 
-	pDependencies->push_back(programName);
+	pDependencies->push_back(moduleName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -352,19 +352,21 @@ int main(int argc, char* argv[])
 	const uint64_t overallTimeStart = HqClockGetTimestamp();
 
 	uint64_t createVmTimeSlice = 0;
-	uint64_t loadProgramTimeSlice = 0;
-	uint64_t initProgramsTimeSlice = 0;
+	uint64_t loadModuleTimeSlice = 0;
+	uint64_t initModulesTimeSlice = 0;
 	uint64_t createExecTimeSlice = 0;
 	uint64_t initExecTimeSlice = 0;
 	uint64_t disposeExecTimeSlice = 0;
 	uint64_t disposeVmTimeSlice = 0;
 
-	uint64_t runProgramTotalTime = 0;
+	uint64_t runModuleTotalTime = 0;
 	uint64_t resetExecTotalTime = 0;
 
 	uint64_t totalApplicationTime = 0;
 	uint64_t totalDisassembleTime = 0;
+#if !_GC_THREAD_ENABLED
 	uint64_t totalManualGcTime = 0;
+#endif
 
 	// Create the VM context.
 	{
@@ -390,13 +392,13 @@ int main(int argc, char* argv[])
 
 	const char* const scriptFilePath = argv[1];
 
-	// Load the program file.
+	// Load the module file.
 	{
 		const uint64_t timeStart = HqClockGetTimestamp();
 
 		HqSerializerHandle hFileSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-		// Create the serializer we'll use to read the program file data.
+		// Create the serializer we'll use to read the module file data.
 		const int createFileSerializerResult = HqSerializerCreate(&hFileSerializer, HQ_SERIALIZER_MODE_READER);
 		if(createFileSerializerResult != HQ_SUCCESS)
 		{
@@ -410,8 +412,8 @@ int main(int argc, char* argv[])
 			return APPLICATION_RESULT_FAILURE;
 		}
 
-		const int readProgramFileResult = HqSerializerLoadStreamFromFile(hFileSerializer, scriptFilePath);
-		if(readProgramFileResult == HQ_SUCCESS)
+		const int readModuleFileResult = HqSerializerLoadStreamFromFile(hFileSerializer, scriptFilePath);
+		if(readModuleFileResult == HQ_SUCCESS)
 		{
 			const void* const pFileData = HqSerializerGetRawStreamPointer(hFileSerializer);
 			const size_t fileSize = HqSerializerGetStreamLength(hFileSerializer);
@@ -426,64 +428,64 @@ int main(int argc, char* argv[])
 
 		HqSerializerDispose(&hFileSerializer);
 
-		if(readProgramFileResult != HQ_SUCCESS)
+		if(readModuleFileResult != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				hReport,
 				HQ_MESSAGE_TYPE_FATAL,
 				"Failed to read compiled binary: error=\"%s\"",
-				HqGetErrorCodeString(readProgramFileResult)
+				HqGetErrorCodeString(readModuleFileResult)
 			);
 			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 
-		// Load the program data into the VM.
-		const int loadProgramResult = HqVmLoadProgram(hVm, "test", &fileData[0], fileData.size());
-		if(loadProgramResult != HQ_SUCCESS)
+		// Load the module data into the VM.
+		const int loadModuleResult = HqVmLoadModule(hVm, "test", &fileData[0], fileData.size());
+		if(loadModuleResult != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				hReport,
 				HQ_MESSAGE_TYPE_FATAL,
-				"Failed to load script program: \"%s\", error=\"%s\"",
+				"Failed to load script module: \"%s\", error=\"%s\"",
 				scriptFilePath,
-				HqGetErrorCodeString(loadProgramResult)
+				HqGetErrorCodeString(loadModuleResult)
 			);
 			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 
 		const uint64_t timeEnd = HqClockGetTimestamp();
-		loadProgramTimeSlice = timeEnd - timeStart;
+		loadModuleTimeSlice = timeEnd - timeStart;
 	}
 
 	// Clear the cached file data now that we no longer need it.
 	fileData.clear();
 
-	// Initialize the loaded programs.
+	// Initialize the loaded modules.
 	{
 		HqExecutionHandle hInitExec = HQ_EXECUTION_HANDLE_NULL;
 
 		const uint64_t timeStart = HqClockGetTimestamp();
 
-		const int initProgramsResult = HqVmInitializePrograms(hVm, &hInitExec);
-		if(initProgramsResult != HQ_SUCCESS)
+		const int initModulesResult = HqVmInitializeModules(hVm, &hInitExec);
+		if(initModulesResult != HQ_SUCCESS)
 		{
 			HqReportMessage(
 				hReport,
 				HQ_MESSAGE_TYPE_FATAL,
-				"Failed to initialize script programs: error=\"%s\"",
-				HqGetErrorCodeString(initProgramsResult)
+				"Failed to initialize script modules: error=\"%s\"",
+				HqGetErrorCodeString(initModulesResult)
 			);
 			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
 
 		const uint64_t timeEnd = HqClockGetTimestamp();
-		initProgramsTimeSlice = timeEnd - timeStart;
+		initModulesTimeSlice = timeEnd - timeStart;
 	}
 
-	auto iterateProgram = [](void* const pUserData, HqProgramHandle hProgram) -> bool
+	auto iterateModule = [](void* const pUserData, HqModuleHandle hModule) -> bool
 	{
 		auto iterateString = [](void*, const char* const string, const size_t index) -> bool
 		{
@@ -529,30 +531,30 @@ int main(int argc, char* argv[])
 			return true;
 		};
 
-		const char* programName = nullptr;
-		HqProgramGetName(hProgram, &programName);
+		const char* moduleName = nullptr;
+		HqModuleGetName(hModule, &moduleName);
 
-		printf("[Program: \"%s\"]\n", programName);
+		printf("[Module: \"%s\"]\n", moduleName);
 		printf("    [strings]\n");
 
-		HqProgramListStrings(hProgram, iterateString, pUserData);
+		HqModuleListStrings(hModule, iterateString, pUserData);
 
 		printf("\n    [code]\n");
 
-		// Iterate each function within in the program.
-		HqProgramListFunctions(hProgram, iterateFunction, pUserData);
+		// Iterate each function within in the module.
+		HqModuleListFunctions(hModule, iterateFunction, pUserData);
 
 		return true;
 	};
 
 	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
 
-	// Generate the script program disassembly.
+	// Generate the script module disassembly.
 	{
 		const uint64_t timeStart = HqClockGetTimestamp();
 
-		// Iterate all the programs to disassemble them.
-		HqVmListPrograms(hVm, iterateProgram, hVm);
+		// Iterate all the modules to disassemble them.
+		HqVmListModules(hVm, iterateModule, hVm);
 
 		const uint64_t timeEnd = HqClockGetTimestamp();
 		totalDisassembleTime = timeEnd - timeStart;
@@ -561,7 +563,7 @@ int main(int argc, char* argv[])
 	// Bind the native functions to the script VM.
 	{
 		HqFunctionHandle hNativePrintFunc = HQ_FUNCTION_HANDLE_NULL;
-		HqVmGetFunction(hVm, &hNativePrintFunc, "void App.Program.PrintString(string)");
+		HqVmGetFunction(hVm, &hNativePrintFunc, "void Program.PrintString(string)");
 
 		if(hNativePrintFunc != HQ_FUNCTION_HANDLE_NULL)
 		{
@@ -585,7 +587,7 @@ int main(int argc, char* argv[])
 		}
 
 		HqFunctionHandle hNativeDecrementFunc = HQ_FUNCTION_HANDLE_NULL;
-		HqVmGetFunction(hVm, &hNativeDecrementFunc, "(int32, bool) App.Program.Decrement(int32)");
+		HqVmGetFunction(hVm, &hNativeDecrementFunc, "(int32, bool) Program.Decrement(int32)");
 
 		if(hNativeDecrementFunc != HQ_FUNCTION_HANDLE_NULL)
 		{
@@ -633,12 +635,12 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	const char* const entryPointFuncName = "void App.Program.Main()";
+	const char* const entryPointFuncName = "void Program.Main()";
 
 	HqFunctionHandle hEntryFunc = HQ_FUNCTION_HANDLE_NULL;
 	HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
 
-	// Create the execution context that will run the program's entry point function.
+	// Create the execution context that will run the module's entry point function.
 	{
 		const uint64_t timeStart = HqClockGetTimestamp();
 
@@ -793,7 +795,7 @@ int main(int argc, char* argv[])
 			}
 
 			const uint64_t timeEnd = HqClockGetTimestamp();
-			runProgramTotalTime += timeEnd - timeStart;
+			runModuleTotalTime += timeEnd - timeStart;
 		}
 
 #if !_GC_THREAD_ENABLED
@@ -873,9 +875,9 @@ int main(int argc, char* argv[])
 		"    Max:  %zu\n"
 		"    Peak: %zu\n"
 		"  [Count]\n"
-		"    Total:     %zu\n"
-		"    Malloc():  %zu\n"
-		"    Realloc(): %zu\n",
+		"    Total:   %zu\n"
+		"    Malloc:  %zu\n"
+		"    Realloc: %zu\n",
 		minAllocSize,
 		maxAllocSize,
 		peakMemUsage,
@@ -901,14 +903,18 @@ int main(int argc, char* argv[])
 		"    Init:    %f ms\n"
 		"    Reset:   %f ms\n"
 		"    Dispose: %f ms\n"
-		"  [Program]\n"
+		"  [Module]\n"
 		"    Init: %f ms\n"
 		"    Load: %f ms\n"
 		"    Run:  %f ms\n"
 		"  [Misc]\n"
 		"    Total application: %f ms\n"
 		"    Total disassemble: %f ms\n"
+#if _GC_THREAD_ENABLED
+		"    Total manual GC:   n/a\n",
+#else
 		"    Total manual GC:   %f ms\n",
+#endif
 
 		double(createVmTimeSlice) * convertTimeToMs,
 		double(disposeVmTimeSlice) * convertTimeToMs,
@@ -918,13 +924,15 @@ int main(int argc, char* argv[])
 		double(resetExecTotalTime) * convertTimeToMs,
 		double(disposeExecTimeSlice) * convertTimeToMs,
 
-		double(initProgramsTimeSlice) * convertTimeToMs,
-		double(loadProgramTimeSlice) * convertTimeToMs,
-		double(runProgramTotalTime) * convertTimeToMs,
+		double(initModulesTimeSlice) * convertTimeToMs,
+		double(loadModuleTimeSlice) * convertTimeToMs,
+		double(runModuleTotalTime) * convertTimeToMs,
 
 		double(totalApplicationTime) * convertTimeToMs,
-		double(totalDisassembleTime) * convertTimeToMs,
-		double(totalManualGcTime) * convertTimeToMs
+		double(totalDisassembleTime) * convertTimeToMs
+#if !_GC_THREAD_ENABLED
+		, double(totalManualGcTime) * convertTimeToMs
+#endif
 	);
 
 #ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS

@@ -20,7 +20,7 @@
 
 #include "Compiler.hpp"
 #include "FunctionData.hpp"
-#include "ProgramWriter.hpp"
+#include "ModuleWriter.hpp"
 
 #include "../base/Serializer.hpp"
 #include "../base/String.hpp"
@@ -90,73 +90,73 @@ int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutR
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterCreate(HqProgramWriterHandle* phOutProgramWriter, HqCompilerHandle hCompiler)
+int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqCompilerHandle hCompiler)
 {
-	if(!phOutProgramWriter || (*phOutProgramWriter) || !hCompiler)
+	if(!phOutModuleWriter || (*phOutModuleWriter) || !hCompiler)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqProgramWriterHandle hWriter = HqProgramWriter::Create();
+	HqModuleWriterHandle hWriter = HqModuleWriter::Create();
 	if(!hWriter)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	(*phOutProgramWriter) = hWriter;
+	(*phOutModuleWriter) = hWriter;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterDispose(HqProgramWriterHandle* phProgramWriter)
+int HqModuleWriterDispose(HqModuleWriterHandle* phModuleWriter)
 {
-	if(!phProgramWriter || !(*phProgramWriter))
+	if(!phModuleWriter || !(*phModuleWriter))
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqProgramWriterHandle hWriter = (*phProgramWriter);
+	HqModuleWriterHandle hWriter = (*phModuleWriter);
 
-	(*phProgramWriter) = HQ_PROGRAM_WRITER_HANDLE_NULL;
+	(*phModuleWriter) = HQ_MODULE_WRITER_HANDLE_NULL;
 
-	HqProgramWriter::Dispose(hWriter);
+	HqModuleWriter::Dispose(hWriter);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddDependency(HqProgramWriterHandle hProgramWriter, const char* const programName)
+int HqModuleWriterAddDependency(HqModuleWriterHandle hModuleWriter, const char* const moduleName)
 {
-	if(!hProgramWriter || !programName || programName[0] == '\0')
+	if(!hModuleWriter || !moduleName || moduleName[0] == '\0')
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqString* const pProgramName = HqString::Create(programName);
-	if(!pProgramName)
+	HqString* const pModuleName = HqString::Create(moduleName);
+	if(!pModuleName)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	if(hProgramWriter->dependencies.count(pProgramName))
+	if(hModuleWriter->dependencies.count(pModuleName))
 	{
-		HqString::Release(pProgramName);
+		HqString::Release(pModuleName);
 		return HQ_ERROR_KEY_ALREADY_EXISTS;
 	}
 
-	hProgramWriter->dependencies.emplace(pProgramName, false);
+	hModuleWriter->dependencies.emplace(pModuleName, false);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddString(HqProgramWriterHandle hProgramWriter, const char* value, uint32_t* pOutputIndex)
+int HqModuleWriterAddString(HqModuleWriterHandle hModuleWriter, const char* value, uint32_t* pOutputIndex)
 {
-	if(!hProgramWriter || !value || !pOutputIndex)
+	if(!hModuleWriter || !value || !pOutputIndex)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -167,7 +167,7 @@ int HqProgramWriterAddString(HqProgramWriterHandle hProgramWriter, const char* v
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	(*pOutputIndex) = HqProgramWriter::AddString(hProgramWriter, pString);
+	(*pOutputIndex) = HqModuleWriter::AddString(hModuleWriter, pString);
 
 	HqString::Release(pString);
 
@@ -176,9 +176,9 @@ int HqProgramWriterAddString(HqProgramWriterHandle hProgramWriter, const char* v
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddObjectType(HqProgramWriterHandle hProgramWriter, const char* objectTypeName)
+int HqModuleWriterAddObjectType(HqModuleWriterHandle hModuleWriter, const char* objectTypeName)
 {
-	if(!hProgramWriter || !objectTypeName || objectTypeName[0] == '\0')
+	if(!hModuleWriter || !objectTypeName || objectTypeName[0] == '\0')
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -190,7 +190,7 @@ int HqProgramWriterAddObjectType(HqProgramWriterHandle hProgramWriter, const cha
 	}
 
 	// Verify a object type mapped to the input name doesn't already exist.
-	if(hProgramWriter->objectTypes.count(pTypeName))
+	if(hModuleWriter->objectTypes.count(pTypeName))
 	{
 		HqString::Release(pTypeName);
 		return HQ_ERROR_KEY_ALREADY_EXISTS;
@@ -199,22 +199,22 @@ int HqProgramWriterAddObjectType(HqProgramWriterHandle hProgramWriter, const cha
 	HqObjectData objectData;
 	objectData.pTypeName = pTypeName;
 
-	hProgramWriter->objectTypes.emplace(pTypeName, objectData);
+	hModuleWriter->objectTypes.emplace(pTypeName, objectData);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddObjectMember(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterAddObjectMember(
+	HqModuleWriterHandle hModuleWriter,
 	const char* objectTypeName,
 	const char* memberName,
 	uint8_t memberValueType,
 	uint32_t* pOutIndex
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !objectTypeName
 		|| objectTypeName[0] == '\0'
 		|| !memberName
@@ -230,12 +230,12 @@ int HqProgramWriterAddObjectMember(
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	auto typeKv = hProgramWriter->objectTypes.find(pTypeName);
+	auto typeKv = hModuleWriter->objectTypes.find(pTypeName);
 
 	// Release the object type name string now that we're done with it.
 	HqString::Release(pTypeName);
 
-	if(typeKv == hProgramWriter->objectTypes.end())
+	if(typeKv == hModuleWriter->objectTypes.end())
 	{
 		// Cannot add member to an object type that does not exist.
 		return HQ_ERROR_KEY_DOES_NOT_EXIST;
@@ -269,9 +269,9 @@ int HqProgramWriterAddObjectMember(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* variableName)
+int HqModuleWriterAddGlobal(HqModuleWriterHandle hModuleWriter, const char* variableName)
 {
-	if(!hProgramWriter || !variableName || variableName[0] == '\0')
+	if(!hModuleWriter || !variableName || variableName[0] == '\0')
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -284,46 +284,46 @@ int HqProgramWriterAddGlobal(HqProgramWriterHandle hProgramWriter, const char* v
 	}
 
 	// Verify the input name doesn't already exist.
-	if(hProgramWriter->globals.count(pKey))
+	if(hModuleWriter->globals.count(pKey))
 	{
 		HqString::Release(pKey);
 		return HQ_ERROR_KEY_ALREADY_EXISTS;
 	}
 
 	// Track the name of the global variable.
-	hProgramWriter->globals.insert(pKey);
+	hModuleWriter->globals.insert(pKey);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterSetProgramInitFunction(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterSetModuleInitFunction(
+	HqModuleWriterHandle hModuleWriter,
 	const void* const pBytecode,
 	const size_t bytecodeLength
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !pBytecode
 		|| bytecodeLength == 0)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Copy the input bytecode data to the byte vector that will be set in the program writer.
+	// Copy the input bytecode data to the byte vector that will be set in the module writer.
 	std::vector<uint8_t> bytecode(bytecodeLength);
 	memcpy(bytecode.data(), pBytecode, bytecode.size());
 
-	hProgramWriter->initBytecode = std::move(bytecode);
+	hModuleWriter->initBytecode = std::move(bytecode);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddFunction(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterAddFunction(
+	HqModuleWriterHandle hModuleWriter,
 	const char* const functionSignature,
 	const void* const pBytecode,
 	const size_t bytecodeLength,
@@ -331,7 +331,7 @@ int HqProgramWriterAddFunction(
 	const uint16_t numReturnValues
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
 		|| !pBytecode
@@ -348,7 +348,7 @@ int HqProgramWriterAddFunction(
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	// Copy the input bytecode data to the byte vector that will be mapped into the program writer.
+	// Copy the input bytecode data to the byte vector that will be mapped into the module writer.
 	std::vector<uint8_t> bytecode(bytecodeLength);
 	memcpy(bytecode.data(), pBytecode, bytecode.size());
 
@@ -359,21 +359,21 @@ int HqProgramWriterAddFunction(
 	function.numReturnValues = numReturnValues;
 	function.isNative = false;
 
-	hProgramWriter->functions.emplace(pSignature, function);
+	hModuleWriter->functions.emplace(pSignature, function);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddNativeFunction(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterAddNativeFunction(
+	HqModuleWriterHandle hModuleWriter,
 	const char* const functionSignature,
 	const uint16_t numParameters,
 	const uint16_t numReturnValues
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
 		|| numParameters > HQ_VM_IO_REGISTER_COUNT
@@ -394,20 +394,20 @@ int HqProgramWriterAddNativeFunction(
 	function.numReturnValues = numReturnValues;
 	function.isNative = true;
 
-	hProgramWriter->functions.emplace(pSignature, function);
+	hModuleWriter->functions.emplace(pSignature, function);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddLocalVariable(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterAddLocalVariable(
+	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	const char* variableName
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
 		|| !variableName
@@ -423,8 +423,8 @@ int HqProgramWriterAddLocalVariable(
 	}
 
 	// Find the desired function by checking what we currently have mapped.
-	auto kv = hProgramWriter->functions.find(pSignature);
-	if(kv == hProgramWriter->functions.end())
+	auto kv = hModuleWriter->functions.find(pSignature);
+	if(kv == hModuleWriter->functions.end())
 	{
 		HqString::Release(pSignature);
 		return HQ_ERROR_KEY_DOES_NOT_EXIST;
@@ -452,15 +452,15 @@ int HqProgramWriterAddLocalVariable(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddGuardedBlock(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterAddGuardedBlock(
+	HqModuleWriterHandle hModuleWriter,
 	const char* const functionSignature,
 	const size_t bytecodeOffset,
 	const size_t bytecodeLength,
 	uint32_t* const pOutBlockId
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
 		|| bytecodeLength == 0
@@ -471,8 +471,8 @@ int HqProgramWriterAddGuardedBlock(
 
 	HqFunctionData* pFunction = nullptr;
 
-	// Find the function in the program writer.
-	const int lookupResult = HqProgramWriter::LookupFunction(hProgramWriter, functionSignature, &pFunction);
+	// Find the function in the module writer.
+	const int lookupResult = HqModuleWriter::LookupFunction(hModuleWriter, functionSignature, &pFunction);
 	if(lookupResult != HQ_SUCCESS)
 	{
 		return lookupResult;
@@ -511,8 +511,8 @@ int HqProgramWriterAddGuardedBlock(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterAddExceptionHandler(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterAddExceptionHandler(
+	HqModuleWriterHandle hModuleWriter,
 	const char* const functionSignature,
 	const uint32_t blockId,
 	const size_t bytecodeOffset,
@@ -520,7 +520,7 @@ int HqProgramWriterAddExceptionHandler(
 	const char* const className
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !functionSignature
 		|| functionSignature[0] == '\0'
 		|| handledType < 0
@@ -532,8 +532,8 @@ int HqProgramWriterAddExceptionHandler(
 
 	HqFunctionData* pFunction = nullptr;
 
-	// Find the function in the program writer.
-	const int lookupResult = HqProgramWriter::LookupFunction(hProgramWriter, functionSignature, &pFunction);
+	// Find the function in the module writer.
+	const int lookupResult = HqModuleWriter::LookupFunction(hModuleWriter, functionSignature, &pFunction);
 	if(lookupResult != HQ_SUCCESS)
 	{
 		return lookupResult;
@@ -584,13 +584,13 @@ int HqProgramWriterAddExceptionHandler(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProgramWriterSerialize(
-	HqProgramWriterHandle hProgramWriter,
+int HqModuleWriterSerialize(
+	HqModuleWriterHandle hModuleWriter,
 	HqCompilerHandle hCompiler,
 	HqSerializerHandle hSerializer
 )
 {
-	if(!hProgramWriter
+	if(!hModuleWriter
 		|| !hCompiler
 		|| !hSerializer
 		|| HqSerializerGetMode(hSerializer) != HQ_SERIALIZER_MODE_WRITER)
@@ -598,7 +598,7 @@ int HqProgramWriterSerialize(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hProgramWriter->initBytecode.size() == 0)
+	if(hModuleWriter->initBytecode.size() == 0)
 	{
 		// Serialize bytecode for the default init function bytecode when the high-level compiler does not supply it.
 		HqSerializerHandle hInitSerializer = HQ_SERIALIZER_HANDLE_NULL;
@@ -612,15 +612,15 @@ int HqProgramWriterSerialize(
 		const size_t initBytecodeLength = HqSerializerGetStreamLength(hInitSerializer);
 		assert(initBytecodeLength > 0);
 
-		// Copy the bytecode into the program writer.
-		hProgramWriter->initBytecode.resize(initBytecodeLength);
-		memcpy(hProgramWriter->initBytecode.data(), pInitBytecode, initBytecodeLength);
+		// Copy the bytecode into the module writer.
+		hModuleWriter->initBytecode.resize(initBytecodeLength);
+		memcpy(hModuleWriter->initBytecode.data(), pInitBytecode, initBytecodeLength);
 
 		HqSerializerDispose(&hInitSerializer);
 	}
 
-	// Write the program to the serializer.
-	if(!HqProgramWriter::Serialize(hProgramWriter, hCompiler, hSerializer))
+	// Write the module to the serializer.
+	if(!HqModuleWriter::Serialize(hModuleWriter, hCompiler, hSerializer))
 	{
 		return HQ_ERROR_UNSPECIFIED_FAILURE;
 	}

@@ -98,14 +98,14 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	HqProgramWriterHandle hProgramWriter = HQ_PROGRAM_WRITER_HANDLE_NULL;
+	HqModuleWriterHandle hModuleWriter = HQ_MODULE_WRITER_HANDLE_NULL;
 
-	// Create the program writer.
-	result = HqProgramWriterCreate(&hProgramWriter, hCompiler);
+	// Create the module writer.
+	result = HqModuleWriterCreate(&hModuleWriter, hCompiler);
 	if(result != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin program writer: error=\"%s\"", HqGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin module writer: error=\"%s\"", HqGetErrorCodeString(result));
 		OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
 		return 1;
 	}
@@ -132,14 +132,14 @@ int main(int argc, char* argv[])
 	assert(HqSerializerGetEndianness(hFileSerializer) == HqSerializerGetEndianness(hMainFuncSerializer));
 	assert(HqSerializerGetEndianness(hFileSerializer) == HqSerializerGetEndianness(hExcFuncSerializer));
 
-	const char* const mainFuncSignature = "void App.Program.Main()";
-	const char* const subFuncSignature = "int32 App.Program.DoWork(float64)";
-	const char* const excFuncSignature = "void App.Program.ExceptionHandlingTest()";
-	const char* const nativePrintFuncSignature = "void App.Program.PrintString(string)";
-	const char* const nativeDecrementFuncSignature = "(int32, bool) App.Program.Decrement(int32)";
+	const char* const mainFuncSignature = "void Program.Main()";
+	const char* const subFuncSignature = "int32 Program.DoWork(float64)";
+	const char* const excFuncSignature = "void Program.ExceptionHandlingTest()";
+	const char* const nativePrintFuncSignature = "void Program.PrintString(string)";
+	const char* const nativeDecrementFuncSignature = "(int32, bool) Program.Decrement(int32)";
 	const char* const globalVariableName = "globalTestVar";
 	const char* const localVariableName = "localTestVar";
-	const char* const objectTypeName = "App.TestClass";
+	const char* const objectTypeName = "Program.TestClass";
 	const char* const objectMemberName = "memberTest";
 
 	const char* const opAddStringSignature = HqGetBuiltInFunctionSignature(HQ_BUILT_IN_OP_ADD_STRING);
@@ -148,30 +148,30 @@ int main(int argc, char* argv[])
 	const char* const opLenStringSignature = HqGetBuiltInFunctionSignature(HQ_BUILT_IN_OP_LEN_STRING);
 	const char* const opLenArraySignature = HqGetBuiltInFunctionSignature(HQ_BUILT_IN_OP_LEN_ARRAY);
 
-	uint32_t stringIndex0; HqProgramWriterAddString(hProgramWriter, "this is ", &stringIndex0);
-	uint32_t stringIndex1; HqProgramWriterAddString(hProgramWriter, "a test string", &stringIndex1);
-	uint32_t stringIndex2; HqProgramWriterAddString(hProgramWriter, globalVariableName, &stringIndex2);
-	uint32_t stringIndex3; HqProgramWriterAddString(hProgramWriter, subFuncSignature, &stringIndex3);
-	uint32_t stringIndex4; HqProgramWriterAddString(hProgramWriter, nativePrintFuncSignature, &stringIndex4);
-	uint32_t stringIndex5; HqProgramWriterAddString(hProgramWriter, localVariableName, &stringIndex5);
-	uint32_t stringIndex6; HqProgramWriterAddString(hProgramWriter, opAddStringSignature, &stringIndex6);
-	uint32_t stringIndex7; HqProgramWriterAddString(hProgramWriter, opCastInt32ToStringSignature, &stringIndex7);
-	uint32_t stringIndex8; HqProgramWriterAddString(hProgramWriter, objectTypeName, &stringIndex8);
-	uint32_t stringIndex9; HqProgramWriterAddString(hProgramWriter, objectMemberName, &stringIndex9);
-	uint32_t stringIndex10; HqProgramWriterAddString(hProgramWriter, nativeDecrementFuncSignature, &stringIndex10);
-	uint32_t stringIndex11; HqProgramWriterAddString(hProgramWriter, opCastInt64ToStringSignature, &stringIndex11);
-	uint32_t stringIndex12; HqProgramWriterAddString(hProgramWriter, opLenStringSignature, &stringIndex12);
-	uint32_t stringIndex13; HqProgramWriterAddString(hProgramWriter, excFuncSignature, &stringIndex13);
-	uint32_t stringIndex14; HqProgramWriterAddString(hProgramWriter, "This is an exception string", &stringIndex14);
-	uint32_t stringIndex15; HqProgramWriterAddString(hProgramWriter, "The exception was handled successfully!", &stringIndex15);
-	uint32_t stringIndex16; HqProgramWriterAddString(hProgramWriter, opLenArraySignature, &stringIndex16);
+	uint32_t stringIndex0; HqModuleWriterAddString(hModuleWriter, "this is ", &stringIndex0);
+	uint32_t stringIndex1; HqModuleWriterAddString(hModuleWriter, "a test string", &stringIndex1);
+	uint32_t stringIndex2; HqModuleWriterAddString(hModuleWriter, globalVariableName, &stringIndex2);
+	uint32_t stringIndex3; HqModuleWriterAddString(hModuleWriter, subFuncSignature, &stringIndex3);
+	uint32_t stringIndex4; HqModuleWriterAddString(hModuleWriter, nativePrintFuncSignature, &stringIndex4);
+	uint32_t stringIndex5; HqModuleWriterAddString(hModuleWriter, localVariableName, &stringIndex5);
+	uint32_t stringIndex6; HqModuleWriterAddString(hModuleWriter, opAddStringSignature, &stringIndex6);
+	uint32_t stringIndex7; HqModuleWriterAddString(hModuleWriter, opCastInt32ToStringSignature, &stringIndex7);
+	uint32_t stringIndex8; HqModuleWriterAddString(hModuleWriter, objectTypeName, &stringIndex8);
+	uint32_t stringIndex9; HqModuleWriterAddString(hModuleWriter, objectMemberName, &stringIndex9);
+	uint32_t stringIndex10; HqModuleWriterAddString(hModuleWriter, nativeDecrementFuncSignature, &stringIndex10);
+	uint32_t stringIndex11; HqModuleWriterAddString(hModuleWriter, opCastInt64ToStringSignature, &stringIndex11);
+	uint32_t stringIndex12; HqModuleWriterAddString(hModuleWriter, opLenStringSignature, &stringIndex12);
+	uint32_t stringIndex13; HqModuleWriterAddString(hModuleWriter, excFuncSignature, &stringIndex13);
+	uint32_t stringIndex14; HqModuleWriterAddString(hModuleWriter, "This is an exception string", &stringIndex14);
+	uint32_t stringIndex15; HqModuleWriterAddString(hModuleWriter, "The exception was handled successfully!", &stringIndex15);
+	uint32_t stringIndex16; HqModuleWriterAddString(hModuleWriter, opLenArraySignature, &stringIndex16);
 
-	// Add the program globals.
-	HqProgramWriterAddGlobal(hProgramWriter, globalVariableName);
+	// Add the module globals.
+	HqModuleWriterAddGlobal(hModuleWriter, globalVariableName);
 
-	// Write the program object types.
-	HqProgramWriterAddObjectType(hProgramWriter, objectTypeName);
-	HqProgramWriterAddObjectMember(hProgramWriter, objectTypeName, objectMemberName, HQ_VALUE_TYPE_INT32, nullptr);
+	// Write the module object types.
+	HqModuleWriterAddObjectType(hModuleWriter, objectTypeName);
+	HqModuleWriterAddObjectMember(hModuleWriter, objectTypeName, objectMemberName, HQ_VALUE_TYPE_INT32, nullptr);
 
 	// Free the built-in operator function signatures.
 	HqMemFree((void*)(opAddStringSignature));
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 	HqMemFree((void*)(opLenStringSignature));
 	HqMemFree((void*)(opLenArraySignature));
 
-	// void App.Program.Main()
+	// void App.Module.Main()
 	{
 		HqBytecodeWriteLoadConstNull(hMainFuncSerializer, 0);
 		HqBytecodeWriteLoadConstI8(hMainFuncSerializer, 1, 20);
@@ -214,10 +214,10 @@ int main(int argc, char* argv[])
 		const void* const pMainFuncData = HqSerializerGetRawStreamPointer(hMainFuncSerializer);
 		const size_t mainFuncLength = HqSerializerGetStreamLength(hMainFuncSerializer);
 
-		HqProgramWriterAddFunction(hProgramWriter, mainFuncSignature, pMainFuncData, mainFuncLength, 0, 0);
+		HqModuleWriterAddFunction(hModuleWriter, mainFuncSignature, pMainFuncData, mainFuncLength, 0, 0);
 	}
 
-	// int32 App.Program.DoWork(float64)
+	// int32 App.Module.DoWork(float64)
 	{
 		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 0);
 
@@ -283,21 +283,21 @@ int main(int argc, char* argv[])
 		const void* const pFuncData = HqSerializerGetRawStreamPointer(hSubFuncSerializer);
 		const size_t funcLength = HqSerializerGetStreamLength(hSubFuncSerializer);
 
-		HqProgramWriterAddFunction(hProgramWriter, subFuncSignature, pFuncData, funcLength, 1, 1);
-		HqProgramWriterAddLocalVariable(hProgramWriter, subFuncSignature, localVariableName);
+		HqModuleWriterAddFunction(hModuleWriter, subFuncSignature, pFuncData, funcLength, 1, 1);
+		HqModuleWriterAddLocalVariable(hModuleWriter, subFuncSignature, localVariableName);
 	}
 
-	// void App.Program.PrintString(string)
+	// void App.Module.PrintString(string)
 	{
-		HqProgramWriterAddNativeFunction(hProgramWriter, nativePrintFuncSignature, 1, 0);
+		HqModuleWriterAddNativeFunction(hModuleWriter, nativePrintFuncSignature, 1, 0);
 	}
 
-	// (int32, bool) App.Program.Decrement(int32)
+	// (int32, bool) App.Module.Decrement(int32)
 	{
-		HqProgramWriterAddNativeFunction(hProgramWriter, nativeDecrementFuncSignature, 1, 2);
+		HqModuleWriterAddNativeFunction(hModuleWriter, nativeDecrementFuncSignature, 1, 2);
 	}
 
-	// void App.Program.ExceptionHandlingTest()
+	// void App.Module.ExceptionHandlingTest()
 	{
 		size_t tryBlockStart;
 		size_t tryBlockEnd;
@@ -350,18 +350,18 @@ int main(int argc, char* argv[])
 		const void* const pFuncData = HqSerializerGetRawStreamPointer(hExcFuncSerializer);
 		const size_t funcLength = HqSerializerGetStreamLength(hExcFuncSerializer);
 
-		HqProgramWriterAddFunction(hProgramWriter, excFuncSignature, pFuncData, funcLength, 0, 0);
+		HqModuleWriterAddFunction(hModuleWriter, excFuncSignature, pFuncData, funcLength, 0, 0);
 
 		// Setup the exception handling data on the function.
 		{
 			uint32_t tryBlockId = 0;
 
-			HqProgramWriterAddGuardedBlock(hProgramWriter, excFuncSignature, tryBlockStart, tryBlockEnd - tryBlockStart, &tryBlockId);
-			HqProgramWriterAddExceptionHandler(hProgramWriter, excFuncSignature, tryBlockId, exceptionHandlerStart, HQ_VALUE_TYPE_STRING, nullptr);
+			HqModuleWriterAddGuardedBlock(hModuleWriter, excFuncSignature, tryBlockStart, tryBlockEnd - tryBlockStart, &tryBlockId);
+			HqModuleWriterAddExceptionHandler(hModuleWriter, excFuncSignature, tryBlockId, exceptionHandlerStart, HQ_VALUE_TYPE_STRING, nullptr);
 		}
 	}
 
-	result = HqProgramWriterSerialize(hProgramWriter, hCompiler, hFileSerializer);
+	result = HqModuleWriterSerialize(hModuleWriter, hCompiler, hFileSerializer);
 	if(result == HQ_SUCCESS)
 	{
 		const void* const pFileData = HqSerializerGetRawStreamPointer(hFileSerializer);
@@ -383,12 +383,12 @@ int main(int argc, char* argv[])
 	HqSerializerDispose(&hExcFuncSerializer);
 	HqSerializerDispose(&hFileSerializer);
 
-	// Dispose of the program writer.
-	result = HqProgramWriterDispose(&hProgramWriter);
+	// Dispose of the module writer.
+	result = HqModuleWriterDispose(&hModuleWriter);
 	if(result != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin program writer: error=\"%s\"", HqGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin module writer: error=\"%s\"", HqGetErrorCodeString(result));
 		OnMessageReported(NULL, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 

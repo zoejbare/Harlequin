@@ -21,7 +21,7 @@
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
 #include "../../Frame.hpp"
-#include "../../Program.hpp"
+#include "../../Module.hpp"
 #include "../../Vm.hpp"
 
 #include <stdio.h>

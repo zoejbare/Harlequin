@@ -21,7 +21,7 @@
 #include "../Decoder.hpp"
 #include "../Execution.hpp"
 #include "../Function.hpp"
-#include "../Program.hpp"
+#include "../Module.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -48,12 +48,12 @@
 static void MoveInstructionPointer(HqExecutionHandle hExec, const int32_t relativeOffset)
 {
 	HqFunctionHandle hFunction = hExec->hCurrentFrame->hFunction;
-	HqProgramHandle hProgram = hExec->hCurrentFrame->hFunction->hProgram;
+	HqModuleHandle hModule = hExec->hCurrentFrame->hFunction->hModule;
 
 	uint8_t* const pNewIp = hExec->hCurrentFrame->decoder.cachedIp + relativeOffset;
 
-	const uint8_t* const pFunctionStart = hProgram->code.pData + hFunction->bytecodeOffsetStart;
-	const uint8_t* const pFunctionEnd = hProgram->code.pData + hFunction->bytecodeOffsetEnd;
+	const uint8_t* const pFunctionStart = hModule->code.pData + hFunction->bytecodeOffsetStart;
+	const uint8_t* const pFunctionEnd = hModule->code.pData + hFunction->bytecodeOffsetEnd;
 
 	// Verify the new instruction pointer falls within the bounds of the current function.
 	if(pNewIp < pFunctionStart || pNewIp >= pFunctionEnd)

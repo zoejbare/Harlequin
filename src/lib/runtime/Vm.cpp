@@ -49,7 +49,7 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 
 	// Allocate the VM data maps.
 	EmbeddedExceptionMap::Allocate(pOutput->embeddedExceptions);
-	HqProgram::StringToHandleMap::Allocate(pOutput->programs);
+	HqModule::StringToHandleMap::Allocate(pOutput->modules);
 	HqFunction::StringToHandleMap::Allocate(pOutput->functions);
 	HqValue::StringToHandleMap::Allocate(pOutput->globals);
 	HqScriptObject::StringToPtrMap::Allocate(pOutput->objectSchemas);
@@ -111,16 +111,16 @@ void HqVm::Dispose(HqVmHandle hVm)
 			hVm->isGcThreadEnabled = false;
 		}
 
-		// Clean up each loaded program.
+		// Clean up each loaded module.
 		{
-			HqProgram::StringToHandleMap::Iterator iter;
-			while(HqProgram::StringToHandleMap::IterateNext(hVm->programs, iter))
+			HqModule::StringToHandleMap::Iterator iter;
+			while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
 			{
 				HqString::Release(iter.pData->key);
-				HqProgram::Dispose(iter.pData->value);
+				HqModule::Dispose(iter.pData->value);
 			}
 
-			HqProgram::StringToHandleMap::Dispose(hVm->programs);
+			HqModule::StringToHandleMap::Dispose(hVm->modules);
 		}
 
 		// Clean up each loaded function.
@@ -252,17 +252,17 @@ int HqVm::SetGlobalVariable(HqVmHandle hVm, HqValueHandle hValue, HqString* cons
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProgramHandle HqVm::GetProgram(HqVmHandle hVm, HqString* const pProgramName, int* const pOutResult)
+HqModuleHandle HqVm::GetModule(HqVmHandle hVm, HqString* const pModuleName, int* const pOutResult)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
-	assert(pProgramName != nullptr);
+	assert(pModuleName != nullptr);
 	assert(pOutResult != nullptr);
 
-	HqProgramHandle hOutput = HQ_PROGRAM_HANDLE_NULL;
-	if(!HqProgram::StringToHandleMap::Get(hVm->programs, pProgramName, hOutput))
+	HqModuleHandle hOutput = HQ_MODULE_HANDLE_NULL;
+	if(!HqModule::StringToHandleMap::Get(hVm->modules, pModuleName, hOutput))
 	{
 		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
-		return HQ_PROGRAM_HANDLE_NULL;
+		return HQ_MODULE_HANDLE_NULL;
 	}
 
 	(*pOutResult) = HQ_SUCCESS;

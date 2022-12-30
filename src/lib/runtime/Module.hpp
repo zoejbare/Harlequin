@@ -20,28 +20,55 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include <stdint.h>
+#include "Function.hpp"
+#include "Value.hpp"
+
+#include "../base/String.hpp"
+
+#include "../common/ByteHelper.hpp"
+#include "../common/HashMap.hpp"
+#include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqProgramHeader
+struct HqModule
 {
-	struct Section
-	{
-		uint32_t offset;
-		uint32_t length;
-	};
+	typedef HqHashMap<
+		HqString*,
+		HqModuleHandle,
+		HqString::StlHash,
+		HqString::StlCompare
+	> StringToHandleMap;
 
-	Section dependencyTable;
-	Section objectTable;
-	Section stringTable;
-	Section globalTable;
-	Section functionTable;
-	Section extensionTable;
-	Section bytecode;
+	typedef HqStack<HqModuleHandle> HandleStack;
+	typedef HqArray<HqString*> StringArray;
 
-	uint32_t initFunctionLength;
-	uint32_t headerEndPosition;
+	static HqModuleHandle Create(HqVmHandle hVm, HqString* const pModuleName, const char* const filePath);
+	static HqModuleHandle Create(
+		HqVmHandle hVm,
+		HqString* const pModuleName,
+		const void* const pFileData,
+		const size_t fileLength
+	);
+	static void Dispose(HqModuleHandle hModule);
+
+	static HqString* GetString(HqModuleHandle hModule, const uint32_t index, int* const pOutResult);
+
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
+
+	HqValue::StringToBoolMap dependencies;
+	HqFunction::StringToBoolMap functions;
+	HqValue::StringToBoolMap objectSchemas;
+	HqValue::StringToBoolMap globals;
+
+	StringArray strings;
+	HqByteHelper::Array code;
+
+	HqVmHandle hVm;
+	HqFunctionHandle hInitFunction;
+
+	HqString* pName;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

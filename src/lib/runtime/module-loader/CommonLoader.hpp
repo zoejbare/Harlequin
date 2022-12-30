@@ -24,11 +24,11 @@
 
 #include "../../base/String.hpp"
 
-#include "../../common/program-format/FileHeader.hpp"
+#include "../../common/module-format/FileHeader.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqProgramCommonLoader
+struct HqModuleCommonLoader
 {
 	static bool CheckMagicNumber(const HqFileHeader& fileHeader);
 
