@@ -1495,6 +1495,354 @@ int HqBytecodeWriteBranchIfFalse(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqBytecodeWriteLength(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LENGTH);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteAdd(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_ADD);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteSub(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_SUB);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteMul(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_MUL);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteDiv(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_DIV);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastInt8(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I8);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastInt16(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I16);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastInt32(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I32);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastInt64(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I64);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastUint8(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U8);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastUint16(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U16);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastUint32(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U32);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastUint64(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U64);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastFloat32(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_F32);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastFloat64(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_F64);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastBool(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_BOOL);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCastString(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_STR);
+	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
+	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 #undef _HQ_WRITE_OP_UBYTE
 #undef _HQ_WRITE_OP_SBYTE
 

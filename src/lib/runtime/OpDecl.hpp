@@ -102,6 +102,26 @@ HQ_DECLARE_OP_CODE_FN(Branch);
 HQ_DECLARE_OP_CODE_FN(BranchIfTrue);
 HQ_DECLARE_OP_CODE_FN(BranchIfFalse);
 
+HQ_DECLARE_OP_CODE_FN(Length);
+
+HQ_DECLARE_OP_CODE_FN(Add);
+HQ_DECLARE_OP_CODE_FN(Sub);
+HQ_DECLARE_OP_CODE_FN(Mul);
+HQ_DECLARE_OP_CODE_FN(Div);
+
+HQ_DECLARE_OP_CODE_FN(CastInt8);
+HQ_DECLARE_OP_CODE_FN(CastInt16);
+HQ_DECLARE_OP_CODE_FN(CastInt32);
+HQ_DECLARE_OP_CODE_FN(CastInt64);
+HQ_DECLARE_OP_CODE_FN(CastUint8);
+HQ_DECLARE_OP_CODE_FN(CastUint16);
+HQ_DECLARE_OP_CODE_FN(CastUint32);
+HQ_DECLARE_OP_CODE_FN(CastUint64);
+HQ_DECLARE_OP_CODE_FN(CastFloat32);
+HQ_DECLARE_OP_CODE_FN(CastFloat64);
+HQ_DECLARE_OP_CODE_FN(CastBool);
+HQ_DECLARE_OP_CODE_FN(CastString);
+
 //----------------------------------------------------------------------------------------------------------------------
 
 }

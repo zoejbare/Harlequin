@@ -59,6 +59,7 @@ struct HQ_BASE_API HqString
 	};
 
 	static HqString* Create(const char* const stringData);
+	static HqString* CreateFmt(const char* const fmt, ...);
 	static int32_t AddRef(HqString* const pString);
 	static int32_t Release(HqString* const pString);
 	static bool Compare(const HqString* const pLeft, const HqString* const pRight);

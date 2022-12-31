@@ -154,6 +154,39 @@ HqString* HqString::Create(const char* const stringData)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+HqString* HqString::CreateFmt(const char* const fmt, ...)
+{
+	// TODO: Implement string pooling.
+
+	if(!fmt || fmt[0] == '\0')
+	{
+		return Create("");
+	}
+
+	HqString* const pOutput = new HqString();
+	assert(pOutput != nullptr);
+
+	va_list vl;
+	va_start(vl, fmt);
+
+	char* const stringData = HqString::RawFormatVarArgs(fmt, vl);
+	assert(stringData != nullptr);
+
+	va_end(vl);
+
+	const size_t length = strlen(stringData);
+
+	pOutput->length = length;
+	pOutput->hash = RawHash(stringData);
+	pOutput->data = stringData;
+
+	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int32_t HqString::AddRef(HqString* const pString)
 {
 	return (pString)

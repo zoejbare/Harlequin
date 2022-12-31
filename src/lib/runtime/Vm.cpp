@@ -55,7 +55,6 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	HqScriptObject::StringToPtrMap::Allocate(pOutput->objectSchemas);
 
 	prv_setupOpCodes(pOutput);
-	prv_setupBuiltIns(pOutput);
 	prv_setupEmbeddedExceptions(pOutput);
 
 	HqMutex::Create(pOutput->lock);

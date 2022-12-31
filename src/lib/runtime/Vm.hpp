@@ -78,7 +78,6 @@ struct HqVm
 	static void EndianSwapOpCode(HqVmHandle hVm, HqDecoder& decoder, const uint32_t opCode);
 
 	static void prv_setupOpCodes(HqVmHandle);
-	static void prv_setupBuiltIns(HqVmHandle);
 	static void prv_setupEmbeddedExceptions(HqVmHandle);
 
 	static int32_t prv_gcThreadMain(void*);
