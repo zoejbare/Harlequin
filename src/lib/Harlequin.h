@@ -790,75 +790,75 @@ HQ_MAIN_API int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, uint32_
 
 HQ_MAIN_API int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstNull(HqSerializerHandle hSerializer,uint32_t gpRegIndex);
+HQ_MAIN_API int HqBytecodeWriteLoadImmNull(HqSerializerHandle hSerializer,uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstBool(
+HQ_MAIN_API int HqBytecodeWriteLoadImmBool(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	bool value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstI8(
+HQ_MAIN_API int HqBytecodeWriteLoadImmI8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int8_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstI16(
+HQ_MAIN_API int HqBytecodeWriteLoadImmI16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int16_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstI32(
+HQ_MAIN_API int HqBytecodeWriteLoadImmI32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int32_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstI64(
+HQ_MAIN_API int HqBytecodeWriteLoadImmI64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int64_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstU8(
+HQ_MAIN_API int HqBytecodeWriteLoadImmU8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint8_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstU16(
+HQ_MAIN_API int HqBytecodeWriteLoadImmU16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint16_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstU32(
+HQ_MAIN_API int HqBytecodeWriteLoadImmU32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstU64(
+HQ_MAIN_API int HqBytecodeWriteLoadImmU64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint64_t value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstF32(
+HQ_MAIN_API int HqBytecodeWriteLoadImmF32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	float value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstF64(
+HQ_MAIN_API int HqBytecodeWriteLoadImmF64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	double value
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadConstStr(
+HQ_MAIN_API int HqBytecodeWriteLoadImmStr(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t stringIndex

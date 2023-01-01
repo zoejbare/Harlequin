@@ -783,14 +783,14 @@ int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, const uint32_t gpRegInd
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstNull(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
+int HqBytecodeWriteLoadImmNull(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_NULL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_NULL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
@@ -798,7 +798,7 @@ int HqBytecodeWriteLoadConstNull(HqSerializerHandle hSerializer, const uint32_t 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstBool(
+int HqBytecodeWriteLoadImmBool(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const bool value
@@ -809,7 +809,7 @@ int HqBytecodeWriteLoadConstBool(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_BOOL);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_BOOL);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_BOOL(value);
 
@@ -818,7 +818,7 @@ int HqBytecodeWriteLoadConstBool(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstI8(
+int HqBytecodeWriteLoadImmI8(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int8_t value
@@ -829,7 +829,7 @@ int HqBytecodeWriteLoadConstI8(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I8);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I8);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SBYTE(value);
 
@@ -838,7 +838,7 @@ int HqBytecodeWriteLoadConstI8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstI16(
+int HqBytecodeWriteLoadImmI16(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int16_t value
@@ -849,7 +849,7 @@ int HqBytecodeWriteLoadConstI16(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I16);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I16);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SWORD(value);
 
@@ -858,7 +858,7 @@ int HqBytecodeWriteLoadConstI16(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstI32(
+int HqBytecodeWriteLoadImmI32(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int32_t value
@@ -869,7 +869,7 @@ int HqBytecodeWriteLoadConstI32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I32);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I32);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SDWORD(value);
 
@@ -878,7 +878,7 @@ int HqBytecodeWriteLoadConstI32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstI64(
+int HqBytecodeWriteLoadImmI64(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int64_t value
@@ -889,7 +889,7 @@ int HqBytecodeWriteLoadConstI64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_I64);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I64);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SQWORD(value);
 
@@ -898,7 +898,7 @@ int HqBytecodeWriteLoadConstI64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstU8(
+int HqBytecodeWriteLoadImmU8(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint8_t value
@@ -909,7 +909,7 @@ int HqBytecodeWriteLoadConstU8(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U8);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U8);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UBYTE(value);
 
@@ -918,7 +918,7 @@ int HqBytecodeWriteLoadConstU8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstU16(
+int HqBytecodeWriteLoadImmU16(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint16_t value
@@ -929,7 +929,7 @@ int HqBytecodeWriteLoadConstU16(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U16);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U16);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UWORD(value);
 
@@ -938,7 +938,7 @@ int HqBytecodeWriteLoadConstU16(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstU32(
+int HqBytecodeWriteLoadImmU32(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t value
@@ -949,7 +949,7 @@ int HqBytecodeWriteLoadConstU32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U32);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U32);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(value);
 
@@ -958,7 +958,7 @@ int HqBytecodeWriteLoadConstU32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstU64(
+int HqBytecodeWriteLoadImmU64(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint64_t value
@@ -969,7 +969,7 @@ int HqBytecodeWriteLoadConstU64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_U64);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U64);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UQWORD(value);
 
@@ -978,7 +978,7 @@ int HqBytecodeWriteLoadConstU64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstF32(
+int HqBytecodeWriteLoadImmF32(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const float value
@@ -989,7 +989,7 @@ int HqBytecodeWriteLoadConstF32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_F32);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_F32);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_FLOAT(value);
 
@@ -998,7 +998,7 @@ int HqBytecodeWriteLoadConstF32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstF64(
+int HqBytecodeWriteLoadImmF64(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const double value
@@ -1009,7 +1009,7 @@ int HqBytecodeWriteLoadConstF64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_F64);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_F64);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_DOUBLE(value);
 
@@ -1018,7 +1018,7 @@ int HqBytecodeWriteLoadConstF64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadConstStr(
+int HqBytecodeWriteLoadImmStr(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t stringIndex
@@ -1029,7 +1029,7 @@ int HqBytecodeWriteLoadConstStr(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_CONST_STR);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_STR);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(stringIndex);
 
