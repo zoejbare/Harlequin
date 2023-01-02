@@ -331,16 +331,12 @@ HqValueHandle HqValue::CreateNative(
 	HqVmHandle hVm,
 	void* const pNativeObject,
 	HqCallbackNativeValueCopy onCopy,
-	HqCallbackNativeValueDestruct onDestruct,
-	HqCallbackNativeValueEqual onTestEqual,
-	HqCallbackNativeValueLessThan onTestLessThan
+	HqCallbackNativeValueDestruct onDestruct
 )
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(onCopy != nullptr);
 	assert(onDestruct != nullptr);
-	assert(onTestEqual != nullptr);
-	assert(onTestLessThan != nullptr);
 
 	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_NATIVE, hVm);
 	if(!pOutput)
@@ -351,8 +347,6 @@ HqValueHandle HqValue::CreateNative(
 	pOutput->as.native.pObject = pNativeObject;
 	pOutput->as.native.onCopy = onCopy;
 	pOutput->as.native.onDestruct = onDestruct;
-	pOutput->as.native.onTestEqual = onTestEqual;
-	pOutput->as.native.onTestLessThan = onTestLessThan;
 
 	return pOutput;
 }
@@ -361,6 +355,8 @@ HqValueHandle HqValue::CreateNative(
 
 HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 {
+	assert(hVm != HQ_VM_HANDLE_NULL);
+
 	if(!hValue)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -427,7 +423,7 @@ HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 			break;
 
 		case HQ_VALUE_TYPE_OBJECT:
-			pOutput->as.pObject = HqScriptObject::CreateCopy(hValue->as.pObject->pSchema);
+			pOutput->as.pObject = HqScriptObject::CreateCopy(hValue->as.pObject);
 			break;
 
 		case HQ_VALUE_TYPE_ARRAY:

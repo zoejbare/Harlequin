@@ -325,8 +325,6 @@ typedef void (*HqCallbackOpDisasm)(void*, const char*, uintptr_t);
 
 typedef void (*HqCallbackNativeValueCopy)(void**, const void*);
 typedef void (*HqCallbackNativeValueDestruct)(void*);
-typedef bool (*HqCallbackNativeValueEqual)(const void*, const void*);
-typedef bool (*HqCallbackNativeValueLessThan)(const void*, const void*);
 
 typedef bool (*HqCallbackIterateFrame)(void*, HqFrameHandle);
 typedef bool (*HqCallbackIterateModule)(void*, HqModuleHandle);
@@ -571,9 +569,7 @@ HQ_MAIN_API HqValueHandle HqValueCreateNative(
 	HqVmHandle hVm,
 	void* pNativeObject,
 	HqCallbackNativeValueCopy onCopy,
-	HqCallbackNativeValueDestruct onDestruct,
-	HqCallbackNativeValueEqual onTestEqual,
-	HqCallbackNativeValueLessThan onTestLessThan
+	HqCallbackNativeValueDestruct onDestruct
 );
 
 HQ_MAIN_API HqValueHandle HqValueCopy(HqVmHandle hVm, HqValueHandle hValue);
@@ -1097,6 +1093,25 @@ HQ_MAIN_API int HqBytecodeWriteCastBool(
 );
 
 HQ_MAIN_API int HqBytecodeWriteCastString(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteCompare(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteMove(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteCopy(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex

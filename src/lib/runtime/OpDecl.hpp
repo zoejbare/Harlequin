@@ -123,6 +123,10 @@ HQ_DECLARE_OP_CODE_FN(CastFloat64);
 HQ_DECLARE_OP_CODE_FN(CastBool);
 HQ_DECLARE_OP_CODE_FN(CastString);
 
+HQ_DECLARE_OP_CODE_FN(Compare);
+HQ_DECLARE_OP_CODE_FN(Move);
+HQ_DECLARE_OP_CODE_FN(Copy);
+
 //----------------------------------------------------------------------------------------------------------------------
 
 }

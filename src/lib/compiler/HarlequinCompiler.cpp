@@ -635,47 +635,47 @@ int HqModuleWriterSerialize(
 		return HQ_ERROR_NO_WRITE; \
 	}
 
-#define _HQ_WRITE_OP_UBYTE(x) \
+#define _HQ_EMIT_UBYTE(x) \
 	if(HqSerializerWriteUint32(hSerializer, uint32_t(x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
-#define _HQ_WRITE_OP_SBYTE(x) \
+#define _HQ_EMIT_SBYTE(x) \
 	if(HqSerializerWriteInt32(hSerializer, int32_t(x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
 
-#define _HQ_WRITE_OP_UWORD(x) \
+#define _HQ_EMIT_UWORD(x) \
 	if(HqSerializerWriteUint32(hSerializer, uint32_t(x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
-#define _HQ_WRITE_OP_SWORD(x) \
+#define _HQ_EMIT_SWORD(x) \
 	if(HqSerializerWriteInt32(hSerializer, int32_t(x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
 
-#define _HQ_WRITE_OP_UDWORD(x) \
+#define _HQ_EMIT_UDWORD(x) \
 	if(HqSerializerWriteUint32(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
-#define _HQ_WRITE_OP_SDWORD(x) \
+#define _HQ_EMIT_SDWORD(x) \
 	if(HqSerializerWriteInt32(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
 
-#define _HQ_WRITE_OP_UQWORD(x) \
+#define _HQ_EMIT_UQWORD(x) \
 	if(HqSerializerWriteUint64(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
-#define _HQ_WRITE_OP_SQWORD(x) \
+#define _HQ_EMIT_SQWORD(x) \
 	if(HqSerializerWriteInt64(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
 
-#define _HQ_WRITE_OP_FLOAT(x) \
+#define _HQ_EMIT_FLOAT(x) \
 	if(HqSerializerWriteFloat32(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
-#define _HQ_WRITE_OP_DOUBLE(x) \
+#define _HQ_EMIT_DOUBLE(x) \
 	if(HqSerializerWriteFloat64(hSerializer, (x)) != HQ_SUCCESS) { \
 		return HQ_ERROR_NO_WRITE; \
 	}
@@ -689,7 +689,7 @@ int HqBytecodeWriteNop(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_NOP);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_NOP);
 
 	return HQ_SUCCESS;
 }
@@ -703,7 +703,7 @@ int HqBytecodeWriteAbort(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_ABORT);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_ABORT);
 
 	return HQ_SUCCESS;
 }
@@ -717,7 +717,7 @@ int HqBytecodeWriteReturn(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_RETURN);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_RETURN);
 
 	return HQ_SUCCESS;
 }
@@ -731,7 +731,7 @@ int HqBytecodeWriteYield(HqSerializerHandle hSerializer)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_YIELD);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_YIELD);
 
 	return HQ_SUCCESS;
 }
@@ -745,8 +745,8 @@ int HqBytecodeWriteCall(HqSerializerHandle hSerializer, const uint32_t stringInd
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CALL);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CALL);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -760,8 +760,8 @@ int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, const uint32_t gpRe
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CALL_VALUE);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CALL_VALUE);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -775,8 +775,8 @@ int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, const uint32_t gpRegInd
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_RAISE);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_RAISE);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -790,8 +790,8 @@ int HqBytecodeWriteLoadImmNull(HqSerializerHandle hSerializer, const uint32_t gp
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_NULL);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_NULL);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -809,8 +809,8 @@ int HqBytecodeWriteLoadImmBool(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_BOOL);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_BOOL);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_BOOL(value);
 
 	return HQ_SUCCESS;
@@ -829,9 +829,9 @@ int HqBytecodeWriteLoadImmI8(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I8);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_SBYTE(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_I8);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_SBYTE(value);
 
 	return HQ_SUCCESS;
 }
@@ -849,9 +849,9 @@ int HqBytecodeWriteLoadImmI16(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I16);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_SWORD(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_I16);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_SWORD(value);
 
 	return HQ_SUCCESS;
 }
@@ -869,9 +869,9 @@ int HqBytecodeWriteLoadImmI32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I32);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_SDWORD(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_I32);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_SDWORD(value);
 
 	return HQ_SUCCESS;
 }
@@ -889,9 +889,9 @@ int HqBytecodeWriteLoadImmI64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_I64);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_SQWORD(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_I64);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_SQWORD(value);
 
 	return HQ_SUCCESS;
 }
@@ -909,9 +909,9 @@ int HqBytecodeWriteLoadImmU8(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U8);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UBYTE(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_U8);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(value);
 
 	return HQ_SUCCESS;
 }
@@ -929,9 +929,9 @@ int HqBytecodeWriteLoadImmU16(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U16);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UWORD(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_U16);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UWORD(value);
 
 	return HQ_SUCCESS;
 }
@@ -949,9 +949,9 @@ int HqBytecodeWriteLoadImmU32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U32);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_U32);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(value);
 
 	return HQ_SUCCESS;
 }
@@ -969,9 +969,9 @@ int HqBytecodeWriteLoadImmU64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_U64);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UQWORD(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_U64);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UQWORD(value);
 
 	return HQ_SUCCESS;
 }
@@ -989,9 +989,9 @@ int HqBytecodeWriteLoadImmF32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_F32);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_FLOAT(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_F32);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_FLOAT(value);
 
 	return HQ_SUCCESS;
 }
@@ -1009,9 +1009,9 @@ int HqBytecodeWriteLoadImmF64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_F64);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_DOUBLE(value);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_F64);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_DOUBLE(value);
 
 	return HQ_SUCCESS;
 }
@@ -1029,9 +1029,9 @@ int HqBytecodeWriteLoadImmStr(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_IMM_STR);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_IMM_STR);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1049,9 +1049,9 @@ int HqBytecodeWriteLoadGlobal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_GLOBAL);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_GLOBAL);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1069,9 +1069,9 @@ int HqBytecodeWriteLoadLocal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_LOCAL);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_LOCAL);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1089,9 +1089,9 @@ int HqBytecodeWriteLoadParam(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_PARAM);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(ioRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_PARAM);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(ioRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1110,10 +1110,10 @@ int HqBytecodeWriteLoadObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_OBJECT);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
-	_HQ_WRITE_OP_UDWORD(memberIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_OBJECT);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(memberIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1132,10 +1132,10 @@ int HqBytecodeWriteLoadArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LOAD_ARRAY);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
-	_HQ_WRITE_OP_UDWORD(arrayIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_ARRAY);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(arrayIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1153,9 +1153,9 @@ int HqBytecodeWriteStoreGlobal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_GLOBAL);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_GLOBAL);
+	_HQ_EMIT_UDWORD(stringIndex);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1173,9 +1173,9 @@ int HqBytecodeWriteStoreLocal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_LOCAL);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_LOCAL);
+	_HQ_EMIT_UDWORD(stringIndex);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1193,9 +1193,9 @@ int HqBytecodeWriteStoreParam(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_PARAM);
-	_HQ_WRITE_OP_UDWORD(ioRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_PARAM);
+	_HQ_EMIT_UDWORD(ioRegIndex);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1214,10 +1214,10 @@ int HqBytecodeWriteStoreObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_OBJECT);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
-	_HQ_WRITE_OP_UDWORD(memberIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_OBJECT);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(memberIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1236,10 +1236,10 @@ int HqBytecodeWriteStoreArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_STORE_ARRAY);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
-	_HQ_WRITE_OP_UDWORD(arrayIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_ARRAY);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(arrayIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1257,9 +1257,9 @@ int HqBytecodeWritePullGlobal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_GLOBAL);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_PULL_GLOBAL);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1277,9 +1277,9 @@ int HqBytecodeWritePullLocal(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_LOCAL);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_PULL_LOCAL);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1297,9 +1297,9 @@ int HqBytecodeWritePullParam(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_PARAM);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(ioRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_PULL_PARAM);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(ioRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1318,10 +1318,10 @@ int HqBytecodeWritePullObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_OBJECT);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
-	_HQ_WRITE_OP_UDWORD(memberIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_PULL_OBJECT);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(memberIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1340,10 +1340,10 @@ int HqBytecodeWritePullArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PULL_ARRAY);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
-	_HQ_WRITE_OP_UDWORD(arrayIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_PULL_ARRAY);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(arrayIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1357,8 +1357,8 @@ int HqBytecodeWritePush(HqSerializerHandle hSerializer, const uint32_t gpRegInde
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_PUSH);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_PUSH);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1372,8 +1372,8 @@ int HqBytecodeWritePop(HqSerializerHandle hSerializer, const uint32_t gpRegIndex
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_POP);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_POP);
+	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1391,9 +1391,9 @@ int HqBytecodeWriteInitObject(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_OBJECT);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_INIT_OBJECT);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1411,9 +1411,9 @@ int HqBytecodeWriteInitArray(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_ARRAY);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(initialCount);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_INIT_ARRAY);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(initialCount);
 
 	return HQ_SUCCESS;
 }
@@ -1431,9 +1431,9 @@ int HqBytecodeWriteInitFunction(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_FUNC);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_UDWORD(stringIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_INIT_FUNC);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1447,8 +1447,8 @@ int HqBytecodeWriteJump(HqSerializerHandle hSerializer, const int32_t offset)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_JMP);
-	_HQ_WRITE_OP_SDWORD(offset);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_JMP);
+	_HQ_EMIT_SDWORD(offset);
 
 	return HQ_SUCCESS;
 }
@@ -1466,9 +1466,9 @@ int HqBytecodeWriteJumpIfTrue(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_JMP_TRUE);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_SDWORD(offset);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_JMP_TRUE);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_SDWORD(offset);
 
 	return HQ_SUCCESS;
 }
@@ -1486,9 +1486,9 @@ int HqBytecodeWriteJumpIfFalse(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_JMP_FALSE);
-	_HQ_WRITE_OP_UDWORD(gpRegIndex);
-	_HQ_WRITE_OP_SDWORD(offset);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_JMP_FALSE);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_SDWORD(offset);
 
 	return HQ_SUCCESS;
 }
@@ -1506,9 +1506,9 @@ int HqBytecodeWriteLength(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_LENGTH);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LENGTH);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1527,10 +1527,10 @@ int HqBytecodeWriteAdd(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_ADD);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_ADD);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1549,10 +1549,10 @@ int HqBytecodeWriteSub(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_SUB);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_SUB);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1571,10 +1571,10 @@ int HqBytecodeWriteMul(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_MUL);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_MUL);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1593,10 +1593,10 @@ int HqBytecodeWriteDiv(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_DIV);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcLeftRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRightRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_DIV);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1614,9 +1614,9 @@ int HqBytecodeWriteCastInt8(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I8);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_I8);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1634,9 +1634,9 @@ int HqBytecodeWriteCastInt16(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I16);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_I16);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1654,9 +1654,9 @@ int HqBytecodeWriteCastInt32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I32);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_I32);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1674,9 +1674,9 @@ int HqBytecodeWriteCastInt64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_I64);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_I64);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1694,9 +1694,9 @@ int HqBytecodeWriteCastUint8(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U8);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_U8);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1714,9 +1714,9 @@ int HqBytecodeWriteCastUint16(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U16);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_U16);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1734,9 +1734,9 @@ int HqBytecodeWriteCastUint32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U32);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_U32);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1754,9 +1754,9 @@ int HqBytecodeWriteCastUint64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_U64);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_U64);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1774,9 +1774,9 @@ int HqBytecodeWriteCastFloat32(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_F32);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_F32);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1794,9 +1794,9 @@ int HqBytecodeWriteCastFloat64(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_F64);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_F64);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1814,9 +1814,9 @@ int HqBytecodeWriteCastBool(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_BOOL);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_BOOL);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1834,29 +1834,91 @@ int HqBytecodeWriteCastString(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_CAST_STR);
-	_HQ_WRITE_OP_UDWORD(gpDstRegIndex);
-	_HQ_WRITE_OP_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CAST_STR);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#undef _HQ_WRITE_OP_UBYTE
-#undef _HQ_WRITE_OP_SBYTE
+int HqBytecodeWriteCompare(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
 
-#undef _HQ_WRITE_OP_UWORD
-#undef _HQ_WRITE_OP_SWORD
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
-#undef _HQ_WRITE_OP_UDWORD
-#undef _HQ_WRITE_OP_SDWORD
+	return HQ_SUCCESS;
+}
 
-#undef _HQ_WRITE_OP_UQWORD
-#undef _HQ_WRITE_OP_SQWORD
+//----------------------------------------------------------------------------------------------------------------------
 
-#undef _HQ_WRITE_OP_FLOAT
-#undef _HQ_WRITE_OP_DOUBLE
+int HqBytecodeWriteMove(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_MOV);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCopy(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_COPY);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#undef _HQ_EMIT_UBYTE
+#undef _HQ_EMIT_SBYTE
+
+#undef _HQ_EMIT_UWORD
+#undef _HQ_EMIT_SWORD
+
+#undef _HQ_EMIT_UDWORD
+#undef _HQ_EMIT_SDWORD
+
+#undef _HQ_EMIT_UQWORD
+#undef _HQ_EMIT_SQWORD
+
+#undef _HQ_EMIT_FLOAT
+#undef _HQ_EMIT_DOUBLE
 
 //----------------------------------------------------------------------------------------------------------------------
 

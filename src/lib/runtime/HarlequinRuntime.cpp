@@ -1725,23 +1725,26 @@ HqValueHandle HqValueCreateNative(
 	HqVmHandle hVm,
 	void* pNativeObject,
 	HqCallbackNativeValueCopy onCopy,
-	HqCallbackNativeValueDestruct onDestruct,
-	HqCallbackNativeValueEqual onTestEqual,
-	HqCallbackNativeValueLessThan onTestLessThan
+	HqCallbackNativeValueDestruct onDestruct
 )
 {
-	if(!hVm || !onCopy || !onDestruct || !onTestEqual || !onTestLessThan)
+	if(!hVm || !onCopy || !onDestruct)
 	{
 		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return HqValue::CreateNative(hVm, pNativeObject, onCopy, onDestruct, onTestEqual, onTestLessThan);
+	return HqValue::CreateNative(hVm, pNativeObject, onCopy, onDestruct);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 HqValueHandle HqValueCopy(HqVmHandle hVm, HqValueHandle hValue)
 {
+	if(!hVm || !hValue)
+	{
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
 	HqValueHandle hValueCopy = HqValue::Copy(hVm, hValue);
 
 	return hValueCopy;

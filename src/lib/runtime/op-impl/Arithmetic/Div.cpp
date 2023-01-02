@@ -20,8 +20,6 @@
 
 #include "../../Decoder.hpp"
 #include "../../Execution.hpp"
-#include "../../Function.hpp"
-#include "../../Module.hpp"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -34,7 +32,7 @@
 //
 //   r# [first]  = General-purpose register index where the result will be stored
 //   r# [second] = General-purpose register index containing the left-hand operand value
-//   r# [third]  = General-purpose register index containing the right-handl operand value
+//   r# [third]  = General-purpose register index containing the right-hand operand value
 //
 //----------------------------------------------------------------------------------------------------------------------
 

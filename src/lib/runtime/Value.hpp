@@ -38,8 +38,6 @@ struct HqNativeValueWrapper
 
 	HqCallbackNativeValueCopy onCopy;
 	HqCallbackNativeValueDestruct onDestruct;
-	HqCallbackNativeValueEqual onTestEqual;
-	HqCallbackNativeValueLessThan onTestLessThan;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -85,9 +83,7 @@ struct HqValue
 		HqVmHandle hVm,
 		void* const pNativeObject,
 		HqCallbackNativeValueCopy onCopy,
-		HqCallbackNativeValueDestruct onDestruct,
-		HqCallbackNativeValueEqual onTestEqual,
-		HqCallbackNativeValueLessThan onTestLessThan
+		HqCallbackNativeValueDestruct onDestruct
 	);
 	static HqValueHandle Copy(HqVmHandle hVm, HqValueHandle hValue);
 
