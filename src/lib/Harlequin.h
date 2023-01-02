@@ -982,15 +982,15 @@ HQ_MAIN_API int HqBytecodeWriteInitFunction(
 	uint32_t stringIndex
 );
 
-HQ_MAIN_API int HqBytecodeWriteBranch(HqSerializerHandle hSerializer, int32_t offset);
+HQ_MAIN_API int HqBytecodeWriteJump(HqSerializerHandle hSerializer, int32_t offset);
 
-HQ_MAIN_API int HqBytecodeWriteBranchIfTrue(
+HQ_MAIN_API int HqBytecodeWriteJumpIfTrue(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int32_t offset
 );
 
-HQ_MAIN_API int HqBytecodeWriteBranchIfFalse(
+HQ_MAIN_API int HqBytecodeWriteJumpIfFalse(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int32_t offset

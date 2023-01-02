@@ -30,22 +30,22 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
 // Move the instruction pointer by a specified offset. Offset cannot exceed the bounds of the current function.
-// The conditional branch instructions will depend on the boolean evaluation of a specified register.
+// The conditional jump instructions will depend on the boolean evaluation of a specified register.
 //
-// 0x: BRANCH ##
-//   ## - Signed offset relative to the bytecode the current branch instruction
+// 0x: JMP ##
+//   ## - Signed offset relative to the bytecode the current jump instruction
 //
-// 0x: BRANCH_IF_TRUE r#, ##
+// 0x: JMP<TRUE> r#, ##
 //   r# - Register to evaluate
-//   ## - Signed offset relative to the bytecode the current branch instruction
+//   ## - Signed offset relative to the bytecode the current jump instruction
 //
-// 0x: BRANCH_IF_FALSE r#, ##
+// 0x: JMP<FALSE> r#, ##
 //   r# - Register to evaluate
-//   ## - Signed offset relative to the bytecode the current branch instruction
+//   ## - Signed offset relative to the bytecode the current jump instruction
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-static void MoveInstructionPointer(HqExecutionHandle hExec, const int32_t relativeOffset)
+static inline void _MoveInstructionPointer(HqExecutionHandle hExec, const int32_t relativeOffset)
 {
 	HqFunctionHandle hFunction = hExec->hCurrentFrame->hFunction;
 	HqModuleHandle hModule = hExec->hCurrentFrame->hFunction->hModule;
@@ -62,7 +62,7 @@ static void MoveInstructionPointer(HqExecutionHandle hExec, const int32_t relati
 		HqExecution::RaiseOpCodeException(
 			hExec, 
 			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-			"Invalid branch offset: offset=%" PRId32 ", currentPosition=0x%" PRIXPTR ", functionStart=0x%" PRIXPTR ", functionEnd=0x%" PRIXPTR,
+			"Invalid jump offset: offset=%" PRId32 ", currentPosition=0x%" PRIXPTR ", functionStart=0x%" PRIXPTR ", functionEnd=0x%" PRIXPTR,
 			relativeOffset,
 			uintptr_t(hExec->hCurrentFrame->decoder.cachedIp),
 			uintptr_t(pFunctionStart),
@@ -78,7 +78,7 @@ static void MoveInstructionPointer(HqExecutionHandle hExec, const int32_t relati
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static bool EvaluateValue(HqValueHandle hValue)
+static inline bool _EvaluateValue(HqValueHandle hValue)
 {
 	if(!hValue)
 	{
@@ -123,6 +123,16 @@ static bool EvaluateValue(HqValueHandle hValue)
 		case HQ_VALUE_TYPE_STRING:
 			return hValue->as.pString->length != 0;
 
+		case HQ_VALUE_TYPE_FUNCTION:
+		case HQ_VALUE_TYPE_OBJECT:
+			return true;
+
+		case HQ_VALUE_TYPE_NATIVE:
+			return hValue->as.native.pObject != nullptr;
+
+		case HQ_VALUE_TYPE_ARRAY:
+			return hValue->as.array.count > 0;
+
 		default:
 			assert(false);
 			break;
@@ -133,7 +143,7 @@ static bool EvaluateValue(HqValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static void RaiseFatalException_ObjectAsBool(HqExecutionHandle hExec, const uint32_t registerIndex)
+static inline void _RaiseFatalException_ObjectAsBool(HqExecutionHandle hExec, const uint32_t registerIndex)
 {
 	HqExecution::RaiseOpCodeException(
 		hExec, 
@@ -145,7 +155,7 @@ static void RaiseFatalException_ObjectAsBool(HqExecutionHandle hExec, const uint
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static void RaiseFatalException_NoValueAtGpRegister(HqExecutionHandle hExec, const uint32_t registerIndex)
+static inline void _RaiseFatalException_NoValueAtGpRegister(HqExecutionHandle hExec, const uint32_t registerIndex)
 {
 	HqExecution::RaiseOpCodeException(
 		hExec, 
@@ -157,36 +167,36 @@ static void RaiseFatalException_NoValueAtGpRegister(HqExecutionHandle hExec, con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeExec_Branch(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_Jump(HqExecutionHandle hExec)
 {
 	const int32_t offset = HqDecoder::LoadInt32(hExec->hCurrentFrame->decoder);
 
 	// No condition, just move the instruction pointer.
-	MoveInstructionPointer(hExec, offset);
+	_MoveInstructionPointer(hExec, offset);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeDisasm_Branch(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_Jump(HqDisassemble& disasm)
 {
 	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
-	snprintf(str, sizeof(str), "BRANCH #%" PRId32 " (0x%" PRIXPTR ")", offset, position);
+	snprintf(str, sizeof(str), "JMP #%" PRId32 " (0x%" PRIXPTR ")", offset, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeEndian_Branch(HqDecoder& decoder)
+extern "C" void OpCodeEndian_Jump(HqDecoder& decoder)
 {
 	HqDecoder::EndianSwapInt32(decoder);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeExec_BranchIfTrue(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_JumpIfTrue(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -199,42 +209,42 @@ extern "C" void OpCodeExec_BranchIfTrue(HqExecutionHandle hExec)
 		// Object values cannot be evaluated directly.
 		if(!HqValueIsObject(hValue))
 		{
-			const bool pass = EvaluateValue(hValue);
+			const bool pass = _EvaluateValue(hValue);
 
 			if(pass)
 			{
-				MoveInstructionPointer(hExec, offset);
+				_MoveInstructionPointer(hExec, offset);
 			}
 		}
 		else
 		{
 			// Raise a fatal script exception.
-			RaiseFatalException_ObjectAsBool(hExec, registerIndex);
+			_RaiseFatalException_ObjectAsBool(hExec, registerIndex);
 		}
 	}
 	else
 	{
 		// Raise a fatal script exception.
-		RaiseFatalException_NoValueAtGpRegister(hExec, registerIndex);
+		_RaiseFatalException_NoValueAtGpRegister(hExec, registerIndex);
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeDisasm_BranchIfTrue(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_JumpIfTrue(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
-	snprintf(str, sizeof(str), "BRANCH_IF_TRUE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
+	snprintf(str, sizeof(str), "JMP_TRUE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeEndian_BranchIfTrue(HqDecoder& decoder)
+extern "C" void OpCodeEndian_JumpIfTrue(HqDecoder& decoder)
 {
 	HqDecoder::EndianSwapUint32(decoder);
 	HqDecoder::EndianSwapInt32(decoder);
@@ -242,7 +252,7 @@ extern "C" void OpCodeEndian_BranchIfTrue(HqDecoder& decoder)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeExec_BranchIfFalse(HqExecutionHandle hExec)
+extern "C" void OpCodeExec_JumpIfFalse(HqExecutionHandle hExec)
 {
 	int result;
 
@@ -255,42 +265,42 @@ extern "C" void OpCodeExec_BranchIfFalse(HqExecutionHandle hExec)
 		// Object values cannot be evaluated directly.
 		if(!HqValueIsObject(hValue))
 		{
-			const bool pass = !EvaluateValue(hValue);
+			const bool pass = !_EvaluateValue(hValue);
 
 			if(pass)
 			{
-				MoveInstructionPointer(hExec, offset);
+				_MoveInstructionPointer(hExec, offset);
 			}
 		}
 		else
 		{
 			// Raise a fatal script exception.
-			RaiseFatalException_ObjectAsBool(hExec, registerIndex);
+			_RaiseFatalException_ObjectAsBool(hExec, registerIndex);
 		}
 	}
 	else
 	{
 		// Raise a fatal script exception.
-		RaiseFatalException_NoValueAtGpRegister(hExec, registerIndex);
+		_RaiseFatalException_NoValueAtGpRegister(hExec, registerIndex);
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeDisasm_BranchIfFalse(HqDisassemble& disasm)
+extern "C" void OpCodeDisasm_JumpIfFalse(HqDisassemble& disasm)
 {
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const int32_t offset = HqDecoder::LoadInt32(disasm.decoder);
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
-	snprintf(str, sizeof(str), "BRANCH_IF_FALSE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
+	snprintf(str, sizeof(str), "JMP_FALSE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void OpCodeEndian_BranchIfFalse(HqDecoder& decoder)
+extern "C" void OpCodeEndian_JumpIfFalse(HqDecoder& decoder)
 {
 	HqDecoder::EndianSwapUint32(decoder);
 	HqDecoder::EndianSwapInt32(decoder);

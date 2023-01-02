@@ -99,7 +99,7 @@ extern "C" void OpCodeDisasm_InitFunction(HqDisassemble& disasm)
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
-	char instr[512];
+	char instr[64];
 	snprintf(instr, sizeof(instr), "INIT_FUNC r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }

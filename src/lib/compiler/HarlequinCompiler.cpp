@@ -1431,7 +1431,7 @@ int HqBytecodeWriteInitFunction(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_FUNCTION);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_INIT_FUNC);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_UDWORD(stringIndex);
 
@@ -1440,14 +1440,14 @@ int HqBytecodeWriteInitFunction(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteBranch(HqSerializerHandle hSerializer, const int32_t offset)
+int HqBytecodeWriteJump(HqSerializerHandle hSerializer, const int32_t offset)
 {
 	if(!hSerializer)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_BRANCH);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_JMP);
 	_HQ_WRITE_OP_SDWORD(offset);
 
 	return HQ_SUCCESS;
@@ -1455,7 +1455,7 @@ int HqBytecodeWriteBranch(HqSerializerHandle hSerializer, const int32_t offset)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteBranchIfTrue(
+int HqBytecodeWriteJumpIfTrue(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int32_t offset
@@ -1466,7 +1466,7 @@ int HqBytecodeWriteBranchIfTrue(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_BRANCH_IF_TRUE);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_JMP_TRUE);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SDWORD(offset);
 
@@ -1475,7 +1475,7 @@ int HqBytecodeWriteBranchIfTrue(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteBranchIfFalse(
+int HqBytecodeWriteJumpIfFalse(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int32_t offset
@@ -1486,7 +1486,7 @@ int HqBytecodeWriteBranchIfFalse(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_BRANCH_IF_FALSE);
+	_HQ_WRITE_OP_UBYTE(HQ_OP_CODE_JMP_FALSE);
 	_HQ_WRITE_OP_UDWORD(gpRegIndex);
 	_HQ_WRITE_OP_SDWORD(offset);
 

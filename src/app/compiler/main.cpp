@@ -246,15 +246,15 @@ int main(int argc, char* argv[])
 		HqBytecodeWriteStoreObject(hSubFuncSerializer, 2, 0, 0);
 
 		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 1);
-		HqBytecodeWriteBranchIfTrue(hSubFuncSerializer, 0, 20);
+		HqBytecodeWriteJumpIfTrue(hSubFuncSerializer, 0, 20);
 
 		const size_t loopOffsetEnd = HqSerializerGetStreamPosition(hSubFuncSerializer);
 		const int32_t loopRelativeOffset = int32_t(loopOffsetEnd - loopOffsetStart);
 
-		HqBytecodeWriteBranch(hSubFuncSerializer, -loopRelativeOffset);
+		HqBytecodeWriteJump(hSubFuncSerializer, -loopRelativeOffset);
 
 		HqBytecodeWriteLoadObject(hSubFuncSerializer, 0, 2, 0);
-		HqBytecodeWriteBranchIfFalse(hSubFuncSerializer, 0, 16);
+		HqBytecodeWriteJumpIfFalse(hSubFuncSerializer, 0, 16);
 		HqBytecodeWriteAbort(hSubFuncSerializer);
 
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
 			exceptionHandlerStart = HqSerializerGetStreamPosition(hExcFuncSerializer);
 
 			HqBytecodeWriteCall(hExcFuncSerializer, stringIndex4);
-			HqBytecodeWriteBranch(hExcFuncSerializer, 8);
+			HqBytecodeWriteJump(hExcFuncSerializer, 8);
 		}
 
 		HqBytecodeWriteNop(hExcFuncSerializer);
