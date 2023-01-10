@@ -23,6 +23,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#define _HQ_SIGNED_INT_CLAMP(x, min, max) ( \
+	((x) > (max)) \
+		? (max) \
+		: ((x) < (min)) \
+			? (min) \
+			: (x) \
+)
+
+#define _HQ_UNSIGNED_INT_CLAMP(x, max) ( \
+	((x) > (max)) \
+		? (max) \
+		: (x) \
+)
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void HqDecoder::Initialize(HqDecoder& output, HqModuleHandle hModule, uint32_t offset)
 {
 	assert(hModule != HQ_MODULE_HANDLE_NULL);
@@ -60,7 +76,7 @@ int8_t HqDecoder::LoadInt8(HqDecoder& decoder)
 	decoder.ip += sizeof(int32_t);
 
 	// Return the data.
-	return int8_t(output);
+	return int8_t(_HQ_SIGNED_INT_CLAMP(output, SCHAR_MIN, SCHAR_MAX));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -76,7 +92,7 @@ int16_t HqDecoder::LoadInt16(HqDecoder& decoder)
 	decoder.ip += sizeof(int32_t);
 
 	// Return the data.
-	return int16_t(output);
+	return int16_t(_HQ_SIGNED_INT_CLAMP(output, SHRT_MIN, SHRT_MAX));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -124,7 +140,7 @@ uint8_t HqDecoder::LoadUint8(HqDecoder& decoder)
 	decoder.ip += sizeof(uint32_t);
 
 	// Return the data.
-	return uint8_t(output);
+	return uint8_t(_HQ_UNSIGNED_INT_CLAMP(output, UCHAR_MAX));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -140,7 +156,7 @@ uint16_t HqDecoder::LoadUint16(HqDecoder& decoder)
 	decoder.ip += sizeof(uint32_t);
 
 	// Return the data.
-	return uint16_t(output);
+	return uint16_t(_HQ_UNSIGNED_INT_CLAMP(output, USHRT_MAX));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -216,7 +232,7 @@ bool HqDecoder::EndianSwapBool(HqDecoder& decoder)
 	int32_t* const pData = reinterpret_cast<int32_t*>(decoder.ip);
 
 	// Endian swap the current bytecode data.
-	const bool output = HqEndianSwapInt32(*pData);
+	const bool output = (HqEndianSwapInt32(*pData) > 0);
 
 	// Store the endian swapped data back to the bytecode.
 	(*pData) = output;
@@ -426,5 +442,10 @@ double HqDecoder::EndianSwapFloat64(HqDecoder& decoder)
 
 	return output;
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#undef _HQ_UNSIGNED_INT_CLAMP
+#undef _HQ_SIGNED_INT_CLAMP
 
 //----------------------------------------------------------------------------------------------------------------------

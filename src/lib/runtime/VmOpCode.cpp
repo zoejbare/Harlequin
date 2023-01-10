@@ -88,6 +88,15 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	_HQ_BIND_OP_CODE(SUB, Sub);
 	_HQ_BIND_OP_CODE(MUL, Mul);
 	_HQ_BIND_OP_CODE(DIV, Div);
+	_HQ_BIND_OP_CODE(MOD, Mod);
+
+	_HQ_BIND_OP_CODE(AND, BitAnd);
+	_HQ_BIND_OP_CODE(OR, BitOr);
+	_HQ_BIND_OP_CODE(XOR, BitXor);
+	_HQ_BIND_OP_CODE(LSH, LeftShift);
+	_HQ_BIND_OP_CODE(RSH, RightShift);
+	_HQ_BIND_OP_CODE(LROT, LeftRotate);
+	_HQ_BIND_OP_CODE(RROT, RightRotate);
 
 	_HQ_BIND_OP_CODE(CAST_I8,   CastInt8);
 	_HQ_BIND_OP_CODE(CAST_I16,  CastInt16);
@@ -103,6 +112,7 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	_HQ_BIND_OP_CODE(CAST_STR,  CastString);
 
 	_HQ_BIND_OP_CODE(CMP,  Compare);
+	_HQ_BIND_OP_CODE(TEST, Test);
 	_HQ_BIND_OP_CODE(MOV,  Move);
 	_HQ_BIND_OP_CODE(COPY, Copy);
 

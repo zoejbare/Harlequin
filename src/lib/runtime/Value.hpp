@@ -91,6 +91,8 @@ struct HqValue
 
 	static void SetAutoMark(HqValueHandle hValue, const bool autoMark);
 
+	static bool EvaluateAsBoolean(HqValueHandle hValue);
+
 	static HqValue* prv_onCreate(int, HqVmHandle);
 	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
 	static void prv_onGcDestruct(void*);

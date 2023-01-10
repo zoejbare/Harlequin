@@ -78,71 +78,6 @@ static inline void _MoveInstructionPointer(HqExecutionHandle hExec, const int32_
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static inline bool _EvaluateValue(HqValueHandle hValue)
-{
-	if(!hValue)
-	{
-		return false;
-	}
-
-	switch(hValue->type)
-	{
-		case HQ_VALUE_TYPE_INT8:
-			return hValue->as.int8 != 0;
-
-		case HQ_VALUE_TYPE_INT16:
-			return hValue->as.int16 != 0;
-
-		case HQ_VALUE_TYPE_INT32:
-			return hValue->as.int32 != 0;
-
-		case HQ_VALUE_TYPE_INT64:
-			return hValue->as.int64 != 0;
-
-		case HQ_VALUE_TYPE_UINT8:
-			return hValue->as.uint8 != 0;
-
-		case HQ_VALUE_TYPE_UINT16:
-			return hValue->as.uint16 != 0;
-
-		case HQ_VALUE_TYPE_UINT32:
-			return hValue->as.uint32 != 0;
-
-		case HQ_VALUE_TYPE_UINT64:
-			return hValue->as.uint64 != 0;
-
-		case HQ_VALUE_TYPE_FLOAT32:
-			return hValue->as.float32 != 0.0f;
-
-		case HQ_VALUE_TYPE_FLOAT64:
-			return hValue->as.float64 != 0.0;
-
-		case HQ_VALUE_TYPE_BOOL:
-			return hValue->as.boolean;
-
-		case HQ_VALUE_TYPE_STRING:
-			return hValue->as.pString->length != 0;
-
-		case HQ_VALUE_TYPE_FUNCTION:
-		case HQ_VALUE_TYPE_OBJECT:
-			return true;
-
-		case HQ_VALUE_TYPE_NATIVE:
-			return hValue->as.native.pObject != nullptr;
-
-		case HQ_VALUE_TYPE_ARRAY:
-			return hValue->as.array.count > 0;
-
-		default:
-			assert(false);
-			break;
-	}
-
-	return false;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 static inline void _RaiseFatalException_ObjectAsBool(HqExecutionHandle hExec, const uint32_t registerIndex)
 {
 	HqExecution::RaiseOpCodeException(
@@ -209,7 +144,7 @@ extern "C" void OpCodeExec_JumpIfTrue(HqExecutionHandle hExec)
 		// Object values cannot be evaluated directly.
 		if(!HqValueIsObject(hValue))
 		{
-			const bool pass = _EvaluateValue(hValue);
+			const bool pass = HqValue::EvaluateAsBoolean(hValue);
 
 			if(pass)
 			{
@@ -265,7 +200,7 @@ extern "C" void OpCodeExec_JumpIfFalse(HqExecutionHandle hExec)
 		// Object values cannot be evaluated directly.
 		if(!HqValueIsObject(hValue))
 		{
-			const bool pass = !_EvaluateValue(hValue);
+			const bool pass = !HqValue::EvaluateAsBoolean(hValue);
 
 			if(pass)
 			{

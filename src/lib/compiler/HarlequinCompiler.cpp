@@ -1603,6 +1603,182 @@ int HqBytecodeWriteDiv(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqBytecodeWriteMod(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_MOD);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteBitAnd(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_AND);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteBitOr(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_OR);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteBitXor(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_XOR);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLeftShift(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint8_t shiftAmount
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LSH);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(shiftAmount);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteRightShift(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint8_t shiftAmount
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_RSH);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(shiftAmount);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteLeftRotate(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint8_t shiftAmount
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LROT);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(shiftAmount);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteRightRotate(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint8_t shiftAmount
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_RROT);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(shiftAmount);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqBytecodeWriteCastInt8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
@@ -1859,6 +2035,26 @@ int HqBytecodeWriteCompare(
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
 	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
 	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteTest(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_TEST);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
 	return HQ_SUCCESS;
 }
