@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	HqSerializerCreate(&hSubFuncSerializer, HQ_SERIALIZER_MODE_WRITER);
 	HqSerializerCreate(&hExcFuncSerializer, HQ_SERIALIZER_MODE_WRITER);
 
-	const int endianness = HqGetPlatformEndianness();
+	const int endianness = HQ_ENDIAN_ORDER_BIG;
 
 	// Set the endianness of each serializer.
 	HqSerializerSetEndianness(hFileSerializer, endianness);
