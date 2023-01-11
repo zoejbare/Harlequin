@@ -29,7 +29,7 @@
 //
 // Load two values from general-purpose registers and calculate the division remainder between them.
 //
-// 0x: MUL r#, r#, r#
+// 0x: MOD r#, r#, r#
 //
 //   r# [first]  = General-purpose register index where the result will be stored
 //   r# [second] = General-purpose register index containing the left-hand operand value
@@ -65,7 +65,7 @@ extern "C" void OpCodeExec_Mod(HqExecutionHandle hExec)
 					case HQ_VALUE_TYPE_UINT16:  hOutput = HqValue::CreateUint16(hExec->hVm, hLeft->as.uint16 % hRight->as.uint16);         break;
 					case HQ_VALUE_TYPE_UINT32:  hOutput = HqValue::CreateUint32(hExec->hVm, hLeft->as.uint32 % hRight->as.uint32);         break;
 					case HQ_VALUE_TYPE_UINT64:  hOutput = HqValue::CreateUint64(hExec->hVm, hLeft->as.uint64 % hRight->as.uint64);         break;
-					case HQ_VALUE_TYPE_FLOAT32: hOutput = HqValue::CreateFloat32(hExec->hVm, fmod(hLeft->as.float32, hRight->as.float32)); break;
+					case HQ_VALUE_TYPE_FLOAT32: hOutput = HqValue::CreateFloat32(hExec->hVm, fmodf(hLeft->as.float32, hRight->as.float32)); break;
 					case HQ_VALUE_TYPE_FLOAT64: hOutput = HqValue::CreateFloat64(hExec->hVm, fmod(hLeft->as.float64, hRight->as.float64)); break;
 
 					default:
