@@ -1625,6 +1625,28 @@ int HqBytecodeWriteMod(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqBytecodeWriteExp(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_EXP);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqBytecodeWriteBitAnd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,

@@ -1033,6 +1033,13 @@ HQ_MAIN_API int HqBytecodeWriteMod(
 	uint32_t gpSrcRightRegIndex
 );
 
+HQ_MAIN_API int HqBytecodeWriteExp(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+);
+
 HQ_MAIN_API int HqBytecodeWriteBitAnd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,

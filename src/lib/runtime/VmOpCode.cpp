@@ -89,6 +89,7 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	_HQ_BIND_OP_CODE(MUL, Mul);
 	_HQ_BIND_OP_CODE(DIV, Div);
 	_HQ_BIND_OP_CODE(MOD, Mod);
+	_HQ_BIND_OP_CODE(EXP, Exp);
 
 	_HQ_BIND_OP_CODE(AND, BitAnd);
 	_HQ_BIND_OP_CODE(OR, BitOr);
