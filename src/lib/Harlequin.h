@@ -1064,29 +1064,29 @@ HQ_MAIN_API int HqBytecodeWriteBitXor(
 HQ_MAIN_API int HqBytecodeWriteLeftShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteRightShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteLeftRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteRightRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteCastInt8(

@@ -1716,8 +1716,8 @@ int HqBytecodeWriteBitXor(
 int HqBytecodeWriteLeftShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 )
 {
 	if(!hSerializer)
@@ -1727,8 +1727,8 @@ int HqBytecodeWriteLeftShift(
 
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_LSH);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
-	_HQ_EMIT_UDWORD(gpSrcRegIndex);
-	_HQ_EMIT_UDWORD(shiftAmount);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1738,8 +1738,8 @@ int HqBytecodeWriteLeftShift(
 int HqBytecodeWriteRightShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 )
 {
 	if(!hSerializer)
@@ -1749,8 +1749,8 @@ int HqBytecodeWriteRightShift(
 
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_RSH);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
-	_HQ_EMIT_UDWORD(gpSrcRegIndex);
-	_HQ_EMIT_UDWORD(shiftAmount);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1760,8 +1760,8 @@ int HqBytecodeWriteRightShift(
 int HqBytecodeWriteLeftRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 )
 {
 	if(!hSerializer)
@@ -1771,8 +1771,8 @@ int HqBytecodeWriteLeftRotate(
 
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_LROT);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
-	_HQ_EMIT_UDWORD(gpSrcRegIndex);
-	_HQ_EMIT_UDWORD(shiftAmount);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1782,8 +1782,8 @@ int HqBytecodeWriteLeftRotate(
 int HqBytecodeWriteRightRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex,
-	uint8_t shiftAmount
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
 )
 {
 	if(!hSerializer)
@@ -1793,8 +1793,8 @@ int HqBytecodeWriteRightRotate(
 
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_RROT);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
-	_HQ_EMIT_UDWORD(gpSrcRegIndex);
-	_HQ_EMIT_UDWORD(shiftAmount);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
 
 	return HQ_SUCCESS;
 }

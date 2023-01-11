@@ -28,11 +28,11 @@
 //
 // Perform a bitwise right shift on an integer value.
 //
-// 0x: LSH r#, r#, ##
+// 0x: RSH r#, r#, r#
 //
 //   r# [first]  = General-purpose register index where the result will be stored
-//   r# [second] = General-purpose register index containing the source value to be shifted
-//   ##          = Amount to shift the source value
+//   r# [second] = General-purpose register index containing the left-hand operand value
+//   r# [third]  = General-purpose register index containing the right-hand operand value
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -41,52 +41,79 @@ extern "C" void OpCodeExec_RightShift(HqExecutionHandle hExec)
 	int result;
 
 	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint8_t shiftAmount = HqDecoder::LoadUint8(hExec->hCurrentFrame->decoder);
+	const uint32_t gpSrcLeftRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpSrcRightRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
-	HqValueHandle hSource = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
-	if(hSource)
+	HqValueHandle hLeft = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcLeftRegIndex, &result);
+	if(hLeft)
 	{
-		HqValueHandle hOutput = HQ_VALUE_HANDLE_NULL;
-
-		switch(hSource->type)
+		HqValueHandle hRight = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRightRegIndex, &result);
+		if(hRight)
 		{
-			case HQ_VALUE_TYPE_INT8:    hOutput = HqValue::CreateInt8(hExec->hVm, hSource->as.int8 >> shiftAmount);     break;
-			case HQ_VALUE_TYPE_INT16:   hOutput = HqValue::CreateInt16(hExec->hVm, hSource->as.int16 >> shiftAmount);   break;
-			case HQ_VALUE_TYPE_INT32:   hOutput = HqValue::CreateInt32(hExec->hVm, hSource->as.int32 >> shiftAmount);   break;
-			case HQ_VALUE_TYPE_INT64:   hOutput = HqValue::CreateInt64(hExec->hVm, hSource->as.int64 >> shiftAmount);   break;
-			case HQ_VALUE_TYPE_UINT8:   hOutput = HqValue::CreateUint8(hExec->hVm, hSource->as.uint8 >> shiftAmount);   break;
-			case HQ_VALUE_TYPE_UINT16:  hOutput = HqValue::CreateUint16(hExec->hVm, hSource->as.uint16 >> shiftAmount); break;
-			case HQ_VALUE_TYPE_UINT32:  hOutput = HqValue::CreateUint32(hExec->hVm, hSource->as.uint32 >> shiftAmount); break;
-			case HQ_VALUE_TYPE_UINT64:  hOutput = HqValue::CreateUint64(hExec->hVm, hSource->as.uint64 >> shiftAmount); break;
+			if(hLeft->type == hRight->type)
+			{
+				HqValueHandle hOutput = HQ_VALUE_HANDLE_NULL;
 
-			default:
+				switch(hLeft->type)
+				{
+					case HQ_VALUE_TYPE_INT8:   hOutput = HqValue::CreateInt8(hExec->hVm, hLeft->as.int8 >> hRight->as.int8);       break;
+					case HQ_VALUE_TYPE_INT16:  hOutput = HqValue::CreateInt16(hExec->hVm, hLeft->as.int16 >> hRight->as.int16);    break;
+					case HQ_VALUE_TYPE_INT32:  hOutput = HqValue::CreateInt32(hExec->hVm, hLeft->as.int32 >> hRight->as.int32);    break;
+					case HQ_VALUE_TYPE_INT64:  hOutput = HqValue::CreateInt64(hExec->hVm, hLeft->as.int64 >> hRight->as.int64);    break;
+					case HQ_VALUE_TYPE_UINT8:  hOutput = HqValue::CreateUint8(hExec->hVm, hLeft->as.uint8 >> hRight->as.uint8);    break;
+					case HQ_VALUE_TYPE_UINT16: hOutput = HqValue::CreateUint16(hExec->hVm, hLeft->as.uint16 >> hRight->as.uint16); break;
+					case HQ_VALUE_TYPE_UINT32: hOutput = HqValue::CreateUint32(hExec->hVm, hLeft->as.uint32 >> hRight->as.uint32); break;
+					case HQ_VALUE_TYPE_UINT64: hOutput = HqValue::CreateUint64(hExec->hVm, hLeft->as.uint64 >> hRight->as.uint64); break;
+
+					default:
+					{
+						// Raise a fatal script exception.
+						HqExecution::RaiseOpCodeException(
+							hExec, 
+							HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
+							"Type mismatch; expected integer type: r(%" PRIu32 ")", 
+							gpSrcLeftRegIndex
+						);
+						return;
+					}
+				}
+
+				if(hOutput)
+				{
+					// Remove the auto-mark from the output value so it can be cleaned up when it's no longer referenced.
+					HqValue::SetAutoMark(hOutput, false);
+
+					result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hOutput, gpDstRegIndex);
+					if(result != HQ_SUCCESS)
+					{
+						// Raise a fatal script exception.
+						HqExecution::RaiseOpCodeException(
+							hExec,
+							HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+							"Failed to set general-purpose register: r(%" PRIu32 ")",
+							gpDstRegIndex
+						);
+					}
+				}
+				else
+				{
+					// Raise a fatal script exception.
+					HqExecution::RaiseOpCodeException(
+						hExec, 
+						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+						"Failed to create output value"
+					);
+				}
+			}
+			else
 			{
 				// Raise a fatal script exception.
 				HqExecution::RaiseOpCodeException(
 					hExec, 
 					HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
-					"Type mismatch; expected integer type: r(%" PRIu32 ")", 
-					gpSrcRegIndex
-				);
-				return;
-			}
-		}
-
-		if(hOutput)
-		{
-			// Remove the auto-mark from the output value so it can be cleaned up when it's no longer referenced.
-			HqValue::SetAutoMark(hOutput, false);
-
-			result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hOutput, gpDstRegIndex);
-			if(result != HQ_SUCCESS)
-			{
-				// Raise a fatal script exception.
-				HqExecution::RaiseOpCodeException(
-					hExec,
-					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
-					"Failed to set general-purpose register: r(%" PRIu32 ")",
-					gpDstRegIndex
+					"Type mismatch; operand registers contain values of differing types: r(%" PRIu32 "), r(%" PRIu32 ")", 
+					gpSrcLeftRegIndex,
+					gpSrcRightRegIndex
 				);
 			}
 		}
@@ -96,7 +123,8 @@ extern "C" void OpCodeExec_RightShift(HqExecutionHandle hExec)
 			HqExecution::RaiseOpCodeException(
 				hExec, 
 				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-				"Failed to create output value"
+				"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
+				gpSrcRightRegIndex
 			);
 		}
 	}
@@ -107,7 +135,7 @@ extern "C" void OpCodeExec_RightShift(HqExecutionHandle hExec)
 			hExec, 
 			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
 			"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
-			gpSrcRegIndex
+			gpSrcLeftRegIndex
 		);
 	}
 }
@@ -117,11 +145,11 @@ extern "C" void OpCodeExec_RightShift(HqExecutionHandle hExec)
 extern "C" void OpCodeDisasm_RightShift(HqDisassemble& disasm)
 {
 	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(disasm.decoder);
-	const uint8_t shiftAmount = HqDecoder::LoadUint8(disasm.decoder);
+	const uint32_t gpSrcLeftRegIndex = HqDecoder::LoadUint32(disasm.decoder);
+	const uint32_t gpSrcRightRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "RSH r%" PRIu32 ", r%" PRIu32 ", #%" PRIu8, gpDstRegIndex, gpSrcRegIndex, shiftAmount);
+	snprintf(str, sizeof(str), "RSH r%" PRIu32 ", r%" PRIu32 ", r%" PRIu32, gpDstRegIndex, gpSrcLeftRegIndex, gpSrcRightRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -131,7 +159,7 @@ extern "C" void OpCodeEndian_RightShift(HqDecoder& decoder)
 {
 	HqDecoder::EndianSwapUint32(decoder); // r# [first]
 	HqDecoder::EndianSwapUint32(decoder); // r# [second]
-	HqDecoder::EndianSwapUint8(decoder); // ##
+	HqDecoder::EndianSwapUint32(decoder); // r# [third]
 }
 
 //----------------------------------------------------------------------------------------------------------------------
