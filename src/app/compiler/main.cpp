@@ -169,17 +169,63 @@ int main(int argc, char* argv[])
 		HqBytecodeWriteLoadImmI16(hMainFuncSerializer, 2, 31);
 		HqBytecodeWriteLoadImmI32(hMainFuncSerializer, 3, 123);
 		HqBytecodeWriteLoadImmI64(hMainFuncSerializer, 4, 53);
-		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 5, 64);
-		HqBytecodeWriteLoadImmI16(hMainFuncSerializer, 6, 75);
-		HqBytecodeWriteLoadImmI32(hMainFuncSerializer, 1, 86);
-		HqBytecodeWriteLoadImmI64(hMainFuncSerializer, 8, 97);
-		HqBytecodeWriteLoadImmF32(hMainFuncSerializer, 9, 3.1419f);
+		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 5, 23);
+		HqBytecodeWriteLoadImmU16(hMainFuncSerializer, 6, 75);
+		HqBytecodeWriteLoadImmU32(hMainFuncSerializer, 7, 86);
+		HqBytecodeWriteLoadImmU64(hMainFuncSerializer, 8, 97);
+		HqBytecodeWriteLoadImmF32(hMainFuncSerializer, 9, 3.1415926535897932384626433832795f);
 		HqBytecodeWriteLoadImmF64(hMainFuncSerializer, 10, 1.2345);
 		HqBytecodeWriteLoadImmF64(hMainFuncSerializer, 11, 2.3456);
 		HqBytecodeWriteLoadImmStr(hMainFuncSerializer, 12, stringIndex0);
 		HqBytecodeWriteLoadImmStr(hMainFuncSerializer, 13, stringIndex1);
 		HqBytecodeWriteLoadImmStr(hMainFuncSerializer, 14, stringIndex2);
 		HqBytecodeWriteNop(hMainFuncSerializer);
+
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 0);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 1);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 2);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 3);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 4);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 5);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 6);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 7);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 8);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 9);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 10);
+		HqBytecodeWriteTest(hMainFuncSerializer, 20, 12);
+
+		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 7);
+		HqBytecodeWriteMod(hMainFuncSerializer, 20, 1, 20);
+
+		HqBytecodeWriteLoadImmF32(hMainFuncSerializer, 20, 0.5772156649015328606065120900824f);
+		HqBytecodeWriteMod(hMainFuncSerializer, 20, 9, 20);
+
+		HqBytecodeWriteLoadImmI32(hMainFuncSerializer, 20, 3);
+		HqBytecodeWriteExp(hMainFuncSerializer, 20, 3, 20);
+
+		HqBytecodeWriteLoadImmF32(hMainFuncSerializer, 20, 2.7182818284590452353602874713527f);
+		HqBytecodeWriteExp(hMainFuncSerializer, 20, 9, 20);
+
+		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 100);
+		HqBytecodeWriteBitAnd(hMainFuncSerializer, 20, 1, 20);
+
+		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 100);
+		HqBytecodeWriteBitOr(hMainFuncSerializer, 20, 1, 20);
+
+		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 100);
+		HqBytecodeWriteBitXor(hMainFuncSerializer, 20, 1, 20);
+
+		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 3);
+		HqBytecodeWriteLeftShift(hMainFuncSerializer, 20, 5, 20);
+
+		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 2);
+		HqBytecodeWriteRightShift(hMainFuncSerializer, 20, 5, 20);
+
+		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 2);
+		HqBytecodeWriteLeftRotate(hMainFuncSerializer, 20, 5, 20);
+
+		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 4);
+		HqBytecodeWriteRightRotate(hMainFuncSerializer, 20, 5, 20);
 
 		HqBytecodeWriteLoadGlobal(hMainFuncSerializer, 15, stringIndex2);
 		HqBytecodeWriteStoreGlobal(hMainFuncSerializer, stringIndex2, 13);
