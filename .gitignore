@@ -1,4 +1,5 @@
 .csbuild/*
+.idea/*
 .vs/*
 _*/*
-.idea/*
+src/lib/compiler/generated/*

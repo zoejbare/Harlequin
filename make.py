@@ -220,6 +220,34 @@ _hq_setup_psvita.setupHqGlobalOptions()
 
 ###################################################################################################
 
+class ExtAntlr4Runtime(object):
+	projectName = "ExtLibAntlr4Runtime"
+	outputName = "libantlr4"
+	path = "external/antlr4/runtime/src"
+
+with csbuild.Project(ExtAntlr4Runtime.projectName, ExtAntlr4Runtime.path, autoDiscoverSourceFiles=False):
+	csbuild.SetOutput(ExtAntlr4Runtime.outputName, csbuild.ProjectType.SharedLibrary)
+
+	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
+
+	csbuild.AddSourceDirectories(ExtAntlr4Runtime.path)
+	csbuild.AddIncludeDirectories(ExtAntlr4Runtime.path)
+	csbuild.AddDefines("ANTLR4CPP_EXPORTS")
+
+	with csbuild.Toolchain("msvc"):
+		csbuild.AddCompilerFlags(
+			"/wd4100", # 'foo': unreferenced formal parameter
+			"/wd4244", # 'initializing': conversion from 'foo' to 'bar', possible loss of data
+			"/wd4251", # class 'foo' needs to have dll-interface to be used by clients of class 'bar'
+			"/wd4275", # non dll-interface class 'foo' used as base for dll-interface class 'bar'
+			"/wd4996", # 'foo': Use the default constructor of bar instead
+		)
+
+	with csbuild.Scope(csbuild.ScopeDef.Children):
+		csbuild.AddIncludeDirectories(ExtAntlr4Runtime.path)
+
+###################################################################################################
+
 class ExtGoogleTest(object):
 	projectName = "external_gtest"
 	path = "external/googletest/googletest"
@@ -352,6 +380,7 @@ class LibHarlequinCompiler(object):
 	outputName = "libhqcompiler"
 	dependencies = [
 		LibHarlequinBase.projectName,
+		ExtAntlr4Runtime.projectName,
 	]
 
 with csbuild.Project(LibHarlequinCompiler.projectName, HarlequinCommon.libRootPath, LibHarlequinCompiler.dependencies, autoDiscoverSourceFiles=False):
@@ -359,15 +388,21 @@ with csbuild.Project(LibHarlequinCompiler.projectName, HarlequinCommon.libRootPa
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
+	with csbuild.Toolchain("msvc"):
+		csbuild.AddCompilerFlags(
+			"/wd4251", # class 'foo' needs to have dll-interface to be used by clients of class 'bar'
+			"/wd4275", # non dll-interface class 'foo' used as base for dll-interface class 'bar'
+		)
+
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
 			f"{HarlequinCommon.libRootPath}/base",
+			f"{HarlequinCommon.libRootPath}/common",
 			f"{HarlequinCommon.libRootPath}/runtime",
 		)
 
 	else:
 		csbuild.AddSourceDirectories(
-			f"{HarlequinCommon.libRootPath}/common",
 			f"{HarlequinCommon.libRootPath}/compiler",
 		)
 
@@ -392,12 +427,12 @@ with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPat
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
 			f"{HarlequinCommon.libRootPath}/base",
+			f"{HarlequinCommon.libRootPath}/common",
 			f"{HarlequinCommon.libRootPath}/compiler",
 		)
 
 	else:
 		csbuild.AddSourceDirectories(
-			f"{HarlequinCommon.libRootPath}/common",
 			f"{HarlequinCommon.libRootPath}/runtime",
 		)
 
