@@ -1,3 +1,4 @@
 .csbuild/*
 .vs/*
 _*/*
+.idea/*
