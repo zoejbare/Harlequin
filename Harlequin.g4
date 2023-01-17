@@ -171,30 +171,30 @@ exprStmt
 
 // Expression rule
 expr
-	: expr (Incr | Decr)                                                            # unaryPostfix
-    | <assoc=right> expr Expo expr                                                  # exponent
-    | expr LeftParen (expr (Comma expr)*)? RightParen                               # call
-	| LeftParen expr RightParen                                                     # paren
-    | expr LeftBracket expr RightBracket                                            # index
-	| expr Dot expr                                                                 # dot
-	| LeftBrace arrayParamSeq* RightBrace                                           # array
-	| (Incr | Decr | Sub | Excl | Tilde) expr                                       # unaryPrefix
-	| expr (Mult | Div | Mod) expr                                                  # arithmetic
-	| expr (Add | Sub) expr                                                         # arithmetic
-	| expr (LeftRotate | RightRotate | LeftShift | RightShift) expr                 # bitShift
-	| expr (LessThan | LessThanOrEqualTo | GreaterThan | GreaterThanOrEqualTo) expr # equality
-	| expr (EqualTo | NotEqualTo) expr                                              # equality
-	| expr BitAnd expr                                                              # bitwise
-	| expr BitXor expr                                                              # bitwise
-	| expr BitOr expr                                                               # bitwise
-	| expr LogicAnd expr                                                            # logic
-	| expr LogicOr expr                                                             # logic
-	| expr (Assign | ExpoAssign | AddAssign | SubAssign | MultAssign | DivAssign | ModAssign | LeftRotateAssign | RightRotateAssign | LeftShiftAssign | RightShiftAssign | BitAndAssign | BitXorAssign | BitOrAssign) expr # assignment
-	| expr Comma expr                                                               # comma
-	| (BreakKw | ContinueKw)                                                        # control
-	| CopyIntrinKw                                                                  # intrinsic
-	| (NullLit | BoolLit | RealLit | IntLit | StrLit)                               # literal
-	| Id                                                                            # id
+	: expr (Incr | Decr)                                                            # exprUnaryPostfix
+    | <assoc=right> expr Expo expr                                                  # exprExponent
+    | expr LeftParen (expr (Comma expr)*)? RightParen                               # exprCall
+	| LeftParen expr RightParen                                                     # exprParen
+    | expr LeftBracket expr RightBracket                                            # exprIndex
+	| expr Dot expr                                                                 # exprDot
+	| LeftBrace arrayParamSeq* RightBrace                                           # exprArray
+	| (Incr | Decr | Sub | Excl | Tilde) expr                                       # exprUnaryPrefix
+	| expr (Mult | Div | Mod) expr                                                  # exprArithmetic
+	| expr (Add | Sub) expr                                                         # exprArithmetic
+	| expr (LeftRotate | RightRotate | LeftShift | RightShift) expr                 # exprBitShift
+	| expr (LessThan | LessThanOrEqualTo | GreaterThan | GreaterThanOrEqualTo) expr # exprEquality
+	| expr (EqualTo | NotEqualTo) expr                                              # exprEquality
+	| expr BitAnd expr                                                              # exprBitwise
+	| expr BitXor expr                                                              # exprBitwise
+	| expr BitOr expr                                                               # exprBitwise
+	| expr LogicAnd expr                                                            # exprLogic
+	| expr LogicOr expr                                                             # exprLogic
+	| expr (Assign | ExpoAssign | AddAssign | SubAssign | MultAssign | DivAssign | ModAssign | LeftRotateAssign | RightRotateAssign | LeftShiftAssign | RightShiftAssign | BitAndAssign | BitXorAssign | BitOrAssign) expr # exprAssignment
+	| expr Comma expr                                                               # exprComma
+	| (BreakKw | ContinueKw)                                                        # exprControl
+	| CopyIntrinKw                                                                  # exprIntrinsic
+	| (NullLit | BoolLit | RealLit | IntLit | StrLit)                               # exprLiteral
+	| Id                                                                            # exprId
 	;
 
 // Method return statement rule
@@ -283,11 +283,17 @@ finallyBlockDef
 
 // Assembly code declaration rule
 asmBlock
-	: AsmIntrinKw LeftBrace (asmStmt | asmLabel)* RightBrace
+	: AsmIntrinKw LeftBrace asmStmt* RightBrace
 	;
 
-// Assembly instruction statement rule
+// Assembly code statement rule
 asmStmt
+	: asmInstr
+	| asmLabel
+	;
+
+// Assembly instruction rule
+asmInstr
 	: Id (asmOperand (Comma asmOperand)*)?
 	;
 
