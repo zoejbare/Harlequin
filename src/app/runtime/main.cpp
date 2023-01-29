@@ -190,7 +190,9 @@ int main(int argc, char* argv[])
 	{
 		assert(size > 0);
 
-		size_t* const pMem = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
+		const size_t totalSize = size + sizeof(size_t);
+
+		size_t* const pMem = reinterpret_cast<size_t*>(malloc(totalSize));
 		assert(pMem != nullptr);
 
 		(*pMem) = size;
@@ -220,9 +222,10 @@ int main(int argc, char* argv[])
 	{
 		assert(newSize > 0);
 
-		size_t* const pAlloc = (pOldMem) ? (reinterpret_cast<size_t*>(pOldMem) - 1) : nullptr;
+		const size_t totalNewSize = newSize + sizeof(size_t);
 
-		size_t* const pNewMem = reinterpret_cast<size_t*>(realloc(pAlloc, newSize + sizeof(size_t)));
+		size_t* const pAlloc = (pOldMem) ? (reinterpret_cast<size_t*>(pOldMem) - 1) : nullptr;
+		size_t* const pNewMem = reinterpret_cast<size_t*>(realloc(pAlloc, totalNewSize));
 		assert(pNewMem != nullptr);
 
 		(*pNewMem) = newSize;
@@ -388,7 +391,6 @@ int main(int argc, char* argv[])
 	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
 	HqVmGetReportHandle(hVm, &hReport);
 
-	std::vector<uint8_t> fileData;
 
 	const char* const scriptFilePath = argv[1];
 
@@ -411,6 +413,8 @@ int main(int argc, char* argv[])
 			HqVmDispose(&hVm);
 			return APPLICATION_RESULT_FAILURE;
 		}
+
+		std::vector<uint8_t> fileData;
 
 		const int readModuleFileResult = HqSerializerLoadStreamFromFile(hFileSerializer, scriptFilePath);
 		if(readModuleFileResult == HQ_SUCCESS)
@@ -458,9 +462,6 @@ int main(int argc, char* argv[])
 		const uint64_t timeEnd = HqClockGetTimestamp();
 		loadModuleTimeSlice = timeEnd - timeStart;
 	}
-
-	// Clear the cached file data now that we no longer need it.
-	fileData.clear();
 
 	// Initialize the loaded modules.
 	{

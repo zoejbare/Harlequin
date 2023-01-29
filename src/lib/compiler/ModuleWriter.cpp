@@ -20,9 +20,6 @@
 
 #include "Compiler.hpp"
 
-#include "../common/module-format/FileHeader.hpp"
-#include "../common/module-format/ModuleHeader.hpp"
-
 #include <algorithm>
 #include <assert.h>
 #include <inttypes.h>
@@ -30,62 +27,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static bool SerializeString(
-	HqSerializerHandle hSerializer,
-	HqReportHandle hReport,
-	const char* const stringData,
-	const size_t stringLength
-)
-{
-	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
-	assert(hReport != HQ_REPORT_HANDLE_NULL);
-
-	int result = 0;
-
-	if(stringLength > 0)
-	{
-		assert(stringData != nullptr);
-
-		result = HqSerializerWriteBuffer(hSerializer, stringLength, stringData);
-		if(result != HQ_SUCCESS)
-		{
-			const char* const errorString = HqGetErrorCodeString(result);
-
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to write string data: error=\"%s\", data=\"%s\"",
-				errorString,
-				stringData
-			);
-
-			return false;
-		}
-	}
-
-	// Always write the null-terminator for strings.
-	result = HqSerializerWriteUint8(hSerializer, 0);
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write string null-terminator: error=\"%s\"",
-			errorString
-		);
-
-		return false;
-	}
-
-	return true;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 HqModuleWriterHandle HqModuleWriter::Create()
 {
+
 	HqModuleWriter* const pOutput = new HqModuleWriter();
 	return pOutput;
 }
@@ -97,9 +41,9 @@ void HqModuleWriter::Dispose(HqModuleWriterHandle hModuleWriter)
 	assert(hModuleWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 
 	// Dispose of all dependency names.
-	for(auto& kv : hModuleWriter->dependencies)
+	for(HqString* const pDepName : hModuleWriter->dependencies)
 	{
-		HqString::Release(kv.first);
+		HqString::Release(pDepName);
 	}
 
 	// Dispose of all module globals.
@@ -109,7 +53,7 @@ void HqModuleWriter::Dispose(HqModuleWriterHandle hModuleWriter)
 	}
 
 	// Dispose of all module strings.
-	for(auto& kv : hModuleWriter->stringIndexMap)
+	for(auto& kv : hModuleWriter->stringIndices)
 	{
 		HqString::Release(kv.first);
 	}
@@ -157,46 +101,12 @@ void HqModuleWriter::Dispose(HqModuleWriterHandle hModuleWriter)
 
 bool HqModuleWriter::Serialize(
 	HqModuleWriterHandle hModuleWriter,
-	HqCompilerHandle hCompiler,
+	HqReportHandle hReport,
 	HqSerializerHandle hSerializer
 )
 {
 	assert(hModuleWriter != HQ_MODULE_WRITER_HANDLE_NULL);
-	assert(hCompiler != HQ_COMPILER_HANDLE_NULL);
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
-
-	HqReportHandle hReport = &hCompiler->report;
-
-	HqFileHeader fileHeader = {};
-	HqModuleHeader moduleHeader = {};
-
-	fileHeader.magicNumber[0] = 'H';
-	fileHeader.magicNumber[1] = 'Q';
-	fileHeader.magicNumber[2] = 'P';
-	fileHeader.magicNumber[3] = 'R';
-	fileHeader.magicNumber[4] = 'G';
-
-	const int endianness = HqSerializerGetEndianness(hSerializer);
-
-	// Set the big endian flag.
-	switch(endianness)
-	{
-		case HQ_ENDIAN_ORDER_LITTLE:
-			fileHeader.bigEndianFlag = 0;
-			break;
-
-		case HQ_ENDIAN_ORDER_BIG:
-			fileHeader.bigEndianFlag = 1;
-			break;
-
-		default:
-#ifdef HQ_CPU_ENDIAN_LITTLE
-			fileHeader.bigEndianFlag = 0;
-#else
-			fileHeader.bigEndianFlag = 1;
-#endif
-			break;
-	}
 
 	auto getAlignedSize = [](const size_t size) -> size_t
 	{
@@ -204,602 +114,733 @@ bool HqModuleWriter::Serialize(
 		return (size + 63) & ~63;
 	};
 
-	struct FunctionBinding
+	auto guardedBlockSortFunc = [](
+		const HqFunctionData::GuardedBlock& left,
+		const HqFunctionData::GuardedBlock& right
+	) -> bool
 	{
-		HqFunctionData* pFunction;
-		HqString* pSignature;
+		if(left.offset < right.offset)
+		{
+			// Earlier guarded blocks are sorted before the blocks that come after them.
+			return true;
+		}
+		else if(left.offset == right.offset)
+		{
+			// Nested blocks are sorted *after* the blocks that contain them.
+			if(left.length > right.length)
+			{
+				return true;
+			}
+		}
 
-		uint32_t offset;
-		uint32_t length;
+		return false;
 	};
 
-	std::deque<FunctionBinding> functionBindings;
+	auto exceptionHandlerSortFunc = [](
+		const HqFunctionData::ExceptionHandler& left,
+		const HqFunctionData::ExceptionHandler& right
+	) -> bool
+	{
+		return left.offset < right.offset;
+	};
+
+	// Sort the guarded blocks for each function.
+	for(auto& kv : hModuleWriter->functions)
+	{
+		// Native functions don't use guarded blocks.
+		if(!kv.second.isNative)
+		{
+			std::sort(
+				kv.second.guardedBlocks.begin(),
+				kv.second.guardedBlocks.end(),
+				guardedBlockSortFunc
+			);
+		}
+	}
+
+	typedef std::unordered_map<size_t, HqString*> SizeToStringMap;
+
+	// We needs maps for both string-to-index and index-to-string. This is so we can both build a set
+	// of indicies for every string and iterate over the indices from start to end for each string.
+	StringToSizeMap stringToIndexMap;
+	SizeToStringMap indexToStringMap;
+
+	StringToSizeMap functionOffsets;
 	HqFunctionData::Bytecode bytecode;
+
+	auto mapStringIndex = [&stringToIndexMap, &indexToStringMap](HqString* const pString)
+	{
+		if(stringToIndexMap.count(pString) == 0)
+		{
+			const size_t newIndex = stringToIndexMap.size();
+
+			stringToIndexMap.emplace(pString, newIndex);
+			indexToStringMap.emplace(newIndex, pString);
+		}
+	};
+
+	// Copy the strings-to-indices map since it already contains the expected indices for all string constants.
+	stringToIndexMap = hModuleWriter->stringIndices;
+
+	// Fill out the indices-to-strings map from the existing string constant indicies.
+	for(auto& kv : hModuleWriter->stringIndices)
+	{
+		indexToStringMap.emplace(kv.second, kv.first);
+	}
+
+	// Add the dependency names to the string index maps.
+	for(HqString* const pDepName : hModuleWriter->dependencies)
+	{
+		mapStringIndex(pDepName);
+	}
+
+	// Add the global variable names to the string index maps.
+	for(HqString* const pVarName : hModuleWriter->globals)
+	{
+		mapStringIndex(pVarName);
+	}
+
+	// Add the function signatures to the string index maps.
+	for(auto& kv : hModuleWriter->functions)
+	{
+		mapStringIndex(kv.first);
+	}
+
+	// Calculate the aligned length of the init function bytecode.
+	const size_t initFuncAlignedLength = getAlignedSize(hModuleWriter->initBytecode.size());
 
 	// Get the function bindings and bytecode ready to be written out.
 	{
-		// The module's init function will always be at the start of the bytecode.
-		// All other functions will be defined after it.
-		uint32_t bytecodeLength = uint32_t(getAlignedSize(hModuleWriter->initBytecode.size()));
+		size_t bytecodeAlignedLength = 0;
 
 		// Build the binding data for each function while calculating total length of the bytecode.
 		for(auto& kv : hModuleWriter->functions)
 		{
-			FunctionBinding binding;
+			if(!kv.second.isNative)
+			{
+				const size_t offset = bytecodeAlignedLength;
+				const size_t length = kv.second.bytecode.size();
 
-			binding.pFunction = &kv.second;
-			binding.pSignature = kv.first;
-			binding.offset = uint32_t(bytecodeLength);
-			binding.length = uint32_t(binding.pFunction->bytecode.size());
+				// Align the bytecode length to add padding between each function.
+				bytecodeAlignedLength += getAlignedSize(length);
 
-			// Align the bytecode length to add padding between each function.
-			bytecodeLength += uint32_t(getAlignedSize(binding.length));
-
-			functionBindings.push_back(binding);
+				functionOffsets.emplace(kv.first, offset);
+			}
 		}
 
 		// Allocate space for the entire block of bytecode for the module.
-		bytecode.resize(bytecodeLength);
+		bytecode.resize(bytecodeAlignedLength);
 
 		// Clear the bytecode buffer.
 		uint8_t* const pModuleBytecode = bytecode.data();
 		memset(pModuleBytecode, 0, bytecode.size());
 
-		// Copy the module's init function to the start of the bytecode.
-		memcpy(bytecode.data(), hModuleWriter->initBytecode.data(), hModuleWriter->initBytecode.size());
-
-
-		// Fill out the full module bytecode from each function's individual bytecode.
-		for(const FunctionBinding& binding : functionBindings)
+		// Fill out the module's final bytecode from each function's individual bytecode.
+		for(auto& kv : hModuleWriter->functions)
 		{
-			memcpy(
-				pModuleBytecode + binding.offset,
-				binding.pFunction->bytecode.data(),
-				binding.pFunction->bytecode.size()
-			);
+			if(!kv.second.isNative)
+			{
+				const void* const pFuncBytecode = kv.second.bytecode.data();
+				const size_t length = kv.second.bytecode.size();
+				const size_t offset = functionOffsets.at(kv.first);
+
+				memcpy(pModuleBytecode + offset, pFuncBytecode, length);
+			}
 		}
 	}
 
-	moduleHeader.dependencyTable.length = uint32_t(hModuleWriter->dependencies.size());
-	moduleHeader.objectTable.length = uint32_t(hModuleWriter->objectTypes.size());
-	moduleHeader.stringTable.length = uint32_t(hModuleWriter->strings.size());
-	moduleHeader.globalTable.length = uint32_t(hModuleWriter->globals.size());
-	moduleHeader.bytecode.length = uint32_t(bytecode.size());
-	moduleHeader.functionTable.length = uint32_t(functionBindings.size());
-	moduleHeader.initFunctionLength = uint32_t(hModuleWriter->initBytecode.size());
+	HqModuleFileHeader fileHeader = {};
+	HqModuleTableOfContents contents = {};
 
-	// TODO: Add support for module extensions.
-	moduleHeader.extensionTable.offset = 0;
-	moduleHeader.extensionTable.length = 0;
+	// Initialize the module file header to set its properties to their default values.
+	HqModuleFileHeader::Initialize(fileHeader);
+
+	const int endianness = HqSerializerGetEndianness(hSerializer);
+
+	// Set the big endian flag if endianness is being forced.
+	switch(endianness)
+	{
+		case HQ_ENDIAN_ORDER_LITTLE:
+			fileHeader.isBigEndian = false;
+			break;
+
+		case HQ_ENDIAN_ORDER_BIG:
+			fileHeader.isBigEndian = true;
+			break;
+
+		default:
+			break;
+	}
+
+	// Fill in the section lengths in the table of contents since they won't be changing.
+	contents.stringTable.length = uint32_t(indexToStringMap.size());
+	contents.dependencyTable.length = uint32_t(hModuleWriter->dependencies.size());
+	contents.globalTable.length = uint32_t(hModuleWriter->globals.size());
+	contents.objectTable.length = uint32_t(hModuleWriter->objectTypes.size());
+	contents.functionTable.length = uint32_t(hModuleWriter->functions.size());
+	contents.initBytecode.length = uint32_t(hModuleWriter->initBytecode.size());
+	contents.bytecode.length = uint32_t(bytecode.size());
 
 	int result = HQ_SUCCESS;
+	size_t streamOffset = 0;
 
-	// Write the common header.
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[0]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[1]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[2]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[3]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.magicNumber[4]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[0]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[1]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[2]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[3]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[4]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[5]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[6]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[7]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[8]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.reserved[9]); }
-	if(result == HQ_SUCCESS) { result = HqSerializerWriteUint8(hSerializer, fileHeader.bigEndianFlag); }
-
-	if(result != HQ_SUCCESS)
+	// Write the file header.
+	if(!prv_writeFileHeader(hSerializer, fileHeader, result, streamOffset))
 	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write module common header: error=\"%s\"",
-			errorString
+			"Failed to write module file header"
+				": error='%s'"
+				", streamOffset=%zu",
+			HqGetErrorCodeString(result),
+			streamOffset
 		);
 
 		return false;
 	}
 
-	auto writeVersionHeader = [&hSerializer, &moduleHeader]() -> int
-	{
-		int result = HQ_SUCCESS;
-
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.dependencyTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.dependencyTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.objectTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.objectTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.stringTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.stringTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.globalTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.globalTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.functionTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.functionTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.extensionTable.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.extensionTable.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.bytecode.offset); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.bytecode.length); }
-		if(result == HQ_SUCCESS) { result = HqSerializerWriteUint32(hSerializer, moduleHeader.initFunctionLength); }
-
-		return result;
-	};
-
-	const size_t versionHeaderPosition = HqSerializerGetStreamPosition(hSerializer);
+	const size_t tableOfContentsOffset = HqSerializerGetStreamPosition(hSerializer);
 
 	// Write temporary data for the version header.
 	// We'll come back to fill it out at the end.
-	result = writeVersionHeader();
-
-	if(result != HQ_SUCCESS)
+	if(!prv_writeTableOfContents(hSerializer, contents, result, streamOffset))
 	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write module version header data: error=\"%s\"",
-			errorString
+			"Failed to write module table of contents stub"
+				": error='%s'"
+				", streamOffset=%zu",
+			HqGetErrorCodeString(result),
+			streamOffset
 		);
 
 		return false;
 	}
 
-	moduleHeader.dependencyTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
-
-	// Write the dependency table.
-	for(auto& kv : hModuleWriter->dependencies)
+	// String table
 	{
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing dependency: name=\"%s\"", kv.first->data);
+		// Cache the current stream position for the table of contents.
+		contents.stringTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
-		if(!SerializeString(hSerializer, hReport, kv.first->data, kv.first->length))
+		// Iterate over the module's strings.
+		for(size_t index = 0; index < indexToStringMap.size(); ++index)
 		{
-			return false;
-		}
-	}
+			HqString* const pString = indexToStringMap.at(index);
 
-	moduleHeader.objectTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
-
-	// Write the object type schemas.
-	for(auto& typeKv : hModuleWriter->objectTypes)
-	{
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing object type: name=\"%s\"", typeKv.first->data);
-
-		if(!SerializeString(hSerializer, hReport, typeKv.first->data, typeKv.first->length))
-		{
-			return false;
-		}
-
-		const uint32_t memberCount = uint32_t(typeKv.second.orderedMemberNames.size());
-
-		// Write the number of members belonging to this object.
-		result = HqSerializerWriteUint32(hSerializer, memberCount);
-		if(result != HQ_SUCCESS)
-		{
-			const char* const errorString = HqGetErrorCodeString(result);
-
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to serialize object member count: error=\"%s\", objectType=\"%s\", memberCount=%" PRIu32,
-				errorString,
-				typeKv.first->data,
-				memberCount
-			);
-
-			return false;
-		}
-
-		for(size_t memberIndex = 0; memberIndex < typeKv.second.orderedMemberNames.size(); ++memberIndex)
-		{
-			HqString* const pMemberName = typeKv.second.orderedMemberNames[memberIndex];
-			const uint8_t memberValueType = uint8_t(typeKv.second.members[pMemberName]);
-
-			const char* const memberTypeString = HqGetValueTypeString(memberValueType);
-
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, " - Serializing object member: name=\"%s\", type=%s" , pMemberName->data, memberTypeString);
-
-			// Write the member name string.
-			if(!SerializeString(hSerializer, hReport, pMemberName->data, pMemberName->length))
+			// Write the string data.
+			if(!prv_writeString(hSerializer, pString->data, pString->length, result, streamOffset))
 			{
-				return false;
-			}
-
-			// Write the member value type.
-			result = HqSerializerWriteUint8(hSerializer, uint8_t(memberValueType));
-			if(result != HQ_SUCCESS)
-			{
-				const char* const errorString = HqGetErrorCodeString(result);
-
 				HqReportMessage(
 					hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to serialize object member type: error=\"%s\", objectType=\"%s\", memberName=\"%s\", memberType=%s",
-					errorString,
-					typeKv.first->data,
-					pMemberName->data,
-					memberTypeString
+					"Failed to write string"
+						": error='%s'"
+						", streamOffset=%zu"
+						", stringIndex=%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					index
 				);
-
 				return false;
 			}
 		}
 	}
 
-	moduleHeader.stringTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
-
-	// Write the constant table.
-	for(size_t index = 0; index < hModuleWriter->strings.size(); ++index)
+	// Dependency table
 	{
-		HqString* const pString = hModuleWriter->strings[index];
+		// Cache the current stream position for the table of contents.
+		contents.dependencyTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing string: index=%" PRIuPTR ", data=\"%s\"", index, pString->data);
-		
-		if(!SerializeString(hSerializer, hReport, pString->data, pString->length))
+		// Iterate over the module's dependency.
+		for(HqString* const pDepName : hModuleWriter->dependencies)
 		{
-			return false;
+			const size_t stringIndex = stringToIndexMap.at(pDepName);
+
+			// Write the dependency name string index.
+			if(!prv_writeUint32(hSerializer, uint32_t(stringIndex), result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write dependency string index"
+						": error='%s'"
+						", streamOffset=%zu"
+						", depName='%s'"
+						", stringIndex=%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pDepName,
+					stringIndex
+				);
+				return false;
+			}
 		}
 	}
 
-	moduleHeader.globalTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
-
-	// Write the global variable table.
-	for(HqString* const pVarName : hModuleWriter->globals)
+	// Global variable table
 	{
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Serializing global variable: name=\"%s\"", pVarName->data);
+		// Cache the current stream position for the table of contents.
+		contents.globalTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
-		// First, write the string key of the global.
-		if(!SerializeString(hSerializer, hReport, pVarName->data, pVarName->length))
+		// Iterate over the module's global variables.
+		for(HqString* const pVarName : hModuleWriter->globals)
 		{
-			return false;
+			const size_t stringIndex = stringToIndexMap.at(pVarName);
+
+			// Write the global variable string index.
+			if(!prv_writeUint32(hSerializer, uint32_t(stringIndex), result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write global variable string index"
+						": error='%s'"
+						", streamOffset=%zu"
+						", varName='%s'"
+						", stringIndex=%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pVarName->data,
+					stringIndex
+				);
+				return false;
+			}
 		}
 	}
 
-	moduleHeader.functionTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
-
-	// Write the function table.
-	for(const FunctionBinding& binding : functionBindings)
+	// Object table
 	{
-		if(binding.pFunction->isNative)
+		// Cache the current stream position for the table of contents.
+		contents.objectTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+
+		// Iterate over the module's object types.
+		for(auto& typeKv : hModuleWriter->objectTypes)
 		{
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_VERBOSE,
-				"Serializing native function: signature=\"%s\", numParams=%" PRIu16 ", numReturnValues=%" PRIu16,
-				binding.pSignature->data,
-				binding.pFunction->numParameters,
-				binding.pFunction->numReturnValues
-			);
-		}
-		else
-		{
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_VERBOSE,
-				"Serializing script function: signature=\"%s\", numParams=%" PRIu16
-				", numReturnValues=%" PRIu16 ", offset=0x%" PRIX32 ", length=%" PRIu32,
-				binding.pSignature->data,
-				binding.pFunction->numParameters,
-				binding.pFunction->numReturnValues,
-				binding.offset,
-				binding.length
-			);
-		}
+			HqString* const pTypeName = typeKv.first;
 
-		// Write the function signature.
-		if(!SerializeString(hSerializer, hReport, binding.pSignature->data, binding.pSignature->length))
-		{
-			return false;
-		}
+			const size_t typeStringIndex = stringToIndexMap.at(pTypeName);
+			const size_t memberCount = typeKv.second.orderedMemberNames.size();
 
-		// Write the function's native switch into the module file.
-		result = HqSerializerWriteBool(hSerializer, binding.pFunction->isNative);
-		if(result != HQ_SUCCESS)
-		{
-			const char* const errorString = HqGetErrorCodeString(result);
-
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function 'isNative' flag: error=\"%s\", signature=\"%s\", native=%s",
-				errorString,
-				binding.pSignature->data,
-				binding.pFunction->isNative ? "true" : "false"
-			);
-
-			return false;
-		}
-
-		// Write the function's parameter count into the module file.
-		result = HqSerializerWriteUint16(hSerializer, binding.pFunction->numParameters);
-		if(result != HQ_SUCCESS)
-		{
-			const char* const errorString = HqGetErrorCodeString(result);
-
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function parameter count: error=\"%s\", signature=\"%s\", count=%" PRIu16,
-				errorString,
-				binding.pSignature->data,
-				binding.pFunction->numParameters
-			);
-
-			return false;
-		}
-
-		// Write the function's return value count into the module file.
-		result = HqSerializerWriteUint16(hSerializer, binding.pFunction->numReturnValues);
-		if(result != HQ_SUCCESS)
-		{
-			const char* const errorString = HqGetErrorCodeString(result);
-
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to serialize function return value count: error=\"%s\", signature=\"%s\", count=%" PRIu16,
-				errorString,
-				binding.pSignature->data,
-				binding.pFunction->numReturnValues
-			);
-
-			return false;
-		}
-
-		if(!binding.pFunction->isNative)
-		{
-			// Write the function's offset into the module file.
-			result = HqSerializerWriteUint32(hSerializer, binding.offset);
-			if(result != HQ_SUCCESS)
+			// Write the type name string index.
+			if(!prv_writeUint32(hSerializer, uint32_t(typeStringIndex), result, streamOffset))
 			{
-				const char* const errorString = HqGetErrorCodeString(result);
-
 				HqReportMessage(
 					hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", offset=0x%" PRIX32,
-					errorString,
-					binding.pSignature->data,
-					binding.offset
+					"Failed to write object type name string index"
+						": error='%s'"
+						", streamOffset=%zu"
+						", typeName='%s'"
+						", stringIndex=%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pTypeName->data,
+					typeStringIndex
 				);
-
 				return false;
 			}
 
-			// Write the function's length in bytes into the module file.
-			result = HqSerializerWriteUint32(hSerializer, binding.length);
-			if(result != HQ_SUCCESS)
+			// Write the number of members belonging to the current object type.
+			if(!prv_writeUint32(hSerializer, uint32_t(memberCount), result, streamOffset))
 			{
-				const char* const errorString = HqGetErrorCodeString(result);
-
 				HqReportMessage(
 					hReport,
 					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function offset: error=\"%s\", signature=\"%s\", length=%" PRIu32,
-					errorString,
-					binding.pSignature->data,
-					binding.length
+					"Failed to write object type member count"
+						": error='%s'"
+						", streamOffset=%zu"
+						", typeName='%s'"
+						", memberCount=%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pTypeName->data,
+					memberCount
 				);
-
 				return false;
 			}
 
-			// Write the function's local variable count.
-			result = HqSerializerWriteUint32(hSerializer, uint32_t(binding.pFunction->locals.size()));
-			if(result != HQ_SUCCESS)
+			// Iterate over each member in the current object type.
+			for(size_t memberIndex = 0; memberIndex < typeKv.second.orderedMemberNames.size(); ++memberIndex)
 			{
-				const char* const errorString = HqGetErrorCodeString(result);
+				HqString* const pMemberName = typeKv.second.orderedMemberNames[memberIndex];
 
-				HqReportMessage(
-					hReport,
-					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function local variable count: error=\"%s\", signature=\"%s\", count=%" PRIu32,
-					errorString,
-					binding.pSignature->data,
-					uint32_t(binding.pFunction->locals.size())
-				);
+				const size_t memberStringIndex = stringToIndexMap.at(pMemberName);
+				const uint32_t memberType = uint32_t(typeKv.second.members.at(pMemberName));
 
-				return false;
-			}
-
-			// Write the function's local variable table.
-			for(const HqString* const pVarName : binding.pFunction->locals)
-			{
-				HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, " - Serializing local variable: name=\"%s\"", pVarName->data);
-
-				// First, write the string key of the local.
-				if(!SerializeString(hSerializer, hReport, pVarName->data, pVarName->length))
+				// Write the member name string index.
+				if(!prv_writeUint32(hSerializer, uint32_t(memberStringIndex), result, streamOffset))
 				{
-					return false;
-				}
-			}
-
-			const size_t guardedBlockCount = uint32_t(binding.pFunction->guardedBlocks.size());
-
-			// Write the function's guarded block count into the module file.
-			result = HqSerializerWriteUint32(hSerializer, uint32_t(guardedBlockCount));
-			if(result != HQ_SUCCESS)
-			{
-				const char* const errorString = HqGetErrorCodeString(result);
-
-				HqReportMessage(
-					hReport,
-					HQ_MESSAGE_TYPE_ERROR,
-					"Failed to serialize function guarded block count: error=\"%s\", signature=\"%s\", count=%zu",
-					errorString,
-					binding.pSignature->data,
-					guardedBlockCount
-				);
-
-				return false;
-			}
-
-			auto guardedBlockSortFunc = [](
-				const HqFunctionData::GuardedBlock& left,
-				const HqFunctionData::GuardedBlock& right
-			) -> bool
-			{
-				if(left.offset < right.offset)
-				{
-					// Earlier guarded blocks are sorted before the blocks that come after them.
-					return true;
-				}
-				else if(left.offset == right.offset)
-				{
-					// Nested blocks are sorted *after* the blocks that contain them.
-					if(left.length > right.length)
-					{
-						return true;
-					}
-				}
-
-				return false;
-			};
-
-			auto exceptionHandlerSortFunc = [](
-				const HqFunctionData::ExceptionHandler& left,
-				const HqFunctionData::ExceptionHandler& right
-			) -> bool
-			{
-				return left.offset < right.offset;
-			};
-
-			// Sort the guarded blocks for this function.
-			std::sort(
-				binding.pFunction->guardedBlocks.begin(),
-				binding.pFunction->guardedBlocks.end(),
-				guardedBlockSortFunc
-			);
-
-			// Serialize the guarded blocks with their exception handlers.
-			for(const HqFunctionData::GuardedBlock& block : binding.pFunction->guardedBlocks)
-			{
-				HqFunctionData::ExceptionHandler::Vector exceptionHandlers;
-				exceptionHandlers.reserve(block.handlers.size());
-
-				// Build a flat array of exception handlers for this guarded block.
-				for(auto& kv : block.handlers)
-				{
-					exceptionHandlers.push_back(kv.second);
-				}
-
-				// Sort the array of exception handlers.
-				std::sort(exceptionHandlers.begin(), exceptionHandlers.end(), exceptionHandlerSortFunc);
-
-				// Calculate the offset from the start of the bytecode for this guarded block.
-				const uint32_t blockOffset = binding.offset + block.offset;
-
-				// Write the guarded block bytecode offset.
-				result = HqSerializerWriteUint32(hSerializer, blockOffset);
-				if(result != HQ_SUCCESS)
-				{
-					const char* const errorString = HqGetErrorCodeString(result);
-
 					HqReportMessage(
 						hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to write guarded block bytecode offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
-						errorString,
-						binding.pSignature->data,
-						block.offset
+						"Failed to write object member name string index"
+							": error='%s'"
+							", streamOffset=%zu"
+							", typeName='%s'"
+							", memberName='%s'"
+							", stringIndex=%zu",
+						HqGetErrorCodeString(result),
+						streamOffset,
+						pTypeName->data,
+						pMemberName->data,
+						memberStringIndex
 					);
-
 					return false;
 				}
 
-				// Write the guarded block bytecode length.
-				result = HqSerializerWriteUint32(hSerializer, block.length);
-				if(result != HQ_SUCCESS)
+				// Write the member value type.
+				if(!prv_writeUint32(hSerializer, memberType, result, streamOffset))
 				{
-					const char* const errorString = HqGetErrorCodeString(result);
-
 					HqReportMessage(
 						hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to write guarded block bytecode length: error=\"%s\", signature=\"%s\", length=%" PRIu32,
-						errorString,
-						binding.pSignature->data,
-						block.length
+						"Failed to write object member name"
+							": error='%s'"
+							", streamOffset=%zu"
+							", typeName='%s'"
+							", memberType='%s'",
+						HqGetErrorCodeString(result),
+						streamOffset,
+						pTypeName->data,
+						HqGetValueTypeString(memberType)
 					);
-
 					return false;
 				}
+			}
+		}
+	}
 
-				const uint32_t exceptionHandlerCount = uint32_t(exceptionHandlers.size());
+	// Function table
+	{
+		// Cache the current stream position for the table of contents.
+		contents.functionTable.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
-				// Write the number of exception handlers contained in this guarded block.
-				result = HqSerializerWriteUint32(hSerializer, exceptionHandlerCount);
-				if(result != HQ_SUCCESS)
+		// Iterate over the module's functions.
+		for(auto& funcKv : hModuleWriter->functions)
+		{
+			HqString* const pFuncSig = funcKv.first;
+
+			const size_t sigStringIndex = stringToIndexMap.at(pFuncSig);
+			const uint16_t numInputs = funcKv.second.numParameters;
+			const uint16_t numOutputs = funcKv.second.numReturnValues;
+			const bool isNative = funcKv.second.isNative;
+
+			// Write the function signature string index.
+			if(!prv_writeUint32(hSerializer, uint32_t(sigStringIndex), result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write function signature string index"
+						": error='%s'"
+						", streamOffset=%zu"
+						", signature='%s'"
+						", stringIndex=%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pFuncSig->data,
+					sigStringIndex
+				);
+				return false;
+			}
+
+			// Write the function's number of input values.
+			if(!prv_writeUint16(hSerializer, numInputs, result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write function input value count"
+						": error='%s'"
+						", streamOffset=%zu"
+						", signature='%s'"
+						", numInputs=%" PRIu16,
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pFuncSig->data,
+					numInputs
+				);
+				return false;
+			}
+
+			// Write the function's number of output values.
+			if(!prv_writeUint16(hSerializer, numOutputs, result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write function input value count"
+						": error='%s'"
+						", streamOffset=%zu"
+						", signature='%s'"
+						", numOutputs=%" PRIu16,
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pFuncSig->data,
+					numOutputs
+				);
+				return false;
+			}
+
+			// Write the function's 'isNative' flag.
+			if(!prv_writeBool32(hSerializer, isNative, result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write function 'isNative' flag"
+						": error='%s'"
+						", streamOffset=%zu"
+						", signature='%s'"
+						", isNative=%s",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					pFuncSig->data,
+					isNative ? "true" : "false"
+				);
+				return false;
+			}
+
+			if(!isNative)
+			{
+				const size_t funcOffset = functionOffsets.at(pFuncSig);
+				const size_t funcLength = funcKv.second.bytecode.size();
+				const size_t numGuardedBlocks = funcKv.second.guardedBlocks.size();
+
+				// Write the function's bytecode offset.
+				if(!prv_writeUint32(hSerializer, uint32_t(funcOffset), result, streamOffset))
 				{
-					const char* const errorString = HqGetErrorCodeString(result);
-
 					HqReportMessage(
 						hReport,
 						HQ_MESSAGE_TYPE_ERROR,
-						"Failed to write guarded block exception handler count: error=\"%s\", signature=\"%s\", count=%" PRIu32,
-						errorString,
-						binding.pSignature->data,
-						exceptionHandlerCount
+						"Failed to write function's bytecode offset"
+							": error='%s'"
+							", streamOffset=%zu"
+							", signature='%s'"
+							", bytecodeOffset=%zu",
+						HqGetErrorCodeString(result),
+						streamOffset,
+						pFuncSig->data,
+						funcOffset
 					);
-
 					return false;
 				}
 
-				// Serialize each exception handler contained by this guarded block.
-				for(uint32_t handlerIndex = 0; handlerIndex < exceptionHandlerCount; ++handlerIndex)
+				// Write the function's bytecode length.
+				if(!prv_writeUint32(hSerializer, uint32_t(funcLength), result, streamOffset))
 				{
-					const HqFunctionData::ExceptionHandler& handler = exceptionHandlers[handlerIndex];
+					HqReportMessage(
+						hReport,
+						HQ_MESSAGE_TYPE_ERROR,
+						"Failed to write function's bytecode length"
+							": error='%s'"
+							", streamOffset=%zu"
+							", signature='%s'"
+							", length=%zu",
+						HqGetErrorCodeString(result),
+						streamOffset,
+						pFuncSig->data,
+						funcLength
+					);
+					return false;
+				}
 
-					// Write the value type for this exception handler.
-					result = HqSerializerWriteUint8(hSerializer, uint8_t(handler.type));
-					if(result != HQ_SUCCESS)
+				// Write the function's number of guarded blocks.
+				if(!prv_writeUint32(hSerializer, uint32_t(numGuardedBlocks), result, streamOffset))
+				{
+					HqReportMessage(
+						hReport,
+						HQ_MESSAGE_TYPE_ERROR,
+						"Failed to write function's number of guarded blocks"
+							": error='%s'"
+							", streamOffset=%zu"
+							", signature='%s'"
+							", blockCount=%zu",
+						HqGetErrorCodeString(result),
+						streamOffset,
+						pFuncSig->data,
+						numGuardedBlocks
+					);
+					return false;
+				}
+
+				// Iterate over the current function's guarded blocks.
+				for(size_t blockIndex = 0; blockIndex < funcKv.second.guardedBlocks.size(); ++blockIndex)
+				{
+					const HqFunctionData::GuardedBlock& guardedBlock = funcKv.second.guardedBlocks.at(blockIndex);
+					const size_t numExceptionHandlers = guardedBlock.handlers.size();
+
+					HqFunctionData::ExceptionHandler::Vector exceptionHandlers;
+					if(numExceptionHandlers > 0)
 					{
-						const char* const errorString = HqGetErrorCodeString(result);
-						const char* const valueTypeString = HqGetValueTypeString(handler.type);
+						// Preallocate space for each exception handler.
+						exceptionHandlers.reserve(numExceptionHandlers);
 
-						HqReportMessage(
-							hReport,
-							HQ_MESSAGE_TYPE_ERROR,
-							"Failed to write exception handler type: error=\"%s\", signature=\"%s\", type=\"%s\"",
-							errorString,
-							binding.pSignature->data,
-							valueTypeString
-						);
-
-						return false;
-					}
-
-					// Calculate the offset from the start of the bytecode for this exception handler.
-					const uint32_t handlerOffset = binding.offset + handler.offset;
-
-					// Write the offset where this exception handler is located.
-					result = HqSerializerWriteUint32(hSerializer, handlerOffset);
-					if(result != HQ_SUCCESS)
-					{
-						const char* const errorString = HqGetErrorCodeString(result);
-
-						HqReportMessage(
-							hReport,
-							HQ_MESSAGE_TYPE_ERROR,
-							"Failed to write exception handler offset: error=\"%s\", signature=\"%s\", offset=%" PRIu32,
-							errorString,
-							binding.pSignature->data,
-							handler.offset
-						);
-
-						return false;
-					}
-
-					if(handler.type == HQ_VALUE_TYPE_OBJECT)
-					{
-						// Write the class name if this exception handler references an object type.
-						if(!SerializeString(hSerializer, hReport, handler.pClassName->data, handler.pClassName->length))
+						// Transfer each exception handler in the map to a flat array.
+						for(auto& excKv : guardedBlock.handlers)
 						{
+							exceptionHandlers.push_back(excKv.second);
+						}
+
+						// Sort the flat array of exception handlers for the current guarded block.
+						std::sort(
+							exceptionHandlers.begin(),
+							exceptionHandlers.end(),
+							exceptionHandlerSortFunc
+						);
+					}
+
+					// Calculate the offset from the start of the bytecode for this guarded block.
+					const uint32_t blockOffset = uint32_t(funcOffset) + guardedBlock.offset;
+					const uint32_t blockLength = guardedBlock.length;
+
+					// Write the guarded block's bytecode offset.
+					if(!prv_writeUint32(hSerializer, blockOffset, result, streamOffset))
+					{
+						HqReportMessage(
+							hReport,
+							HQ_MESSAGE_TYPE_ERROR,
+							"Failed to write guarded block's bytecode offset"
+								": error='%s'"
+								", streamOffset=%zu"
+								", signature='%s'"
+								", blockIndex=%zu"
+								", bytecodeOffset=%" PRIu32,
+							HqGetErrorCodeString(result),
+							streamOffset,
+							pFuncSig->data,
+							blockIndex,
+							blockOffset
+						);
+						return false;
+					}
+
+					// Write the guarded block's bytecode length.
+					if(!prv_writeUint32(hSerializer, blockLength, result, streamOffset))
+					{
+						HqReportMessage(
+							hReport,
+							HQ_MESSAGE_TYPE_ERROR,
+							"Failed to write guarded block's bytecode length"
+								": error='%s'"
+								", streamOffset=%zu"
+								", signature='%s'"
+								", blockIndex=%zu"
+								", length=%" PRIu32,
+							HqGetErrorCodeString(result),
+							streamOffset,
+							pFuncSig->data,
+							blockIndex,
+							blockLength
+						);
+						return false;
+					}
+
+					// Write the guarded block's number of exception handlers.
+					if(!prv_writeUint32(hSerializer, uint32_t(numExceptionHandlers), result, streamOffset))
+					{
+						HqReportMessage(
+							hReport,
+							HQ_MESSAGE_TYPE_ERROR,
+							"Failed to write guarded block's bytecode length"
+								": error='%s'"
+								", streamOffset=%zu"
+								", signature='%s'"
+								", blockIndex=%zu"
+								", handlerCount=%zu",
+							HqGetErrorCodeString(result),
+							streamOffset,
+							pFuncSig->data,
+							blockIndex,
+							numExceptionHandlers
+						);
+						return false;
+					}
+
+					for(size_t handlerIndex = 0; handlerIndex < numExceptionHandlers; ++handlerIndex)
+					{
+						const HqFunctionData::ExceptionHandler& handler = exceptionHandlers.at(handlerIndex);
+
+						// Calculate the offset from the start of the bytecode for this exception handler.
+						const uint32_t handlerOffset = uint32_t(funcOffset) + handler.offset;
+						const uint32_t handledType = uint32_t(handler.type);
+
+						// Write the exception handler's bytecode offset.
+						if(!prv_writeUint32(hSerializer, handlerOffset, result, streamOffset))
+						{
+							HqReportMessage(
+								hReport,
+								HQ_MESSAGE_TYPE_ERROR,
+								"Failed to write exception handler's bytecode offset"
+									": error='%s'"
+									", streamOffset=%zu"
+									", signature='%s'"
+									", blockIndex=%zu"
+									", handlerIndex=%zu"
+									", bytecodeOffset=%" PRIu32,
+								HqGetErrorCodeString(result),
+								streamOffset,
+								pFuncSig->data,
+								blockIndex,
+								handlerIndex,
+								handlerOffset
+							);
 							return false;
+						}
+
+						// Write the exception handler's handled type.
+						if(!prv_writeUint32(hSerializer, handledType, result, streamOffset))
+						{
+							HqReportMessage(
+								hReport,
+								HQ_MESSAGE_TYPE_ERROR,
+								"Failed to write exception handler's handled type"
+									": error='%s'"
+									", streamOffset=%zu"
+									", signature='%s'"
+									", blockIndex=%zu"
+									", handlerIndex=%zu"
+									", type='%s'",
+								HqGetErrorCodeString(result),
+								streamOffset,
+								pFuncSig->data,
+								blockIndex,
+								handlerIndex,
+								HqGetValueTypeString(handledType)
+							);
+							return false;
+						}
+
+						if(handledType == HQ_VALUE_TYPE_OBJECT)
+						{
+							const size_t typeStringIndex = stringToIndexMap.at(handler.pClassName);
+
+							// Write the string index for the class name handled by the current exception handler.
+							if(!prv_writeUint32(hSerializer, handledType, result, streamOffset))
+							{
+								HqReportMessage(
+									hReport,
+									HQ_MESSAGE_TYPE_ERROR,
+									"Failed to write exception handler's class name string index"
+										": error='%s'"
+										", streamOffset=%zu"
+										", signature='%s'"
+										", blockIndex=%zu"
+										", handlerIndex=%zu"
+										", className='%s'"
+										", stringIndex=%zu",
+									HqGetErrorCodeString(result),
+									streamOffset,
+									pFuncSig->data,
+									blockIndex,
+									handlerIndex,
+									handler.pClassName->data,
+									typeStringIndex
+								);
+								return false;
+							}
 						}
 					}
 				}
@@ -807,74 +848,127 @@ bool HqModuleWriter::Serialize(
 		}
 	}
 
-	moduleHeader.bytecode.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
-
-	if(bytecode.size() > 0)
+	// Module init function bytecode
 	{
-		// Write the bytecode.
-		result = HqSerializerWriteBuffer(hSerializer, bytecode.size(), bytecode.data());
-		if(result != HQ_SUCCESS)
-		{
-			const char* const errorString = HqGetErrorCodeString(result);
+		// Cache the current stream position for the table of contents.
+		contents.initBytecode.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
+		const size_t initFunctionLength = hModuleWriter->initBytecode.size();
+
+		// Write the module's init function bytecode.
+		if(!prv_writeBuffer(hSerializer, hModuleWriter->initBytecode.data(), initFunctionLength, result, streamOffset))
+		{
 			HqReportMessage(
 				hReport,
 				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to write module bytecode buffer: error=\"%s\"",
-				errorString
+				"Failed to write module init function bytecode"
+					": error='%s'"
+					", streamOffset=%zu"
+					", length=%zu",
+				HqGetErrorCodeString(result),
+				streamOffset,
+				initFunctionLength
+			);
+
+			return false;
+		}
+
+		const size_t totalPadding = initFuncAlignedLength - initFunctionLength;
+
+		// Write the required padding after the init function so the next section is aligned.
+		for(size_t paddingIndex = 0; paddingIndex < totalPadding; ++paddingIndex)
+		{
+			if(!prv_writeUint8(hSerializer, 0, result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write padding to the end of the module init function"
+						": error='%s'"
+						", streamOffset=%zu"
+						", paddingIndex=%zu/%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					paddingIndex,
+					totalPadding
+				);
+
+				return false;
+			}
+		}
+	}
+
+	// General bytecode
+	{
+		// Cache the current stream position for the table of contents.
+		contents.bytecode.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
+
+		// Write the module's bytecode.
+		if(!prv_writeBuffer(hSerializer, bytecode.data(), bytecode.size(), result, streamOffset))
+		{
+			HqReportMessage(
+				hReport,
+				HQ_MESSAGE_TYPE_ERROR,
+				"Failed to write module bytecode"
+					": error='%s'"
+					", streamOffset=%zu"
+					", length=%zu",
+				HqGetErrorCodeString(result),
+				streamOffset,
+				bytecode.size()
 			);
 
 			return false;
 		}
 	}
 
-	const size_t fileEndPosition = HqSerializerGetStreamPosition(hSerializer);
+	const size_t fileEndOffset = HqSerializerGetStreamPosition(hSerializer);
 
-	// Move back to the version header so we can write the real data for it.
-	result = HqSerializerSetStreamPosition(hSerializer, versionHeaderPosition);
+	// Move back to the table of contents so we can write the real data for it.
+	result = HqSerializerSetStreamPosition(hSerializer, tableOfContentsOffset);
 	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to move serializer position to the start of the file version header: error=\"%s\", position=%" PRIuPTR,
-			errorString,
-			versionHeaderPosition
+			"Failed to move serializer position to the start of the module table of contents"
+				": error='%s'"
+				", streamOffset=%zu",
+			HqGetErrorCodeString(result),
+			tableOfContentsOffset
 		);
 
 		return false;
 	}
 
-	// Write the real version header now.
-	result = writeVersionHeader();
-
-	if(result != HQ_SUCCESS)
+	// Write the real table contents.
+	if(!prv_writeTableOfContents(hSerializer, contents, result, streamOffset))
 	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to write module version header data (2nd pass): error=\"%s\"",
-			errorString
+			"Failed to write module table of contents"
+				": error='%s'"
+				", streamOffset=%zu",
+			HqGetErrorCodeString(result),
+			streamOffset
 		);
 
 		return false;
 	}
 
-	result = HqSerializerSetStreamPosition(hSerializer, fileEndPosition);
+	// Return to the end of the file stream.
+	result = HqSerializerSetStreamPosition(hSerializer, fileEndOffset);
 	if(result != HQ_SUCCESS)
 	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
 		HqReportMessage(
 			hReport,
 			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to move serializer position to the end of the file stream: error=\"%s\", position=%" PRIuPTR,
-			errorString,
-			fileEndPosition
+			"Failed to move serializer position to the end of the file stream"
+				": error='%s'"
+				", streamOffset=%zu",
+			HqGetErrorCodeString(result),
+			fileEndOffset
 		);
 
 		return false;
@@ -925,20 +1019,215 @@ uint32_t HqModuleWriter::AddString(HqModuleWriterHandle hWriter, HqString* const
 	assert(hWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 	assert(pValue != nullptr);
 
-	auto kv = hWriter->stringIndexMap.find(pValue);
-	if(kv != hWriter->stringIndexMap.end())
+	auto kv = hWriter->stringIndices.find(pValue);
+	if(kv != hWriter->stringIndices.end())
 	{
-		return kv->second;
+		return uint32_t(kv->second);
 	}
 
-	const uint32_t output = uint32_t(hWriter->strings.size());
+	const uint32_t output = uint32_t(hWriter->stringConstants.size());
 
 	HqString::AddRef(pValue);
 
-	hWriter->stringIndexMap.emplace(pValue, output);
-	hWriter->strings.push_back(pValue);
+	hWriter->stringIndices.emplace(pValue, output);
+	hWriter->stringConstants.push_back(pValue);
 
 	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeFileHeader(
+	HqSerializerHandle hSerializer,
+	const HqModuleFileHeader& fileHeader,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.magicNumber[0], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.magicNumber[1], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.magicNumber[2], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.magicNumber[3], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[0], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[1], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[2], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[3], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[4], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[5], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[6], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[7], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[8], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[9], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint8(hSerializer, fileHeader.reserved[10], outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeBool8(hSerializer, fileHeader.isBigEndian, outResult, outStreamOffset); }
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeTableOfContents(
+	HqSerializerHandle hSerializer,
+	const HqModuleTableOfContents& contents,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.stringTable.offset, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.stringTable.length, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.dependencyTable.offset, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.dependencyTable.length, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.globalTable.offset, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.globalTable.length, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.objectTable.offset, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.objectTable.length, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.functionTable.offset, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.functionTable.length, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.initBytecode.offset, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.initBytecode.length, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.bytecode.offset, outResult, outStreamOffset); }
+	if(outResult == HQ_SUCCESS) { prv_writeUint32(hSerializer, contents.bytecode.length, outResult, outStreamOffset); }
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeBuffer(
+	HqSerializerHandle hSerializer,
+	const void* const pBuffer,
+	const size_t length,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+	outResult = HqSerializerWriteBuffer(hSerializer, length, pBuffer);
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeString(
+	HqSerializerHandle hSerializer,
+	const char* const stringData,
+	const size_t stringLength,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	if(stringLength > 0)
+	{
+		assert(stringData != nullptr);
+
+		outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+		outResult = HqSerializerWriteBuffer(hSerializer, stringLength, stringData);
+
+		if(outResult != HQ_SUCCESS)
+		{
+			return false;
+		}
+	}
+
+	// Always write the null-terminator for strings.
+	outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+	outResult = HqSerializerWriteUint8(hSerializer, 0);
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeUint8(
+	HqSerializerHandle hSerializer,
+	const uint8_t value,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+	outResult = HqSerializerWriteUint8(hSerializer, value);
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeUint16(
+	HqSerializerHandle hSerializer,
+	const uint16_t value,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+	outResult = HqSerializerWriteUint16(hSerializer, value);
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeUint32(
+	HqSerializerHandle hSerializer,
+	const uint32_t value,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+	outResult = HqSerializerWriteUint32(hSerializer, value);
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeBool8(
+	HqSerializerHandle hSerializer,
+	const bool value,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+	outResult = HqSerializerWriteBool8(hSerializer, value);
+
+	return (outResult == HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModuleWriter::prv_writeBool32(
+	HqSerializerHandle hSerializer,
+	const bool value,
+	int& outResult,
+	size_t& outStreamOffset
+)
+{
+	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	outStreamOffset = HqSerializerGetStreamPosition(hSerializer);
+	outResult = HqSerializerWriteBool32(hSerializer, value);
+
+	return (outResult == HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

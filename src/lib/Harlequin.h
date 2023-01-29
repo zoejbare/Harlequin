@@ -202,7 +202,13 @@ HQ_BASE_API int HqSerializerSaveStreamToFile(HqSerializerHandle hSerializer, con
 
 HQ_BASE_API int HqSerializerSaveStreamToBuffer(HqSerializerHandle hSerializer, void* pBuffer, size_t* pBufferLength);
 
-HQ_BASE_API int HqSerializerWriteBool(HqSerializerHandle hSerializer, bool value);
+HQ_BASE_API int HqSerializerWriteBool8(HqSerializerHandle hSerializer, bool value);
+
+HQ_BASE_API int HqSerializerWriteBool16(HqSerializerHandle hSerializer, bool value);
+
+HQ_BASE_API int HqSerializerWriteBool32(HqSerializerHandle hSerializer, bool value);
+
+HQ_BASE_API int HqSerializerWriteBool64(HqSerializerHandle hSerializer, bool value);
 
 HQ_BASE_API int HqSerializerWriteInt8(HqSerializerHandle hSerializer, int8_t value);
 
@@ -226,7 +232,13 @@ HQ_BASE_API int HqSerializerWriteFloat64(HqSerializerHandle hSerializer, double 
 
 HQ_BASE_API int HqSerializerWriteBuffer(HqSerializerHandle hSerializer, size_t bufferLength, const void* pBuffer);
 
-HQ_BASE_API int HqSerializerReadBool(HqSerializerHandle hSerializer, bool* pOutValue);
+HQ_BASE_API int HqSerializerReadBool8(HqSerializerHandle hSerializer, bool* pOutValue);
+
+HQ_BASE_API int HqSerializerReadBool16(HqSerializerHandle hSerializer, bool* pOutValue);
+
+HQ_BASE_API int HqSerializerReadBool32(HqSerializerHandle hSerializer, bool* pOutValue);
+
+HQ_BASE_API int HqSerializerReadBool64(HqSerializerHandle hSerializer, bool* pOutValue);
 
 HQ_BASE_API int HqSerializerReadInt8(HqSerializerHandle hSerializer, int8_t* pOutValue);
 
@@ -766,7 +778,7 @@ HQ_MAIN_API int HqModuleWriterAddExceptionHandler(
 
 HQ_MAIN_API int HqModuleWriterSerialize(
 	HqModuleWriterHandle hModuleWriter,
-	HqCompilerHandle hCompiler,
+	HqReportHandle hReport,
 	HqSerializerHandle hSerializer
 );
 
@@ -866,12 +878,6 @@ HQ_MAIN_API int HqBytecodeWriteLoadGlobal(
 	uint32_t stringIndex
 );
 
-HQ_MAIN_API int HqBytecodeWriteLoadLocal(
-	HqSerializerHandle hSerializer,
-	uint32_t gpRegIndex,
-	uint32_t stringIndex
-);
-
 HQ_MAIN_API int HqBytecodeWriteLoadParam(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
@@ -898,12 +904,6 @@ HQ_MAIN_API int HqBytecodeWriteStoreGlobal(
 	uint32_t gpRegIndex
 );
 
-HQ_MAIN_API int HqBytecodeWriteStoreLocal(
-	HqSerializerHandle hSerializer,
-	uint32_t stringIndex,
-	uint32_t gpRegIndex
-);
-
 HQ_MAIN_API int HqBytecodeWriteStoreParam(
 	HqSerializerHandle hSerializer,
 	uint32_t ioRegIndex,
@@ -925,12 +925,6 @@ HQ_MAIN_API int HqBytecodeWriteStoreArray(
 );
 
 HQ_MAIN_API int HqBytecodeWritePullGlobal(
-	HqSerializerHandle hSerializer,
-	uint32_t gpRegIndex,
-	uint32_t stringIndex
-);
-
-HQ_MAIN_API int HqBytecodeWritePullLocal(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t stringIndex

@@ -41,23 +41,19 @@ struct HqFunction
 		HqString::StlCompare
 	> StringToHandleMap;
 
-	typedef HqHashMap<
-		HqString*, 
-		bool, 
-		HqString::StlHash, 
-		HqString::StlCompare
-	> StringToBoolMap;
-
 	typedef HqStack<HqFunctionHandle> HandleStack;
 
-	static HqFunctionHandle CreateInit(HqModuleHandle hModule, uint32_t bytecodeLength);
+	static HqFunctionHandle CreateInit(
+		HqModuleHandle hModule,
+		uint32_t bytecodeOffset,
+		uint32_t bytecodeLength
+	);
 	static HqFunctionHandle CreateScript(
 		HqModuleHandle hModule,
 		HqString* pSignature,
-		StringToBoolMap& locals,
-		HqGuardedBlock::Array& guardedBlocks,
-		uint32_t bytecodeOffsetStart,
-		uint32_t bytecodeOffsetEnd,
+		HqGuardedBlock::PtrArray& guardedBlocks,
+		uint32_t bytecodeOffset,
+		uint32_t bytecodeLength,
 		uint16_t numParameters,
 		uint16_t numReturnValues
 	);
@@ -86,8 +82,7 @@ struct HqFunction
 	HqString* pSignature;
 	void* pNativeUserData;
 
-	HqGuardedBlock::Array guardedBlocks;
-	StringToBoolMap locals;
+	HqGuardedBlock::PtrArray guardedBlocks;
 
 	uint32_t bytecodeOffsetStart;
 	uint32_t bytecodeOffsetEnd;

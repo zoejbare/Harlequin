@@ -21,141 +21,14 @@
 #include "BuiltInDecl.hpp"
 #include "Vm.hpp"
 
-#include "module-loader/CommonLoader.hpp"
-#include "module-loader/ModuleLoader.hpp"
-
+#include "../base/ModuleLoader.hpp"
 #include "../base/Mutex.hpp"
+
+#include "../common/OpCodeEnum.hpp"
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-static bool LoadModule(
-	HqModule* const pOutModule,
-	HqVmHandle hVm,
-	HqSerializerHandle hSerializer
-)
-{
-	assert(pOutModule != nullptr);
-	assert(hVm != HQ_VM_HANDLE_NULL);
-	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
-
-	HqReportHandle hReport = &hVm->report;
-
-	int result = HQ_SUCCESS;
-
-	// The first few bytes should always be read natively. We'll switch
-	// the endianness after reading the 'isBigEndian' flag.
-	result = HqSerializerSetEndianness(hSerializer, HQ_ENDIAN_ORDER_NATIVE);
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-		const char* const endianString = HqGetEndiannessString(HQ_ENDIAN_ORDER_NATIVE);
-
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Error setting endian mode on the module file serializer: error=\"%s\", endiaMode=\"%s\"",
-			errorString,
-			endianString
-		);
-
-		return false;
-	}
-
-	HqFileHeader fileHeader;
-	memset(&fileHeader, 0, sizeof(fileHeader));
-
-	// Read the magic number.
-	result = HqSerializerReadBuffer(hSerializer, sizeof(fileHeader.magicNumber), fileHeader.magicNumber);
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading module file magic number: error=\"%s\"",
-			errorString
-		);
-
-		return false;
-	}
-
-	// Validate the magic number.
-	if(!HqModuleCommonLoader::CheckMagicNumber(fileHeader))
-	{
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Invalid module file magic number: magicNumber=\"%c%c%c%c%c\", expected=\"HQPRG\"",
-			fileHeader.magicNumber[0],
-			fileHeader.magicNumber[1],
-			fileHeader.magicNumber[2],
-			fileHeader.magicNumber[3],
-			fileHeader.magicNumber[4]
-		);
-
-		return false;
-	}
-
-	// Read the reserved section of the file header.
-	result = HqSerializerReadBuffer(hSerializer, sizeof(fileHeader.reserved), fileHeader.reserved);
-	if(result != HQ_SUCCESS)
-	{
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading module file reserved section: error=\"%s\"",
-			HqGetErrorCodeString(result)
-		);
-		return false;
-	}
-
-	// Read the 'isBigEndian' flag.
-	result = HqSerializerReadUint8(hSerializer, &fileHeader.bigEndianFlag);
-	if(result != HQ_SUCCESS)
-	{
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Error reading module file big endian flag: error=\"%s\"",
-			HqGetErrorCodeString(result)
-		);
-		return false;
-	}
-
-	HqReportMessage(
-		hReport,
-		HQ_MESSAGE_TYPE_VERBOSE,
-		"Detected module file endianness: bigEndian=%d",
-		fileHeader.bigEndianFlag
-	);
-
-	// Save the endianness value to the output module since we'll need
-	// that when dispatching bytecode data.
-	const int endianness = (fileHeader.bigEndianFlag > 0)
-		? HQ_ENDIAN_ORDER_BIG
-		: HQ_ENDIAN_ORDER_LITTLE;
-
-	// Now that we know the endianness, we can set it on the serializer.
-	result = HqSerializerSetEndianness(hSerializer, endianness);
-	if(result != HQ_SUCCESS)
-	{
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Error setting endian mode on the module file serializer: error=\"%s\", endianness=\"%s\"",
-			HqGetErrorCodeString(result),
-			HqGetEndiannessString(endianness)
-		);
-		return false;
-	}
-
-	return HqModuleLoader::Load(pOutModule, hVm, hSerializer);
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -166,99 +39,27 @@ HqModuleHandle HqModule::Create(HqVmHandle hVm, HqString* const pModuleName, con
 	assert(filePath != nullptr);
 
 	HqReportHandle hReport = &hVm->report;
-	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
-
 	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Loading module \"%s\" from file: \"%s\"", pModuleName->data, filePath);
 
-	int result;
+	HqModule* pOutput = nullptr;
 
-	// Create the serializer for stream reading.
-	result = HqSerializerCreate(&hSerializer, HQ_SERIALIZER_MODE_READER);
-	if(result != HQ_SUCCESS)
+	// Attempt to load the module data.
+	HqModuleLoader loader;
+	if(HqModuleLoader::Load(loader, hReport, filePath, HqModuleLoader::NO_FLAGS))
 	{
-		const char* const errorString = HqGetErrorCodeString(result);
+		pOutput = new HqModule();
+		assert(pOutput != nullptr);
 
-		// Failed to the create the serializer.
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to create module serializer: error=\"%s\"",
-			errorString
-		);
-
-		return nullptr;
-	}
-
-	// Open the file into a serializer.
-	result = HqSerializerLoadStreamFromFile(hSerializer, filePath);
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
-		// The file could not be opened.
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to load module stream: error=\"%s\"",
-			errorString
-		);
-
-		HqSerializerDispose(&hSerializer);
-		return nullptr;
-	}
-
-	HqString::AddRef(pModuleName);
-
-	HqModule* pOutput = new HqModule();
-	assert(pOutput != HQ_MODULE_HANDLE_NULL);
-
-	pOutput->hVm = hVm;
-	pOutput->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
-	pOutput->pName = pModuleName;
-
-	// Initialize the module data.
-	HqValue::StringToBoolMap::Allocate(pOutput->dependencies);
-	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
-	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
-	HqValue::StringToBoolMap::Allocate(pOutput->globals);
-
-	StringArray::Initialize(pOutput->strings);
-	HqByteHelper::Array::Initialize(pOutput->code);
-
-	// This load block needs to lock the garbage collector since we'll be manipulating
-	// the VM and adding garbage collected resources.
-	{
-		HqScopedMutex vmLock(hVm->lock);
-		HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
-
-		// Attempt to load the module.
-		if(LoadModule(pOutput, hVm, hSerializer))
+		// Add the loaded module data to the runtime.
+		if(!prv_init(hVm, hReport, pOutput, loader, pModuleName))
 		{
-			// Map the module to the VM.
-			HqModule::StringToHandleMap::Insert(hVm->modules, pModuleName, pOutput);
-		}
-		else
-		{
-			HqString::Release(pModuleName);
-			HqModule::Dispose(pOutput);
-
+			// The module data failed verification, so we abandon the load.
+			Dispose(pOutput);
 			pOutput = nullptr;
 		}
 	}
 
-	result = HqSerializerDispose(&hSerializer);
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
-		// Failed disposing of the serializer.
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_WARNING,
-			"Failed to dispose of module serializer: error=\"%s\"",
-			errorString
-		);
-	}
+	HqModuleLoader::Dispose(loader);
 
 	return pOutput;
 }
@@ -278,97 +79,27 @@ HqModuleHandle HqModule::Create(
 	assert(fileLength > 0);
 
 	HqReportHandle hReport = &hVm->report;
-	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
-
 	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Loading module \"%s\" from data buffer", pModuleName->data);
 
-	int result;
+	HqModule* pOutput = nullptr;
 
-	// Create the serializer for stream reading.
-	result = HqSerializerCreate(&hSerializer, HQ_SERIALIZER_MODE_READER);
-	if(result != HQ_SUCCESS)
+	// Attempt to load the module data.
+	HqModuleLoader loader;
+	if(HqModuleLoader::Load(loader, hReport, pFileData, fileLength, HqModuleLoader::NO_FLAGS))
 	{
-		const char* const errorString = HqGetErrorCodeString(result);
+		pOutput = new HqModule();
+		assert(pOutput != nullptr);
 
-		// Failed to the create the serializer.
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to create module serializer: error=\"%s\"",
-			errorString
-		);
-
-		return nullptr;
-	}
-
-	// Open the file stream into a serializer.
-	result = HqSerializerLoadStreamFromBuffer(hSerializer, pFileData, fileLength);
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
-		// The stream could not be opened.
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_ERROR,
-			"Failed to load module stream: error=\"%s\"",
-			errorString
-		);
-
-		return nullptr;
-	}
-
-	HqString::AddRef(pModuleName);
-
-	HqModule* pOutput = new HqModule();
-	assert(pOutput != HQ_MODULE_HANDLE_NULL);
-
-	pOutput->hVm = hVm;
-	pOutput->pName = pModuleName;
-
-	// Initialize the module data.
-	HqValue::StringToBoolMap::Allocate(pOutput->dependencies);
-	HqFunction::StringToBoolMap::Allocate(pOutput->functions);
-	HqValue::StringToBoolMap::Allocate(pOutput->objectSchemas);
-	HqValue::StringToBoolMap::Allocate(pOutput->globals);
-
-	StringArray::Initialize(pOutput->strings);
-	HqByteHelper::Array::Initialize(pOutput->code);
-
-	// This load block needs to lock the garbage collector since we'll be manipulating
-	// the VM and adding garbage collected resources.
-	{
-		HqScopedMutex vmLock(hVm->lock);
-		HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
-
-		// Attempt to load the module.
-		if(LoadModule(pOutput, hVm, hSerializer))
+		// Add the loaded module data to the runtime.
+		if(!prv_init(hVm, hReport, pOutput, loader, pModuleName))
 		{
-			// Map the module to the VM.
-			HqModule::StringToHandleMap::Insert(hVm->modules, pModuleName, pOutput);
-		}
-		else
-		{
-			HqString::Release(pModuleName);
-			HqModule::Dispose(pOutput);
-
+			// The module data failed verification, so we abandon the load.
+			Dispose(pOutput);
 			pOutput = nullptr;
 		}
 	}
 
-	result = HqSerializerDispose(&hSerializer);
-	if(result != HQ_SUCCESS)
-	{
-		const char* const errorString = HqGetErrorCodeString(result);
-
-		// Failed disposing of the serializer.
-		HqReportMessage(
-			hReport,
-			HQ_MESSAGE_TYPE_WARNING,
-			"Failed to dispose of module serializer: error=\"%s\"",
-			errorString
-		);
-	}
+	HqModuleLoader::Dispose(loader);
 
 	return pOutput;
 }
@@ -379,6 +110,16 @@ void HqModule::Dispose(HqModuleHandle hModule)
 {
 	assert(hModule != HQ_MODULE_HANDLE_NULL);
 
+	// Release all strings values.
+	{
+		for(size_t i = 0; i < hModule->strings.count; ++i)
+		{
+			HqString::Release(hModule->strings.pData[i]);
+		}
+
+		StringArray::Dispose(hModule->strings);
+	}
+
 	// Dispose of all module dependencies.
 	{
 		HqValue::StringToBoolMap::Iterator iter;
@@ -388,28 +129,6 @@ void HqModule::Dispose(HqModuleHandle hModule)
 		}
 
 		HqValue::StringToBoolMap::Dispose(hModule->dependencies);
-	}
-
-	// Release the function signature keys.
-	{
-		HqFunction::StringToBoolMap::Iterator iter;
-		while(HqFunction::StringToBoolMap::IterateNext(hModule->functions, iter))
-		{
-			HqString::Release(iter.pData->key);
-		}
-
-		HqFunction::StringToBoolMap::Dispose(hModule->functions);
-	}
-
-	// Release the object schema type names.
-	{
-		HqValue::StringToBoolMap::Iterator iter;
-		while(HqValue::StringToBoolMap::IterateNext(hModule->objectSchemas, iter))
-		{
-			HqString::Release(iter.pData->key);
-		}
-
-		HqValue::StringToBoolMap::Dispose(hModule->objectSchemas);
 	}
 
 	// Release the global variable names.
@@ -423,14 +142,29 @@ void HqModule::Dispose(HqModuleHandle hModule)
 		HqValue::StringToBoolMap::Dispose(hModule->globals);
 	}
 
-	// Release all strings values.
-	for(size_t i = 0; i < hModule->strings.count; ++i)
+	// Release the object schema type names.
 	{
-		HqString::Release(hModule->strings.pData[i]);
+		HqScriptObject::StringToPtrMap::Iterator iter;
+		while(HqScriptObject::StringToPtrMap::IterateNext(hModule->objectSchemas, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		HqScriptObject::StringToPtrMap::Dispose(hModule->objectSchemas);
 	}
 
-	// Clean up the data structures.
-	StringArray::Dispose(hModule->strings);
+	// Release the function signature keys.
+	{
+		HqFunction::StringToHandleMap::Iterator iter;
+		while(HqFunction::StringToHandleMap::IterateNext(hModule->functions, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+
+		HqFunction::StringToHandleMap::Dispose(hModule->functions);
+	}
+
+	// Clean up the bytecode.
 	HqByteHelper::Array::Dispose(hModule->code);
 
 	if(hModule->hInitFunction)
@@ -461,6 +195,342 @@ HqString* HqModule::GetString(HqModuleHandle hModule, const uint32_t index, int*
 	(*pOutResult) = HQ_SUCCESS;
 
 	return hModule->strings.pData[index];
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleHandle hModule, HqModuleLoader& loader, HqString* const pModuleName)
+{
+	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(hModule != HQ_MODULE_HANDLE_NULL);
+	assert(pModuleName != nullptr);
+
+	auto endianSwapBytecode = [&hVm](uint8_t* const pBytecode, const uint32_t offset)
+	{
+		assert(pBytecode != nullptr);
+
+		HqDecoder decoder;
+		HqDecoder::Initialize(decoder, pBytecode, offset);
+
+		// Iterate through each instruction in the bytecode.
+		for(;;)
+		{
+			const uint8_t opCode = HqDecoder::EndianSwapUint8(decoder);
+
+			HqVm::EndianSwapOpCode(hVm, decoder, opCode);
+
+			if(opCode == HQ_OP_CODE_RETURN)
+			{
+				// The RETURN opcode indicates the end of the function,
+				// so we don't care about any bytecode after this.
+				break;
+			}
+		}
+	};
+
+	const bool needEndianSwap = (loader.endianness != HqGetPlatformEndianness());
+
+	hModule->hVm = hVm;
+	hModule->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
+	hModule->pName = pModuleName;
+
+	// Initialize the module data maps.
+	HqValue::StringToBoolMap::Allocate(hModule->dependencies);
+	HqValue::StringToBoolMap::Allocate(hModule->globals);
+	HqScriptObject::StringToPtrMap::Allocate(hModule->objectSchemas);
+	HqFunction::StringToHandleMap::Allocate(hModule->functions);
+
+	// Initialize the module arrays.
+	StringArray::Initialize(hModule->strings);
+	HqByteHelper::Array::Initialize(hModule->code);
+
+	// This block needs to lock the garbage collector since we'll be manipulating
+	// the VM and adding garbage collected resources.
+	{
+		HqScopedMutex vmLock(hVm->lock);
+		HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
+
+		// Verify the module can initialized in the VM.
+		if(!prv_verify(hVm, hReport, loader, pModuleName))
+		{
+			return false;
+		}
+
+		// Map the module to the VM.
+		HqModule::StringToHandleMap::Insert(hVm->modules, pModuleName, hModule);
+		HqString::AddRef(pModuleName);
+
+		// Create the init function.
+		hModule->hInitFunction = HqFunction::CreateInit(
+			hModule, 
+			uint32_t(loader.bytecode.count), 
+			uint32_t(loader.initBytecode.count)
+		);
+
+		// Reserve space for the string pool.
+		StringArray::Reserve(hModule->strings, loader.strings.count);
+
+		// Set the total number of strings that will exist in the string pool.
+		hModule->strings.count = loader.strings.count;
+
+		// Add the module's strings.
+		for(size_t stringIndex = 0; stringIndex < loader.strings.count; ++stringIndex)
+		{
+			HqString* const pString = loader.strings.pData[stringIndex];
+
+			hModule->strings.pData[stringIndex] = pString;
+
+			// Add a reference to the string.
+			HqString::AddRef(pString);
+		}
+
+		// Add the module's dependencies.
+		for(size_t depIndex = 0; depIndex < loader.dependencies.count; ++depIndex)
+		{
+			HqString* const pDepName = loader.dependencies.pData[depIndex];
+
+			if(!HqValue::StringToBoolMap::Contains(hModule->dependencies, pDepName))
+			{
+				HqValue::StringToBoolMap::Insert(hModule->dependencies, pDepName, false);
+				HqString::AddRef(pDepName);
+			}
+		}
+
+		// Add the module's global variables
+		for(size_t varIndex = 0; varIndex < loader.globals.count; ++varIndex)
+		{
+			HqString* const pVarName = loader.globals.pData[varIndex];
+
+			if(!HqValue::StringToBoolMap::Contains(hModule->globals, pVarName))
+			{
+				// Add the global variable to the module.
+				HqValue::StringToBoolMap::Insert(hModule->globals, pVarName, false);
+				HqString::AddRef(pVarName);
+
+				// Add the global variable to the VM.
+				HqValue::StringToHandleMap::Insert(hVm->globals, pVarName, HQ_VALUE_HANDLE_NULL);
+				HqString::AddRef(pVarName);
+			}
+		}
+
+		// Add the module's object type schemas.
+		for(size_t objTypeIndex = 0; objTypeIndex < loader.objectTypes.count; ++objTypeIndex)
+		{
+			const HqModuleLoader::ObjectType& type = loader.objectTypes.pData[objTypeIndex];
+
+			HqScriptObject::MemberDefinitionMap objMemberDefs;
+			HqScriptObject::MemberDefinitionMap::Allocate(objMemberDefs);
+
+			// Map each object member.
+			for(size_t memberIndex = 0; memberIndex < type.memberDefinitions.count; ++memberIndex)
+			{
+				const HqModuleLoader::ObjectType::MemberDefinition& inputDef = type.memberDefinitions.pData[memberIndex];
+				HqScriptObject::MemberDefinition outputDef;
+
+				outputDef.bindingIndex = uint32_t(memberIndex);
+				outputDef.valueType = inputDef.type;
+
+				HqScriptObject::MemberDefinitionMap::Insert(objMemberDefs, inputDef.pName, outputDef);
+			}
+
+			// Create the new object schema. This call will internally add a reference to the object type name
+			// and each member name. This means we don't need to explicitly add references to those strings here.
+			HqScriptObject* const pObjSchema = HqScriptObject::CreateSchema(type.pName, objMemberDefs);
+
+			// Dispose of the object member map since it's no longer needed.
+			HqScriptObject::MemberDefinitionMap::Dispose(objMemberDefs);
+
+			// Add the object schema to the module.
+			HqScriptObject::StringToPtrMap::Insert(hModule->objectSchemas, type.pName, pObjSchema);
+			HqString::AddRef(type.pName);
+
+			// Add the object schema to the VM.
+			HqScriptObject::StringToPtrMap::Insert(hVm->objectSchemas, type.pName, pObjSchema);
+			HqString::AddRef(type.pName);
+		}
+
+		// Add the module's functions.
+		for(size_t funcIndex = 0; funcIndex < loader.functions.count; ++funcIndex)
+		{
+			const HqModuleLoader::Function& func = loader.functions.pData[funcIndex];
+
+			HqFunctionHandle hFunc = HQ_FUNCTION_HANDLE_NULL;
+
+			if(func.isNative)
+			{
+				// Create a native function handle. This will implicitly add a reference to the function signature.
+				hFunc = HqFunction::CreateNative(hModule, func.pSignature, func.numInputs, func.numOutputs);
+			}
+			else
+			{
+				HqGuardedBlock::PtrArray guardedBlocks;
+				HqGuardedBlock::PtrArray::Initialize(guardedBlocks);
+				HqGuardedBlock::PtrArray::Reserve(guardedBlocks, func.guardedBlocks.count);
+
+				guardedBlocks.count = func.guardedBlocks.count;
+
+				// Construct the guarded blocks for the function.
+				for(size_t blockIndex = 0; blockIndex < func.guardedBlocks.count; ++blockIndex)
+				{
+					const HqModuleLoader::Function::GuardedBlock& block = func.guardedBlocks.pData[blockIndex];
+
+					HqGuardedBlock::ExceptionHandlerArray exceptionHandlers;
+					HqGuardedBlock::ExceptionHandlerArray::Initialize(exceptionHandlers);
+					HqGuardedBlock::ExceptionHandlerArray::Reserve(exceptionHandlers, block.exceptionHandlers.count);
+
+					exceptionHandlers.count = block.exceptionHandlers.count;
+
+					// Setup the exception handlers for the current guarded block.
+					for(size_t handlerIndex = 0; handlerIndex < block.exceptionHandlers.count; ++handlerIndex)
+					{
+						const HqModuleLoader::Function::GuardedBlock::ExceptionHandler& inputHandler = block.exceptionHandlers.pData[handlerIndex];
+						HqGuardedBlock::ExceptionHandler& outputHandler = exceptionHandlers.pData[handlerIndex];
+
+						outputHandler.pClassName = inputHandler.pClassName;
+						outputHandler.offset = inputHandler.offset;
+						outputHandler.type = inputHandler.type;
+					}
+
+					// Create the new guarded block. This will implicitly add a reference to each exception handler class name.
+					guardedBlocks.pData[blockIndex] = HqGuardedBlock::Create(exceptionHandlers, block.offset, block.length);
+
+					HqGuardedBlock::ExceptionHandlerArray::Dispose(exceptionHandlers);
+				}
+
+				// Create the new script function. This will implicitly add a reference to
+				// the signature and copy all guarded blocks to its own internal array.
+				hFunc = HqFunction::CreateScript(
+					hModule, 
+					func.pSignature, 
+					guardedBlocks, 
+					func.offset, 
+					func.offset + func.length, 
+					func.numInputs, 
+					func.numOutputs
+				);
+
+				HqGuardedBlock::PtrArray::Dispose(guardedBlocks);
+			}
+
+			// Add the function to the module.
+			HqFunction::StringToHandleMap::Insert(hModule->functions, func.pSignature, hFunc);
+			HqString::AddRef(func.pSignature);
+
+			// Add the function to the VM.
+			HqFunction::StringToHandleMap::Insert(hVm->functions, func.pSignature, hFunc);
+			HqString::AddRef(func.pSignature);
+		}
+	}
+
+	// Reserve enough space for both the general bytecode and init bytecode.
+	// This is so we can concatenate them together for the runtime code.
+	HqByteHelper::Array::Reserve(hModule->code, loader.bytecode.count + loader.initBytecode.count);
+
+	// Copy all bytecode into the module.
+	memcpy(hModule->code.pData, loader.bytecode.pData, loader.bytecode.count);
+	memcpy(hModule->code.pData + loader.bytecode.count, loader.initBytecode.pData, loader.initBytecode.count);
+
+	if(needEndianSwap)
+	{
+		uint8_t* const pBytecode = hModule->code.pData;
+
+		// Endian swap the init function.
+		endianSwapBytecode(pBytecode, hModule->hInitFunction->bytecodeOffsetStart);
+
+		// Endian swap each non-native function.
+		HqFunction::StringToHandleMap::Iterator iter;
+		while(HqFunction::StringToHandleMap::IterateNext(hModule->functions, iter))
+		{
+			HqFunctionHandle hFunc = iter.pData->value;
+
+			if(!hFunc->isNative)
+			{
+				endianSwapBytecode(pBytecode, hFunc->bytecodeOffsetStart);
+			}
+		}
+	}
+
+	return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool HqModule::prv_verify(HqVmHandle hVm, HqReportHandle hReport, HqModuleLoader& loader, HqString* const pModuleName)
+{
+	assert(hVm != HQ_VM_HANDLE_NULL);
+	assert(pModuleName != nullptr);
+
+	// Check if a module with this name has already been loaded.
+	if(HqModule::StringToHandleMap::Contains(hVm->modules, pModuleName))
+	{
+		// If a module with this name already exists, we can assume it's the same module,
+		// so to avoid spamming useless conflict errors, we bail out now.
+		HqReportMessage(
+			hReport,
+			HQ_MESSAGE_TYPE_ERROR,
+			"Module already loaded: module='%s'",
+			pModuleName->data
+		);
+		return false;
+	}
+
+	bool success = true;
+
+	// Check for global variable name conflicts.
+	for(size_t varIndex = 0; varIndex < loader.globals.count; ++varIndex)
+	{
+		HqString* const pVarName = loader.globals.pData[varIndex];
+
+		if(HqValue::StringToHandleMap::Contains(hVm->globals, pVarName))
+		{
+			HqReportMessage(
+				hReport,
+				HQ_MESSAGE_TYPE_ERROR,
+				"Global variable conflict: module='%s', variableName='%s'",
+				pModuleName->data,
+				pVarName->data
+			);
+			success = false;
+		}
+	}
+
+	// Check for object schema conflicts.
+	for(size_t objTypeIndex = 0; objTypeIndex < loader.objectTypes.count; ++objTypeIndex)
+	{
+		const HqModuleLoader::ObjectType& type = loader.objectTypes.pData[objTypeIndex];
+
+		if(HqScriptObject::StringToPtrMap::Contains(hVm->objectSchemas, type.pName))
+		{
+			HqReportMessage(
+				hReport,
+				HQ_MESSAGE_TYPE_ERROR,
+				"Class type conflict: module='%s', className='%s'",
+				pModuleName->data,
+				type.pName->data
+			);
+			success = false;
+		}
+	}
+
+	// Check for function conflicts.
+	for(size_t funcIndex = 0; funcIndex < loader.functions.count; ++funcIndex)
+	{
+		const HqModuleLoader::Function& func = loader.functions.pData[funcIndex];
+
+		if(HqFunction::StringToHandleMap::Contains(hVm->functions, func.pSignature))
+		{
+			HqReportMessage(
+				hReport,
+				HQ_MESSAGE_TYPE_ERROR,
+				"Function signature conflict: module='%s', className='%s'",
+				pModuleName->data,
+				func.pSignature->data
+			);
+			success = false;
+		}
+	}
+
+	return success;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

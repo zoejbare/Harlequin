@@ -461,7 +461,7 @@ int HqSerializerSaveStreamToBuffer(HqSerializerHandle hSerializer, void* pBuffer
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqSerializerWriteBool(HqSerializerHandle hSerializer, bool value)
+int HqSerializerWriteBool8(HqSerializerHandle hSerializer, bool value)
 {
 	if(!hSerializer)
 	{
@@ -473,9 +473,66 @@ int HqSerializerWriteBool(HqSerializerHandle hSerializer, bool value)
 		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	uint8_t temp = value ? 1 : 0;
+	const uint8_t temp = value ? uint8_t(0xFF) : 0;
 
-	return HqSerializer::WriteData(hSerializer, reinterpret_cast<uint8_t*>(&temp), sizeof(uint8_t));
+	return HqSerializer::WriteRawData(hSerializer, &temp, sizeof(uint8_t));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSerializerWriteBool16(HqSerializerHandle hSerializer, bool value)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	if(hSerializer->mode != HQ_SERIALIZER_MODE_WRITER)
+	{
+		return HQ_ERROR_INVALID_TYPE;
+	}
+
+	const uint16_t temp = value ? 0xFFFF : 0;
+
+	return HqSerializer::WriteRawData(hSerializer, &temp, sizeof(uint16_t));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSerializerWriteBool32(HqSerializerHandle hSerializer, bool value)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	if(hSerializer->mode != HQ_SERIALIZER_MODE_WRITER)
+	{
+		return HQ_ERROR_INVALID_TYPE;
+	}
+
+	const uint32_t temp = value ? 0xFFFFFFFFul : 0;
+
+	return HqSerializer::WriteRawData(hSerializer, &temp, sizeof(uint32_t));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSerializerWriteBool64(HqSerializerHandle hSerializer, bool value)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	if(hSerializer->mode != HQ_SERIALIZER_MODE_WRITER)
+	{
+		return HQ_ERROR_INVALID_TYPE;
+	}
+
+	const uint64_t temp = value ? 0xFFFFFFFFFFFFFFFFull : 0;
+
+	return HqSerializer::WriteRawData(hSerializer, &temp, sizeof(uint64_t));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -667,7 +724,7 @@ int HqSerializerWriteBuffer(HqSerializerHandle hSerializer, size_t bufferLength,
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqSerializerReadBool(HqSerializerHandle hSerializer, bool* pOutValue)
+int HqSerializerReadBool8(HqSerializerHandle hSerializer, bool* pOutValue)
 {
 	if(!hSerializer || !pOutValue)
 	{
@@ -676,7 +733,67 @@ int HqSerializerReadBool(HqSerializerHandle hSerializer, bool* pOutValue)
 
 	uint8_t temp = 0;
 
-	int result = HqSerializer::ReadData(hSerializer, reinterpret_cast<uint8_t*>(&temp), sizeof(uint8_t));
+	int result = HqSerializer::ReadRawData(hSerializer, &temp, sizeof(uint8_t));
+	if(result == HQ_SUCCESS)
+	{
+		(*pOutValue) = temp ? true : false;
+	}
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSerializerReadBool16(HqSerializerHandle hSerializer, bool* pOutValue)
+{
+	if(!hSerializer || !pOutValue)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	uint16_t temp = 0;
+
+	int result = HqSerializer::ReadRawData(hSerializer, &temp, sizeof(uint16_t));
+	if(result == HQ_SUCCESS)
+	{
+		(*pOutValue) = temp ? true : false;
+	}
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSerializerReadBool32(HqSerializerHandle hSerializer, bool* pOutValue)
+{
+	if(!hSerializer || !pOutValue)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	uint32_t temp = 0;
+
+	int result = HqSerializer::ReadRawData(hSerializer, &temp, sizeof(uint32_t));
+	if(result == HQ_SUCCESS)
+	{
+		(*pOutValue) = temp ? true : false;
+	}
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSerializerReadBool64(HqSerializerHandle hSerializer, bool* pOutValue)
+{
+	if(!hSerializer || !pOutValue)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	uint64_t temp = 0;
+
+	int result = HqSerializer::ReadRawData(hSerializer, &temp, sizeof(uint64_t));
 	if(result == HQ_SUCCESS)
 	{
 		(*pOutValue) = temp ? true : false;

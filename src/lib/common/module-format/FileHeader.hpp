@@ -20,15 +20,33 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include <string.h>
 #include <stdint.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqFileHeader
+struct HqModuleFileHeader
 {
-	uint8_t magicNumber[5];
-	uint8_t reserved[10];
-	uint8_t bigEndianFlag;
+	static void Initialize(HqModuleFileHeader& output)
+	{
+		memset(output.reserved, 0, sizeof(output.reserved));
+
+		output.magicNumber[0] = 'H';
+		output.magicNumber[1] = 'Q';
+		output.magicNumber[2] = 'M';
+		output.magicNumber[3] = '\0';
+
+#ifdef HQ_CPU_ENDIAN_LITTLE
+		output.isBigEndian = false;
+#else
+		output.isBigEndian = true;
+#endif
+	}
+
+	uint8_t magicNumber[4];
+	uint8_t reserved[11];
+
+	bool isBigEndian;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

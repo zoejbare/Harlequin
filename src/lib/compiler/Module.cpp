@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2023, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -16,32 +16,8 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "Module.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
-
-#include <stdint.h>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct HqModuleHeader
-{
-	struct Section
-	{
-		uint32_t offset;
-		uint32_t length;
-	};
-
-	Section dependencyTable;
-	Section objectTable;
-	Section stringTable;
-	Section globalTable;
-	Section functionTable;
-	Section extensionTable;
-	Section bytecode;
-
-	uint32_t initFunctionLength;
-	uint32_t headerEndPosition;
-};
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -352,8 +352,8 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 				return false;
 			}
 
-			HqGuardedBlock::Stack validBlocks;
-			HqGuardedBlock::Stack::Initialize(validBlocks, hFrame->hFunction->guardedBlocks.count);
+			HqGuardedBlock::PtrStack validBlocks;
+			HqGuardedBlock::PtrStack::Initialize(validBlocks, hFrame->hFunction->guardedBlocks.count);
 
 			// Find all the guarded blocks that encapsulate the instruction that raised the exception.
 			for(size_t blockIndex = 0; blockIndex < hFrame->hFunction->guardedBlocks.count; ++blockIndex)
@@ -363,7 +363,7 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 				if(currentOffset >= pBlock->bytecodeOffsetStart
 					&& currentOffset <= pBlock->bytecodeOffsetEnd)
 				{
-					HqGuardedBlock::Stack::Push(validBlocks, pBlock);
+					HqGuardedBlock::PtrStack::Push(validBlocks, pBlock);
 				}
 			}
 
@@ -378,24 +378,24 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 				// Check each handler on the current block.
 				for(size_t handlerIndex = 0; handlerIndex < pBlock->handlers.count; ++handlerIndex)
 				{
-					HqExceptionHandler* const pHandler = pBlock->handlers.pData[handlerIndex];
+					const HqGuardedBlock::ExceptionHandler& handler = pBlock->handlers.pData[handlerIndex];
 
 					// Check if the general type of the handler matches the raised value.
-					if(pHandler->type == valueType)
+					if(handler.type == valueType)
 					{
 						// If the value is an object, we need to also compare the class type name to
 						// verify this handler will handle the exact object type that was raised.
 						if(valueType != HQ_VALUE_TYPE_OBJECT ||
 							(
 								valueType == HQ_VALUE_TYPE_OBJECT
-									&& (!hValue || HqString::Compare(pHandler->pClassName, hValue->as.pObject->pTypeName))
+									&& (!hValue || HqString::Compare(handler.pClassName, hValue->as.pObject->pTypeName))
 							)
 						)
 						{
 							// This is the handler we'll use.
-							HqGuardedBlock::Stack::Dispose(validBlocks);
+							HqGuardedBlock::PtrStack::Dispose(validBlocks);
 
-							(*pOutHandlerOffset) = pHandler->offset;
+							(*pOutHandlerOffset) = handler.offset;
 							return true;
 						}
 					}
@@ -403,7 +403,7 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 			}
 
 			// No acceptable handler was found for this frame.
-			HqGuardedBlock::Stack::Dispose(validBlocks);
+			HqGuardedBlock::PtrStack::Dispose(validBlocks);
 
 			return false;
 		};

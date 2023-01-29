@@ -71,18 +71,7 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 	// Native functions are effectively represented as dummy frames, so they need no other initialization.
 	if(!hFunction->isNative)
 	{
-		// Build the local table for the new frame. This will intentionally copy each value from the function's local table
-		// so any changes made the variables in the frame will not affect the prototypes in the function.
-		HqFunction::StringToBoolMap::Iterator iter;
-		while(HqFunction::StringToBoolMap::IterateNext(hFunction->locals, iter))
-		{
-			HqString* const pKey = iter.pData->key;
-			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-
-			HqValue::StringToHandleMap::Insert(hFrame->locals, pKey, hValue);
-		}
-
-		HqDecoder::Initialize(hFrame->decoder, hFunction->hModule, hFunction->bytecodeOffsetStart);
+		HqDecoder::Initialize(hFrame->decoder, hFunction->hModule->code.pData, hFunction->bytecodeOffsetStart);
 
 		// The frame is now active, so we need to assume it can have GC data references at any time.
 		hFrame->active = true;

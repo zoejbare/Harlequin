@@ -538,8 +538,8 @@ int HqModuleListFunctions(HqModuleHandle hModule, HqCallbackIterateString onIter
 	}
 
 	// Call the callback for each function signature in the module.
-	HqFunction::StringToBoolMap::Iterator iter;
-	while(HqFunction::StringToBoolMap::IterateNext(hModule->functions, iter))
+	HqFunction::StringToHandleMap::Iterator iter;
+	while(HqFunction::StringToHandleMap::IterateNext(hModule->functions, iter))
 	{
 		if(!onIterateFn(pUserData, iter.pData->key->data))
 		{
@@ -850,7 +850,7 @@ int HqFunctionDisassemble(HqFunctionHandle hFunction, HqCallbackOpDisasm onDisas
 	disasm.onDisasmFn = onDisasmFn;
 	disasm.pUserData = pUserData;
 
-	HqDecoder::Initialize(disasm.decoder, hFunction->hModule, hFunction->bytecodeOffsetStart);
+	HqDecoder::Initialize(disasm.decoder, hFunction->hModule->code.pData, hFunction->bytecodeOffsetStart);
 
 	// Iterate through each instruction.
 	for(;;)

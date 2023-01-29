@@ -21,8 +21,10 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "Function.hpp"
+#include "ScriptObject.hpp"
 #include "Value.hpp"
 
+#include "../base/ModuleLoader.hpp"
 #include "../base/String.hpp"
 
 #include "../common/ByteHelper.hpp"
@@ -54,13 +56,17 @@ struct HqModule
 
 	static HqString* GetString(HqModuleHandle hModule, const uint32_t index, int* const pOutResult);
 
+	static bool prv_init(HqVmHandle, HqReportHandle, HqModuleHandle, HqModuleLoader&, HqString*);
+	static bool prv_verify(HqVmHandle, HqReportHandle, HqModuleLoader&, HqString*);
+
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	HqValue::StringToBoolMap dependencies;
-	HqFunction::StringToBoolMap functions;
-	HqValue::StringToBoolMap objectSchemas;
 	HqValue::StringToBoolMap globals;
+
+	HqScriptObject::StringToPtrMap objectSchemas;
+	HqFunction::StringToHandleMap functions;
 
 	StringArray strings;
 	HqByteHelper::Array code;

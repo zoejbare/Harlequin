@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022, Zoe J. Bare
+// Copyright (c) 2023, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,26 +20,23 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../base/String.hpp"
+#include "../Harlequin.h"
 
-#include "../common/Array.hpp"
+#include "generated/HarlequinBaseListener.h"
+
+#include <unordered_set>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqExceptionHandler
+class Module
+	: public HarlequinBaseListener
 {
-	typedef HqArray<HqExceptionHandler*> Array;
+public:
 
-	static HqExceptionHandler* Create(const uint8_t type, const uint32_t offset, HqString* const pClassName);
-	static void Dispose(HqExceptionHandler* const pExceptionHandler);
+	virtual void enterModule(HarlequinParser::ModuleContext* pCtx) override;
+	virtual void exitModule(HarlequinParser::ModuleContext* pCtx) override;
 
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
-
-	HqString* pClassName;
-
-	uint32_t offset;
-	uint8_t type;
+	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext* pCtx) override;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

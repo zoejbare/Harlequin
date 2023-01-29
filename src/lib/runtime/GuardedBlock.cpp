@@ -22,17 +22,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqGuardedBlock* HqGuardedBlock::Create(const uint32_t offset, const uint32_t length, const size_t handlerCount)
+HqGuardedBlock* HqGuardedBlock::Create(
+	ExceptionHandlerArray& exceptionHandlers, 
+	const uint32_t bytecodeOffset, 
+	const uint32_t bytecodeLength
+)
 {
 	HqGuardedBlock* const pOutput = new HqGuardedBlock();
 	assert(pOutput != nullptr);
 
-	pOutput->bytecodeOffsetStart = offset;
-	pOutput->bytecodeOffsetEnd = offset + length;
+	pOutput->bytecodeOffsetStart = bytecodeOffset;
+	pOutput->bytecodeOffsetEnd = bytecodeOffset + bytecodeLength;
 
-	// Initialize the array of exception handlers.
-	HqExceptionHandler::Array::Initialize(pOutput->handlers);
-	HqExceptionHandler::Array::Reserve(pOutput->handlers, handlerCount);
+	// Take ownership over the exception handler array.
+	ExceptionHandlerArray::Move(pOutput->handlers, exceptionHandlers);
+
+	// Add a reference to the class name strings in each exception handler.
+	for(size_t i = 0; i < pOutput->handlers.count; ++i)
+	{
+		ExceptionHandler& handler = pOutput->handlers.pData[i];
+
+		HqString::AddRef(handler.pClassName);
+	}
 
 	return pOutput;
 }
@@ -41,14 +52,15 @@ HqGuardedBlock* HqGuardedBlock::Create(const uint32_t offset, const uint32_t len
 
 void HqGuardedBlock::Dispose(HqGuardedBlock* const pGuardedBlock)
 {
+	// Release the exception handler class name strings.
 	for(size_t i = 0; i < pGuardedBlock->handlers.count; ++i)
 	{
-		HqExceptionHandler* const pHandler = pGuardedBlock->handlers.pData[i];
+		ExceptionHandler& handler = pGuardedBlock->handlers.pData[i];
 
-		HqExceptionHandler::Dispose(pHandler);
+		HqString::Release(handler.pClassName);
 	}
 
-	HqExceptionHandler::Array::Dispose(pGuardedBlock->handlers);
+	ExceptionHandlerArray::Dispose(pGuardedBlock->handlers);
 
 	delete pGuardedBlock;
 }

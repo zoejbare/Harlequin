@@ -24,7 +24,11 @@
 #include "ObjectData.hpp"
 
 #include "../base/String.hpp"
+
 #include "../common/Array.hpp"
+
+#include "../common/module-format/FileHeader.hpp"
+#include "../common/module-format/TableOfContents.hpp"
 
 #include <deque>
 #include <unordered_map>
@@ -37,7 +41,7 @@ struct HqModuleWriter
 	static void Dispose(HqModuleWriterHandle hWriter);
 	static bool Serialize(
 		HqModuleWriterHandle hModuleWriter,
-		HqCompilerHandle hCompiler,
+		HqReportHandle hReport,
 		HqSerializerHandle hSerializer
 	);
 
@@ -49,12 +53,22 @@ struct HqModuleWriter
 
 	static uint32_t AddString(HqModuleWriterHandle hWriter, HqString* const pString);
 
+	static bool prv_writeFileHeader(HqSerializerHandle, const HqModuleFileHeader&, int&, size_t&);
+	static bool prv_writeTableOfContents(HqSerializerHandle, const HqModuleTableOfContents&, int&, size_t&);
+
+	static bool prv_writeBuffer(HqSerializerHandle, const void*, size_t, int&, size_t&);
+	static bool prv_writeString(HqSerializerHandle, const char*, size_t, int&, size_t&);
+	static bool prv_writeUint8(HqSerializerHandle, uint8_t, int&, size_t&);
+	static bool prv_writeUint16(HqSerializerHandle, uint16_t, int&, size_t&);
+	static bool prv_writeUint32(HqSerializerHandle, uint32_t, int&, size_t&);
+	static bool prv_writeBool8(HqSerializerHandle, bool, int&, size_t&);
+	static bool prv_writeBool32(HqSerializerHandle, bool, int&, size_t&);
+
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	typedef std::unordered_map<
+	typedef std::unordered_set<
 		HqString*,
-		bool,
 		HqString::StlHash,
 		HqString::StlCompare
 	> DependencySet;
@@ -67,10 +81,10 @@ struct HqModuleWriter
 
 	typedef std::unordered_map<
 		HqString*,
-		uint32_t,
+		size_t,
 		HqString::StlHash,
 		HqString::StlCompare
-	> StringIndexMap;
+	> StringToSizeMap;
 
 	DependencySet dependencies;
 	GlobalValueSet globals;
@@ -79,12 +93,8 @@ struct HqModuleWriter
 
 	HqFunctionData::Bytecode initBytecode;
 
-	StringIndexMap stringIndexMap;
-	std::deque<HqString*> strings;
-
-	uint32_t nullIndex;
-	uint32_t boolTrueIndex;
-	uint32_t boolFalseIndex;
+	StringToSizeMap stringIndices;
+	std::deque<HqString*> stringConstants;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -26,6 +26,7 @@
 
 HqFunctionHandle HqFunction::CreateInit(
 	HqModuleHandle hModule,
+	const uint32_t bytecodeOffset,
 	const uint32_t bytecodeLength
 )
 {
@@ -40,13 +41,11 @@ HqFunctionHandle HqFunction::CreateInit(
 
 	pOutput->hModule = hModule;
 	pOutput->pSignature = HqString::Create(funcName);
-	pOutput->bytecodeOffsetStart = 0;
-	pOutput->bytecodeOffsetEnd = bytecodeLength;
+	pOutput->bytecodeOffsetStart = bytecodeOffset;
+	pOutput->bytecodeOffsetEnd = bytecodeOffset + bytecodeLength;
 	pOutput->numParameters = 0;
 	pOutput->numReturnValues = 0;
 	pOutput->isNative = false;
-
-	StringToBoolMap::Initialize(pOutput->locals);
 
 	return pOutput;
 }
@@ -56,8 +55,7 @@ HqFunctionHandle HqFunction::CreateInit(
 HqFunctionHandle HqFunction::CreateScript(
 	HqModuleHandle hModule,
 	HqString* const pSignature,
-	StringToBoolMap& locals,
-	HqGuardedBlock::Array& guardedBlocks,
+	HqGuardedBlock::PtrArray& guardedBlocks,
 	const uint32_t bytecodeOffset,
 	const uint32_t bytecodeLength,
 	const uint16_t numParameters,
@@ -72,28 +70,17 @@ HqFunctionHandle HqFunction::CreateScript(
 
 	pOutput->hModule = hModule;
 	pOutput->pSignature = pSignature;
-	pOutput->locals = locals;
-	pOutput->guardedBlocks = guardedBlocks;
 	pOutput->bytecodeOffsetStart = bytecodeOffset;
 	pOutput->bytecodeOffsetEnd = bytecodeOffset + bytecodeLength;
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = false;
 
+	// Take ownership of the guarded block array.
+	HqGuardedBlock::PtrArray::Move(pOutput->guardedBlocks, guardedBlocks);
+
+	// Add a reference to the function signature string.
 	HqString::AddRef(pOutput->pSignature);
-
-	// Make a copy of the input local variable map to store on this function.
-	HqFunction::StringToBoolMap::Initialize(pOutput->locals);
-	HqFunction::StringToBoolMap::Copy(pOutput->locals, locals);
-
-	// Track the name strings in the local variables map.
-	{
-		HqFunction::StringToBoolMap::Iterator iter;
-		while(HqFunction::StringToBoolMap::IterateNext(pOutput->locals, iter))
-		{
-			HqString::AddRef(iter.pData->key);
-		}
-	}
 
 	return pOutput;
 }
@@ -123,7 +110,6 @@ HqFunctionHandle HqFunction::CreateNative(
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = true;
 
-	StringToBoolMap::Initialize(pOutput->locals);
 	HqString::AddRef(pOutput->pSignature);
 
 	return pOutput;
@@ -154,7 +140,6 @@ HqFunctionHandle HqFunction::CreateBuiltIn(
 	pOutput->numReturnValues = numReturnValues;
 	pOutput->isNative = true;
 
-	StringToBoolMap::Initialize(pOutput->locals);
 	HqString::AddRef(pOutput->pSignature);
 
 	return pOutput;
@@ -166,24 +151,13 @@ void HqFunction::Dispose(HqFunctionHandle hFunction)
 {
 	assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
 
-	// Dispose of the local variables.
-	{
-		StringToBoolMap::Iterator iter;
-		while(StringToBoolMap::IterateNext(hFunction->locals, iter))
-		{
-			HqString::Release(iter.pData->key);
-		}
-
-		StringToBoolMap::Dispose(hFunction->locals);
-	}
-
 	// Release each guarded block.
 	for(size_t blockIndex = 0; blockIndex < hFunction->guardedBlocks.count; ++blockIndex)
 	{
 		HqGuardedBlock::Dispose(hFunction->guardedBlocks.pData[blockIndex]);
 	}
 
-	HqGuardedBlock::Array::Dispose(hFunction->guardedBlocks);
+	HqGuardedBlock::PtrArray::Dispose(hFunction->guardedBlocks);
 	HqString::Release(hFunction->pSignature);
 
 	delete hFunction;

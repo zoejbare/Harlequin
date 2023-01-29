@@ -26,7 +26,7 @@
 
 struct HqDecoder
 {
-	static void Initialize(HqDecoder& output, HqModuleHandle hModule, uint32_t offset);
+	static void Initialize(HqDecoder& output, uint8_t* pBytecode, uint32_t offset);
 
 	static bool LoadBool(HqDecoder& decoder);
 

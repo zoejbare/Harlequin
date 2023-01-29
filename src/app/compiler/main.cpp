@@ -250,8 +250,7 @@ int main(int argc, char* argv[])
 		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 0);
 
 		HqBytecodeWriteLoadImmF64(hSubFuncSerializer, 0, 1.2345);
-		HqBytecodeWriteStoreLocal(hSubFuncSerializer, stringIndex5, 0);
-		HqBytecodeWriteLoadLocal(hSubFuncSerializer, 1, stringIndex5);
+		HqBytecodeWriteMove(hSubFuncSerializer, 1, 0);
 
 		HqBytecodeWritePush(hSubFuncSerializer, 0);
 		HqBytecodeWriteYield(hSubFuncSerializer);
@@ -391,7 +390,10 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	result = HqModuleWriterSerialize(hModuleWriter, hCompiler, hFileSerializer);
+	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
+	HqCompilerGetReportHandle(hCompiler, &hReport);
+
+	result = HqModuleWriterSerialize(hModuleWriter, hReport, hFileSerializer);
 	if(result == HQ_SUCCESS)
 	{
 		const void* const pFileData = HqSerializerGetRawStreamPointer(hFileSerializer);

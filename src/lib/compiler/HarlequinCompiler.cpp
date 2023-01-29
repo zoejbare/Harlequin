@@ -147,7 +147,7 @@ int HqModuleWriterAddDependency(HqModuleWriterHandle hModuleWriter, const char* 
 		return HQ_ERROR_KEY_ALREADY_EXISTS;
 	}
 
-	hModuleWriter->dependencies.emplace(pModuleName, false);
+	hModuleWriter->dependencies.insert(pModuleName);
 
 	return HQ_SUCCESS;
 }
@@ -586,12 +586,11 @@ int HqModuleWriterAddExceptionHandler(
 
 int HqModuleWriterSerialize(
 	HqModuleWriterHandle hModuleWriter,
-	HqCompilerHandle hCompiler,
+	HqReportHandle hReport,
 	HqSerializerHandle hSerializer
 )
 {
 	if(!hModuleWriter
-		|| !hCompiler
 		|| !hSerializer
 		|| HqSerializerGetMode(hSerializer) != HQ_SERIALIZER_MODE_WRITER)
 	{
@@ -620,7 +619,7 @@ int HqModuleWriterSerialize(
 	}
 
 	// Write the module to the serializer.
-	if(!HqModuleWriter::Serialize(hModuleWriter, hCompiler, hSerializer))
+	if(!HqModuleWriter::Serialize(hModuleWriter, hReport, hSerializer))
 	{
 		return HQ_ERROR_UNSPECIFIED_FAILURE;
 	}
@@ -1058,26 +1057,6 @@ int HqBytecodeWriteLoadGlobal(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadLocal(
-	HqSerializerHandle hSerializer,
-	const uint32_t gpRegIndex,
-	const uint32_t stringIndex
-)
-{
-	if(!hSerializer)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_LOCAL);
-	_HQ_EMIT_UDWORD(gpRegIndex);
-	_HQ_EMIT_UDWORD(stringIndex);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int HqBytecodeWriteLoadParam(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
@@ -1162,26 +1141,6 @@ int HqBytecodeWriteStoreGlobal(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteStoreLocal(
-	HqSerializerHandle hSerializer,
-	const uint32_t stringIndex,
-	const uint32_t gpRegIndex
-)
-{
-	if(!hSerializer)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_LOCAL);
-	_HQ_EMIT_UDWORD(stringIndex);
-	_HQ_EMIT_UDWORD(gpRegIndex);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int HqBytecodeWriteStoreParam(
 	HqSerializerHandle hSerializer,
 	const uint32_t ioRegIndex,
@@ -1258,26 +1217,6 @@ int HqBytecodeWritePullGlobal(
 	}
 
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_PULL_GLOBAL);
-	_HQ_EMIT_UDWORD(gpRegIndex);
-	_HQ_EMIT_UDWORD(stringIndex);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqBytecodeWritePullLocal(
-	HqSerializerHandle hSerializer,
-	const uint32_t gpRegIndex,
-	const uint32_t stringIndex
-)
-{
-	if(!hSerializer)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	_HQ_EMIT_UBYTE(HQ_OP_CODE_PULL_LOCAL);
 	_HQ_EMIT_UDWORD(gpRegIndex);
 	_HQ_EMIT_UDWORD(stringIndex);
 

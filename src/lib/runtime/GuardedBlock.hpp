@@ -20,24 +20,39 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ExceptionHandler.hpp"
+#include "../base/String.hpp"
 
+#include "../common/Array.hpp"
 #include "../common/Stack.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct HqGuardedBlock
 {
-	typedef HqArray<HqGuardedBlock*> Array;
-	typedef HqStack<HqGuardedBlock*> Stack;
+	struct ExceptionHandler
+	{
+		HqString* pClassName;
 
-	static HqGuardedBlock* Create(const uint32_t offset, const uint32_t length, const size_t handlerCount);
+		uint32_t offset;
+		uint8_t type;
+	};
+
+	typedef HqArray<HqGuardedBlock*> PtrArray;
+	typedef HqStack<HqGuardedBlock*> PtrStack;
+
+	typedef HqArray<ExceptionHandler> ExceptionHandlerArray;
+
+	static HqGuardedBlock* Create(
+		ExceptionHandlerArray& exceptionHandlers, 
+		uint32_t bytecodeOffset, 
+		uint32_t bytecodeLength
+	);
 	static void Dispose(HqGuardedBlock* const pGuardedBlock);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	HqExceptionHandler::Array handlers;
+	ExceptionHandlerArray handlers;
 
 	uint32_t bytecodeOffsetStart;
 	uint32_t bytecodeOffsetEnd;

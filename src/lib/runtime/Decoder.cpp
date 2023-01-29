@@ -17,9 +17,9 @@
 //
 
 #include "Decoder.hpp"
-#include "Module.hpp"
 
 #include <assert.h>
+#include <limits.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -39,11 +39,11 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqDecoder::Initialize(HqDecoder& output, HqModuleHandle hModule, uint32_t offset)
+void HqDecoder::Initialize(HqDecoder& output, uint8_t* const pBytecode, uint32_t offset)
 {
-	assert(hModule != HQ_MODULE_HANDLE_NULL);
+	assert(pBytecode != nullptr);
 
-	output.ip = hModule->code.pData + offset;
+	output.ip = pBytecode + offset;
 	output.cachedIp = output.ip;
 }
 

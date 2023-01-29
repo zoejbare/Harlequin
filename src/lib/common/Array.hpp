@@ -51,6 +51,17 @@ struct HqArray
 		}
 	}
 
+	static void Move(HqArray& output, HqArray& input)
+	{
+		output.pData = input.pData;
+		output.count = input.count;
+		output.capacity = input.capacity;
+
+		input.pData = nullptr;
+		input.count = 0;
+		input.capacity = 0;
+	}
+
 	static void Reserve(HqArray& array, size_t desiredCapacity)
 	{
 		if(array.capacity < desiredCapacity)

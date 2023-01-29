@@ -20,22 +20,25 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../Harlequin.h"
-
-#include "../../base/String.hpp"
-
-#include "../../common/module-format/FileHeader.hpp"
+#include <stdint.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqModuleCommonLoader
+struct HqModuleTableOfContents
 {
-	static bool CheckMagicNumber(const HqFileHeader& fileHeader);
+	struct Section
+	{
+		uint32_t offset;
+		uint32_t length;
+	};
 
-	static HqString* ReadString(
-		HqSerializerHandle hSerializer,
-		HqReportHandle hReport
-	);
+	Section stringTable;
+	Section dependencyTable;
+	Section globalTable;
+	Section objectTable;
+	Section functionTable;
+	Section initBytecode;
+	Section bytecode;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
