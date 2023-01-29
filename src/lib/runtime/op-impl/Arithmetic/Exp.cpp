@@ -40,13 +40,6 @@
 template <typename T>
 inline T _HqIntFastPow(T base, T exp)
 {
-	if(exp < 0)
-	{
-		// Not mathematically correct, but this implementation is intended to be a fast and minimal.
-		// If users want something more accurate, they can use some other higher level implementation.
-		return 0;
-	}
-
 	T result = 1;
 
 	while(exp)
@@ -61,6 +54,21 @@ inline T _HqIntFastPow(T base, T exp)
 	}
 
 	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline T _HqIntFastPowSigned(T base, T exp)
+{
+	if(exp < 0)
+	{
+		// Not mathematically correct, but this implementation is intended to be a fast and minimal.
+		// If users want something more accurate, they can use some other higher level implementation.
+		return 0;
+	}
+
+	return _HqIntFastPow(base, exp);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -85,10 +93,10 @@ extern "C" void OpCodeExec_Exp(HqExecutionHandle hExec)
 
 				switch(hLeft->type)
 				{
-					case HQ_VALUE_TYPE_INT8:    hOutput = HqValue::CreateInt8(hExec->hVm, _HqIntFastPow(hLeft->as.int8, hRight->as.int8));       break;
-					case HQ_VALUE_TYPE_INT16:   hOutput = HqValue::CreateInt16(hExec->hVm, _HqIntFastPow(hLeft->as.int16, hRight->as.int16));    break;
-					case HQ_VALUE_TYPE_INT32:   hOutput = HqValue::CreateInt32(hExec->hVm, _HqIntFastPow(hLeft->as.int32, hRight->as.int32));    break;
-					case HQ_VALUE_TYPE_INT64:   hOutput = HqValue::CreateInt64(hExec->hVm, _HqIntFastPow(hLeft->as.int64, hRight->as.int64));    break;
+					case HQ_VALUE_TYPE_INT8:    hOutput = HqValue::CreateInt8(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int8, hRight->as.int8));       break;
+					case HQ_VALUE_TYPE_INT16:   hOutput = HqValue::CreateInt16(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int16, hRight->as.int16));    break;
+					case HQ_VALUE_TYPE_INT32:   hOutput = HqValue::CreateInt32(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int32, hRight->as.int32));    break;
+					case HQ_VALUE_TYPE_INT64:   hOutput = HqValue::CreateInt64(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int64, hRight->as.int64));    break;
 					case HQ_VALUE_TYPE_UINT8:   hOutput = HqValue::CreateUint8(hExec->hVm, _HqIntFastPow(hLeft->as.uint8, hRight->as.uint8));    break;
 					case HQ_VALUE_TYPE_UINT16:  hOutput = HqValue::CreateUint16(hExec->hVm, _HqIntFastPow(hLeft->as.uint16, hRight->as.uint16)); break;
 					case HQ_VALUE_TYPE_UINT32:  hOutput = HqValue::CreateUint32(hExec->hVm, _HqIntFastPow(hLeft->as.uint32, hRight->as.uint32)); break;
