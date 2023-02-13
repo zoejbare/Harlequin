@@ -213,6 +213,11 @@ with csbuild.Toolchain("msvc"):
 		"/wd4804", # 'operation' : unsafe use of type 'bool' in operation
 	)
 
+csbuild.AddDefines(
+	"UNICODE",
+	"_UNICODE",
+)
+
 _hq_setup_ps3.setupHqGlobalOptions()
 _hq_setup_ps4.setupHqGlobalOptions()
 _hq_setup_ps5.setupHqGlobalOptions()
@@ -354,6 +359,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 			f"{HarlequinCommon.libRootPath}/base/fiber-impl",
 			f"{HarlequinCommon.libRootPath}/base/mutex-impl",
 			f"{HarlequinCommon.libRootPath}/base/rwlock-impl",
+			f"{HarlequinCommon.libRootPath}/base/system-impl",
 			f"{HarlequinCommon.libRootPath}/base/thread-impl",
 		)
 
