@@ -26,7 +26,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" wchar_t* HqSysMakeWideStr(const char* const string)
+extern "C" wchar_t* _HqSysMakeWideStr(const char* const string)
 {
 	assert(string != nullptr);
 
@@ -60,7 +60,7 @@ extern "C" wchar_t* HqSysMakeWideStr(const char* const string)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" char* HqSysMakeUtf8Str(const wchar_t* const string)
+extern "C" char* _HqSysMakeUtf8Str(const wchar_t* const string)
 {
 	assert(string != nullptr);
 
@@ -100,7 +100,7 @@ extern "C" char* HqSysMakeUtf8Str(const wchar_t* const string)
 
 inline DWORD _HqSysWin32GetFileAttr(const char* const path)
 {
-	const wchar_t* const widePath = HqSysMakeWideStr(path);
+	const wchar_t* const widePath = _HqSysMakeWideStr(path);
 
 	const DWORD fileAttr = GetFileAttributesW(widePath);
 	HqMemFree((void*) widePath);
@@ -110,7 +110,7 @@ inline DWORD _HqSysWin32GetFileAttr(const char* const path)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool HqSysIsFile(const char* const path)
+extern "C" bool _HqSysIsFile(const char* const path)
 {
 	if(!path || path[0] == '\0')
 	{
@@ -129,7 +129,7 @@ extern "C" bool HqSysIsFile(const char* const path)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool HqSysIsDir(const char* const path)
+extern "C" bool _HqSysIsDir(const char* const path)
 {
 	if(!path || path[0] == '\0')
 	{
@@ -148,15 +148,15 @@ extern "C" bool HqSysIsDir(const char* const path)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool HqSysIsExe(const char* const path)
+extern "C" bool _HqSysIsExe(const char* const path)
 {
 	// All files on windows are implicitly executable.
-	return HqSysIsFile(path);
+	return _HqSysIsFile(path);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void HqSysListDir(
+extern "C" void _HqSysListDir(
 	void* const pUserData, 
 	const char* const rootPath, 
 	HqListDirectoryCallback onFileFound,
@@ -180,7 +180,7 @@ extern "C" void HqSysListDir(
 	rootPathSpec[pathLen + 2] = '\0';
 
 	// Convert the path spec to a wide string.
-	const wchar_t* const wideRootPathSpec = HqSysMakeWideStr(rootPathSpec);
+	const wchar_t* const wideRootPathSpec = _HqSysMakeWideStr(rootPathSpec);
 	HqMemFree((void*) rootPathSpec);
 
 	// Find the first entry in the directory to kick things off.
@@ -198,7 +198,7 @@ extern "C" void HqSysListDir(
 			continue;
 		}
 
-		const char* const entryName = HqSysMakeUtf8Str(findData.cFileName);
+		const char* const entryName = _HqSysMakeUtf8Str(findData.cFileName);
 
 		if((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
 		{

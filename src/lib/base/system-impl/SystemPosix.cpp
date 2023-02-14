@@ -29,7 +29,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" wchar_t* HqSysMakeWideStr(const char* const string)
+extern "C" wchar_t* _HqSysMakeWideStr(const char* const string)
 {
 	assert(string != nullptr);
 
@@ -52,7 +52,7 @@ extern "C" wchar_t* HqSysMakeWideStr(const char* const string)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" char* HqSysMakeUtf8Str(const wchar_t* const string)
+extern "C" char* _HqSysMakeUtf8Str(const wchar_t* const string)
 {
 	assert(string != nullptr);
 
@@ -75,7 +75,7 @@ extern "C" char* HqSysMakeUtf8Str(const wchar_t* const string)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool HqSysIsFile(const char* const path)
+extern "C" bool _HqSysIsFile(const char* const path)
 {
 	if(!path || path[0] == '\0')
 	{
@@ -96,7 +96,7 @@ extern "C" bool HqSysIsFile(const char* const path)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool HqSysIsDir(const char* const path)
+extern "C" bool _HqSysIsDir(const char* const path)
 {
 	if(!path || path[0] == '\0')
 	{
@@ -117,7 +117,7 @@ extern "C" bool HqSysIsDir(const char* const path)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" bool HqSysIsExe(const char* const path)
+extern "C" bool _HqSysIsExe(const char* const path)
 {
 	if(!path || path[0] == '\0')
 	{
@@ -139,7 +139,7 @@ extern "C" bool HqSysIsExe(const char* const path)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void HqSysListDir(
+extern "C" void _HqSysListDir(
 	void* const pUserData, 
 	const char* const rootPath, 
 	HqListDirectoryCallback onFileFound,
