@@ -158,21 +158,10 @@ extern "C" void HqSysListDir(
 		return;
 	}
 
-	// Calculate the maximum lengh of the temporary string that will be used for constructing the full paths for each entry.
-	const size_t rootPathLen = strlen(rootPath);
-	const size_t maxPathLen = rootPathLen + (sizeof(dirent::d_name) / sizeof(char)) + 1;
-
-	char* const tempPath = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * (maxPathLen + 1)));
-
-	// Construct the start of the temporary path string.
-	strncpy(tempPath, rootPath, rootPathLen);
-	strncat(tempPath, "/", 1);
-
 	// Iterate over each entry in the directory.
 	for(;;)
 	{
 		struct dirent* const pEntry = readdir(pDir);
-
 		if(!pEntry)
 		{
 			// The end of the directory has been reached.
@@ -185,31 +174,17 @@ extern "C" void HqSysListDir(
 			continue;
 		}
 
-		// Finish constructing the temporary path for the current entry.
-		strcpy(tempPath + rootPathLen + 1, pEntry->d_name);
-
-		struct stat statBuf;
-
-		const int statResult = stat(tempPath, &statBuf);
-		if(statResult != 0)
-		{
-			// This probably shouldn't be able to happen, but if we can't examine
-			// the entry's file system properties, we move on to the next entry.
-			continue;
-		}
-
-		if(S_ISDIR(statBuf.st_mode))
+		if(pEntry->d_type == DT_DIR)
 		{
 			onDirFound(pUserData, rootPath, pEntry->d_name);
 		}
-		else if(S_ISREG(statBuf.st_mode))
+		else if(pEntry->d_type == DT_REG)
 		{
 			onFileFound(pUserData, rootPath, pEntry->d_name);
 		}
 	}
 
-	// Free the temporary path string and close the directory.
-	HqMemFree((void*) tempPath);
+	// Close the directory.
 	closedir(pDir);
 }
 
