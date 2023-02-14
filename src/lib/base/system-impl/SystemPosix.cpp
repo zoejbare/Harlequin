@@ -20,9 +20,12 @@
 #include "../../common/ListDirectoryCallback.hpp"
 
 #include <assert.h>
+#include <dirent.h>
+#include <errno.h>
+#include <string.h>
+#include <wchar.h>
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include <sys/stat.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -32,25 +35,14 @@ extern "C" wchar_t* HqSysMakeWideStr(const char* const string)
 
 	// Calculate the lengths of the input and output strings.
 	const size_t utf8Len = strlen(string);
-	const size_t wideLen = (size_t) MultiByteToWideChar(
-		CP_UTF8, 0,
-		string,
-		DWORD(utf8Len),
-		nullptr, 0
-	);
+	const size_t wideLen = mbstowcs(nullptr, string, utf8Len);
 
 	// Allocate the output string.
 	wchar_t* const outputString = reinterpret_cast<wchar_t*>(HqMemAlloc(sizeof(wchar_t) * (wideLen + 1)));
 	assert(outputString != nullptr);
 
 	// Convert the input string.
-	MultiByteToWideChar(
-		CP_UTF8, 0,
-		string,
-		DWORD(utf8Len),
-		outputString,
-		int(wideLen)
-	);
+	mbstowcs(outputString, string, utf8Len);
 
 	// Add a null-terminator to the output string.
 	outputString[wideLen] = L'\0';
@@ -66,46 +58,19 @@ extern "C" char* HqSysMakeUtf8Str(const wchar_t* const string)
 
 	// Calculate the lengths of the input and output strings.
 	const size_t wideLen = wcslen(string);
-	const size_t utf8Len = (size_t) WideCharToMultiByte(
-		CP_UTF8, 0,
-		string,
-		DWORD(wideLen),
-		nullptr, 0,
-		nullptr,
-		nullptr
-	);
+	const size_t utf8Len = wcstombs(nullptr, string, wideLen);
 
 	// Allocate the output string.
 	char* const outputString = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * (utf8Len + 1)));
 	assert(outputString != nullptr);
 
 	// Convert the input string.
-	WideCharToMultiByte(
-		CP_UTF8, 0,
-		string,
-		DWORD(wideLen),
-		outputString,
-		int(utf8Len),
-		nullptr,
-		nullptr
-	);
+	wcstombs(outputString, string, wideLen);
 
 	// Add a null-terminator to the output string.
 	outputString[utf8Len] = '\0';
 
 	return outputString;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline DWORD _HqSysWin32GetFileAttr(const char* const path)
-{
-	const wchar_t* const widePath = HqSysMakeWideStr(path);
-
-	const DWORD fileAttr = GetFileAttributesW(widePath);
-	HqMemFree((void*) widePath);
-
-	return fileAttr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -117,14 +82,16 @@ extern "C" bool HqSysIsFile(const char* const path)
 		return false;
 	}
 
-	const DWORD fileAttr = _HqSysWin32GetFileAttr(path);
-	if(fileAttr == INVALID_FILE_ATTRIBUTES || (fileAttr & FILE_ATTRIBUTE_DIRECTORY) != 0)
+	struct stat statBuf;
+
+	const int result = stat(path, &statBuf);
+	if(result != 0)
 	{
-		// The input path cannot be examined or is a directory.
+		// The input path cannot be examined.
 		return false;
 	}
 
-	return true;
+	return S_ISREG(statBuf.st_mode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -136,22 +103,38 @@ extern "C" bool HqSysIsDir(const char* const path)
 		return false;
 	}
 
-	const DWORD fileAttr = _HqSysWin32GetFileAttr(path);
-	if(fileAttr == INVALID_FILE_ATTRIBUTES || (fileAttr & FILE_ATTRIBUTE_DIRECTORY) == 0)
+	struct stat statBuf;
+
+	const int result = stat(path, &statBuf);
+	if(result != 0)
 	{
-		// The input path cannot be examined or is a file.
+		// The input path cannot be examined.
 		return false;
 	}
 
-	return true;
+	return S_ISDIR(statBuf.st_mode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 extern "C" bool HqSysIsExe(const char* const path)
 {
-	// All files on windows are implicitly executable.
-	return HqSysIsFile(path);
+	if(!path || path[0] == '\0')
+	{
+		return false;
+	}
+
+	struct stat statBuf;
+
+	const int result = stat(path, &statBuf);
+	if(result != 0)
+	{
+		// The input path cannot be examined.
+		return false;
+	}
+
+	// Directories are usually implicitly executable, so we need to exclude them so we only check files and symlinks.
+	return !S_ISDIR(statBuf.st_mode) && (statBuf.st_mode & S_IEXEC);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -167,54 +150,67 @@ extern "C" void HqSysListDir(
 	assert(onFileFound != nullptr);
 	assert(onDirFound != nullptr);
 
-	// Allocate enough space for a custom path spec we can use for searching the input directory.
-	const size_t pathLen = strlen(rootPath);
-	char* const rootPathSpec = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * (pathLen + 3)));
-
-	// Copy the input path to the path spec string.
-	memcpy(rootPathSpec, rootPath, sizeof(char) * pathLen);
-
-	// Finish constructing the path spec string.
-	rootPathSpec[pathLen + 0] = '\\';
-	rootPathSpec[pathLen + 1] = '*';
-	rootPathSpec[pathLen + 2] = '\0';
-
-	// Convert the path spec to a wide string.
-	const wchar_t* const wideRootPathSpec = HqSysMakeWideStr(rootPathSpec);
-	HqMemFree((void*) rootPathSpec);
-
-	// Find the first entry in the directory to kick things off.
-	WIN32_FIND_DATAW findData;
-	HANDLE hFind = FindFirstFileW(wideRootPathSpec, &findData);
-
-	// We don't need the path spec wide string anymore.
-	HqMemFree((void*) wideRootPathSpec);
-
-	do
+	// Open the directory at the root path.
+	DIR* const pDir = opendir(rootPath);
+	if(!pDir)
 	{
-		if(_wcsicmp(findData.cFileName, L".") == 0 || _wcsicmp(findData.cFileName, L"..") == 0)
+		// Failed to open the root path as a directory.
+		return;
+	}
+
+	// Calculate the maximum lengh of the temporary string that will be used for constructing the full paths for each entry.
+	const size_t rootPathLen = strlen(rootPath);
+	const size_t maxPathLen = rootPathLen + (sizeof(dirent::d_name) / sizeof(char)) + 1;
+
+	char* const tempPath = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * (maxPathLen + 1)));
+
+	// Construct the start of the temporary path string.
+	strncpy(tempPath, rootPath, rootPathLen);
+	strncat(tempPath, "/", 1);
+
+	// Iterate over each entry in the directory.
+	for(;;)
+	{
+		struct dirent* const pEntry = readdir(pDir);
+
+		if(!pEntry)
+		{
+			// The end of the directory has been reached.
+			break;
+		}
+
+		if(strcasecmp(pEntry->d_name, ".") == 0 || strcasecmp(pEntry->d_name, "..") == 0)
 		{
 			// Discard the "." and ".." entries.
 			continue;
 		}
 
-		const char* const entryName = HqSysMakeUtf8Str(findData.cFileName);
+		// Finish constructing the temporary path for the current entry.
+		strcpy(tempPath + rootPathLen + 1, pEntry->d_name);
 
-		if((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+		struct stat statBuf;
+
+		const int statResult = stat(tempPath, &statBuf);
+		if(statResult != 0)
 		{
-			// The current entry is a directory.
-			onDirFound(pUserData, rootPath, entryName);
-		}
-		else
-		{
-			// The current entry is a file.
-			onFileFound(pUserData, rootPath, entryName);
+			// This probably shouldn't be able to happen, but if we can't examine
+			// the entry's file system properties, we move on to the next entry.
+			continue;
 		}
 
-		HqMemFree((void*) entryName);
+		if(S_ISDIR(statBuf.st_mode))
+		{
+			onDirFound(pUserData, rootPath, pEntry->d_name);
+		}
+		else if(S_ISREG(statBuf.st_mode))
+		{
+			onFileFound(pUserData, rootPath, pEntry->d_name);
+		}
 	}
-	// Find the next entry in the directory.
-	while(FindNextFileW(hFind, &findData));
+
+	// Free the temporary path string and close the directory.
+	HqMemFree((void*) tempPath);
+	closedir(pDir);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

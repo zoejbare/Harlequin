@@ -28,8 +28,8 @@
 
 extern "C"
 {
-	wchar_t* HqSysWin32MakeWideStr(const char*);
-	char* HqSysWin32MakeUtf8Str(const wchar_t*);
+	wchar_t* HqSysMakeWideStr(const char*);
+	char* HqSysMakeUtf8Str(const wchar_t*);
 
 	bool HqSysIsFile(const char* path);
 	bool HqSysIsDir(const char* path);
