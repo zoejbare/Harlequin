@@ -26,7 +26,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" wchar_t* _HqSysMakeWideStr(const char* const string)
+inline wchar_t* _HqSysWin32MakeWideStr(const char* const string)
 {
 	assert(string != nullptr);
 
@@ -60,7 +60,7 @@ extern "C" wchar_t* _HqSysMakeWideStr(const char* const string)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" char* _HqSysMakeUtf8Str(const wchar_t* const string)
+inline char* _HqSysWin32MakeMultiByteStr(const wchar_t* const string)
 {
 	assert(string != nullptr);
 
@@ -100,7 +100,7 @@ extern "C" char* _HqSysMakeUtf8Str(const wchar_t* const string)
 
 inline DWORD _HqSysWin32GetFileAttr(const char* const path)
 {
-	const wchar_t* const widePath = _HqSysMakeWideStr(path);
+	const wchar_t* const widePath = _HqSysWin32MakeWideStr(path);
 
 	const DWORD fileAttr = GetFileAttributesW(widePath);
 	HqMemFree((void*) widePath);
@@ -180,7 +180,7 @@ extern "C" void _HqSysListDir(
 	rootPathSpec[pathLen + 2] = '\0';
 
 	// Convert the path spec to a wide string.
-	const wchar_t* const wideRootPathSpec = _HqSysMakeWideStr(rootPathSpec);
+	const wchar_t* const wideRootPathSpec = _HqSysWin32MakeWideStr(rootPathSpec);
 	HqMemFree((void*) rootPathSpec);
 
 	// Find the first entry in the directory to kick things off.
@@ -198,7 +198,7 @@ extern "C" void _HqSysListDir(
 			continue;
 		}
 
-		const char* const entryName = _HqSysMakeUtf8Str(findData.cFileName);
+		const char* const entryName = _HqSysWin32MakeMultiByteStr(findData.cFileName);
 
 		if((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
 		{

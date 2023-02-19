@@ -29,52 +29,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" wchar_t* _HqSysMakeWideStr(const char* const string)
-{
-	assert(string != nullptr);
-
-	// Calculate the lengths of the input and output strings.
-	const size_t utf8Len = strlen(string);
-	const size_t wideLen = mbstowcs(nullptr, string, utf8Len);
-
-	// Allocate the output string.
-	wchar_t* const outputString = reinterpret_cast<wchar_t*>(HqMemAlloc(sizeof(wchar_t) * (wideLen + 1)));
-	assert(outputString != nullptr);
-
-	// Convert the input string.
-	mbstowcs(outputString, string, utf8Len);
-
-	// Add a null-terminator to the output string.
-	outputString[wideLen] = L'\0';
-
-	return outputString;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-extern "C" char* _HqSysMakeUtf8Str(const wchar_t* const string)
-{
-	assert(string != nullptr);
-
-	// Calculate the lengths of the input and output strings.
-	const size_t wideLen = wcslen(string);
-	const size_t utf8Len = wcstombs(nullptr, string, wideLen);
-
-	// Allocate the output string.
-	char* const outputString = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * (utf8Len + 1)));
-	assert(outputString != nullptr);
-
-	// Convert the input string.
-	wcstombs(outputString, string, wideLen);
-
-	// Add a null-terminator to the output string.
-	outputString[utf8Len] = '\0';
-
-	return outputString;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 extern "C" bool _HqSysIsFile(const char* const path)
 {
 	if(!path || path[0] == '\0')

@@ -28,9 +28,6 @@
 
 extern "C"
 {
-	wchar_t* _HqSysMakeWideStr(const char*);
-	char* _HqSysMakeUtf8Str(const wchar_t*);
-
 	bool _HqSysIsFile(const char*);
 	bool _HqSysIsDir(const char*);
 	bool _HqSysIsExe(const char*);
@@ -41,16 +38,6 @@ extern "C"
 
 struct HQ_BASE_API HqSys
 {
-	static wchar_t* MakeWideStr(const char* const string)
-	{
-		return _HqSysMakeWideStr(string);
-	}
-
-	static char* MakeUtf8Str(const wchar_t* const string)
-	{
-		return _HqSysMakeUtf8Str(string);
-	}
-
 	static bool IsFile(const char* const path)
 	{
 		return _HqSysIsFile(path);
