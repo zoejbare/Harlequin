@@ -22,8 +22,6 @@ from __future__ import unicode_literals, division, print_function
 import csbuild
 import platform
 import os
-import shutil
-import stat
 import sys
 
 from csbuild.tools.common.android_tool_base import AndroidStlLibType
@@ -218,10 +216,51 @@ csbuild.AddDefines(
 	"_UNICODE",
 )
 
+csbuild.AddIncludeDirectories(
+	# The library source root should be a global include path.
+	f"{_REPO_ROOT_PATH}/src/lib",
+)
+
 _hq_setup_ps3.setupHqGlobalOptions()
 _hq_setup_ps4.setupHqGlobalOptions()
 _hq_setup_ps5.setupHqGlobalOptions()
 _hq_setup_psvita.setupHqGlobalOptions()
+
+###################################################################################################
+
+def _setCommonLibOptions(libRootPath, outputName):
+	def _applyStaticBuildOptions(outputName):
+		csbuild.SetOutput(outputName, csbuild.ProjectType.StaticLibrary)
+
+		with csbuild.Scope(csbuild.ScopeDef.All):
+			csbuild.AddDefines("HQ_BUILD_STATIC_LIB")
+
+	if os.getenv("HQ_FORCE_BUILD_STATIC"):
+		# Detecting the environment override will force all platforms to build static libs.
+		_applyStaticBuildOptions(outputName)
+
+	else:
+		# The libraries are built as DLLs by default.
+		csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
+
+		# Consoles should always build with static libs.
+		with csbuild.Toolchain("ps3", "ps4", "ps5", "psvita"):
+			_applyStaticBuildOptions(outputName)
+
+	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
+		csbuild.AddSourceDirectories(libRootPath)
+
+def _setCommonAppOptions(outputName):
+	csbuild.SetOutput(outputName, csbuild.ProjectType.Application)
+
+	with csbuild.Toolchain("msvc"):
+		csbuild.SetMsvcSubsystem("CONSOLE")
+
+	with csbuild.Toolchain("gcc", "clang"):
+		with csbuild.Platform("Linux"):
+			csbuild.AddLibraries(
+				"pthread",
+			)
 
 ###################################################################################################
 
@@ -290,46 +329,6 @@ class HarlequinCommon(object):
 	appRootPath = "src/app"
 	libRootPath = "src/lib"
 
-	@staticmethod
-	def applyStaticBuildOptions(outputName):
-		csbuild.SetOutput(outputName, csbuild.ProjectType.StaticLibrary)
-
-		with csbuild.Scope(csbuild.ScopeDef.All):
-			csbuild.AddDefines("HQ_BUILD_STATIC_LIB")
-
-	@staticmethod
-	def setLibCommonOptions(outputName):
-		if os.getenv("HQ_FORCE_BUILD_STATIC"):
-			# Detecting the environment override will force all platforms to build static libs.
-			HarlequinCommon.applyStaticBuildOptions(outputName)
-
-		else:
-			# The libraries are built as DLLs by default.
-			csbuild.SetOutput(outputName, csbuild.ProjectType.SharedLibrary)
-
-			# Consoles should always build with static libs.
-			with csbuild.Toolchain("ps3", "ps4", "ps5", "psvita"):
-				HarlequinCommon.applyStaticBuildOptions(outputName)
-
-		with csbuild.Scope(csbuild.ScopeDef.All):
-			csbuild.AddIncludeDirectories(HarlequinCommon.libRootPath)
-
-		if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-			csbuild.AddSourceDirectories(HarlequinCommon.libRootPath)
-
-	@staticmethod
-	def setAppCommonOptions(outputName):
-		csbuild.SetOutput(outputName, csbuild.ProjectType.Application)
-
-		with csbuild.Toolchain("msvc"):
-			csbuild.SetMsvcSubsystem("CONSOLE")
-
-		with csbuild.Toolchain("gcc", "clang"):
-			with csbuild.Platform("Linux"):
-				csbuild.AddLibraries(
-					"pthread",
-				)
-
 ###################################################################################################
 
 class LibHarlequinBase(object):
@@ -340,7 +339,7 @@ class LibHarlequinBase(object):
 	]
 
 with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, LibHarlequinBase.dependencies, autoDiscoverSourceFiles=False):
-	HarlequinCommon.setLibCommonOptions(LibHarlequinBase.outputName)
+	_setCommonLibOptions(HarlequinCommon.libRootPath, LibHarlequinBase.outputName)
 
 	_hq_setup_ps3.setupHqBaseLib()
 	_hq_setup_ps4.setupHqBaseLib()
@@ -381,6 +380,36 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 
 ###################################################################################################
 
+class LibHarlequinRuntime(object):
+	projectName = "LibHarlequinRuntime"
+	outputName = "libhqruntime"
+	dependencies = [
+		LibHarlequinBase.projectName,
+	]
+
+with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPath, LibHarlequinRuntime.dependencies, autoDiscoverSourceFiles=False):
+	_setCommonLibOptions(HarlequinCommon.libRootPath, LibHarlequinRuntime.outputName)
+
+	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
+		csbuild.AddExcludeDirectories(
+			f"{HarlequinCommon.libRootPath}/base",
+			f"{HarlequinCommon.libRootPath}/common",
+			f"{HarlequinCommon.libRootPath}/compiler",
+		)
+
+	else:
+		csbuild.AddSourceDirectories(
+			f"{HarlequinCommon.libRootPath}/runtime",
+		)
+
+	with csbuild.Scope(csbuild.ScopeDef.All):
+		csbuild.AddDefines("HQ_LIB_RUNTIME")
+
+	with csbuild.Toolchain("msvc", "gcc", "clang"):
+		csbuild.AddDefines("HQ_BUILD_MAIN_LIB_EXPORT")
+
+###################################################################################################
+
 class LibHarlequinTool(object):
 	projectName = "LibHarlequinTool"
 	outputName = "libhqtool"
@@ -390,7 +419,7 @@ class LibHarlequinTool(object):
 	]
 
 with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, LibHarlequinTool.dependencies, autoDiscoverSourceFiles=False):
-	HarlequinCommon.setLibCommonOptions(LibHarlequinTool.outputName)
+	_setCommonLibOptions(HarlequinCommon.libRootPath, LibHarlequinTool.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
@@ -420,36 +449,6 @@ with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, 
 
 ###################################################################################################
 
-class LibHarlequinRuntime(object):
-	projectName = "LibHarlequinRuntime"
-	outputName = "libhqruntime"
-	dependencies = [
-		LibHarlequinBase.projectName,
-	]
-
-with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPath, LibHarlequinRuntime.dependencies, autoDiscoverSourceFiles=False):
-	HarlequinCommon.setLibCommonOptions(LibHarlequinRuntime.outputName)
-
-	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
-		csbuild.AddExcludeDirectories(
-			f"{HarlequinCommon.libRootPath}/base",
-			f"{HarlequinCommon.libRootPath}/common",
-			f"{HarlequinCommon.libRootPath}/compiler",
-		)
-
-	else:
-		csbuild.AddSourceDirectories(
-			f"{HarlequinCommon.libRootPath}/runtime",
-		)
-
-	with csbuild.Scope(csbuild.ScopeDef.All):
-		csbuild.AddDefines("HQ_LIB_RUNTIME")
-
-	with csbuild.Toolchain("msvc", "gcc", "clang"):
-		csbuild.AddDefines("HQ_BUILD_MAIN_LIB_EXPORT")
-
-###################################################################################################
-
 class HarlequinCompiler(object):
 	projectName = "HarlequinCompiler"
 	outputName = "hqc"
@@ -459,7 +458,7 @@ class HarlequinCompiler(object):
 	]
 
 with csbuild.Project(HarlequinCompiler.projectName, HarlequinCompiler.path, HarlequinCompiler.dependencies):
-	HarlequinCommon.setAppCommonOptions(HarlequinCompiler.outputName)
+	_setCommonAppOptions(HarlequinCompiler.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
@@ -474,7 +473,7 @@ class HarlequinRuntime(object):
 	]
 
 with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, HarlequinRuntime.dependencies):
-	HarlequinCommon.setAppCommonOptions(HarlequinRuntime.outputName)
+	_setCommonAppOptions(HarlequinRuntime.outputName)
 
 	_hq_setup_ps3.setupHqRuntimeApp()
 	_hq_setup_ps4.setupHqRuntimeApp()
@@ -494,7 +493,7 @@ class HarlequinUnitTest(object):
 	]
 
 with csbuild.Project(HarlequinUnitTest.projectName, HarlequinUnitTest.path, HarlequinUnitTest.dependencies):
-	HarlequinCommon.setAppCommonOptions(HarlequinUnitTest.outputName)
+	_setCommonAppOptions(HarlequinUnitTest.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
