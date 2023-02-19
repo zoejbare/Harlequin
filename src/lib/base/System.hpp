@@ -74,6 +74,6 @@ struct HQ_BASE_API HqSys
 	{
 		_HqSysListDir(pUserData, rootPath, onFileFound, onDirFound);
 	}
-}
+};
 
 //----------------------------------------------------------------------------------------------------------------------
