@@ -32,6 +32,10 @@
 	#include <memory.h>
 #endif
 
+#if !defined(HQ_PLATFORM_PSVITA)
+	#include <locale.h>
+#endif
+
 #include <deque>
 #include <map>
 #include <vector>
@@ -169,6 +173,11 @@ static void OnAlloc(const size_t size)
 
 int main(int argc, char* argv[])
 {
+#if !defined(HQ_PLATFORM_PSVITA)
+	// Set the program locale to the environment default.
+	setlocale(LC_ALL, "");
+#endif
+
 	if(argc < 2)
 	{
 		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_FATAL, "Missing required 'filepath' argument");

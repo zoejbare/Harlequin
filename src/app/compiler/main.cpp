@@ -23,6 +23,7 @@
 #endif
 
 #include <assert.h>
+#include <locale.h>
 #include <stdio.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -74,6 +75,9 @@ int main(int argc, char* argv[])
 {
 	(void) argc;
 	(void) argv;
+
+	// Set the program locale to the environment default.
+	setlocale(LC_ALL, "");
 
 #if defined(HQ_PLATFORM_WINDOWS)
 	// This enables tracking of global heap allocations.  If any are leaked, they will show up in the
