@@ -32,6 +32,8 @@ extern "C"
 	bool _HqSysIsDir(const char*);
 	bool _HqSysIsExe(const char*);
 	void _HqSysListDir(void*, const char*, HqListDirectoryCallback, HqListDirectoryCallback);
+	size_t _HqSysUtf32ToUtf8(char*, char32_t);
+	char32_t _HqSysUtf8ToUtf32(size_t*, const char*);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -60,6 +62,16 @@ struct HQ_BASE_API HqSys
 		HqListDirectoryCallback onDirFound)
 	{
 		_HqSysListDir(pUserData, rootPath, onFileFound, onDirFound);
+	}
+
+	static size_t ConvertUtf32ToUtf8(char* const pOutMbSeq, const char32_t codePoint)
+	{
+		return _HqSysUtf32ToUtf8(pOutMbSeq, codePoint);
+	}
+
+	static char32_t ConvertUtf8ToUtf32(size_t* const pOutMbLen, const char* const pMbSeq)
+	{
+		return _HqSysUtf8ToUtf32(pOutMbLen, pMbSeq);
 	}
 };
 
