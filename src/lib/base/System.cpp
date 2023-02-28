@@ -18,7 +18,10 @@
 
 #include "System.hpp"
 
+#include "unicode/utf32-record-table.h"
+
 #include <assert.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -208,6 +211,129 @@ utf32ConvFinish:
 	(*pOutMbLen) = mbLen;
 
 	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+char32_t _HqSysToUtf32SimpleLower(const char32_t codePoint)
+{
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
+		? utf32RecordTable.indices[codePoint] 
+		: 0;
+
+	if(recordIndex > 0)
+	{
+		return utf32RecordTable.records[recordIndex].lowerCase.simple;
+	}
+
+	// The input code point is out of the supported range or has no case mapping data.
+	return codePoint;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+char32_t _HqSysToUtf32SimpleUpper(const char32_t codePoint)
+{
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
+		? utf32RecordTable.indices[codePoint] 
+		: 0;
+
+	if(recordIndex > 0)
+	{
+		return utf32RecordTable.records[recordIndex].upperCase.simple;
+	}
+
+	// The input code point is out of the supported range or has no case mapping data.
+	return codePoint;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+char32_t _HqSysToUtf32SimpleTitle(const char32_t codePoint)
+{
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
+		? utf32RecordTable.indices[codePoint] 
+		: 0;
+
+	if(recordIndex > 0)
+	{
+		return utf32RecordTable.records[recordIndex].titleCase.simple;
+	}
+
+	// The input code point is out of the supported range or has no case mapping data.
+	return codePoint;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t _HqSysToUtf32FullLower(char32_t* const pOutCodePoints, const char32_t codePoint)
+{
+	assert(pOutCodePoints != nullptr);
+
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
+		? utf32RecordTable.indices[codePoint] 
+		: 0;
+
+	if(recordIndex > 0)
+	{
+		const HqUtf32Mapping& mapping = utf32RecordTable.records[recordIndex].lowerCase;
+
+		memcpy(pOutCodePoints, mapping.full, sizeof(char32_t) * mapping.fullLength);
+
+		return mapping.fullLength;
+	}
+
+	// The input code point is out of the supported range or has no case mapping data.
+	(*pOutCodePoints) = codePoint;
+	return 1;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t _HqSysToUtf32FullUpper(char32_t* const pOutCodePoints, const char32_t codePoint)
+{
+	assert(pOutCodePoints != nullptr);
+
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
+		? utf32RecordTable.indices[codePoint] 
+		: 0;
+
+	if(recordIndex > 0)
+	{
+		const HqUtf32Mapping& mapping = utf32RecordTable.records[recordIndex].upperCase;
+
+		memcpy(pOutCodePoints, mapping.full, sizeof(char32_t) * mapping.fullLength);
+
+		return mapping.fullLength;
+	}
+
+	// The input code point is out of the supported range or has no case mapping data.
+	(*pOutCodePoints) = codePoint;
+	return 1;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t _HqSysToUtf32FullTitle(char32_t* const pOutCodePoints, const char32_t codePoint)
+{
+	assert(pOutCodePoints != nullptr);
+
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
+		? utf32RecordTable.indices[codePoint] 
+		: 0;
+
+	if(recordIndex > 0)
+	{
+		const HqUtf32Mapping& mapping = utf32RecordTable.records[recordIndex].titleCase;
+
+		memcpy(pOutCodePoints, mapping.full, sizeof(char32_t) * mapping.fullLength);
+
+		return mapping.fullLength;
+	}
+
+	// The input code point is out of the supported range or has no case mapping data.
+	(*pOutCodePoints) = codePoint;
+	return 1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

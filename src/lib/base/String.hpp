@@ -65,6 +65,14 @@ struct HQ_BASE_API HqString
 	static bool Compare(const HqString* const pLeft, const HqString* const pRight);
 	static bool Less(const HqString* const pLeft, const HqString* const pRight);
 
+	static void ToSimpleLowerCase(HqString* const pString);
+	static void ToSimpleUpperCase(HqString* const pString);
+	static void ToSimpleTitleCase(HqString* const pString);
+
+	static void ToFullLowerCase(HqString* const pString);
+	static void ToFullUpperCase(HqString* const pString);
+	static void ToFullTitleCase(HqString* const pString);
+
 	static bool RawCompare(const char* const left, const char* right);
 	static size_t RawHash(const char* const string);
 

@@ -83,6 +83,15 @@ def installDependencies(buildPath, externalPath):
 	csbuildPath = os.path.join(externalPath, "csbuild2")
 	pythonExePath = _getEnvPython(buildPath)
 
+	# Install the 'requests' package to the virtual environment.
+	cmd = [
+		pythonExePath,
+		"-m", "pip",
+		"install",
+		"requests",
+	]
+	_runCmd(cmd, "Failed to install 'requests' to Python virtual environment")
+
 	# Install csbuild to the virtual environment.
 	cmd = [
 		pythonExePath,

@@ -17,6 +17,9 @@
 //
 
 #include "String.hpp"
+#include "System.hpp"
+
+#include "unicode/utf32-record-table.h"
 
 #include "../common/Hash.hpp"
 
@@ -37,6 +40,133 @@
 #if defined(HQ_PLATFORM_PSVITA)
 	#pragma pop_macro("restrict")
 #endif
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void _HqStringSimpleCaseOperation(HqString* const pString, char32_t (*SimpleCaseOpFunc)(char32_t))
+{
+	assert(pString != nullptr);
+	assert(SimpleCaseOpFunc != nullptr);
+
+	if(pString->length > 0)
+	{
+		size_t outputStringLength = 0;
+		char temp[4];
+
+		// Calculate the required size for the output string.
+		// This is not optimal, but the output string can potentially
+		// have a different length from the input string.
+		for(size_t inputIndex = 0; inputIndex < pString->length;)
+		{
+			size_t inputByteLength = 0;
+			const char32_t originalCodePoint = HqSys::ConvertUtf8ToUtf32(&inputByteLength, &pString->data[inputIndex]);
+			const char32_t convertedCodePoint = SimpleCaseOpFunc(originalCodePoint);
+			const size_t outputByteLength = HqSys::ConvertUtf32ToUtf8(temp, convertedCodePoint);
+
+			inputIndex += inputByteLength;
+			outputStringLength += outputByteLength;
+		}
+
+		// Allocate a new string.
+		char* const outputData = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * (outputStringLength + 1)));
+
+		// Add the null terminator to the end of the new string.
+		outputData[outputStringLength] = '\0';
+
+		// Convert the input string, storing the new characters in the output string.
+		for(size_t inputIndex = 0, outputIndex = 0; inputIndex < pString->length;)
+		{
+			size_t inputByteLength = 0;
+			const char32_t originalCodePoint = HqSys::ConvertUtf8ToUtf32(&inputByteLength, &pString->data[inputIndex]);
+			const char32_t convertedCodePoint = SimpleCaseOpFunc(originalCodePoint);
+			const size_t outputByteLength = HqSys::ConvertUtf32ToUtf8(temp, convertedCodePoint);
+
+			// Copy the converted bytes to the output string.
+			for(size_t subIndex = 0; subIndex < outputByteLength; ++subIndex)
+			{
+				outputData[subIndex + outputIndex] = temp[subIndex];
+			}
+
+			inputIndex += inputByteLength;
+			outputIndex += outputByteLength;
+		}
+
+		// Free the old string memory.
+		HqMemFree(pString->data);
+
+		pString->data = outputData;
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void _HqStringFullCaseOperation(HqString* const pString, size_t (*FullCaseOpFunc)(char32_t*, char32_t))
+{
+	assert(pString != nullptr);
+	assert(FullCaseOpFunc != nullptr);
+
+	if(pString->length > 0)
+	{
+		size_t outputStringLength = 0;
+		char tempUtf8[4];
+		char32_t tempUtf32[HQ_UTF32_FULL_MAPPING_ARRAY_LENGTH];
+
+		// Calculate the required size for the output string.
+		// This is not optimal, but the output string can potentially
+		// have a different length from the input string.
+		for(size_t inputIndex = 0; inputIndex < pString->length;)
+		{
+			size_t inputByteLength = 0;
+			const char32_t originalCodePoint = HqSys::ConvertUtf8ToUtf32(&inputByteLength, &pString->data[inputIndex]);
+			const size_t convertedLength = FullCaseOpFunc(tempUtf32, originalCodePoint);
+
+			// Calculate the length for each converted code point.
+			for(size_t subIndex = 0; subIndex < convertedLength; ++subIndex)
+			{
+				const size_t outputByteLength = HqSys::ConvertUtf32ToUtf8(tempUtf8, tempUtf32[subIndex]);
+
+				outputStringLength += outputByteLength;
+			}
+
+			inputIndex += inputByteLength;
+		}
+
+		// Allocate a new string.
+		char* const outputData = reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * (outputStringLength + 1)));
+
+		// Add the null terminator to the end of the new string.
+		outputData[outputStringLength] = '\0';
+
+		// Convert the input string, storing the new characters in the output string.
+		for(size_t inputIndex = 0, outputIndex = 0; inputIndex < pString->length;)
+		{
+			size_t inputByteLength = 0;
+			const char32_t originalCodePoint = HqSys::ConvertUtf8ToUtf32(&inputByteLength, &pString->data[inputIndex]);
+			const size_t convertedLength = FullCaseOpFunc(tempUtf32, originalCodePoint);
+
+			// Calculate the length for each converted code point.
+			for(size_t codePointIndex = 0; codePointIndex < convertedLength; ++codePointIndex)
+			{
+				const size_t outputByteLength = HqSys::ConvertUtf32ToUtf8(tempUtf8, tempUtf32[codePointIndex]);
+
+				// Copy the converted bytes to the output string.
+				for(size_t subIndex = 0; subIndex < outputByteLength; ++subIndex)
+				{
+					outputData[subIndex + outputIndex] = tempUtf8[subIndex];
+				}
+
+				outputIndex += outputByteLength;
+			}
+
+			inputIndex += inputByteLength;
+		}
+
+		// Free the old string memory.
+		HqMemFree(pString->data);
+
+		pString->data = outputData;
+	}
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -257,6 +387,48 @@ bool HqString::Less(const HqString* const pLeft, const HqString* const pRight)
 	}
 
 	return pLeft->length < pRight->length;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToSimpleLowerCase(HqString* const pString)
+{
+	_HqStringSimpleCaseOperation(pString, HqSys::ToUtf32SimpleLowerCase);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToSimpleUpperCase(HqString* const pString)
+{
+	_HqStringSimpleCaseOperation(pString, HqSys::ToUtf32SimpleUpperCase);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToSimpleTitleCase(HqString* const pString)
+{
+	_HqStringSimpleCaseOperation(pString, HqSys::ToUtf32SimpleTitleCase);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToFullLowerCase(HqString* const pString)
+{
+	_HqStringFullCaseOperation(pString, HqSys::ToUtf32FullLowerCase);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToFullUpperCase(HqString* const pString)
+{
+	_HqStringFullCaseOperation(pString, HqSys::ToUtf32FullUpperCase);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToFullTitleCase(HqString* const pString)
+{
+	_HqStringFullCaseOperation(pString, HqSys::ToUtf32FullTitleCase);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
