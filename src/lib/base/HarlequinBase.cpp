@@ -23,6 +23,7 @@
 #include "Clock.hpp"
 #include "Serializer.hpp"
 #include "String.hpp"
+#include "System.hpp"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -1020,6 +1021,39 @@ uint64_t HqClockGetFrequency()
 uint64_t HqClockGetTimestamp()
 {
 	return _HqClockImplGetTimestamp();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool HqSysIsFile(const char* const path)
+{
+	return _HqSysIsFile(path);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool HqSysIsDirectory(const char* const path)
+{
+	return _HqSysIsDir(path);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool HqSysIsExecutable(const char* const path)
+{
+	return _HqSysIsExe(path);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqSysListDirectory(
+	void* const pUserData, 
+	const char* const rootPath, 
+	HqListDirectoryCallback onFileFound, 
+	HqListDirectoryCallback onDirFound
+)
+{
+	return _HqSysListDir(pUserData, rootPath, onFileFound, onDirFound);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

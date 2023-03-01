@@ -116,6 +116,7 @@ enum HqMessageTypeEnum
 };
 
 typedef void (*HqMessageCallback)(void*, int, const char*);
+typedef void (*HqListDirectoryCallback)(void*, const char*, const char*);
 
 typedef struct HqReport* HqReportHandle;
 
@@ -285,6 +286,21 @@ HQ_BASE_API double HqEndianSwapFloat64(double value);
 HQ_BASE_API uint64_t HqClockGetFrequency();
 
 HQ_BASE_API uint64_t HqClockGetTimestamp();
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+HQ_BASE_API bool HqSysIsFile(const char* path);
+
+HQ_BASE_API bool HqSysIsDirectory(const char* path);
+
+HQ_BASE_API bool HqSysIsExecutable(const char* path);
+
+HQ_BASE_API void HqSysListDirectory(
+	void* pUserData,
+	const char* rootPath,
+	HqListDirectoryCallback onFileFound,
+	HqListDirectoryCallback onDirFound
+);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

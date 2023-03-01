@@ -17,7 +17,6 @@
 //
 
 #include "../../Harlequin.h"
-#include "../../common/ListDirectoryCallback.hpp"
 
 #include <assert.h>
 
