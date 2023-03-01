@@ -41,16 +41,16 @@ _REPO_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 ###################################################################################################
 
-_SUPPORT_PLATFORM_PATHS = [
-	os.path.join(_REPO_ROOT_PATH, "_support", "ps3"),
-	os.path.join(_REPO_ROOT_PATH, "_support", "ps4"),
-	os.path.join(_REPO_ROOT_PATH, "_support", "ps5"),
-	os.path.join(_REPO_ROOT_PATH, "_support", "psvita"),
+_PLATFORM_REPO_PATHS = [
+	os.path.join(_REPO_ROOT_PATH, "..", "Harlequin-PS3"),
+	os.path.join(_REPO_ROOT_PATH, "..", "Harlequin-PS4"),
+	os.path.join(_REPO_ROOT_PATH, "..", "Harlequin-PS5"),
+	os.path.join(_REPO_ROOT_PATH, "..", "Harlequin-PSVita"),
 ]
-_SUPPORT_PLATFORM_PATHS = [x for x in _SUPPORT_PLATFORM_PATHS if os.access(x, os.F_OK)]
+_PLATFORM_REPO_PATHS = [x for x in _PLATFORM_REPO_PATHS if os.access(x, os.F_OK)]
 
 # Patch the sys path so we can search for modules in the platform support directories.
-sys.path = _SUPPORT_PLATFORM_PATHS + sys.path
+sys.path = _PLATFORM_REPO_PATHS + sys.path
 
 ###################################################################################################
 

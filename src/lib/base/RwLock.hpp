@@ -33,13 +33,13 @@
 	#include "rwlock-impl/RwLockPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../_support/ps3/lib/base/RwLock.hpp"
+	#include "../../../../Harlequin-PS3/lib/base/RwLock.hpp"
 
 #elif defined(HQ_PLATFORM_PS4) || defined(HQ_PLATFORM_PS5)
-	#include "../../../_support/ps4/lib/base/RwLock.hpp"
+	#include "../../../../Harlequin-PS4/lib/base/RwLock.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../_support/psvita/lib/base/RwLock.hpp"
+	#include "../../../../Harlequin-PSVita/lib/base/RwLock.hpp"
 
 #else
 	#error "HqRwLock not implemented for this platform"

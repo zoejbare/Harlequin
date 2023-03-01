@@ -36,13 +36,13 @@
 	#include "thread-impl/ThreadPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../_support/ps3/lib/base/Thread.hpp"
+	#include "../../../../Harlequin-PS3/lib/base/Thread.hpp"
 
 #elif defined(HQ_PLATFORM_PS4) || defined(HQ_PLATFORM_PS5)
-	#include "../../../_support/ps4/lib/base/Thread.hpp"
+	#include "../../../../Harlequin-PS4/lib/base/Thread.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../_support/psvita/lib/base/Thread.hpp"
+	#include "../../../../Harlequin-PSVita/lib/base/Thread.hpp"
 
 #else
 	#error "HqThread not implemented for this platform"

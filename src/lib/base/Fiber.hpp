@@ -35,13 +35,13 @@
 	#include "fiber-impl/FiberPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../_support/ps3/lib/base/Fiber.hpp"
+	#include "../../../../Harlequin-PS3/lib/base/Fiber.hpp"
 
 #elif defined(HQ_PLATFORM_PS4) || defined(HQ_PLATFORM_PS5)
-	#include "../../../_support/ps4/lib/base/Fiber.hpp"
+	#include "../../../../Harlequin-PS4/lib/base/Fiber.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../_support/psvita/lib/base/Fiber.hpp"
+	#include "../../../../Harlequin-PSVita/lib/base/Fiber.hpp"
 
 #else
 	#error "HqFiber not implemented for this platform"

@@ -33,13 +33,13 @@
 	#include "mutex-impl/MutexPosix.hpp"
 
 #elif defined(HQ_PLATFORM_PS3)
-	#include "../../../_support/ps3/lib/base/Mutex.hpp"
+	#include "../../../../Harlequin-PS3/lib/base/Mutex.hpp"
 
 #elif defined(HQ_PLATFORM_PS4) || defined(HQ_PLATFORM_PS5)
-	#include "../../../_support/ps4/lib/base/Mutex.hpp"
+	#include "../../../../Harlequin-PS4/lib/base/Mutex.hpp"
 
 #elif defined(HQ_PLATFORM_PSVITA)
-	#include "../../../_support/psvita/lib/base/Mutex.hpp"
+	#include "../../../../Harlequin-PSVita/lib/base/Mutex.hpp"
 
 #else
 	#error "HqMutex not implemented for this platform"
