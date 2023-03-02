@@ -4,6 +4,63 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Setup Build Environment",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "python3",
+			"args": ["setup-build-env.py"],
+			"windows":{
+				"command": "python.exe"
+			}
+		},
+		{
+			"label": "Generate Parser+Lexer",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"args": ["run-antlr.py", "-r", "module", "generator", "Harlequin.g4"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe"
+			}
+		},
+		{
+			"label": "Generate UTF-32 Record Table",
+			"type": "shell",
+			"group": "build",
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"command": "${config:buildEnvPath}/bin/python",
+			"args": ["generate-utf32-table.py", "-v"],
+			"windows":{
+				"command": "${config:buildEnvPath}/Scripts/python.exe"
+			}
+		},
+		{
 			"label": "Build [clang/debug/arm64]",
 			"type": "shell",
 			"group": "build",
