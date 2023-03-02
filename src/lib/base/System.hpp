@@ -31,8 +31,7 @@ extern "C"
 	bool _HqSysIsExe(const char*);
 	void _HqSysListDir(void*, const char*, HqListDirectoryCallback, HqListDirectoryCallback);
 
-	const char* _HqSysGetPlatform();
-	const char* _HqSysGetPathSep();
+	void _HqSysGetInfo(HqSysPlatformInfo&);
 
 	HqDllHandle _HqSysOpenLib(const char*);
 	void _HqSysCloseLib(HqDllHandle);

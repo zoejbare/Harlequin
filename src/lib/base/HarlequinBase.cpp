@@ -1058,16 +1058,16 @@ void HqSysListDirectory(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-const char* HqSysGetPlatformName()
+int HqSysGetInfo(HqSysPlatformInfo* const pOutInfo)
 {
-	return _HqSysGetPlatform();
-}
+	if(!pOutInfo)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
 
-//----------------------------------------------------------------------------------------------------------------------
+	_HqSysGetInfo(*pOutInfo);
 
-const char* HqSysGetPathSeparator()
-{
-	return _HqSysGetPathSep();
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

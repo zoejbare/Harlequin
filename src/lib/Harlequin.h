@@ -172,10 +172,8 @@ enum HqSerializerModeEnum
 };
 
 typedef struct HqSerializer* HqSerializerHandle;
-typedef void*                HqDllHandle;
 
 #define HQ_SERIALIZER_HANDLE_NULL ((HqSerializerHandle)0)
-#define HQ_DLL_HANDLE_NULL        ((HqDllHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -291,6 +289,20 @@ HQ_BASE_API uint64_t HqClockGetTimestamp();
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
+typedef struct
+{
+	char name[32];
+
+	int bits;
+	char pathSep;
+} HqSysPlatformInfo;
+
+typedef void* HqDllHandle;
+
+#define HQ_DLL_HANDLE_NULL ((HqDllHandle)0)
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
 HQ_BASE_API bool HqSysIsFile(const char* path);
 
 HQ_BASE_API bool HqSysIsDirectory(const char* path);
@@ -304,9 +316,7 @@ HQ_BASE_API void HqSysListDirectory(
 	HqListDirectoryCallback onDirFound
 );
 
-HQ_BASE_API const char* HqSysGetPlatformName();
-
-HQ_BASE_API const char* HqSysGetPathSeparator();
+HQ_BASE_API int HqSysGetInfo(HqSysPlatformInfo* pOutInfo);
 
 HQ_BASE_API int HqSysOpenLibrary(HqDllHandle* phOutDll, const char* dllPath);
 

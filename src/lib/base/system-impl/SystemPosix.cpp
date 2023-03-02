@@ -144,22 +144,21 @@ extern "C" void _HqSysListDir(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" const char* _HqSysGetPlatform()
+extern "C" void _HqSysGetInfo(HqSysPlatformInfo& outInfo)
 {
+	const char* const platformName = 
 #if defined(HQ_PLATFORM_MAC_OS)
-	return "macOS";
+		"macOS";
 #elif defined(HQ_PLATFORM_LINUX)
-	return "Linux";
+		"Linux";
 #else
-	return "Unknown";
+		"Unknown";
 #endif
-}
 
-//----------------------------------------------------------------------------------------------------------------------
+	strncpy(outInfo.name, platformName, sizeof(outInfo.name) / sizeof(char));
 
-extern "C" const char* _HqSysGetPathSep()
-{
-	return "/";
+	outInfo.bits = sizeof(size_t) * 8;
+	outInfo.pathSep = '/';
 }
 
 //----------------------------------------------------------------------------------------------------------------------

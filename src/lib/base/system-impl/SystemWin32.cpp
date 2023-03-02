@@ -19,6 +19,7 @@
 #include "../../Harlequin.h"
 
 #include <assert.h>
+#include <stdio.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -218,16 +219,12 @@ extern "C" void _HqSysListDir(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" const char* _HqSysGetPlatform()
+extern "C" void _HqSysGetInfo(HqSysPlatformInfo& outInfo)
 {
-	return "Windows";
-}
+	strncpy(outInfo.name, "Windows", sizeof(outInfo.name) / sizeof(char));
 
-//----------------------------------------------------------------------------------------------------------------------
-
-extern "C" const char* _HqSysGetPathSep()
-{
-	return "\\";
+	outInfo.bits = sizeof(size_t) * 8;
+	outInfo.pathSep = '\\';
 }
 
 //----------------------------------------------------------------------------------------------------------------------
