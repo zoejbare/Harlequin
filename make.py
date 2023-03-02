@@ -379,7 +379,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 		csbuild.AddDefines("_XOPEN_SOURCE=1")
 
 	with csbuild.Scope(csbuild.ScopeDef.Final):
-		with csbuild.Platform("Linux", "Darwin"):
+		with csbuild.Platform("Linux"):
 			csbuild.AddLibraries("dl")
 
 ###################################################################################################
