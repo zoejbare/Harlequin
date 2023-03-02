@@ -302,6 +302,10 @@ HQ_BASE_API void HqSysListDirectory(
 	HqListDirectoryCallback onDirFound
 );
 
+HQ_BASE_API const char* HqSysGetPlatformName();
+
+HQ_BASE_API const char* HqSysGetPathSeparator();
+
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 #if HQ_LIB_RUNTIME

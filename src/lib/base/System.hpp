@@ -30,6 +30,9 @@ extern "C"
 	bool _HqSysIsDir(const char*);
 	bool _HqSysIsExe(const char*);
 	void _HqSysListDir(void*, const char*, HqListDirectoryCallback, HqListDirectoryCallback);
+
+	const char* _HqSysGetPlatform();
+	const char* _HqSysGetPathSep();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
