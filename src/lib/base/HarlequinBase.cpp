@@ -1072,6 +1072,54 @@ const char* HqSysGetPathSeparator()
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqSysOpenLibrary(HqDllHandle* phOutDll, const char* const dllPath)
+{
+	if(!phOutDll || !dllPath || dllPath[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqDllHandle hOutput = _HqSysOpenLib(dllPath);
+	if(!hOutput)
+	{
+		return HQ_ERROR_INVALID_OPERATION;
+	}
+
+	(*phOutDll) = hOutput;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSysCloseLibrary(HqDllHandle* phDll)
+{
+	if(!phDll || !(*phDll))
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HqSysCloseLib(*phDll);
+
+	(*phDll) = HQ_DLL_HANDLE_NULL;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void* HqSysGetSymbol(HqDllHandle hDll, const char* const symbolName)
+{
+	if(!hDll || !symbolName || symbolName[0] == '\0')
+	{
+		return nullptr;
+	}
+
+	return _HqSysGetSym(hDll, symbolName);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------

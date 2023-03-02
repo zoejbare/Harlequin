@@ -172,8 +172,10 @@ enum HqSerializerModeEnum
 };
 
 typedef struct HqSerializer* HqSerializerHandle;
+typedef void*                HqDllHandle;
 
 #define HQ_SERIALIZER_HANDLE_NULL ((HqSerializerHandle)0)
+#define HQ_DLL_HANDLE_NULL        ((HqDllHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -305,6 +307,12 @@ HQ_BASE_API void HqSysListDirectory(
 HQ_BASE_API const char* HqSysGetPlatformName();
 
 HQ_BASE_API const char* HqSysGetPathSeparator();
+
+HQ_BASE_API int HqSysOpenLibrary(HqDllHandle* phOutDll, const char* dllPath);
+
+HQ_BASE_API int HqSysCloseLibrary(HqDllHandle* phDll);
+
+HQ_BASE_API void* HqSysGetSymbol(HqDllHandle hDll, const char* symbolName);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

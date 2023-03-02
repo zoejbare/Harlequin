@@ -231,3 +231,40 @@ extern "C" const char* _HqSysGetPathSep()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+
+extern "C" HqDllHandle _HqSysOpenLib(const char* const dllPath)
+{
+	assert(dllPath != nullptr);
+	assert(dllPath[0] != '\0');
+
+	// Convert the DLL path to a wide string.
+	const wchar_t* const wideDllPath = _HqSysWin32MakeWideStr(dllPath);
+
+	HMODULE hModule = LoadLibraryW(wideDllPath);
+
+	HqMemFree((void*) wideDllPath);
+
+	return reinterpret_cast<HqDllHandle>(hModule);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void _HqSysCloseLib(HqDllHandle hDll)
+{
+	assert(hDll != HQ_DLL_HANDLE_NULL);
+
+	FreeLibrary(reinterpret_cast<HMODULE>(hDll));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void* _HqSysGetSym(HqDllHandle hDll, const char* const symbolName)
+{
+	assert(hDll != HQ_DLL_HANDLE_NULL);
+	assert(symbolName != nullptr);
+	assert(symbolName[0] != '\0');
+
+	return GetProcAddress(reinterpret_cast<HMODULE>(hDll), symbolName);
+}
+
+//----------------------------------------------------------------------------------------------------------------------

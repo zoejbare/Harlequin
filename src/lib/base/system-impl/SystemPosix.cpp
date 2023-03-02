@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <dirent.h>
+#include <dlfcn.h>
 #include <errno.h>
 #include <string.h>
 #include <wchar.h>
@@ -159,6 +160,36 @@ extern "C" const char* _HqSysGetPlatform()
 extern "C" const char* _HqSysGetPathSep()
 {
 	return "/";
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" HqDllHandle _HqSysOpenLib(const char* const dllPath)
+{
+	assert(dllPath != nullptr);
+	assert(dllPath[0] != '\0');
+
+	return reinterpret_cast<HqDllHandle>(dlopen(dllPath, RTLD_LAZY | RTLD_LOCAL));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void _HqSysCloseLib(HqDllHandle hDll)
+{
+	assert(hDll != HQ_DLL_HANDLE_NULL);
+
+	dlclose(reinterpret_cast<void*>(hDll));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern "C" void* _HqSysGetSym(HqDllHandle hDll, const char* const symbolName)
+{
+	assert(hDll != HQ_DLL_HANDLE_NULL);
+	assert(symbolName != nullptr);
+	assert(symbolName[0] != '\0');
+
+	return dlsym(reinterpret_cast<void*>(hDll), symbolName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -33,6 +33,10 @@ extern "C"
 
 	const char* _HqSysGetPlatform();
 	const char* _HqSysGetPathSep();
+
+	HqDllHandle _HqSysOpenLib(const char*);
+	void _HqSysCloseLib(HqDllHandle);
+	void* _HqSysGetSym(HqDllHandle, const char*);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
