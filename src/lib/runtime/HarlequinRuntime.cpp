@@ -427,50 +427,71 @@ int HqVmInitializeModules(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 
 	bool scriptError = false;
 
-	HqModule::StringToHandleMap::Iterator iter;
-	while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
+	// Initialize the DLLs loaded for each module. This needs to be done *before* the init bytecode is run
+	// in case any modules call into native functions bound through DLLs.
 	{
-		HqModuleHandle hModule = iter.pData->value;
-
-		if(hModule->hInitFunction)
+		HqModule::StringToHandleMap::Iterator iter;
+		while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
 		{
-			// Initialize the execution context with the current module's initialize function (this should never fail).
-			const int execInitResult = HqExecution::Initialize(hExec, hModule->hInitFunction);
-			if(execInitResult == HQ_ERROR_BAD_ALLOCATION)
-			{
-				// We ran out of memory.
-				HqExecution::Dispose(hExec);
-				return HQ_ERROR_BAD_ALLOCATION;
-			}
-			else
-			{
-				// We should only expect success at this point.
-				assert(execInitResult == HQ_SUCCESS);
-			}
+			HqModuleHandle hModule = iter.pData->value;
 
-			// Run the current initializer function in a loop until it's finished just in case any of its code yields.
-			// This will effectively cause script continuations to be silently ignored in the initializer functions.
-			while(!hExec->state.finished && !hExec->state.exception && !hExec->state.abort)
+			if(hModule->pDllEntryPoint)
 			{
-				HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
+				HqDllRuntimeInfo info;
+				HqSysGetVersion(&info.version);
 
-				// Run the initializer function to completion.
-				HqExecution::Run(hExec, HQ_RUN_FULL);
+				hModule->pDllEntryPoint(&info);
 			}
+		}
+	}
 
-			// Check for any unhandled exceptions that occurred when running the initializer.
-			if(hExec->state.exception || hExec->state.abort)
+	// Initialize each module.
+	{
+		HqModule::StringToHandleMap::Iterator iter;
+		while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
+		{
+			HqModuleHandle hModule = iter.pData->value;
+
+			if(hModule->hInitFunction)
 			{
-				// When fatal script errors do occur, return immediately to allow the user code to
-				// query the execution context for more details on what went wrong.
-				scriptError = true;
-				break;
-			}
+				// Initialize the execution context with the current module's initialize function (this should never fail).
+				const int execInitResult = HqExecution::Initialize(hExec, hModule->hInitFunction);
+				if(execInitResult == HQ_ERROR_BAD_ALLOCATION)
+				{
+					// We ran out of memory.
+					HqExecution::Dispose(hExec);
+					return HQ_ERROR_BAD_ALLOCATION;
+				}
+				else
+				{
+					// We should only expect success at this point.
+					assert(execInitResult == HQ_SUCCESS);
+				}
 
-			// Now that we've called the module's initializer function, we won't be calling it again,
-			// so we can dispose of it.
-			HqFunction::Dispose(hModule->hInitFunction);
-			hModule->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
+				// Run the current initializer function in a loop until it's finished just in case any of its code yields.
+				// This will effectively cause script continuations to be silently ignored in the initializer functions.
+				while(!hExec->state.finished && !hExec->state.exception && !hExec->state.abort)
+				{
+					HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
+
+					// Run the initializer function to completion.
+					HqExecution::Run(hExec, HQ_RUN_FULL);
+				}
+
+				// Check for any unhandled exceptions that occurred when running the initializer.
+				if(hExec->state.exception || hExec->state.abort)
+				{
+					// When fatal script errors do occur, return immediately to allow the user code to
+					// query the execution context for more details on what went wrong.
+					scriptError = true;
+					break;
+				}
+
+				// Now that we've called the module's initializer function, we won't be calling it again,
+				// so we can dispose of it.
+				HqFunction::Dispose(hModule->hInitFunction);
+				hModule->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
+			}
 		}
 	}
 

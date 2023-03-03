@@ -176,6 +176,11 @@ void HqModule::Dispose(HqModuleHandle hModule)
 
 	HqString::Release(hModule->pName);
 
+	if(hModule->hDll)
+	{
+		HqSysCloseLibrary(&hModule->hDll);
+	}
+
 	delete hModule;
 }
 
@@ -232,6 +237,8 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 
 	hModule->hVm = hVm;
 	hModule->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
+	hModule->hDll = HQ_DLL_HANDLE_NULL;
+	hModule->pDllEntryPoint = nullptr;
 	hModule->pName = pModuleName;
 
 	// Initialize the module data maps.
@@ -449,6 +456,60 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 			}
 		}
 	}
+
+#if !defined(HQ_BUILD_STATIC_LIB)
+	// Attempt to load a native DLL with the same name as this module.
+	// This module will presumeably have special logic for binding any
+	// native functions specific to this module into the script VM.
+	{
+		HqSysPlatformInfo info;
+		HqSysGetInfo(&info);
+
+		const size_t dllExtLength = strlen(info.dllExt);
+		const size_t dllPathMaxLength = pModuleName->length + dllExtLength + 1;
+
+		// If the current platform has no DLL file extension defined, we skip loading the DLL.
+		if(dllExtLength > 0)
+		{
+			// Allocate a new path at the maximum length.
+			char* const dllPath = reinterpret_cast<char*>(HqMemAlloc(dllPathMaxLength * sizeof(char)));
+
+			// Copy the module name and the native DLL extension into the DLL path string.
+			// TODO: We should probably re-evaluate how we construct the DLL file path at
+			//       some point so we have more control over where they're loaded from.
+			strcpy(dllPath, pModuleName->data);
+			strcat(dllPath, info.dllExt);
+
+			// Attempt to open the DLL.
+			HqDllHandle hDll = HQ_DLL_HANDLE_NULL;
+			const int dllResult = HqSysOpenLibrary(&hDll, dllPath);
+
+			// Free the DLL file path now that we no longer need it.
+			HqMemFree(dllPath);
+
+			if(dllResult == HQ_SUCCESS)
+			{
+				HqDllEntryPoint pEntryPoint = reinterpret_cast<HqDllEntryPoint>(HqSysGetSymbol(hDll, "HqDllInit"));
+
+				if(pEntryPoint)
+				{
+					hModule->hDll = hDll;
+					hModule->pDllEntryPoint = pEntryPoint;
+				}
+				else
+				{
+					HqReportMessage(
+						hReport, 
+						HQ_MESSAGE_TYPE_WARNING, 
+						"Found native DLL for module '%s', but did not contain the required entry point function", 
+						pModuleName->data
+					);
+					HqSysCloseLibrary(&hDll);
+				}
+			}
+		}
+	}
+#endif
 
 	return true;
 }

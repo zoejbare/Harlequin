@@ -73,6 +73,9 @@ struct HqModule
 
 	HqVmHandle hVm;
 	HqFunctionHandle hInitFunction;
+	HqDllHandle hDll;
+
+	HqDllEntryPoint pDllEntryPoint;
 
 	HqString* pName;
 };
