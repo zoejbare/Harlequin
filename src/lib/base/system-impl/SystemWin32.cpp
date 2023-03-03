@@ -222,6 +222,7 @@ extern "C" void _HqSysListDir(
 extern "C" void _HqSysGetInfo(HqSysPlatformInfo& outInfo)
 {
 	strncpy(outInfo.name, "Windows", sizeof(outInfo.name) / sizeof(char));
+	strncpy(outInfo.dllExt, ".dll", sizeof(outInfo.dllExt) / sizeof(char));
 
 	outInfo.bits = sizeof(size_t) * 8;
 	outInfo.pathSep = '\\';

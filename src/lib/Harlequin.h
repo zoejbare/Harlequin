@@ -33,6 +33,12 @@ extern "C" {
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
+#define HQ_VERSION_MAJOR 0
+#define HQ_VERSION_MINOR 0
+#define HQ_VERSION_PATCH 0
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
 #define HQ_VM_FRAME_STACK_SIZE 1024
 #define HQ_VM_VALUE_STACK_SIZE 128
 
@@ -116,7 +122,6 @@ enum HqMessageTypeEnum
 };
 
 typedef void (*HqMessageCallback)(void*, int, const char*);
-typedef void (*HqListDirectoryCallback)(void*, const char*, const char*);
 
 typedef struct HqReport* HqReportHandle;
 
@@ -291,17 +296,29 @@ HQ_BASE_API uint64_t HqClockGetTimestamp();
 
 typedef struct
 {
+	uint16_t major;
+	uint16_t minor;
+	uint16_t patch;
+} HqSysVersion;
+
+typedef struct
+{
 	char name[32];
+	char dllExt[8];
 
 	int bits;
 	char pathSep;
 } HqSysPlatformInfo;
+
+typedef void (*HqListDirectoryCallback)(void*, const char*, const char*);
 
 typedef void* HqDllHandle;
 
 #define HQ_DLL_HANDLE_NULL ((HqDllHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
+
+HQ_BASE_API int HqSysGetVersion(HqSysVersion* pOutVersion);
 
 HQ_BASE_API bool HqSysIsFile(const char* path);
 
@@ -362,12 +379,30 @@ enum HqExceptionSeverity
 	HQ_EXCEPTION_SEVERITY__COUNT,
 };
 
+typedef struct
+{
+	HqCommonInit common;
+
+	uint32_t gcThreadStackSize;
+	uint32_t gcTimeSliceMs;
+	uint32_t gcTimeWaitMs;
+
+	bool gcEnableThread;
+} HqVmInit;
+
+typedef struct
+{
+	HqSysVersion version;
+} HqDllRuntimeInfo;
+
 typedef struct HqVm* HqVmHandle;
 typedef struct HqModule* HqModuleHandle;
 typedef struct HqFunction* HqFunctionHandle;
 typedef struct HqExecution* HqExecutionHandle;
 typedef struct HqFrame* HqFrameHandle;
 typedef struct HqValue* HqValueHandle;
+
+typedef int (*HqDllEntryPoint)(const HqDllRuntimeInfo*);
 
 typedef void (*HqNativeFunction)(HqExecutionHandle, HqFunctionHandle, void*);
 
@@ -384,19 +419,8 @@ typedef bool (*HqCallbackIterateString)(void*, const char*);
 typedef bool (*HqCallbackIterateStringWithIndex)(void*, const char*, size_t);
 typedef bool (*HqCallbackIterateObjectMember)(void*, const char*, int);
 
-typedef struct
-{
-	HqCommonInit common;
-
-	uint32_t gcThreadStackSize;
-	uint32_t gcTimeSliceMs;
-	uint32_t gcTimeWaitMs;
-
-	bool gcEnableThread;
-} HqVmInit;
-
 #define HQ_VM_HANDLE_NULL        ((HqVmHandle)0)
-#define HQ_MODULE_HANDLE_NULL   ((HqModuleHandle)0)
+#define HQ_MODULE_HANDLE_NULL    ((HqModuleHandle)0)
 #define HQ_FUNCTION_HANDLE_NULL  ((HqFunctionHandle)0)
 #define HQ_EXECUTION_HANDLE_NULL ((HqExecutionHandle)0)
 #define HQ_FRAME_HANDLE_NULL     ((HqFrameHandle)0)

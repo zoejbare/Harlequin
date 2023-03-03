@@ -1025,6 +1025,22 @@ uint64_t HqClockGetTimestamp()
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqSysGetVersion(HqSysVersion* const pOutVersion)
+{
+	if(!pOutVersion)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	pOutVersion->major = HQ_VERSION_MAJOR;
+	pOutVersion->minor = HQ_VERSION_MINOR;
+	pOutVersion->patch = HQ_VERSION_PATCH;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 bool HqSysIsFile(const char* const path)
 {
 	return _HqSysIsFile(path);

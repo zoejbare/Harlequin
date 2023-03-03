@@ -155,7 +155,15 @@ extern "C" void _HqSysGetInfo(HqSysPlatformInfo& outInfo)
 		"Unknown";
 #endif
 
+	const char* const dllExt =
+#if defined(HQ_PLATFORM_MAC_OS)
+		".dylib";
+#else
+		".so";
+#endif
+
 	strncpy(outInfo.name, platformName, sizeof(outInfo.name) / sizeof(char));
+	strncpy(outInfo.dllExt, dllExt, sizeof(outInfo.dllExt) / sizeof(char));
 
 	outInfo.bits = sizeof(size_t) * 8;
 	outInfo.pathSep = '/';
