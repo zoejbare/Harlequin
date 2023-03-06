@@ -40,7 +40,6 @@ TEST(TestAllocator, SetCustomAllocator)
 	};
 
 	const HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
-
 	HqMemAllocator currentAllocator = HqMemGetAllocator();
 
 	// Verify the initial allocator matches the default allocator.
@@ -54,7 +53,7 @@ TEST(TestAllocator, SetCustomAllocator)
 	customAllocator.freeFn = customFree;
 
 	// Set a custom allocator.
-	HqMemSetAllocator(customAllocator);
+	EXPECT_EQ(HqMemSetAllocator(customAllocator), HQ_SUCCESS);
 	currentAllocator = HqMemGetAllocator();
 
 	// Verify the current allocator matches the custom allocator.
@@ -63,13 +62,69 @@ TEST(TestAllocator, SetCustomAllocator)
 	EXPECT_EQ(currentAllocator.freeFn, customAllocator.freeFn);
 
 	// Reset back to the default allocator.
-	HqMemSetAllocator(defaultAllocator);
+	EXPECT_EQ(HqMemSetAllocator(defaultAllocator), HQ_SUCCESS);
 	currentAllocator = HqMemGetAllocator();
 
 	// Verify the current allocator matches the default allocator.
 	EXPECT_EQ(currentAllocator.allocFn, defaultAllocator.allocFn);
 	EXPECT_EQ(currentAllocator.reallocFn, defaultAllocator.reallocFn);
 	EXPECT_EQ(currentAllocator.freeFn, defaultAllocator.freeFn);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(TestAllocator, AllocThenFree)
+{
+	HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
+
+	EXPECT_EQ(HqMemSetAllocator(defaultAllocator), HQ_SUCCESS);
+
+	void* const pMem = HqMemAlloc(sizeof(size_t));
+
+	EXPECT_NE(pMem, nullptr);
+	EXPECT_EQ(HqMemFree(pMem), HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(TestAllocator, ReallocNullThenFree)
+{
+	HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
+
+	EXPECT_EQ(HqMemSetAllocator(defaultAllocator), HQ_SUCCESS);
+
+	void* const pMem = HqMemRealloc(nullptr, sizeof(size_t));
+
+	EXPECT_NE(pMem, nullptr);
+	EXPECT_EQ(HqMemFree(pMem), HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(TestAllocator, AllocReallocThenFree)
+{
+	HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
+
+	EXPECT_EQ(HqMemSetAllocator(defaultAllocator), HQ_SUCCESS);
+
+	// Make the initial allocation.
+	void* const pOriginalMem = HqMemAlloc(sizeof(size_t) * 4);
+	EXPECT_NE(pOriginalMem, nullptr);
+
+	// Re-allocate to the same size as the original.
+	void* const pReallocEqualMem = HqMemRealloc(pOriginalMem, sizeof(size_t) * 4);
+	EXPECT_NE(pReallocEqualMem, nullptr);
+
+	// Re-allocate to a smaller size than the original.
+	void* const pReallocSmallMem = HqMemRealloc(pReallocEqualMem, sizeof(size_t));
+	EXPECT_NE(pReallocSmallMem, nullptr);
+
+	// Re-allocate to a much larger size than the original.
+	void* const pReallocLargeMem = HqMemRealloc(pReallocSmallMem, sizeof(size_t) * 64);
+	EXPECT_NE(pReallocLargeMem, nullptr);
+
+	// Free the allocation.
+	EXPECT_EQ(HqMemFree(pReallocLargeMem), HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
