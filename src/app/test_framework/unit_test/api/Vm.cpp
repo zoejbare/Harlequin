@@ -134,249 +134,121 @@ TEST(TestVm, ReportMessages)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// TODO: Restore this test once we can actually compile and execute script bytecode.
-#if 0
-TEST(TestVm, Execution)
+TEST(TestVm, EmptyExecutionContext)
 {
 	HqVmInit init = ConstructInitObject(nullptr, HQ_MESSAGE_TYPE_FATAL, DummyMessageCallback);
 	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
-	HqFunctionHandle hFunc = HQ_FUNCTION_HANDLE_NULL;
 	HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
 
 	// Create the VM context.
-	const int createContextResult = HqVmCreate(&hVm, init);
-	ASSERT_EQ(createContextResult, HQ_SUCCESS);
+	const int createVmResult = HqVmCreate(&hVm, init);
+	ASSERT_EQ(createVmResult, HQ_SUCCESS);
+	EXPECT_NE(hVm, HQ_VM_HANDLE_NULL);
 
-	// Create an execution handle.
-	const int createExecutionResult = HqExecutionCreate(&hExec, hVm, hFunc);
-	ASSERT_EQ(createExecutionResult, HQ_SUCCESS);
+	// Create an execution context.
+	const int createExecResult = HqExecutionCreate(&hExec, hVm);
+	ASSERT_EQ(createExecResult, HQ_SUCCESS);
+	EXPECT_NE(hExec, HQ_EXECUTION_HANDLE_NULL);
 
-	const size_t testValueCount = 4;
+	// Reset the execution context; this should succeed even though the
+	// context has not been initialized with a script function.
+	const int resetExecResult = HqExecutionReset(hExec);
+	ASSERT_EQ(resetExecResult, HQ_SUCCESS);
 
-	HqValue testValue[testValueCount] =
+	// Attempt to run the execution context without a script function.
+	const int runExecResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+	ASSERT_EQ(runExecResult, HQ_ERROR_SCRIPT_NO_FUNCTION);
+
+	// Get the VM that the execution context belongs to.
+	HqVmHandle hTempVm = HQ_VM_HANDLE_NULL;
+	const int getVmResult = HqExecutionGetVm(hExec, &hTempVm);
+	ASSERT_EQ(getVmResult, HQ_SUCCESS);
+	ASSERT_EQ(hTempVm, hVm);
+
+	// Get the 'execution aborted' status.
+	bool abortStatus = false;
+	const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &abortStatus);
+	ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
+	ASSERT_FALSE(abortStatus);
+
+	// Get the 'execution complete' status.
+	bool completeStatus = false;
+	const int getCompleteStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &completeStatus);
+	ASSERT_EQ(getCompleteStatusResult, HQ_SUCCESS);
+	ASSERT_FALSE(completeStatus);
+
+	// Get the 'exception raised' status.
+	bool exceptionStatus = false;
+	const int getExceptionStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &exceptionStatus);
+	ASSERT_EQ(getExceptionStatusResult, HQ_SUCCESS);
+	ASSERT_FALSE(exceptionStatus);
+
+	// Get the 'execution in progress' status.
+	bool runningStatus = false;
+	const int getRunningStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &runningStatus);
+	ASSERT_EQ(getRunningStatusResult, HQ_SUCCESS);
+	ASSERT_FALSE(runningStatus);
+
+	// Get the 'execution yielded' status.
+	bool yieldStatus = false;
+	const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &yieldStatus);
+	ASSERT_EQ(getYieldStatusResult, HQ_SUCCESS);
+	ASSERT_FALSE(yieldStatus);
+
+	// Get the unhandled exception flag.
+	bool unhandledException = false;
+	const int hasUnhandledExceptionResult = HqExecutionHasUnhandledExceptionOccurred(hExec, &unhandledException);
+	ASSERT_EQ(hasUnhandledExceptionResult, HQ_SUCCESS);
+	ASSERT_FALSE(unhandledException);
+
+	// Get the current frame stack depth.
+	size_t frameStackDepth = 0;
+	const int getFrameStackDepthResult = HqExecutionGetFrameStackDepth(hExec, &frameStackDepth);
+	ASSERT_EQ(getFrameStackDepthResult, HQ_SUCCESS);
+	ASSERT_EQ(frameStackDepth, 0);
+
+	// Get the current frame.
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	const int getCurrentFrameResult = HqExecutionGetCurrentFrame(hExec, &hFrame);
+	ASSERT_EQ(getCurrentFrameResult, HQ_SUCCESS);
+	ASSERT_EQ(hFrame, HQ_FRAME_HANDLE_NULL);
+
+	// Set each I/O register on the execution context.
+	for(size_t i = 0; i < HQ_VM_IO_REGISTER_COUNT; ++i)
 	{
-		HqValueCreateBool(true),
-		HqValueCreateUint32(123),
-		HqValueCreateFloat64(1.23456789),
-		HqValueCreateInt64(-234),
-	};
+		HqValueHandle hValue = HqValueCreateUint64(hVm, uint64_t(i));
 
-	// Test the parameter stack.
-	{
-		// Check the initial stack size.
-		const size_t stackSizeBeforePush = HqExecutionGetParameterStackSize(executionHandle);
-		EXPECT_EQ(stackSizeBeforePush, 0);
+		const int setIoRegisterResult = HqExecutionSetIoRegister(hExec, hValue, int(i));
+		ASSERT_EQ(setIoRegisterResult, HQ_SUCCESS);
 
-		// Push the test values to the execution stack.
-		{
-			const int pushTestValue0Result = HqExecutionPushParameter(executionHandle, &testValue[0]);
-			EXPECT_EQ(pushTestValue0Result, HQ_SUCCESS);
-
-			const int pushTestValue1Result = HqExecutionPushParameter(executionHandle, &testValue[1]);
-			EXPECT_EQ(pushTestValue1Result, HQ_SUCCESS);
-
-			const int pushTestValue2Result = HqExecutionPushParameter(executionHandle, &testValue[2]);
-			EXPECT_EQ(pushTestValue2Result, HQ_SUCCESS);
-
-			const int pushTestValue3Result = HqExecutionPushParameter(executionHandle, &testValue[3]);
-			EXPECT_EQ(pushTestValue3Result, HQ_SUCCESS);
-		}
-
-		// Check the stack size after pushing each test value to the stack.
-		const size_t stackSizeAfterPush = HqExecutionGetParameterStackSize(executionHandle);
-		EXPECT_EQ(stackSizeAfterPush, testValueCount);
-
-		// Peek at the values on the stack.
-		{
-			HqValue peekValue = HqValueCreateNull();
-
-			const int peekTestValue3Result = HqExecutionPeekParameter(executionHandle, &peekValue, 0);
-			EXPECT_EQ(peekTestValue3Result, HQ_SUCCESS);
-			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_INT64);
-			EXPECT_EQ(peekValue.as.int64, testValue[3].as.int64);
-
-			const int peekTestValue3 = HqValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue3, HQ_SUCCESS);
-
-			peekValue = HqValueCreateNull();
-
-			const int peekTestValue2Result = HqExecutionPeekParameter(executionHandle, &peekValue, 1);
-			EXPECT_EQ(peekTestValue2Result, HQ_SUCCESS);
-			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_FLOAT64);
-			EXPECT_EQ(peekValue.as.float64, testValue[2].as.float64);
-
-			const int peekTestValue2 = HqValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue2, HQ_SUCCESS);
-
-			peekValue = HqValueCreateNull();
-
-			const int peekTestValue1Result = HqExecutionPeekParameter(executionHandle, &peekValue, 2);
-			EXPECT_EQ(peekTestValue1Result, HQ_SUCCESS);
-			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_UINT32);
-			EXPECT_EQ(peekValue.as.uint32, testValue[1].as.uint32);
-
-			const int peekTestValue1 = HqValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue1, HQ_SUCCESS);
-
-			peekValue = HqValueCreateNull();
-
-			const int peekTestValue0Result = HqExecutionPeekParameter(executionHandle, &peekValue, 3);
-			EXPECT_EQ(peekTestValue0Result, HQ_SUCCESS);
-			EXPECT_EQ(peekValue.type, HQ_VALUE_TYPE_BOOL);
-			EXPECT_EQ(peekValue.as.boolean, testValue[0].as.boolean);
-
-			const int peekTestValue0 = HqValueGcExpose(&peekValue);
-			EXPECT_EQ(peekTestValue0, HQ_SUCCESS);
-		}
-
-		// Check the stack size after peeking at each value on the stack.
-		const size_t stackSizeAfterPeek = HqExecutionGetParameterStackSize(executionHandle);
-		EXPECT_EQ(stackSizeAfterPeek, testValueCount);
-
-		// Pop the values from the stack.
-		{
-			HqValue popValue = HqValueCreateNull();
-
-			const int popTestValue3Result = HqExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue3Result, HQ_SUCCESS);
-			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_INT64);
-			EXPECT_EQ(popValue.as.int64, testValue[3].as.int64);
-
-			const int popTestValue3 = HqValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue3, HQ_SUCCESS);
-
-			popValue = HqValueCreateNull();
-
-			const int popTestValue2Result = HqExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue2Result, HQ_SUCCESS);
-			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_FLOAT64);
-			EXPECT_EQ(popValue.as.float64, testValue[2].as.float64);
-
-			const int popTestValue2 = HqValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue2, HQ_SUCCESS);
-
-			popValue = HqValueCreateNull();
-
-			const int popTestValue1Result = HqExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue1Result, HQ_SUCCESS);
-			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_UINT32);
-			EXPECT_EQ(popValue.as.uint32, testValue[1].as.uint32);
-
-			const int popTestValue1 = HqValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue1, HQ_SUCCESS);
-
-			popValue = HqValueCreateNull();
-
-			const int popTestValue0Result = HqExecutionPopParameter(executionHandle, &popValue);
-			EXPECT_EQ(popTestValue0Result, HQ_SUCCESS);
-			EXPECT_EQ(popValue.type, HQ_VALUE_TYPE_BOOL);
-			EXPECT_EQ(popValue.as.boolean, testValue[0].as.boolean);
-
-			const int popTestValue0 = HqValueGcExpose(&popValue);
-			EXPECT_EQ(popTestValue0, HQ_SUCCESS);
-		}
-
-		// Check the stack size after popping each value from the stack.
-		const size_t stackSizeAfterPop = HqExecutionGetParameterStackSize(executionHandle);
-		EXPECT_EQ(stackSizeAfterPop, 0);
+		const int gcExposeIoValueResult = HqValueGcExpose(hValue);
+		ASSERT_EQ(gcExposeIoValueResult, HQ_SUCCESS);
 	}
 
-	// Test the local variable stack.
+	// Verify each I/O register is correct.
+	for(size_t i = 0; i < HQ_VM_IO_REGISTER_COUNT; ++i)
 	{
-		// Check the initial stack size.
-		const size_t localCountBeforePush = HqExecutionGetLocalVariableCount(executionHandle);
-		EXPECT_EQ(localCountBeforePush, 0);
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
 
-		// Push the test values to the parameter stack.
-		{
-			const int pushTestValue0Result = HqExecutionPushLocalVariable(executionHandle, &testValue[0]);
-			EXPECT_EQ(pushTestValue0Result, HQ_SUCCESS);
+		const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, int(i));
+		ASSERT_EQ(getIoRegisterResult, HQ_SUCCESS);
 
-			const int pushTestValue1Result = HqExecutionPushLocalVariable(executionHandle, &testValue[1]);
-			EXPECT_EQ(pushTestValue1Result, HQ_SUCCESS);
+		const bool isIoValueUint64 = HqValueIsUint64(hValue);
+		ASSERT_TRUE(isIoValueUint64);
 
-			const int pushTestValue2Result = HqExecutionPushLocalVariable(executionHandle, &testValue[2]);
-			EXPECT_EQ(pushTestValue2Result, HQ_SUCCESS);
-
-			const int pushTestValue3Result = HqExecutionPushLocalVariable(executionHandle, &testValue[3]);
-			EXPECT_EQ(pushTestValue3Result, HQ_SUCCESS);
-		}
-
-		// Check the stack size after pushing each test value to the stack.
-		const size_t localCountAfterPush = HqExecutionGetLocalVariableCount(executionHandle);
-		EXPECT_EQ(localCountAfterPush, testValueCount);
-
-		// Retrieve local variables currently on the local stack.
-		{
-			HqValue localValue = HqValueCreateNull();
-
-			const int localTestValue0Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 0);
-			EXPECT_EQ(localTestValue0Result, HQ_SUCCESS);
-			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_BOOL);
-			EXPECT_EQ(localValue.as.boolean, testValue[0].as.boolean);
-
-			const int localTestValue0 = HqValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue0, HQ_SUCCESS);
-
-			localValue = HqValueCreateNull();
-
-			const int localTestValue1Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 1);
-			EXPECT_EQ(localTestValue1Result, HQ_SUCCESS);
-			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_UINT32);
-			EXPECT_EQ(localValue.as.uint32, testValue[1].as.uint32);
-
-			const int localTestValue1 = HqValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue1, HQ_SUCCESS);
-
-			localValue = HqValueCreateNull();
-
-			const int localTestValue2Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 2);
-			EXPECT_EQ(localTestValue2Result, HQ_SUCCESS);
-			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_FLOAT64);
-			EXPECT_EQ(localValue.as.float64, testValue[2].as.float64);
-
-			const int localTestValue2 = HqValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue2, HQ_SUCCESS);
-
-			localValue = HqValueCreateNull();
-
-			const int localTestValue3Result = HqExecutionGetLocalVariable(executionHandle, &localValue, 3);
-			EXPECT_EQ(localTestValue3Result, HQ_SUCCESS);
-			EXPECT_EQ(localValue.type, HQ_VALUE_TYPE_INT64);
-			EXPECT_EQ(localValue.as.int64, testValue[3].as.int64);
-
-			const int localTestValue3 = HqValueGcExpose(&localValue);
-			EXPECT_EQ(localTestValue3, HQ_SUCCESS);
-		}
-
-		// Check the stack size after peeking at each value on the stack.
-		const size_t localCountAfterPeek = HqExecutionGetLocalVariableCount(executionHandle);
-		EXPECT_EQ(localCountAfterPeek, testValueCount);
-
-		// Pop the values from the stack.
-		{
-			const int popTestValue3Result = HqExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue3Result, HQ_SUCCESS);
-
-			const int popTestValue2Result = HqExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue2Result, HQ_SUCCESS);
-
-			const int popTestValue1Result = HqExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue1Result, HQ_SUCCESS);
-
-			const int popTestValue0Result = HqExecutionPopLocalVariable(executionHandle);
-			EXPECT_EQ(popTestValue0Result, HQ_SUCCESS);
-		}
-
-		// Check the stack size after popping each value from the stack.
-		const size_t localCountAfterPop = HqExecutionGetLocalVariableCount(executionHandle);
-		EXPECT_EQ(localCountAfterPop, 0);
+		const uint64_t valueData = HqValueGetUint64(hValue);
+		ASSERT_EQ(valueData, uint64_t(i));
 	}
+
+	// Dispose of the execution context.
+	const int disposeExecResult = HqExecutionDispose(&hExec);
+	ASSERT_EQ(disposeExecResult, HQ_SUCCESS);
+	EXPECT_EQ(hExec, HQ_EXECUTION_HANDLE_NULL);
 
 	// Dispose of the VM context.
-	const int disposeContextResult = HqVmDispose(&hVm);
-	EXPECT_EQ(disposeContextResult, HQ_SUCCESS);
+	const int disposeVmResult = HqVmDispose(&hVm);
+	EXPECT_EQ(disposeVmResult, HQ_SUCCESS);
+	EXPECT_EQ(hVm, HQ_VM_HANDLE_NULL);
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------
