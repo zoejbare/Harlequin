@@ -262,6 +262,21 @@ def _setCommonAppOptions(outputName):
 				"pthread",
 			)
 
+def _setTestAppOptions(outputName):
+	_setCommonAppOptions(outputName)
+	
+	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
+
+	with csbuild.Toolchain("gcc", "clang"):
+		csbuild.AddCompilerCxxFlags(
+			"-Wno-sign-compare",
+		)
+
+	with csbuild.Toolchain("msvc"):
+		csbuild.AddCompilerCxxFlags(
+			"/wd4389", # '==': signed/unsigned mismatch
+		)
+
 ###################################################################################################
 
 class ExtAntlr4Runtime(object):
@@ -332,7 +347,7 @@ class HarlequinCommon(object):
 ###################################################################################################
 
 class LibHarlequinBase(object):
-	projectName = "LibHarlequinBase"
+	projectName = "LibHqBase"
 	outputName = "libhqbase"
 	dependencies = [
 		ExtXxHash.projectName,
@@ -385,7 +400,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 ###################################################################################################
 
 class LibHarlequinRuntime(object):
-	projectName = "LibHarlequinRuntime"
+	projectName = "LibHqRuntime"
 	outputName = "libhqruntime"
 	dependencies = [
 		LibHarlequinBase.projectName,
@@ -415,7 +430,7 @@ with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPat
 ###################################################################################################
 
 class LibHarlequinTool(object):
-	projectName = "LibHarlequinTool"
+	projectName = "LibHqTool"
 	outputName = "libhqtool"
 	dependencies = [
 		LibHarlequinBase.projectName,
@@ -454,7 +469,7 @@ with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, 
 ###################################################################################################
 
 class HarlequinCompiler(object):
-	projectName = "HarlequinCompiler"
+	projectName = "HqCompiler"
 	outputName = "hqc"
 	path = f"{HarlequinCommon.appRootPath}/compiler"
 	dependencies = [
@@ -469,7 +484,7 @@ with csbuild.Project(HarlequinCompiler.projectName, HarlequinCompiler.path, Harl
 ###################################################################################################
 
 class HarlequinRuntime(object):
-	projectName = "HarlequinRuntime"
+	projectName = "HqRuntime"
 	outputName = "hq"
 	path = f"{HarlequinCommon.appRootPath}/runtime"
 	dependencies = [
@@ -487,9 +502,9 @@ with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, Harleq
 ###################################################################################################
 
 class HarlequinUnitTest(object):
-	projectName = "UnitTest"
+	projectName = "HqUnitTest"
 	outputName = "unittest"
-	path = f"{HarlequinCommon.appRootPath}/unit_test"
+	path = f"{HarlequinCommon.appRootPath}/test_framework/unit_test"
 	dependencies = [
 		ExtGoogleTest.projectName,
 		LibHarlequinTool.projectName,
@@ -497,18 +512,6 @@ class HarlequinUnitTest(object):
 	]
 
 with csbuild.Project(HarlequinUnitTest.projectName, HarlequinUnitTest.path, HarlequinUnitTest.dependencies):
-	_setCommonAppOptions(HarlequinUnitTest.outputName)
-
-	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
-
-	with csbuild.Toolchain("gcc", "clang"):
-		csbuild.AddCompilerCxxFlags(
-			"-Wno-sign-compare",
-		)
-
-	with csbuild.Toolchain("msvc"):
-		csbuild.AddCompilerCxxFlags(
-			"/wd4389", # '==': signed/unsigned mismatch
-		)
+	_setTestAppOptions(HarlequinUnitTest.outputName)
 
 ###################################################################################################
