@@ -704,48 +704,6 @@ bool HqString::Less(const HqString* const pLeft, const HqString* const pRight)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqString::ToSimpleLowerCase(HqString* const pString)
-{
-	_HqStringSimpleCaseOperation(pString, _HqCharToUtf32SimpleLower);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqString::ToSimpleUpperCase(HqString* const pString)
-{
-	_HqStringSimpleCaseOperation(pString, _HqCharToUtf32SimpleUpper);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqString::ToSimpleTitleCase(HqString* const pString)
-{
-	_HqStringSimpleCaseOperation(pString, _HqCharToUtf32SimpleTitle);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqString::ToFullLowerCase(HqString* const pString)
-{
-	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullLower);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqString::ToFullUpperCase(HqString* const pString)
-{
-	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullUpper);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqString::ToFullTitleCase(HqString* const pString)
-{
-	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullTitle);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 bool HqString::RawCompare(const char* left, const char* right)
 {
 	assert(left != nullptr);
@@ -811,6 +769,48 @@ char* HqString::RawFormatVarArgs(const char* const fmt, va_list vl)
 	}
 
 	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToSimpleLowerCase(HqString* const pString)
+{
+	_HqStringSimpleCaseOperation(pString, _HqCharToUtf32SimpleLower);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToSimpleUpperCase(HqString* const pString)
+{
+	_HqStringSimpleCaseOperation(pString, _HqCharToUtf32SimpleUpper);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToSimpleTitleCase(HqString* const pString)
+{
+	_HqStringSimpleCaseOperation(pString, _HqCharToUtf32SimpleTitle);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToFullLowerCase(HqString* const pString)
+{
+	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullLower);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToFullUpperCase(HqString* const pString)
+{
+	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullUpper);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqString::ToFullTitleCase(HqString* const pString)
+{
+	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullTitle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
