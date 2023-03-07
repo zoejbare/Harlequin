@@ -22,7 +22,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class TestValue
+class _HQ_TEST_NAME(TestValue)
 	: public ::testing::Test
 {
 public:
@@ -48,11 +48,11 @@ protected:
 	static HqVmHandle m_hVm;
 };
 
-HqVmHandle TestValue::m_hVm = HQ_VM_HANDLE_NULL;
+HqVmHandle _HQ_TEST_NAME(TestValue)::m_hVm = HQ_VM_HANDLE_NULL;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateBoolValue)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateBoolValue)
 {
 	// Create a boolean value object.
 	HqValueHandle hValue = HqValueCreateBool(m_hVm, true);
@@ -67,7 +67,7 @@ TEST_F(TestValue, CreateBoolValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateInt8Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateInt8Value)
 {
 	constexpr int8_t valueData = -123;
 
@@ -84,7 +84,7 @@ TEST_F(TestValue, CreateInt8Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateInt16Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateInt16Value)
 {
 	constexpr int16_t valueData = -4567;
 
@@ -101,7 +101,7 @@ TEST_F(TestValue, CreateInt16Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateInt32Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateInt32Value)
 {
 	constexpr int32_t valueData = -432895l;
 
@@ -118,7 +118,7 @@ TEST_F(TestValue, CreateInt32Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateInt64Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateInt64Value)
 {
 	constexpr int64_t valueData = -348641864189ll;
 
@@ -135,7 +135,7 @@ TEST_F(TestValue, CreateInt64Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateUint8Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateUint8Value)
 {
 	constexpr uint8_t valueData = 123;
 
@@ -152,7 +152,7 @@ TEST_F(TestValue, CreateUint8Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateUint16Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateUint16Value)
 {
 	constexpr uint16_t valueData = 4567;
 
@@ -169,7 +169,7 @@ TEST_F(TestValue, CreateUint16Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateUint32Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateUint32Value)
 {
 	constexpr uint32_t valueData = 432895ul;
 
@@ -186,7 +186,7 @@ TEST_F(TestValue, CreateUint32Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateUint64Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateUint64Value)
 {
 	constexpr uint64_t valueData = 348641864189ull;
 
@@ -203,7 +203,7 @@ TEST_F(TestValue, CreateUint64Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateFloat32Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateFloat32Value)
 {
 	constexpr float valueData = 1234.56789f;
 
@@ -220,7 +220,7 @@ TEST_F(TestValue, CreateFloat32Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateFloat64Value)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateFloat64Value)
 {
 	constexpr double valueData = 123456.789;
 
@@ -237,7 +237,7 @@ TEST_F(TestValue, CreateFloat64Value)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateStringValue)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateStringValue)
 {
 	// Create native string value object.
 	HqValueHandle hValue = HqValueCreateString(m_hVm, "This is a native string");
@@ -263,7 +263,7 @@ TEST_F(TestValue, CreateStringValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateFunctionValue)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateFunctionValue)
 {
 	// Since we're not using the function we're creating, we can trick the runtime into thinking we have a valid one.
 	const HqFunctionHandle hFunction = reinterpret_cast<HqFunctionHandle>(0x1234);
@@ -281,7 +281,7 @@ TEST_F(TestValue, CreateFunctionValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateNullObjectValue)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateNullObjectValue)
 {
 	// Attempt to create an object value object from a non-existent typename.
 	HqValueHandle hValue = HqValueCreateObject(m_hVm, "Foo");
@@ -291,7 +291,7 @@ TEST_F(TestValue, CreateNullObjectValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateArrayValue)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateArrayValue)
 {
 	constexpr size_t arraySize = 5;
 	constexpr size_t index = 3;
@@ -321,7 +321,7 @@ TEST_F(TestValue, CreateArrayValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreatePrimitiveValueCopy)
+TEST_F(_HQ_TEST_NAME(TestValue), CreatePrimitiveValueCopy)
 {
 	// Create a primitive (int64) value object.
 	HqValueHandle hOriginalIntValue = HqValueCreateInt64(m_hVm, 12345);
@@ -344,7 +344,7 @@ TEST_F(TestValue, CreatePrimitiveValueCopy)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateNativeValue)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateNativeValue)
 {
 	static void* const pValueData = reinterpret_cast<void*>(0x1234);
 
@@ -387,7 +387,7 @@ TEST_F(TestValue, CreateNativeValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(TestValue, CreateStringValueCopy)
+TEST_F(_HQ_TEST_NAME(TestValue), CreateStringValueCopy)
 {
 	// Create a native string value object.
 	HqValueHandle hOriginalStringValue = HqValueCreateString(m_hVm, "Test string");

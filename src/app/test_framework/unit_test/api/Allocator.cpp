@@ -16,13 +16,13 @@
 // IN THE SOFTWARE.
 //
 
-#include <gtest/gtest.h>
+#include "../../common/Util.hpp"
 
-#include <Harlequin.h>
+#include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestAllocator, SetCustomAllocator)
+TEST(_HQ_TEST_NAME(TestAllocator), SetCustomAllocator)
 {
 	auto customAlloc = [](const size_t size) -> void*
 	{
@@ -73,7 +73,7 @@ TEST(TestAllocator, SetCustomAllocator)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestAllocator, AllocThenFree)
+TEST(_HQ_TEST_NAME(TestAllocator), AllocThenFree)
 {
 	HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
 
@@ -87,7 +87,7 @@ TEST(TestAllocator, AllocThenFree)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestAllocator, ReallocNullThenFree)
+TEST(_HQ_TEST_NAME(TestAllocator), ReallocNullThenFree)
 {
 	HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
 
@@ -101,7 +101,7 @@ TEST(TestAllocator, ReallocNullThenFree)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestAllocator, AllocReallocThenFree)
+TEST(_HQ_TEST_NAME(TestAllocator), AllocReallocThenFree)
 {
 	HqMemAllocator defaultAllocator = HqMemGetDefaultAllocator();
 

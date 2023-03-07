@@ -18,6 +18,26 @@
 
 #include <Harlequin.h>
 
+//----------------------------------------------------------------------------------------------------------------------
+
+#if defined(_HQ_CONFIG_DEBUG)
+	#define __HQ_TEST_NAME_PREFIX Dbg_
+
+#elif defined(_HQ_CONFIG_FASTDEBUG)
+	#define __HQ_TEST_NAME_PREFIX FDbg_
+
+#elif defined(_HQ_CONFIG_RELEASE)
+	#define __HQ_TEST_NAME_PREFIX Rel_
+
+#else
+	#error Unknown build configuration
+
+#endif
+
+#define __HQ_NAME_CONCAT_EVAL2(prefix, name) prefix ## name
+#define __HQ_NAME_CONCAT_EVAL1(prefix, name) __HQ_NAME_CONCAT_EVAL2(prefix, name)
+
+#define _HQ_TEST_NAME(test_name) __HQ_NAME_CONCAT_EVAL1(__HQ_TEST_NAME_PREFIX, test_name)
 
 //----------------------------------------------------------------------------------------------------------------------
 

@@ -101,19 +101,19 @@ with csbuild.Toolchain("gcc", "clang", "msvc"):
 ###################################################################################################
 
 with csbuild.Target("debug"):
-	csbuild.AddDefines("_DEBUG")
+	csbuild.AddDefines("_DEBUG", "_HQ_CONFIG_DEBUG")
 	csbuild.SetDebugLevel(csbuild.DebugLevel.ExternalSymbolsPlus)
 	csbuild.SetOptimizationLevel(csbuild.OptimizationLevel.Disabled)
 	csbuild.SetDebugRuntime(True)
 
 with csbuild.Target("fastdebug"):
-	csbuild.AddDefines("_DEBUG")
+	csbuild.AddDefines("_DEBUG", "_HQ_CONFIG_FASTDEBUG")
 	csbuild.SetDebugLevel(csbuild.DebugLevel.ExternalSymbolsPlus)
 	csbuild.SetOptimizationLevel(csbuild.OptimizationLevel.Max)
 	csbuild.SetDebugRuntime(True)
 
 with csbuild.Target("release"):
-	csbuild.AddDefines("NDEBUG")
+	csbuild.AddDefines("NDEBUG", "_HQ_CONFIG_RELEASE")
 	csbuild.SetDebugLevel(csbuild.DebugLevel.Disabled)
 	csbuild.SetOptimizationLevel(csbuild.OptimizationLevel.Max)
 	csbuild.SetDebugRuntime(False)

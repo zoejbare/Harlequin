@@ -42,7 +42,7 @@ void StoreReportLine(void* const pUserData, const int messageType, const char* c
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestVm, CreateAndDisposeContext)
+TEST(_HQ_TEST_NAME(TestVm), CreateAndDisposeContext)
 {
 	HqVmInit init = GetDefaultHqVmInit(nullptr, nullptr, HQ_MESSAGE_TYPE_FATAL);
 	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
@@ -58,7 +58,7 @@ TEST(TestVm, CreateAndDisposeContext)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestVm, ReportMessages)
+TEST(_HQ_TEST_NAME(TestVm), ReportMessages)
 {
 	ReportLine line;
 
@@ -111,7 +111,7 @@ TEST(TestVm, ReportMessages)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestVm, EmptyExecutionContext)
+TEST(_HQ_TEST_NAME(TestVm), EmptyExecutionContext)
 {
 	HqVmInit init = GetDefaultHqVmInit(nullptr, nullptr, HQ_MESSAGE_TYPE_FATAL);
 	HqVmHandle hVm = HQ_VM_HANDLE_NULL;

@@ -16,9 +16,9 @@
 // IN THE SOFTWARE.
 //
 
-#include <gtest/gtest.h>
+#include "../../common/Util.hpp"
 
-#include <Harlequin.h>
+#include <gtest/gtest.h>
 
 #ifdef HQ_PLATFORM_WINDOWS
 	#define WIN32_LEAN_AND_MEAN
@@ -241,7 +241,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, CreateAndDisposeReader)
+TEST(_HQ_TEST_NAME(TestSerializer), CreateAndDisposeReader)
 {
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
@@ -260,7 +260,7 @@ TEST(TestSerializer, CreateAndDisposeReader)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, CreateAndDisposeWriter)
+TEST(_HQ_TEST_NAME(TestSerializer), CreateAndDisposeWriter)
 {
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
@@ -279,7 +279,7 @@ TEST(TestSerializer, CreateAndDisposeWriter)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, AttemptToCreateWithUnknownMode)
+TEST(_HQ_TEST_NAME(TestSerializer), AttemptToCreateWithUnknownMode)
 {
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
@@ -290,7 +290,7 @@ TEST(TestSerializer, AttemptToCreateWithUnknownMode)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, ReadStreamFromBuffer)
+TEST(_HQ_TEST_NAME(TestSerializer), ReadStreamFromBuffer)
 {
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
@@ -325,7 +325,7 @@ TEST(TestSerializer, ReadStreamFromBuffer)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, ReadStreamFromFile)
+TEST(_HQ_TEST_NAME(TestSerializer), ReadStreamFromFile)
 {
 	// Create a temporary file that will be deleted when destructed.
 	TemporaryFile tempFile(TempFileBehavior::Filled);
@@ -363,7 +363,7 @@ TEST(TestSerializer, ReadStreamFromFile)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, LoadFileThenWriteFile)
+TEST(_HQ_TEST_NAME(TestSerializer), LoadFileThenWriteFile)
 {
 	// Create a series of temporary files that will all be deleted upon destruction.
 	// The first file is just for the initial stream load.  The others are for testing.
@@ -420,7 +420,7 @@ TEST(TestSerializer, LoadFileThenWriteFile)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, WriteNativeEndianData)
+TEST(_HQ_TEST_NAME(TestSerializer), WriteNativeEndianData)
 {
 	constexpr size_t expectedStreamLength = 42;
 
@@ -590,7 +590,7 @@ TEST(TestSerializer, WriteNativeEndianData)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, WriteLittleEndianData)
+TEST(_HQ_TEST_NAME(TestSerializer), WriteLittleEndianData)
 {
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
@@ -634,7 +634,7 @@ TEST(TestSerializer, WriteLittleEndianData)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST(TestSerializer, WriteBigEndianData)
+TEST(_HQ_TEST_NAME(TestSerializer), WriteBigEndianData)
 {
 	HqSerializerHandle hSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
