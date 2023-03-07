@@ -1944,7 +1944,7 @@ bool HqValueIsNative(HqValueHandle hValue)
 
 bool HqValueGetBool(HqValueHandle hValue)
 {
-	if(HqValueIsString(hValue))
+	if(HqValueIsBool(hValue))
 	{
 		return hValue->as.boolean;
 	}
@@ -2307,45 +2307,26 @@ int HqValueSetObjectUserData(HqValueHandle hValue, void* pUserData)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqValueGetArrayLength(HqValueHandle hValue, size_t* const pOutIndex)
+size_t HqValueGetArrayLength(HqValueHandle hValue)
 {
-	if(!pOutIndex)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
 	if(!HqValueIsArray(hValue))
 	{
-		return HQ_ERROR_INVALID_TYPE;
+		return 0;
 	}
 
-	(*pOutIndex) = hValue->as.array.count;
-
-	return HQ_SUCCESS;
+	return hValue->as.array.count;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqValueGetArrayElement(HqValueHandle hValue, size_t index, HqValueHandle* phOutElementValue)
+HqValueHandle HqValueGetArrayElement(HqValueHandle hValue, size_t index)
 {
-	if(!phOutElementValue)
+	if(!HqValueIsArray(hValue) || index >= hValue->as.array.count)
 	{
-		return HQ_ERROR_INVALID_ARG;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	if(!HqValueIsArray(hValue))
-	{
-		return HQ_ERROR_INVALID_TYPE;
-	}
-
-	if(index >= hValue->as.array.count)
-	{
-		return HQ_ERROR_INDEX_OUT_OF_RANGE;
-	}
-
-	(*phOutElementValue) = hValue->as.array.pData[index];
-
-	return HQ_SUCCESS;
+	return hValue->as.array.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------

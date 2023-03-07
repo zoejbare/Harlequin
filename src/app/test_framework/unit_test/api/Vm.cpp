@@ -16,28 +16,12 @@
 // IN THE SOFTWARE.
 //
 
-#include <gtest/gtest.h>
+#include "../../common/Util.hpp"
 
-#include <Harlequin.h>
+#include <gtest/gtest.h>
 
 #include <string>
 #include <vector>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-HqVmInit ConstructInitObject(void* const pUserData, const int reportLevel, HqMessageCallback onMessageFn)
-{
-	HqVmInit output;
-	output.common.report.onMessageFn = onMessageFn;
-	output.common.report.pUserData = pUserData;
-	output.common.report.reportLevel = reportLevel;
-	output.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
-	output.gcTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
-	output.gcTimeWaitMs = HQ_VM_GC_DEFAULT_TIME_WAIT_MS;
-	output.gcEnableThread = false;
-
-	return output;
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -58,16 +42,9 @@ void StoreReportLine(void* const pUserData, const int messageType, const char* c
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void DummyMessageCallback(void*, int, const char*)
-{
-	// Ignore all messages.
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 TEST(TestVm, CreateAndDisposeContext)
 {
-	HqVmInit init = ConstructInitObject(nullptr, HQ_MESSAGE_TYPE_FATAL, DummyMessageCallback);
+	HqVmInit init = GetDefaultHqVmInit(nullptr, nullptr, HQ_MESSAGE_TYPE_FATAL);
 	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
 
 	// Create the VM context.
@@ -85,7 +62,7 @@ TEST(TestVm, ReportMessages)
 {
 	ReportLine line;
 
-	HqVmInit init = ConstructInitObject(&line, HQ_MESSAGE_TYPE_VERBOSE, StoreReportLine);
+	HqVmInit init = GetDefaultHqVmInit(&line, StoreReportLine, HQ_MESSAGE_TYPE_VERBOSE);
 	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
 
 	// Create the VM context.
@@ -136,7 +113,7 @@ TEST(TestVm, ReportMessages)
 
 TEST(TestVm, EmptyExecutionContext)
 {
-	HqVmInit init = ConstructInitObject(nullptr, HQ_MESSAGE_TYPE_FATAL, DummyMessageCallback);
+	HqVmInit init = GetDefaultHqVmInit(nullptr, nullptr, HQ_MESSAGE_TYPE_FATAL);
 	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
 	HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
 

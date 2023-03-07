@@ -408,7 +408,7 @@ typedef void (*HqNativeFunction)(HqExecutionHandle, HqFunctionHandle, void*);
 
 typedef void (*HqCallbackOpDisasm)(void*, const char*, uintptr_t);
 
-typedef void (*HqCallbackNativeValueCopy)(void**, const void*);
+typedef void (*HqCallbackNativeValueCopy)(void**, void*);
 typedef void (*HqCallbackNativeValueDestruct)(void*);
 
 typedef bool (*HqCallbackIterateFrame)(void*, HqFrameHandle);
@@ -734,9 +734,9 @@ HQ_MAIN_API void* HqValueGetObjectUserData(HqValueHandle hValue);
 
 HQ_MAIN_API int HqValueSetObjectUserData(HqValueHandle hValue, void* pUserData);
 
-HQ_MAIN_API int HqValueGetArrayLength(HqValueHandle hValue, size_t* pOutLength);
+HQ_MAIN_API size_t HqValueGetArrayLength(HqValueHandle hValue);
 
-HQ_MAIN_API int HqValueGetArrayElement(HqValueHandle hValue, size_t index, HqValueHandle* phOutElementValue);
+HQ_MAIN_API HqValueHandle HqValueGetArrayElement(HqValueHandle hValue, size_t index);
 
 HQ_MAIN_API int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqValueHandle hElementValue);
 

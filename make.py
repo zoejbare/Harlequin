@@ -264,7 +264,7 @@ def _setCommonAppOptions(outputName):
 
 def _setTestAppOptions(outputName):
 	_setCommonAppOptions(outputName)
-	
+
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
 	with csbuild.Toolchain("gcc", "clang"):
@@ -504,14 +504,19 @@ with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, Harleq
 class HarlequinUnitTest(object):
 	projectName = "HqUnitTest"
 	outputName = "unittest"
-	path = f"{HarlequinCommon.appRootPath}/test_framework/unit_test"
+	path = f"{HarlequinCommon.appRootPath}/test_framework"
 	dependencies = [
 		ExtGoogleTest.projectName,
 		LibHarlequinTool.projectName,
 		LibHarlequinRuntime.projectName,
 	]
 
-with csbuild.Project(HarlequinUnitTest.projectName, HarlequinUnitTest.path, HarlequinUnitTest.dependencies):
+with csbuild.Project(HarlequinUnitTest.projectName, HarlequinUnitTest.path, HarlequinUnitTest.dependencies, autoDiscoverSourceFiles=False):
 	_setTestAppOptions(HarlequinUnitTest.outputName)
+
+	csbuild.AddSourceDirectories(
+		f"{HarlequinUnitTest.path}/common",
+		f"{HarlequinUnitTest.path}/unit_test"
+	)
 
 ###################################################################################################
