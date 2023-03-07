@@ -343,6 +343,7 @@ with csbuild.Project(ExtXxHash.projectName, ExtXxHash.path, autoDiscoverSourceFi
 class HarlequinCommon(object):
 	appRootPath = "src/app"
 	libRootPath = "src/lib"
+	testRootPath = "src/test"
 
 ###################################################################################################
 
@@ -504,7 +505,7 @@ with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, Harleq
 class HarlequinUnitTest(object):
 	projectName = "HqUnitTest"
 	outputName = "unittest"
-	path = f"{HarlequinCommon.appRootPath}/test_framework"
+	path = HarlequinCommon.testRootPath
 	dependencies = [
 		ExtGoogleTest.projectName,
 		LibHarlequinTool.projectName,
