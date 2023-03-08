@@ -402,7 +402,7 @@ typedef struct HqExecution* HqExecutionHandle;
 typedef struct HqFrame* HqFrameHandle;
 typedef struct HqValue* HqValueHandle;
 
-typedef int (*HqDllEntryPoint)(const HqDllRuntimeInfo*);
+typedef int (*HqDllEntryPoint)(const HqDllRuntimeInfo*, HqVmHandle);
 
 typedef void (*HqNativeFunction)(HqExecutionHandle, HqFunctionHandle, void*);
 

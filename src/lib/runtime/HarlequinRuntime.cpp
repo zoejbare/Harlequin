@@ -388,6 +388,15 @@ int HqVmLoadModule(
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
+	// Convert all backslashes in the module name to forward slashes for consistency.
+	for(size_t i = 0; i < pModuleName->length; ++i)
+	{
+		if(pModuleName->data[i] == '\\')
+		{
+			pModuleName->data[i] = '/';
+		}
+	}
+
 	// Check if a module with this name has already been loaded.
 	if(HqModule::StringToHandleMap::Contains(hVm->modules, pModuleName))
 	{
@@ -418,18 +427,13 @@ int HqVmInitializeModules(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Create an execution context for running the initialize function for each module.
-	HqExecutionHandle hExec = HqExecution::Create(hVm);
-	if(!hExec)
-	{
-		return HQ_ERROR_BAD_ALLOCATION;
-	}
-
-	bool scriptError = false;
+	HqReportHandle hReport = &hVm->report;
 
 	// Initialize the DLLs loaded for each module. This needs to be done *before* the init bytecode is run
 	// in case any modules call into native functions bound through DLLs.
 	{
+		bool dllInitSuccess = true;
+
 		HqModule::StringToHandleMap::Iterator iter;
 		while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
 		{
@@ -440,13 +444,33 @@ int HqVmInitializeModules(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 				HqDllRuntimeInfo info;
 				HqSysGetVersion(&info.version);
 
-				hModule->pDllEntryPoint(&info);
+				const int dllInitResult = hModule->pDllEntryPoint(&info, hVm);
+				if(dllInitResult != HQ_SUCCESS)
+				{
+					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to initialize DLL for module: %s", hModule->pName->data);
+
+					dllInitSuccess = false;
+				}
 			}
+		}
+
+		if(!dllInitSuccess)
+		{
+			return HQ_ERROR_INVALID_OPERATION;
 		}
 	}
 
+	bool scriptError = false;
+
 	// Initialize each module.
 	{
+		// Create an execution context for running the initialize function for each module.
+		HqExecutionHandle hExec = HqExecution::Create(hVm);
+		if(!hExec)
+		{
+			return HQ_ERROR_BAD_ALLOCATION;
+		}
+
 		HqModule::StringToHandleMap::Iterator iter;
 		while(HqModule::StringToHandleMap::IterateNext(hVm->modules, iter))
 		{
@@ -493,13 +517,19 @@ int HqVmInitializeModules(HqVmHandle hVm, HqExecutionHandle* phOutExec)
 				hModule->hInitFunction = HQ_FUNCTION_HANDLE_NULL;
 			}
 		}
-	}
 
-	// We only skip disposal of the execution context when a script error occurs.
-	// Otherwise, it needs to be returned to the user.
-	if(!scriptError)
-	{
-		HqExecution::Dispose(hExec);
+		// We only skip disposal of the execution context when a script error occurs.
+		// Otherwise, it needs to be returned to the user.
+		if(!scriptError)
+		{
+			HqExecution::Dispose(hExec);
+
+			(*phOutExec) = HQ_EXECUTION_HANDLE_NULL;
+		}
+		else
+		{
+			(*phOutExec) = hExec;
+		}
 	}
 
 	return scriptError

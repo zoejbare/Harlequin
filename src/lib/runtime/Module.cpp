@@ -466,28 +466,66 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 		HqSysGetInfo(&info);
 
 		const size_t dllExtLength = strlen(info.dllExt);
-		const size_t dllPathMaxLength = pModuleName->length + dllExtLength + 1;
+		const size_t dllPathMaxLength = pModuleName->length + dllExtLength + 4; // Add enough to account for the null terminator and the 'lib' prefix.
 
 		// If the current platform has no DLL file extension defined, we skip loading the DLL.
 		if(dllExtLength > 0)
 		{
+			const char* const possibleLibPrefixes[] =
+			{
+				"lib",
+				"",
+			};
+
+			const size_t prefixCount = sizeof(possibleLibPrefixes) / sizeof(char*);
+
+			// Search for the path separator in the module name. If found, we'll need to split the filename
+			// from the rest of the path so we can insert the library prefix before the filename. We also
+			// explicitly check for a forward slash here since all module names will standardize on that.
+			const char* const finalPathSep = strrchr(pModuleName->data, '/');
+
+			HqDllHandle hDll = HQ_DLL_HANDLE_NULL;
+
 			// Allocate a new path at the maximum length.
 			char* const dllPath = reinterpret_cast<char*>(HqMemAlloc(dllPathMaxLength * sizeof(char)));
 
-			// Copy the module name and the native DLL extension into the DLL path string.
-			// TODO: We should probably re-evaluate how we construct the DLL file path at
-			//       some point so we have more control over where they're loaded from.
-			strcpy(dllPath, pModuleName->data);
-			strcat(dllPath, info.dllExt);
+			// The library may or may not have a platform-specific prefix, so we search all of the possibilities in priority order.f
+			for(size_t i = 0; i < prefixCount; ++i)
+			{
+				// TODO: We should probably re-evaluate how we construct the DLL file path at
+				//       some point so we have more control over where they're loaded from.
+				if(finalPathSep)
+				{
+					// Move the filename start pointer past the path delimiter.
+					const char* const fileNameStart = finalPathSep + 1;
 
-			// Attempt to open the DLL.
-			HqDllHandle hDll = HQ_DLL_HANDLE_NULL;
-			const int dllResult = HqSysOpenLibrary(&hDll, dllPath);
+					snprintf(dllPath, size_t(fileNameStart - pModuleName->data) + 1, "%s", pModuleName->data);
+					strcat(dllPath, possibleLibPrefixes[i]);
+					strcat(dllPath, fileNameStart);
+				}
+				else
+				{
+					// No path separator found, so we can stick the prefix directly to the start of the DLL path.
+					strcpy(dllPath, possibleLibPrefixes[i]);
+					strcat(dllPath, pModuleName->data);
+				}
+
+				// Append native DLL extension to the DLL path string.
+				strcat(dllPath, info.dllExt);
+
+				// Attempt to open the DLL.
+				const int dllResult = HqSysOpenLibrary(&hDll, dllPath);
+				if(dllResult == HQ_SUCCESS)
+				{
+					// Found a DLL matching the current filename.
+					break;
+				}
+			}
 
 			// Free the DLL file path now that we no longer need it.
 			HqMemFree(dllPath);
 
-			if(dllResult == HQ_SUCCESS)
+			if(hDll)
 			{
 				HqDllEntryPoint pEntryPoint = reinterpret_cast<HqDllEntryPoint>(HqSysGetSymbol(hDll, "HqDllInit"));
 
