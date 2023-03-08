@@ -520,3 +520,41 @@ with csbuild.Project(HarlequinUnitTest.projectName, HarlequinCommon.testRootPath
 	)
 
 ###################################################################################################
+
+class HarlequinFunctionalTest(object):
+	projectName = "HqTest_FunctionalTest"
+	outputName = "hq_func_test"
+	dependencies = [
+		ExtGoogleTest.projectName,
+		LibHarlequinTool.projectName,
+		LibHarlequinRuntime.projectName,
+	]
+
+with csbuild.Project(HarlequinFunctionalTest.projectName, HarlequinCommon.testRootPath, HarlequinFunctionalTest.dependencies, autoDiscoverSourceFiles=False):
+	_setTestAppOptions(HarlequinFunctionalTest.outputName)
+
+	csbuild.AddSourceDirectories(
+		f"{HarlequinCommon.testRootPath}/common",
+		f"{HarlequinCommon.testRootPath}/functional_test",
+	)
+
+	csbuild.AddExcludeDirectories(
+		f"{HarlequinCommon.testRootPath}/functional_test/op_codes/native",
+	)
+
+###################################################################################################
+
+class HarlequinTest_OpCodesNative(object):
+	projectName = "HqTest_NativeImpl_OpCodes"
+	outputName = "libTestOpCodes"
+	path = f"{HarlequinCommon.testRootPath}/functional_test/op_codes/native"
+	dependencies = [
+		ExtGoogleTest.projectName,
+		LibHarlequinRuntime.projectName,
+	]
+
+with csbuild.Project(HarlequinTest_OpCodesNative.projectName, HarlequinTest_OpCodesNative.path, HarlequinTest_OpCodesNative.dependencies):
+	csbuild.SetOutput(HarlequinTest_OpCodesNative.outputName, csbuild.ProjectType.SharedLibrary)
+	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
+
+###################################################################################################
