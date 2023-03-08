@@ -903,22 +903,25 @@ bool HqModuleWriter::Serialize(
 		// Cache the current stream position for the table of contents.
 		contents.bytecode.offset = uint32_t(HqSerializerGetStreamPosition(hSerializer));
 
-		// Write the module's bytecode.
-		if(!prv_writeBuffer(hSerializer, bytecode.data(), bytecode.size(), result, streamOffset))
+		if(bytecode.size() > 0)
 		{
-			HqReportMessage(
-				hReport,
-				HQ_MESSAGE_TYPE_ERROR,
-				"Failed to write module bytecode"
-					": error='%s'"
-					", streamOffset=%zu"
-					", length=%zu",
-				HqGetErrorCodeString(result),
-				streamOffset,
-				bytecode.size()
-			);
+			// Write the module's bytecode.
+			if(!prv_writeBuffer(hSerializer, bytecode.data(), bytecode.size(), result, streamOffset))
+			{
+				HqReportMessage(
+					hReport,
+					HQ_MESSAGE_TYPE_ERROR,
+					"Failed to write module bytecode"
+						": error='%s'"
+						", streamOffset=%zu"
+						", length=%zu",
+					HqGetErrorCodeString(result),
+					streamOffset,
+					bytecode.size()
+				);
 
-			return false;
+				return false;
+			}
 		}
 	}
 
