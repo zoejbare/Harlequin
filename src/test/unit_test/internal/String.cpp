@@ -16,7 +16,7 @@
 // IN THE SOFTWARE.
 //
 
-#include "../../common/Util.hpp"
+#include "../../common/Util.h"
 
 #include <base/String.hpp>
 

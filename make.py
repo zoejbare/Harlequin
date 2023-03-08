@@ -280,7 +280,7 @@ def _setTestAppOptions(outputName):
 ###################################################################################################
 
 class ExtAntlr4Runtime(object):
-	projectName = "ExtLibAntlr4Runtime"
+	projectName = "ExtLib_Antlr4Runtime"
 	outputName = "libantlr4"
 	path = "external/antlr4/runtime/src"
 
@@ -308,7 +308,7 @@ with csbuild.Project(ExtAntlr4Runtime.projectName, ExtAntlr4Runtime.path, autoDi
 ###################################################################################################
 
 class ExtGoogleTest(object):
-	projectName = "external_gtest"
+	projectName = "ExtStub_gtest"
 	path = "external/googletest/googletest"
 
 with csbuild.Project(ExtGoogleTest.projectName, ExtGoogleTest.path, autoDiscoverSourceFiles=False):
@@ -329,7 +329,7 @@ with csbuild.Project(ExtGoogleTest.projectName, ExtGoogleTest.path, autoDiscover
 ###################################################################################################
 
 class ExtXxHash(object):
-	projectName = "external_xxhash"
+	projectName = "ExtStub_xxhash"
 	path = "external/xxHash"
 
 with csbuild.Project(ExtXxHash.projectName, ExtXxHash.path, autoDiscoverSourceFiles=False):
@@ -348,7 +348,7 @@ class HarlequinCommon(object):
 ###################################################################################################
 
 class LibHarlequinBase(object):
-	projectName = "LibHqBase"
+	projectName = "HqLib_Base"
 	outputName = "libhqbase"
 	dependencies = [
 		ExtXxHash.projectName,
@@ -401,7 +401,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 ###################################################################################################
 
 class LibHarlequinRuntime(object):
-	projectName = "LibHqRuntime"
+	projectName = "HqLib_Runtime"
 	outputName = "libhqruntime"
 	dependencies = [
 		LibHarlequinBase.projectName,
@@ -431,7 +431,7 @@ with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPat
 ###################################################################################################
 
 class LibHarlequinTool(object):
-	projectName = "LibHqTool"
+	projectName = "HqLib_Tool"
 	outputName = "libhqtool"
 	dependencies = [
 		LibHarlequinBase.projectName,
@@ -470,7 +470,7 @@ with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, 
 ###################################################################################################
 
 class HarlequinCompiler(object):
-	projectName = "HqCompiler"
+	projectName = "HqApp_Compiler"
 	outputName = "hqc"
 	path = f"{HarlequinCommon.appRootPath}/compiler"
 	dependencies = [
@@ -485,7 +485,7 @@ with csbuild.Project(HarlequinCompiler.projectName, HarlequinCompiler.path, Harl
 ###################################################################################################
 
 class HarlequinRuntime(object):
-	projectName = "HqRuntime"
+	projectName = "HqApp_Runtime"
 	outputName = "hq"
 	path = f"{HarlequinCommon.appRootPath}/runtime"
 	dependencies = [
@@ -503,21 +503,20 @@ with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, Harleq
 ###################################################################################################
 
 class HarlequinUnitTest(object):
-	projectName = "HqUnitTest"
-	outputName = "unittest"
-	path = HarlequinCommon.testRootPath
+	projectName = "HqTest_UnitTest"
+	outputName = "hq_unit_test"
 	dependencies = [
 		ExtGoogleTest.projectName,
 		LibHarlequinTool.projectName,
 		LibHarlequinRuntime.projectName,
 	]
 
-with csbuild.Project(HarlequinUnitTest.projectName, HarlequinUnitTest.path, HarlequinUnitTest.dependencies, autoDiscoverSourceFiles=False):
+with csbuild.Project(HarlequinUnitTest.projectName, HarlequinCommon.testRootPath, HarlequinUnitTest.dependencies, autoDiscoverSourceFiles=False):
 	_setTestAppOptions(HarlequinUnitTest.outputName)
 
 	csbuild.AddSourceDirectories(
-		f"{HarlequinUnitTest.path}/common",
-		f"{HarlequinUnitTest.path}/unit_test"
+		f"{HarlequinCommon.testRootPath}/common",
+		f"{HarlequinCommon.testRootPath}/unit_test"
 	)
 
 ###################################################################################################

@@ -16,6 +16,10 @@
 // IN THE SOFTWARE.
 //
 
+#pragma once
+
+//----------------------------------------------------------------------------------------------------------------------
+
 #include <Harlequin.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -41,23 +45,23 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline HqVmInit GetDefaultHqVmInit(void* const pUserData, HqMessageCallback onMessageFn, const int reportLevel)
-{
-	auto dummyMsg = [](void*, int, const char*)
-	{
-		// Ignore all messages.
-	};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	HqVmInit output;
-	output.common.report.onMessageFn = onMessageFn ? onMessageFn : dummyMsg;
-	output.common.report.pUserData = pUserData;
-	output.common.report.reportLevel = reportLevel;
-	output.gcThreadStackSize = HQ_VM_THREAD_DEFAULT_STACK_SIZE;
-	output.gcTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
-	output.gcTimeWaitMs = HQ_VM_GC_DEFAULT_TIME_WAIT_MS;
-	output.gcEnableThread = false;
+//----------------------------------------------------------------------------------------------------------------------
 
-	return output;
+extern void DefaultMessageCallback(void* pUserData, int messageType, const char* message);
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern HqVmInit GetDefaultHqVmInit(void* pUserData, HqMessageCallback onMessageFn, int reportLevel);
+extern HqCompilerInit GetDefaultHqCompilerInit(void* pUserData, HqMessageCallback onMessageFn, int reportLevel);
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#ifdef __cplusplus
 }
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
