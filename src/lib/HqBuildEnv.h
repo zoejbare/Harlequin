@@ -158,9 +158,12 @@
 		#endif
 	#endif
 
+	#define HQ_NATIVE_API __declspec(dllexport)
+
 #else
 	#define HQ_BASE_API
 	#define HQ_MAIN_API
+	#define HQ_NATIVE_API
 
 #endif
 
