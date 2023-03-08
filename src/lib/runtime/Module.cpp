@@ -466,7 +466,10 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 		HqSysGetInfo(&info);
 
 		const size_t dllExtLength = strlen(info.dllExt);
-		const size_t dllPathMaxLength = pModuleName->length + dllExtLength + 4; // Add enough to account for the null terminator and the 'lib' prefix.
+
+		// Add enough to account for the null terminator and the 'lib' prefix.
+		// Additionally, POSIX-based systems will require "./" at the start of the path.
+		const size_t dllPathMaxLength = pModuleName->length + dllExtLength + 6;
 
 		// If the current platform has no DLL file extension defined, we skip loading the DLL.
 		if(dllExtLength > 0)
@@ -488,6 +491,12 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 
 			// Allocate a new path at the maximum length.
 			char* const dllPath = reinterpret_cast<char*>(HqMemAlloc(dllPathMaxLength * sizeof(char)));
+			dllPath[0] = '\0';
+
+#if !defined(HQ_PLATFORM_WINDOWS)
+			// POSIX-based systems require "./" when referencing a file relative to the executable.
+			strcpy(dllPath, "./");
+#endif
 
 			// The library may or may not have a platform-specific prefix, so we search all of the possibilities in priority order.f
 			for(size_t i = 0; i < prefixCount; ++i)
@@ -499,14 +508,23 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 					// Move the filename start pointer past the path delimiter.
 					const char* const fileNameStart = finalPathSep + 1;
 
-					snprintf(dllPath, size_t(fileNameStart - pModuleName->data) + 1, "%s", pModuleName->data);
+					const size_t pathLength = strlen(dllPath);
+					const size_t dirSegmentLength = size_t(fileNameStart - pModuleName->data);
+
+					// Copy only the directory segment of the module name into the path.
+					// We manually append the null terminator because strncat() may not
+					// do that for us when the max length is hit.
+					strncat(dllPath, pModuleName->data, dirSegmentLength);
+					dllPath[pathLength + dirSegmentLength] = '\0';
+
+					// Concatenate the filename into the path string.
 					strcat(dllPath, possibleLibPrefixes[i]);
 					strcat(dllPath, fileNameStart);
 				}
 				else
 				{
 					// No path separator found, so we can stick the prefix directly to the start of the DLL path.
-					strcpy(dllPath, possibleLibPrefixes[i]);
+					strcat(dllPath, possibleLibPrefixes[i]);
 					strcat(dllPath, pModuleName->data);
 				}
 
