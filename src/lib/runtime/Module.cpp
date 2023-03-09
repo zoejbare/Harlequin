@@ -491,16 +491,17 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 
 			// Allocate a new path at the maximum length.
 			char* const dllPath = reinterpret_cast<char*>(HqMemAlloc(dllPathMaxLength * sizeof(char)));
-			dllPath[0] = '\0';
-
-#if !defined(HQ_PLATFORM_WINDOWS)
-			// POSIX-based systems require "./" when referencing a file relative to the executable.
-			strcpy(dllPath, "./");
-#endif
 
 			// The library may or may not have a platform-specific prefix, so we search all of the possibilities in priority order.f
 			for(size_t i = 0; i < prefixCount; ++i)
 			{
+#if defined(HQ_PLATFORM_WINDOWS)
+				// Reset the DLL path so we can construct a new one.
+				dllPath[0] = '\0';
+#else
+				// POSIX-based systems require "./" when referencing a file relative to the executable.
+				strcpy(dllPath, "./");
+#endif
 				// TODO: We should probably re-evaluate how we construct the DLL file path at
 				//       some point so we have more control over where they're loaded from.
 				if(finalPathSep)
