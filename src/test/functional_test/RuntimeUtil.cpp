@@ -23,12 +23,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, ModuleCtorCallback moduleCtor)
+extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback)
 {
 	// Set the memory context so we have a better idea of where to look when memory validation failures occur.
 	Memory::Instance.SetContext("compiler");
 
-	constexpr int endianess = HQ_ENDIAN_ORDER_NATIVE;
+	constexpr int endianness = HQ_ENDIAN_ORDER_NATIVE;
 
 	const HqCompilerInit init = GetDefaultHqCompilerInit(nullptr, DefaultMessageCallback, HQ_MESSAGE_TYPE_WARNING);
 
@@ -47,9 +47,9 @@ extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, ModuleCtorCal
 	const int createModuleWriterResult = HqModuleWriterCreate(&hModuleWriter, hCompiler);
 	ASSERT_EQ(createModuleWriterResult, HQ_SUCCESS);
 
-	if(moduleCtor)
+	if(callback)
 	{
-		moduleCtor(hModuleWriter, endianess);
+		callback(hModuleWriter, endianness);
 	}
 
 	// Create the file serializer.
@@ -58,15 +58,15 @@ extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, ModuleCtorCal
 	ASSERT_EQ(createFileSerializerResult, HQ_SUCCESS);
 
 	// Set the file serializer to the system's native endianness.
-	const int setFileSerializerEndiannessResult = HqSerializerSetEndianness(hFileSerializer, endianess);
+	const int setFileSerializerEndiannessResult = HqSerializerSetEndianness(hFileSerializer, endianness);
 	ASSERT_EQ(setFileSerializerEndiannessResult, HQ_SUCCESS);
 
 	// Write the bytecode to the serializer.
 	const int writeBytecodeResult = HqModuleWriterSerialize(hModuleWriter, hReport, hFileSerializer);
 	ASSERT_EQ(writeBytecodeResult, HQ_SUCCESS);
 
-	const size_t moduleLength = HqSerializerGetStreamLength(hFileSerializer);
 	const void* const pModuleData = HqSerializerGetRawStreamPointer(hFileSerializer);
+	const size_t moduleLength = HqSerializerGetStreamLength(hFileSerializer);
 
 	// Reserve space in the output vector, then copy the module file data to it.
 	outBytecode.resize(moduleLength);
@@ -90,7 +90,11 @@ extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, ModuleCtorCal
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void RunBytecode(const char* const moduleName, const std::vector<uint8_t>& bytecode)
+extern "C" void ProcessBytecode(
+	const char* const moduleName,
+	const char* const function,
+	RuntimeCallback callback,
+	const std::vector<uint8_t>& bytecode)
 {
 	// Set the memory context so we have a better idea of where to look when memory validation failures occur.
 	Memory::Instance.SetContext("runtime");
@@ -110,6 +114,34 @@ extern "C" void RunBytecode(const char* const moduleName, const std::vector<uint
 	HqExecutionHandle hExec = HQ_EXECUTION_HANDLE_NULL;
 	const int initModulesResult = HqVmInitializeModules(hVm, &hExec);
 	ASSERT_EQ(initModulesResult, HQ_SUCCESS);
+
+	// TODO: Check the execution context from module initialization to make sure there were no errors.
+
+	if(function)
+	{
+		// Retrieve the function from the VM.
+		HqFunctionHandle hFunction = HQ_FUNCTION_HANDLE_NULL;
+		const int getFunctionResult = HqVmGetFunction(hVm, &hFunction, function);
+		ASSERT_EQ(getFunctionResult, HQ_SUCCESS);
+
+		// Create a new execution context.
+		hExec = HQ_EXECUTION_HANDLE_NULL;
+		const int createExecResult = HqExecutionCreate(&hExec, hVm);
+		ASSERT_EQ(createExecResult, HQ_SUCCESS);
+
+		// Initialize the execution context with the function.
+		const int initExecResult = HqExecutionInitialize(hExec, hFunction);
+		ASSERT_EQ(initExecResult, HQ_SUCCESS);
+
+		if(callback)
+		{
+			callback(hVm, hExec);
+		}
+
+		// Dispose of the execution context.
+		const int disposeExecResult = HqExecutionDispose(&hExec);
+		ASSERT_EQ(disposeExecResult, HQ_SUCCESS);
+	}
 
 	// Dispose of the runtime VM.
 	const int disposeVmResult = HqVmDispose(&hVm);

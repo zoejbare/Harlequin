@@ -31,7 +31,70 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Return)
 	CompileBytecode(bytecode, nullptr);
 	ASSERT_GE(bytecode.size(), 0);
 
-	RunBytecode("TestOpCodes", bytecode);
+	ProcessBytecode("TestOpCodes", nullptr, nullptr, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), Abort)
+{
+	static const char* const mainFuncSig = "void main()";
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		// Create a serializer for the function.
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+		const int createFuncSerializerResult = HqSerializerCreate(&hFuncSerializer, HQ_SERIALIZER_MODE_WRITER);
+		ASSERT_EQ(createFuncSerializerResult, HQ_SUCCESS);
+
+		// Set the file serializer to the system's native endianness.
+		const int setFuncSerializerEndiannessResult = HqSerializerSetEndianness(hFuncSerializer, endianness);
+		ASSERT_EQ(setFuncSerializerEndiannessResult, HQ_SUCCESS);
+
+		// Write the instruction that we're going to test.
+		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
+
+		// Write a RETURN instruction just in case something goes wrong.
+		const int writeReturnInstrResult = HqBytecodeWriteReturn(hFuncSerializer);
+		ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
+
+		const void* const pFuncData = HqSerializerGetRawStreamPointer(hFuncSerializer);
+		const size_t funcLength = HqSerializerGetStreamLength(hFuncSerializer);
+
+		// Add the function to the module writer.
+		const int addFunctionResult = HqModuleWriterAddFunction(hModuleWriter, mainFuncSig, pFuncData, funcLength, 0, 0);
+		ASSERT_EQ(addFunctionResult, HQ_SUCCESS);
+
+		// Dispose of the function serializer.
+		const int disposeFuncSerializerResult = HqSerializerDispose(&hFuncSerializer);
+		ASSERT_EQ(disposeFuncSerializerResult, HQ_SUCCESS);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		bool executionAborted = false;
+
+		// Get the 'aborted' status.
+		const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &executionAborted);
+		ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
+		ASSERT_TRUE(executionAborted);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Compiling with just an empty init function is enough to test the RETURN opcode since
+	// that gets added to the module by default if no other bytecode is supplied for it.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GE(bytecode.size(), 0);
+
+	ProcessBytecode("TestOpCodes", mainFuncSig, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

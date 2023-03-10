@@ -26,11 +26,17 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-typedef void (*ModuleCtorCallback)(HqModuleWriterHandle, int);
+typedef void (*CompilerCallback)(HqModuleWriterHandle, int);
+typedef void (*RuntimeCallback)(HqVmHandle, HqExecutionHandle);
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, ModuleCtorCallback moduleCtor);
-extern "C" void RunBytecode(const char* moduleName, const std::vector<uint8_t>& bytecode);
+extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback);
+extern "C" void ProcessBytecode(
+	const char* moduleName,
+	const char* function,
+	RuntimeCallback callback,
+	const std::vector<uint8_t>& bytecode
+);
 
 //----------------------------------------------------------------------------------------------------------------------
