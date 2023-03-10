@@ -17,6 +17,7 @@
 //
 
 #include "RuntimeUtil.hpp"
+#include "Memory.hpp"
 
 #include <gtest/gtest.h>
 
@@ -24,6 +25,9 @@
 
 extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, ModuleCtorCallback moduleCtor)
 {
+	// Set the memory context so we have a better idea of where to look when memory validation failures occur.
+	Memory::Instance.SetContext("compiler");
+
 	constexpr int endianess = HQ_ENDIAN_ORDER_NATIVE;
 
 	const HqCompilerInit init = GetDefaultHqCompilerInit(nullptr, DefaultMessageCallback, HQ_MESSAGE_TYPE_WARNING);
@@ -79,12 +83,18 @@ extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, ModuleCtorCal
 	// Dispose of the compiler.
 	const int disposeCompilerResult = HqCompilerDispose(&hCompiler);
 	ASSERT_EQ(disposeCompilerResult, HQ_SUCCESS);
+
+	// Verify all memory has been freed.
+	Memory::Instance.Finalize();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 extern "C" void RunBytecode(const char* const moduleName, const std::vector<uint8_t>& bytecode)
 {
+	// Set the memory context so we have a better idea of where to look when memory validation failures occur.
+	Memory::Instance.SetContext("runtime");
+
 	const HqVmInit init = GetDefaultHqVmInit(nullptr, DefaultMessageCallback, HQ_MESSAGE_TYPE_WARNING);
 
 	// Create the runtime VM.
@@ -104,6 +114,9 @@ extern "C" void RunBytecode(const char* const moduleName, const std::vector<uint
 	// Dispose of the runtime VM.
 	const int disposeVmResult = HqVmDispose(&hVm);
 	ASSERT_EQ(disposeVmResult, HQ_SUCCESS);
+
+	// Verify all memory has been freed.
+	Memory::Instance.Finalize();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
