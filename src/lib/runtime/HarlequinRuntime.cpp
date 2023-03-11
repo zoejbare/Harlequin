@@ -1145,11 +1145,14 @@ int HqExecutionGetStatus(HqExecutionHandle hExec, int statusType, bool* pOutStat
 			break;
 
 		case HQ_EXEC_STATUS_RUNNING:
-			(*pOutStatus) = (hExec->state.started && !hExec->state.finished) || hExec->state.exception;
+			(*pOutStatus) = hExec->state.started 
+				&& !hExec->state.finished 
+				&& !hExec->state.exception 
+				&& !hExec->state.abort;
 			break;
 
 		case HQ_EXEC_STATUS_COMPLETE:
-			(*pOutStatus) = hExec->state.finished || hExec->state.exception;
+			(*pOutStatus) = hExec->state.finished;
 			break;
 
 		case HQ_EXEC_STATUS_EXCEPTION:

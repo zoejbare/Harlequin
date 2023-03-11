@@ -22,6 +22,42 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+struct ExecStatus
+{
+	bool yield;
+	bool running;
+	bool complete;
+	bool exception;
+	bool abort;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
+{
+	// Get the 'yielded' status.
+	const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield);
+	ASSERT_EQ(getYieldStatusResult, HQ_SUCCESS);
+
+	// Get the 'running' status.
+	const int getRunningStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &output.running);
+	ASSERT_EQ(getRunningStatusResult, HQ_SUCCESS);
+
+	// Get the 'completed' status.
+	const int getCompletedStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &output.complete);
+	ASSERT_EQ(getCompletedStatusResult, HQ_SUCCESS);
+
+	// Get the 'exception' status.
+	const int getExceptionStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &output.exception);
+	ASSERT_EQ(getExceptionStatusResult, HQ_SUCCESS);
+
+	// Get the 'aborted' status.
+	const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort);
+	ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 TEST(_HQ_TEST_NAME(TestOpCodes), Return)
 {
 	std::vector<uint8_t> bytecode;
@@ -79,12 +115,14 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Abort)
 		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
 		ASSERT_EQ(execRunResult, HQ_SUCCESS);
 
-		bool executionAborted = false;
-
-		// Get the 'aborted' status.
-		const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &executionAborted);
-		ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
-		ASSERT_TRUE(executionAborted);
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_FALSE(status.yield);
+		ASSERT_FALSE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_TRUE(status.abort);
 	};
 
 	std::vector<uint8_t> bytecode;
