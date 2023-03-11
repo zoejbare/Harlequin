@@ -24,7 +24,7 @@
 
 namespace Function
 {
-	constexpr const char* const main = "void main()";
+	static constexpr const char* const main = "void main()";
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ struct ExecStatus
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void SetupFunctionSerializer(HqSerializerHandle& output, const int endianness)
+inline void SetupFunctionSerializer(HqSerializerHandle& output, const int endianness)
 {
 	// Create a serializer for the function.
 	HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
@@ -56,11 +56,15 @@ void SetupFunctionSerializer(HqSerializerHandle& output, const int endianness)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void FinalizeFunctionSerializer(
+inline void FinalizeFunctionSerializer(
 	HqSerializerHandle hSerializer,
 	HqModuleWriterHandle hModuleWriter,
 	const char* const functionSignature)
 {
+	// All functions should end with a RETURN opcode.
+	const int writeReturnInstrResult = HqBytecodeWriteReturn(hSerializer);
+	ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
+
 	const void* const pFuncData = HqSerializerGetRawStreamPointer(hSerializer);
 	const size_t funcLength = HqSerializerGetStreamLength(hSerializer);
 
@@ -75,7 +79,7 @@ void FinalizeFunctionSerializer(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
+inline void GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
 {
 	// Get the 'yielded' status.
 	const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield);
@@ -96,6 +100,34 @@ void GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
 	// Get the 'aborted' status.
 	const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort);
 	ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void GetCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec)
+{
+	// Get the current frame in the callstack.
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	const int getFrameResult = HqExecutionGetCurrentFrame(hExec, &hFrame);
+	ASSERT_EQ(getFrameResult, HQ_SUCCESS);
+	ASSERT_NE(hFrame, HQ_FRAME_HANDLE_NULL);
+
+	output = hFrame;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void GetGpRegister(HqValueHandle& output, HqExecutionHandle hExec, const int gpRegIndex)
+{
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	GetCurrentFrame(hFrame, hExec);
+
+	// Get the general-purpose register that has the value we want to inspect.
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	const int getGpRegisterResult = HqFrameGetGpRegister(hFrame, &hValue, gpRegIndex);
+	ASSERT_EQ(getGpRegisterResult, HQ_SUCCESS);
+
+	output = hValue;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -126,10 +158,6 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Nop)
 		// Write the instruction that we're going to test.
 		const int writeNopInstrResult = HqBytecodeWriteNop(hFuncSerializer);
 		ASSERT_EQ(writeNopInstrResult, HQ_SUCCESS);
-
-		// Write a RETURN instruction just in case something goes wrong.
-		const int writeReturnInstrResult = HqBytecodeWriteReturn(hFuncSerializer);
-		ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
 		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -178,10 +206,6 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Abort)
 		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
-		// Write a RETURN instruction just in case something goes wrong.
-		const int writeReturnInstrResult = HqBytecodeWriteReturn(hFuncSerializer);
-		ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
-
 		// Finalize the serializer and add it to the module.
 		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
@@ -229,9 +253,56 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Yield)
 		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
-		// Write a RETURN instruction just in case something goes wrong.
-		const int writeReturnInstrResult = HqBytecodeWriteReturn(hFuncSerializer);
-		ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmNull)
+{
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 0);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
 		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -253,6 +324,760 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Yield)
 		ASSERT_FALSE(status.complete);
 		ASSERT_FALSE(status.exception);
 		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_EQ(hValue, HQ_VALUE_HANDLE_NULL);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmBool)
+{
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 0, true);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsBool(hValue));
+		ASSERT_TRUE(HqValueGetBool(hValue));
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmI8)
+{
+	static constexpr int8_t testValueData = 123;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsInt8(hValue));
+		ASSERT_EQ(HqValueGetInt8(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmI16)
+{
+	static constexpr int16_t testValueData = 12345;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsInt16(hValue));
+		ASSERT_EQ(HqValueGetInt16(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmI32)
+{
+	static constexpr int32_t testValueData = 1234578;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsInt32(hValue));
+		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmI64)
+{
+	static constexpr int64_t testValueData = 12345678901ll;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsInt64(hValue));
+		ASSERT_EQ(HqValueGetInt64(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmU8)
+{
+	static constexpr uint8_t testValueData = 123;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsUint8(hValue));
+		ASSERT_EQ(HqValueGetUint8(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmU16)
+{
+	static constexpr uint16_t testValueData = 12345;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsUint16(hValue));
+		ASSERT_EQ(HqValueGetUint16(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmU32)
+{
+	static constexpr uint32_t testValueData = 1234578u;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsUint32(hValue));
+		ASSERT_EQ(HqValueGetUint32(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmU64)
+{
+	static constexpr uint64_t testValueData = 12345678901ull;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsUint64(hValue));
+		ASSERT_EQ(HqValueGetUint64(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmF32)
+{
+	static constexpr float testValueData = 3.1415926535897932384626433832795f;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsFloat32(hValue));
+		ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmF64)
+{
+	static constexpr double testValueData = 6.283185307179586476925286766559;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsFloat64(hValue));
+		ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), LoadImmStr)
+{
+	static constexpr const char* const testValueData = "test string data";
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Add the string value to the module string table.
+		uint32_t stringIndex = 0;
+		const int addStringResult = HqModuleWriterAddString(hModuleWriter, testValueData, &stringIndex);
+		ASSERT_EQ(addStringResult, HQ_SUCCESS);
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the instruction that we're going to test.
+		const int writeLoadInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 0, stringIndex);
+		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the GP registers in the frame.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		GetGpRegister(hValue, hExec, 0);
+
+		// Validate the register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsString(hValue));
+		ASSERT_STRCASEEQ(HqValueGetString(hValue), testValueData);
 	};
 
 	std::vector<uint8_t> bytecode;
