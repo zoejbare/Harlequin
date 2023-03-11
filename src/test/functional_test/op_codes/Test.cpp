@@ -29,7 +29,7 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Return)
 	// Compiling with just an empty init function is enough to test the RETURN opcode since
 	// that gets added to the module by default if no other bytecode is supplied for it.
 	CompileBytecode(bytecode, nullptr);
-	ASSERT_GE(bytecode.size(), 0);
+	ASSERT_GT(bytecode.size(), 0u);
 
 	ProcessBytecode("TestOpCodes", nullptr, nullptr, bytecode);
 }
@@ -89,11 +89,11 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Abort)
 
 	std::vector<uint8_t> bytecode;
 
-	// Compiling with just an empty init function is enough to test the RETURN opcode since
-	// that gets added to the module by default if no other bytecode is supplied for it.
+	// Construct the module bytecode for the test.
 	CompileBytecode(bytecode, compilerCallback);
-	ASSERT_GE(bytecode.size(), 0);
+	ASSERT_GT(bytecode.size(), 0u);
 
+	// Run the module bytecode.
 	ProcessBytecode("TestOpCodes", mainFuncSig, runtimeCallback, bytecode);
 }
 

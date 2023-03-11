@@ -323,7 +323,6 @@ with csbuild.Project(ExtGoogleTest.projectName, ExtGoogleTest.path, autoDiscover
 		)
 		csbuild.AddSourceFiles(
 			f"{ExtGoogleTest.path}/src/gtest-all.cc",
-			f"{ExtGoogleTest.path}/src/gtest_main.cc",
 		)
 
 ###################################################################################################
@@ -514,6 +513,9 @@ class HarlequinUnitTest(object):
 with csbuild.Project(HarlequinUnitTest.projectName, HarlequinCommon.testRootPath, HarlequinUnitTest.dependencies, autoDiscoverSourceFiles=False):
 	_setTestAppOptions(HarlequinUnitTest.outputName)
 
+	csbuild.AddSourceFiles(
+		f"{HarlequinCommon.testRootPath}/Main.cpp",
+	)
 	csbuild.AddSourceDirectories(
 		f"{HarlequinCommon.testRootPath}/common",
 		f"{HarlequinCommon.testRootPath}/unit_test"
@@ -533,11 +535,13 @@ class HarlequinFunctionalTest(object):
 with csbuild.Project(HarlequinFunctionalTest.projectName, HarlequinCommon.testRootPath, HarlequinFunctionalTest.dependencies, autoDiscoverSourceFiles=False):
 	_setTestAppOptions(HarlequinFunctionalTest.outputName)
 
+	csbuild.AddSourceFiles(
+		f"{HarlequinCommon.testRootPath}/Main.cpp",
+	)
 	csbuild.AddSourceDirectories(
 		f"{HarlequinCommon.testRootPath}/common",
 		f"{HarlequinCommon.testRootPath}/functional_test",
 	)
-
 	csbuild.AddExcludeDirectories(
 		f"{HarlequinCommon.testRootPath}/functional_test/op_codes/native",
 	)
