@@ -33,12 +33,21 @@
 	#define restrict __restrict__
 #endif
 
+#if defined(HQ_PLATFORM_PS3)
+	#pragma push_macro("__GNUC__")
+	#undef __GNUC__
+#endif
+
 #define XXH_INLINE_ALL 1
 #define XXH_ACCEPT_NULL_INPUT_POINTER 1
 #include <xxhash.h>
 
 #if defined(HQ_PLATFORM_PSVITA)
 	#pragma pop_macro("restrict")
+#endif
+
+#if defined(HQ_PLATFORM_PS3)
+	#pragma pop_macro("__GNUC__")
 #endif
 
 //----------------------------------------------------------------------------------------------------------------------
