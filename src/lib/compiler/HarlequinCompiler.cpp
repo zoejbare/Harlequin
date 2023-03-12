@@ -348,6 +348,12 @@ int HqModuleWriterAddFunction(
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
+	if(hModuleWriter->functions.count(pSignature))
+	{
+		HqString::Release(pSignature);
+		return HQ_ERROR_KEY_ALREADY_EXISTS;
+	}
+
 	// Copy the input bytecode data to the byte vector that will be mapped into the module writer.
 	std::vector<uint8_t> bytecode(bytecodeLength);
 	memcpy(bytecode.data(), pBytecode, bytecode.size());
@@ -386,6 +392,12 @@ int HqModuleWriterAddNativeFunction(
 	if(!pSignature)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	if(hModuleWriter->functions.count(pSignature))
+	{
+		HqString::Release(pSignature);
+		return HQ_ERROR_KEY_ALREADY_EXISTS;
 	}
 
 	HqFunctionData function;
