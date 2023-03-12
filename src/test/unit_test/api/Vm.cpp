@@ -136,6 +136,24 @@ TEST(_HQ_TEST_NAME(TestVm), EmptyExecutionContext)
 	const int runExecResult = HqExecutionRun(hExec, HQ_RUN_FULL);
 	ASSERT_EQ(runExecResult, HQ_ERROR_SCRIPT_NO_FUNCTION);
 
+	// Attempt to yield outside of bytecode execution.
+	const int yieldExecResult = HqExecutionYield(hExec);
+	ASSERT_EQ(yieldExecResult, HQ_ERROR_SCRIPT_NO_FUNCTION);
+
+	// Attempt to raise a standard exception outside of bytecode execution.
+	const int raiseStdExceptionResult = HqExecutionRaiseStandardException(
+		hExec,
+		HQ_EXCEPTION_SEVERITY_FATAL,
+		HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+		"%s",
+		"TestException"
+	);
+	ASSERT_EQ(raiseStdExceptionResult, HQ_ERROR_SCRIPT_NO_FUNCTION);
+
+	// Attempt to raise a custom exception outside of bytecode execution.
+	const int raiseExceptionResult = HqExecutionRaiseException(hExec, HQ_VALUE_HANDLE_NULL, HQ_EXCEPTION_SEVERITY_FATAL);
+	ASSERT_EQ(raiseExceptionResult, HQ_ERROR_SCRIPT_NO_FUNCTION);
+
 	// Get the VM that the execution context belongs to.
 	HqVmHandle hTempVm = HQ_VM_HANDLE_NULL;
 	const int getVmResult = HqExecutionGetVm(hExec, &hTempVm);

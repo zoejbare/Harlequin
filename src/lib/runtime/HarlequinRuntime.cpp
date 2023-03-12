@@ -1019,6 +1019,10 @@ int HqExecutionRun(HqExecutionHandle hExec, int runMode)
 	{
 		return HQ_ERROR_SCRIPT_NO_FUNCTION;
 	}
+	else if(!HqFiber::IsRunning(hExec->mainFiber))
+	{
+		return HQ_ERROR_INVALID_OPERATION;
+	}
 
 	HqScopedReadLock gcLock(hExec->hVm->gc.rwLock, hExec->hVm->isGcThreadEnabled);
 
@@ -1034,6 +1038,14 @@ int HqExecutionYield(HqExecutionHandle hExec)
 	if(!hExec)
 	{
 		return HQ_ERROR_INVALID_ARG;
+	}
+	else if(!hExec->hCurrentFrame)
+	{
+		return HQ_ERROR_SCRIPT_NO_FUNCTION;
+	}
+	else if(!HqFiber::IsRunning(hExec->mainFiber))
+	{
+		return HQ_ERROR_INVALID_OPERATION;
 	}
 
 	hExec->state.yield = true;
@@ -1060,6 +1072,14 @@ int HqExecutionRaiseStandardException(
 		|| exceptionType >= HQ_STANDARD_EXCEPTION__COUNT)
 	{
 		return HQ_ERROR_INVALID_ARG;
+	}
+	else if(!hExec->hCurrentFrame)
+	{
+		return HQ_ERROR_SCRIPT_NO_FUNCTION;
+	}
+	else if(!HqFiber::IsRunning(hExec->mainFiber))
+	{
+		return HQ_ERROR_INVALID_OPERATION;
 	}
 
 	const char* formattedMessage = nullptr;
@@ -1105,6 +1125,14 @@ int HqExecutionRaiseException(HqExecutionHandle hExec, HqValueHandle hValue, int
 	if(!hExec || severity < 0 || severity >= HQ_EXCEPTION_SEVERITY__COUNT)
 	{
 		return HQ_ERROR_INVALID_ARG;
+	}
+	else if(!hExec->hCurrentFrame)
+	{
+		return HQ_ERROR_SCRIPT_NO_FUNCTION;
+	}
+	else if(!HqFiber::IsRunning(hExec->mainFiber))
+	{
+		return HQ_ERROR_INVALID_OPERATION;
 	}
 
 	// Lock the GC thread since we need to handle the exception in the execution context.
