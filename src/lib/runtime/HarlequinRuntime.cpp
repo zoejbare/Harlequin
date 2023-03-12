@@ -1019,7 +1019,7 @@ int HqExecutionRun(HqExecutionHandle hExec, int runMode)
 	{
 		return HQ_ERROR_SCRIPT_NO_FUNCTION;
 	}
-	else if(!HqFiber::IsRunning(hExec->mainFiber))
+	else if(HqFiber::IsRunning(hExec->mainFiber))
 	{
 		return HQ_ERROR_INVALID_OPERATION;
 	}
