@@ -18,6 +18,8 @@
 
 #include <Harlequin.h>
 
+#include <assert.h>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 extern "C" HQ_NATIVE_API int HqDllInit(const HqDllRuntimeInfo* const pRuntime, HqVmHandle hVm)
@@ -26,6 +28,26 @@ extern "C" HQ_NATIVE_API int HqDllInit(const HqDllRuntimeInfo* const pRuntime, H
 	if(pRuntime->version.major > HQ_VERSION_MAJOR)
 	{
 		return HQ_ERROR_MISMATCH;
+	}
+
+	HqFunctionHandle hCallNativeTestFunc = HQ_FUNCTION_HANDLE_NULL;
+	HqVmGetFunction(hVm, &hCallNativeTestFunc, "int32_t testCallNative(int32_t)");
+
+	if(hCallNativeTestFunc)
+	{
+		auto funcImpl = [](HqExecutionHandle hExec, HqFunctionHandle /*hFunc*/, void* /*pUserData*/)
+		{
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+
+			const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, 0);
+			assert(getIoRegisterResult == HQ_SUCCESS);
+
+			const int setIoRegisterResult = HqExecutionSetIoRegister(hExec, hValue, 1);
+			assert(setIoRegisterResult == HQ_SUCCESS);
+		};
+
+		const int setNativeBindingResult = HqFunctionSetNativeBinding(hCallNativeTestFunc, funcImpl, nullptr);
+		assert(setNativeBindingResult == HQ_SUCCESS);
 	}
 
 	return HQ_SUCCESS;
