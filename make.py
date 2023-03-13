@@ -157,6 +157,7 @@ with csbuild.Toolchain("gcc", "android-gcc"):
 
 		# Disabled warnings.
 		"-Wno-address",
+		"-Wno-deprecated-declarations",
 		"-Wno-ignored-qualifiers",
 		"-Wno-implicit-fallthrough",
 		"-Wno-missing-field-initializers",
@@ -172,6 +173,7 @@ with csbuild.Toolchain("clang", "android-clang"):
 
 		# Disabled warnings.
 		"-Wno-extra-semi",
+		"-Wno-dollar-in-identifier-extension",
 		"-Wno-format-pedantic",
 		"-Wno-gnu-anonymous-struct",
 		"-Wno-gnu-zero-variadic-macro-arguments",
