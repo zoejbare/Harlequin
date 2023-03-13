@@ -18,6 +18,7 @@
 
 #include "../RuntimeUtil.hpp"
 
+#include <compiler/WriteJumpInstr.hpp>
 #include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1493,6 +1494,59 @@ TEST(_HQ_TEST_NAME(TestOpCodes), Call_NativeNonExistent)
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
 		ASSERT_TRUE(status.exception);
+		ASSERT_FALSE(status.abort);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST(_HQ_TEST_NAME(TestOpCodes), Jmp)
+{
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Scoped to write the JMP opcode.
+		{
+			WriteJumpInstr jump(hFuncSerializer, JumpBehavior::Forward, JumpCondition::None, 0);
+
+			// Write an ABORT opcode just so we have an error case to check for
+			// in case the JMP opcode doesn't branch correctly.
+			const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
+		}
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_FALSE(status.yield);
+		ASSERT_FALSE(status.running);
+		ASSERT_TRUE(status.complete);
+		ASSERT_FALSE(status.exception);
 		ASSERT_FALSE(status.abort);
 	};
 
