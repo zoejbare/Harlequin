@@ -75,12 +75,13 @@ Memory::~Memory()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void Memory::Finalize()
+void Memory::Validate()
 {
 	if(m_activeAllocCount > 0 || m_currentTotalSize > 0)
 	{
 		// Output memory allocation stats.
-		printf(
+		fprintf(
+			stderr,
 			"Memory Stats:\n"
 			"  Context: \"%s\"\n"
 			"  [Size]\n"
@@ -103,13 +104,18 @@ void Memory::Finalize()
 			m_mallocCount,
 			m_reallocCount
 		);
+		fflush(stderr);
 	}
 
-	const size_t activeAllocCount = m_activeAllocCount;
-	const size_t currentTotalSize = m_currentTotalSize;
+	// Verify there were no active allocations.
+	ASSERT_EQ(m_activeAllocCount, 0);
+	ASSERT_EQ(m_currentTotalSize, 0);
+}
 
-	// Reset the memory handler stats before checking for test
-	// failure conditions so they won't affect subsequent runs.
+//----------------------------------------------------------------------------------------------------------------------
+
+void Memory::Reset()
+{
 	m_context = "Unknown";
 	m_minAllocSize = 0;
 	m_maxAllocSize = 0;
@@ -119,10 +125,6 @@ void Memory::Finalize()
 	m_activeAllocCount = 0;
 	m_totalAllocCount = 0;
 	m_currentTotalSize = 0;
-
-	// Verify there were no active allocations.
-	ASSERT_EQ(activeAllocCount, 0);
-	ASSERT_EQ(currentTotalSize, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

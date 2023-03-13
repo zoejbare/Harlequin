@@ -31,7 +31,8 @@ public:
 	static Memory Instance;
 
 	void SetContext(const char* context);
-	void Finalize();
+	void Validate();
+	void Reset();
 
 
 private:

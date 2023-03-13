@@ -85,7 +85,7 @@ extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallb
 	ASSERT_EQ(disposeCompilerResult, HQ_SUCCESS);
 
 	// Verify all memory has been freed.
-	Memory::Instance.Finalize();
+	Memory::Instance.Validate();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ extern "C" void ProcessBytecode(
 	ASSERT_EQ(disposeVmResult, HQ_SUCCESS);
 
 	// Verify all memory has been freed.
-	Memory::Instance.Finalize();
+	Memory::Instance.Validate();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
