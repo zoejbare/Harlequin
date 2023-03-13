@@ -105,10 +105,11 @@ void Memory::Finalize()
 		);
 	}
 
-	// Verify there are no active allocations.
-	ASSERT_EQ(m_activeAllocCount, 0);
-	ASSERT_EQ(m_currentTotalSize, 0);
+	const size_t activeAllocCount = m_activeAllocCount;
+	const size_t currentTotalSize = m_currentTotalSize;
 
+	// Reset the memory handler stats before checking for test
+	// failure conditions so they won't affect subsequent runs.
 	m_context = "Unknown";
 	m_minAllocSize = 0;
 	m_maxAllocSize = 0;
@@ -118,6 +119,10 @@ void Memory::Finalize()
 	m_activeAllocCount = 0;
 	m_totalAllocCount = 0;
 	m_currentTotalSize = 0;
+
+	// Verify there were no active allocations.
+	ASSERT_EQ(activeAllocCount, 0);
+	ASSERT_EQ(currentTotalSize, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
