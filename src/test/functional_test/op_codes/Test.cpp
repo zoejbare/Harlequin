@@ -31,136 +31,6 @@ namespace Function
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct ExecStatus
-{
-	bool yield;
-	bool running;
-	bool complete;
-	bool exception;
-	bool abort;
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void SetupFunctionSerializer(HqSerializerHandle& output, const int endianness)
-{
-	// Create a serializer for the function.
-	HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
-	const int createFuncSerializerResult = HqSerializerCreate(&hFuncSerializer, HQ_SERIALIZER_MODE_WRITER);
-	ASSERT_EQ(createFuncSerializerResult, HQ_SUCCESS);
-
-	// Set the file serializer to the system's native endianness.
-	const int setFuncSerializerEndiannessResult = HqSerializerSetEndianness(hFuncSerializer, endianness);
-	ASSERT_EQ(setFuncSerializerEndiannessResult, HQ_SUCCESS);
-
-	output = hFuncSerializer;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void FinalizeFunctionSerializer(
-	HqSerializerHandle& hSerializer,
-	HqModuleWriterHandle hModuleWriter,
-	const char* const functionSignature)
-{
-	// All functions should end with a RETURN opcode.
-	const int writeReturnInstrResult = HqBytecodeWriteReturn(hSerializer);
-	ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
-
-	const void* const pFuncData = HqSerializerGetRawStreamPointer(hSerializer);
-	const size_t funcLength = HqSerializerGetStreamLength(hSerializer);
-
-	// Add the function to the module writer.
-	const int addFunctionResult = HqModuleWriterAddFunction(hModuleWriter, functionSignature, pFuncData, funcLength, 0, 0);
-	ASSERT_EQ(addFunctionResult, HQ_SUCCESS);
-
-	// Dispose of the function serializer.
-	const int disposeFuncSerializerResult = HqSerializerDispose(&hSerializer);
-	ASSERT_EQ(disposeFuncSerializerResult, HQ_SUCCESS);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
-{
-	// Get the 'yielded' status.
-	const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield);
-	ASSERT_EQ(getYieldStatusResult, HQ_SUCCESS);
-
-	// Get the 'running' status.
-	const int getRunningStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &output.running);
-	ASSERT_EQ(getRunningStatusResult, HQ_SUCCESS);
-
-	// Get the 'completed' status.
-	const int getCompletedStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &output.complete);
-	ASSERT_EQ(getCompletedStatusResult, HQ_SUCCESS);
-
-	// Get the 'exception' status.
-	const int getExceptionStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &output.exception);
-	ASSERT_EQ(getExceptionStatusResult, HQ_SUCCESS);
-
-	// Get the 'aborted' status.
-	const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort);
-	ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void GetCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec)
-{
-	// Get the current frame in the callstack.
-	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-	const int getFrameResult = HqExecutionGetCurrentFrame(hExec, &hFrame);
-	ASSERT_EQ(getFrameResult, HQ_SUCCESS);
-	ASSERT_NE(hFrame, HQ_FRAME_HANDLE_NULL);
-
-	output = hFrame;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void GetGpRegister(HqValueHandle& output, HqExecutionHandle hExec, const int gpRegIndex)
-{
-	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-	GetCurrentFrame(hFrame, hExec);
-
-	// Get the general-purpose register that has the value we want to inspect.
-	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-	const int getGpRegisterResult = HqFrameGetGpRegister(hFrame, &hValue, gpRegIndex);
-	ASSERT_EQ(getGpRegisterResult, HQ_SUCCESS);
-
-	output = hValue;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void GetIoRegister(HqValueHandle& output, HqExecutionHandle hExec, const int ioRegIndex)
-{
-	// Get the general-purpose register that has the value we want to inspect.
-	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-	const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, ioRegIndex);
-	ASSERT_EQ(getIoRegisterResult, HQ_SUCCESS);
-
-	output = hValue;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline void GetStackValue(HqValueHandle& output, HqExecutionHandle hExec, const int stackIndex)
-{
-	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-	GetCurrentFrame(hFrame, hExec);
-
-	// Get the general-purpose register that has the value we want to inspect.
-	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-	const int peekStackValueResult = HqFramePeekValue(hFrame, &hValue, stackIndex);
-	ASSERT_EQ(peekStackValueResult, HQ_SUCCESS);
-
-	output = hValue;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 class _HQ_TEST_NAME(TestOpCodes)
 	: public ::testing::Test
 {
@@ -170,6 +40,123 @@ public:
 	{
 		// Force the memory handler to reset after each test.
 		Memory::Instance.Reset();
+	}
+
+
+protected:
+
+	struct ExecStatus
+	{
+		bool yield;
+		bool running;
+		bool complete;
+		bool exception;
+		bool abort;
+	};
+
+	static void _setupFunctionSerializer(HqSerializerHandle& output, const int endianness)
+	{
+		// Create a serializer for the function.
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+		const int createFuncSerializerResult = HqSerializerCreate(&hFuncSerializer, HQ_SERIALIZER_MODE_WRITER);
+		ASSERT_EQ(createFuncSerializerResult, HQ_SUCCESS);
+
+		// Set the file serializer to the system's native endianness.
+		const int setFuncSerializerEndiannessResult = HqSerializerSetEndianness(hFuncSerializer, endianness);
+		ASSERT_EQ(setFuncSerializerEndiannessResult, HQ_SUCCESS);
+
+		output = hFuncSerializer;
+	}
+
+	static void _finalizeFunctionSerializer(
+		HqSerializerHandle& hSerializer,
+		HqModuleWriterHandle hModuleWriter,
+		const char* const functionSignature)
+	{
+		// All functions should end with a RETURN opcode.
+		const int writeReturnInstrResult = HqBytecodeWriteReturn(hSerializer);
+		ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
+
+		const void* const pFuncData = HqSerializerGetRawStreamPointer(hSerializer);
+		const size_t funcLength = HqSerializerGetStreamLength(hSerializer);
+
+		// Add the function to the module writer.
+		const int addFunctionResult = HqModuleWriterAddFunction(hModuleWriter, functionSignature, pFuncData, funcLength, 0, 0);
+		ASSERT_EQ(addFunctionResult, HQ_SUCCESS);
+
+		// Dispose of the function serializer.
+		const int disposeFuncSerializerResult = HqSerializerDispose(&hSerializer);
+		ASSERT_EQ(disposeFuncSerializerResult, HQ_SUCCESS);
+	}
+
+	static void _getExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
+	{
+		// Get the 'yielded' status.
+		const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield);
+		ASSERT_EQ(getYieldStatusResult, HQ_SUCCESS);
+
+		// Get the 'running' status.
+		const int getRunningStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &output.running);
+		ASSERT_EQ(getRunningStatusResult, HQ_SUCCESS);
+
+		// Get the 'completed' status.
+		const int getCompletedStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &output.complete);
+		ASSERT_EQ(getCompletedStatusResult, HQ_SUCCESS);
+
+		// Get the 'exception' status.
+		const int getExceptionStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &output.exception);
+		ASSERT_EQ(getExceptionStatusResult, HQ_SUCCESS);
+
+		// Get the 'aborted' status.
+		const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort);
+		ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
+	}
+
+	static void _getCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec)
+	{
+		// Get the current frame in the callstack.
+		HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+		const int getFrameResult = HqExecutionGetCurrentFrame(hExec, &hFrame);
+		ASSERT_EQ(getFrameResult, HQ_SUCCESS);
+		ASSERT_NE(hFrame, HQ_FRAME_HANDLE_NULL);
+
+		output = hFrame;
+	}
+
+	static void _getGpRegister(HqValueHandle& output, HqExecutionHandle hExec, const int gpRegIndex)
+	{
+		HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+		_getCurrentFrame(hFrame, hExec);
+
+		// Get the general-purpose register that has the value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		const int getGpRegisterResult = HqFrameGetGpRegister(hFrame, &hValue, gpRegIndex);
+		ASSERT_EQ(getGpRegisterResult, HQ_SUCCESS);
+
+		output = hValue;
+	}
+
+	static void _getIoRegister(HqValueHandle& output, HqExecutionHandle hExec, const int ioRegIndex)
+	{
+		// Get the general-purpose register that has the value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, ioRegIndex);
+		ASSERT_EQ(getIoRegisterResult, HQ_SUCCESS);
+
+		output = hValue;
+	}
+
+	static void _getStackValue(HqValueHandle& output, HqExecutionHandle hExec, const int stackIndex)
+	{
+		HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+		_getCurrentFrame(hFrame, hExec);
+
+		// Get the general-purpose register that has the value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		const int peekStackValueResult = HqFramePeekValue(hFrame, &hValue, stackIndex);
+		ASSERT_EQ(peekStackValueResult, HQ_SUCCESS);
+
+		output = hValue;
 	}
 };
 
@@ -196,14 +183,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Nop)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeNopInstrResult = HqBytecodeWriteNop(hFuncSerializer);
 		ASSERT_EQ(writeNopInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -216,7 +203,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Nop)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_TRUE(status.complete);
@@ -243,14 +230,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Abort)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -263,7 +250,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Abort)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -290,14 +277,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Yield)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -310,7 +297,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Yield)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -357,7 +344,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		ASSERT_EQ(addStringResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM_NULL instruction.
 		const int writeLoadNullInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 0);
@@ -416,7 +403,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -429,7 +416,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -440,7 +427,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 0);
+			_getGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_EQ(hValue, HQ_VALUE_HANDLE_NULL);
@@ -450,7 +437,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 1);
+			_getGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -462,7 +449,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 2);
+			_getGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -474,7 +461,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 3);
+			_getGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -486,7 +473,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 4);
+			_getGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -498,7 +485,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 5);
+			_getGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -510,7 +497,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 6);
+			_getGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -522,7 +509,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 7);
+			_getGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -534,7 +521,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 8);
+			_getGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -546,7 +533,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 9);
+			_getGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -558,7 +545,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 10);
+			_getGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -570,7 +557,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 11);
+			_getGpRegister(hValue, hExec, 11);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -582,7 +569,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 12);
+			_getGpRegister(hValue, hExec, 12);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -622,7 +609,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 		ASSERT_EQ(addGlobalResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM instruction so we have data to put in the global variable.
 		const int writeLoadImmInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -641,7 +628,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -654,7 +641,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -672,7 +659,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
 
 		// Get the register value we want to inspect.
-		GetGpRegister(hValue, hExec, 1);
+		_getGpRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -700,7 +687,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 	{
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM instruction so we have data to put in the I/O register.
 		const int writeLoadImmInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -719,7 +706,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -732,7 +719,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -741,7 +728,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 
 		// Get the GP register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		GetGpRegister(hValue, hExec, 1);
+		_getGpRegister(hValue, hExec, 1);
 
 		// Validate the GP register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -749,7 +736,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
 
 		// Get the I/O register value we want to inspect.
-		GetIoRegister(hValue, hExec, 2);
+		_getIoRegister(hValue, hExec, 2);
 
 		// Validate the I/O register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -787,7 +774,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		ASSERT_EQ(addObjMemberResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_OBJECT instruction to initialize an instance of an object into a GP register.
 		const int writeInitObjInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 0, 0);
@@ -810,7 +797,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -823,7 +810,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -834,7 +821,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 0);
+			_getGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -859,7 +846,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 2);
+			_getGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -889,7 +876,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_ARRAY instruction to initialize an instance of an array into a GP register.
 		const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, 1);
@@ -912,7 +899,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -925,7 +912,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -936,7 +923,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 0);
+			_getGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -955,7 +942,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 2);
+			_getGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -976,7 +963,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
+TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 {
 	static constexpr const char* const functionName = "int32_t test(int32_t)";
 	static constexpr int32_t testValueData = 1234578;
@@ -993,7 +980,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 		// Main function
 		{
 			// Set the function serializer.
-			SetupFunctionSerializer(hFuncSerializer, endianness);
+			_setupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write the instruction that we're going to test.
 			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1012,13 +999,13 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
-			FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+			_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 		}
 
 		// Sub-function
 		{
 			// Set the function serializer.
-			SetupFunctionSerializer(hFuncSerializer, endianness);
+			_setupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write a LOAD_PARAM instruction to load the input parameter to a GP register.
 			const int writeLoadInstrResult = HqBytecodeWriteLoadParam(hFuncSerializer, 0, 0);
@@ -1031,7 +1018,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
-			FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, functionName);
+			_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, functionName);
 		}
 	};
 
@@ -1045,7 +1032,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1054,7 +1041,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 
 		// Get the register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		GetIoRegister(hValue, hExec, 1);
+		_getIoRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1074,7 +1061,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Native)
+TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Native)
 {
 	static constexpr const char* const functionName = "int32_t testCallNative(int32_t)";
 	static constexpr int32_t testValueData = 1234578;
@@ -1093,7 +1080,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Native)
 		ASSERT_EQ(addNativeFunctionResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1112,7 +1099,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Native)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 
 	};
 
@@ -1126,7 +1113,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Native)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1135,7 +1122,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Native)
 
 		// Get the register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		GetIoRegister(hValue, hExec, 1);
+		_getIoRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1155,7 +1142,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Native)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_NativeNonExistent)
+TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$NativeNonExistent)
 {
 	static constexpr const char* const functionName = "void nativeFuncWithoutImpl()";
 
@@ -1173,14 +1160,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_NativeNonExistent)
 		ASSERT_EQ(addNativeFunctionResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the CALL isntruction to attempt invoke the function.
 		const int writeCallInstrResult = HqBytecodeWriteCall(hFuncSerializer, stringIndex);
 		ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 
 	};
 
@@ -1194,7 +1181,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_NativeNonExistent)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1221,7 +1208,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Scoped to write the JMP opcode.
 		{
@@ -1234,7 +1221,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 		}
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -1247,7 +1234,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_TRUE(status.complete);
@@ -1276,7 +1263,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		SetupFunctionSerializer(hFuncSerializer, endianness);
+		_setupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
 		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1299,7 +1286,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		ASSERT_EQ(writeAnotherYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -1312,7 +1299,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1323,7 +1310,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetStackValue(hValue, hExec, 0);
+			_getStackValue(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1336,7 +1323,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		ASSERT_EQ(execRunAgainResult, HQ_SUCCESS);
 
 		// Get the status of the execution context.
-		GetExecutionStatus(status, hExec);
+		_getExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1347,7 +1334,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			GetGpRegister(hValue, hExec, 1);
+			_getGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
