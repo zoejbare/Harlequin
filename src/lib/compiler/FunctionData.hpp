@@ -39,12 +39,6 @@ struct HqFunctionData
 		HqString::StlCompare
 	> StringToFunctionMap;
 
-	typedef std::unordered_set<
-		HqString*,
-		HqString::StlHash,
-		HqString::StlCompare
-	> LocalVariableSet;
-
 	struct ExceptionHandler
 	{
 		typedef std::unordered_map<uint32_t, ExceptionHandler> Map;
@@ -68,7 +62,6 @@ struct HqFunctionData
 		uint32_t length;
 	};
 
-	LocalVariableSet locals;
 	GuardedBlock::Vector guardedBlocks;
 	Bytecode bytecode;
 

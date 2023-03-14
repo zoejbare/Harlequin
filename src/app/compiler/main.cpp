@@ -142,7 +142,6 @@ int main(int argc, char* argv[])
 	const char* const nativePrintFuncSignature = "void Program.PrintString(string)";
 	const char* const nativeDecrementFuncSignature = "(int32, bool) Program.Decrement(int32)";
 	const char* const globalVariableName = "globalTestVar";
-	const char* const localVariableName = "localTestVar";
 	const char* const objectTypeName = "Program.TestClass";
 	const char* const objectMemberName = "memberTest";
 
@@ -151,7 +150,6 @@ int main(int argc, char* argv[])
 	uint32_t stringIndex2; HqModuleWriterAddString(hModuleWriter, globalVariableName, &stringIndex2);
 	uint32_t stringIndex3; HqModuleWriterAddString(hModuleWriter, subFuncSignature, &stringIndex3);
 	uint32_t stringIndex4; HqModuleWriterAddString(hModuleWriter, nativePrintFuncSignature, &stringIndex4);
-	uint32_t stringIndex5; HqModuleWriterAddString(hModuleWriter, localVariableName, &stringIndex5);
 	uint32_t stringIndex8; HqModuleWriterAddString(hModuleWriter, objectTypeName, &stringIndex8);
 	uint32_t stringIndex9; HqModuleWriterAddString(hModuleWriter, objectMemberName, &stringIndex9);
 	uint32_t stringIndex10; HqModuleWriterAddString(hModuleWriter, nativeDecrementFuncSignature, &stringIndex10);
@@ -319,7 +317,6 @@ int main(int argc, char* argv[])
 		const size_t funcLength = HqSerializerGetStreamLength(hSubFuncSerializer);
 
 		HqModuleWriterAddFunction(hModuleWriter, subFuncSignature, pFuncData, funcLength, 1, 1);
-		HqModuleWriterAddLocalVariable(hModuleWriter, subFuncSignature, localVariableName);
 	}
 
 	// void Program.PrintString(string)

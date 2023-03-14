@@ -413,57 +413,6 @@ int HqModuleWriterAddNativeFunction(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqModuleWriterAddLocalVariable(
-	HqModuleWriterHandle hModuleWriter,
-	const char* functionSignature,
-	const char* variableName
-)
-{
-	if(!hModuleWriter
-		|| !functionSignature
-		|| functionSignature[0] == '\0'
-		|| !variableName
-		|| variableName[0] == '\0')
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	HqString* const pSignature = HqString::Create(functionSignature);
-	if(!pSignature)
-	{
-		return HQ_ERROR_BAD_ALLOCATION;
-	}
-
-	// Find the desired function by checking what we currently have mapped.
-	auto kv = hModuleWriter->functions.find(pSignature);
-	if(kv == hModuleWriter->functions.end())
-	{
-		HqString::Release(pSignature);
-		return HQ_ERROR_KEY_DOES_NOT_EXIST;
-	}
-
-	// The string object for the function signature is no longer needed.
-	HqString::Release(pSignature);
-
-	// Script local variables cannot be added to native functions.
-	if(kv->second.isNative)
-	{
-		return HQ_ERROR_INVALID_TYPE;
-	}
-
-	HqString* const pVariableName = HqString::Create(variableName);
-	if(!pVariableName)
-	{
-		return HQ_ERROR_BAD_ALLOCATION;
-	}
-
-	kv->second.locals.insert(pVariableName);
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int HqModuleWriterAddGuardedBlock(
 	HqModuleWriterHandle hModuleWriter,
 	const char* const functionSignature,

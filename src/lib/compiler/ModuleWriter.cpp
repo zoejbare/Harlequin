@@ -63,11 +63,6 @@ void HqModuleWriter::Dispose(HqModuleWriterHandle hModuleWriter)
 	{
 		HqString::Release(funcKv.first);
 
-		for(HqString* pVarName : funcKv.second.locals)
-		{
-			HqString::Release(pVarName);
-		}
-
 		// Dispose of each guarded block.
 		for(HqFunctionData::GuardedBlock& guardedBlock : funcKv.second.guardedBlocks)
 		{

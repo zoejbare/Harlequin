@@ -815,12 +815,6 @@ HQ_MAIN_API int HqModuleWriterAddNativeFunction(
 	uint16_t numReturnValues
 );
 
-HQ_MAIN_API int HqModuleWriterAddLocalVariable(
-	HqModuleWriterHandle hModuleWriter,
-	const char* functionSignature,
-	const char* variableName
-);
-
 HQ_MAIN_API int HqModuleWriterAddGuardedBlock(
 	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
