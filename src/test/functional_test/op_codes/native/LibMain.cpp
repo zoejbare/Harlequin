@@ -40,14 +40,14 @@ extern "C" HQ_NATIVE_API int HqDllInit(const HqDllRuntimeInfo* const pRuntime, H
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
 
 			const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, 0);
-			assert(getIoRegisterResult == HQ_SUCCESS);
+			assert(getIoRegisterResult == HQ_SUCCESS); (void) getIoRegisterResult;
 
 			const int setIoRegisterResult = HqExecutionSetIoRegister(hExec, hValue, 1);
-			assert(setIoRegisterResult == HQ_SUCCESS);
+			assert(setIoRegisterResult == HQ_SUCCESS); (void) setIoRegisterResult;
 		};
 
 		const int setNativeBindingResult = HqFunctionSetNativeBinding(hCallNativeTestFunc, funcImpl, nullptr);
-		assert(setNativeBindingResult == HQ_SUCCESS);
+		assert(setNativeBindingResult == HQ_SUCCESS); (void) setNativeBindingResult;
 	}
 
 	return HQ_SUCCESS;

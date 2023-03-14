@@ -37,7 +37,7 @@ WriteJumpInstr::WriteJumpInstr(
 	{
 		// Write a temporary instruction since we'll come back to fill it in at the end.
 		const int writeDummyJumpInstrResult = prv_writeJump(0);
-		assert(writeDummyJumpInstrResult == HQ_SUCCESS);
+		assert(writeDummyJumpInstrResult == HQ_SUCCESS); (void) writeDummyJumpInstrResult;
 	}
 }
 
@@ -50,18 +50,18 @@ WriteJumpInstr::~WriteJumpInstr()
 	if(m_beh == JumpBehavior::Forward)
 	{
 		const int setStreamPositionBackResult = HqSerializerSetStreamPosition(m_hSerializer, m_offset);
-		assert(setStreamPositionBackResult == HQ_SUCCESS);
+		assert(setStreamPositionBackResult == HQ_SUCCESS); (void) setStreamPositionBackResult;
 
 		const int writeRealJumpInstrResult = prv_writeJump(int32_t(currentOffset - m_offset));
-		assert(writeRealJumpInstrResult == HQ_SUCCESS);
+		assert(writeRealJumpInstrResult == HQ_SUCCESS); (void) writeRealJumpInstrResult;
 
 		const int restoreStreamPositionResult = HqSerializerSetStreamPosition(m_hSerializer, currentOffset);
-		assert(restoreStreamPositionResult == HQ_SUCCESS);
+		assert(restoreStreamPositionResult == HQ_SUCCESS); (void) restoreStreamPositionResult;
 	}
 	else
 	{
 		const int writeRealJumpInstrResult = prv_writeJump(-int32_t(currentOffset - m_offset));
-		assert(writeRealJumpInstrResult == HQ_SUCCESS);
+		assert(writeRealJumpInstrResult == HQ_SUCCESS); (void) writeRealJumpInstrResult;
 	}
 }
 
