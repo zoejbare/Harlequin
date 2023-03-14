@@ -754,6 +754,117 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
+{
+	static constexpr const char* const objTypeName = "TestObject";
+	static constexpr const char* const objMemberName = "foo";
+	static constexpr int32_t testValueData = 12345;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		const int addObjTypeResult = HqModuleWriterAddObjectType(hModuleWriter, objTypeName);
+		ASSERT_EQ(addObjTypeResult, HQ_SUCCESS);
+
+		uint32_t memberIndex = 0;
+		const int addObjMemberResult = HqModuleWriterAddObjectMember(hModuleWriter, objTypeName, objMemberName, HQ_VALUE_TYPE_INT32, &memberIndex);
+		ASSERT_EQ(addObjMemberResult, HQ_SUCCESS);
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the INIT_OBJECT instruction to initialize an instance of an object into a GP register.
+		const int writeInitObjInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 0, 0);
+		ASSERT_EQ(writeInitObjInstrResult, HQ_SUCCESS);
+
+		// Write the LOAD_IMM_I32 instruction so we have test data to assign to the object member.
+		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData);
+		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
+
+		// Write the STORE_OBJECT instruction to set the object member to the test data.
+		const int writeStoreObjInstrResult = HqBytecodeWriteStoreObject(hFuncSerializer, 0, 1, memberIndex);
+		ASSERT_EQ(writeStoreObjInstrResult, HQ_SUCCESS);
+
+		// Write the LOAD_OBJECT instruction to pull the object member data into a GP register for inspection.
+		const int writeLoadObjInstrResult = HqBytecodeWriteLoadObject(hFuncSerializer, 2, 0, memberIndex);
+		ASSERT_EQ(writeLoadObjInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the values.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Verify the object instance data.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			GetGpRegister(hValue, hExec, 0);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsObject(hValue));
+			ASSERT_STRCASEEQ(HqValueGetObjectTypeName(hValue), objTypeName);
+			ASSERT_EQ(HqValueGetObjectMemberCount(hValue), 1);
+
+			uint8_t objMemberType = HQ_VALUE_TYPE_INT8;
+			const int getObjMemberTypeResult = HqValueGetObjectMemberType(hValue, objMemberName, &objMemberType);
+			ASSERT_EQ(getObjMemberTypeResult, HQ_SUCCESS);
+			ASSERT_EQ(objMemberType, HQ_VALUE_TYPE_INT32);
+
+			HqValueHandle hMemberValue = HqValueGetObjectMemberValue(hValue, objMemberName);
+
+			// Validate the member value.
+			ASSERT_NE(hMemberValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hMemberValue));
+			ASSERT_EQ(HqValueGetInt32(hMemberValue), testValueData);
+		}
+
+		// Verify the value extracted from the object.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			GetGpRegister(hValue, hExec, 2);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 {
 	static constexpr const char* const functionName = "int32_t test(int32_t)";
