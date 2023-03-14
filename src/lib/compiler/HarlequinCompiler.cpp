@@ -201,6 +201,10 @@ int HqModuleWriterAddObjectType(HqModuleWriterHandle hModuleWriter, const char* 
 
 	hModuleWriter->objectTypes.emplace(pTypeName, objectData);
 
+	// Automatically add the type name to the string table.
+	uint32_t stringIndex = 0;
+	HqModuleWriterAddString(hModuleWriter, objectTypeName, &stringIndex);
+
 	return HQ_SUCCESS;
 }
 
@@ -264,6 +268,10 @@ int HqModuleWriterAddObjectMember(
 	typeKv->second.members.emplace(pMemberName, memberValueType);
 	typeKv->second.orderedMemberNames.push_back(pMemberName);
 
+	// Automatically add the member name to the string table.
+	uint32_t stringIndex = 0;
+	HqModuleWriterAddString(hModuleWriter, memberName, &stringIndex);
+
 	return HQ_SUCCESS;
 }
 
@@ -292,6 +300,10 @@ int HqModuleWriterAddGlobal(HqModuleWriterHandle hModuleWriter, const char* vari
 
 	// Track the name of the global variable.
 	hModuleWriter->globals.insert(pKey);
+
+	// Automatically add the variable name to the string table.
+	uint32_t stringIndex = 0;
+	HqModuleWriterAddString(hModuleWriter, variableName, &stringIndex);
 
 	return HQ_SUCCESS;
 }
@@ -367,6 +379,10 @@ int HqModuleWriterAddFunction(
 
 	hModuleWriter->functions.emplace(pSignature, function);
 
+	// Automatically add the function signature to the string table.
+	uint32_t stringIndex = 0;
+	HqModuleWriterAddString(hModuleWriter, functionSignature, &stringIndex);
+
 	return HQ_SUCCESS;
 }
 
@@ -407,6 +423,10 @@ int HqModuleWriterAddNativeFunction(
 	function.isNative = true;
 
 	hModuleWriter->functions.emplace(pSignature, function);
+
+	// Automatically add the function signature to the string table.
+	uint32_t stringIndex = 0;
+	HqModuleWriterAddString(hModuleWriter, functionSignature, &stringIndex);
 
 	return HQ_SUCCESS;
 }
