@@ -146,6 +146,21 @@ inline void GetIoRegister(HqValueHandle& output, HqExecutionHandle hExec, const 
 
 //----------------------------------------------------------------------------------------------------------------------
 
+inline void GetStackValue(HqValueHandle& output, HqExecutionHandle hExec, const int stackIndex)
+{
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	GetCurrentFrame(hFrame, hExec);
+
+	// Get the general-purpose register that has the value we want to inspect.
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	const int peekStackValueResult = HqFramePeekValue(hFrame, &hValue, stackIndex);
+	ASSERT_EQ(peekStackValueResult, HQ_SUCCESS);
+
+	output = hValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 class _HQ_TEST_NAME(TestOpCodes)
 	: public ::testing::Test
 {
@@ -1238,6 +1253,107 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 		ASSERT_TRUE(status.complete);
 		ASSERT_FALSE(status.exception);
 		ASSERT_FALSE(status.abort);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
+{
+	static constexpr int32_t testValueData = 12345;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
+		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
+
+		// Write a PUSH instruction so we have some data on the stack.
+		const int writePushInstrResult = HqBytecodeWritePush(hFuncSerializer, 0);
+		ASSERT_EQ(writePushInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the stack.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Write a POP instruction so we can pull the value we pushed into a GP register.
+		const int writePopInstrResult = HqBytecodeWritePop(hFuncSerializer, 1);
+		ASSERT_EQ(writePopInstrResult, HQ_SUCCESS);
+
+		// Write one more YIELD instruction so we can examine the GP register.
+		const int writeAnotherYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeAnotherYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Verify the stack value.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			GetStackValue(hValue, hExec, 0);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+		}
+
+		// Run the execution context again.
+		const int execRunAgainResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunAgainResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Verify the value extracted from the object.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			GetGpRegister(hValue, hExec, 1);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+		}
 	};
 
 	std::vector<uint8_t> bytecode;
