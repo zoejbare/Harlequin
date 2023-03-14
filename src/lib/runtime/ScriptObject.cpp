@@ -166,7 +166,6 @@ HqScriptObject::MemberDefinition HqScriptObject::GetMemberDefinition(
 int HqScriptObject::SetMemberValue(HqScriptObject* const pObject, const uint32_t memberIndex, HqValueHandle hValue)
 {
 	assert(pObject != nullptr);
-	assert(hValue != HQ_VALUE_HANDLE_NULL);
 
 	if(memberIndex < uint32_t(pObject->members.count))
 	{
