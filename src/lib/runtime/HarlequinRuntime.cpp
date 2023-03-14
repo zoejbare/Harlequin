@@ -2221,42 +2221,42 @@ size_t HqValueGetObjectMemberCount(HqValueHandle hValue)
 
 HqValueHandle HqValueGetObjectMemberValue(HqValueHandle hValue, const char* memberName)
 {
-	if(HqValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	if(!HqValueIsObject(hValue) || !memberName || memberName[0] == '\0')
 	{
-		HqScriptObject* const pScriptObject = hValue->as.pObject;
-		HqString* const pMemberName = HqString::Create(memberName);
-
-		int result;
-
-		const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
-		if(result != HQ_SUCCESS)
-		{
-			return HQ_VALUE_HANDLE_NULL;
-		}
-
-		// Release the member name string now that we don't need it anymore.
-		HqString::Release(pMemberName);
-
-		HqValueHandle hMemberValue = HqScriptObject::GetMemberValue(pScriptObject, memberDef.bindingIndex, &result);
-		if(result != HQ_SUCCESS)
-		{
-			return HQ_VALUE_HANDLE_NULL;
-		}
-
-		// Guard the value against being garbage collected.
-		HqValue::SetAutoMark(hMemberValue, true);
-
-		return hMemberValue;
+		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	return HQ_VALUE_HANDLE_NULL;
+	HqScriptObject* const pScriptObject = hValue->as.pObject;
+	HqString* const pMemberName = HqString::Create(memberName);
+
+	int result;
+
+	const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+	if(result != HQ_SUCCESS)
+	{
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
+	// Release the member name string now that we don't need it anymore.
+	HqString::Release(pMemberName);
+
+	HqValueHandle hMemberValue = HqScriptObject::GetMemberValue(pScriptObject, memberDef.bindingIndex, &result);
+	if(result != HQ_SUCCESS)
+	{
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
+	// Guard the value against being garbage collected.
+	HqValue::SetAutoMark(hMemberValue, true);
+
+	return hMemberValue;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 int HqValueGetObjectMemberType(HqValueHandle hValue, const char* memberName, uint8_t* pOutType)
 {
-	if(HqValueIsObject(hValue) || !memberName || memberName[0] == '\0' || !pOutType)
+	if(!HqValueIsObject(hValue) || !memberName || memberName[0] == '\0' || !pOutType)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -2284,70 +2284,70 @@ int HqValueGetObjectMemberType(HqValueHandle hValue, const char* memberName, uin
 
 int HqValueSetObjectMemberValue(HqValueHandle hValue, const char* memberName, HqValueHandle hMemberValue)
 {
-	if(HqValueIsObject(hValue) && memberName && memberName[0] != '\0')
+	if(!HqValueIsObject(hValue) || !memberName || memberName[0] == '\0')
 	{
-		HqScriptObject* const pScriptObject = hValue->as.pObject;
-		HqString* const pMemberName = HqString::Create(memberName);
-
-		int result;
-
-		const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
-		if(result != HQ_SUCCESS)
-		{
-			return result;
-		}
-
-		// Release the member name string now that we don't need it anymore.
-		HqString::Release(pMemberName);
-
-		HqScriptObject::SetMemberValue(pScriptObject, memberDef.bindingIndex, hMemberValue);
-
-		return HQ_SUCCESS;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	return HQ_ERROR_INVALID_TYPE;
+	HqScriptObject* const pScriptObject = hValue->as.pObject;
+	HqString* const pMemberName = HqString::Create(memberName);
+
+	int result;
+
+	const HqScriptObject::MemberDefinition memberDef = HqScriptObject::GetMemberDefinition(pScriptObject, pMemberName, &result);
+	if(result != HQ_SUCCESS)
+	{
+		return result;
+	}
+
+	// Release the member name string now that we don't need it anymore.
+	HqString::Release(pMemberName);
+
+	HqScriptObject::SetMemberValue(pScriptObject, memberDef.bindingIndex, hMemberValue);
+
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 int HqValueListObjectMembers(HqValueHandle hValue, HqCallbackIterateObjectMember onIterateFn, void* pUserData)
 {
-	if(HqValueIsObject(hValue))
+	if(!HqValueIsObject(hValue))
 	{
-		HqScriptObject* const pObject = hValue->as.pObject;
-
-		HqScriptObject::MemberDefinitionMap& definitions = (pObject->pSchema)
-			? pObject->pSchema->definitions
-			: pObject->definitions;
-
-		// Iterate through each member definition on the object.
-		HqScriptObject::MemberDefinitionMap::Iterator iter;
-		while(HqScriptObject::MemberDefinitionMap::IterateNext(definitions, iter))
-		{
-			if(!onIterateFn(pUserData, iter.pData->key->data, iter.pData->value.valueType))
-			{
-				break;
-			}
-		}
-
-		return HQ_SUCCESS;
+		return HQ_ERROR_INVALID_TYPE;
 	}
 
-	return HQ_ERROR_INVALID_TYPE;
+	HqScriptObject* const pObject = hValue->as.pObject;
+
+	HqScriptObject::MemberDefinitionMap& definitions = (pObject->pSchema)
+		? pObject->pSchema->definitions
+		: pObject->definitions;
+
+	// Iterate through each member definition on the object.
+	HqScriptObject::MemberDefinitionMap::Iterator iter;
+	while(HqScriptObject::MemberDefinitionMap::IterateNext(definitions, iter))
+	{
+		if(!onIterateFn(pUserData, iter.pData->key->data, iter.pData->value.valueType))
+		{
+			break;
+		}
+	}
+
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void* HqValueGetObjectUserData(HqValueHandle hValue)
 {
-	if(HqValueIsObject(hValue))
+	if(!HqValueIsObject(hValue))
 	{
-		HqScriptObject* const pScriptObject = hValue->as.pObject;
-
-		return pScriptObject->pUserData;
+		return nullptr;
 	}
 
-	return nullptr;
+	HqScriptObject* const pScriptObject = hValue->as.pObject;
+
+	return pScriptObject->pUserData;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
