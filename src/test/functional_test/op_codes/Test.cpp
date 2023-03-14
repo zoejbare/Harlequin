@@ -865,6 +865,102 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
+{
+	static constexpr int32_t testValueData = 12345;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the INIT_ARRAY instruction to initialize an instance of an array into a GP register.
+		const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, 1);
+		ASSERT_EQ(writeInitArrayInstrResult, HQ_SUCCESS);
+
+		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
+		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData);
+		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
+
+		// Write the STORE_ARRAY instruction to set the value at the specified array index to the test data.
+		const int writeStoreArrayInstrResult = HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 0);
+		ASSERT_EQ(writeStoreArrayInstrResult, HQ_SUCCESS);
+
+		// Write the LOAD_ARRAY instruction to pull the value data from the array element into a GP register for inspection.
+		const int writeLoadArrayInstrResult = HqBytecodeWriteLoadArray(hFuncSerializer, 2, 0, 0);
+		ASSERT_EQ(writeLoadArrayInstrResult, HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the values.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Verify the array instance data.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			GetGpRegister(hValue, hExec, 0);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsArray(hValue));
+			ASSERT_EQ(HqValueGetArrayLength(hValue), 1);
+
+			HqValueHandle hIndexValue = HqValueGetArrayElement(hValue, 0);
+
+			// Validate the array element value.
+			ASSERT_NE(hIndexValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hIndexValue));
+			ASSERT_EQ(HqValueGetInt32(hIndexValue), testValueData);
+		}
+
+		// Verify the value extracted from the object.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			GetGpRegister(hValue, hExec, 2);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 TEST_F(_HQ_TEST_NAME(TestOpCodes), Call_Script)
 {
 	static constexpr const char* const functionName = "int32_t test(int32_t)";
