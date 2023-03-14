@@ -1412,8 +1412,7 @@ int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, int stackI
 	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
 	HqFrame::PeekValue(hFrame, &hValue, stackIndex);
 
-	// Guard the value against being garbage collected.
-	HqValue::SetAutoMark(hValue, true);
+	(*phOutValue) = hValue;
 
 	return HQ_SUCCESS;
 }
