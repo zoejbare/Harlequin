@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 
 		HqBytecodeWriteStoreParam(hMainFuncSerializer, 0, 11);
 		HqBytecodeWriteCall(hMainFuncSerializer, stringIndex3);
-		HqBytecodeWritePullParam(hMainFuncSerializer, 8, 0);
+		HqBytecodeWriteLoadParam(hMainFuncSerializer, 8, 0);
 
 		HqBytecodeWriteInitFunction(hMainFuncSerializer, 0, stringIndex13);
 		HqBytecodeWriteCallValue(hMainFuncSerializer, 0);
@@ -249,8 +249,6 @@ int main(int argc, char* argv[])
 
 	// int32 Program.DoWork(float64)
 	{
-		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 0);
-
 		HqBytecodeWriteLoadImmF64(hSubFuncSerializer, 0, 1.2345);
 		HqBytecodeWriteMove(hSubFuncSerializer, 1, 0);
 
@@ -295,10 +293,10 @@ int main(int argc, char* argv[])
 
 		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
 		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex10);
-		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 0);
+		HqBytecodeWriteLoadParam(hSubFuncSerializer, 0, 0);
 		HqBytecodeWriteStoreObject(hSubFuncSerializer, 2, 0, 0);
 
-		HqBytecodeWritePullParam(hSubFuncSerializer, 0, 1);
+		HqBytecodeWriteLoadParam(hSubFuncSerializer, 0, 1);
 		HqBytecodeWriteJumpIfTrue(hSubFuncSerializer, 0, 20);
 
 		const size_t loopOffsetEnd = HqSerializerGetStreamPosition(hSubFuncSerializer);

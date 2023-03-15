@@ -63,11 +63,6 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	_HQ_BIND_OP_CODE(STORE_OBJECT, StoreObject);
 	_HQ_BIND_OP_CODE(STORE_ARRAY, StoreArray);
 
-	_HQ_BIND_OP_CODE(PULL_GLOBAL, PullGlobal);
-	_HQ_BIND_OP_CODE(PULL_PARAM, PullParam);
-	_HQ_BIND_OP_CODE(PULL_OBJECT, PullObject);
-	_HQ_BIND_OP_CODE(PULL_ARRAY, PullArray);
-
 	_HQ_BIND_OP_CODE(PUSH, Push);
 	_HQ_BIND_OP_CODE(POP, Pop);
 
