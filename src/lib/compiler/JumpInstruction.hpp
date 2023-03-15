@@ -24,47 +24,55 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-enum class JumpBehavior
-{
-	Forward,
-	Back,
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-enum class JumpCondition
-{
-	None,
-	IfTrue,
-	IfFalse,
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-class HQ_MAIN_API WriteJumpInstr
+class HQ_MAIN_API JumpInstruction
 {
 public:
 
-	WriteJumpInstr() = delete;
-	WriteJumpInstr(const WriteJumpInstr&) = delete;
-	WriteJumpInstr(WriteJumpInstr&&) = delete;
+	enum class Behavior
+	{
+		Forward,
+		Back,
+	};
 
-	WriteJumpInstr& operator =(const WriteJumpInstr&) = delete;
-	WriteJumpInstr& operator =(WriteJumpInstr&&) = delete;
+	enum class Condition
+	{
+		None,
+		IfTrue,
+		IfFalse,
+	};
 
-	WriteJumpInstr(HqSerializerHandle hSerializer, JumpBehavior behavior, JumpCondition condition, uint32_t gpRegIndex);
-	~WriteJumpInstr();
+	JumpInstruction(const JumpInstruction&) = delete;
+	JumpInstruction(JumpInstruction&&) = delete;
+
+	JumpInstruction& operator =(const JumpInstruction&) = delete;
+	JumpInstruction& operator =(JumpInstruction&&) = delete;
+
+	JumpInstruction();
+
+	void Begin(HqSerializerHandle hSerializer, Behavior behavior, Condition condition, uint32_t gpRegIndex);
+	void End();
 
 
 private:
 
-	int prv_writeJump(int32_t);
+	int _writeJump(int32_t);
 
 	HqSerializerHandle m_hSerializer;
 	size_t m_offset;
 	uint32_t m_regIndex;
-	JumpBehavior m_beh;
-	JumpCondition m_cond;
+	Behavior m_beh;
+	Condition m_cond;
 };
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline JumpInstruction::JumpInstruction()
+	: m_hSerializer(HQ_SERIALIZER_HANDLE_NULL)
+	, m_offset(0)
+	, m_regIndex(0)
+	, m_beh(Behavior::Forward)
+	, m_cond(Condition::None)
+{
+}
 
 //----------------------------------------------------------------------------------------------------------------------

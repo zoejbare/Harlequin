@@ -19,7 +19,7 @@
 #include "../Memory.hpp"
 #include "../RuntimeUtil.hpp"
 
-#include <compiler/WriteJumpInstr.hpp>
+#include <compiler/JumpInstruction.hpp>
 #include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1201,59 +1201,6 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$NativeNonExistent)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
-{
-	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
-	{
-		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
-
-		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
-
-		// Scoped to write the JMP opcode.
-		{
-			WriteJumpInstr jump(hFuncSerializer, JumpBehavior::Forward, JumpCondition::None, 0);
-
-			// Write an ABORT opcode just so we have an error case to check for
-			// in case the JMP opcode doesn't branch correctly.
-			const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
-			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
-		}
-
-		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
-	};
-
-	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
-	{
-		(void) hVm;
-
-		// Run the execution context.
-		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
-		ASSERT_EQ(execRunResult, HQ_SUCCESS);
-
-		// Get the status of the execution context.
-		ExecStatus status;
-		_getExecutionStatus(status, hExec);
-		ASSERT_FALSE(status.yield);
-		ASSERT_FALSE(status.running);
-		ASSERT_TRUE(status.complete);
-		ASSERT_FALSE(status.exception);
-		ASSERT_FALSE(status.abort);
-	};
-
-	std::vector<uint8_t> bytecode;
-
-	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
-	ASSERT_GT(bytecode.size(), 0u);
-
-	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 {
 	static constexpr int32_t testValueData = 12345;
@@ -1341,6 +1288,62 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 			ASSERT_TRUE(HqValueIsInt32(hValue));
 			ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
 		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
+{
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		JumpInstruction jump;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Begin the jump block.
+		jump.Begin(hFuncSerializer, JumpInstruction::Behavior::Forward, JumpInstruction::Condition::None, 0);
+
+		// Write an ABORT opcode just so we have an error case to check for
+		// in case the JMP opcode doesn't branch correctly.
+		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
+
+		// End the block indicating where the instruction pointer will jump to.
+		jump.End();
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_FALSE(status.yield);
+		ASSERT_FALSE(status.running);
+		ASSERT_TRUE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
 	};
 
 	std::vector<uint8_t> bytecode;
