@@ -93,17 +93,17 @@ extern "C" void OpCodeExec_Exp(HqExecutionHandle hExec)
 
 				switch(hLeft->type)
 				{
-					case HQ_VALUE_TYPE_INT8:    hOutput = HqValue::CreateInt8(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int8, hRight->as.int8));       break;
-					case HQ_VALUE_TYPE_INT16:   hOutput = HqValue::CreateInt16(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int16, hRight->as.int16));    break;
-					case HQ_VALUE_TYPE_INT32:   hOutput = HqValue::CreateInt32(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int32, hRight->as.int32));    break;
-					case HQ_VALUE_TYPE_INT64:   hOutput = HqValue::CreateInt64(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int64, hRight->as.int64));    break;
-					case HQ_VALUE_TYPE_UINT8:   hOutput = HqValue::CreateUint8(hExec->hVm, _HqIntFastPow(hLeft->as.uint8, hRight->as.uint8));    break;
-					case HQ_VALUE_TYPE_UINT16:  hOutput = HqValue::CreateUint16(hExec->hVm, _HqIntFastPow(hLeft->as.uint16, hRight->as.uint16)); break;
-					case HQ_VALUE_TYPE_UINT32:  hOutput = HqValue::CreateUint32(hExec->hVm, _HqIntFastPow(hLeft->as.uint32, hRight->as.uint32)); break;
-					case HQ_VALUE_TYPE_UINT64:  hOutput = HqValue::CreateUint64(hExec->hVm, _HqIntFastPow(hLeft->as.uint64, hRight->as.uint64)); break;
-					case HQ_VALUE_TYPE_FLOAT32: hOutput = HqValue::CreateFloat32(hExec->hVm, powf(hLeft->as.float32, hRight->as.float32));       break;
-					case HQ_VALUE_TYPE_FLOAT64: hOutput = HqValue::CreateFloat64(hExec->hVm, pow(hLeft->as.float64, hRight->as.float64));        break;
-					case HQ_VALUE_TYPE_BOOL:    hOutput = HqValue::CreateBool(hExec->hVm, hLeft->as.boolean && hRight->as.boolean);              break;
+					case HQ_VALUE_TYPE_INT8:    hOutput = HqValue::CreateInt8(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int8, hRight->as.int8));    break;
+					case HQ_VALUE_TYPE_INT16:   hOutput = HqValue::CreateInt16(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int16, hRight->as.int16)); break;
+					case HQ_VALUE_TYPE_INT32:   hOutput = HqValue::CreateInt32(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int32, hRight->as.int32)); break;
+					case HQ_VALUE_TYPE_INT64:   hOutput = HqValue::CreateInt64(hExec->hVm, _HqIntFastPowSigned(hLeft->as.int64, hRight->as.int64)); break;
+					case HQ_VALUE_TYPE_UINT8:   hOutput = HqValue::CreateUint8(hExec->hVm, _HqIntFastPow(hLeft->as.uint8, hRight->as.uint8));       break;
+					case HQ_VALUE_TYPE_UINT16:  hOutput = HqValue::CreateUint16(hExec->hVm, _HqIntFastPow(hLeft->as.uint16, hRight->as.uint16));    break;
+					case HQ_VALUE_TYPE_UINT32:  hOutput = HqValue::CreateUint32(hExec->hVm, _HqIntFastPow(hLeft->as.uint32, hRight->as.uint32));    break;
+					case HQ_VALUE_TYPE_UINT64:  hOutput = HqValue::CreateUint64(hExec->hVm, _HqIntFastPow(hLeft->as.uint64, hRight->as.uint64));    break;
+					case HQ_VALUE_TYPE_FLOAT32: hOutput = HqValue::CreateFloat32(hExec->hVm, powf(hLeft->as.float32, hRight->as.float32));          break;
+					case HQ_VALUE_TYPE_FLOAT64: hOutput = HqValue::CreateFloat64(hExec->hVm, pow(hLeft->as.float64, hRight->as.float64));           break;
+					case HQ_VALUE_TYPE_BOOL:    hOutput = HqValue::CreateBool(hExec->hVm, hLeft->as.boolean && hRight->as.boolean);                 break;
 
 					default:
 					{
