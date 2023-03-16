@@ -170,7 +170,7 @@ inline char32_t _HqCharUtf8ToUtf32(size_t* const pOutMbLen, const char* const mb
 		const uint8_t byte3 = uint8_t(mbSeq[3]);
 
 		if((byte1 & _checkMask[0]) != _seqId[0]
-			|| (byte2 & _checkMask[0]) != _seqId[0] 
+			|| (byte2 & _checkMask[0]) != _seqId[0]
 			|| (byte3 & _checkMask[0]) != _seqId[0])
 		{
 			goto utf32ConvFinish;
@@ -244,8 +244,8 @@ utf32ConvFinish:
 
 inline char32_t _HqCharToUtf32SimpleLower(const char32_t codePoint)
 {
-	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
-		? utf32RecordTable.indices[codePoint] 
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT)
+		? utf32RecordTable.indices[codePoint]
 		: 0;
 
 	if(recordIndex > 0)
@@ -261,8 +261,8 @@ inline char32_t _HqCharToUtf32SimpleLower(const char32_t codePoint)
 
 inline char32_t _HqCharToUtf32SimpleUpper(const char32_t codePoint)
 {
-	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
-		? utf32RecordTable.indices[codePoint] 
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT)
+		? utf32RecordTable.indices[codePoint]
 		: 0;
 
 	if(recordIndex > 0)
@@ -278,8 +278,8 @@ inline char32_t _HqCharToUtf32SimpleUpper(const char32_t codePoint)
 
 inline char32_t _HqCharToUtf32SimpleTitle(const char32_t codePoint)
 {
-	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
-		? utf32RecordTable.indices[codePoint] 
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT)
+		? utf32RecordTable.indices[codePoint]
 		: 0;
 
 	if(recordIndex > 0)
@@ -297,8 +297,8 @@ inline size_t _HqCharToUtf32FullLower(char32_t* const pOutCodePoints, const char
 {
 	assert(pOutCodePoints != nullptr);
 
-	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
-		? utf32RecordTable.indices[codePoint] 
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT)
+		? utf32RecordTable.indices[codePoint]
 		: 0;
 
 	if(recordIndex > 0)
@@ -321,8 +321,8 @@ inline size_t _HqCharToUtf32FullUpper(char32_t* const pOutCodePoints, const char
 {
 	assert(pOutCodePoints != nullptr);
 
-	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
-		? utf32RecordTable.indices[codePoint] 
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT)
+		? utf32RecordTable.indices[codePoint]
 		: 0;
 
 	if(recordIndex > 0)
@@ -345,8 +345,8 @@ inline size_t _HqCharToUtf32FullTitle(char32_t* const pOutCodePoints, const char
 {
 	assert(pOutCodePoints != nullptr);
 
-	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT) 
-		? utf32RecordTable.indices[codePoint] 
+	const HQ_UTF32_RECORD_INDEX_TYPE recordIndex = (codePoint < HQ_UTF32_RECORD_INDEX_COUNT)
+		? utf32RecordTable.indices[codePoint]
 		: 0;
 
 	if(recordIndex > 0)
@@ -591,7 +591,7 @@ HqString* HqString::Create(const char* const stringData)
 
 	pOutput->length = length;
 	pOutput->hash = RawHash(stringData ? stringData : "");
-	pOutput->data = (length > 0) ? reinterpret_cast<char*>(HqMemAlloc(length + 1)) : nullptr;
+	pOutput->data = reinterpret_cast<char*>(HqMemAlloc(length + 1));
 
 	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
