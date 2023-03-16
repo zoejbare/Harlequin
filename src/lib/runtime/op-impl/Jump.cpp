@@ -141,20 +141,10 @@ extern "C" void OpCodeExec_JumpIfTrue(HqExecutionHandle hExec)
 	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
 	if(result == HQ_SUCCESS)
 	{
-		// Object values cannot be evaluated directly.
-		if(!HqValueIsObject(hValue))
+		const bool pass = HqValue::EvaluateAsBoolean(hValue);
+		if(pass)
 		{
-			const bool pass = HqValue::EvaluateAsBoolean(hValue);
-
-			if(pass)
-			{
-				_MoveInstructionPointer(hExec, offset);
-			}
-		}
-		else
-		{
-			// Raise a fatal script exception.
-			_RaiseFatalException_ObjectAsBool(hExec, registerIndex);
+			_MoveInstructionPointer(hExec, offset);
 		}
 	}
 	else
@@ -197,20 +187,10 @@ extern "C" void OpCodeExec_JumpIfFalse(HqExecutionHandle hExec)
 	HqValueHandle hValue = HqFrame::GetGpRegister(hExec->hCurrentFrame, registerIndex, &result);
 	if(result == HQ_SUCCESS)
 	{
-		// Object values cannot be evaluated directly.
-		if(!HqValueIsObject(hValue))
+		const bool pass = !HqValue::EvaluateAsBoolean(hValue);
+		if(pass)
 		{
-			const bool pass = !HqValue::EvaluateAsBoolean(hValue);
-
-			if(pass)
-			{
-				_MoveInstructionPointer(hExec, offset);
-			}
-		}
-		else
-		{
-			// Raise a fatal script exception.
-			_RaiseFatalException_ObjectAsBool(hExec, registerIndex);
+			_MoveInstructionPointer(hExec, offset);
 		}
 	}
 	else

@@ -630,6 +630,8 @@ bool HqValue::EvaluateAsBoolean(HqValueHandle hValue)
 
 		case HQ_VALUE_TYPE_FUNCTION:
 		case HQ_VALUE_TYPE_OBJECT:
+			// Always evaluate to true since we can only test them directly for their existence
+			// and they only way for these types to not exist is to be null.
 			return true;
 
 		case HQ_VALUE_TYPE_NATIVE:
