@@ -1310,6 +1310,7 @@ inline void HqModuleLoader::prv_initialize(HqModuleLoader& output)
 	StringArray::Initialize(output.globals);
 	ObjectTypeArray::Initialize(output.objectTypes);
 	FunctionArray::Initialize(output.functions);
+	ByteArray::Initialize(output.initBytecode);
 	ByteArray::Initialize(output.bytecode);
 }
 
