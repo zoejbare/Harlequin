@@ -813,7 +813,7 @@ bool HqModuleWriter::Serialize(
 							const size_t typeStringIndex = stringToIndexMap.at(handler.pClassName);
 
 							// Write the string index for the class name handled by the current exception handler.
-							if(!prv_writeUint32(hSerializer, handledType, result, streamOffset))
+							if(!prv_writeUint32(hSerializer, uint32_t(typeStringIndex), result, streamOffset))
 							{
 								HqReportMessage(
 									hReport,
