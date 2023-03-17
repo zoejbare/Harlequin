@@ -1269,10 +1269,9 @@ int HqExecutionGetCurrentFrame(HqExecutionHandle hExec, HqFrameHandle* phOutFram
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqExecutionSetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, int registerIndex)
+int HqExecutionSetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, uint32_t registerIndex)
 {
 	if(!hExec
-		|| registerIndex < 0
 		|| registerIndex >= HQ_VM_IO_REGISTER_COUNT)
 	{
 		return HQ_ERROR_INVALID_ARG;
@@ -1288,11 +1287,10 @@ int HqExecutionSetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, int 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqExecutionGetIoRegister(HqExecutionHandle hExec, HqValueHandle* phOutValue, int registerIndex)
+int HqExecutionGetIoRegister(HqExecutionHandle hExec, HqValueHandle* phOutValue, uint32_t registerIndex)
 {
 	if(!hExec
 		|| !phOutValue
-		|| registerIndex < 0
 		|| registerIndex >= HQ_VM_IO_REGISTER_COUNT)
 	{
 		return HQ_ERROR_INVALID_ARG;
@@ -1397,7 +1395,7 @@ int HqFramePopValue(HqFrameHandle hFrame, HqValueHandle* phOutValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, int stackIndex)
+int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t stackIndex)
 {
 	if(!hFrame || !phOutValue || *phOutValue)
 	{
@@ -1419,9 +1417,9 @@ int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, int stackI
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, int registerIndex)
+int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, uint32_t registerIndex)
 {
-	if(!hFrame || registerIndex < 0 || registerIndex >= HQ_VM_GP_REGISTER_COUNT)
+	if(!hFrame || registerIndex >= HQ_VM_GP_REGISTER_COUNT)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -1449,11 +1447,10 @@ int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, int registe
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, int registerIndex)
+int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t registerIndex)
 {
 	if(!hFrame
 		|| !phOutValue
-		|| registerIndex < 0
 		|| registerIndex >= HQ_VM_GP_REGISTER_COUNT)
 	{
 		return HQ_ERROR_INVALID_ARG;

@@ -579,9 +579,9 @@ HQ_MAIN_API int HqExecutionResolveFrameStack(
 
 HQ_MAIN_API int HqExecutionGetCurrentFrame(HqExecutionHandle hExec, HqFrameHandle* phOutFrame);
 
-HQ_MAIN_API int HqExecutionSetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, int registerIndex);
+HQ_MAIN_API int HqExecutionSetIoRegister(HqExecutionHandle hExec, HqValueHandle hValue, uint32_t registerIndex);
 
-HQ_MAIN_API int HqExecutionGetIoRegister(HqExecutionHandle hExec, HqValueHandle* phOutValue, int registerIndex);
+HQ_MAIN_API int HqExecutionGetIoRegister(HqExecutionHandle hExec, HqValueHandle* phOutValue, uint32_t registerIndex);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -593,11 +593,11 @@ HQ_MAIN_API int HqFramePushValue(HqFrameHandle hFrame, HqValueHandle hValue);
 
 HQ_MAIN_API int HqFramePopValue(HqFrameHandle hFrame, HqValueHandle* phOutValue);
 
-HQ_MAIN_API int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, int stackIndex);
+HQ_MAIN_API int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t stackIndex);
 
-HQ_MAIN_API int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, int registerIndex);
+HQ_MAIN_API int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, uint32_t registerIndex);
 
-HQ_MAIN_API int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, int registerIndex);
+HQ_MAIN_API int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t registerIndex);
 
 HQ_MAIN_API int HqFrameSetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, const char* variableName);
 
