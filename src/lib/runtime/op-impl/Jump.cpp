@@ -78,18 +78,6 @@ static inline void _MoveInstructionPointer(HqExecutionHandle hExec, const int32_
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static inline void _RaiseFatalException_ObjectAsBool(HqExecutionHandle hExec, const uint32_t registerIndex)
-{
-	HqExecution::RaiseOpCodeException(
-		hExec, 
-		HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
-		"Type mismatch; expected boolean, null, primitive value, or string: r(%" PRIu32 ")", 
-		registerIndex
-	);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 static inline void _RaiseFatalException_NoValueAtGpRegister(HqExecutionHandle hExec, const uint32_t registerIndex)
 {
 	HqExecution::RaiseOpCodeException(
