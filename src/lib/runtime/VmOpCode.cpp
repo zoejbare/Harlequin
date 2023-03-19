@@ -106,7 +106,7 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 
 	_HQ_BIND_OP_CODE(CMP,  Compare);
 	_HQ_BIND_OP_CODE(TEST, Test);
-	_HQ_BIND_OP_CODE(MOV,  Move);
+	_HQ_BIND_OP_CODE(MOVE,  Move);
 	_HQ_BIND_OP_CODE(COPY, Copy);
 
 	#undef _HQ_BIND_OP_CODE

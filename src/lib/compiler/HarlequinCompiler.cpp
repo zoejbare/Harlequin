@@ -1930,7 +1930,7 @@ int HqBytecodeWriteMove(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_EMIT_UBYTE(HQ_OP_CODE_MOV);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_MOVE);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
 	_HQ_EMIT_UDWORD(gpSrcRegIndex);
 
