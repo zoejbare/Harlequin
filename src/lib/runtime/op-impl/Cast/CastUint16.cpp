@@ -52,11 +52,11 @@ extern "C" void OpCodeExec_CastUint16(HqExecutionHandle hExec)
 		switch(hSource->type)
 		{
 			case HQ_VALUE_TYPE_INT8:    hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.int8));    break;
-			case HQ_VALUE_TYPE_INT16:   hOutput = hSource;                                                          break;
+			case HQ_VALUE_TYPE_INT16:   hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.int16));   break;
 			case HQ_VALUE_TYPE_INT32:   hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.int32));   break;
 			case HQ_VALUE_TYPE_INT64:   hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.int64));   break;
 			case HQ_VALUE_TYPE_UINT8:   hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.uint8));   break;
-			case HQ_VALUE_TYPE_UINT16:  hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.uint16));  break;
+			case HQ_VALUE_TYPE_UINT16:  hOutput = hSource;                                                          break;
 			case HQ_VALUE_TYPE_UINT32:  hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.uint32));  break;
 			case HQ_VALUE_TYPE_UINT64:  hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.uint64));  break;
 			case HQ_VALUE_TYPE_FLOAT32: hOutput = HqValue::CreateUint16(hExec->hVm, uint16_t(hSource->as.float32)); break;
