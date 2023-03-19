@@ -7160,7 +7160,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 		const int writeMovInstrResult = HqBytecodeWriteMove(hFuncSerializer, 1, 0);
 		ASSERT_EQ(writeMovInstrResult, HQ_SUCCESS);
 
-		// Write the instruction that we're going to test.
+		// Write a YIELD instruction so we can examine register data.
 		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
@@ -7192,10 +7192,840 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 		_getGpRegister(hOriginalValue, hExec, 0);
 		_getGpRegister(hMovedValue, hExec, 1);
 
-		// Validate the register value.
+		// Validate the register values.
 		ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
 		ASSERT_NE(hMovedValue, HQ_VALUE_HANDLE_NULL);
 		ASSERT_EQ(hOriginalValue, hMovedValue);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
+{
+	static constexpr const char* const objTypeName = "TestObj";
+	static constexpr const char* const objMemberName = "member";
+	static constexpr const char* const testString = "test";
+
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		uint32_t testStringIndex = 0;
+		const int addTestStringResult = HqModuleWriterAddString(hModuleWriter, testString, &testStringIndex);
+		ASSERT_EQ(addTestStringResult, HQ_SUCCESS);
+
+		uint32_t funcStringIndex = 0;
+		const int addFuncStringResult = HqModuleWriterAddString(hModuleWriter, Function::main, &funcStringIndex);
+		ASSERT_EQ(addFuncStringResult, HQ_SUCCESS);
+
+		uint32_t objTypeStringIndex = 0;
+		const int addObjTypeStringResult = HqModuleWriterAddString(hModuleWriter, objTypeName, &objTypeStringIndex);
+		ASSERT_EQ(addObjTypeStringResult, HQ_SUCCESS);
+
+		const int addObjTypeResult = HqModuleWriterAddObjectType(hModuleWriter, objTypeName);
+		ASSERT_EQ(addObjTypeResult, HQ_SUCCESS);
+
+		uint32_t objMemberIndex = 0;
+		const int addObjMemberResult = HqModuleWriterAddObjectMember(hModuleWriter, objTypeName, objMemberName, HQ_VALUE_TYPE_INT8, &objMemberIndex);
+		ASSERT_EQ(addObjMemberResult, HQ_SUCCESS);
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// null
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 0);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 0, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 0, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 0, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 0, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 0, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 0, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 0, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 0, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 0, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 0, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// string
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 0, testStringIndex);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// function
+		{
+			// Write an INIT_FUNC instruction to create a function value.
+			const int writeLoadInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 0, funcStringIndex);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// object
+		{
+			// Write an INIT_OBJECT instruction to create an array value.
+			const int writeInitInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 0, objTypeStringIndex);
+			ASSERT_EQ(writeInitInstrResult, HQ_SUCCESS);
+
+			// Write an instruction to load some data into a register that will live in the array.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 1, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a STORE_OBJECT instruction to place the loaded value in the object.
+			const int writeStoreInstrResult = HqBytecodeWriteStoreObject(hFuncSerializer, 0, 1, objMemberIndex);
+			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// array
+		{
+			// Write an INIT_ARRAY instruction to create an array value.
+			const int writeInitInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, 1);
+			ASSERT_EQ(writeInitInstrResult, HQ_SUCCESS);
+
+			// Write an instruction to load some data into a register that will live in the array.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 1, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a STORE_ARRAY instruction to place the loaded value in the array.
+			const int writeStoreInstrResult = HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 0);
+			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
+
+			// Write a COPY instruction to create a new value from the source register.
+			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+
+			// Write a YIELD instruction so we can examine register data.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// null
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_EQ(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_EQ(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+		}
+
+		// bool
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsBool(hOriginalValue));
+			ASSERT_TRUE(HqValueIsBool(hCopiedValue));
+			ASSERT_EQ(HqValueGetBool(hOriginalValue), HqValueGetBool(hCopiedValue));
+		}
+
+		// int8
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsInt8(hOriginalValue));
+			ASSERT_TRUE(HqValueIsInt8(hCopiedValue));
+			ASSERT_EQ(HqValueGetInt8(hOriginalValue), HqValueGetInt8(hCopiedValue));
+		}
+
+		// int16
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsInt16(hOriginalValue));
+			ASSERT_TRUE(HqValueIsInt16(hCopiedValue));
+			ASSERT_EQ(HqValueGetInt16(hOriginalValue), HqValueGetInt16(hCopiedValue));
+		}
+
+		// int32
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsInt32(hOriginalValue));
+			ASSERT_TRUE(HqValueIsInt32(hCopiedValue));
+			ASSERT_EQ(HqValueGetInt32(hOriginalValue), HqValueGetInt32(hCopiedValue));
+		}
+
+		// int64
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsInt64(hOriginalValue));
+			ASSERT_TRUE(HqValueIsInt64(hCopiedValue));
+			ASSERT_EQ(HqValueGetInt64(hOriginalValue), HqValueGetInt64(hCopiedValue));
+		}
+
+		// uint8
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsUint8(hOriginalValue));
+			ASSERT_TRUE(HqValueIsUint8(hCopiedValue));
+			ASSERT_EQ(HqValueGetUint8(hOriginalValue), HqValueGetUint8(hCopiedValue));
+		}
+
+		// uint16
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsUint16(hOriginalValue));
+			ASSERT_TRUE(HqValueIsUint16(hCopiedValue));
+			ASSERT_EQ(HqValueGetUint16(hOriginalValue), HqValueGetUint16(hCopiedValue));
+		}
+
+		// uint32
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsUint32(hOriginalValue));
+			ASSERT_TRUE(HqValueIsUint32(hCopiedValue));
+			ASSERT_EQ(HqValueGetUint32(hOriginalValue), HqValueGetUint32(hCopiedValue));
+		}
+
+		// uint64
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsUint64(hOriginalValue));
+			ASSERT_TRUE(HqValueIsUint64(hCopiedValue));
+			ASSERT_EQ(HqValueGetUint64(hOriginalValue), HqValueGetUint64(hCopiedValue));
+		}
+
+		// float32
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsFloat32(hOriginalValue));
+			ASSERT_TRUE(HqValueIsFloat32(hCopiedValue));
+			ASSERT_EQ(HqValueGetFloat32(hOriginalValue), HqValueGetFloat32(hCopiedValue));
+		}
+
+		// float64
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsFloat64(hOriginalValue));
+			ASSERT_TRUE(HqValueIsFloat64(hCopiedValue));
+			ASSERT_EQ(HqValueGetFloat64(hOriginalValue), HqValueGetFloat64(hCopiedValue));
+		}
+
+		// string
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsString(hOriginalValue));
+			ASSERT_TRUE(HqValueIsString(hCopiedValue));
+			ASSERT_STREQ(HqValueGetString(hOriginalValue), HqValueGetString(hCopiedValue));
+		}
+
+		// function
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsFunction(hOriginalValue));
+			ASSERT_TRUE(HqValueIsFunction(hCopiedValue));
+			ASSERT_EQ(HqValueGetFunction(hOriginalValue), HqValueGetFunction(hCopiedValue));
+		}
+
+		// object
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsObject(hOriginalValue));
+			ASSERT_TRUE(HqValueIsObject(hCopiedValue));
+
+			HqValueHandle hOriginalMember = HqValueGetObjectMemberValue(hOriginalValue, objMemberName);
+			HqValueHandle hCopiedMember = HqValueGetObjectMemberValue(hCopiedValue, objMemberName);
+
+			// Validate the member values.
+			ASSERT_NE(hOriginalMember, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedMember, HQ_VALUE_HANDLE_NULL);
+			ASSERT_EQ(hOriginalMember, hCopiedMember);
+			ASSERT_TRUE(HqValueIsInt8(hOriginalMember));
+			ASSERT_EQ(HqValueGetInt8(hOriginalMember), testValueInt8);
+		}
+
+		// array
+		{
+			// Run the execution context.
+			const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+			ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+			// Get the status of the execution context.
+			ExecStatus status;
+			_getExecutionStatus(status, hExec);
+			ASSERT_TRUE(status.yield);
+			ASSERT_TRUE(status.running);
+			ASSERT_FALSE(status.complete);
+			ASSERT_FALSE(status.exception);
+			ASSERT_FALSE(status.abort);
+
+			HqValueHandle hOriginalValue = HQ_VALUE_HANDLE_NULL;
+			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
+
+			// Get the register values we want to inspect.
+			_getGpRegister(hOriginalValue, hExec, 0);
+			_getGpRegister(hCopiedValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hOriginalValue, hCopiedValue);
+			ASSERT_TRUE(HqValueIsArray(hOriginalValue));
+			ASSERT_TRUE(HqValueIsArray(hCopiedValue));
+
+			HqValueHandle hOriginalElement = HqValueGetArrayElement(hOriginalValue, 0);
+			HqValueHandle hCopiedElement = HqValueGetArrayElement(hCopiedValue, 0);
+
+			// Validate the array element values.
+			ASSERT_NE(hOriginalElement, HQ_VALUE_HANDLE_NULL);
+			ASSERT_NE(hCopiedElement, HQ_VALUE_HANDLE_NULL);
+			ASSERT_EQ(hOriginalElement, hCopiedElement);
+			ASSERT_TRUE(HqValueIsInt8(hOriginalElement));
+			ASSERT_EQ(HqValueGetInt8(hOriginalElement), testValueInt8);
+		}
 	};
 
 	std::vector<uint8_t> bytecode;
