@@ -6241,6 +6241,3962 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// int8
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// int16
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// int32
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// int64
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// uint8
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// uint16
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// uint32
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// uint64
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// float32
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+
+		// float64
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), 1);
+		}
+
+		// int8
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const int8_t expectedValue = static_cast<int8_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), 1);
+		}
+
+		// int8
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const int16_t expectedValue = static_cast<int16_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), 1);
+		}
+
+		// int8
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const int32_t expectedValue = static_cast<int32_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), 1);
+		}
+
+		// int8
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const int64_t expectedValue = static_cast<int64_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), 1);
+		}
+
+		// int8
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const uint8_t expectedValue = static_cast<uint8_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), 1);
+		}
+
+		// int8
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const uint16_t expectedValue = static_cast<uint16_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), 1);
+		}
+
+		// int8
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const uint32_t expectedValue = static_cast<uint32_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), 1);
+		}
+
+		// int8
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const uint64_t expectedValue = static_cast<uint64_t>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), 1.0f);
+		}
+
+		// int8
+		{
+			const float expectedValue = static_cast<float>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const float expectedValue = static_cast<float>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const float expectedValue = static_cast<float>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const float expectedValue = static_cast<float>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const float expectedValue = static_cast<float>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const float expectedValue = static_cast<float>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const float expectedValue = static_cast<float>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const float expectedValue = static_cast<float>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const float expectedValue = static_cast<float>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const float expectedValue = static_cast<float>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat32(hValue));
+			ASSERT_FLOAT_EQ(HqValueGetFloat32(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), 1.0);
+		}
+
+		// int8
+		{
+			const double expectedValue = static_cast<double>(testValueInt8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// int16
+		{
+			const double expectedValue = static_cast<double>(testValueInt16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// int32
+		{
+			const double expectedValue = static_cast<double>(testValueInt32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// int64
+		{
+			const double expectedValue = static_cast<double>(testValueInt64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// uint8
+		{
+			const double expectedValue = static_cast<double>(testValueUint8);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// uint16
+		{
+			const double expectedValue = static_cast<double>(testValueUint16);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// uint32
+		{
+			const double expectedValue = static_cast<double>(testValueUint32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// uint64
+		{
+			const double expectedValue = static_cast<double>(testValueUint64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// float32
+		{
+			const double expectedValue = static_cast<double>(testValueFloat32);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+
+		// float64
+		{
+			const double expectedValue = static_cast<double>(testValueFloat64);
+
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsFloat64(hValue));
+			ASSERT_DOUBLE_EQ(HqValueGetFloat64(hValue), expectedValue);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
+{
+	static constexpr int8_t testValueInt8 = 12;
+	static constexpr int16_t testValueInt16 = 1234;
+	static constexpr int32_t testValueInt32 = 123456;
+	static constexpr int64_t testValueInt64 = 12345678901ll;
+	static constexpr uint8_t testValueUint8 = 23;
+	static constexpr uint16_t testValueUint16 = 2345;
+	static constexpr uint32_t testValueUint32 = 234567;
+	static constexpr uint64_t testValueUint64 = 23456789012ull;
+	static constexpr float testValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr double testValueFloat64 = 2.7182818284590452353602874713527;
+
+	static constexpr uint32_t tempRegIndex = HQ_VM_GP_REGISTER_COUNT - 1;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		_setupFunctionSerializer(hFuncSerializer, endianness);
+
+		// bool
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 0, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 1, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 2, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 3, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 4, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 5, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 6, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 7, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 8, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float32
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 9, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// float64
+		{
+			// Write an instruction to load the initial value into a register.
+			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
+			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 10, tempRegIndex);
+			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine register data.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		_getExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 0);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "true");
+		}
+
+		// int8
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 1);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "12");
+		}
+
+		// int16
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 2);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "1234");
+		}
+
+		// int32
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 3);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "123456");
+		}
+
+		// int64
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 4);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "12345678901");
+		}
+
+		// uint8
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 5);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "23");
+		}
+
+		// uint16
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 6);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "2345");
+		}
+
+		// uint32
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 7);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "234567");
+		}
+
+		// uint64
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 8);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "23456789012");
+		}
+
+		// float32
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 9);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "3.141593");
+		}
+
+		// float64
+		{
+			// Get the register values we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			_getGpRegister(hValue, hExec, 10);
+
+			// Validate the register values.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsString(hValue));
+			ASSERT_STREQ(HqValueGetString(hValue), "2.718282");
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 {
 	static constexpr const char* const objTypeName = "TestObj";
