@@ -31,12 +31,39 @@ typedef void (*RuntimeCallback)(HqVmHandle, HqExecutionHandle);
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback);
-extern "C" void ProcessBytecode(
-	const char* moduleName,
-	const char* function,
-	RuntimeCallback callback,
-	const std::vector<uint8_t>& bytecode
-);
+struct ExecStatus
+{
+	bool yield;
+	bool running;
+	bool complete;
+	bool exception;
+	bool abort;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Util
+{
+	void CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback);
+	void ProcessBytecode(
+		const char* moduleName,
+		const char* function,
+		RuntimeCallback callback,
+		const std::vector<uint8_t>& bytecode
+	);
+
+	void SetupFunctionSerializer(HqSerializerHandle& output, int endianness);
+	void FinalizeFunctionSerializer(
+		HqSerializerHandle& hSerializer,
+		HqModuleWriterHandle hModuleWriter,
+		const char* functionSignature
+	);
+
+	void GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec);
+	void GetCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec);
+	void GetGpRegister(HqValueHandle& output, HqExecutionHandle hExec, uint32_t gpRegIndex);
+	void GetIoRegister(HqValueHandle& output, HqExecutionHandle hExec, uint32_t ioRegIndex);
+	void GetStackValue(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t stackIndex);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

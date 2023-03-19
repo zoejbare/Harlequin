@@ -16,8 +16,8 @@
 // IN THE SOFTWARE.
 //
 
+#include "../FuncTestUtil.hpp"
 #include "../Memory.hpp"
-#include "../RuntimeUtil.hpp"
 
 #include <compiler/JumpInstruction.hpp>
 #include <gtest/gtest.h>
@@ -43,123 +43,6 @@ public:
 		// Force the memory handler to reset after each test.
 		Memory::Instance.Reset();
 	}
-
-
-protected:
-
-	struct ExecStatus
-	{
-		bool yield;
-		bool running;
-		bool complete;
-		bool exception;
-		bool abort;
-	};
-
-	static void _setupFunctionSerializer(HqSerializerHandle& output, const int endianness)
-	{
-		// Create a serializer for the function.
-		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
-		const int createFuncSerializerResult = HqSerializerCreate(&hFuncSerializer, HQ_SERIALIZER_MODE_WRITER);
-		ASSERT_EQ(createFuncSerializerResult, HQ_SUCCESS);
-
-		// Set the file serializer to the system's native endianness.
-		const int setFuncSerializerEndiannessResult = HqSerializerSetEndianness(hFuncSerializer, endianness);
-		ASSERT_EQ(setFuncSerializerEndiannessResult, HQ_SUCCESS);
-
-		output = hFuncSerializer;
-	}
-
-	static void _finalizeFunctionSerializer(
-		HqSerializerHandle& hSerializer,
-		HqModuleWriterHandle hModuleWriter,
-		const char* const functionSignature)
-	{
-		// All functions should end with a RETURN opcode.
-		const int writeReturnInstrResult = HqBytecodeWriteReturn(hSerializer);
-		ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
-
-		const void* const pFuncData = HqSerializerGetRawStreamPointer(hSerializer);
-		const size_t funcLength = HqSerializerGetStreamLength(hSerializer);
-
-		// Add the function to the module writer.
-		const int addFunctionResult = HqModuleWriterAddFunction(hModuleWriter, functionSignature, pFuncData, funcLength, 0, 0);
-		ASSERT_EQ(addFunctionResult, HQ_SUCCESS);
-
-		// Dispose of the function serializer.
-		const int disposeFuncSerializerResult = HqSerializerDispose(&hSerializer);
-		ASSERT_EQ(disposeFuncSerializerResult, HQ_SUCCESS);
-	}
-
-	static void _getExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
-	{
-		// Get the 'yielded' status.
-		const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield);
-		ASSERT_EQ(getYieldStatusResult, HQ_SUCCESS);
-
-		// Get the 'running' status.
-		const int getRunningStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &output.running);
-		ASSERT_EQ(getRunningStatusResult, HQ_SUCCESS);
-
-		// Get the 'completed' status.
-		const int getCompletedStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &output.complete);
-		ASSERT_EQ(getCompletedStatusResult, HQ_SUCCESS);
-
-		// Get the 'exception' status.
-		const int getExceptionStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &output.exception);
-		ASSERT_EQ(getExceptionStatusResult, HQ_SUCCESS);
-
-		// Get the 'aborted' status.
-		const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort);
-		ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
-	}
-
-	static void _getCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec)
-	{
-		// Get the current frame in the callstack.
-		HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-		const int getFrameResult = HqExecutionGetCurrentFrame(hExec, &hFrame);
-		ASSERT_EQ(getFrameResult, HQ_SUCCESS);
-		ASSERT_NE(hFrame, HQ_FRAME_HANDLE_NULL);
-
-		output = hFrame;
-	}
-
-	static void _getGpRegister(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t gpRegIndex)
-	{
-		HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-		_getCurrentFrame(hFrame, hExec);
-
-		// Get the general-purpose register that has the value we want to inspect.
-		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		const int getGpRegisterResult = HqFrameGetGpRegister(hFrame, &hValue, gpRegIndex);
-		ASSERT_EQ(getGpRegisterResult, HQ_SUCCESS);
-
-		output = hValue;
-	}
-
-	static void _getIoRegister(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t ioRegIndex)
-	{
-		// Get the general-purpose register that has the value we want to inspect.
-		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, ioRegIndex);
-		ASSERT_EQ(getIoRegisterResult, HQ_SUCCESS);
-
-		output = hValue;
-	}
-
-	static void _getStackValue(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t stackIndex)
-	{
-		HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-		_getCurrentFrame(hFrame, hExec);
-
-		// Get the general-purpose register that has the value we want to inspect.
-		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		const int peekStackValueResult = HqFramePeekValue(hFrame, &hValue, stackIndex);
-		ASSERT_EQ(peekStackValueResult, HQ_SUCCESS);
-
-		output = hValue;
-	}
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -170,10 +53,10 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Return)
 
 	// Compiling with just an empty init function is enough to test the RETURN opcode since
 	// that gets added to the module by default if no other bytecode is supplied for it.
-	CompileBytecode(bytecode, nullptr);
+	Util::CompileBytecode(bytecode, nullptr);
 	ASSERT_GT(bytecode.size(), 0u);
 
-	ProcessBytecode("TestOpCodes", nullptr, nullptr, bytecode);
+	Util::ProcessBytecode("TestOpCodes", nullptr, nullptr, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -185,14 +68,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Nop)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeNopInstrResult = HqBytecodeWriteNop(hFuncSerializer);
 		ASSERT_EQ(writeNopInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -205,7 +88,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Nop)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_TRUE(status.complete);
@@ -216,11 +99,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Nop)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -232,14 +115,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Abort)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -252,7 +135,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Abort)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -263,11 +146,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Abort)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -279,14 +162,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Yield)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -299,7 +182,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Yield)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -310,11 +193,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Yield)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -346,7 +229,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		ASSERT_EQ(addStringResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM_NULL instruction.
 		const int writeLoadNullInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 0);
@@ -405,7 +288,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -418,7 +301,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -429,7 +312,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_EQ(hValue, HQ_VALUE_HANDLE_NULL);
@@ -439,7 +322,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -451,7 +334,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -463,7 +346,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -475,7 +358,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -487,7 +370,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -499,7 +382,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -511,7 +394,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -523,7 +406,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -535,7 +418,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -547,7 +430,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -559,7 +442,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 11);
+			Util::GetGpRegister(hValue, hExec, 11);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -571,7 +454,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		{
 			// Get the register value.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 12);
+			Util::GetGpRegister(hValue, hExec, 12);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -583,11 +466,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -611,7 +494,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 		ASSERT_EQ(addGlobalResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM instruction so we have data to put in the global variable.
 		const int writeLoadImmInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -630,7 +513,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -643,7 +526,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -661,7 +544,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
 
 		// Get the register value we want to inspect.
-		_getGpRegister(hValue, hExec, 1);
+		Util::GetGpRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -672,11 +555,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -689,7 +572,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 	{
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM instruction so we have data to put in the I/O register.
 		const int writeLoadImmInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -708,7 +591,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -721,7 +604,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -730,7 +613,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 
 		// Get the GP register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		_getGpRegister(hValue, hExec, 1);
+		Util::GetGpRegister(hValue, hExec, 1);
 
 		// Validate the GP register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -738,7 +621,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
 
 		// Get the I/O register value we want to inspect.
-		_getIoRegister(hValue, hExec, 2);
+		Util::GetIoRegister(hValue, hExec, 2);
 
 		// Validate the I/O register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -749,11 +632,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -776,7 +659,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		ASSERT_EQ(addObjMemberResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_OBJECT instruction to initialize an instance of an object into a GP register.
 		const int writeInitObjInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 0, 0);
@@ -799,7 +682,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -812,7 +695,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -823,7 +706,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -848,7 +731,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -860,11 +743,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -878,7 +761,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_ARRAY instruction to initialize an instance of an array into a GP register.
 		const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, 1);
@@ -901,7 +784,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -914,7 +797,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -925,7 +808,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -944,7 +827,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -956,11 +839,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -982,7 +865,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 		// Main function
 		{
 			// Set the function serializer.
-			_setupFunctionSerializer(hFuncSerializer, endianness);
+			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write the instruction that we're going to test.
 			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1001,13 +884,13 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
-			_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+			Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 		}
 
 		// Sub-function
 		{
 			// Set the function serializer.
-			_setupFunctionSerializer(hFuncSerializer, endianness);
+			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write a LOAD_PARAM instruction to load the input parameter to a GP register.
 			const int writeLoadInstrResult = HqBytecodeWriteLoadParam(hFuncSerializer, 0, 0);
@@ -1020,7 +903,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
-			_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, functionName);
+			Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, functionName);
 		}
 	};
 
@@ -1034,7 +917,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1043,7 +926,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 
 		// Get the register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		_getIoRegister(hValue, hExec, 1);
+		Util::GetIoRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1054,11 +937,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1082,7 +965,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Native)
 		ASSERT_EQ(addNativeFunctionResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1101,7 +984,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Native)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 
 	};
 
@@ -1115,7 +998,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Native)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1124,7 +1007,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Native)
 
 		// Get the register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		_getIoRegister(hValue, hExec, 1);
+		Util::GetIoRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1135,11 +1018,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Native)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1162,14 +1045,14 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$NativeNonExistent)
 		ASSERT_EQ(addNativeFunctionResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the CALL isntruction to attempt invoke the function.
 		const int writeCallInstrResult = HqBytecodeWriteCall(hFuncSerializer, stringIndex);
 		ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 
 	};
 
@@ -1183,7 +1066,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$NativeNonExistent)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1194,11 +1077,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$NativeNonExistent)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1220,7 +1103,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 		// Main function
 		{
 			// Set the function serializer.
-			_setupFunctionSerializer(hFuncSerializer, endianness);
+			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write the instruction that we're going to test.
 			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1243,13 +1126,13 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
-			_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+			Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 		}
 
 		// Sub-function
 		{
 			// Set the function serializer.
-			_setupFunctionSerializer(hFuncSerializer, endianness);
+			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write a LOAD_PARAM instruction to load the input parameter to a GP register.
 			const int writeLoadInstrResult = HqBytecodeWriteLoadParam(hFuncSerializer, 0, 0);
@@ -1262,7 +1145,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
-			_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, functionName);
+			Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, functionName);
 		}
 	};
 
@@ -1276,7 +1159,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1285,7 +1168,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 
 		// Get the register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		_getIoRegister(hValue, hExec, 1);
+		Util::GetIoRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1296,11 +1179,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1324,7 +1207,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Native)
 		ASSERT_EQ(addNativeFunctionResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
 		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1347,7 +1230,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Native)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 
 	};
 
@@ -1361,7 +1244,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Native)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1370,7 +1253,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Native)
 
 		// Get the register value we want to inspect.
 		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-		_getIoRegister(hValue, hExec, 1);
+		Util::GetIoRegister(hValue, hExec, 1);
 
 		// Validate the register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1381,11 +1264,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Native)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1408,7 +1291,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$NativeNonExistent)
 		ASSERT_EQ(addNativeFunctionResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_FUNC instruction to create a value pointing to the function we want to call.
 		const int writeInitFuncInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 0, stringIndex);
@@ -1419,7 +1302,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$NativeNonExistent)
 		ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 
 	};
 
@@ -1433,7 +1316,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$NativeNonExistent)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1444,11 +1327,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$NativeNonExistent)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1472,7 +1355,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 		ASSERT_EQ(addObjStringResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		const size_t guardOffsetStart = HqSerializerGetStreamPosition(hFuncSerializer);
 
@@ -1505,7 +1388,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 		ASSERT_EQ(writeRaiseUnhandledInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 
 		// Add the guarded block to the module.
 		uint32_t guardBlockId = 0;
@@ -1540,7 +1423,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1551,7 +1434,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getIoRegister(hValue, hExec, 0);
+			Util::GetIoRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1564,7 +1447,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 		ASSERT_EQ(execRunAgainResult, HQ_SUCCESS);
 
 		// Get the status of the execution context.
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1575,7 +1458,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getIoRegister(hValue, hExec, 0);
+			Util::GetIoRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1587,11 +1470,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1605,7 +1488,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
 		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
@@ -1628,7 +1511,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		ASSERT_EQ(writeAnotherYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -1641,7 +1524,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1652,7 +1535,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getStackValue(hValue, hExec, 0);
+			Util::GetStackValue(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1665,7 +1548,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		ASSERT_EQ(execRunAgainResult, HQ_SUCCESS);
 
 		// Get the status of the execution context.
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -1676,7 +1559,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -1688,11 +1571,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1706,7 +1589,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 		JumpInstruction jump;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Begin the jump block.
 		jump.Begin(hFuncSerializer, JumpInstruction::Behavior::Forward, JumpInstruction::Condition::None, 0);
@@ -1720,7 +1603,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 		jump.End();
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -1733,7 +1616,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_TRUE(status.complete);
@@ -1744,11 +1627,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1789,7 +1672,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 		ASSERT_EQ(addDummyNativeFunctionResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Load the immediate values that we expect evaluate to true.
 		{
@@ -1872,7 +1755,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 		writeJumpBlock(14); // function
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -1885,7 +1768,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_TRUE(status.complete);
@@ -1896,11 +1779,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1919,7 +1802,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 		ASSERT_EQ(addEmptyStringResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Load the immediate values that we expect evaluate to true.
 		{
@@ -1998,7 +1881,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 		writeJumpBlock(13); // array
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -2011,7 +1894,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_TRUE(status.complete);
@@ -2022,11 +1905,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2045,7 +1928,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 		ASSERT_EQ(addStringResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write an INIT_ARRAY instruction to create an array we can query.
 		const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, arrayLength);
@@ -2072,7 +1955,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 		ASSERT_EQ(writeLengthNullInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -2085,7 +1968,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_FALSE(status.yield);
 		ASSERT_FALSE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -2096,7 +1979,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2110,7 +1993,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2122,7 +2005,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_EQ(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2132,11 +2015,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2192,7 +2075,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		ASSERT_EQ(addRightStringResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -2355,7 +2238,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -2368,7 +2251,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -2379,7 +2262,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2391,7 +2274,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2403,7 +2286,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2415,7 +2298,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2427,7 +2310,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2439,7 +2322,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2451,7 +2334,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2463,7 +2346,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2475,7 +2358,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2487,7 +2370,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2499,7 +2382,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2521,7 +2404,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 11);
+			Util::GetGpRegister(hValue, hExec, 11);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2534,7 +2417,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 12);
+			Util::GetGpRegister(hValue, hExec, 12);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2546,11 +2429,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2592,7 +2475,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -2731,7 +2614,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -2744,7 +2627,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -2755,7 +2638,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2767,7 +2650,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2779,7 +2662,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2791,7 +2674,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2803,7 +2686,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2815,7 +2698,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2827,7 +2710,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2839,7 +2722,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2851,7 +2734,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2863,7 +2746,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2875,7 +2758,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -2887,11 +2770,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2933,7 +2816,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -3072,7 +2955,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -3085,7 +2968,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -3096,7 +2979,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3108,7 +2991,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3120,7 +3003,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3132,7 +3015,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3144,7 +3027,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3156,7 +3039,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3168,7 +3051,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3180,7 +3063,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3192,7 +3075,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3204,7 +3087,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3216,7 +3099,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3228,11 +3111,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -3274,7 +3157,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -3413,7 +3296,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -3426,7 +3309,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -3437,7 +3320,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3449,7 +3332,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3461,7 +3344,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3473,7 +3356,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3485,7 +3368,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3497,7 +3380,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3509,7 +3392,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3521,7 +3404,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3533,7 +3416,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3545,7 +3428,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3557,7 +3440,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3569,11 +3452,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -3615,7 +3498,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// int8
 		{
@@ -3742,7 +3625,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -3755,7 +3638,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -3766,7 +3649,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3778,7 +3661,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3790,7 +3673,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3802,7 +3685,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3814,7 +3697,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3826,7 +3709,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3838,7 +3721,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3850,7 +3733,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3862,7 +3745,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3874,7 +3757,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -3886,11 +3769,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -3932,7 +3815,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -4071,7 +3954,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -4084,7 +3967,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -4095,7 +3978,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4114,7 +3997,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4133,7 +4016,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4152,7 +4035,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4171,7 +4054,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4190,7 +4073,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4209,7 +4092,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4228,7 +4111,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4247,7 +4130,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4261,7 +4144,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4275,7 +4158,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4287,11 +4170,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -4327,7 +4210,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -4442,7 +4325,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -4455,7 +4338,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -4466,7 +4349,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4478,7 +4361,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4490,7 +4373,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4502,7 +4385,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4514,7 +4397,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4526,7 +4409,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4538,7 +4421,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4550,7 +4433,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4562,7 +4445,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4574,11 +4457,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -4614,7 +4497,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -4729,7 +4612,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -4742,7 +4625,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -4753,7 +4636,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4765,7 +4648,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4777,7 +4660,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4789,7 +4672,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4801,7 +4684,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4813,7 +4696,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4825,7 +4708,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4837,7 +4720,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4849,7 +4732,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -4861,11 +4744,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -4901,7 +4784,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Bool
 		{
@@ -5016,7 +4899,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -5029,7 +4912,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -5040,7 +4923,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5052,7 +4935,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5064,7 +4947,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5076,7 +4959,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5088,7 +4971,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5100,7 +4983,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5112,7 +4995,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5124,7 +5007,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5136,7 +5019,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5148,11 +5031,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5188,7 +5071,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// int8
 		{
@@ -5291,7 +5174,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -5304,7 +5187,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -5315,7 +5198,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5327,7 +5210,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5339,7 +5222,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5351,7 +5234,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5363,7 +5246,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5375,7 +5258,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5387,7 +5270,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5399,7 +5282,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5411,11 +5294,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5451,7 +5334,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// int8
 		{
@@ -5554,7 +5437,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -5567,7 +5450,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -5578,7 +5461,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5590,7 +5473,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5602,7 +5485,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5614,7 +5497,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5626,7 +5509,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5638,7 +5521,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5650,7 +5533,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5662,7 +5545,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5674,11 +5557,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5714,7 +5597,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// int8
 		{
@@ -5817,7 +5700,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -5830,7 +5713,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -5843,7 +5726,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5857,7 +5740,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5871,7 +5754,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5885,7 +5768,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5899,7 +5782,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5913,7 +5796,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5927,7 +5810,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5941,7 +5824,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -5953,11 +5836,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5993,7 +5876,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// int8
 		{
@@ -6096,7 +5979,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -6109,7 +5992,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -6122,7 +6005,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6136,7 +6019,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6150,7 +6033,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6164,7 +6047,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6178,7 +6061,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6192,7 +6075,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6206,7 +6089,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6220,7 +6103,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6232,11 +6115,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -6261,7 +6144,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -6389,7 +6272,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -6402,7 +6285,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -6413,7 +6296,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6425,7 +6308,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6437,7 +6320,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6449,7 +6332,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6461,7 +6344,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6473,7 +6356,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6485,7 +6368,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6497,7 +6380,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6509,7 +6392,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6521,7 +6404,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6533,7 +6416,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6545,11 +6428,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -6574,7 +6457,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -6702,7 +6585,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -6715,7 +6598,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -6726,7 +6609,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6740,7 +6623,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6754,7 +6637,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6768,7 +6651,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6782,7 +6665,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6796,7 +6679,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6810,7 +6693,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6824,7 +6707,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6838,7 +6721,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6852,7 +6735,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6866,7 +6749,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -6878,11 +6761,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -6907,7 +6790,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -7035,7 +6918,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -7048,7 +6931,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -7059,7 +6942,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7073,7 +6956,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7087,7 +6970,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7101,7 +6984,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7115,7 +6998,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7129,7 +7012,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7143,7 +7026,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7157,7 +7040,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7171,7 +7054,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7185,7 +7068,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7199,7 +7082,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7211,11 +7094,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -7240,7 +7123,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -7368,7 +7251,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -7381,7 +7264,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -7392,7 +7275,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7406,7 +7289,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7420,7 +7303,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7434,7 +7317,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7448,7 +7331,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7462,7 +7345,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7476,7 +7359,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7490,7 +7373,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7504,7 +7387,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7518,7 +7401,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7532,7 +7415,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7544,11 +7427,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -7573,7 +7456,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -7701,7 +7584,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -7714,7 +7597,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -7725,7 +7608,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7739,7 +7622,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7753,7 +7636,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7767,7 +7650,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7781,7 +7664,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7795,7 +7678,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7809,7 +7692,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7823,7 +7706,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7837,7 +7720,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7851,7 +7734,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7865,7 +7748,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -7877,11 +7760,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -7906,7 +7789,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -8034,7 +7917,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -8047,7 +7930,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -8058,7 +7941,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8072,7 +7955,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8086,7 +7969,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8100,7 +7983,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8114,7 +7997,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8128,7 +8011,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8142,7 +8025,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8156,7 +8039,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8170,7 +8053,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8184,7 +8067,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8198,7 +8081,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8210,11 +8093,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -8239,7 +8122,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -8367,7 +8250,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -8380,7 +8263,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -8391,7 +8274,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8405,7 +8288,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8419,7 +8302,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8433,7 +8316,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8447,7 +8330,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8461,7 +8344,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8475,7 +8358,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8489,7 +8372,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8503,7 +8386,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8517,7 +8400,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8531,7 +8414,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8543,11 +8426,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -8572,7 +8455,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -8700,7 +8583,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -8713,7 +8596,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -8724,7 +8607,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8738,7 +8621,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8752,7 +8635,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8766,7 +8649,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8780,7 +8663,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8794,7 +8677,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8808,7 +8691,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8822,7 +8705,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8836,7 +8719,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8850,7 +8733,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8864,7 +8747,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -8876,11 +8759,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -8905,7 +8788,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -9033,7 +8916,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -9046,7 +8929,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -9057,7 +8940,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9071,7 +8954,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9085,7 +8968,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9099,7 +8982,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9113,7 +8996,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9127,7 +9010,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9141,7 +9024,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9155,7 +9038,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9169,7 +9052,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9183,7 +9066,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9197,7 +9080,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9209,11 +9092,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -9238,7 +9121,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -9366,7 +9249,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -9379,7 +9262,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -9390,7 +9273,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9404,7 +9287,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9418,7 +9301,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9432,7 +9315,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9446,7 +9329,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9460,7 +9343,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9474,7 +9357,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9488,7 +9371,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9502,7 +9385,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9516,7 +9399,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9530,7 +9413,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9542,11 +9425,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -9571,7 +9454,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -9699,7 +9582,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -9712,7 +9595,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -9723,7 +9606,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9737,7 +9620,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9751,7 +9634,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9765,7 +9648,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9779,7 +9662,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9793,7 +9676,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9807,7 +9690,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9821,7 +9704,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9835,7 +9718,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9849,7 +9732,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9863,7 +9746,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -9875,11 +9758,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -9904,7 +9787,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// bool
 		{
@@ -10032,7 +9915,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -10045,7 +9928,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -10056,7 +9939,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 0);
+			Util::GetGpRegister(hValue, hExec, 0);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10068,7 +9951,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 1);
+			Util::GetGpRegister(hValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10080,7 +9963,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 2);
+			Util::GetGpRegister(hValue, hExec, 2);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10092,7 +9975,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 3);
+			Util::GetGpRegister(hValue, hExec, 3);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10104,7 +9987,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 4);
+			Util::GetGpRegister(hValue, hExec, 4);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10116,7 +9999,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 5);
+			Util::GetGpRegister(hValue, hExec, 5);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10128,7 +10011,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 6);
+			Util::GetGpRegister(hValue, hExec, 6);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10140,7 +10023,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 7);
+			Util::GetGpRegister(hValue, hExec, 7);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10152,7 +10035,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 8);
+			Util::GetGpRegister(hValue, hExec, 8);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10164,7 +10047,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 9);
+			Util::GetGpRegister(hValue, hExec, 9);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10176,7 +10059,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		{
 			// Get the register values we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, 10);
+			Util::GetGpRegister(hValue, hExec, 10);
 
 			// Validate the register values.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10188,11 +10071,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -10272,7 +10155,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 		ASSERT_EQ(addDummyFuncResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// True comparisons
 		{
@@ -10634,7 +10517,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 		}
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -10647,7 +10530,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -10659,7 +10542,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, regIndex);
+			Util::GetGpRegister(hValue, hExec, regIndex);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10672,7 +10555,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 		ASSERT_EQ(execRunAgainResult, HQ_SUCCESS);
 
 		// Get the status of the execution context.
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -10684,7 +10567,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, regIndex);
+			Util::GetGpRegister(hValue, hExec, regIndex);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -10696,11 +10579,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -10750,7 +10633,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 		ASSERT_EQ(addObjTypeResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// True comparisons
 		{
@@ -11028,7 +10911,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 		}
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -11041,7 +10924,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -11053,7 +10936,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, regIndex);
+			Util::GetGpRegister(hValue, hExec, regIndex);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -11066,7 +10949,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 		ASSERT_EQ(execRunAgainResult, HQ_SUCCESS);
 
 		// Get the status of the execution context.
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -11078,7 +10961,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 		{
 			// Get the register value we want to inspect.
 			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-			_getGpRegister(hValue, hExec, regIndex);
+			Util::GetGpRegister(hValue, hExec, regIndex);
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
@@ -11090,11 +10973,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -11106,7 +10989,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM_I8 instruction just to have a value to move.
 		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 0, 123);
@@ -11121,7 +11004,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -11134,7 +11017,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 
 		// Get the status of the execution context.
 		ExecStatus status;
-		_getExecutionStatus(status, hExec);
+		Util::GetExecutionStatus(status, hExec);
 		ASSERT_TRUE(status.yield);
 		ASSERT_TRUE(status.running);
 		ASSERT_FALSE(status.complete);
@@ -11145,8 +11028,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 		HqValueHandle hMovedValue = HQ_VALUE_HANDLE_NULL;
 
 		// Get the register values we want to inspect.
-		_getGpRegister(hOriginalValue, hExec, 0);
-		_getGpRegister(hMovedValue, hExec, 1);
+		Util::GetGpRegister(hOriginalValue, hExec, 0);
+		Util::GetGpRegister(hMovedValue, hExec, 1);
 
 		// Validate the register values.
 		ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11157,11 +11040,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -11207,7 +11090,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 		ASSERT_EQ(addObjMemberResult, HQ_SUCCESS);
 
 		// Set the function serializer.
-		_setupFunctionSerializer(hFuncSerializer, endianness);
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// null
 		{
@@ -11466,7 +11349,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 		}
 
 		// Finalize the serializer and add it to the module.
-		_finalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
 	};
 
 	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
@@ -11481,7 +11364,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11492,8 +11375,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_EQ(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11508,7 +11391,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11519,8 +11402,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11539,7 +11422,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11550,8 +11433,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11570,7 +11453,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11581,8 +11464,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11601,7 +11484,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11612,8 +11495,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11632,7 +11515,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11643,8 +11526,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11663,7 +11546,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11674,8 +11557,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11694,7 +11577,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11705,8 +11588,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11725,7 +11608,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11736,8 +11619,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11756,7 +11639,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11767,8 +11650,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11787,7 +11670,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11798,8 +11681,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11818,7 +11701,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11829,8 +11712,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11849,7 +11732,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11860,8 +11743,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11880,7 +11763,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11891,8 +11774,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11911,7 +11794,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11922,8 +11805,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11951,7 +11834,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 
 			// Get the status of the execution context.
 			ExecStatus status;
-			_getExecutionStatus(status, hExec);
+			Util::GetExecutionStatus(status, hExec);
 			ASSERT_TRUE(status.yield);
 			ASSERT_TRUE(status.running);
 			ASSERT_FALSE(status.complete);
@@ -11962,8 +11845,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 			HqValueHandle hCopiedValue = HQ_VALUE_HANDLE_NULL;
 
 			// Get the register values we want to inspect.
-			_getGpRegister(hOriginalValue, hExec, 0);
-			_getGpRegister(hCopiedValue, hExec, 1);
+			Util::GetGpRegister(hOriginalValue, hExec, 0);
+			Util::GetGpRegister(hCopiedValue, hExec, 1);
 
 			// Validate the register values.
 			ASSERT_NE(hOriginalValue, HQ_VALUE_HANDLE_NULL);
@@ -11987,11 +11870,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 	std::vector<uint8_t> bytecode;
 
 	// Construct the module bytecode for the test.
-	CompileBytecode(bytecode, compilerCallback);
+	Util::CompileBytecode(bytecode, compilerCallback);
 	ASSERT_GT(bytecode.size(), 0u);
 
 	// Run the module bytecode.
-	ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

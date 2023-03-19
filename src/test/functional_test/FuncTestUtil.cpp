@@ -16,14 +16,14 @@
 // IN THE SOFTWARE.
 //
 
-#include "RuntimeUtil.hpp"
+#include "FuncTestUtil.hpp"
 #include "Memory.hpp"
 
 #include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback)
+void Util::CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback)
 {
 	// Set the memory context so we have a better idea of where to look when memory validation failures occur.
 	Memory::Instance.SetContext("compiler");
@@ -90,7 +90,7 @@ extern "C" void CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallb
 
 //----------------------------------------------------------------------------------------------------------------------
 
-extern "C" void ProcessBytecode(
+void Util::ProcessBytecode(
 	const char* const moduleName,
 	const char* const function,
 	RuntimeCallback callback,
@@ -149,6 +149,125 @@ extern "C" void ProcessBytecode(
 
 	// Verify all memory has been freed.
 	Memory::Instance.Validate();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::SetupFunctionSerializer(HqSerializerHandle& output, const int endianness)
+{
+	// Create a serializer for the function.
+	HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+	const int createFuncSerializerResult = HqSerializerCreate(&hFuncSerializer, HQ_SERIALIZER_MODE_WRITER);
+	ASSERT_EQ(createFuncSerializerResult, HQ_SUCCESS);
+
+	// Set the file serializer to the system's native endianness.
+	const int setFuncSerializerEndiannessResult = HqSerializerSetEndianness(hFuncSerializer, endianness);
+	ASSERT_EQ(setFuncSerializerEndiannessResult, HQ_SUCCESS);
+
+	output = hFuncSerializer;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::FinalizeFunctionSerializer(
+	HqSerializerHandle& hSerializer,
+	HqModuleWriterHandle hModuleWriter,
+	const char* const functionSignature)
+{
+	// All functions should end with a RETURN opcode.
+	const int writeReturnInstrResult = HqBytecodeWriteReturn(hSerializer);
+	ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
+
+	const void* const pFuncData = HqSerializerGetRawStreamPointer(hSerializer);
+	const size_t funcLength = HqSerializerGetStreamLength(hSerializer);
+
+	// Add the function to the module writer.
+	const int addFunctionResult = HqModuleWriterAddFunction(hModuleWriter, functionSignature, pFuncData, funcLength, 0, 0);
+	ASSERT_EQ(addFunctionResult, HQ_SUCCESS);
+
+	// Dispose of the function serializer.
+	const int disposeFuncSerializerResult = HqSerializerDispose(&hSerializer);
+	ASSERT_EQ(disposeFuncSerializerResult, HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
+{
+	// Get the 'yielded' status.
+	const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield);
+	ASSERT_EQ(getYieldStatusResult, HQ_SUCCESS);
+
+	// Get the 'running' status.
+	const int getRunningStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &output.running);
+	ASSERT_EQ(getRunningStatusResult, HQ_SUCCESS);
+
+	// Get the 'completed' status.
+	const int getCompletedStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &output.complete);
+	ASSERT_EQ(getCompletedStatusResult, HQ_SUCCESS);
+
+	// Get the 'exception' status.
+	const int getExceptionStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &output.exception);
+	ASSERT_EQ(getExceptionStatusResult, HQ_SUCCESS);
+
+	// Get the 'aborted' status.
+	const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort);
+	ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::GetCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec)
+{
+	// Get the current frame in the callstack.
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	const int getFrameResult = HqExecutionGetCurrentFrame(hExec, &hFrame);
+	ASSERT_EQ(getFrameResult, HQ_SUCCESS);
+	ASSERT_NE(hFrame, HQ_FRAME_HANDLE_NULL);
+
+	output = hFrame;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::GetGpRegister(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t gpRegIndex)
+{
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	GetCurrentFrame(hFrame, hExec);
+
+	// Get the general-purpose register that has the value we want to inspect.
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	const int getGpRegisterResult = HqFrameGetGpRegister(hFrame, &hValue, gpRegIndex);
+	ASSERT_EQ(getGpRegisterResult, HQ_SUCCESS);
+
+	output = hValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::GetIoRegister(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t ioRegIndex)
+{
+	// Get the general-purpose register that has the value we want to inspect.
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, ioRegIndex);
+	ASSERT_EQ(getIoRegisterResult, HQ_SUCCESS);
+
+	output = hValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::GetStackValue(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t stackIndex)
+{
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	GetCurrentFrame(hFrame, hExec);
+
+	// Get the general-purpose register that has the value we want to inspect.
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	const int peekStackValueResult = HqFramePeekValue(hFrame, &hValue, stackIndex);
+	ASSERT_EQ(peekStackValueResult, HQ_SUCCESS);
+
+	output = hValue;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
