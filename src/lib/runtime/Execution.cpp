@@ -577,26 +577,41 @@ void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 
 	// Visit all active frames.
 	const size_t activeStackSize = HqFrame::HandleStack::GetCurrentSize(hExec->frameStack);
-	for(size_t i = 0; i < activeStackSize; ++i)
+	for(size_t frameIndex = 0; frameIndex < activeStackSize; ++frameIndex)
 	{
-		HqFrameHandle hFrame = hExec->frameStack.memory.pData[i];
+		HqFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
 
-		HqGarbageCollector::MarkObject(gc, &hFrame->gcProxy);
-	}
+		if(!hFrame->hFunction->isNative)
+		{
+			// Discover values in the stack.
+			size_t stackSize = HqValue::HandleStack::GetCurrentSize(hFrame->stack);
+			for(size_t stackIndex = 0; stackIndex < stackSize; ++stackIndex)
+			{
+				HqValueHandle hValue = hFrame->stack.memory.pData[stackIndex];
 
-	// Visit all unused frames.
-	const size_t unusedStackSize = HqFrame::HandleStack::GetCurrentSize(hExec->framePool);
-	for(size_t i = 0; i < unusedStackSize; ++i)
-	{
-		HqFrameHandle hFrame = hExec->framePool.memory.pData[i];
+				if(hValue)
+				{
+					HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+				}
+			}
 
-		HqGarbageCollector::MarkObject(gc, &hFrame->gcProxy);
+			// Discover values held in the general purpose registers.
+			for(size_t stackIndex = 0; stackIndex < hFrame->registers.count; ++stackIndex)
+			{
+				HqValueHandle hValue = hFrame->registers.pData[stackIndex];
+
+				if(hValue)
+				{
+					HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+				}
+			}
+		}
 	}
 
 	// Discover values held in the I/O registers.
-	for(size_t i = 0; i < hExec->registers.count; ++i)
+	for(size_t regIndex = 0; regIndex < hExec->registers.count; ++regIndex)
 	{
-		HqValueHandle hValue = hExec->registers.pData[i];
+		HqValueHandle hValue = hExec->registers.pData[regIndex];
 
 		if(hValue)
 		{
@@ -611,6 +626,22 @@ void HqExecution::prv_onGcDestruct(void* pObject)
 {
 	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pObject);
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
+
+	// Destroy all active frames.
+	const size_t activeStackSize = HqFrame::HandleStack::GetCurrentSize(hExec->frameStack);
+	for(size_t frameIndex = 0; frameIndex < activeStackSize; ++frameIndex)
+	{
+		HqFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
+		HqFrame::Dispose(hFrame);
+	}
+
+	// Destroy all unused frames.
+	const size_t unusedStackSize = HqFrame::HandleStack::GetCurrentSize(hExec->framePool);
+	for(size_t frameIndex = 0; frameIndex < unusedStackSize; ++frameIndex)
+	{
+		HqFrameHandle hFrame = hExec->framePool.memory.pData[frameIndex];
+		HqFrame::Dispose(hFrame);
+	}
 
 	HqFrame::HandleStack::Dispose(hExec->frameStack);
 	HqFrame::HandleStack::Dispose(hExec->framePool);

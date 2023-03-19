@@ -599,14 +599,6 @@ HQ_MAIN_API int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue,
 
 HQ_MAIN_API int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t registerIndex);
 
-HQ_MAIN_API int HqFrameSetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, const char* variableName);
-
-HQ_MAIN_API int HqFrameGetLocalVariable(HqFrameHandle hFrame, HqValueHandle* phOutValue, const char* variableName);
-
-HQ_MAIN_API int HqFrameGetLocalVariableCount(HqFrameHandle hFrame, size_t* pOutCount);
-
-HQ_MAIN_API int HqFrameListLocalVariables(HqFrameHandle hFrame, HqCallbackIterateVariable onIterateFn, void* pUserData);
-
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 HQ_MAIN_API HqValueHandle HqValueCreateBool(HqVmHandle hVm, bool value);

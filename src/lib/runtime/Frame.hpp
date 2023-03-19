@@ -22,7 +22,6 @@
 
 #include "Decoder.hpp"
 #include "Function.hpp"
-#include "GcProxy.hpp"
 #include "Value.hpp"
 
 #include "../common/Array.hpp"
@@ -38,6 +37,7 @@ struct HqFrame
 	static HqFrameHandle Create(HqExecutionHandle hExec);
 
 	static void Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction);
+	static void Dispose(HqFrameHandle hFrame);
 	static void Reset(HqFrameHandle hFrame);
 
 	static int PushValue(HqFrameHandle hFrame, HqValueHandle hValue);
@@ -45,29 +45,19 @@ struct HqFrame
 	static int PeekValue(HqFrameHandle hFrame, HqValueHandle* const phOutValue, const size_t index);
 
 	static int SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uint32_t index);
-	static int SetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, HqString* const pVariableName);
 
 	static HqValueHandle GetGpRegister(HqFrameHandle hFrame, const uint32_t index, int* const pOutResult);
-	static HqValueHandle GetLocalVariable(HqFrameHandle hFrame, HqString* const pVariableName, int* const pOutResult);
-
-	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
-	static void prv_onGcDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	HqGcProxy gcProxy;
-
 	HqValue::HandleStack stack;
 	HqValue::HandleArray registers;
-	HqValue::StringToHandleMap locals;
 
 	HqExecutionHandle hExec;
 	HqFunctionHandle hFunction;
 
 	HqDecoder decoder;
-
-	bool active;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

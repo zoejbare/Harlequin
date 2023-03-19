@@ -34,10 +34,6 @@ HqFrame* HqFrame::Create(HqExecutionHandle hExec)
 	HqFrame* const pOutput = new HqFrame();
 	assert(pOutput != nullptr);
 
-	// No need to lock the garbage collector here since only the execution context is allowed to create frames
-	// and it will be handling the lock for us.
-	HqGcProxy::Initialize(pOutput->gcProxy, hExec->hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, false, true);
-
 	pOutput->hExec = hExec;
 
 	// Initialize the value stack and registers.
@@ -49,9 +45,6 @@ HqFrame* HqFrame::Create(HqExecutionHandle hExec)
 
 	pOutput->stack.nextIndex = 0;
 	pOutput->registers.count = HQ_VM_GP_REGISTER_COUNT;
-
-	// Allocate the local variable map.
-	HqValue::StringToHandleMap::Allocate(pOutput->locals);
 
 	// Reset the state of the value stack and registers.
 	Reset(pOutput);
@@ -72,10 +65,20 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 	if(!hFunction->isNative)
 	{
 		HqDecoder::Initialize(hFrame->decoder, hFunction->hModule->code.pData, hFunction->bytecodeOffsetStart);
-
-		// The frame is now active, so we need to assume it can have GC data references at any time.
-		hFrame->active = true;
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFrame::Dispose(HqFrameHandle hFrame)
+{
+	assert(hFrame != HQ_FRAME_HANDLE_NULL);
+
+	// Dispose of the value stack and registers.
+	HqValue::HandleStack::Dispose(hFrame->stack);
+	HqValue::HandleArray::Dispose(hFrame->registers);
+
+	delete hFrame;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -88,12 +91,6 @@ void HqFrame::Reset(HqFrameHandle hFrame)
 
 	// Initialize each register value.
 	memset(hFrame->registers.pData, 0, sizeof(HqValueHandle) * hFrame->registers.count);
-
-	// Remove all local variables.
-	HqValue::StringToHandleMap::Clear(hFrame->locals);
-
-	// When the frame has been reset, it implicitly references no GC data.
-	hFrame->active = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -158,21 +155,6 @@ int HqFrame::SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uin
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqFrame::SetLocalVariable(HqFrameHandle hFrame, HqValueHandle hValue, HqString* const pVariableName)
-{
-	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-	assert(pVariableName != nullptr);
-
-	if(!HqValue::StringToHandleMap::Set(hFrame->locals, pVariableName, hValue))
-	{
-		return HQ_ERROR_KEY_DOES_NOT_EXIST;
-	}
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 HqValueHandle HqFrame::GetGpRegister(HqFrameHandle hFrame, const uint32_t index, int* const pOutResult)
 {
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
@@ -186,90 +168,6 @@ HqValueHandle HqFrame::GetGpRegister(HqFrameHandle hFrame, const uint32_t index,
 
 	(*pOutResult) = HQ_SUCCESS;
 	return hFrame->registers.pData[index];
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-HqValueHandle HqFrame::GetLocalVariable(HqFrameHandle hFrame, HqString* const pVariableName, int* const pOutResult)
-{
-	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-	assert(pVariableName != nullptr);
-	assert(pOutResult != nullptr);
-
-	HqValueHandle hOutput = HQ_VALUE_HANDLE_NULL;
-	if(!HqValue::StringToHandleMap::Get(hFrame->locals, pVariableName, hOutput))
-	{
-		(*pOutResult) = HQ_ERROR_KEY_DOES_NOT_EXIST;
-		return HQ_VALUE_HANDLE_NULL;
-	}
-
-	(*pOutResult) = HQ_SUCCESS;
-	return hOutput;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqFrame::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
-{
-	HqFrameHandle hFrame = reinterpret_cast<HqFrameHandle>(pOpaque);
-	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-	
-	if(hFrame->active)
-	{
-		// Discover values in the stack.
-		size_t stackSize = HqValue::HandleStack::GetCurrentSize(hFrame->stack);
-		for(size_t i = 0; i < stackSize; ++i)
-		{
-			HqValueHandle hValue = hFrame->stack.memory.pData[i];
-
-			if(hValue)
-			{
-				HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
-			}
-		}
-
-		// Discover values held in the general purpose registers.
-		for(size_t i = 0; i < hFrame->registers.count; ++i)
-		{
-			HqValueHandle hValue = hFrame->registers.pData[i];
-
-			if(hValue)
-			{
-				HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
-			}
-		}
-
-		// Discover the local variable values.
-		{
-			HqValue::StringToHandleMap::Iterator iter;
-			while(HqValue::StringToHandleMap::IterateNext(hFrame->locals, iter))
-			{
-				HqValueHandle hValue = iter.pData->value;
-
-				if(hValue)
-				{
-					HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
-				}
-			}
-		}
-	}
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqFrame::prv_onGcDestruct(void* const pOpaque)
-{
-	HqFrameHandle hFrame = reinterpret_cast<HqFrameHandle>(pOpaque);
-	assert(hFrame != HQ_FRAME_HANDLE_NULL);
-
-	// Dispose of the value stack and registers.
-	HqValue::HandleStack::Dispose(hFrame->stack);
-	HqValue::HandleArray::Dispose(hFrame->registers);
-
-	// Dispose of the local variable map.
-	HqValue::StringToHandleMap::Dispose(hFrame->locals);
-
-	delete hFrame;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
