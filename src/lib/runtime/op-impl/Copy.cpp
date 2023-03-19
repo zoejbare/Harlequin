@@ -73,13 +73,18 @@ extern "C" void OpCodeExec_Copy(HqExecutionHandle hExec)
 	}
 	else
 	{
-		// Raise a fatal script exception.
-		HqExecution::RaiseOpCodeException(
-			hExec, 
-			HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-			"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
-			gpSrcRegIndex
-		);
+		// When the input register references a null value, we can set the output register directly to null.
+		result = HqFrame::SetGpRegister(hExec->hCurrentFrame, HQ_VALUE_HANDLE_NULL, gpDstRegIndex);
+		if(result != HQ_SUCCESS)
+		{
+			// Raise a fatal script exception.
+			HqExecution::RaiseOpCodeException(
+				hExec,
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+				"Failed to set general-purpose register: r(%" PRIu32 ")",
+				gpDstRegIndex
+			);
+		}
 	}
 }
 
