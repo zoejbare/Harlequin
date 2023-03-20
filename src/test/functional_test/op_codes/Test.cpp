@@ -1983,8 +1983,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
-			ASSERT_TRUE(HqValueIsUint64(hValue));
-			ASSERT_EQ(HqValueGetUint64(hValue), arrayLength);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), arrayLength);
 		}
 
 		// String length
@@ -1997,8 +1997,8 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 
 			// Validate the register value.
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
-			ASSERT_TRUE(HqValueIsUint64(hValue));
-			ASSERT_EQ(HqValueGetUint64(hValue), stringLength);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), stringLength);
 		}
 
 		// Null

@@ -28,7 +28,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 //
-// Store the length of an array or string in a general-purpose register as a uint64 value.
+// Store the length of an array or string in a general-purpose register as a uint32 value.
 //
 // 0x: LENGTH r#, r#
 //
@@ -48,26 +48,26 @@ extern "C" void OpCodeExec_Length(HqExecutionHandle hExec)
 	HqValueHandle hSource = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
 	if(result == HQ_SUCCESS)
 	{
-		uint64_t length = 0;
+		uint32_t length = 0;
 		bool validType = false;
 
 		if(HqValueIsArray(hSource))
 		{
 			// Get the length of the value data as an array.
-			length = uint64_t(hSource->as.array.count);
+			length = uint32_t(hSource->as.array.count);
 			validType = true;
 		}
 		else if(HqValueIsString(hSource))
 		{
 			// Get the length of the value data as a string.
-			length = uint64_t(hSource->as.pString->length);
+			length = uint32_t(hSource->as.pString->length);
 			validType = true;
 		}
 
 		if(validType)
 		{
 			// Create a value to hold the length.
-			HqValueHandle hOutput = HqValue::CreateUint64(hExec->hVm, length);
+			HqValueHandle hOutput = HqValue::CreateUint32(hExec->hVm, length);
 			if(hOutput)
 			{
 				// Remove the auto-mark from the output value so it can be cleaned up when it's no longer referenced.
