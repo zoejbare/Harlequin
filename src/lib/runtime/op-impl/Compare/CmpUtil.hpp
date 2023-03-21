@@ -20,56 +20,44 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "Reference.hpp"
+#include "../../Execution.hpp"
 
-#include <stdarg.h>
+#include <inttypes.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HQ_BASE_API HqString
+namespace CmpUtil
 {
-	struct HQ_BASE_API StlCompare
+	inline void SetResult(HqExecutionHandle hExec, const uint32_t gpDstRegIndex, const bool cmpResult)
 	{
-		bool operator()(HqString* pLeft, HqString* pRight);
-		bool operator()(const HqString* pLeft, const HqString* pRight) const;
-	};
+		HqValueHandle hOutput = HqValue::CreateBool(hExec->hVm, cmpResult);
+		if(hOutput)
+		{
+			// Remove the auto-mark from the output value so it can be cleaned up when it's no longer referenced.
+			HqValue::SetAutoMark(hOutput, false);
 
-	struct HQ_BASE_API StlHash
-	{
-		size_t operator()(HqString* pString);
-		size_t operator()(const HqString* pString) const;
-	};
-
-	static HqString* Create(const char* stringData);
-	static HqString* CreateFmt(const char* fmt, ...);
-	static int32_t AddRef(HqString* pString);
-	static int32_t Release(HqString* pString);
-	static int32_t SlowCompare(const HqString* pLeft, const HqString* pRight);
-	static bool FastCompare(const HqString* pLeft, const HqString* pRight);
-
-	static size_t RawHash(const char* string);
-
-	static char* RawFormatVarArgs(const char* fmt, va_list vl);
-
-	static void ToSimpleLowerCase(HqString* pString);
-	static void ToSimpleUpperCase(HqString* pString);
-	static void ToSimpleTitleCase(HqString* pString);
-
-	static void ToFullLowerCase(HqString* pString);
-	static void ToFullUpperCase(HqString* pString);
-	static void ToFullTitleCase(HqString* pString);
-
-	static void prv_onDestruct(void*);
-
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
-
-	HqReference ref;
-
-	size_t length;
-	size_t hash;
-
-	char* data;
-};
+			const int result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hOutput, gpDstRegIndex);
+			if(result != HQ_SUCCESS)
+			{
+				// Raise a fatal script exception.
+				HqExecution::RaiseOpCodeException(
+					hExec,
+					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR,
+					"Failed to set general-purpose register: r(%" PRIu32 ")",
+					gpDstRegIndex
+				);
+			}
+		}
+		else
+		{
+			// Raise a fatal script exception.
+			HqExecution::RaiseOpCodeException(
+				hExec, 
+				HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+				"Failed to create output value"
+			);
+		}
+	}
+}
 
 //----------------------------------------------------------------------------------------------------------------------

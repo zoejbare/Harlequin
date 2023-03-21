@@ -10080,7 +10080,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareEqual)
 {
 	static constexpr const char* const objTypeName = "TestObj";
 	static constexpr const char* const dummyFuncName = "void dummyFunc()";
@@ -10167,7 +10167,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10179,7 +10179,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10191,7 +10191,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10203,7 +10203,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10215,7 +10215,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10227,7 +10227,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10239,7 +10239,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10251,7 +10251,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10263,7 +10263,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10275,7 +10275,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10287,7 +10287,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10299,7 +10299,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10311,7 +10311,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, mainFuncStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10320,7 +10320,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, trueRegCount++, 20, 20);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 20);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10339,7 +10339,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10351,7 +10351,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10363,7 +10363,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10375,7 +10375,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10387,7 +10387,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10399,7 +10399,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10411,7 +10411,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10423,7 +10423,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10435,7 +10435,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10447,7 +10447,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10459,7 +10459,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10471,7 +10471,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10483,7 +10483,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeInitRightInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 21, rightArraySize);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10495,7 +10495,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeInitRightInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 21, objTypeStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10507,7 +10507,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, dummyFuncStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompare(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
@@ -10573,6 +10573,514 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Compare)
 			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
 			ASSERT_TRUE(HqValueIsBool(hValue));
 			ASSERT_FALSE(HqValueGetBool(hValue));
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	Util::CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareNotEqual)
+{
+	static constexpr const char* const objTypeName = "TestObj";
+	static constexpr const char* const dummyFuncName = "void dummyFunc()";
+
+	static constexpr const char* const leftTestString = "test0";
+	static constexpr const char* const rightTestString = "test1";
+
+	static constexpr int8_t leftValueInt8 = 12;
+	static constexpr int8_t rightValueInt8 = 23;
+
+	static constexpr int16_t leftValueInt16 = 1234;
+	static constexpr int16_t rightValueInt16 = 2345;
+
+	static constexpr int32_t leftValueInt32 = 123456;
+	static constexpr int32_t rightValueInt32 = 234567;
+
+	static constexpr int64_t leftValueInt64 = 12345678901ll;
+	static constexpr int64_t rightValueInt64 = 23456789012ll;
+
+	static constexpr uint8_t leftValueUint8 = 23;
+	static constexpr uint8_t rightValueUint8 = 34;
+
+	static constexpr uint16_t leftValueUint16 = 2345;
+	static constexpr uint16_t rightValueUint16 = 3456;
+
+	static constexpr uint32_t leftValueUint32 = 234567;
+	static constexpr uint32_t rightValueUint32 = 345678;
+
+	static constexpr uint64_t leftValueUint64 = 23456789012ull;
+	static constexpr uint64_t rightValueUint64 = 34567890123ull;
+
+	static constexpr float leftValueFloat32 = 3.1415926535897932384626433832795f;
+	static constexpr float rightValueFloat32 = 6.283185307179586476925286766559f;
+
+	static constexpr double leftValueFloat64 = 2.7182818284590452353602874713527;
+	static constexpr double rightValueFloat64 = 5.4365636569180904707205749427053;
+
+	static constexpr size_t leftArraySize = 1;
+	static constexpr size_t rightArraySize = 1;
+
+	static uint32_t trueRegCount = 0;
+	static uint32_t falseRegCount = 0;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		uint32_t objTypeStringIndex = 0;
+		const int addObjStringResult = HqModuleWriterAddString(hModuleWriter, objTypeName, &objTypeStringIndex);
+		ASSERT_EQ(addObjStringResult, HQ_SUCCESS);
+
+		uint32_t mainFuncStringIndex = 0;
+		const int addMainFuncStringResult = HqModuleWriterAddString(hModuleWriter, Function::main, &mainFuncStringIndex);
+		ASSERT_EQ(addMainFuncStringResult, HQ_SUCCESS);
+
+		uint32_t dummyFuncStringIndex = 0;
+		const int addDummyFuncStringResult = HqModuleWriterAddString(hModuleWriter, dummyFuncName, &dummyFuncStringIndex);
+		ASSERT_EQ(addDummyFuncStringResult, HQ_SUCCESS);
+
+		uint32_t leftStringIndex = 0;
+		const int addLeftStringResult = HqModuleWriterAddString(hModuleWriter, leftTestString, &leftStringIndex);
+		ASSERT_EQ(addLeftStringResult, HQ_SUCCESS);
+
+		uint32_t rightStringIndex = 0;
+		const int addRightStringResult = HqModuleWriterAddString(hModuleWriter, rightTestString, &rightStringIndex);
+		ASSERT_EQ(addRightStringResult, HQ_SUCCESS);
+
+		const int addObjTypeResult = HqModuleWriterAddObjectType(hModuleWriter, objTypeName);
+		ASSERT_EQ(addObjTypeResult, HQ_SUCCESS);
+
+		const int addDummyFuncResult = HqModuleWriterAddNativeFunction(hModuleWriter, dummyFuncName, 0, 0);
+		ASSERT_EQ(addDummyFuncResult, HQ_SUCCESS);
+
+		// Set the function serializer.
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// False comparisons
+		{
+			// Bool
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int8
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int16
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int32
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int64
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint8
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint16
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint32
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint64
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// float32
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// float64
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// string
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// function
+			{
+				const int writeInitLeftInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
+				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
+
+				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, mainFuncStringIndex);
+				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// Same value reference
+			{
+				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 20);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// Write a YIELD instruction so we can examine the values.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// False comparisons
+		{
+			// Bool
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int8
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int16
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int32
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// int64
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint8
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint16
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint32
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// uint64
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// float32
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// float64
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// string
+			{
+				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// array
+			{
+				const int writeInitLeftInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 20, leftArraySize);
+				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
+
+				const int writeInitRightInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 21, rightArraySize);
+				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// object
+			{
+				const int writeInitLeftInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 20, objTypeStringIndex);
+				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
+
+				const int writeInitRightInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 21, objTypeStringIndex);
+				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// function
+			{
+				const int writeInitLeftInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
+				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
+
+				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, dummyFuncStringIndex);
+				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
+
+				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
+			}
+
+			// Write a YIELD instruction so we can examine the values.
+			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		}
+
+		// Finalize the serializer and add it to the module.
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		Util::GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Check for all true comparisons.
+		for(uint32_t regIndex = 0; regIndex < trueRegCount; ++regIndex)
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, regIndex);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_FALSE(HqValueGetBool(hValue));
+		}
+
+		// Run the execution context again.
+		const int execRunAgainResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunAgainResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		Util::GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Check for all false comparisons.
+		for(uint32_t regIndex = 0; regIndex < falseRegCount; ++regIndex)
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, regIndex);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_TRUE(HqValueGetBool(hValue));
 		}
 	};
 

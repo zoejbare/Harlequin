@@ -261,10 +261,10 @@ int main(int argc, char* argv[])
 		HqBytecodeWriteStoreObject(hSubFuncSerializer, 2, 1, 0);
 
 		HqBytecodeWriteMove(hSubFuncSerializer, 3, 2);
-		HqBytecodeWriteCompare(hSubFuncSerializer, 3, 2, 3);
+		HqBytecodeWriteCompareEqual(hSubFuncSerializer, 3, 2, 3);
 
 		HqBytecodeWriteCopy(hSubFuncSerializer, 3, 2);
-		HqBytecodeWriteCompare(hSubFuncSerializer, 3, 2, 3);
+		HqBytecodeWriteCompareEqual(hSubFuncSerializer, 3, 2, 3);
 
 		HqBytecodeWriteLoadImmStr(hSubFuncSerializer, 0, stringIndex0);
 		HqBytecodeWriteLoadImmStr(hSubFuncSerializer, 1, stringIndex1);

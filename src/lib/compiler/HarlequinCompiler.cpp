@@ -543,7 +543,7 @@ int HqModuleWriterAddExceptionHandler(
 		// Check if there is already a handler registered for this class type.
 		for(auto& kv : guardedBlock.handlers)
 		{
-			if(kv.second.pClassName && HqString::Compare(kv.second.pClassName, pClassName))
+			if(kv.second.pClassName && HqString::FastCompare(kv.second.pClassName, pClassName))
 			{
 				HqString::Release(pClassName);
 				return HQ_ERROR_KEY_ALREADY_EXISTS;
@@ -1877,7 +1877,7 @@ int HqBytecodeWriteCastString(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCompare(
+int HqBytecodeWriteCompareEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1889,7 +1889,117 @@ int HqBytecodeWriteCompare(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP);
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP_EQ);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCompareNotEqual(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP_NE);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCompareLess(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP_LT);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCompareLessEqual(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP_LE);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCompareGreater(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP_GT);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteCompareGreaterEqual(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_CMP_GE);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
 	_HQ_EMIT_UDWORD(gpSrcLeftRegIndex);
 	_HQ_EMIT_UDWORD(gpSrcRightRegIndex);

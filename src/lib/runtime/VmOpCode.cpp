@@ -104,7 +104,13 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	_HQ_BIND_OP_CODE(CAST_BOOL, CastBool);
 	_HQ_BIND_OP_CODE(CAST_STR,  CastString);
 
-	_HQ_BIND_OP_CODE(CMP,  Compare);
+	_HQ_BIND_OP_CODE(CMP_EQ, CompareEqual);
+	_HQ_BIND_OP_CODE(CMP_NE, CompareNotEqual);
+	_HQ_BIND_OP_CODE(CMP_LT, CompareLess);
+	_HQ_BIND_OP_CODE(CMP_LE, CompareLessEqual);
+	_HQ_BIND_OP_CODE(CMP_GT, CompareGreater);
+	_HQ_BIND_OP_CODE(CMP_GE, CompareGreaterEqual);
+
 	_HQ_BIND_OP_CODE(TEST, Test);
 	_HQ_BIND_OP_CODE(MOVE,  Move);
 	_HQ_BIND_OP_CODE(COPY, Copy);

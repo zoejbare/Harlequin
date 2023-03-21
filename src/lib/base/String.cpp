@@ -497,7 +497,7 @@ bool HqString::StlCompare::operator()(
 	HqString* const pRight
 )
 {
-	return Compare(pLeft, pRight);
+	return FastCompare(pLeft, pRight);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -507,27 +507,7 @@ bool HqString::StlCompare::operator()(
 	const HqString* const pRight
 ) const
 {
-	return Compare(pLeft, pRight) ;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqString::StlLess::operator()(
-	HqString* const pLeft,
-	HqString* const pRight
-)
-{
-	return Less(pLeft, pRight);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqString::StlLess::operator()(
-	const HqString* const pLeft,
-	const HqString* const pRight
-) const
-{
-	return Less(pLeft, pRight) ;
+	return FastCompare(pLeft, pRight) ;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -542,40 +522,6 @@ size_t HqString::StlHash::operator()(HqString* const pObject)
 size_t HqString::StlHash::operator()(const HqString* const pObject) const
 {
 	return pObject->hash;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqString::StlRawCompare::operator()(
-	char* const strLeft,
-	char* const strRight
-)
-{
-	return RawCompare(strLeft, strRight);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqString::StlRawCompare::operator()(
-	const char* const strLeft,
-	const char* const strRight
-) const
-{
-	return RawCompare(strLeft, strRight) ;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-size_t HqString::StlRawHash::operator()(char* const str)
-{
-	return RawHash(str);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-size_t HqString::StlRawHash::operator()(const char* const str) const
-{
-	return RawHash(str);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -657,7 +603,30 @@ int32_t HqString::Release(HqString* const pString)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqString::Compare(const HqString* const pLeft, const HqString* const pRight)
+int32_t HqString::SlowCompare(const HqString* const pLeft, const HqString* const pRight)
+{
+	assert(pLeft != nullptr);
+	assert(pLeft->data != nullptr);
+
+	assert(pRight != nullptr);
+	assert(pRight->data != nullptr);
+
+	if(pLeft->data == pRight->data)
+	{
+		// Same string in memory.
+		return true;
+	}
+
+	const size_t minLength = (pLeft->length < pRight->length) 
+		? pLeft->length 
+		: pRight->length;
+
+	return memcmp(pLeft->data, pRight->data, minLength);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool HqString::FastCompare(const HqString* const pLeft, const HqString* const pRight)
 {
 	assert(pLeft != nullptr);
 	assert(pLeft->data != nullptr);
@@ -688,43 +657,6 @@ bool HqString::Compare(const HqString* const pLeft, const HqString* const pRight
 	// and have same hash. In reality, this should only ever happen if identical string data exists in two
 	// separate string objects, so it's not likely to happen much.
 	return memcmp(pLeft->data, pRight->data, pLeft->length) == 0;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqString::Less(const HqString* const pLeft, const HqString* const pRight)
-{
-	assert(pLeft != nullptr);
-	assert(pLeft->data != nullptr);
-
-	assert(pRight != nullptr);
-	assert(pRight->data != nullptr);
-
-	const size_t minSize = (pLeft->length < pRight->length) ? pLeft->length : pRight->length;
-	const int cmp = memcmp(pLeft->data, pRight->data, minSize);
-
-	if(cmp != 0)
-	{
-		return cmp < 0;
-	}
-
-	return pLeft->length < pRight->length;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqString::RawCompare(const char* left, const char* right)
-{
-	assert(left != nullptr);
-	assert(right != nullptr);
-
-	if(left == right)
-	{
-		// Same string in memory.
-		return true;
-	}
-
-	return strcmp(left, right) == 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

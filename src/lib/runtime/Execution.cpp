@@ -388,7 +388,7 @@ void HqExecution::RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, 
 						if(valueType != HQ_VALUE_TYPE_OBJECT ||
 							(
 								valueType == HQ_VALUE_TYPE_OBJECT
-									&& (!hValue || HqString::Compare(handler.pClassName, hValue->as.pObject->pTypeName))
+									&& (!hValue || HqString::FastCompare(handler.pClassName, hValue->as.pObject->pTypeName))
 							)
 						)
 						{

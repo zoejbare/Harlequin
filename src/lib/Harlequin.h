@@ -1177,7 +1177,42 @@ HQ_MAIN_API int HqBytecodeWriteCastString(
 	uint32_t gpSrcRegIndex
 );
 
-HQ_MAIN_API int HqBytecodeWriteCompare(
+HQ_MAIN_API int HqBytecodeWriteCompareEqual(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteCompareNotEqual(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteCompareLess(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteCompareLessEqual(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteCompareGreater(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcLeftRegIndex,
+	uint32_t gpSrcRightRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteCompareGreaterEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
