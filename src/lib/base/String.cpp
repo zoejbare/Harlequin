@@ -614,14 +614,11 @@ int32_t HqString::SlowCompare(const HqString* const pLeft, const HqString* const
 	if(pLeft->data == pRight->data)
 	{
 		// Same string in memory.
-		return true;
+		return 0;
 	}
 
-	const size_t minLength = (pLeft->length < pRight->length) 
-		? pLeft->length 
-		: pRight->length;
-
-	return memcmp(pLeft->data, pRight->data, minLength);
+	// Let strcmp() handle the rest for us (hence this being the 'slow' compare).
+	return strcmp(pLeft->data, pRight->data);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
