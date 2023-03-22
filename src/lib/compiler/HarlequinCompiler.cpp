@@ -1084,7 +1084,7 @@ int HqBytecodeWriteLoadArray(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
-	const uint32_t arrayIndex
+	const uint32_t gpArrIdxRegIndex
 )
 {
 	if(!hSerializer)
@@ -1095,7 +1095,7 @@ int HqBytecodeWriteLoadArray(
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_ARRAY);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
 	_HQ_EMIT_UDWORD(gpSrcRegIndex);
-	_HQ_EMIT_UDWORD(arrayIndex);
+	_HQ_EMIT_UDWORD(gpArrIdxRegIndex);
 
 	return HQ_SUCCESS;
 }
@@ -1168,7 +1168,7 @@ int HqBytecodeWriteStoreArray(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
-	const uint32_t arrayIndex
+	const uint32_t gpArrIdxRegIndex
 )
 {
 	if(!hSerializer)
@@ -1179,7 +1179,7 @@ int HqBytecodeWriteStoreArray(
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_ARRAY);
 	_HQ_EMIT_UDWORD(gpDstRegIndex);
 	_HQ_EMIT_UDWORD(gpSrcRegIndex);
-	_HQ_EMIT_UDWORD(arrayIndex);
+	_HQ_EMIT_UDWORD(gpArrIdxRegIndex);
 
 	return HQ_SUCCESS;
 }

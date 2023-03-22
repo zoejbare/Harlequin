@@ -764,24 +764,22 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_ARRAY instruction to initialize an instance of an array into a GP register.
-		const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, 1);
-		ASSERT_EQ(writeInitArrayInstrResult, HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeWriteInitArray(hFuncSerializer, 0, 1), HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
-		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData);
-		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData), HQ_SUCCESS);
+
+		// Write the LOAD_IMM_I8 instruction with the array index.
+		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 2, 0), HQ_SUCCESS);
 
 		// Write the STORE_ARRAY instruction to set the value at the specified array index to the test data.
-		const int writeStoreArrayInstrResult = HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 0);
-		ASSERT_EQ(writeStoreArrayInstrResult, HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 2), HQ_SUCCESS);
 
 		// Write the LOAD_ARRAY instruction to pull the value data from the array element into a GP register for inspection.
-		const int writeLoadArrayInstrResult = HqBytecodeWriteLoadArray(hFuncSerializer, 2, 0, 0);
-		ASSERT_EQ(writeLoadArrayInstrResult, HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeWriteLoadArray(hFuncSerializer, 2, 0, 2), HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
-		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
 		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -11378,7 +11376,6 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareLess)
 
 	static uint32_t lessThanRegCount = 0;
 	static uint32_t equalToRegCount = 0;
-	static uint32_t alwaysFalseRegCount = 0;
 
 	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
 	{
@@ -11815,7 +11812,6 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareLessEqual)
 
 	static uint32_t lessThanRegCount = 0;
 	static uint32_t equalToRegCount = 0;
-	static uint32_t alwaysFalseRegCount = 0;
 
 	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
 	{
@@ -12252,7 +12248,6 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareGreater)
 
 	static uint32_t greaterThanRegCount = 0;
 	static uint32_t equalToRegCount = 0;
-	static uint32_t alwaysFalseRegCount = 0;
 
 	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
 	{
@@ -12689,7 +12684,6 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareGreaterEqual)
 
 	static uint32_t greaterThanRegCount = 0;
 	static uint32_t equalToRegCount = 0;
-	static uint32_t alwaysFalseRegCount = 0;
 
 	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
 	{
@@ -13829,24 +13823,22 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 		// array
 		{
 			// Write an INIT_ARRAY instruction to create an array value.
-			const int writeInitInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, 1);
-			ASSERT_EQ(writeInitInstrResult, HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeWriteInitArray(hFuncSerializer, 0, 1), HQ_SUCCESS);
 
 			// Write an instruction to load some data into a register that will live in the array.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 1, testValueInt8);
-			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 1, testValueInt8), HQ_SUCCESS);
+
+			// Write an instruction to store the array index.
+			ASSERT_EQ(HqBytecodeWriteLoadImmI16(hFuncSerializer, 2, 0), HQ_SUCCESS);
 
 			// Write a STORE_ARRAY instruction to place the loaded value in the array.
-			const int writeStoreInstrResult = HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 0);
-			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 2), HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
-			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeWriteCopy(hFuncSerializer, 1, 0), HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
-			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
 		}
 
 		// Finalize the serializer and add it to the module.

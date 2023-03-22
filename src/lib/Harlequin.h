@@ -943,7 +943,7 @@ HQ_MAIN_API int HqBytecodeWriteLoadArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
-	uint32_t arrayIndex
+	uint32_t gpArrIdxRegIndex
 );
 
 HQ_MAIN_API int HqBytecodeWriteStoreGlobal(
@@ -969,7 +969,7 @@ HQ_MAIN_API int HqBytecodeWriteStoreArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
-	uint32_t arrayIndex
+	uint32_t gpArrIdxRegIndex
 );
 
 HQ_MAIN_API int HqBytecodeWritePush(HqSerializerHandle hSerializer, uint32_t gpRegIndex);

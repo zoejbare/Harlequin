@@ -340,13 +340,16 @@ int main(int argc, char* argv[])
 			HqBytecodeWriteInitArray(hExcFuncSerializer, 0, 4);
 			HqBytecodeWriteLoadImmStr(hExcFuncSerializer, 1, stringIndex14);
 			HqBytecodeWriteLoadImmStr(hExcFuncSerializer, 2, stringIndex8);
-			HqBytecodeWriteStoreArray(hExcFuncSerializer, 0, 1, 1);
+			HqBytecodeWriteLoadImmU8(hExcFuncSerializer, 3, 1);
+			HqBytecodeWriteStoreArray(hExcFuncSerializer, 0, 1, 3);
+			HqBytecodeWriteLoadImmU16(hExcFuncSerializer, 3, 3);
 			HqBytecodeWriteStoreArray(hExcFuncSerializer, 0, 2, 3);
 			HqBytecodeWriteLoadImmNull(hExcFuncSerializer, 2);
 
 			HqBytecodeWriteLength(hExcFuncSerializer, 1, 0);
 
-			HqBytecodeWriteLoadArray(hExcFuncSerializer, 0, 0, 1);
+			HqBytecodeWriteLoadImmU32(hExcFuncSerializer, 3, 1);
+			HqBytecodeWriteLoadArray(hExcFuncSerializer, 0, 0, 3);
 			HqBytecodeWriteRaise(hExcFuncSerializer, 0);
 			HqBytecodeWriteAbort(hExcFuncSerializer);
 

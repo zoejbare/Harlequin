@@ -30,11 +30,11 @@
 //
 // Load a value by index from an array into a general-purpose register.
 //
-// 0x: LOAD_ARRAY r#, r#, ##
+// 0x: LOAD_ARRAY r#, r#, r#
 //
 //   r# [first]  = General-purpose register index where the extracted member value will be stored
-//   r# [second] = General-purpose register index that contains the object where the member resides
-//   ##          = Immediate integer used as the direct index into the array
+//   r# [second] = General-purpose register index that contains the array where the desired element resides
+//   r# [third]  = General-purpose register index that contains the array index
 //
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ extern "C" void OpCodeExec_LoadArray(HqExecutionHandle hExec)
 
 	const uint32_t gpDstRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
-	const uint32_t arrayIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
+	const uint32_t gpArrIdxRegIndex = HqDecoder::LoadUint32(hExec->hCurrentFrame->decoder);
 
 	// Load the array value from the source register.
 	HqValueHandle hSource = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpSrcRegIndex, &result);
@@ -53,21 +53,61 @@ extern "C" void OpCodeExec_LoadArray(HqExecutionHandle hExec)
 		// Verify the loaded value is an array type.
 		if(HqValueIsArray(hSource))
 		{
-			if(size_t(arrayIndex) < hSource->as.array.count)
+			HqValueHandle hIndex = HqFrame::GetGpRegister(hExec->hCurrentFrame, gpArrIdxRegIndex, &result);
+			if(result == HQ_SUCCESS)
 			{
-				// Load the element in the array at the source index.
-				HqValueHandle hElement = hSource->as.array.pData[arrayIndex];
+				size_t arrayIndex = 0;
 
-				// Store the element in the destination register.
-				result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hElement, gpDstRegIndex);
-				if(result != HQ_SUCCESS)
+				switch(hIndex->type)
+				{
+					case HQ_VALUE_TYPE_INT8:   arrayIndex = size_t(hIndex->as.int8);   break;
+					case HQ_VALUE_TYPE_INT16:  arrayIndex = size_t(hIndex->as.int16);  break;
+					case HQ_VALUE_TYPE_INT32:  arrayIndex = size_t(hIndex->as.int32);  break;
+					case HQ_VALUE_TYPE_INT64:  arrayIndex = size_t(hIndex->as.int64);  break;
+					case HQ_VALUE_TYPE_UINT8:  arrayIndex = size_t(hIndex->as.uint8);  break;
+					case HQ_VALUE_TYPE_UINT16: arrayIndex = size_t(hIndex->as.uint16); break;
+					case HQ_VALUE_TYPE_UINT32: arrayIndex = size_t(hIndex->as.uint32); break;
+					case HQ_VALUE_TYPE_UINT64: arrayIndex = size_t(hIndex->as.uint64); break;
+
+					default:
+						// Raise a fatal script exception.
+						HqExecution::RaiseOpCodeException(
+							hExec, 
+							HQ_STANDARD_EXCEPTION_TYPE_ERROR, 
+							"Type mismatch; expected integer: r(%" PRIu32 ")", 
+							gpArrIdxRegIndex
+						);
+						return;
+				}
+
+				if(arrayIndex < hSource->as.array.count)
+				{
+					// Load the element in the array at the source index.
+					HqValueHandle hElement = hSource->as.array.pData[arrayIndex];
+
+					// Store the element in the destination register.
+					result = HqFrame::SetGpRegister(hExec->hCurrentFrame, hElement, gpDstRegIndex);
+					if(result != HQ_SUCCESS)
+					{
+						// Raise a fatal script exception.
+						HqExecution::RaiseOpCodeException(
+							hExec, 
+							HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
+							"Failed to set general-purpose register: r(%" PRIu32 ")", 
+							gpDstRegIndex
+						);
+					}
+				}
+				else
 				{
 					// Raise a fatal script exception.
 					HqExecution::RaiseOpCodeException(
 						hExec, 
 						HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-						"Failed to set general-purpose register: r(%" PRIu32 ")", 
-						gpDstRegIndex
+						"Array index out of range: r(%" PRIu32 "), length=%zu, index=%" PRIu32,
+						gpSrcRegIndex,
+						hSource->as.array.count,
+						arrayIndex
 					);
 				}
 			}
@@ -77,10 +117,8 @@ extern "C" void OpCodeExec_LoadArray(HqExecutionHandle hExec)
 				HqExecution::RaiseOpCodeException(
 					hExec, 
 					HQ_STANDARD_EXCEPTION_RUNTIME_ERROR, 
-					"Array index out of range: r(%" PRIu32 "), length=%zu, index=%" PRIu32,
-					gpSrcRegIndex,
-					hSource->as.array.count,
-					arrayIndex
+					"Failed to retrieve general-purpose register: r(%" PRIu32 ")", 
+					gpArrIdxRegIndex
 				);
 			}
 		}
@@ -116,7 +154,7 @@ extern "C" void OpCodeDisasm_LoadArray(HqDisassemble& disasm)
 	const uint32_t arrayIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "LOAD_ARRAY r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, arrayIndex);
+	snprintf(str, sizeof(str), "LOAD_ARRAY r%" PRIu32 ", r%" PRIu32 ", r%" PRIu32, gpDstRegIndex, gpSrcRegIndex, arrayIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -126,7 +164,7 @@ extern "C" void OpCodeEndian_LoadArray(HqDecoder& decoder)
 {
 	HqDecoder::EndianSwapUint32(decoder); // r#
 	HqDecoder::EndianSwapUint32(decoder); // r#
-	HqDecoder::EndianSwapUint32(decoder); // ##
+	HqDecoder::EndianSwapUint32(decoder); // r#
 }
 
 //----------------------------------------------------------------------------------------------------------------------
