@@ -5040,6 +5040,251 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+TEST_F(_HQ_TEST_NAME(TestOpCodes), BitNot)
+{
+	static constexpr int8_t testValueInt8 = 23;
+	static constexpr int16_t testValueInt16 = 2345;
+	static constexpr int32_t testValueInt32 = 234567;
+	static constexpr int64_t testValueInt64 = 23456789012ll;
+	static constexpr uint8_t testValueUint8 = 34;
+	static constexpr uint16_t testValueUint16 = 3456;
+	static constexpr uint32_t testValueUint32 = 345678;
+	static constexpr uint64_t testValueUint64 = 34567890123ull;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Bool
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 0, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// int8
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, testValueInt8);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 1, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// int16
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, testValueInt16);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 2, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// int32
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, testValueInt32);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 3, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// int64
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, testValueInt64);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 4, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// uint8
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, testValueUint8);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 5, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// uint16
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, testValueUint16);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 6, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// uint32
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, testValueUint32);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 7, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// uint64
+		{
+			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, testValueUint64);
+			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
+
+			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 8, 20);
+			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
+		}
+
+		// Write a YIELD instruction so we can examine the values.
+		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		Util::GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// bool
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 0);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsBool(hValue));
+			ASSERT_EQ(HqValueGetBool(hValue), true);
+		}
+
+		// int8
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 1);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt8(hValue));
+			ASSERT_EQ(HqValueGetInt8(hValue), int8_t(~testValueInt8));
+		}
+
+		// int16
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 2);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt16(hValue));
+			ASSERT_EQ(HqValueGetInt16(hValue), int16_t(~testValueInt16));
+		}
+
+		// int32
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 3);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), int32_t(~testValueInt32));
+		}
+
+		// int64
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 4);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt64(hValue));
+			ASSERT_EQ(HqValueGetInt64(hValue), int64_t(~testValueInt64));
+		}
+
+		// uint8
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 5);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint8(hValue));
+			ASSERT_EQ(HqValueGetUint8(hValue), uint8_t(~testValueUint8));
+		}
+
+		// uint16
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 6);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint16(hValue));
+			ASSERT_EQ(HqValueGetUint16(hValue), uint16_t(~testValueUint16));
+		}
+
+		// uint32
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 7);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint32(hValue));
+			ASSERT_EQ(HqValueGetUint32(hValue), uint32_t(~testValueUint32));
+		}
+
+		// uint64
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 8);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsUint64(hValue));
+			ASSERT_EQ(HqValueGetUint64(hValue), uint64_t(~testValueUint64));
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	Util::CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 {
 	static constexpr int8_t leftValueInt8 = 12;

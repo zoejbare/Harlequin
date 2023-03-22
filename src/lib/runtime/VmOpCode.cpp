@@ -86,6 +86,7 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 	_HQ_BIND_OP_CODE(AND, BitAnd);
 	_HQ_BIND_OP_CODE(OR, BitOr);
 	_HQ_BIND_OP_CODE(XOR, BitXor);
+	_HQ_BIND_OP_CODE(NOT, BitNot);
 	_HQ_BIND_OP_CODE(LSH, LeftShift);
 	_HQ_BIND_OP_CODE(RSH, RightShift);
 	_HQ_BIND_OP_CODE(LROT, LeftRotate);

@@ -1077,6 +1077,12 @@ HQ_MAIN_API int HqBytecodeWriteBitXor(
 	uint32_t gpSrcRightRegIndex
 );
 
+HQ_MAIN_API int HqBytecodeWriteBitNot(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex
+);
+
 HQ_MAIN_API int HqBytecodeWriteLeftShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
