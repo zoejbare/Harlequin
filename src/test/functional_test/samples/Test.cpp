@@ -19,7 +19,7 @@
 #include "../FuncTestUtil.hpp"
 #include "../Memory.hpp"
 
-#include <compiler/Branch.hpp>
+#include <compiler/ControlFlow.hpp>
 #include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -206,8 +206,8 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, centroidZReg, 0.0f), HQ_SUCCESS);
 
 				// CODE: for(uint32_t i = 0; i < vec_array_len; ++i)
-				Branch branch;
-				branch.Begin(hFuncSerializer, Branch::Behavior::While, Branch::Condition::False, condReg);
+				ControlFlow ctrl;
+				ctrl.Begin(hFuncSerializer, ControlFlow::Behavior::While, ControlFlow::Condition::False, condReg);
 				{
 					const uint32_t pointReg = reg(9);
 					const uint32_t pointXReg = reg(10);
@@ -227,7 +227,7 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 					ASSERT_EQ(HqBytecodeWriteAdd(hFuncSerializer, iterReg, iterReg, incrReg), HQ_SUCCESS);
 					ASSERT_EQ(HqBytecodeWriteCompareLess(hFuncSerializer, condReg, iterReg, arrayLenIntReg), HQ_SUCCESS);
 				}
-				branch.End();
+				ctrl.End();
 
 				// centroid *= inv_vec_array_len
 				ASSERT_EQ(HqBytecodeWriteMul(hFuncSerializer, centroidXReg, centroidXReg, arrayInvLenReg), HQ_SUCCESS);
@@ -267,8 +267,8 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, m22Reg, 1.0f), HQ_SUCCESS);
 
 				// CODE: for(uint32_t i = 0; i < vec_array_len; ++i)
-				Branch branch;
-				branch.Begin(hFuncSerializer, Branch::Behavior::While, Branch::Condition::False, condReg);
+				ControlFlow ctrl;
+				ctrl.Begin(hFuncSerializer, ControlFlow::Behavior::While, ControlFlow::Condition::False, condReg);
 				{
 					const uint32_t relVecXReg = reg(15);
 					const uint32_t relVecYReg = reg(16);
@@ -318,7 +318,7 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 					ASSERT_EQ(HqBytecodeWriteAdd(hFuncSerializer, iterReg, iterReg, incrReg), HQ_SUCCESS);
 					ASSERT_EQ(HqBytecodeWriteCompareLess(hFuncSerializer, condReg, iterReg, arrayLenIntReg), HQ_SUCCESS);
 				}
-				branch.End();
+				ctrl.End();
 
 				// matrix *= inv_vec_array_len
 				ASSERT_EQ(HqBytecodeWriteMul(hFuncSerializer, m00Reg, m00Reg, arrayInvLenReg), HQ_SUCCESS);

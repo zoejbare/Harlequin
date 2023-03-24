@@ -19,7 +19,7 @@
 #include "../FuncTestUtil.hpp"
 #include "../Memory.hpp"
 
-#include <compiler/Branch.hpp>
+#include <compiler/ControlFlow.hpp>
 #include <gtest/gtest.h>
 
 #include <math.h>
@@ -1584,13 +1584,13 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 	{
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-		Branch branch;
+		ControlFlow ctrl;
 
 		// Set the function serializer.
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Begin the jump block.
-		branch.Begin(hFuncSerializer, Branch::Behavior::If, Branch::Condition::None, 0);
+		ctrl.Begin(hFuncSerializer, ControlFlow::Behavior::If, ControlFlow::Condition::None, 0);
 
 		// Write an ABORT opcode just so we have an error case to check for
 		// in case the JMP opcode doesn't branch correctly.
@@ -1598,7 +1598,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 		// End the block indicating where the instruction pointer will jump to.
-		branch.End();
+		ctrl.End();
 
 		// Finalize the serializer and add it to the module.
 		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -1720,10 +1720,10 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 
 		auto writeJumpBlock = [hFuncSerializer](const uint32_t gpRegIndex)
 		{
-			Branch branch;
+			ControlFlow ctrl;
 
 			// Begin the jump block.
-			branch.Begin(hFuncSerializer, Branch::Behavior::If, Branch::Condition::True, gpRegIndex);
+			ctrl.Begin(hFuncSerializer, ControlFlow::Behavior::If, ControlFlow::Condition::True, gpRegIndex);
 
 			// Write an ABORT opcode just so we have an error case to check for
 			// in case the jump operation doesn't branch correctly.
@@ -1731,7 +1731,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 			// End the block indicating where the instruction pointer will jump to.
-			branch.End();
+			ctrl.End();
 		};
 
 		writeJumpBlock(0); // bool
@@ -1845,10 +1845,10 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 
 		auto writeJumpBlock = [hFuncSerializer](const uint32_t gpRegIndex)
 		{
-			Branch branch;
+			ControlFlow ctrl;
 
 			// Begin the jump block.
-			branch.Begin(hFuncSerializer, Branch::Behavior::If, Branch::Condition::False, gpRegIndex);
+			ctrl.Begin(hFuncSerializer, ControlFlow::Behavior::If, ControlFlow::Condition::False, gpRegIndex);
 
 			// Write an ABORT opcode just so we have an error case to check for
 			// in case the jump operation doesn't branch correctly.
@@ -1856,7 +1856,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 			// End the block indicating where the instruction pointer will jump to.
-			branch.End();
+			ctrl.End();
 		};
 
 		writeJumpBlock(0); // null

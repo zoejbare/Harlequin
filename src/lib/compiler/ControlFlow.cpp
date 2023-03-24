@@ -16,34 +16,13 @@
 // IN THE SOFTWARE.
 //
 
-#include "Branch.hpp"
+#include "ControlFlow.hpp"
 
 #include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-Branch::Branch()
-	: m_cmds()
-	, m_hSerializer(HQ_SERIALIZER_HANDLE_NULL)
-	, m_offStart(0)
-	, m_offEnd(0)
-	, m_reg(0)
-	, m_beh(Behavior::If)
-	, m_cond(Condition::None)
-{
-	CommandList::Initialize(m_cmds);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-Branch::~Branch()
-{
-	CommandList::Dispose(m_cmds);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void Branch::Begin(
+void ControlFlow::Begin(
 	HqSerializerHandle hSerializer,
 	const Behavior behavior, 
 	const Condition condition, 
@@ -72,7 +51,7 @@ void Branch::Begin(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void Branch::End()
+void ControlFlow::End()
 {
 	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -131,7 +110,7 @@ void Branch::End()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void Branch::GoToStart()
+void ControlFlow::GoToStart()
 {
 	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	_addCommand(JmpType::Normal, JmpLoc::Start);
@@ -139,7 +118,7 @@ void Branch::GoToStart()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void Branch::GoToEnd()
+void ControlFlow::GoToEnd()
 {
 	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 	_addCommand(JmpType::Normal, JmpLoc::End);
@@ -147,7 +126,7 @@ void Branch::GoToEnd()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void Branch::_writeJump(const int32_t offset, const JmpType type)
+inline void ControlFlow::_writeJump(const int32_t offset, const JmpType type)
 {
 	int writeJumpResult = HQ_SUCCESS;
 
@@ -178,7 +157,7 @@ inline void Branch::_writeJump(const int32_t offset, const JmpType type)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void Branch::_addCommand(const JmpType type, const JmpLoc loc)
+inline void ControlFlow::_addCommand(const JmpType type, const JmpLoc loc)
 {
 	Command cmd;
 	cmd.offset = HqSerializerGetStreamPosition(m_hSerializer);

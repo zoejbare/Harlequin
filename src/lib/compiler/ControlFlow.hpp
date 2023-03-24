@@ -26,7 +26,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class HQ_MAIN_API Branch
+class HQ_MAIN_API ControlFlow
 {
 public:
 
@@ -44,14 +44,14 @@ public:
 		False,
 	};
 
-	Branch(const Branch&) = delete;
-	Branch(Branch&&) = delete;
+	ControlFlow(const ControlFlow&) = delete;
+	ControlFlow(ControlFlow&&) = delete;
 
-	Branch& operator =(const Branch&) = delete;
-	Branch& operator =(Branch&&) = delete;
+	ControlFlow& operator =(const ControlFlow&) = delete;
+	ControlFlow& operator =(ControlFlow&&) = delete;
 
-	Branch();
-	~Branch();
+	ControlFlow();
+	~ControlFlow();
 
 	void Begin(HqSerializerHandle hSerializer, Behavior behavior, Condition condition, uint32_t gpRegIndex);
 	void End();
@@ -94,7 +94,27 @@ private:
 	uint32_t m_reg;
 	Behavior m_beh;
 	Condition m_cond;
-	bool m_active;
 };
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline ControlFlow::ControlFlow()
+	: m_cmds()
+	, m_hSerializer(HQ_SERIALIZER_HANDLE_NULL)
+	, m_offStart(0)
+	, m_offEnd(0)
+	, m_reg(0)
+	, m_beh(Behavior::If)
+	, m_cond(Condition::None)
+{
+	CommandList::Initialize(m_cmds);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline ControlFlow::~ControlFlow()
+{
+	CommandList::Dispose(m_cmds);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
