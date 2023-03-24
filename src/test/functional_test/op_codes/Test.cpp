@@ -19,7 +19,7 @@
 #include "../FuncTestUtil.hpp"
 #include "../Memory.hpp"
 
-#include <compiler/JumpInstruction.hpp>
+#include <compiler/Branch.hpp>
 #include <gtest/gtest.h>
 
 #include <math.h>
@@ -1584,13 +1584,13 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 	{
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-		JumpInstruction jump;
+		Branch branch;
 
 		// Set the function serializer.
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Begin the jump block.
-		jump.Begin(hFuncSerializer, JumpInstruction::Behavior::Forward, JumpInstruction::Condition::None, 0);
+		branch.Begin(hFuncSerializer, Branch::Behavior::If, Branch::Condition::None, 0);
 
 		// Write an ABORT opcode just so we have an error case to check for
 		// in case the JMP opcode doesn't branch correctly.
@@ -1598,7 +1598,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 		// End the block indicating where the instruction pointer will jump to.
-		jump.End();
+		branch.End();
 
 		// Finalize the serializer and add it to the module.
 		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -1642,8 +1642,6 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
 	{
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
-
-		JumpInstruction jump;
 
 		// Add a non-empty string to the module.
 		uint32_t nonEmptyStringIndex = 0;
@@ -1722,10 +1720,10 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 
 		auto writeJumpBlock = [hFuncSerializer](const uint32_t gpRegIndex)
 		{
-			JumpInstruction jump;
+			Branch branch;
 
 			// Begin the jump block.
-			jump.Begin(hFuncSerializer, JumpInstruction::Behavior::Forward, JumpInstruction::Condition::IfTrue, gpRegIndex);
+			branch.Begin(hFuncSerializer, Branch::Behavior::If, Branch::Condition::True, gpRegIndex);
 
 			// Write an ABORT opcode just so we have an error case to check for
 			// in case the jump operation doesn't branch correctly.
@@ -1733,7 +1731,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 			// End the block indicating where the instruction pointer will jump to.
-			jump.End();
+			branch.End();
 		};
 
 		writeJumpBlock(0); // bool
@@ -1792,8 +1790,6 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 	{
 		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
 
-		JumpInstruction jump;
-
 		// Add an empty string to the module.
 		uint32_t emptyStringIndex = 0;
 		const int addEmptyStringResult = HqModuleWriterAddString(hModuleWriter, "", &emptyStringIndex);
@@ -1849,10 +1845,10 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 
 		auto writeJumpBlock = [hFuncSerializer](const uint32_t gpRegIndex)
 		{
-			JumpInstruction jump;
+			Branch branch;
 
 			// Begin the jump block.
-			jump.Begin(hFuncSerializer, JumpInstruction::Behavior::Forward, JumpInstruction::Condition::IfFalse, gpRegIndex);
+			branch.Begin(hFuncSerializer, Branch::Behavior::If, Branch::Condition::False, gpRegIndex);
 
 			// Write an ABORT opcode just so we have an error case to check for
 			// in case the jump operation doesn't branch correctly.
@@ -1860,7 +1856,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 			// End the block indicating where the instruction pointer will jump to.
-			jump.End();
+			branch.End();
 		};
 
 		writeJumpBlock(0); // null

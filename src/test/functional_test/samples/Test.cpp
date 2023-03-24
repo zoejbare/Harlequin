@@ -19,7 +19,7 @@
 #include "../FuncTestUtil.hpp"
 #include "../Memory.hpp"
 
-#include <compiler/JumpInstruction.hpp>
+#include <compiler/Branch.hpp>
 #include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -197,14 +197,17 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 				ASSERT_EQ(HqBytecodeWriteLoadImmU32(hFuncSerializer, iterReg, 0), HQ_SUCCESS);
 				ASSERT_EQ(HqBytecodeWriteLoadImmU32(hFuncSerializer, incrReg, 1), HQ_SUCCESS);
 
+				// Initialize the condition variable by doing the initial condition check.
+				ASSERT_EQ(HqBytecodeWriteCompareLess(hFuncSerializer, condReg, iterReg, arrayLenIntReg), HQ_SUCCESS);
+
 				// Load the initial values of the centroid member values into registers.
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, centroidXReg, 0.0f), HQ_SUCCESS);
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, centroidYReg, 0.0f), HQ_SUCCESS);
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, centroidZReg, 0.0f), HQ_SUCCESS);
 
 				// CODE: for(uint32_t i = 0; i < vec_array_len; ++i)
-				JumpInstruction jump;
-				jump.Begin(hFuncSerializer, JumpInstruction::Behavior::Back, JumpInstruction::Condition::IfTrue, condReg);
+				Branch branch;
+				branch.Begin(hFuncSerializer, Branch::Behavior::While, Branch::Condition::False, condReg);
 				{
 					const uint32_t pointReg = reg(9);
 					const uint32_t pointXReg = reg(10);
@@ -224,7 +227,7 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 					ASSERT_EQ(HqBytecodeWriteAdd(hFuncSerializer, iterReg, iterReg, incrReg), HQ_SUCCESS);
 					ASSERT_EQ(HqBytecodeWriteCompareLess(hFuncSerializer, condReg, iterReg, arrayLenIntReg), HQ_SUCCESS);
 				}
-				jump.End();
+				branch.End();
 
 				// centroid *= inv_vec_array_len
 				ASSERT_EQ(HqBytecodeWriteMul(hFuncSerializer, centroidXReg, centroidXReg, arrayInvLenReg), HQ_SUCCESS);
@@ -252,6 +255,9 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 				ASSERT_EQ(HqBytecodeWriteLoadImmU32(hFuncSerializer, iterReg, 0), HQ_SUCCESS);
 				ASSERT_EQ(HqBytecodeWriteLoadImmU32(hFuncSerializer, incrReg, 1), HQ_SUCCESS);
 
+				// Initialize the condition variable by doing the initial condition check.
+				ASSERT_EQ(HqBytecodeWriteCompareLess(hFuncSerializer, condReg, iterReg, arrayLenIntReg), HQ_SUCCESS);
+
 				// Initialize the matrix element variables.
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, m00Reg, 1.0f), HQ_SUCCESS);
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, m01Reg, 0.0f), HQ_SUCCESS);
@@ -261,8 +267,8 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 				ASSERT_EQ(HqBytecodeWriteLoadImmF32(hFuncSerializer, m22Reg, 1.0f), HQ_SUCCESS);
 
 				// CODE: for(uint32_t i = 0; i < vec_array_len; ++i)
-				JumpInstruction jump;
-				jump.Begin(hFuncSerializer, JumpInstruction::Behavior::Back, JumpInstruction::Condition::IfTrue, condReg);
+				Branch branch;
+				branch.Begin(hFuncSerializer, Branch::Behavior::While, Branch::Condition::False, condReg);
 				{
 					const uint32_t relVecXReg = reg(15);
 					const uint32_t relVecYReg = reg(16);
@@ -312,7 +318,7 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 					ASSERT_EQ(HqBytecodeWriteAdd(hFuncSerializer, iterReg, iterReg, incrReg), HQ_SUCCESS);
 					ASSERT_EQ(HqBytecodeWriteCompareLess(hFuncSerializer, condReg, iterReg, arrayLenIntReg), HQ_SUCCESS);
 				}
-				jump.End();
+				branch.End();
 
 				// matrix *= inv_vec_array_len
 				ASSERT_EQ(HqBytecodeWriteMul(hFuncSerializer, m00Reg, m00Reg, arrayInvLenReg), HQ_SUCCESS);

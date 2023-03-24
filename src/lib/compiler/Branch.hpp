@@ -22,57 +22,79 @@
 
 #include "../Harlequin.h"
 
+#include "../common/Array.hpp"
+
 //----------------------------------------------------------------------------------------------------------------------
 
-class HQ_MAIN_API JumpInstruction
+class HQ_MAIN_API Branch
 {
 public:
 
 	enum class Behavior
 	{
-		Forward,
-		Back,
+		If,
+		While,
+		DoWhile,
 	};
 
 	enum class Condition
 	{
 		None,
-		IfTrue,
-		IfFalse,
+		True,
+		False,
 	};
 
-	JumpInstruction(const JumpInstruction&) = delete;
-	JumpInstruction(JumpInstruction&&) = delete;
+	Branch(const Branch&) = delete;
+	Branch(Branch&&) = delete;
 
-	JumpInstruction& operator =(const JumpInstruction&) = delete;
-	JumpInstruction& operator =(JumpInstruction&&) = delete;
+	Branch& operator =(const Branch&) = delete;
+	Branch& operator =(Branch&&) = delete;
 
-	JumpInstruction();
+	Branch();
+	~Branch();
 
 	void Begin(HqSerializerHandle hSerializer, Behavior behavior, Condition condition, uint32_t gpRegIndex);
 	void End();
 
+	void GoToStart();
+	void GoToEnd();
+
 
 private:
 
-	int _writeJump(int32_t);
+	enum class JmpType
+	{
+		Normal,
+		Condition,
+	};
+
+	enum class JmpLoc
+	{
+		Start,
+		End,
+	};
+
+	struct Command
+	{
+		size_t offset;
+		JmpType type;
+		JmpLoc loc;
+	};
+
+	void _writeJump(int32_t, JmpType);
+	void _addCommand(JmpType, JmpLoc);
+
+	typedef HqArray<Command> CommandList;
+
+	CommandList m_cmds;
 
 	HqSerializerHandle m_hSerializer;
-	size_t m_offset;
-	uint32_t m_regIndex;
+	size_t m_offStart;
+	size_t m_offEnd;
+	uint32_t m_reg;
 	Behavior m_beh;
 	Condition m_cond;
+	bool m_active;
 };
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline JumpInstruction::JumpInstruction()
-	: m_hSerializer(HQ_SERIALIZER_HANDLE_NULL)
-	, m_offset(0)
-	, m_regIndex(0)
-	, m_beh(Behavior::Forward)
-	, m_cond(Condition::None)
-{
-}
 
 //----------------------------------------------------------------------------------------------------------------------
