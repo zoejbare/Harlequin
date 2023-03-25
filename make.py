@@ -309,6 +309,18 @@ with csbuild.Project(ExtAntlr4Runtime.projectName, ExtAntlr4Runtime.path, autoDi
 
 ###################################################################################################
 
+class ExtCxxOpts(object):
+	projectName = "ExtStub_cxxopts"
+	path = "external/cxxopts"
+
+with csbuild.Project(ExtCxxOpts.projectName, ExtCxxOpts.path, autoDiscoverSourceFiles=False):
+	csbuild.SetOutput("{name}", csbuild.ProjectType.Stub)
+
+	with csbuild.Scope(csbuild.ScopeDef.Children):
+		csbuild.AddIncludeDirectories(f"{ExtCxxOpts.path}/include")
+
+###################################################################################################
+
 class ExtGoogleTest(object):
 	projectName = "ExtStub_gtest"
 	path = "external/googletest/googletest"
@@ -475,11 +487,27 @@ class HarlequinCompiler(object):
 	outputName = "hqc"
 	path = f"{HarlequinCommon.appRootPath}/compiler"
 	dependencies = [
-		LibHarlequinTool.projectName
+		LibHarlequinTool.projectName,
 	]
 
 with csbuild.Project(HarlequinCompiler.projectName, HarlequinCompiler.path, HarlequinCompiler.dependencies):
 	_setCommonAppOptions(HarlequinCompiler.outputName)
+
+	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
+
+###################################################################################################
+
+class HarlequinDisassembler(object):
+	projectName = "HqApp_Disassembler"
+	outputName = "hqd"
+	path = f"{HarlequinCommon.appRootPath}/disassembler"
+	dependencies = [
+		ExtCxxOpts.projectName,
+		LibHarlequinRuntime.projectName,
+	]
+
+with csbuild.Project(HarlequinDisassembler.projectName, HarlequinDisassembler.path, HarlequinDisassembler.dependencies):
+	_setCommonAppOptions(HarlequinDisassembler.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
@@ -490,7 +518,7 @@ class HarlequinRuntime(object):
 	outputName = "hq"
 	path = f"{HarlequinCommon.appRootPath}/runtime"
 	dependencies = [
-		LibHarlequinRuntime.projectName
+		LibHarlequinRuntime.projectName,
 	]
 
 with csbuild.Project(HarlequinRuntime.projectName, HarlequinRuntime.path, HarlequinRuntime.dependencies):

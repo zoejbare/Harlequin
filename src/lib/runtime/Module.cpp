@@ -450,7 +450,7 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 		{
 			HqFunctionHandle hFunc = iter.pData->value;
 
-			if(!hFunc->isNative)
+			if(hFunc->type != HqFunction::Type::Native)
 			{
 				endianSwapBytecode(pBytecode, hFunc->bytecodeOffsetStart);
 			}

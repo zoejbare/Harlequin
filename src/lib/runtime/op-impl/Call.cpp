@@ -53,7 +53,7 @@ static void CallScriptFunction(HqExecutionHandle hExec, HqFunctionHandle hFuncti
 	// exception were to occur within the native function.
 	HqExecution::PushFrame(hExec, hFunction);
 
-	if(hFunction->isNative)
+	if(hFunction->type == HqFunction::Type::Native)
 	{
 		// Native functions are called immediately.
 		if(hFunction->nativeFn)

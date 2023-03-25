@@ -62,7 +62,7 @@ void HqFrame::Initialize(HqFrameHandle hFrame, HqFunctionHandle hFunction)
 	hFrame->hFunction = hFunction;
 
 	// Native functions are effectively represented as dummy frames, so they need no other initialization.
-	if(!hFunction->isNative)
+	if(hFunction->type != HqFunction::Type::Native)
 	{
 		HqDecoder::Initialize(hFrame->decoder, hFunction->hModule->code.pData, hFunction->bytecodeOffsetStart);
 	}

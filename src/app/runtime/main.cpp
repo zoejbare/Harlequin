@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
 		HqFunctionGetSignature(hFunction, &functionSignature);
 
 		bool isNative = false;
-		HqFunctionGetIsNative(hFunction, &isNative);
+		HqFunctionIsNative(hFunction, &isNative);
 
 		uint32_t offset = 0;
 		HqFrameGetBytecodeOffset(hFrame, &offset);
@@ -494,82 +494,6 @@ int main(int argc, char* argv[])
 		const uint64_t timeEnd = HqClockGetTimestamp();
 		initModulesTimeSlice = timeEnd - timeStart;
 	}
-
-	auto iterateModule = [](void* const pUserData, HqModuleHandle hModule) -> bool
-	{
-		auto iterateString = [](void*, const char* const string, const size_t index) -> bool
-		{
-			const size_t length = strlen(string);
-
-			printf(
-				"        s(%" PRIuPTR "): \"%.48s\"%s\n",
-				index,
-				string,
-				(length > 48) ? " ..." : ""
-			);
-			return true;
-		};
-
-		auto iterateFunction = [](void* const pUserData, const char* const signature) -> bool
-		{
-			auto onDisasm = [](void*, const char* const asmLine, const uintptr_t offset)
-			{
-				printf("            0x%08" PRIXPTR ": %s\n", offset, asmLine);
-			};
-
-			HqVmHandle hVm = reinterpret_cast<HqVmHandle>(pUserData);
-			HqFunctionHandle hFunction = HQ_FUNCTION_HANDLE_NULL;
-
-			HqVmGetFunction(hVm, &hFunction, signature);
-
-			assert(hFunction != HQ_FUNCTION_HANDLE_NULL);
-			printf("        %s\n", signature);
-
-			bool isNative = false;
-			HqFunctionGetIsNative(hFunction, &isNative);
-
-			if(isNative)
-			{
-				printf("            <native call>\n");
-			}
-			else
-			{
-				HqFunctionDisassemble(hFunction, onDisasm, nullptr);
-			}
-
-			printf("\n");
-			return true;
-		};
-
-		const char* moduleName = nullptr;
-		HqModuleGetName(hModule, &moduleName);
-
-		printf("[Module: \"%s\"]\n", moduleName);
-		printf("    [strings]\n");
-
-		HqModuleListStrings(hModule, iterateString, pUserData);
-
-		printf("\n    [code]\n");
-
-		// Iterate each function within in the module.
-		HqModuleListFunctions(hModule, iterateFunction, pUserData);
-
-		return true;
-	};
-
-	HqReportMessage(hReport, HQ_MESSAGE_TYPE_VERBOSE, "Disassembling ...\n");
-
-	// Generate the script module disassembly.
-	{
-		const uint64_t timeStart = HqClockGetTimestamp();
-
-		// Iterate all the modules to disassemble them.
-		HqVmListModules(hVm, iterateModule, hVm);
-
-		const uint64_t timeEnd = HqClockGetTimestamp();
-		totalDisassembleTime = timeEnd - timeStart;
-	}
-
 	// Bind the native functions to the script VM.
 	{
 		HqFunctionHandle hNativePrintFunc = HQ_FUNCTION_HANDLE_NULL;

@@ -37,7 +37,7 @@ HqFunctionHandle HqFunction::CreateInit(
 	assert(pOutput != HQ_FUNCTION_HANDLE_NULL);
 
 	char funcName[512];
-	snprintf(funcName, sizeof(funcName), "void `.init-module-'%s'()", hModule->pName->data);
+	snprintf(funcName, sizeof(funcName), "`.init-module-{%s}", hModule->pName->data);
 
 	pOutput->hModule = hModule;
 	pOutput->pSignature = HqString::Create(funcName);
@@ -45,7 +45,7 @@ HqFunctionHandle HqFunction::CreateInit(
 	pOutput->bytecodeOffsetEnd = bytecodeOffset + bytecodeLength;
 	pOutput->numParameters = 0;
 	pOutput->numReturnValues = 0;
-	pOutput->isNative = false;
+	pOutput->type = Type::Init;
 
 	return pOutput;
 }
@@ -74,7 +74,7 @@ HqFunctionHandle HqFunction::CreateScript(
 	pOutput->bytecodeOffsetEnd = bytecodeOffset + bytecodeLength;
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
-	pOutput->isNative = false;
+	pOutput->type = Type::Normal;
 
 	// Take ownership of the guarded block array.
 	HqGuardedBlock::PtrArray::Move(pOutput->guardedBlocks, guardedBlocks);
@@ -108,7 +108,7 @@ HqFunctionHandle HqFunction::CreateNative(
 	pOutput->nativeFn = nullptr; // The callback will be provided externally.
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
-	pOutput->isNative = true;
+	pOutput->type = Type::Native;
 
 	HqString::AddRef(pOutput->pSignature);
 
@@ -138,7 +138,7 @@ HqFunctionHandle HqFunction::CreateBuiltIn(
 	pOutput->nativeFn = nativeFn;
 	pOutput->numParameters = numParameters;
 	pOutput->numReturnValues = numReturnValues;
-	pOutput->isNative = true;
+	pOutput->type = Type::Native;
 
 	HqString::AddRef(pOutput->pSignature);
 

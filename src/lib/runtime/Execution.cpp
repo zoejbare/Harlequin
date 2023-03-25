@@ -581,7 +581,7 @@ void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 	{
 		HqFrameHandle hFrame = hExec->frameStack.memory.pData[frameIndex];
 
-		if(!hFrame->hFunction->isNative)
+		if(hFrame->hFunction->type != HqFunction::Type::Native)
 		{
 			// Discover values in the stack.
 			size_t stackSize = HqValue::HandleStack::GetCurrentSize(hFrame->stack);

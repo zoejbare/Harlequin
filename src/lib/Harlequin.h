@@ -477,7 +477,7 @@ HQ_MAIN_API int HqModuleGetFunctionCount(HqModuleHandle hModule, size_t* pOutCou
 
 HQ_MAIN_API int HqModuleListFunctions(
 	HqModuleHandle hModule,
-	HqCallbackIterateString onIterateFn,
+	HqCallbackIterateFunction onIterateFn,
 	void* pUserData
 );
 
@@ -515,7 +515,9 @@ HQ_MAIN_API int HqFunctionGetModule(HqFunctionHandle hFunction, HqModuleHandle* 
 
 HQ_MAIN_API int HqFunctionGetSignature(HqFunctionHandle hFunction, const char** pOutSignature);
 
-HQ_MAIN_API int HqFunctionGetIsNative(HqFunctionHandle hFunction, bool* pOutNative);
+HQ_MAIN_API int HqFunctionIsNative(HqFunctionHandle hFunction, bool* pOutNative);
+
+HQ_MAIN_API int HqFunctionIsInit(HqFunctionHandle hFunction, bool* pOutInit);
 
 HQ_MAIN_API int HqFunctionGetParameterCount(HqFunctionHandle hFunction, uint16_t* pOutCount);
 

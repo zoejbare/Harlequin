@@ -34,6 +34,13 @@ struct HqModule;
 
 struct HqFunction
 {
+	enum class Type
+	{
+		Normal,
+		Native,
+		Init,
+	};
+
 	typedef HqHashMap<
 		HqString*, 
 		HqFunctionHandle, 
@@ -90,7 +97,7 @@ struct HqFunction
 	uint16_t numParameters;
 	uint16_t numReturnValues;
 
-	bool isNative;
+	Type type;
 };
 
 

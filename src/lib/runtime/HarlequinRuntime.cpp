@@ -581,20 +581,24 @@ int HqModuleGetFunctionCount(HqModuleHandle hModule, size_t* pOutCount)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqModuleListFunctions(HqModuleHandle hModule, HqCallbackIterateString onIterateFn, void* const pUserData)
+int HqModuleListFunctions(HqModuleHandle hModule, HqCallbackIterateFunction onIterateFn, void* const pUserData)
 {
 	if(!hModule || !onIterateFn)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Call the callback for each function signature in the module.
-	HqFunction::StringToHandleMap::Iterator iter;
-	while(HqFunction::StringToHandleMap::IterateNext(hModule->functions, iter))
+	// Always start with the module's init function.
+	if(onIterateFn(pUserData, hModule->hInitFunction))
 	{
-		if(!onIterateFn(pUserData, iter.pData->key->data))
+		// Call the callback for each function signature in the module.
+		HqFunction::StringToHandleMap::Iterator iter;
+		while(HqFunction::StringToHandleMap::IterateNext(hModule->functions, iter))
 		{
-			break;
+			if(!onIterateFn(pUserData, iter.pData->value))
+			{
+				break;
+			}
 		}
 	}
 
@@ -706,11 +710,7 @@ int HqModuleListDependencies(HqModuleHandle hModule, HqCallbackIterateString onI
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqModuleListUnloadedDependencies(
-	HqModuleHandle hModule,
-	HqCallbackIterateString onIterateFn,
-	void* const pUserData
-)
+int HqModuleListUnloadedDependencies(HqModuleHandle hModule, HqCallbackIterateString onIterateFn, void* const pUserData)
 {
 	if(!hModule || !onIterateFn)
 	{
@@ -764,14 +764,28 @@ int HqFunctionGetSignature(HqFunctionHandle hFunction, const char** pOutSignatur
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqFunctionGetIsNative(HqFunctionHandle hFunction, bool* pOutNative)
+int HqFunctionIsNative(HqFunctionHandle hFunction, bool* pOutNative)
 {
 	if(!hFunction || !pOutNative)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*pOutNative) = hFunction->isNative;
+	(*pOutNative) = hFunction->type == HqFunction::Type::Native;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqFunctionIsInit(HqFunctionHandle hFunction, bool* pOutInit)
+{
+	if(!hFunction || !pOutInit)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*pOutInit) = hFunction->type == HqFunction::Type::Init;
 
 	return HQ_SUCCESS;
 }
@@ -813,7 +827,7 @@ int HqFunctionGetBytecodeOffset(HqFunctionHandle hFunction, uint32_t* pOutOffset
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFunction->isNative)
+	if(hFunction->type == HqFunction::Type::Native)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -832,7 +846,7 @@ int HqFunctionGetNativeBinding(HqFunctionHandle hFunction, HqNativeFunction* pOu
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(!hFunction->isNative)
+	if(hFunction->type != HqFunction::Type::Native)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -851,7 +865,7 @@ int HqFunctionGetNativeUserData(HqFunctionHandle hFunction, void** ppOutUserData
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(!hFunction->isNative)
+	if(hFunction->type != HqFunction::Type::Native)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -870,7 +884,7 @@ int HqFunctionSetNativeBinding(HqFunctionHandle hFunction, HqNativeFunction nati
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(!hFunction->isNative)
+	if(hFunction->type != HqFunction::Type::Native)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -890,7 +904,7 @@ int HqFunctionDisassemble(HqFunctionHandle hFunction, HqCallbackOpDisasm onDisas
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFunction->isNative)
+	if(hFunction->type == HqFunction::Type::Native)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -985,6 +999,10 @@ int HqExecutionInitialize(HqExecutionHandle hExec, HqFunctionHandle hEntryPoint)
 	}
 	if(!hExec->hVm)
 	{
+		return HQ_ERROR_INVALID_DATA;
+	}
+	if(hEntryPoint->type == HqFunction::Type::Init)
+	{
 		return HQ_ERROR_INVALID_OPERATION;
 	}
 
@@ -1000,6 +1018,10 @@ int HqExecutionReset(HqExecutionHandle hExec)
 		return HQ_ERROR_INVALID_ARG;
 	}
 	if(!hExec->hVm)
+	{
+		return HQ_ERROR_INVALID_DATA;
+	}
+	if(hExec->hFunction && hExec->hFunction->type == HqFunction::Type::Init)
 	{
 		return HQ_ERROR_INVALID_OPERATION;
 	}
@@ -1329,7 +1351,7 @@ int HqFrameGetBytecodeOffset(HqFrameHandle hFrame, uint32_t* pOutOffset)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFrame->hFunction->isNative)
+	if(hFrame->hFunction->type == HqFunction::Type::Native)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -1348,7 +1370,7 @@ int HqFramePushValue(HqFrameHandle hFrame, HqValueHandle hValue)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFrame->hFunction->isNative)
+	if(hFrame->hFunction->type != HqFunction::Type::Normal)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -1370,7 +1392,7 @@ int HqFramePopValue(HqFrameHandle hFrame, HqValueHandle* phOutValue)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFrame->hFunction->isNative)
+	if(hFrame->hFunction->type != HqFunction::Type::Normal)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -1402,7 +1424,7 @@ int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t s
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFrame->hFunction->isNative)
+	if(hFrame->hFunction->type != HqFunction::Type::Normal)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -1424,7 +1446,7 @@ int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, uint32_t re
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFrame->hFunction->isNative)
+	if(hFrame->hFunction->type != HqFunction::Type::Normal)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
@@ -1456,7 +1478,7 @@ int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	if(hFrame->hFunction->isNative)
+	if(hFrame->hFunction->type != HqFunction::Type::Normal)
 	{
 		return HQ_ERROR_INVALID_TYPE;
 	}
