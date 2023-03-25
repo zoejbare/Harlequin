@@ -316,7 +316,7 @@ extern "C" void OpCodeDisasm_Div(HqDisassemble& disasm)
 	const uint32_t gpSrcRightRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "DIV r%" PRIu32 ", r%" PRIu32 ", r%" PRIu32, gpDstRegIndex, gpSrcLeftRegIndex, gpSrcRightRegIndex);
+	snprintf(str, sizeof(str), "DIV r(%" PRIu32 "), r(%" PRIu32 "), r(%" PRIu32 ")", gpDstRegIndex, gpSrcLeftRegIndex, gpSrcRightRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

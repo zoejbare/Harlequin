@@ -96,7 +96,7 @@ extern "C" void OpCodeDisasm_Copy(HqDisassemble& disasm)
 	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "COPY r%" PRIu32 ", r%" PRIu32, gpDstRegIndex, gpSrcRegIndex);
+	snprintf(str, sizeof(str), "COPY r(%" PRIu32 "), r(%" PRIu32 ")", gpDstRegIndex, gpSrcRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

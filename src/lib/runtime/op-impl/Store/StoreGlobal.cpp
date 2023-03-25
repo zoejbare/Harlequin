@@ -94,7 +94,7 @@ extern "C" void OpCodeDisasm_StoreGlobal(HqDisassemble& disasm)
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "STORE_GLOBAL s%" PRIu32 ", r%" PRIu32, stringIndex, registerIndex);
+	snprintf(str, sizeof(str), "STORE_GLOBAL s(%" PRIu32 "), r(%" PRIu32 ")", stringIndex, registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

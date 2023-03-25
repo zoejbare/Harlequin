@@ -83,7 +83,7 @@ extern "C" void OpCodeDisasm_LoadImmNull(HqDisassemble& disasm)
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_NULL r%" PRIu32, registerIndex);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_NULL r(%" PRIu32 ")", registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -140,7 +140,7 @@ extern "C" void OpCodeDisasm_LoadImmBool(HqDisassemble& disasm)
 	const bool rawValue = HqDecoder::LoadBool(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_BOOL r%" PRIu32 ", %s", registerIndex, rawValue ? "true" : "false");
+	snprintf(instr, sizeof(instr), "LOAD_IMM_BOOL r(%" PRIu32 "), %s", registerIndex, rawValue ? "true" : "false");
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -198,7 +198,7 @@ extern "C" void OpCodeDisasm_LoadImmI8(HqDisassemble& disasm)
 	const int8_t rawValue = HqDecoder::LoadInt8(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_I8 r%" PRIu32 ", %" PRId8, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_I8 r(%" PRIu32 "), %" PRId8, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -256,7 +256,7 @@ extern "C" void OpCodeDisasm_LoadImmI16(HqDisassemble& disasm)
 	const int16_t rawValue = HqDecoder::LoadInt16(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_I16 r%" PRIu32 ", %" PRId16, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_I16 r(%" PRIu32 "), %" PRId16, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -314,7 +314,7 @@ extern "C" void OpCodeDisasm_LoadImmI32(HqDisassemble& disasm)
 	const int32_t rawValue = HqDecoder::LoadInt32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_I32 r%" PRIu32 ", %" PRId32, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_I32 r(%" PRIu32 "), %" PRId32, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -372,7 +372,7 @@ extern "C" void OpCodeDisasm_LoadImmI64(HqDisassemble& disasm)
 	const int64_t rawValue = HqDecoder::LoadInt64(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_I64 r%" PRIu32 ", %" PRId64, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_I64 r(%" PRIu32 "), %" PRId64, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -430,7 +430,7 @@ extern "C" void OpCodeDisasm_LoadImmU8(HqDisassemble& disasm)
 	const uint8_t rawValue = HqDecoder::LoadUint8(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_U8 r%" PRIu32 ", %" PRIu8, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_U8 r(%" PRIu32 "), %" PRIu8, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -488,7 +488,7 @@ extern "C" void OpCodeDisasm_LoadImmU16(HqDisassemble& disasm)
 	const uint16_t rawValue = HqDecoder::LoadUint16(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_U16 r%" PRIu32 ", %" PRIu16, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_U16 r(%" PRIu32 "), %" PRIu16, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -546,7 +546,7 @@ extern "C" void OpCodeDisasm_LoadImmU32(HqDisassemble& disasm)
 	const uint32_t rawValue = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_U32 r%" PRIu32 ", %" PRIu32, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_U32 r(%" PRIu32 "), %" PRIu32, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -604,7 +604,7 @@ extern "C" void OpCodeDisasm_LoadImmU64(HqDisassemble& disasm)
 	const uint64_t rawValue = HqDecoder::LoadUint64(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_U64 r%" PRIu32 ", %" PRIu64, registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_U64 r(%" PRIu32 "), %" PRIu64, registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -662,7 +662,7 @@ extern "C" void OpCodeDisasm_LoadImmF32(HqDisassemble& disasm)
 	const float rawValue = HqDecoder::LoadFloat32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_F32 r%" PRIu32 ", %f", registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_F32 r(%" PRIu32 "), %f", registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -720,7 +720,7 @@ extern "C" void OpCodeDisasm_LoadImmF64(HqDisassemble& disasm)
 	const double rawValue = HqDecoder::LoadFloat64(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_F64 r%" PRIu32 ", %f", registerIndex, rawValue);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_F64 r(%" PRIu32 "), %f", registerIndex, rawValue);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
@@ -793,7 +793,7 @@ extern "C" void OpCodeDisasm_LoadImmStr(HqDisassemble& disasm)
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_STR r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_STR r(%" PRIu32 "), s%" PRIu32, registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 

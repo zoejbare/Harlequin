@@ -80,7 +80,7 @@ extern "C" void OpCodeDisasm_LoadParam(HqDisassemble& disasm)
 	const uint32_t ioRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "LOAD_PARAM r%" PRIu32 ", p%" PRIu32, gpRegIndex, ioRegIndex);
+	snprintf(str, sizeof(str), "LOAD_PARAM r(%" PRIu32 "), p(%" PRIu32 ")", gpRegIndex, ioRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

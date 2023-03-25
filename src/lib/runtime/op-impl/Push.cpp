@@ -75,7 +75,7 @@ extern "C" void OpCodeDisasm_Push(HqDisassemble& disasm)
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[16];
-	snprintf(str, sizeof(str), "PUSH r%" PRIu32, registerIndex);
+	snprintf(str, sizeof(str), "PUSH r(%" PRIu32 ")", registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

@@ -111,7 +111,7 @@ extern "C" void OpCodeDisasm_StoreObject(HqDisassemble& disasm)
 	const uint32_t memberIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "STORE_OBJECT r%" PRIu32 ", r%" PRIu32 ", #%" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);
+	snprintf(str, sizeof(str), "STORE_OBJECT r(%" PRIu32 "), r(%" PRIu32 "), %" PRIu32, gpDstRegIndex, gpSrcRegIndex, memberIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

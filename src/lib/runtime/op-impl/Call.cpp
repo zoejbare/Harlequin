@@ -137,7 +137,7 @@ extern "C" void OpCodeDisasm_Call(HqDisassemble& disasm)
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "CALL s%" PRIu32, stringIndex);
+	snprintf(str, sizeof(str), "CALL s(%" PRIu32 ")", stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -180,7 +180,7 @@ extern "C" void OpCodeDisasm_CallValue(HqDisassemble& disasm)
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "CALL_VALUE r%" PRIu32, registerIndex);
+	snprintf(str, sizeof(str), "CALL_VALUE r(%" PRIu32 ")", registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

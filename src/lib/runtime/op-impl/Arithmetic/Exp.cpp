@@ -189,7 +189,7 @@ extern "C" void OpCodeDisasm_Exp(HqDisassemble& disasm)
 	const uint32_t gpSrcRightRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "EXP r%" PRIu32 ", r%" PRIu32 ", r%" PRIu32, gpDstRegIndex, gpSrcLeftRegIndex, gpSrcRightRegIndex);
+	snprintf(str, sizeof(str), "EXP r(%" PRIu32 "), r(%" PRIu32 "), r(%" PRIu32 ")", gpDstRegIndex, gpSrcLeftRegIndex, gpSrcRightRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

@@ -198,7 +198,7 @@ extern "C" void OpCodeDisasm_CastString(HqDisassemble& disasm)
 	const uint32_t gpSrcRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "CAST_STR r%" PRIu32 ", r%" PRIu32, gpDstRegIndex, gpSrcRegIndex);
+	snprintf(str, sizeof(str), "CAST_STR r(%" PRIu32 "), r(%" PRIu32 ")", gpDstRegIndex, gpSrcRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

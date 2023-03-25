@@ -154,7 +154,7 @@ extern "C" void OpCodeDisasm_LoadArray(HqDisassemble& disasm)
 	const uint32_t arrayIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "LOAD_ARRAY r%" PRIu32 ", r%" PRIu32 ", r%" PRIu32, gpDstRegIndex, gpSrcRegIndex, arrayIndex);
+	snprintf(str, sizeof(str), "LOAD_ARRAY r(%" PRIu32 "), r(%" PRIu32 "), r(%" PRIu32 ")", gpDstRegIndex, gpSrcRegIndex, arrayIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

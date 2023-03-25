@@ -106,7 +106,7 @@ extern "C" void OpCodeDisasm_Jump(HqDisassemble& disasm)
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
-	snprintf(str, sizeof(str), "JMP #%" PRId32 " (0x%" PRIXPTR ")", offset, position);
+	snprintf(str, sizeof(str), "JMP 0x%" PRIXPTR, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -151,7 +151,7 @@ extern "C" void OpCodeDisasm_JumpIfTrue(HqDisassemble& disasm)
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
-	snprintf(str, sizeof(str), "JMP_TRUE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
+	snprintf(str, sizeof(str), "JMP_TRUE r(%" PRIu32 "), 0x%" PRIXPTR, registerIndex, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
@@ -197,7 +197,7 @@ extern "C" void OpCodeDisasm_JumpIfFalse(HqDisassemble& disasm)
 	const uintptr_t position = uintptr_t(intptr_t(disasm.opcodeOffset) + offset);
 
 	char str[64];
-	snprintf(str, sizeof(str), "JMP_FALSE r%" PRIu32 ", #%" PRId32 " (0x%" PRIXPTR ")", registerIndex, offset, position);
+	snprintf(str, sizeof(str), "JMP_FALSE r(%" PRIu32 "), 0x%" PRIXPTR, registerIndex, position);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

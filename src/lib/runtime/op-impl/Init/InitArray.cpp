@@ -82,7 +82,7 @@ extern "C" void OpCodeDisasm_InitArray(HqDisassemble& disasm)
 	const uint32_t initialCount = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "INIT_ARRAY r%" PRIu32 ", #%" PRIu32, registerIndex, initialCount);
+	snprintf(instr, sizeof(instr), "INIT_ARRAY r(%" PRIu32 "), %" PRIu32, registerIndex, initialCount);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 

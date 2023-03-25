@@ -94,7 +94,7 @@ extern "C" void OpCodeDisasm_LoadGlobal(HqDisassemble& disasm)
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[256];
-	snprintf(str, sizeof(str), "LOAD_GLOBAL r%" PRIu32 ", s%" PRIu32, registerIndex, stringIndex);
+	snprintf(str, sizeof(str), "LOAD_GLOBAL r(%" PRIu32 "), s(%" PRIu32 ")", registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

@@ -65,7 +65,7 @@ extern "C" void OpCodeDisasm_Raise(HqDisassemble& disasm)
 	const uint32_t registerIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[24];
-	snprintf(str, sizeof(str), "RAISE r%" PRIu32, registerIndex);
+	snprintf(str, sizeof(str), "RAISE r(%" PRIu32 ")", registerIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 

@@ -78,7 +78,7 @@ extern "C" void OpCodeDisasm_StoreParam(HqDisassemble& disasm)
 	const uint32_t gpRegIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char str[64];
-	snprintf(str, sizeof(str), "STORE_PARAM p%" PRIu32 ", r%" PRIu32, ioRegIndex, gpRegIndex);
+	snprintf(str, sizeof(str), "STORE_PARAM p(%" PRIu32 "), r(%" PRIu32 ")", ioRegIndex, gpRegIndex);
 	disasm.onDisasmFn(disasm.pUserData, str, disasm.opcodeOffset);
 }
 
