@@ -175,19 +175,16 @@ void Util::FinalizeFunctionSerializer(
 	const char* const functionSignature)
 {
 	// All functions should end with a RETURN opcode.
-	const int writeReturnInstrResult = HqBytecodeWriteReturn(hSerializer);
-	ASSERT_EQ(writeReturnInstrResult, HQ_SUCCESS);
+	ASSERT_EQ(HqBytecodeWriteReturn(hSerializer), HQ_SUCCESS);
 
 	const void* const pFuncData = HqSerializerGetRawStreamPointer(hSerializer);
 	const size_t funcLength = HqSerializerGetStreamLength(hSerializer);
 
 	// Add the function to the module writer.
-	const int addFunctionResult = HqModuleWriterAddFunction(hModuleWriter, functionSignature, pFuncData, funcLength, 0, 0);
-	ASSERT_EQ(addFunctionResult, HQ_SUCCESS);
+	ASSERT_EQ(HqModuleWriterAddFunction(hModuleWriter, functionSignature, pFuncData, funcLength, 0, 0), HQ_SUCCESS);
 
 	// Dispose of the function serializer.
-	const int disposeFuncSerializerResult = HqSerializerDispose(&hSerializer);
-	ASSERT_EQ(disposeFuncSerializerResult, HQ_SUCCESS);
+	ASSERT_EQ(HqSerializerDispose(&hSerializer), HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -195,24 +192,19 @@ void Util::FinalizeFunctionSerializer(
 void Util::GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec)
 {
 	// Get the 'yielded' status.
-	const int getYieldStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield);
-	ASSERT_EQ(getYieldStatusResult, HQ_SUCCESS);
+	ASSERT_EQ(HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_YIELD, &output.yield), HQ_SUCCESS);
 
 	// Get the 'running' status.
-	const int getRunningStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &output.running);
-	ASSERT_EQ(getRunningStatusResult, HQ_SUCCESS);
+	ASSERT_EQ(HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_RUNNING, &output.running), HQ_SUCCESS);
 
 	// Get the 'completed' status.
-	const int getCompletedStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &output.complete);
-	ASSERT_EQ(getCompletedStatusResult, HQ_SUCCESS);
+	ASSERT_EQ(HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_COMPLETE, &output.complete), HQ_SUCCESS);
 
 	// Get the 'exception' status.
-	const int getExceptionStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &output.exception);
-	ASSERT_EQ(getExceptionStatusResult, HQ_SUCCESS);
+	ASSERT_EQ(HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_EXCEPTION, &output.exception), HQ_SUCCESS);
 
 	// Get the 'aborted' status.
-	const int getAbortStatusResult = HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort);
-	ASSERT_EQ(getAbortStatusResult, HQ_SUCCESS);
+	ASSERT_EQ(HqExecutionGetStatus(hExec, HQ_EXEC_STATUS_ABORT, &output.abort), HQ_SUCCESS);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -221,8 +213,7 @@ void Util::GetCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec)
 {
 	// Get the current frame in the callstack.
 	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
-	const int getFrameResult = HqExecutionGetCurrentFrame(hExec, &hFrame);
-	ASSERT_EQ(getFrameResult, HQ_SUCCESS);
+	ASSERT_EQ(HqExecutionGetCurrentFrame(hExec, &hFrame), HQ_SUCCESS);
 	ASSERT_NE(hFrame, HQ_FRAME_HANDLE_NULL);
 
 	output = hFrame;
@@ -237,8 +228,21 @@ void Util::GetGpRegister(HqValueHandle& output, HqExecutionHandle hExec, const u
 
 	// Get the general-purpose register that has the value we want to inspect.
 	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-	const int getGpRegisterResult = HqFrameGetGpRegister(hFrame, &hValue, gpRegIndex);
-	ASSERT_EQ(getGpRegisterResult, HQ_SUCCESS);
+	ASSERT_EQ(HqFrameGetGpRegister(hFrame, &hValue, gpRegIndex), HQ_SUCCESS);
+
+	output = hValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void Util::GetVrRegister(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t vrRegIndex)
+{
+	HqFrameHandle hFrame = HQ_FRAME_HANDLE_NULL;
+	GetCurrentFrame(hFrame, hExec);
+
+	// Get the variable register that has the value we want to inspect.
+	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+	ASSERT_EQ(HqFrameGetVrRegister(hFrame, &hValue, vrRegIndex), HQ_SUCCESS);
 
 	output = hValue;
 }
@@ -249,8 +253,7 @@ void Util::GetIoRegister(HqValueHandle& output, HqExecutionHandle hExec, const u
 {
 	// Get the general-purpose register that has the value we want to inspect.
 	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-	const int getIoRegisterResult = HqExecutionGetIoRegister(hExec, &hValue, ioRegIndex);
-	ASSERT_EQ(getIoRegisterResult, HQ_SUCCESS);
+	ASSERT_EQ(HqExecutionGetIoRegister(hExec, &hValue, ioRegIndex), HQ_SUCCESS);
 
 	output = hValue;
 }
@@ -264,8 +267,7 @@ void Util::GetStackValue(HqValueHandle& output, HqExecutionHandle hExec, const u
 
 	// Get the general-purpose register that has the value we want to inspect.
 	HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
-	const int peekStackValueResult = HqFramePeekValue(hFrame, &hValue, stackIndex);
-	ASSERT_EQ(peekStackValueResult, HQ_SUCCESS);
+	ASSERT_EQ(HqFramePeekValue(hFrame, &hValue, stackIndex), HQ_SUCCESS);
 
 	output = hValue;
 }

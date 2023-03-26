@@ -578,7 +578,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 		const int writeLoadImmInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
 		ASSERT_EQ(writeLoadImmInstrResult, HQ_SUCCESS);
 
-		// Write the STORE_PARAM instruction to give the global variable some data.
+		// Write the STORE_PARAM instruction to have some data to work with.
 		const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 2, 0);
 		ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
@@ -624,6 +624,79 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 		Util::GetIoRegister(hValue, hExec, 2);
 
 		// Validate the I/O register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsInt32(hValue));
+		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	Util::CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadVariable_StoreVariable)
+{
+	static constexpr int32_t testValueData = 12345678;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write a LOAD_IMM instruction so we have data to put in the I/O register.
+		ASSERT_EQ(HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData), HQ_SUCCESS);
+
+		// Write the STORE_VAR instruction to give have some data to work with.
+		ASSERT_EQ(HqBytecodeWriteStoreVariable(hFuncSerializer, 2, 0), HQ_SUCCESS);
+
+		// Write the LOAD_VAR instruction to a GP register that we can inspect.
+		ASSERT_EQ(HqBytecodeWriteLoadVariable(hFuncSerializer, 1, 2), HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the values.
+		ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		Util::GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Get the GP register value we want to inspect.
+		HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+		Util::GetGpRegister(hValue, hExec, 1);
+
+		// Validate the GP register value.
+		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+		ASSERT_TRUE(HqValueIsInt32(hValue));
+		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+
+		// Get the variable register value we want to inspect.
+		Util::GetVrRegister(hValue, hExec, 2);
+
+		// Validate the variable register value.
 		ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
 		ASSERT_TRUE(HqValueIsInt32(hValue));
 		ASSERT_EQ(HqValueGetInt32(hValue), testValueData);

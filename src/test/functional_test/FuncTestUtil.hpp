@@ -62,6 +62,7 @@ namespace Util
 	void GetExecutionStatus(ExecStatus& output, HqExecutionHandle hExec);
 	void GetCurrentFrame(HqFrameHandle& output, HqExecutionHandle hExec);
 	void GetGpRegister(HqValueHandle& output, HqExecutionHandle hExec, uint32_t gpRegIndex);
+	void GetVrRegister(HqValueHandle& output, HqExecutionHandle hExec, uint32_t vrRegIndex);
 	void GetIoRegister(HqValueHandle& output, HqExecutionHandle hExec, uint32_t ioRegIndex);
 	void GetStackValue(HqValueHandle& output, HqExecutionHandle hExec, const uint32_t stackIndex);
 }
