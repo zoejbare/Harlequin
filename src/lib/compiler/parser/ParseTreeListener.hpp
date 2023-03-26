@@ -16,8 +16,38 @@
 // IN THE SOFTWARE.
 //
 
-#include "Module.hpp"
+#pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
+
+#include "../../Harlequin.h"
+
+#include "../generated/HarlequinBaseListener.h"
+
+#include <unordered_set>
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class HqParseTreeListener
+	: public HarlequinBaseListener
+{
+public:
+
+	HqParseTreeListener();
+
+	virtual void enterModule(HarlequinParser::ModuleContext* pCtx) override;
+	virtual void exitModule(HarlequinParser::ModuleContext* pCtx) override;
+
+	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext* pCtx) override;
+
+
+private:
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+HqParseTreeListener::HqParseTreeListener()
+{
+}
 
 //----------------------------------------------------------------------------------------------------------------------
