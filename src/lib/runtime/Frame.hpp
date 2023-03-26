@@ -45,14 +45,17 @@ struct HqFrame
 	static int PeekValue(HqFrameHandle hFrame, HqValueHandle* const phOutValue, const size_t index);
 
 	static int SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uint32_t index);
+	static int SetVrRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uint32_t index);
 
 	static HqValueHandle GetGpRegister(HqFrameHandle hFrame, const uint32_t index, int* const pOutResult);
+	static HqValueHandle GetVrRegister(HqFrameHandle hFrame, const uint32_t index, int* const pOutResult);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	HqValue::HandleStack stack;
 	HqValue::HandleArray registers;
+	HqValue::HandleArray variables;
 
 	HqExecutionHandle hExec;
 	HqFunctionHandle hFunction;

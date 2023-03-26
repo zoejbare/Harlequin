@@ -605,6 +605,17 @@ void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 					HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
 				}
 			}
+
+			// Discover values held in the variable registers.
+			for(size_t stackIndex = 0; stackIndex < hFrame->variables.count; ++stackIndex)
+			{
+				HqValueHandle hValue = hFrame->variables.pData[stackIndex];
+
+				if(hValue)
+				{
+					HqGarbageCollector::MarkObject(gc, &hValue->gcProxy);
+				}
+			}
 		}
 	}
 

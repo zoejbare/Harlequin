@@ -55,11 +55,13 @@ void HqVm::prv_setupOpCodes(HqVmHandle hVm)
 
 	_HQ_BIND_OP_CODE(LOAD_GLOBAL, LoadGlobal);
 	_HQ_BIND_OP_CODE(LOAD_PARAM, LoadParam);
+	_HQ_BIND_OP_CODE(LOAD_VAR, LoadVariable);
 	_HQ_BIND_OP_CODE(LOAD_OBJECT, LoadObject);
 	_HQ_BIND_OP_CODE(LOAD_ARRAY, LoadArray);
 
 	_HQ_BIND_OP_CODE(STORE_GLOBAL, StoreGlobal);
 	_HQ_BIND_OP_CODE(STORE_PARAM, StoreParam);
+	_HQ_BIND_OP_CODE(STORE_VAR, StoreVariable);
 	_HQ_BIND_OP_CODE(STORE_OBJECT, StoreObject);
 	_HQ_BIND_OP_CODE(STORE_ARRAY, StoreArray);
 

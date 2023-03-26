@@ -42,8 +42,9 @@ extern "C" {
 #define HQ_VM_FRAME_STACK_SIZE 1024
 #define HQ_VM_VALUE_STACK_SIZE 128
 
-#define HQ_VM_IO_REGISTER_COUNT 128
+#define HQ_VM_IO_REGISTER_COUNT 48
 #define HQ_VM_GP_REGISTER_COUNT 64
+#define HQ_VM_VR_REGISTER_COUNT 128
 
 #define HQ_VM_THREAD_MINIMUM_STACK_SIZE 262144
 #define HQ_VM_THREAD_DEFAULT_STACK_SIZE 1048576
@@ -600,6 +601,10 @@ HQ_MAIN_API int HqFramePeekValue(HqFrameHandle hFrame, HqValueHandle* phOutValue
 HQ_MAIN_API int HqFrameSetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, uint32_t registerIndex);
 
 HQ_MAIN_API int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t registerIndex);
+
+HQ_MAIN_API int HqFrameSetVrRegister(HqFrameHandle hFrame, HqValueHandle hValue, uint32_t registerIndex);
+
+HQ_MAIN_API int HqFrameGetVrRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t registerIndex);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

@@ -39,9 +39,11 @@ HqFrame* HqFrame::Create(HqExecutionHandle hExec)
 	// Initialize the value stack and registers.
 	HqValue::HandleStack::Initialize(pOutput->stack, HQ_VM_FRAME_STACK_SIZE);
 	HqValue::HandleArray::Initialize(pOutput->registers);
+	HqValue::HandleArray::Initialize(pOutput->variables);
 
 	// Reserve enough space for all the registers.
 	HqValue::HandleArray::Reserve(pOutput->registers, HQ_VM_GP_REGISTER_COUNT);
+	HqValue::HandleArray::Reserve(pOutput->variables, HQ_VM_VR_REGISTER_COUNT);
 
 	pOutput->stack.nextIndex = 0;
 	pOutput->registers.count = HQ_VM_GP_REGISTER_COUNT;
@@ -77,6 +79,7 @@ void HqFrame::Dispose(HqFrameHandle hFrame)
 	// Dispose of the value stack and registers.
 	HqValue::HandleStack::Dispose(hFrame->stack);
 	HqValue::HandleArray::Dispose(hFrame->registers);
+	HqValue::HandleArray::Dispose(hFrame->variables);
 
 	delete hFrame;
 }
@@ -89,8 +92,12 @@ void HqFrame::Reset(HqFrameHandle hFrame)
 
 	hFrame->hFunction = HQ_FUNCTION_HANDLE_NULL;
 
-	// Initialize each register value.
-	memset(hFrame->registers.pData, 0, sizeof(HqValueHandle) * hFrame->registers.count);
+	// Clear the stack and registers to prevent the garbage collector from
+	// attempting to collect non-null values that happen to be garbage memory
+	// or old values from a previous frame.
+	memset(hFrame->stack.memory.pData, 0, sizeof(HqValueHandle) * HQ_VM_VALUE_STACK_SIZE);
+	memset(hFrame->registers.pData, 0, sizeof(HqValueHandle) * HQ_VM_GP_REGISTER_COUNT);
+	memset(hFrame->variables.pData, 0, sizeof(HqValueHandle) * HQ_VM_VR_REGISTER_COUNT);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -155,6 +162,18 @@ int HqFrame::SetGpRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uin
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqFrame::SetVrRegister(HqFrameHandle hFrame, HqValueHandle hValue, const uint32_t index)
+{
+	assert(hFrame != HQ_FRAME_HANDLE_NULL);
+	assert(index < HQ_VM_VR_REGISTER_COUNT);
+
+	hFrame->variables.pData[index] = hValue;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 HqValueHandle HqFrame::GetGpRegister(HqFrameHandle hFrame, const uint32_t index, int* const pOutResult)
 {
 	assert(hFrame != HQ_FRAME_HANDLE_NULL);
@@ -168,6 +187,23 @@ HqValueHandle HqFrame::GetGpRegister(HqFrameHandle hFrame, const uint32_t index,
 
 	(*pOutResult) = HQ_SUCCESS;
 	return hFrame->registers.pData[index];
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+HqValueHandle HqFrame::GetVrRegister(HqFrameHandle hFrame, const uint32_t index, int* const pOutResult)
+{
+	assert(hFrame != HQ_FRAME_HANDLE_NULL);
+	assert(pOutResult != nullptr);
+
+	if(index >= HQ_VM_VR_REGISTER_COUNT)
+	{
+		(*pOutResult) = HQ_ERROR_INDEX_OUT_OF_RANGE;
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
+	(*pOutResult) = HQ_SUCCESS;
+	return hFrame->variables.pData[index];
 }
 
 //----------------------------------------------------------------------------------------------------------------------

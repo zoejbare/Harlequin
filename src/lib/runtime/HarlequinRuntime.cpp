@@ -1501,6 +1501,68 @@ int HqFrameGetGpRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqFrameSetVrRegister(HqFrameHandle hFrame, HqValueHandle hValue, uint32_t registerIndex)
+{
+	if(!hFrame || registerIndex >= HQ_VM_VR_REGISTER_COUNT)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	if(hFrame->hFunction->type != HqFunction::Type::Normal)
+	{
+		return HQ_ERROR_INVALID_TYPE;
+	}
+
+	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
+	if(!hVm)
+	{
+		return HQ_ERROR_INVALID_DATA;
+	}
+
+	if(hValue && hVm != hValue->hVm)
+	{
+		return HQ_ERROR_MISMATCH;
+	}
+
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
+
+	return HqFrame::SetVrRegister(hFrame, hValue, registerIndex);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqFrameGetVrRegister(HqFrameHandle hFrame, HqValueHandle* phOutValue, uint32_t registerIndex)
+{
+	if(!hFrame
+		|| !phOutValue
+		|| registerIndex >= HQ_VM_VR_REGISTER_COUNT)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	if(hFrame->hFunction->type != HqFunction::Type::Normal)
+	{
+		return HQ_ERROR_INVALID_TYPE;
+	}
+
+	HqVmHandle hVm = HqFunction::GetVm(hFrame->hFunction);
+	if(!hVm)
+	{
+		return HQ_ERROR_INVALID_DATA;
+	}
+
+	HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
+
+	int result;
+	HqValueHandle hValue = HqFrame::GetVrRegister(hFrame, registerIndex, &result);
+
+	(*phOutValue) = hValue;
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 HqValueHandle HqValueCreateBool(HqVmHandle hVm, bool value)
 {
 	if(!hVm)
