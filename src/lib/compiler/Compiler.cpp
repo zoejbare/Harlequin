@@ -18,11 +18,14 @@
 
 #include "Compiler.hpp"
 
+#include <assert.h>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 HqCompilerHandle HqCompiler::Create(HqCompilerInit init)
 {
 	HqCompiler* const pOutput = new HqCompiler();
+	assert(pOutput != nullptr);
 
 	pOutput->report.onMessageFn = init.common.report.onMessageFn;
 	pOutput->report.pUserData = init.common.report.pUserData;
@@ -35,6 +38,7 @@ HqCompilerHandle HqCompiler::Create(HqCompilerInit init)
 
 void HqCompiler::Dispose(HqCompilerHandle hCompiler)
 {
+	assert(hCompiler != HQ_COMPILER_HANDLE_NULL);
 	delete hCompiler;
 }
 
