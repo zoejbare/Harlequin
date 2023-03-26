@@ -939,6 +939,12 @@ HQ_MAIN_API int HqBytecodeWriteLoadParam(
 	uint32_t ioRegIndex
 );
 
+HQ_MAIN_API int HqBytecodeWriteLoadVariable(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t vrRegIndex
+);
+
 HQ_MAIN_API int HqBytecodeWriteLoadObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
@@ -962,6 +968,12 @@ HQ_MAIN_API int HqBytecodeWriteStoreGlobal(
 HQ_MAIN_API int HqBytecodeWriteStoreParam(
 	HqSerializerHandle hSerializer,
 	uint32_t ioRegIndex,
+	uint32_t gpRegIndex
+);
+
+HQ_MAIN_API int HqBytecodeWriteStoreVariable(
+	HqSerializerHandle hSerializer,
+	uint32_t vrRegIndex,
 	uint32_t gpRegIndex
 );
 

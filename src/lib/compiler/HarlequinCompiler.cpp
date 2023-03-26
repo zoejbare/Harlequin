@@ -1058,6 +1058,26 @@ int HqBytecodeWriteLoadParam(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqBytecodeWriteLoadVariable(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint32_t vrRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_VAR);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(vrRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqBytecodeWriteLoadObject(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
@@ -1135,6 +1155,26 @@ int HqBytecodeWriteStoreParam(
 
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_PARAM);
 	_HQ_EMIT_UDWORD(ioRegIndex);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteStoreVariable(
+	HqSerializerHandle hSerializer,
+	const uint32_t vrRegIndex,
+	const uint32_t gpRegIndex
+)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_VAR);
+	_HQ_EMIT_UDWORD(vrRegIndex);
 	_HQ_EMIT_UDWORD(gpRegIndex);
 
 	return HQ_SUCCESS;
