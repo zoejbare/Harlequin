@@ -750,6 +750,7 @@ HQ_MAIN_API int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqVal
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 typedef struct HqCompiler* HqCompilerHandle;
+typedef struct HqProject* HqProjectHandle;
 typedef struct HqModuleWriter* HqModuleWriterHandle;
 
 typedef struct
@@ -759,7 +760,8 @@ typedef struct
 
 typedef bool (*HqCallbackIterateBuiltInFunction)(void*, int, const char*);
 
-#define HQ_COMPILER_HANDLE_NULL       ((HqCompilerHandle)0)
+#define HQ_COMPILER_HANDLE_NULL      ((HqCompilerHandle)0)
+#define HQ_PROJECT_HANDLE_NULL       ((HqProjectHandle)0)
 #define HQ_MODULE_WRITER_HANDLE_NULL ((HqModuleWriterHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
@@ -769,6 +771,12 @@ HQ_MAIN_API int HqCompilerCreate(HqCompilerHandle* phOutCompiler, HqCompilerInit
 HQ_MAIN_API int HqCompilerDispose(HqCompilerHandle* phCompiler);
 
 HQ_MAIN_API int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutReport);
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+HQ_MAIN_API int HqProjectLoad(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler, HqSerializerHandle hSerializer);
+
+HQ_MAIN_API int HqProjectDispose(HqProjectHandle* phProject);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

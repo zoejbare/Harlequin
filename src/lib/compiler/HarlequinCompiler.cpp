@@ -90,6 +90,36 @@ int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutR
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqProjectLoad(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler, HqSerializerHandle hSerializer)
+{
+	if(!phOutProject || (*phOutProject) || !hCompiler || !hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phOutProject) = HQ_PROJECT_HANDLE_NULL;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectDispose(HqProjectHandle* phProject)
+{
+	if(!phProject || !(*phProject))
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqProjectHandle hProject = (*phProject);
+
+	(*phProject) = HQ_PROJECT_HANDLE_NULL;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqCompilerHandle hCompiler)
 {
 	if(!phOutModuleWriter || (*phOutModuleWriter) || !hCompiler)

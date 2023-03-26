@@ -341,6 +341,18 @@ with csbuild.Project(ExtGoogleTest.projectName, ExtGoogleTest.path, autoDiscover
 
 ###################################################################################################
 
+class ExtRapidXmlNs(object):
+	projectName = "ExtStub_rapidxml_ns"
+	path = "external/rapidxml_ns"
+
+with csbuild.Project(ExtRapidXmlNs.projectName, ExtRapidXmlNs.path, autoDiscoverSourceFiles=False):
+	csbuild.SetOutput("{name}", csbuild.ProjectType.Stub)
+
+	with csbuild.Scope(csbuild.ScopeDef.Children):
+		csbuild.AddIncludeDirectories(ExtRapidXmlNs.path)
+
+###################################################################################################
+
 class ExtXxHash(object):
 	projectName = "ExtStub_xxhash"
 	path = "external/xxHash"
@@ -449,6 +461,7 @@ class LibHarlequinTool(object):
 	dependencies = [
 		LibHarlequinBase.projectName,
 		ExtAntlr4Runtime.projectName,
+		ExtRapidXmlNs.projectName,
 	]
 
 with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, LibHarlequinTool.dependencies, autoDiscoverSourceFiles=False):
@@ -502,8 +515,8 @@ class HarlequinDisassembler(object):
 	outputName = "hqd"
 	path = f"{HarlequinCommon.appRootPath}/disassembler"
 	dependencies = [
-		ExtCxxOpts.projectName,
 		LibHarlequinRuntime.projectName,
+		ExtCxxOpts.projectName,
 	]
 
 with csbuild.Project(HarlequinDisassembler.projectName, HarlequinDisassembler.path, HarlequinDisassembler.dependencies):
@@ -535,9 +548,9 @@ class HarlequinUnitTest(object):
 	projectName = "HqTest_UnitTest"
 	outputName = "hq_unit_test"
 	dependencies = [
-		ExtGoogleTest.projectName,
 		LibHarlequinTool.projectName,
 		LibHarlequinRuntime.projectName,
+		ExtGoogleTest.projectName,
 	]
 
 with csbuild.Project(HarlequinUnitTest.projectName, HarlequinCommon.testRootPath, HarlequinUnitTest.dependencies, autoDiscoverSourceFiles=False):
@@ -557,9 +570,9 @@ class HarlequinFunctionalTest(object):
 	projectName = "HqTest_FunctionalTest"
 	outputName = "hq_func_test"
 	dependencies = [
-		ExtGoogleTest.projectName,
 		LibHarlequinTool.projectName,
 		LibHarlequinRuntime.projectName,
+		ExtGoogleTest.projectName,
 	]
 
 with csbuild.Project(HarlequinFunctionalTest.projectName, HarlequinCommon.testRootPath, HarlequinFunctionalTest.dependencies, autoDiscoverSourceFiles=False):
@@ -583,8 +596,8 @@ class HarlequinTest_OpCodesNative(object):
 	outputName = "libTestOpCodes"
 	path = f"{HarlequinCommon.testRootPath}/functional_test/op_codes/native"
 	dependencies = [
-		ExtGoogleTest.projectName,
 		LibHarlequinRuntime.projectName,
+		ExtGoogleTest.projectName,
 	]
 
 with csbuild.Project(HarlequinTest_OpCodesNative.projectName, HarlequinTest_OpCodesNative.path, HarlequinTest_OpCodesNative.dependencies):
