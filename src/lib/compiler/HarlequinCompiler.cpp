@@ -21,6 +21,7 @@
 #include "Compiler.hpp"
 #include "FunctionData.hpp"
 #include "ModuleWriter.hpp"
+#include "Project.hpp"
 
 #include "../base/Serializer.hpp"
 #include "../base/String.hpp"
@@ -47,7 +48,7 @@ int HqCompilerCreate(HqCompilerHandle* phOutCompiler, HqCompilerInit init)
 
 	HqCompilerHandle hCompiler = HqCompiler::Create(init);
 
-	// The message has to be printed *after* creating the VM state since the state is used in this function.
+	// The message has to be printed *after* creating the compiler since the object is used in this function.
 	HqReportMessage(&hCompiler->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin compiler");
 
 	(*phOutCompiler) = hCompiler;
@@ -90,14 +91,14 @@ int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutR
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProjectLoad(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler, HqSerializerHandle hSerializer)
+int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler)
 {
-	if(!phOutProject || (*phOutProject) || !hCompiler || !hSerializer)
+	if(!phOutProject || (*phOutProject) || !hCompiler)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutProject) = HQ_PROJECT_HANDLE_NULL;
+	(*phOutProject) = HqProject::Create(hCompiler);
 
 	return HQ_SUCCESS;
 }
@@ -115,7 +116,21 @@ int HqProjectDispose(HqProjectHandle* phProject)
 
 	(*phProject) = HQ_PROJECT_HANDLE_NULL;
 
+	HqProject::Dispose(hProject);
+
 	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectLoad(HqProjectHandle hProject, HqSerializerHandle hSerializer)
+{
+	if(!hProject || !hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	return HqProject::Load(hProject, hSerializer);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

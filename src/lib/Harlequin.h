@@ -774,9 +774,11 @@ HQ_MAIN_API int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHa
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqProjectLoad(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler, HqSerializerHandle hSerializer);
+HQ_MAIN_API int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler);
 
 HQ_MAIN_API int HqProjectDispose(HqProjectHandle* phProject);
+
+HQ_MAIN_API int HqProjectLoad(HqProjectHandle hProject, HqSerializerHandle hSerializer);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
