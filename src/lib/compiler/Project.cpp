@@ -17,8 +17,12 @@
 //
 
 #include "Project.hpp"
+#include "Compiler.hpp"
+
+#include <rapidxml_ns.hpp>
 
 #include <assert.h>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -44,8 +48,31 @@ void HqProject::Dispose(HqProjectHandle hProject)
 
 int HqProject::Load(HqProjectHandle hProject, HqSerializerHandle hSerializer)
 {
+	using namespace rapidxml_ns;
+
 	assert(hProject != HQ_PROJECT_HANDLE_NULL);
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	HqReportHandle hReport = &hProject->hCompiler->report;
+
+	// We can read the XML file directly from the serializer stream, so we need the stream pointer and
+	// the positional offset of the serializer so we can parse from the correct starting location.
+	char* const streamData = reinterpret_cast<char*>(HqSerializerGetRawStreamPointer(hSerializer));
+	const size_t streamOffset = HqSerializerGetStreamPosition(hSerializer);
+
+	xml_document<> doc;
+
+	try
+	{
+		// Parse the XML file in-place at the necessary offset.
+		doc.parse<0>(streamData + streamOffset);
+	}
+	catch(const parse_error& error)
+	{
+		// An error occurred while parsing.
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to parse Harlequin project file: %s\n\t%s", error.what(), error.where<char>());
+		return HQ_ERROR_FAILED_TO_OPEN_FILE;
+	}
 
 	return HQ_SUCCESS;
 }
