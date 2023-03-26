@@ -666,7 +666,7 @@ size_t HqString::RawHash(const char* const string)
 	const size_t seed = HqStd::Fnv1aHash(reinterpret_cast<const uint8_t*>(string), length);
 
 	return size_t(
-#ifdef HQ_DATA_WIDTH_64_BIT
+#ifdef HQ_CPU_WORD_64_BIT
 		XXH64
 #else
 		XXH32

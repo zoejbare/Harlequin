@@ -24,7 +24,7 @@
 
 #include <intrin.h>
 
-#if defined(HQ_DATA_WIDTH_32_BIT)
+#if defined(HQ_CPU_WORD_32_BIT)
 	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 #endif
@@ -50,7 +50,7 @@ struct HqAtomic
 
 	static __forceinline int64_t FetchAdd(volatile int64_t* const ptr, const int64_t value)
 	{
-#if defined(HQ_DATA_WIDTH_32_BIT)
+#if defined(HQ_CPU_WORD_32_BIT)
 		int64_t original;
 		int64_t exchange;
 

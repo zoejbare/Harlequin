@@ -49,7 +49,7 @@ struct _HqInternalFiberConfig
 extern "C" void __attribute__((noreturn)) _HqFiberEntryPoint(const uint32_t argLsb, const uint32_t argMsb)
 {
 	const uintptr_t address =
-#ifdef HQ_DATA_WIDTH_64_BIT
+#ifdef HQ_CPU_WORD_64_BIT
 		// Reassemble the input address.
 		static_cast<uintptr_t>(argLsb) | (static_cast<uintptr_t>(argMsb) << 32);
 #else
@@ -138,7 +138,7 @@ extern "C" void _HqFiberImplCreate(HqInternalFiber& obj, const HqFiberConfig& fi
 	{
 		const uintptr_t argAddress = reinterpret_cast<uintptr_t>(&internalConfig);
 
-#ifdef HQ_DATA_WIDTH_64_BIT
+#ifdef HQ_CPU_WORD_64_BIT
 		// The makecontext spec states that arguments passed to the target function should be no larger than 32-bit integers
 		// for portability since some platforms will only pass up to 32-bits per argument. Some Linux platforms will be fine
 		// passing 64-bit arguments, but some other platforms won't (e.g., macOS targeting specifically the M1 architecture).

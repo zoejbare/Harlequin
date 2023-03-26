@@ -35,7 +35,7 @@ TEST(_HQ_TEST_NAME(TestHqString), CreateThenRelease)
 	EXPECT_EQ(pString->length, stringLength);
 	EXPECT_STREQ(pString->data, stringData);
 
-#ifdef HQ_DATA_WIDTH_64_BIT
+#ifdef HQ_CPU_WORD_64_BIT
 	EXPECT_EQ(pString->hash, 14140177864371587597ull);
 
 #else
@@ -61,7 +61,7 @@ TEST(_HQ_TEST_NAME(TestHqString), CreateFmtThenRelease)
 	EXPECT_EQ(pString->length, stringLength);
 	EXPECT_STREQ(pString->data, stringData);
 
-#ifdef HQ_DATA_WIDTH_64_BIT
+#ifdef HQ_CPU_WORD_64_BIT
 	EXPECT_EQ(pString->hash, 14140177864371587597ull);
 
 #else

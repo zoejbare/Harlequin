@@ -29,7 +29,7 @@ namespace HqStd
 {
 	inline size_t Fnv1aHash(const uint8_t* const data, const size_t length)
 	{
-#ifdef HQ_DATA_WIDTH_64_BIT
+#ifdef HQ_CPU_WORD_64_BIT
 		const uint64_t fnvOffsetBasis = 0xCBF29CE484222325ull;
 		const uint64_t fnvPrime = 0x00000100000001B3ull;
 

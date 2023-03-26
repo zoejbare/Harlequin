@@ -76,19 +76,19 @@
 
 #if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__) || defined(__powerpc64__) || defined(__PPC64__) \
 	|| defined(__aarch64__) || defined(_M_PPC) || defined(_M_PPCBE)
-	#define HQ_DATA_WIDTH_64_BIT
+	#define HQ_CPU_WORD_64_BIT
 
 	#if (UINTPTR_MAX == UINT_MAX)
 		/* Some older platforms use a 64-bit CPU, but still define their native word to 32 bits. */
-		#undef HQ_DATA_WIDTH_64_BIT
-		#define HQ_DATA_WIDTH_32_BIT
+		#undef HQ_CPU_WORD_64_BIT
+		#define HQ_CPU_WORD_32_BIT
 	#endif
 
 #elif defined(__i386__) || defined(__powerpc__) || defined(__PPC__) || defined(__arm__) || defined(_M_IX86)
-	#define HQ_DATA_WIDTH_32_BIT
+	#define HQ_CPU_WORD_32_BIT
 
 #else
-	#define HQ_DATA_WIDTH_UNKNOWN
+	#define HQ_CPU_WORD_UNKNOWN
 
 #endif
 
@@ -111,26 +111,20 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-/**
- * Define HQ_ALLOW_UNKNOWN_BUILD_OPTIONS to permit building in an environment that is not
- * officially recognized by the Harlequin build setup.
- */
-#ifndef HQ_ALLOW_UNKNOWN_BUILD_OPTIONS
-	#ifdef HQ_PLATFORM_UNKNOWN
-		#error "Unknown build platform"
-	#endif
+#ifdef HQ_PLATFORM_UNKNOWN
+	#error "Unknown build platform"
+#endif
 
-	#ifdef HQ_CPU_TYPE_UNKNOWN
-		#error "Unknown CPU type"
-	#endif
+#ifdef HQ_CPU_TYPE_UNKNOWN
+	#error "Unknown CPU type"
+#endif
 
-	#ifdef HQ_DATA_WIDTH_UNKNOWN
-		#error "Unknown data native bit width"
-	#endif
+#ifdef HQ_CPU_WORD_UNKNOWN
+	#error "Unknown CPU native word size"
+#endif
 
-	#ifdef HQ_CPU_ENDIAN_UNKNOWN
-		#error "Unknown CPU endianness"
-	#endif
+#ifdef HQ_CPU_ENDIAN_UNKNOWN
+	#error "Unknown CPU endianness"
 #endif
 
 /*---------------------------------------------------------------------------------------------------------------------*/
