@@ -94,14 +94,12 @@ void HqModuleWriter::Dispose(HqModuleWriterHandle hModuleWriter)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqModuleWriter::Serialize(
-	HqModuleWriterHandle hModuleWriter,
-	HqReportHandle hReport,
-	HqSerializerHandle hSerializer
-)
+bool HqModuleWriter::Serialize(HqModuleWriterHandle hModuleWriter, HqSerializerHandle hSerializer)
 {
 	assert(hModuleWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
+
+	HqReportHandle hReport = &hModuleWriter->hCompiler->report;
 
 	auto getAlignedSize = [](const size_t size) -> size_t
 	{

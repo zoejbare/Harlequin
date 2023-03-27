@@ -392,10 +392,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
-	HqCompilerGetReportHandle(hCompiler, &hReport);
-
-	result = HqModuleWriterSerialize(hModuleWriter, hReport, hFileSerializer);
+	result = HqModuleWriterSerialize(hModuleWriter, hFileSerializer);
 	if(result == HQ_SUCCESS)
 	{
 		const void* const pFileData = HqSerializerGetRawStreamPointer(hFileSerializer);

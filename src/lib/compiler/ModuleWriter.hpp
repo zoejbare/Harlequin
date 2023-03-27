@@ -39,11 +39,7 @@ struct HqModuleWriter
 {
 	static HqModuleWriterHandle Create();
 	static void Dispose(HqModuleWriterHandle hWriter);
-	static bool Serialize(
-		HqModuleWriterHandle hModuleWriter,
-		HqReportHandle hReport,
-		HqSerializerHandle hSerializer
-	);
+	static bool Serialize(HqModuleWriterHandle hModuleWriter, HqSerializerHandle hSerializer);
 
 	static int LookupFunction(
 		HqModuleWriterHandle hWriter,
@@ -85,6 +81,8 @@ struct HqModuleWriter
 		HqString::StlHash,
 		HqString::StlCompare
 	> StringToSizeMap;
+
+	HqCompilerHandle hCompiler;
 
 	DependencySet dependencies;
 	GlobalValueSet globals;

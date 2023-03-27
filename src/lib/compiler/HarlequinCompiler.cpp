@@ -91,14 +91,24 @@ int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutR
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler)
+int HqProjectLoad(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler, const void* const pProjectFileData, size_t projectFileSize)
 {
-	if(!phOutProject || (*phOutProject) || !hCompiler)
+	if(!phOutProject 
+		|| (*phOutProject) 
+		|| !hCompiler 
+		|| !pProjectFileData 
+		|| projectFileSize == 0)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutProject) = HqProject::Create(hCompiler);
+	HqProjectHandle hProject = HqProject::Load(hCompiler, pProjectFileData, projectFileSize);
+	if(!hProject)
+	{
+		return HQ_ERROR_FAILED_TO_OPEN_FILE;
+	}
+
+	(*phOutProject) = hProject;
 
 	return HQ_SUCCESS;
 }
@@ -119,18 +129,6 @@ int HqProjectDispose(HqProjectHandle* phProject)
 	HqProject::Dispose(hProject);
 
 	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProjectLoad(HqProjectHandle hProject, HqSerializerHandle hSerializer)
-{
-	if(!hProject || !hSerializer)
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	return HqProject::Load(hProject, hSerializer);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -612,7 +610,6 @@ int HqModuleWriterAddExceptionHandler(
 
 int HqModuleWriterSerialize(
 	HqModuleWriterHandle hModuleWriter,
-	HqReportHandle hReport,
 	HqSerializerHandle hSerializer
 )
 {
@@ -645,7 +642,7 @@ int HqModuleWriterSerialize(
 	}
 
 	// Write the module to the serializer.
-	if(!HqModuleWriter::Serialize(hModuleWriter, hReport, hSerializer))
+	if(!HqModuleWriter::Serialize(hModuleWriter, hSerializer))
 	{
 		return HQ_ERROR_UNSPECIFIED_FAILURE;
 	}

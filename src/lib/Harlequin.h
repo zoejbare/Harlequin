@@ -774,11 +774,14 @@ HQ_MAIN_API int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHa
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler);
+HQ_MAIN_API int HqProjectLoad(
+	HqProjectHandle* phOutProject, 
+	HqCompilerHandle hCompiler, 
+	const void* pProjectFileData, 
+	size_t projectFileSize
+);
 
 HQ_MAIN_API int HqProjectDispose(HqProjectHandle* phProject);
-
-HQ_MAIN_API int HqProjectLoad(HqProjectHandle hProject, HqSerializerHandle hSerializer);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -843,7 +846,6 @@ HQ_MAIN_API int HqModuleWriterAddExceptionHandler(
 
 HQ_MAIN_API int HqModuleWriterSerialize(
 	HqModuleWriterHandle hModuleWriter,
-	HqReportHandle hReport,
 	HqSerializerHandle hSerializer
 );
 

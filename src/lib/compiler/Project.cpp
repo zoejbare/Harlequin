@@ -19,19 +19,65 @@
 #include "Project.hpp"
 #include "Compiler.hpp"
 
+#include "../common/Array.hpp"
+
 #include <rapidxml_ns.hpp>
 
 #include <assert.h>
+#include <inttypes.h>
+
 #include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProjectHandle HqProject::Create(HqCompilerHandle hCompiler)
+HqProjectHandle HqProject::Load(HqCompilerHandle hCompiler, const void* const pProjectFileData, const size_t projectFileSize)
 {
+	using namespace rapidxml_ns;
+
+	assert(hCompiler != HQ_COMPILER_HANDLE_NULL);
+	assert(pProjectFileData != HQ_SERIALIZER_HANDLE_NULL);
+	assert(projectFileSize > 0);
+
 	HqProject* const pOutput = new HqProject();
 	assert(pOutput != nullptr);
 
 	pOutput->hCompiler = hCompiler;
+
+	typedef HqArray<char> XmlBuffer;
+
+	// Rapidxml expects there to be a null terminator at the end of XML files, so we'll need
+	// to copy the file data into a buffer, then manually add the null terminator to the end.
+	XmlBuffer fileData;
+	XmlBuffer::Initialize(fileData);
+	XmlBuffer::Reserve(fileData, projectFileSize + 1);
+
+	// Copy the file data into the buffer.
+	memcpy(fileData.pData, pProjectFileData, projectFileSize);
+	fileData.pData[projectFileSize] = '\0';
+
+	HqReportHandle hReport = &pOutput->hCompiler->report;
+
+	xml_document<> doc;
+
+	try
+	{
+		// Parse the XML file in-place at the necessary offset.
+		doc.parse<0>(fileData.pData);
+	}
+	catch(const parse_error& error)
+	{
+		// An error occurred while parsing.
+		HqReportMessage(
+			hReport, 
+			HQ_MESSAGE_TYPE_ERROR, 
+			"Failed to parse Harlequin project file: %s", 
+			error.what()
+		);
+		delete pOutput;
+	}
+
+	// Dispose of the temporary file data buffer.
+	XmlBuffer::Dispose(fileData);
 
 	return pOutput;
 }
@@ -42,39 +88,6 @@ void HqProject::Dispose(HqProjectHandle hProject)
 {
 	assert(hProject != HQ_PROJECT_HANDLE_NULL);
 	delete hProject;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqProject::Load(HqProjectHandle hProject, HqSerializerHandle hSerializer)
-{
-	using namespace rapidxml_ns;
-
-	assert(hProject != HQ_PROJECT_HANDLE_NULL);
-	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
-
-	HqReportHandle hReport = &hProject->hCompiler->report;
-
-	// We can read the XML file directly from the serializer stream, so we need the stream pointer and
-	// the positional offset of the serializer so we can parse from the correct starting location.
-	char* const streamData = reinterpret_cast<char*>(HqSerializerGetRawStreamPointer(hSerializer));
-	const size_t streamOffset = HqSerializerGetStreamPosition(hSerializer);
-
-	xml_document<> doc;
-
-	try
-	{
-		// Parse the XML file in-place at the necessary offset.
-		doc.parse<0>(streamData + streamOffset);
-	}
-	catch(const parse_error& error)
-	{
-		// An error occurred while parsing.
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to parse Harlequin project file: %s\n\t%s", error.what(), error.where<char>());
-		return HQ_ERROR_FAILED_TO_OPEN_FILE;
-	}
-
-	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -26,10 +26,8 @@
 
 struct HqProject
 {
-	static HqProjectHandle Create(HqCompilerHandle hCompiler);
+	static HqProjectHandle Load(HqCompilerHandle hCompiler, const void* pProjectFileData, size_t projectFileSize);
 	static void Dispose(HqProjectHandle hProject);
-
-	static int Load(HqProjectHandle hProject, HqSerializerHandle hSerializer);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

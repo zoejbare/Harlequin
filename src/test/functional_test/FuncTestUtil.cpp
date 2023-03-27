@@ -37,11 +37,6 @@ void Util::CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback c
 	const int createCompilerResult = HqCompilerCreate(&hCompiler, init);
 	ASSERT_EQ(createCompilerResult, HQ_SUCCESS);
 
-	// Get the compiler's report handle.
-	HqReportHandle hReport = HQ_REPORT_HANDLE_NULL;
-	const int getReportHandleResult = HqCompilerGetReportHandle(hCompiler, &hReport);
-	ASSERT_EQ(getReportHandleResult, HQ_SUCCESS);
-
 	// Create the module writer.
 	HqModuleWriterHandle hModuleWriter = HQ_MODULE_WRITER_HANDLE_NULL;
 	const int createModuleWriterResult = HqModuleWriterCreate(&hModuleWriter, hCompiler);
@@ -62,7 +57,7 @@ void Util::CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback c
 	ASSERT_EQ(setFileSerializerEndiannessResult, HQ_SUCCESS);
 
 	// Write the bytecode to the serializer.
-	const int writeBytecodeResult = HqModuleWriterSerialize(hModuleWriter, hReport, hFileSerializer);
+	const int writeBytecodeResult = HqModuleWriterSerialize(hModuleWriter, hFileSerializer);
 	ASSERT_EQ(writeBytecodeResult, HQ_SUCCESS);
 
 	const void* const pModuleData = HqSerializerGetRawStreamPointer(hFileSerializer);
