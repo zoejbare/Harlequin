@@ -22,17 +22,69 @@
 
 #include "../Harlequin.h"
 
+#include "../base/String.hpp"
+
+#include <rapidxml_ns.hpp>
+
+#include <unordered_map>
+#include <vector>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 struct HqProject
 {
+	struct Reference
+	{
+		HqString* pPath;
+		HqString* pName;
+	};
+
+	struct Define
+	{
+		HqString* pName;
+		HqString* pValue;
+	};
+
+	typedef std::unordered_map<
+		HqString*, 
+		Reference, 
+		HqString::StlHash, 
+		HqString::StlCompare
+	> ReferenceMap;
+
+	typedef std::vector<HqString*> StringList;
+	typedef std::vector<Define>    DefineList;
+
+	struct File
+	{
+		DefineList defines;
+
+		HqString* pPath;
+	};
+
+	typedef std::unordered_map<
+		HqString*, 
+		File, 
+		HqString::StlHash, 
+		HqString::StlCompare
+	> FileMap;
+
 	static HqProjectHandle Load(HqCompilerHandle hCompiler, const void* pProjectFileData, size_t projectFileSize);
 	static void Dispose(HqProjectHandle hProject);
+
+	static bool prv_loadXmlDoc(HqProjectHandle, HqReportHandle, const rapidxml_ns::xml_document<>&);
+	static HqString* prv_createString(const char*, size_t);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
 	HqCompilerHandle hCompiler;
+
+	HqString* pOutput;
+
+	DefineList defines;
+	ReferenceMap references;
+	FileMap files;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
