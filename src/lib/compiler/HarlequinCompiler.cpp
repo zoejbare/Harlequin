@@ -47,6 +47,10 @@ int HqCompilerCreate(HqCompilerHandle* phOutCompiler, HqCompilerInit init)
 	}
 
 	HqCompilerHandle hCompiler = HqCompiler::Create(init);
+	if(!hCompiler)
+	{
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
 
 	// The message has to be printed *after* creating the compiler since the object is used in this function.
 	HqReportMessage(&hCompiler->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin compiler");
@@ -91,21 +95,19 @@ int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutR
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProjectLoad(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler, const void* const pProjectFileData, size_t projectFileSize)
+int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler)
 {
 	if(!phOutProject 
 		|| (*phOutProject) 
-		|| !hCompiler 
-		|| !pProjectFileData 
-		|| projectFileSize == 0)
+		|| !hCompiler)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqProjectHandle hProject = HqProject::Load(hCompiler, pProjectFileData, projectFileSize);
+	HqProjectHandle hProject = HqProject::Create(hCompiler);
 	if(!hProject)
 	{
-		return HQ_ERROR_FAILED_TO_OPEN_FILE;
+		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
 	(*phOutProject) = hProject;
@@ -129,6 +131,147 @@ int HqProjectDispose(HqProjectHandle* phProject)
 	HqProject::Dispose(hProject);
 
 	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectSetOutput(HqProjectHandle hProject, const char* const path)
+{
+	if(!hProject || !path || path[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqString* const pPath = HqString::Create(path);
+	if(!pPath)
+	{
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	const int result = HqProject::SetOutput(hProject, pPath);
+
+	HqString::Release(pPath);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectAddReference(HqProjectHandle hProject, const char* const path, const char* const name)
+{
+	if(!hProject 
+		|| !path 
+		|| path[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqString* const pPath = HqString::Create(path);
+	if(!pPath)
+	{
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	HqString* pName = nullptr;
+	if(name)
+	{
+		if(name[0] == '\0')
+		{
+			HqString::Release(pPath);
+			return HQ_ERROR_INVALID_ARG;
+		}
+
+		pName = HqString::Create(name);
+	}
+
+	const int result = HqProject::AddReference(hProject, pPath, pName);
+
+	HqString::Release(pPath);
+	HqString::Release(pName);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectAddFile(HqProjectHandle hProject, const char* const path)
+{
+	if(!hProject 
+		|| !path 
+		|| path[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqString* const pPath = HqString::Create(path);
+	if(!pPath)
+	{
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	const int result = HqProject::AddFile(hProject, pPath);
+
+	HqString::Release(pPath);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectAddDefine(HqProjectHandle hProject, const char* const define)
+{
+	if(!hProject 
+		|| !define 
+		|| define[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqString* const pDefine = HqString::Create(define);
+	if(!pDefine)
+	{
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	const int result = HqProject::AddDefine(hProject, pDefine);
+
+	HqString::Release(pDefine);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectAddFileDefine(HqProjectHandle hProject, const char* const filePath, const char* const define)
+{
+	if(!hProject
+		|| !filePath
+		|| filePath[0] == '\0'
+		|| !define 
+		|| define[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqString* const pFilePath = HqString::Create(filePath);
+	if(!pFilePath)
+	{
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	HqString* const pDefine = HqString::Create(define);
+	if(!pDefine)
+	{
+		HqString::Release(pFilePath);
+		return HQ_ERROR_BAD_ALLOCATION;
+	}
+
+	const int result = HqProject::AddFileDefine(hProject, pFilePath, pDefine);
+
+	HqString::Release(pFilePath);
+	HqString::Release(pDefine);
+
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

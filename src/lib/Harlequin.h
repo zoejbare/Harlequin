@@ -67,6 +67,8 @@ enum HqErrorCodeEnum
 	HQ_ERROR_BAD_ALLOCATION = -7,
 	HQ_ERROR_KEY_ALREADY_EXISTS = -8,
 	HQ_ERROR_KEY_DOES_NOT_EXIST = -9,
+	HQ_ERROR_DUPLICATE = HQ_ERROR_KEY_ALREADY_EXISTS,
+	HQ_ERROR_NON_EXISTENT = HQ_ERROR_KEY_DOES_NOT_EXIST,
 	HQ_ERROR_FAILED_TO_OPEN_FILE = -10,
 	HQ_ERROR_STREAM_END = -11,
 	HQ_ERROR_STACK_EMPTY = -12,
@@ -774,14 +776,19 @@ HQ_MAIN_API int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHa
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqProjectLoad(
-	HqProjectHandle* phOutProject, 
-	HqCompilerHandle hCompiler, 
-	const void* pProjectFileData, 
-	size_t projectFileSize
-);
+HQ_MAIN_API int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler);
 
 HQ_MAIN_API int HqProjectDispose(HqProjectHandle* phProject);
+
+HQ_MAIN_API int HqProjectSetOutput(HqProjectHandle hProject, const char* path);
+
+HQ_MAIN_API int HqProjectAddReference(HqProjectHandle, const char* path, const char* name);
+
+HQ_MAIN_API int HqProjectAddFile(HqProjectHandle, const char* path);
+
+HQ_MAIN_API int HqProjectAddDefine(HqProjectHandle, const char* define);
+
+HQ_MAIN_API int HqProjectAddFileDefine(HqProjectHandle, const char* filePath, const char* define);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

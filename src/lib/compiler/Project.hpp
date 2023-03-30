@@ -24,8 +24,6 @@
 
 #include "../base/String.hpp"
 
-#include <rapidxml_ns.hpp>
-
 #include <unordered_map>
 #include <vector>
 
@@ -39,12 +37,6 @@ struct HqProject
 		HqString* pName;
 	};
 
-	struct Define
-	{
-		HqString* pName;
-		HqString* pValue;
-	};
-
 	typedef std::unordered_map<
 		HqString*, 
 		Reference, 
@@ -53,11 +45,10 @@ struct HqProject
 	> ReferenceMap;
 
 	typedef std::vector<HqString*> StringList;
-	typedef std::vector<Define>    DefineList;
 
 	struct File
 	{
-		DefineList defines;
+		StringList defines;
 
 		HqString* pPath;
 	};
@@ -69,11 +60,14 @@ struct HqProject
 		HqString::StlCompare
 	> FileMap;
 
-	static HqProjectHandle Load(HqCompilerHandle hCompiler, const void* pProjectFileData, size_t projectFileSize);
+	static HqProjectHandle Create(HqCompilerHandle hCompiler);
 	static void Dispose(HqProjectHandle hProject);
 
-	static bool prv_loadXmlDoc(HqProjectHandle, HqReportHandle, const rapidxml_ns::xml_document<>&);
-	static HqString* prv_createString(const char*, size_t);
+	static int SetOutput(HqProjectHandle hProject, HqString* pPath);
+	static int AddReference(HqProjectHandle hProject, HqString* pPath, HqString* pName);
+	static int AddFile(HqProjectHandle hProject, HqString* pPath);
+	static int AddDefine(HqProjectHandle hProject, HqString* pDefine);
+	static int AddFileDefine(HqProjectHandle hProject, HqString* pFilePath, HqString* pDefine);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
@@ -82,7 +76,7 @@ struct HqProject
 
 	HqString* pOutput;
 
-	DefineList defines;
+	StringList defines;
 	ReferenceMap references;
 	FileMap files;
 };

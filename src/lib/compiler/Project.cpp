@@ -25,65 +25,15 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProjectHandle HqProject::Load(HqCompilerHandle hCompiler, const void* const pProjectFileData, const size_t projectFileSize)
+HqProjectHandle HqProject::Create(HqCompilerHandle hCompiler)
 {
-	using namespace rapidxml_ns;
-
 	assert(hCompiler != HQ_COMPILER_HANDLE_NULL);
-	assert(pProjectFileData != HQ_SERIALIZER_HANDLE_NULL);
-	assert(projectFileSize > 0);
 
 	HqProject* const pOutput = new HqProject();
 	assert(pOutput != nullptr);
 
 	pOutput->hCompiler = hCompiler;
 	pOutput->pOutput = nullptr;
-
-	typedef std::vector<char> XmlBuffer;
-
-	// Rapidxml expects there to be a null terminator at the end of XML files, so we'll need
-	// to copy the file data into a buffer, then manually add the null terminator to the end.
-	XmlBuffer fileData;
-	fileData.resize(projectFileSize + 1);
-
-	// Copy the file data into the buffer.
-	memcpy(fileData.data(), pProjectFileData, projectFileSize);
-	fileData[projectFileSize] = '\0';
-
-	HqReportHandle hReport = &pOutput->hCompiler->report;
-
-	xml_document<> doc;
-
-	try
-	{
-		// Parse the XML file in-place.
-		doc.parse<0>(fileData.data());
-	}
-	catch(const parse_error& error)
-	{
-		// An error occurred while parsing.
-		HqReportMessage(
-			hReport, 
-			HQ_MESSAGE_TYPE_ERROR, 
-			"Failed to parse Harlequin project file: %s", 
-			error.what()
-		);
-		delete pOutput;
-		return nullptr;
-	}
-
-	// Attempt to load the data in the XML file.
-	if(!prv_loadXmlDoc(pOutput, hReport, doc))
-	{
-		// An error occurred while loading the XML file data.
-		HqReportMessage(
-			hReport, 
-			HQ_MESSAGE_TYPE_ERROR, 
-			"Failed to load Harlequin project file data"
-		);
-		delete pOutput;
-		return nullptr;
-	}
 
 	return pOutput;
 }
@@ -97,11 +47,10 @@ void HqProject::Dispose(HqProjectHandle hProject)
 	// Release the output path.
 	HqString::Release(hProject->pOutput);
 
-	// Release all define names and values.
-	for(const Define& def : hProject->defines)
+	// Release all defines.
+	for(HqString* const pDefine : hProject->defines)
 	{
-		HqString::Release(def.pName);
-		HqString::Release(def.pValue);
+		HqString::Release(pDefine);
 	}
 
 	// Release all module reference paths.
@@ -117,10 +66,9 @@ void HqProject::Dispose(HqProjectHandle hProject)
 		const File& file = kv.second;
 
 		// Release all file-specific defines.
-		for(const Define& def : file.defines)
+		for(HqString* const pDefine : file.defines)
 		{
-			HqString::Release(def.pName);
-			HqString::Release(def.pValue);
+			HqString::Release(pDefine);
 		}
 
 		// Release the file path.
@@ -132,188 +80,151 @@ void HqProject::Dispose(HqProjectHandle hProject)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqProject::prv_loadXmlDoc(HqProjectHandle hProject, HqReportHandle hReport, const rapidxml_ns::xml_document<>& root)
+int HqProject::SetOutput(HqProjectHandle hProject, HqString* const pPath)
 {
-	using namespace rapidxml_ns;
+	assert(hProject != HQ_PROJECT_HANDLE_NULL);
+	assert(pPath != nullptr);
+	assert(pPath->length > 0);
 
-	// Get the project node which will contain all project data.
-	const xml_node<>* const pProjectNode = root.first_node("project");
-	if(!pProjectNode)
+	if(hProject->pOutput)
 	{
-		HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Missing <project> node");
-		return false;
+		HqReportMessage(
+			&hProject->hCompiler->report, 
+			HQ_MESSAGE_TYPE_WARNING, 
+			"Overwriting project output path: %s", 
+			hProject->pOutput->data
+		);
+		HqString::Release(hProject->pOutput);
 	}
 
-	// Get the project output.
-	{
-		const xml_node<>* const pOutputNode = pProjectNode->first_node("output");
-		if(!pOutputNode)
-		{
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Missing <output> node");
-			return false;
-		}
+	hProject->pOutput = pPath;
 
-		const xml_attribute<>* const pPathAttr = pOutputNode->first_attribute("path");
-		if(!pPathAttr)
-		{
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Output is missing \"path\" attribute");
-			return false;
-		}
+	HqString::AddRef(hProject->pOutput);
 
-		hProject->pOutput = prv_createString(pPathAttr->value(), pPathAttr->value_size());
-	}
-
-	// Get each project reference.
-	for(const xml_node<>* pRefNode = pProjectNode->first_node("reference")
-		; pRefNode
-		; pRefNode = pRefNode->next_sibling("reference"))
-	{
-		const xml_attribute<>* const pPathAttr = pRefNode->first_attribute("path");
-		if(!pPathAttr)
-		{
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Reference is missing \"path\" attribute");
-			return false;
-		}
-
-		const xml_attribute<>* const pNameAttr = pRefNode->first_attribute("name");
-		if(!pNameAttr)
-		{
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Reference is missing \"name\" attribute");
-			return false;
-		}
-
-		Reference ref;
-		ref.pPath = prv_createString(pPathAttr->value(), pPathAttr->value_size());
-		ref.pName = prv_createString(pNameAttr->value(), pNameAttr->value_size());
-
-		// Check if this path has already been added.
-		for(auto& kv : hProject->references)
-		{
-			if(HqString::FastCompare(ref.pPath, kv.second.pPath))
-			{
-				HqReportMessage(hReport, HQ_MESSAGE_TYPE_WARNING, "Module reference path duplicate: '%s'", ref.pPath->data);
-
-				HqString::Release(ref.pPath);
-				HqString::Release(ref.pName);
-
-				ref.pPath = nullptr;
-				ref.pName = nullptr;
-
-				break;
-			}
-
-			if(HqString::FastCompare(ref.pName, kv.second.pName))
-			{
-				HqReportMessage(hReport, HQ_MESSAGE_TYPE_WARNING, "Module reference name duplicate: '%s'", ref.pName->data);
-
-				HqString::Release(ref.pPath);
-				HqString::Release(ref.pName);
-
-				ref.pPath = nullptr;
-				ref.pName = nullptr;
-
-				break;
-			}
-		}
-
-		if(ref.pPath)
-		{
-			hProject->references.emplace(ref.pPath, ref);
-		}
-	}
-
-	// Get each project define.
-	for(const xml_node<>* pDefineNode = pProjectNode->first_node("define")
-		; pDefineNode
-		; pDefineNode = pDefineNode->next_sibling("define"))
-	{
-		const xml_attribute<>* const pNameAttr = pDefineNode->first_attribute("name");
-		if(!pNameAttr)
-		{
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Project define is missing \"name\" attribute");
-			return false;
-		}
-
-		const xml_attribute<>* const pValueAttr = pDefineNode->first_attribute("value");
-
-		Define def;
-		def.pName = prv_createString(pNameAttr->value(), pNameAttr->value_size());
-		def.pValue = (pValueAttr) ? prv_createString(pValueAttr->value(), pValueAttr->value_size()) : nullptr;
-
-		hProject->defines.push_back(def);
-	}
-
-	// Get each project source file.
-	for(const xml_node<>* pFileNode = pProjectNode->first_node("file")
-		; pFileNode
-		; pFileNode = pFileNode->next_sibling("file"))
-	{
-		const xml_attribute<>* const pPathAttr = pFileNode->first_attribute("path");
-		if(!pPathAttr)
-		{
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "File is missing \"path\" attribute");
-			return false;
-		}
-
-		File file;
-		file.pPath = prv_createString(pPathAttr->value(), pPathAttr->value_size());
-
-		// Check if this path has already been added.
-		for(auto& kv : hProject->references)
-		{
-			if(HqString::FastCompare(file.pPath, kv.second.pPath))
-			{
-				HqReportMessage(hReport, HQ_MESSAGE_TYPE_WARNING, "Source file path duplicate: '%s'", file.pPath->data);
-				HqString::Release(file.pPath);
-
-				file.pPath = nullptr;
-				break;
-			}
-		}
-
-		if(file.pPath)
-		{
-			// Need the use the returned pair in order to access the mapped file object.
-			auto kv = hProject->files.emplace(file.pPath, file).first;
-
-			// Get each define specific to the current file.
-			for(const xml_node<>* pDefineNode = pFileNode->first_node("define")
-				; pDefineNode
-				; pDefineNode = pDefineNode->next_sibling("define"))
-			{
-				const xml_attribute<>* const pNameAttr = pDefineNode->first_attribute("name");
-				if(!pNameAttr)
-				{
-					HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "File define is missing \"name\" attribute");
-					return false;
-				}
-
-				const xml_attribute<>* const pValueAttr = pDefineNode->first_attribute("value");
-
-				Define def;
-				def.pName = prv_createString(pNameAttr->value(), pNameAttr->value_size());
-				def.pValue = (pValueAttr) ? prv_createString(pValueAttr->value(), pValueAttr->value_size()) : nullptr;
-
-				kv->second.defines.push_back(def);
-			}
-		}
-	}
-
-	return true;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqString* HqProject::prv_createString(const char* const data, const size_t length)
+int HqProject::AddReference(HqProjectHandle hProject, HqString* const pPath, HqString* const pName)
 {
-	// Allocate a temporary string.
-	char* const temp = reinterpret_cast<char*>(alloca(sizeof(char) * (length + 1)));
+	assert(hProject != HQ_PROJECT_HANDLE_NULL);
+	assert(pPath != nullptr);
+	assert(pPath->length > 0);
 
-	// Copy the attribute value into the string and add a null terminator.
-	memcpy(temp, data, length);
-	temp[length] = '\0';
+	if(pName)
+	{
+		assert(pName->length > 0);
+	}
 
-	return HqString::Create(temp);
+	// Check for any entry matching the input path or name.
+	for(auto& kv : hProject->references)
+	{
+		if(HqString::FastCompare(pPath, kv.second.pPath))
+		{
+			HqReportMessage(
+				&hProject->hCompiler->report, 
+				HQ_MESSAGE_TYPE_ERROR, 
+				"Duplicate reference path: %s", 
+				pPath->data
+			);
+			return HQ_ERROR_DUPLICATE;
+		}
+
+		if(pName && HqString::FastCompare(pName, kv.second.pName))
+		{
+			HqReportMessage(
+				&hProject->hCompiler->report, 
+				HQ_MESSAGE_TYPE_ERROR, 
+				"Duplicate reference name: %s", 
+				pName->data
+			);
+			return HQ_ERROR_DUPLICATE;
+		}
+	}
+
+	Reference ref;
+	ref.pPath = pPath;
+	ref.pName = pName;
+
+	hProject->references.emplace(pPath, ref);
+	HqString::AddRef(pPath);
+	HqString::AddRef(pName);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProject::AddFile(HqProjectHandle hProject, HqString* const pPath)
+{
+	assert(hProject != HQ_PROJECT_HANDLE_NULL);
+	assert(pPath != nullptr);
+	assert(pPath->length > 0);
+
+	if(hProject->files.count(pPath))
+	{
+		HqReportMessage(
+			&hProject->hCompiler->report, 
+			HQ_MESSAGE_TYPE_ERROR, 
+			"Duplicate source file: %s", 
+			pPath->data
+		);
+		return HQ_ERROR_DUPLICATE;
+	}
+
+	File file;
+	file.pPath = pPath;
+
+	hProject->files.emplace(pPath, file);
+	HqString::AddRef(pPath);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProject::AddDefine(HqProjectHandle hProject, HqString* const pDefine)
+{
+	assert(hProject != HQ_PROJECT_HANDLE_NULL);
+	assert(pDefine != nullptr);
+	assert(pDefine->length > 0);
+
+	hProject->defines.push_back(pDefine);
+	HqString::AddRef(pDefine);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProject::AddFileDefine(HqProjectHandle hProject, HqString* const pFilePath, HqString* const pDefine)
+{
+	assert(hProject != HQ_PROJECT_HANDLE_NULL);
+	assert(pFilePath != nullptr);
+	assert(pFilePath->length > 0);
+	assert(pDefine != nullptr);
+	assert(pDefine->length > 0);
+
+	auto kv = hProject->files.find(pFilePath);
+	if(kv == hProject->files.end())
+	{
+		HqReportMessage(
+			&hProject->hCompiler->report, 
+			HQ_MESSAGE_TYPE_ERROR, 
+			"Source file not found for define"
+				": file='%s'"
+				", define='%s'", 
+			pFilePath->data, 
+			pDefine->data
+		);
+		return HQ_ERROR_NON_EXISTENT;
+	}
+
+	kv->second.defines.push_back(pDefine);
+	HqString::AddRef(pDefine);
+
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
