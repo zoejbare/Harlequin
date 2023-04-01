@@ -172,7 +172,7 @@ def _verifyJavaIsInstalled():
 
 def main():
 	tools = {
-		"generator": GeneratorTool,
+		"generate": GeneratorTool,
 		"parse-gui": ParseTool,
 		"parse-tree": ParseTool,
 		"parse-tokens": ParseTool,
@@ -186,12 +186,6 @@ def main():
 		type=str,
 		choices=sorted(tools.keys()),
 		help="Antlr tool to invoke",
-	)
-	parser.add_argument(
-		"grammar",
-		action="store",
-		type=str,
-		help="File path to the language grammar which will be passed to the selected tool",
 	)
 	parser.add_argument(
 		"-s", "--source",
@@ -212,7 +206,7 @@ def main():
 	_verifyJavaIsInstalled()
 
 	tool = tools.get(args.tool)(args.tool)
-	grammarFilePath = os.path.abspath(args.grammar)
+	grammarFilePath = os.path.join(THIS_PATH, "Harlequin.g4")
 	sourceFilePath = os.path.abspath(args.source) if args.source else None
 	ruleName = args.rule
 
