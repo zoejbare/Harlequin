@@ -20,13 +20,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqParseTreeListener::enterModule(HarlequinParser::ModuleContext* const pCtx)
+void HqParseTreeListener::enterRoot(HarlequinParser::RootContext* const pCtx)
 {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqParseTreeListener::exitModule(HarlequinParser::ModuleContext* const pCtx)
+void HqParseTreeListener::exitRoot(HarlequinParser::RootContext* const pCtx)
 {
 }
 

@@ -20,15 +20,21 @@ grammar Harlequin;
 //---------------------------------------------------------------------------------------------------------------------
 
 // Root parser rule
-module
+root
 	: moduleDef*
 	;
 
 // Module item defintion rule
 moduleDef
-	: usingStmt Term
+	: compilerDirective
+	| usingStmt Term
 	| namespaceDecl
 	| classDecl
+	;
+
+// Compiler directive rule
+compilerDirective
+	: Pound LineKw IntLit
 	;
 
 // Fully qualified ID name rule
@@ -43,7 +49,7 @@ usingStmt
 
 // Namespace declaration rule
 namespaceDecl
-	: NamespaceKw Id namespaceDef
+	: NamespaceKw qualifiedId namespaceDef
 	;
 
 // Namespace definition rule
@@ -193,7 +199,8 @@ expr
 	| expr Comma expr                                                               # exprComma
 	| (BreakKw | ContinueKw)                                                        # exprControl
 	| CopyIntrinKw                                                                  # exprIntrinsic
-	| (NullLit | BoolLit | RealLit | IntLit | StrLit)                               # exprLiteral
+	| (NullLit | BoolLit | RealLit | IntLit)                                        # exprLiteral
+	| StrLit+                                                                       # exprStrLiteral
 	| Id                                                                            # exprId
 	;
 
@@ -441,6 +448,12 @@ Tilde: '~' ;
 Dot:   '.' ;
 Comma: ',' ;
 Colon: ':' ;
+
+// Compiler directive tokens
+Pound: '#' ;
+
+// Compiler directive keyword tokens
+LineKw: 'line' ;
 
 AsmRegId: [rR] FDigit+ ;
 

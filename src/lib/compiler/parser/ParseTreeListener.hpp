@@ -35,8 +35,8 @@ public:
 
 	HqParseTreeListener();
 
-	virtual void enterModule(HarlequinParser::ModuleContext* pCtx) override;
-	virtual void exitModule(HarlequinParser::ModuleContext* pCtx) override;
+	virtual void enterRoot(HarlequinParser::RootContext* pCtx) override;
+	virtual void exitRoot(HarlequinParser::RootContext* pCtx) override;
 
 	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext* pCtx) override;
 
