@@ -16,25 +16,44 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "ToolCore.hpp"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../Harlequin.h"
-
-#include "../common/Report.hpp"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct HqCompiler
+HqToolCoreHandle HqToolCore::Create(HqToolCoreInit init)
 {
-	static HqCompilerHandle Create(HqCompilerInit init);
-	static void Dispose(HqCompilerHandle hCompiler);
+	HqToolCore* const pOutput = new HqToolCore();
+	assert(pOutput != nullptr);
 
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
+	pOutput->report.onMessageFn = init.common.report.onMessageFn;
+	pOutput->report.pUserData = init.common.report.pUserData;
+	pOutput->report.level = init.common.report.reportLevel;
 
-	HqReport report;
-};
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqToolCore::Dispose(HqToolCoreHandle hToolCore)
+{
+	assert(hToolCore != HQ_TOOL_CORE_HANDLE_NULL);
+	delete hToolCore;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void* HqToolCore::operator new(const size_t sizeInBytes)
+{
+	return HqMemAlloc(sizeInBytes);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqToolCore::operator delete(void* const pObject)
+{
+	HqMemFree(pObject);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -19,7 +19,7 @@
 #include "../FuncTestUtil.hpp"
 #include "../Memory.hpp"
 
-#include <compiler/ControlFlow.hpp>
+#include <tool/compiler/ControlFlow.hpp>
 #include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------

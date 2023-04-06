@@ -439,7 +439,7 @@ with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPat
 		csbuild.AddExcludeDirectories(
 			f"{HarlequinCommon.libRootPath}/base",
 			f"{HarlequinCommon.libRootPath}/common",
-			f"{HarlequinCommon.libRootPath}/compiler",
+			f"{HarlequinCommon.libRootPath}/tool",
 		)
 
 	else:
@@ -484,7 +484,7 @@ with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, 
 
 	else:
 		csbuild.AddSourceDirectories(
-			f"{HarlequinCommon.libRootPath}/compiler",
+			f"{HarlequinCommon.libRootPath}/tool",
 		)
 
 	with csbuild.Scope(csbuild.ScopeDef.All):

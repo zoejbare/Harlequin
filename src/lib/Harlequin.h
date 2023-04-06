@@ -18,8 +18,8 @@
 
 #pragma once
 
-#ifndef _HQ_LANG_H_
-#define _HQ_LANG_H_
+#ifndef _HARLEQUIN_H_
+#define _HARLEQUIN_H_
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -751,32 +751,32 @@ HQ_MAIN_API int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqVal
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-typedef struct HqCompiler* HqCompilerHandle;
-typedef struct HqProject* HqProjectHandle;
+typedef struct HqToolCore*     HqToolCoreHandle;
+typedef struct HqProject*      HqProjectHandle;
 typedef struct HqModuleWriter* HqModuleWriterHandle;
 
 typedef struct
 {
 	HqCommonInit common;
-} HqCompilerInit;
+} HqToolCoreInit;
 
 typedef bool (*HqCallbackIterateBuiltInFunction)(void*, int, const char*);
 
-#define HQ_COMPILER_HANDLE_NULL      ((HqCompilerHandle)0)
+#define HQ_TOOL_CORE_HANDLE_NULL     ((HqToolCoreHandle)0)
 #define HQ_PROJECT_HANDLE_NULL       ((HqProjectHandle)0)
 #define HQ_MODULE_WRITER_HANDLE_NULL ((HqModuleWriterHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqCompilerCreate(HqCompilerHandle* phOutCompiler, HqCompilerInit init);
+HQ_MAIN_API int HqToolCoreCreate(HqToolCoreHandle* phOutToolCore, HqToolCoreInit init);
 
-HQ_MAIN_API int HqCompilerDispose(HqCompilerHandle* phCompiler);
+HQ_MAIN_API int HqToolCoreDispose(HqToolCoreHandle* phToolCore);
 
-HQ_MAIN_API int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutReport);
+HQ_MAIN_API int HqToolCoreGetReportHandle(HqToolCoreHandle hToolCore, HqReportHandle* phOutReport);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler);
+HQ_MAIN_API int HqProjectCreate(HqProjectHandle* phOutProject, HqToolCoreHandle hToolCore);
 
 HQ_MAIN_API int HqProjectDispose(HqProjectHandle* phProject);
 
@@ -792,7 +792,7 @@ HQ_MAIN_API int HqProjectAddFileDefine(HqProjectHandle, const char* filePath, co
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqCompilerHandle hCompiler);
+HQ_MAIN_API int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqToolCoreHandle hToolCore);
 
 HQ_MAIN_API int HqModuleWriterDispose(HqModuleWriterHandle* phModuleWriter);
 
@@ -1321,4 +1321,4 @@ enum HqValueType
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#endif /* _HQ_LANG_H_ */
+#endif /* _HARLEQUIN_H_ */

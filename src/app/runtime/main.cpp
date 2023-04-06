@@ -375,7 +375,6 @@ int main(int argc, char* argv[])
 	uint64_t resetExecTotalTime = 0;
 
 	uint64_t totalApplicationTime = 0;
-	uint64_t totalDisassembleTime = 0;
 #if !_GC_THREAD_ENABLED
 	uint64_t totalManualGcTime = 0;
 #endif
@@ -843,7 +842,6 @@ int main(int argc, char* argv[])
 		"    Run:  %f ms\n"
 		"  [Misc]\n"
 		"    Total application: %f ms\n"
-		"    Total disassemble: %f ms\n"
 #if _GC_THREAD_ENABLED
 		"    Total manual GC:   n/a\n",
 #else
@@ -862,8 +860,7 @@ int main(int argc, char* argv[])
 		double(loadModuleTimeSlice) * convertTimeToMs,
 		double(runModuleTotalTime) * convertTimeToMs,
 
-		double(totalApplicationTime) * convertTimeToMs,
-		double(totalDisassembleTime) * convertTimeToMs
+		double(totalApplicationTime) * convertTimeToMs
 #if !_GC_THREAD_ENABLED
 		, double(totalManualGcTime) * convertTimeToMs
 #endif

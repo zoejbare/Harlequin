@@ -20,34 +20,65 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../Harlequin.h"
+#include "../Harlequin.h"
 
-#include "../generated/HarlequinBaseListener.h"
+#include "../base/String.hpp"
 
-#include <unordered_set>
+#include <unordered_map>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class HqParseTreeListener
-	: public HarlequinBaseListener
+struct HqProject
 {
-public:
+	struct Reference
+	{
+		HqString* pPath;
+		HqString* pName;
+	};
 
-	HqParseTreeListener();
+	typedef std::unordered_map<
+		HqString*, 
+		Reference, 
+		HqString::StlHash, 
+		HqString::StlCompare
+	> ReferenceMap;
 
-	virtual void enterRoot(HarlequinParser::RootContext* pCtx) override;
-	virtual void exitRoot(HarlequinParser::RootContext* pCtx) override;
+	typedef std::vector<HqString*> StringList;
 
-	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext* pCtx) override;
+	struct File
+	{
+		StringList defines;
 
+		HqString* pPath;
+	};
 
-private:
+	typedef std::unordered_map<
+		HqString*, 
+		File, 
+		HqString::StlHash, 
+		HqString::StlCompare
+	> FileMap;
+
+	static HqProjectHandle Create(HqToolCoreHandle hToolCore);
+	static void Dispose(HqProjectHandle hProject);
+
+	static int SetOutput(HqProjectHandle hProject, HqString* pPath);
+	static int AddReference(HqProjectHandle hProject, HqString* pPath, HqString* pName);
+	static int AddFile(HqProjectHandle hProject, HqString* pPath);
+	static int AddDefine(HqProjectHandle hProject, HqString* pDefine);
+	static int AddFileDefine(HqProjectHandle hProject, HqString* pFilePath, HqString* pDefine);
+
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
+
+	HqToolCoreHandle hToolCore;
+
+	HqString* pOutput;
+
+	StringList defines;
+	ReferenceMap references;
+	FileMap files;
 };
-
-//----------------------------------------------------------------------------------------------------------------------
-
-HqParseTreeListener::HqParseTreeListener()
-{
-}
 
 //----------------------------------------------------------------------------------------------------------------------

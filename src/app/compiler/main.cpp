@@ -85,19 +85,19 @@ int main(int argc, char* argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	HqCompilerHandle hCompiler = HQ_COMPILER_HANDLE_NULL;
-	HqCompilerInit init;
+	HqToolCoreHandle hCompiler = HQ_TOOL_CORE_HANDLE_NULL;
+	HqToolCoreInit init;
 
 	init.common.report.onMessageFn = OnMessageReported;
 	init.common.report.pUserData = nullptr;
 	init.common.report.reportLevel = HQ_MESSAGE_TYPE_VERBOSE;
 
-	// Create the compiler context.
-	int result = HqCompilerCreate(&hCompiler, init);
+	// Create the tool core context.
+	int result = HqToolCoreCreate(&hCompiler, init);
 	if(result != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin compiler context: error=\"%s\"", HqGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin tool core context: error=\"%s\"", HqGetErrorCodeString(result));
 		OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
 		return 1;
 	}
@@ -423,12 +423,12 @@ int main(int argc, char* argv[])
 		OnMessageReported(NULL, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 
-	// Dispose of the compiler context.
-	result = HqCompilerDispose(&hCompiler);
+	// Dispose of the tool core context.
+	result = HqToolCoreDispose(&hCompiler);
 	if(result != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin compiler context: error=\"%s\"", HqGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin tool core context: error=\"%s\"", HqGetErrorCodeString(result));
 		OnMessageReported(NULL, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 

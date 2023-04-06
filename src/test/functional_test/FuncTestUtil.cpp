@@ -26,20 +26,20 @@
 void Util::CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback)
 {
 	// Set the memory context so we have a better idea of where to look when memory validation failures occur.
-	Memory::Instance.SetContext("compiler");
+	Memory::Instance.SetContext("tool-core");
 
 	constexpr int endianness = HQ_ENDIAN_ORDER_NATIVE;
 
-	const HqCompilerInit init = GetDefaultHqCompilerInit(nullptr, DefaultMessageCallback, HQ_MESSAGE_TYPE_WARNING);
+	const HqToolCoreInit init = GetDefaultHqToolCoreInit(nullptr, DefaultMessageCallback, HQ_MESSAGE_TYPE_WARNING);
 
-	// Create the compiler.
-	HqCompilerHandle hCompiler = HQ_COMPILER_HANDLE_NULL;
-	const int createCompilerResult = HqCompilerCreate(&hCompiler, init);
-	ASSERT_EQ(createCompilerResult, HQ_SUCCESS);
+	// Create the tool core.
+	HqToolCoreHandle hToolCore = HQ_TOOL_CORE_HANDLE_NULL;
+	const int createToolCoreResult = HqToolCoreCreate(&hToolCore, init);
+	ASSERT_EQ(createToolCoreResult, HQ_SUCCESS);
 
 	// Create the module writer.
 	HqModuleWriterHandle hModuleWriter = HQ_MODULE_WRITER_HANDLE_NULL;
-	const int createModuleWriterResult = HqModuleWriterCreate(&hModuleWriter, hCompiler);
+	const int createModuleWriterResult = HqModuleWriterCreate(&hModuleWriter, hToolCore);
 	ASSERT_EQ(createModuleWriterResult, HQ_SUCCESS);
 
 	if(callback)
@@ -75,9 +75,9 @@ void Util::CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback c
 	const int disposeModuleWriterResult = HqModuleWriterDispose(&hModuleWriter);
 	ASSERT_EQ(disposeModuleWriterResult, HQ_SUCCESS);
 
-	// Dispose of the compiler.
-	const int disposeCompilerResult = HqCompilerDispose(&hCompiler);
-	ASSERT_EQ(disposeCompilerResult, HQ_SUCCESS);
+	// Dispose of the tool core.
+	const int disposeToolCoreResult = HqToolCoreDispose(&hToolCore);
+	ASSERT_EQ(disposeToolCoreResult, HQ_SUCCESS);
 
 	// Verify all memory has been freed.
 	Memory::Instance.Validate();

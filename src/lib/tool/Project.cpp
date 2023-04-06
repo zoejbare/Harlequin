@@ -17,7 +17,7 @@
 //
 
 #include "Project.hpp"
-#include "Compiler.hpp"
+#include "ToolCore.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -25,14 +25,14 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqProjectHandle HqProject::Create(HqCompilerHandle hCompiler)
+HqProjectHandle HqProject::Create(HqToolCoreHandle hToolCore)
 {
-	assert(hCompiler != HQ_COMPILER_HANDLE_NULL);
+	assert(hToolCore != HQ_TOOL_CORE_HANDLE_NULL);
 
 	HqProject* const pOutput = new HqProject();
 	assert(pOutput != nullptr);
 
-	pOutput->hCompiler = hCompiler;
+	pOutput->hToolCore = hToolCore;
 	pOutput->pOutput = nullptr;
 
 	return pOutput;
@@ -89,7 +89,7 @@ int HqProject::SetOutput(HqProjectHandle hProject, HqString* const pPath)
 	if(hProject->pOutput)
 	{
 		HqReportMessage(
-			&hProject->hCompiler->report, 
+			&hProject->hToolCore->report, 
 			HQ_MESSAGE_TYPE_WARNING, 
 			"Overwriting project output path: %s", 
 			hProject->pOutput->data
@@ -123,7 +123,7 @@ int HqProject::AddReference(HqProjectHandle hProject, HqString* const pPath, HqS
 		if(HqString::FastCompare(pPath, kv.second.pPath))
 		{
 			HqReportMessage(
-				&hProject->hCompiler->report, 
+				&hProject->hToolCore->report, 
 				HQ_MESSAGE_TYPE_ERROR, 
 				"Duplicate reference path: %s", 
 				pPath->data
@@ -134,7 +134,7 @@ int HqProject::AddReference(HqProjectHandle hProject, HqString* const pPath, HqS
 		if(pName && HqString::FastCompare(pName, kv.second.pName))
 		{
 			HqReportMessage(
-				&hProject->hCompiler->report, 
+				&hProject->hToolCore->report, 
 				HQ_MESSAGE_TYPE_ERROR, 
 				"Duplicate reference name: %s", 
 				pName->data
@@ -165,7 +165,7 @@ int HqProject::AddFile(HqProjectHandle hProject, HqString* const pPath)
 	if(hProject->files.count(pPath))
 	{
 		HqReportMessage(
-			&hProject->hCompiler->report, 
+			&hProject->hToolCore->report, 
 			HQ_MESSAGE_TYPE_ERROR, 
 			"Duplicate source file: %s", 
 			pPath->data
@@ -210,7 +210,7 @@ int HqProject::AddFileDefine(HqProjectHandle hProject, HqString* const pFilePath
 	if(kv == hProject->files.end())
 	{
 		HqReportMessage(
-			&hProject->hCompiler->report, 
+			&hProject->hToolCore->report, 
 			HQ_MESSAGE_TYPE_ERROR, 
 			"Source file not found for define"
 				": file='%s'"

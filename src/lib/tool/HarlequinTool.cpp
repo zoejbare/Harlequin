@@ -18,10 +18,10 @@
 
 #include "../Harlequin.h"
 
-#include "Compiler.hpp"
 #include "FunctionData.hpp"
 #include "ModuleWriter.hpp"
 #include "Project.hpp"
+#include "ToolCore.hpp"
 
 #include "../base/Serializer.hpp"
 #include "../base/String.hpp"
@@ -36,75 +36,73 @@ extern "C" {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqCompilerCreate(HqCompilerHandle* phOutCompiler, HqCompilerInit init)
+int HqToolCoreCreate(HqToolCoreHandle* phOutToolCore, HqToolCoreInit init)
 {
-	if(!phOutCompiler
-		|| (*phOutCompiler)
+	if(!phOutToolCore
+		|| (*phOutToolCore)
 		|| init.common.report.reportLevel < HQ_MESSAGE_TYPE_VERBOSE
 		|| init.common.report.reportLevel > HQ_MESSAGE_TYPE_FATAL)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqCompilerHandle hCompiler = HqCompiler::Create(init);
-	if(!hCompiler)
+	HqToolCoreHandle hToolCore = HqToolCore::Create(init);
+	if(!hToolCore)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	// The message has to be printed *after* creating the compiler since the object is used in this function.
-	HqReportMessage(&hCompiler->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin compiler");
+	// The message has to be printed *after* creating the tool root since the object is used in this function.
+	HqReportMessage(&hToolCore->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin tool root");
 
-	(*phOutCompiler) = hCompiler;
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqCompilerDispose(HqCompilerHandle* phCompiler)
-{
-	if(!phCompiler || !(*phCompiler))
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	HqCompilerHandle hCompiler = (*phCompiler);
-
-	(*phCompiler) = HQ_COMPILER_HANDLE_NULL;
-
-	HqReportMessage(&hCompiler->report, HQ_MESSAGE_TYPE_VERBOSE, "Releasing Harlequin compiler");
-	HqCompiler::Dispose(hCompiler);
+	(*phOutToolCore) = hToolCore;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqCompilerGetReportHandle(HqCompilerHandle hCompiler, HqReportHandle* phOutReport)
+int HqToolCoreDispose(HqToolCoreHandle* phToolCore)
 {
-	if(!hCompiler || !phOutReport)
+	if(!phToolCore || !(*phToolCore))
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutReport) = &hCompiler->report;
+	HqToolCoreHandle hToolCore = (*phToolCore);
+
+	(*phToolCore) = HQ_TOOL_CORE_HANDLE_NULL;
+
+	HqReportMessage(&hToolCore->report, HQ_MESSAGE_TYPE_VERBOSE, "Releasing Harlequin tool core");
+	HqToolCore::Dispose(hToolCore);
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqProjectCreate(HqProjectHandle* phOutProject, HqCompilerHandle hCompiler)
+int HqToolCoreGetReportHandle(HqToolCoreHandle hToolCore, HqReportHandle* phOutReport)
 {
-	if(!phOutProject 
-		|| (*phOutProject) 
-		|| !hCompiler)
+	if(!hToolCore || !phOutReport)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqProjectHandle hProject = HqProject::Create(hCompiler);
+	(*phOutReport) = &hToolCore->report;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqProjectCreate(HqProjectHandle* phOutProject, HqToolCoreHandle hToolCore)
+{
+	if(!phOutProject || (*phOutProject) || !hToolCore)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	HqProjectHandle hProject = HqProject::Create(hToolCore);
 	if(!hProject)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
@@ -276,14 +274,14 @@ int HqProjectAddFileDefine(HqProjectHandle hProject, const char* const filePath,
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqCompilerHandle hCompiler)
+int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqToolCoreHandle hToolCore)
 {
-	if(!phOutModuleWriter || (*phOutModuleWriter) || !hCompiler)
+	if(!phOutModuleWriter || (*phOutModuleWriter) || !hToolCore)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqModuleWriterHandle hWriter = HqModuleWriter::Create();
+	HqModuleWriterHandle hWriter = HqModuleWriter::Create(hToolCore);
 	if(!hWriter)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;

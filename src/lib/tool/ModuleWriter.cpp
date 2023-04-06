@@ -18,7 +18,7 @@
 
 #include "ModuleWriter.hpp"
 
-#include "Compiler.hpp"
+#include "ToolCore.hpp"
 
 #include <algorithm>
 #include <assert.h>
@@ -27,10 +27,15 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqModuleWriterHandle HqModuleWriter::Create()
+HqModuleWriterHandle HqModuleWriter::Create(HqToolCoreHandle hToolCore)
 {
+	assert(hToolCore != HQ_TOOL_CORE_HANDLE_NULL);
 
 	HqModuleWriter* const pOutput = new HqModuleWriter();
+	assert(pOutput != nullptr);
+
+	pOutput->hToolCore = hToolCore;
+
 	return pOutput;
 }
 
@@ -99,7 +104,7 @@ bool HqModuleWriter::Serialize(HqModuleWriterHandle hModuleWriter, HqSerializerH
 	assert(hModuleWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
-	HqReportHandle hReport = &hModuleWriter->hCompiler->report;
+	HqReportHandle hReport = &hModuleWriter->hToolCore->report;
 
 	auto getAlignedSize = [](const size_t size) -> size_t
 	{

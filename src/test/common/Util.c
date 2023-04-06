@@ -100,9 +100,9 @@ HqVmInit GetDefaultHqVmInit(void* const pUserData, HqMessageCallback onMessageFn
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqCompilerInit GetDefaultHqCompilerInit(void* const pUserData, HqMessageCallback onMessageFn, const int reportLevel)
+HqToolCoreInit GetDefaultHqToolCoreInit(void* const pUserData, HqMessageCallback onMessageFn, const int reportLevel)
 {
-	HqCompilerInit output;
+	HqToolCoreInit output;
 	output.common.report.onMessageFn = onMessageFn ? onMessageFn : _DummyMessageCallback;
 	output.common.report.pUserData = pUserData;
 	output.common.report.reportLevel = reportLevel;
