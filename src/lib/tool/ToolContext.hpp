@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2021, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,63 +22,19 @@
 
 #include "../Harlequin.h"
 
-#include "../base/String.hpp"
-
-#include <unordered_map>
-#include <vector>
+#include "../common/Report.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqProject
+struct HqToolContext
 {
-	struct Reference
-	{
-		HqString* pPath;
-		HqString* pName;
-	};
-
-	typedef std::unordered_map<
-		HqString*, 
-		Reference, 
-		HqString::StlHash, 
-		HqString::StlCompare
-	> ReferenceMap;
-
-	typedef std::vector<HqString*> StringList;
-
-	struct File
-	{
-		StringList defines;
-
-		HqString* pPath;
-	};
-
-	typedef std::unordered_map<
-		HqString*, 
-		File, 
-		HqString::StlHash, 
-		HqString::StlCompare
-	> FileMap;
-
-	static HqProjectHandle Create(HqToolCoreHandle hToolCore);
-	static void Dispose(HqProjectHandle hProject);
-
-	static int SetOutput(HqProjectHandle hProject, HqString* pPath);
-	static int AddReference(HqProjectHandle hProject, HqString* pPath, HqString* pName);
-	static int AddFile(HqProjectHandle hProject, HqString* pPath);
-	static int AddDefine(HqProjectHandle hProject, HqString* pDefine);
-	static int AddFileDefine(HqProjectHandle hProject, HqString* pFilePath, HqString* pDefine);
+	static HqToolContextHandle Create(HqToolContextInit init);
+	static void Dispose(HqToolContextHandle hToolCtx);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	HqToolCoreHandle hToolCore;
-
-	HqString* pOutput;
-
-	StringList defines;
-	ReferenceMap references;
-	FileMap files;
+	HqReport report;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

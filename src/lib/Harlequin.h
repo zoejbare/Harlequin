@@ -40,11 +40,11 @@ extern "C" {
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 #define HQ_VM_FRAME_STACK_SIZE 1024
-#define HQ_VM_VALUE_STACK_SIZE 128
+#define HQ_VM_VALUE_STACK_SIZE 64
 
 #define HQ_VM_IO_REGISTER_COUNT 48
 #define HQ_VM_GP_REGISTER_COUNT 64
-#define HQ_VM_VR_REGISTER_COUNT 128
+#define HQ_VM_VR_REGISTER_COUNT 256
 
 #define HQ_VM_THREAD_MINIMUM_STACK_SIZE 262144
 #define HQ_VM_THREAD_DEFAULT_STACK_SIZE 1048576
@@ -58,6 +58,7 @@ enum HqErrorCodeEnum
 {
 	HQ_SUCCESS = 0,
 
+	HQ_ERROR_NOT_IMPLEMENTED = -99,
 	HQ_ERROR_UNSPECIFIED_FAILURE = -1,
 	HQ_ERROR_INVALID_ARG = -2,
 	HQ_ERROR_INVALID_TYPE = -3,
@@ -65,10 +66,14 @@ enum HqErrorCodeEnum
 	HQ_ERROR_INVALID_RANGE = -5,
 	HQ_ERROR_INVALID_OPERATION = -6,
 	HQ_ERROR_BAD_ALLOCATION = -7,
-	HQ_ERROR_KEY_ALREADY_EXISTS = -8,
-	HQ_ERROR_KEY_DOES_NOT_EXIST = -9,
-	HQ_ERROR_DUPLICATE = HQ_ERROR_KEY_ALREADY_EXISTS,
-	HQ_ERROR_NON_EXISTENT = HQ_ERROR_KEY_DOES_NOT_EXIST,
+	HQ_ERROR_DUPLICATE = -8,
+	HQ_ERROR_NON_EXISTENT = -9,
+
+	/**! Deprecated - use HQ_ERROR_DUPLICATE instead */
+	HQ_ERROR_KEY_ALREADY_EXISTS = HQ_ERROR_DUPLICATE,
+	/**! Deprecated - use HQ_ERROR_NON_EXISTENT instead */
+	HQ_ERROR_KEY_DOES_NOT_EXIST = HQ_ERROR_NON_EXISTENT,
+
 	HQ_ERROR_FAILED_TO_OPEN_FILE = -10,
 	HQ_ERROR_STREAM_END = -11,
 	HQ_ERROR_STACK_EMPTY = -12,
@@ -751,48 +756,28 @@ HQ_MAIN_API int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqVal
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-typedef struct HqToolCore*     HqToolCoreHandle;
-typedef struct HqProject*      HqProjectHandle;
-typedef struct HqModuleWriter* HqModuleWriterHandle;
+typedef struct HqToolContext*   HqToolContextHandle;
+typedef struct HqModuleWriter*  HqModuleWriterHandle;
 
 typedef struct
 {
 	HqCommonInit common;
-} HqToolCoreInit;
+} HqToolContextInit;
 
-typedef bool (*HqCallbackIterateBuiltInFunction)(void*, int, const char*);
-
-#define HQ_TOOL_CORE_HANDLE_NULL     ((HqToolCoreHandle)0)
-#define HQ_PROJECT_HANDLE_NULL       ((HqProjectHandle)0)
-#define HQ_MODULE_WRITER_HANDLE_NULL ((HqModuleWriterHandle)0)
+#define HQ_TOOL_CONTEXT_HANDLE_NULL   ((HqToolContextHandle)0)
+#define HQ_MODULE_WRITER_HANDLE_NULL  ((HqModuleWriterHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqToolCoreCreate(HqToolCoreHandle* phOutToolCore, HqToolCoreInit init);
+HQ_MAIN_API int HqToolContextCreate(HqToolContextHandle* phOutToolCtx, HqToolContextInit init);
 
-HQ_MAIN_API int HqToolCoreDispose(HqToolCoreHandle* phToolCore);
+HQ_MAIN_API int HqToolContextDispose(HqToolContextHandle* phToolCtx);
 
-HQ_MAIN_API int HqToolCoreGetReportHandle(HqToolCoreHandle hToolCore, HqReportHandle* phOutReport);
-
-/*---------------------------------------------------------------------------------------------------------------------*/
-
-HQ_MAIN_API int HqProjectCreate(HqProjectHandle* phOutProject, HqToolCoreHandle hToolCore);
-
-HQ_MAIN_API int HqProjectDispose(HqProjectHandle* phProject);
-
-HQ_MAIN_API int HqProjectSetOutput(HqProjectHandle hProject, const char* path);
-
-HQ_MAIN_API int HqProjectAddReference(HqProjectHandle, const char* path, const char* name);
-
-HQ_MAIN_API int HqProjectAddFile(HqProjectHandle, const char* path);
-
-HQ_MAIN_API int HqProjectAddDefine(HqProjectHandle, const char* define);
-
-HQ_MAIN_API int HqProjectAddFileDefine(HqProjectHandle, const char* filePath, const char* define);
+HQ_MAIN_API int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqReportHandle* phOutReport);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqToolCoreHandle hToolCore);
+HQ_MAIN_API int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqToolContextHandle hToolContext);
 
 HQ_MAIN_API int HqModuleWriterDispose(HqModuleWriterHandle* phModuleWriter);
 

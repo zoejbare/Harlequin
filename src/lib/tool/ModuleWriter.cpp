@@ -17,8 +17,7 @@
 //
 
 #include "ModuleWriter.hpp"
-
-#include "ToolCore.hpp"
+#include "ToolContext.hpp"
 
 #include <algorithm>
 #include <assert.h>
@@ -27,14 +26,14 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqModuleWriterHandle HqModuleWriter::Create(HqToolCoreHandle hToolCore)
+HqModuleWriterHandle HqModuleWriter::Create(HqToolContextHandle hToolCtx)
 {
-	assert(hToolCore != HQ_TOOL_CORE_HANDLE_NULL);
+	assert(hToolCtx != HQ_TOOL_CONTEXT_HANDLE_NULL);
 
 	HqModuleWriter* const pOutput = new HqModuleWriter();
 	assert(pOutput != nullptr);
 
-	pOutput->hToolCore = hToolCore;
+	pOutput->hToolCtx = hToolCtx;
 
 	return pOutput;
 }
@@ -104,7 +103,7 @@ bool HqModuleWriter::Serialize(HqModuleWriterHandle hModuleWriter, HqSerializerH
 	assert(hModuleWriter != HQ_MODULE_WRITER_HANDLE_NULL);
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
-	HqReportHandle hReport = &hModuleWriter->hToolCore->report;
+	HqReportHandle hReport = &hModuleWriter->hToolCtx->report;
 
 	auto getAlignedSize = [](const size_t size) -> size_t
 	{

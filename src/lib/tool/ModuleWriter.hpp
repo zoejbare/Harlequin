@@ -37,7 +37,7 @@
 
 struct HqModuleWriter
 {
-	static HqModuleWriterHandle Create(HqToolCoreHandle hToolCore);
+	static HqModuleWriterHandle Create(HqToolContextHandle hToolCtx);
 	static void Dispose(HqModuleWriterHandle hWriter);
 	static bool Serialize(HqModuleWriterHandle hModuleWriter, HqSerializerHandle hSerializer);
 
@@ -82,7 +82,7 @@ struct HqModuleWriter
 		HqString::StlCompare
 	> StringToSizeMap;
 
-	HqToolCoreHandle hToolCore;
+	HqToolContextHandle hToolCtx;
 
 	DependencySet dependencies;
 	GlobalValueSet globals;

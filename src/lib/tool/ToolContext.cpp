@@ -16,15 +16,15 @@
 // IN THE SOFTWARE.
 //
 
-#include "ToolCore.hpp"
+#include "ToolContext.hpp"
 
 #include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqToolCoreHandle HqToolCore::Create(HqToolCoreInit init)
+HqToolContextHandle HqToolContext::Create(HqToolContextInit init)
 {
-	HqToolCore* const pOutput = new HqToolCore();
+	HqToolContext* const pOutput = new HqToolContext();
 	assert(pOutput != nullptr);
 
 	pOutput->report.onMessageFn = init.common.report.onMessageFn;
@@ -36,22 +36,22 @@ HqToolCoreHandle HqToolCore::Create(HqToolCoreInit init)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqToolCore::Dispose(HqToolCoreHandle hToolCore)
+void HqToolContext::Dispose(HqToolContextHandle hToolCtx)
 {
-	assert(hToolCore != HQ_TOOL_CORE_HANDLE_NULL);
-	delete hToolCore;
+	assert(hToolCtx != HQ_TOOL_CONTEXT_HANDLE_NULL);
+	delete hToolCtx;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* HqToolCore::operator new(const size_t sizeInBytes)
+void* HqToolContext::operator new(const size_t sizeInBytes)
 {
 	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqToolCore::operator delete(void* const pObject)
+void HqToolContext::operator delete(void* const pObject)
 {
 	HqMemFree(pObject);
 }
