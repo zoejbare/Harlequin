@@ -756,16 +756,22 @@ HQ_MAIN_API int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqVal
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-typedef struct HqToolContext*   HqToolContextHandle;
-typedef struct HqModuleWriter*  HqModuleWriterHandle;
+typedef struct HqToolContext*     HqToolContextHandle;
+typedef struct HqModuleWriter*    HqModuleWriterHandle;
+typedef struct HqReferenceModule* HqReferenceModuleHandle;
+typedef struct HqSourceFile*      HqSourceFileHandle;
+typedef struct HqSourceModule*    HqSourceModuleHandle;
 
 typedef struct
 {
 	HqCommonInit common;
 } HqToolContextInit;
 
-#define HQ_TOOL_CONTEXT_HANDLE_NULL   ((HqToolContextHandle)0)
-#define HQ_MODULE_WRITER_HANDLE_NULL  ((HqModuleWriterHandle)0)
+#define HQ_TOOL_CONTEXT_HANDLE_NULL     ((HqToolContextHandle)0)
+#define HQ_MODULE_WRITER_HANDLE_NULL    ((HqModuleWriterHandle)0)
+#define HQ_REFERENCE_MODULE_HANDLE_NULL ((HqReferenceModuleHandle)0)
+#define HQ_SOURCE_FILE_HANDLE_NULL      ((HqSourceFileHandle)0)
+#define HQ_SOURCE_MODULE_HANDLE_NULL    ((HqSourceModuleHandle)0)
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -774,6 +780,48 @@ HQ_MAIN_API int HqToolContextCreate(HqToolContextHandle* phOutToolCtx, HqToolCon
 HQ_MAIN_API int HqToolContextDispose(HqToolContextHandle* phToolCtx);
 
 HQ_MAIN_API int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqReportHandle* phOutReport);
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+HQ_MAIN_API int HqReferenceModuleLoad(
+	HqReferenceModuleHandle* phOutRefModule, 
+	HqToolContextHandle hToolCtx,
+	HqSerializerHandle hSerializer
+);
+
+HQ_MAIN_API int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule);
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+HQ_MAIN_API int HqSourceFileLoad(
+	HqSourceFileHandle* phOutSrcFile, 
+	HqToolContextHandle hToolCtx, 
+	HqSerializerHandle hSerializer
+);
+
+HQ_MAIN_API int HqSourceFileDispose(HqSourceFileHandle* phSrcFile);
+
+HQ_MAIN_API int HqSourceFileParse(HqSourceFileHandle hSrcFile);
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+HQ_MAIN_API int HqSourceModuleCreate(HqSourceModuleHandle* phOutSrcModule, HqToolContextHandle hToolCtx);
+
+HQ_MAIN_API int HqSourceModuleDispose(HqSourceModuleHandle* phSrcModule);
+
+HQ_MAIN_API int HqSourceModuleAddReference(
+	HqSourceModuleHandle hSrcModule, 
+	HqReferenceModuleHandle hRefModule, 
+	const char* name
+);
+
+HQ_MAIN_API int HqSourceModuleAddFile(
+	HqSourceModuleHandle hSrcModule, 
+	HqSourceFileHandle hSrcFile, 
+	const char* name
+);
+
+HQ_MAIN_API int HqSourceModuleCompile(HqSourceModuleHandle hSrcModule);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

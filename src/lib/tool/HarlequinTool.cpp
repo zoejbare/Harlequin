@@ -94,6 +94,158 @@ int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqReportHandle* p
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqReferenceModuleLoad(
+	HqReferenceModuleHandle* phOutRefModule, 
+	HqToolContextHandle hToolCtx,
+	HqSerializerHandle hSerializer
+)
+{
+	if(!phOutRefModule
+		|| (*phOutRefModule)
+		|| !hToolCtx
+		|| !hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phOutRefModule) = HQ_REFERENCE_MODULE_HANDLE_NULL;
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule)
+{
+	if(!phRefModule || !(*phRefModule))
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phRefModule) = HQ_REFERENCE_MODULE_HANDLE_NULL;
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceFileLoad(
+	HqSourceFileHandle* phOutSrcFile, 
+	HqToolContextHandle hToolCtx, 
+	HqSerializerHandle hSerializer
+)
+{
+	if(!phOutSrcFile 
+		|| (*phOutSrcFile) 
+		|| !hToolCtx 
+		|| !hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phOutSrcFile) = HQ_SOURCE_FILE_HANDLE_NULL;
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceFileDispose(HqSourceFileHandle* phSrcFile)
+{
+	if(!phSrcFile || !(*phSrcFile))
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phSrcFile) = HQ_SOURCE_FILE_HANDLE_NULL;
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceFileParse(HqSourceFileHandle hSrcFile)
+{
+	if(!hSrcFile)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceModuleCreate(HqSourceModuleHandle* phOutSrcModule, HqToolContextHandle hToolCtx)
+{
+	if(!phOutSrcModule || (*phOutSrcModule) || !hToolCtx)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phOutSrcModule) = HQ_SOURCE_MODULE_HANDLE_NULL;
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceModuleDispose(HqSourceModuleHandle* phSrcModule)
+{
+	if(!phSrcModule || !(*phSrcModule))
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phSrcModule) = HQ_SOURCE_MODULE_HANDLE_NULL;
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceModuleAddReference(HqSourceModuleHandle hSrcModule, HqReferenceModuleHandle hRefModule, const char* const name)
+{
+	if(!hSrcModule
+		|| !hRefModule
+		|| !name
+		|| name[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceModuleAddFile(HqSourceModuleHandle hSrcModule, HqSourceFileHandle hSrcFile, const char* const name)
+{
+	if(!hSrcModule 
+		|| !hSrcFile 
+		|| !name 
+		|| name[0] == '\0')
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceModuleCompile(HqSourceModuleHandle hSrcModule)
+{
+	if(!hSrcModule)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqToolContextHandle hToolCtx)
 {
 	if(!phOutModuleWriter || (*phOutModuleWriter) || !hToolCtx)
