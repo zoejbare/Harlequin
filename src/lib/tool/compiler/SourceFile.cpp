@@ -16,15 +16,16 @@
 // IN THE SOFTWARE.
 //
 
-#include "ReferenceModule.hpp"
+#include "SourceFile.hpp"
 
 #include "../ToolContext.hpp"
 
 #include <assert.h>
+#include <memory.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqReferenceModuleHandle HqReferenceModule::Load(
+HqSourceFileHandle HqSourceFile::Load(
 	HqToolContextHandle hToolCtx,
 	const void* pFileData,
 	size_t fileSize,
@@ -35,43 +36,54 @@ HqReferenceModuleHandle HqReferenceModule::Load(
 	assert(fileSize > 0);
 	assert(pErrorReason != nullptr);
 
-	HqReferenceModule* const pOutput = new HqReferenceModule();
+	HqSourceFile* const pOutput = new HqSourceFile();
 	assert(pOutput != nullptr);
 
-	// Attempt to load the module metadata, disregarding the bytecode.
-	if(!HqModuleLoader::Load(pOutput->data, &hToolCtx->report, pFileData, fileSize, HqModuleLoader::DISCARD_BYTECODE))
-	{
-		(*pErrorReason) = HQ_ERROR_FAILED_TO_OPEN_FILE;
-		delete pOutput;
-		return nullptr;
-	}
-
 	pOutput->hToolCtx = hToolCtx;
+
+	// Initialize the file data array and reserve space for the input data.
+	FileData::Initialize(pOutput->fileData);
+	FileData::Reserve(pOutput->fileData, fileSize);
+
+	pOutput->fileData.count = fileSize;
+
+	// Copy the input data to the file data array.
+	memcpy(pOutput->fileData.pData, pFileData, fileSize);
 
 	return pOutput;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqReferenceModule::Dispose(HqReferenceModuleHandle hRefModule)
+void HqSourceFile::Dispose(HqSourceFileHandle hSrcFile)
 {
-	assert(hRefModule != HQ_REFERENCE_MODULE_HANDLE_NULL);
+	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
-	HqModuleLoader::Dispose(hRefModule->data);
+	// Dispose of the raw file data.
+	FileData::Dispose(hSrcFile->fileData);
 
-	delete hRefModule;
+	delete hSrcFile;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void* HqReferenceModule::operator new(const size_t sizeInBytes)
+int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
+{
+	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
+
+	return HQ_ERROR_NOT_IMPLEMENTED;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void* HqSourceFile::operator new(const size_t sizeInBytes)
 {
 	return HqMemAlloc(sizeInBytes);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqReferenceModule::operator delete(void* const pObject)
+void HqSourceFile::operator delete(void* const pObject)
 {
 	HqMemFree(pObject);
 }

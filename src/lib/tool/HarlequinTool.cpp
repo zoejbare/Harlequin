@@ -23,6 +23,7 @@
 #include "ToolContext.hpp"
 
 #include "compiler/ReferenceModule.hpp"
+#include "compiler/SourceFile.hpp"
 
 #include "../base/Serializer.hpp"
 #include "../base/String.hpp"
@@ -157,9 +158,16 @@ int HqSourceFileLoad(
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutSrcFile) = HQ_SOURCE_FILE_HANDLE_NULL;
+	int result = HQ_SUCCESS;
 
-	return HQ_ERROR_NOT_IMPLEMENTED;
+	// Load the source file data.
+	HqSourceFileHandle hSrcFile = HqSourceFile::Load(hToolCtx, pFileData, fileSize, &result);
+	if(hSrcFile)
+	{
+		(*phOutSrcFile) = hSrcFile;
+	}
+
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -171,9 +179,12 @@ int HqSourceFileDispose(HqSourceFileHandle* phSrcFile)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
+	// Dispose of the loaded source file data.
+	HqSourceFile::Dispose(*phSrcFile);
+
 	(*phSrcFile) = HQ_SOURCE_FILE_HANDLE_NULL;
 
-	return HQ_ERROR_NOT_IMPLEMENTED;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -185,7 +196,7 @@ int HqSourceFileParse(HqSourceFileHandle hSrcFile)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	return HQ_ERROR_NOT_IMPLEMENTED;
+	return HqSourceFile::Parse(hSrcFile);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

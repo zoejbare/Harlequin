@@ -16,64 +16,31 @@
 // IN THE SOFTWARE.
 //
 
-#include "ReferenceModule.hpp"
-
-#include "../ToolContext.hpp"
-
-#include <assert.h>
+#pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqReferenceModuleHandle HqReferenceModule::Load(
-	HqToolContextHandle hToolCtx,
-	const void* pFileData,
-	size_t fileSize,
-	int* pErrorReason)
-{
-	assert(hToolCtx != HQ_TOOL_CONTEXT_HANDLE_NULL);
-	assert(pFileData != nullptr);
-	assert(fileSize > 0);
-	assert(pErrorReason != nullptr);
+#include "../../Harlequin.h"
 
-	HqReferenceModule* const pOutput = new HqReferenceModule();
-	assert(pOutput != nullptr);
-
-	// Attempt to load the module metadata, disregarding the bytecode.
-	if(!HqModuleLoader::Load(pOutput->data, &hToolCtx->report, pFileData, fileSize, HqModuleLoader::DISCARD_BYTECODE))
-	{
-		(*pErrorReason) = HQ_ERROR_FAILED_TO_OPEN_FILE;
-		delete pOutput;
-		return nullptr;
-	}
-
-	pOutput->hToolCtx = hToolCtx;
-
-	return pOutput;
-}
+#include "../../common/Array.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqReferenceModule::Dispose(HqReferenceModuleHandle hRefModule)
+struct HqSourceFile
 {
-	assert(hRefModule != HQ_REFERENCE_MODULE_HANDLE_NULL);
+	typedef HqArray<uint8_t> FileData;
 
-	HqModuleLoader::Dispose(hRefModule->data);
+	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
+	static void Dispose(HqSourceFileHandle hSrcFile);
 
-	delete hRefModule;
-}
+	static int Parse(HqSourceFileHandle hSrcFile);
 
-//----------------------------------------------------------------------------------------------------------------------
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
 
-void* HqReferenceModule::operator new(const size_t sizeInBytes)
-{
-	return HqMemAlloc(sizeInBytes);
-}
+	HqToolContextHandle hToolCtx;
 
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqReferenceModule::operator delete(void* const pObject)
-{
-	HqMemFree(pObject);
-}
+	FileData fileData;
+};
 
 //----------------------------------------------------------------------------------------------------------------------
