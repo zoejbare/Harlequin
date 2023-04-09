@@ -59,7 +59,7 @@ namespaceDef
 
 // Class declaration rule
 classDecl
-	: classModifier* classType? Id classExtends? classImpls? classDef
+	: (accessModifier | classScopeModifier)* classType? Id classExtends? classImpls? classDef
 	;
 
 // Class type rule
@@ -68,10 +68,16 @@ classType
 	| InterfaceKw
 	;
 
-// Class access modifiers rule
-classModifier
-	: AccessSpecKw
-	| StaticKw
+// Class & method access modifier rule
+accessModifier
+	: PublicKw
+	| ProtectedKw
+	| PrivateKw
+	;
+
+// Class & method scope modifier rule
+classScopeModifier
+	: StaticKw
 	;
 
 // Class 'extends' rule
@@ -86,12 +92,12 @@ classImpls
 
 // Class definition rule
 classDef
-	: LeftBrace (classVarDecl Term | methodDecl)* RightBrace
+	: LeftBrace (classVarDecl Term | methodDecl | ctorDecl)* RightBrace
 	;
 
 // Class variable declaration rule
 classVarDecl
-	: AccessSpecKw? StaticKw? varDecl
+	: accessModifier* varDecl
 	;
 
 // Typename rule
@@ -99,9 +105,14 @@ typeName
 	: Id (LeftBracket RightBracket)*
 	;
 
+// Variable access modifier rule
+varAccessModifier
+	: ConstKw
+	;
+
 // Variable declaration rule
 varDecl
-	: ConstKw? typeName varDef (Comma varDef)* ?
+	: varAccessModifier? typeName varDef (Comma varDef)* ?
 	;
 
 // Variable definition rule
@@ -130,17 +141,22 @@ lambdaDecl
 	: LambdaKw typeName Id LeftParen methodParamSeq? RightParen (CaptureKw LeftBracket Id (Comma Id)* RightBracket)? codeBlock
 	;
 
+// Class construction declaration rule
+ctorDecl
+	: accessModifier? ConstructorKw LeftParen methodParamSeq? RightParen codeBlock
+	;
+
 // Method declaration rule
 methodDecl
-	: AccessSpecKw? methodModifier* typeName Id LeftParen methodParamSeq? RightParen (codeBlock | Term)
+	: accessModifier* methodImplModifier* typeName Id LeftParen methodParamSeq? RightParen (codeBlock | Term)
 	;
 
 // Method access modifiers rule
-methodModifier
-	: RetainKw
+methodImplModifier
+	: InlineKw
 	| NativeKw
-	| StaticKw
 	| VirtualKw
+	| StaticKw
 	;
 
 // Method parameter sequence rule
@@ -150,7 +166,7 @@ methodParamSeq
 
 // Method parameter rule
 methodParam
-	: typeName Id?
+	: ConstKw? typeName Id?
 	;
 
 // Code statement rule
@@ -349,45 +365,42 @@ LeftBrace:    '{' ;
 RightBrace:   '}' ;
 
 // Language keyword tokens
-NamespaceKw:  'namespace' ;
-ClassKw:      'class' ;
-InterfaceKw:  'interface' ;
-UsingKw:      'using' ;
-StaticKw:     'static' ;
-RetainKw:     'retain' ;
-ConstKw:      'const' ;
-VirtualKw:    'virtual' ;
-NativeKw:     'native' ;
-ExtendsKw:    'extends' ;
-ImplementsKw: 'implements' ;
-ReturnKw:     'return' ;
-IfKw:         'if' ;
-ElifKw:       'elif' ;
-ElseKw:       'else' ;
-ForKw:        'for' ;
-DoKw:         'do' ;
-WhileKw:      'while' ;
-BreakKw:      'break' ;
-ContinueKw:   'continue' ;
-SwitchKw:     'switch' ;
-CaseKw:       'case' ;
-DefaultKw:    'default' ;
-TryKw:        'try' ;
-CatchKw:      'catch' ;
-FinallyKw:    'finally' ;
-LambdaKw:     'lambda' ;
-CaptureKw:    'capture' ;
+NamespaceKw:   'namespace' ;
+ClassKw:       'class' ;
+InterfaceKw:   'interface' ;
+UsingKw:       'using' ;
+StaticKw:      'static' ;
+InlineKw:      'inline' ;
+ConstKw:       'const' ;
+VirtualKw:     'virtual' ;
+NativeKw:      'native' ;
+ExtendsKw:     'extends' ;
+ImplementsKw:  'implements' ;
+ReturnKw:      'return' ;
+IfKw:          'if' ;
+ElifKw:        'elif' ;
+ElseKw:        'else' ;
+ForKw:         'for' ;
+DoKw:          'do' ;
+WhileKw:       'while' ;
+BreakKw:       'break' ;
+ContinueKw:    'continue' ;
+SwitchKw:      'switch' ;
+CaseKw:        'case' ;
+DefaultKw:     'default' ;
+TryKw:         'try' ;
+CatchKw:       'catch' ;
+FinallyKw:     'finally' ;
+LambdaKw:      'lambda' ;
+CaptureKw:     'capture' ;
+ConstructorKw: 'constructor' ;
+PublicKw:      'public' ;
+ProtectedKw:   'protected' ;
+PrivateKw:     'private' ;
 
 // Intrinsic keyword tokens
 AsmIntrinKw:  '__asm' ;
 CopyIntrinKw: '__copy' ;
-
-// Class access keyword tokens
-AccessSpecKw
-	: 'public'
-	| 'protected'
-	| 'private'
-	;
 
 // Arithmetic/bitwise operator tokens
 Add:         '+' ;
