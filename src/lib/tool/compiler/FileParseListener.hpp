@@ -28,15 +28,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class HqParseTreeListener
+class HqFileParseListener
 	: public HarlequinBaseListener
 {
 public:
 
-	HqParseTreeListener();
-
-	virtual void enterRoot(HarlequinParser::RootContext* pCtx) override;
-	virtual void exitRoot(HarlequinParser::RootContext* pCtx) override;
+	HqFileParseListener();
 
 	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext* pCtx) override;
 
@@ -46,7 +43,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqParseTreeListener::HqParseTreeListener()
+inline HqFileParseListener::HqFileParseListener()
 {
 }
 

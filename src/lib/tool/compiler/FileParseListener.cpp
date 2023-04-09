@@ -16,23 +16,11 @@
 // IN THE SOFTWARE.
 //
 
-#include "ParseTreeListener.hpp"
+#include "FileParseListener.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqParseTreeListener::enterRoot(HarlequinParser::RootContext* const pCtx)
-{
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqParseTreeListener::exitRoot(HarlequinParser::RootContext* const pCtx)
-{
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqParseTreeListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
+void HqFileParseListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
 {
 }
 

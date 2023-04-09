@@ -18,7 +18,14 @@
 
 #include "SourceFile.hpp"
 
+#include "FileParseListener.hpp"
+
+#include "generated/HarlequinLexer.h"
+#include "generated/HarlequinParser.h"
+
 #include "../ToolContext.hpp"
+
+#include <antlr4-runtime.h>
 
 #include <assert.h>
 #include <memory.h>
@@ -69,8 +76,19 @@ void HqSourceFile::Dispose(HqSourceFileHandle hSrcFile)
 
 int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 {
+	using namespace antlr4;
+
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
+	ANTLRInputStream inputStream(reinterpret_cast<const char*>(hSrcFile->fileData.pData), hSrcFile->fileData.count);
+	HarlequinLexer lexer(&inputStream);
+	CommonTokenStream tokenStream(&lexer);
+	HarlequinParser parser(&tokenStream);
+
+	tree::ParseTree* pParseTreeRoot = parser.root();
+
+	HqFileParseListener listener;
+	tree::ParseTreeWalker::DEFAULT.walk(&listener, pParseTreeRoot);
 	return HQ_ERROR_NOT_IMPLEMENTED;
 }
 
