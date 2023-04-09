@@ -22,6 +22,8 @@
 #include "ModuleWriter.hpp"
 #include "ToolContext.hpp"
 
+#include "compiler/ReferenceModule.hpp"
+
 #include "../base/Serializer.hpp"
 #include "../base/String.hpp"
 #include "../common/OpCodeEnum.hpp"
@@ -51,8 +53,8 @@ int HqToolContextCreate(HqToolContextHandle* phOutToolContext, HqToolContextInit
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	// The message has to be printed *after* creating the tool root since the object is used in this function.
-	HqReportMessage(&hToolContext->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin tool root");
+	// The message has to be printed *after* creating the tool context since the object is used in this function.
+	HqReportMessage(&hToolContext->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin tool context");
 
 	(*phOutToolContext) = hToolContext;
 
@@ -95,21 +97,30 @@ int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqReportHandle* p
 //----------------------------------------------------------------------------------------------------------------------
 
 int HqReferenceModuleLoad(
-	HqReferenceModuleHandle* phOutRefModule, 
+	HqReferenceModuleHandle* phOutRefModule,
 	HqToolContextHandle hToolCtx,
-	HqSerializerHandle hSerializer)
+	const void* pFileData,
+	size_t fileSize)
 {
 	if(!phOutRefModule
 		|| (*phOutRefModule)
 		|| !hToolCtx
-		|| !hSerializer)
+		|| !pFileData
+		|| fileSize == 0)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutRefModule) = HQ_REFERENCE_MODULE_HANDLE_NULL;
+	int result = HQ_SUCCESS;
 
-	return HQ_ERROR_NOT_IMPLEMENTED;
+	// Load the module data.
+	HqReferenceModuleHandle hRefModule = HqReferenceModule::Load(hToolCtx, pFileData, fileSize, &result);
+	if(hRefModule)
+	{
+		(*phOutRefModule) = hRefModule;
+	}
+
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -121,22 +132,27 @@ int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
+	// Dispose of the loaded module data.
+	HqReferenceModule::Dispose(*phRefModule);
+
 	(*phRefModule) = HQ_REFERENCE_MODULE_HANDLE_NULL;
 
-	return HQ_ERROR_NOT_IMPLEMENTED;
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 int HqSourceFileLoad(
-	HqSourceFileHandle* phOutSrcFile, 
-	HqToolContextHandle hToolCtx, 
-	HqSerializerHandle hSerializer)
+	HqSourceFileHandle* phOutSrcFile,
+	HqToolContextHandle hToolCtx,
+	const void* pFileData,
+	size_t fileSize)
 {
-	if(!phOutSrcFile 
-		|| (*phOutSrcFile) 
-		|| !hToolCtx 
-		|| !hSerializer)
+	if(!phOutSrcFile
+		|| (*phOutSrcFile)
+		|| !hToolCtx
+		|| !pFileData
+		|| fileSize == 0)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}

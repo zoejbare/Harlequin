@@ -772,18 +772,20 @@ HQ_MAIN_API int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqRep
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 HQ_MAIN_API int HqReferenceModuleLoad(
-	HqReferenceModuleHandle* phOutRefModule, 
+	HqReferenceModuleHandle* phOutRefModule,
 	HqToolContextHandle hToolCtx,
-	HqSerializerHandle hSerializer);
+	const void* pFileData,
+	size_t fileSize);
 
 HQ_MAIN_API int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 HQ_MAIN_API int HqSourceFileLoad(
-	HqSourceFileHandle* phOutSrcFile, 
-	HqToolContextHandle hToolCtx, 
-	HqSerializerHandle hSerializer);
+	HqSourceFileHandle* phOutSrcFile,
+	HqToolContextHandle hToolCtx,
+	const void* pFileData,
+	size_t fileSize);
 
 HQ_MAIN_API int HqSourceFileDispose(HqSourceFileHandle* phSrcFile);
 
