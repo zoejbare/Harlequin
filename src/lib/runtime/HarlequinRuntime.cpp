@@ -373,8 +373,7 @@ int HqVmLoadModule(
 	HqVmHandle hVm,
 	const char* const moduleName,
 	const void* const pModuleFileData,
-	const size_t moduleFileSize
-)
+	const size_t moduleFileSize)
 {
 	if(!hVm || !moduleName || moduleName[0] == '\0' || !pModuleFileData || moduleFileSize == 0)
 	{
@@ -624,8 +623,7 @@ int HqModuleGetStringCount(HqModuleHandle hModule, size_t* pOutCount)
 int HqModuleListStrings(
 	HqModuleHandle hModule,
 	HqCallbackIterateStringWithIndex onIterateFn,
-	void* const pUserData
-)
+	void* const pUserData)
 {
 	if(!hModule || !onIterateFn)
 	{
@@ -665,8 +663,7 @@ int HqModuleGetGlobalVariableCount(HqModuleHandle hModule, size_t* pOutCount)
 int HqModuleListGlobalVariables(
 	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
-	void* const pUserData
-)
+	void* const pUserData)
 {
 	if(!hModule || !onIterateFn)
 	{
@@ -1084,8 +1081,7 @@ int HqExecutionRaiseStandardException(
 	const int severity,
 	const int exceptionType,
 	const char* const message,
-	...
-)
+	...)
 {
 	if(!hExec
 		|| severity < 0
@@ -1253,8 +1249,7 @@ int HqExecutionGetFrameStackDepth(HqExecutionHandle hExec, size_t* pOutDepth)
 int HqExecutionResolveFrameStack(
 	HqExecutionHandle hExec,
 	HqCallbackIterateFrame onIterateFn,
-	void* pUserData
-)
+	void* pUserData)
 {
 	if(!hExec || !onIterateFn)
 	{
@@ -1761,8 +1756,7 @@ HqValueHandle HqValueCreateNative(
 	HqVmHandle hVm,
 	void* pNativeObject,
 	HqCallbackNativeValueCopy onCopy,
-	HqCallbackNativeValueDestruct onDestruct
-)
+	HqCallbackNativeValueDestruct onDestruct)
 {
 	if(!hVm || !onCopy || !onDestruct)
 	{

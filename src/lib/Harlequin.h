@@ -338,8 +338,7 @@ HQ_BASE_API void HqSysListDirectory(
 	void* pUserData,
 	const char* rootPath,
 	HqListDirectoryCallback onFileFound,
-	HqListDirectoryCallback onDirFound
-);
+	HqListDirectoryCallback onDirFound);
 
 HQ_BASE_API int HqSysGetInfo(HqSysPlatformInfo* pOutInfo);
 
@@ -470,8 +469,7 @@ HQ_MAIN_API int HqVmLoadModule(
 	HqVmHandle hVm,
 	const char* moduleName,
 	const void* pModuleFileData,
-	size_t moduleFileSize
-);
+	size_t moduleFileSize);
 
 HQ_MAIN_API int HqVmInitializeModules(HqVmHandle hVm, HqExecutionHandle* phOutExec);
 
@@ -486,36 +484,31 @@ HQ_MAIN_API int HqModuleGetFunctionCount(HqModuleHandle hModule, size_t* pOutCou
 HQ_MAIN_API int HqModuleListFunctions(
 	HqModuleHandle hModule,
 	HqCallbackIterateFunction onIterateFn,
-	void* pUserData
-);
+	void* pUserData);
 
 HQ_MAIN_API int HqModuleGetStringCount(HqModuleHandle hModule, size_t* pOutCount);
 
 HQ_MAIN_API int HqModuleListStrings(
 	HqModuleHandle hModule,
 	HqCallbackIterateStringWithIndex onIterateFn,
-	void* pUserData
-);
+	void* pUserData);
 
 HQ_MAIN_API int HqModuleGetGlobalVariableCount(HqModuleHandle hModule, size_t* pOutCount);
 
 HQ_MAIN_API int HqModuleListGlobalVariables(
 	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
-	void* pUserData
-);
+	void* pUserData);
 
 HQ_MAIN_API int HqModuleListDependencies(
 	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
-	void* pUserData
-);
+	void* pUserData);
 
 HQ_MAIN_API int HqModuleListUnloadedDependencies(
 	HqModuleHandle hModule,
 	HqCallbackIterateString onIterateFn,
-	void* pUserData
-);
+	void* pUserData);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -540,14 +533,12 @@ HQ_MAIN_API int HqFunctionGetNativeUserData(HqFunctionHandle hFunction, void** p
 HQ_MAIN_API int HqFunctionSetNativeBinding(
 	HqFunctionHandle hFunction,
 	HqNativeFunction nativeFn,
-	void* pUserData
-);
+	void* pUserData);
 
 HQ_MAIN_API int HqFunctionDisassemble(
 	HqFunctionHandle hFunction,
 	HqCallbackOpDisasm onDisasmFn,
-	void* pUserData
-);
+	void* pUserData);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -568,8 +559,7 @@ HQ_MAIN_API int HqExecutionRaiseStandardException(
 	int severity,
 	int exceptionType,
 	const char* message,
-	...
-);
+	...);
 
 HQ_MAIN_API int HqExecutionRaiseException(HqExecutionHandle hExec, HqValueHandle hValue, int severity);
 
@@ -584,8 +574,7 @@ HQ_MAIN_API int HqExecutionGetFrameStackDepth(HqExecutionHandle hExec, size_t* p
 HQ_MAIN_API int HqExecutionResolveFrameStack(
 	HqExecutionHandle hExec,
 	HqCallbackIterateFrame onIterateFn,
-	void* pUserData
-);
+	void* pUserData);
 
 HQ_MAIN_API int HqExecutionGetCurrentFrame(HqExecutionHandle hExec, HqFrameHandle* phOutFrame);
 
@@ -649,8 +638,7 @@ HQ_MAIN_API HqValueHandle HqValueCreateNative(
 	HqVmHandle hVm,
 	void* pNativeObject,
 	HqCallbackNativeValueCopy onCopy,
-	HqCallbackNativeValueDestruct onDestruct
-);
+	HqCallbackNativeValueDestruct onDestruct);
 
 HQ_MAIN_API HqValueHandle HqValueCopy(HqVmHandle hVm, HqValueHandle hValue);
 
@@ -786,8 +774,7 @@ HQ_MAIN_API int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqRep
 HQ_MAIN_API int HqReferenceModuleLoad(
 	HqReferenceModuleHandle* phOutRefModule, 
 	HqToolContextHandle hToolCtx,
-	HqSerializerHandle hSerializer
-);
+	HqSerializerHandle hSerializer);
 
 HQ_MAIN_API int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule);
 
@@ -796,8 +783,7 @@ HQ_MAIN_API int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule);
 HQ_MAIN_API int HqSourceFileLoad(
 	HqSourceFileHandle* phOutSrcFile, 
 	HqToolContextHandle hToolCtx, 
-	HqSerializerHandle hSerializer
-);
+	HqSerializerHandle hSerializer);
 
 HQ_MAIN_API int HqSourceFileDispose(HqSourceFileHandle* phSrcFile);
 
@@ -812,14 +798,12 @@ HQ_MAIN_API int HqSourceModuleDispose(HqSourceModuleHandle* phSrcModule);
 HQ_MAIN_API int HqSourceModuleAddReference(
 	HqSourceModuleHandle hSrcModule, 
 	HqReferenceModuleHandle hRefModule, 
-	const char* name
-);
+	const char* name);
 
 HQ_MAIN_API int HqSourceModuleAddFile(
 	HqSourceModuleHandle hSrcModule, 
 	HqSourceFileHandle hSrcFile, 
-	const char* name
-);
+	const char* name);
 
 HQ_MAIN_API int HqSourceModuleCompile(HqSourceModuleHandle hSrcModule);
 
@@ -840,16 +824,14 @@ HQ_MAIN_API int HqModuleWriterAddObjectMember(
 	const char* objectTypeName,
 	const char* memberName,
 	uint8_t memberValueType,
-	uint32_t* pOutIndex
-);
+	uint32_t* pOutIndex);
 
 HQ_MAIN_API int HqModuleWriterAddGlobal(HqModuleWriterHandle hModuleWriter, const char* variableName);
 
 HQ_MAIN_API int HqModuleWriterSetModuleInitFunction(
 	HqModuleWriterHandle hModuleWriter,
 	const void* pBytecode,
-	size_t bytecodeLength
-);
+	size_t bytecodeLength);
 
 HQ_MAIN_API int HqModuleWriterAddFunction(
 	HqModuleWriterHandle hModuleWriter,
@@ -857,23 +839,20 @@ HQ_MAIN_API int HqModuleWriterAddFunction(
 	const void* pFunctionBytecode,
 	size_t bytecodeLength,
 	uint16_t numParameters,
-	uint16_t numReturnValues
-);
+	uint16_t numReturnValues);
 
 HQ_MAIN_API int HqModuleWriterAddNativeFunction(
 	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	uint16_t numParameters,
-	uint16_t numReturnValues
-);
+	uint16_t numReturnValues);
 
 HQ_MAIN_API int HqModuleWriterAddGuardedBlock(
 	HqModuleWriterHandle hModuleWriter,
 	const char* functionSignature,
 	size_t bytecodeOffset,
 	size_t bytecodeLength,
-	uint32_t* pOutBlockId
-);
+	uint32_t* pOutBlockId);
 
 HQ_MAIN_API int HqModuleWriterAddExceptionHandler(
 	HqModuleWriterHandle hModuleWriter,
@@ -881,13 +860,11 @@ HQ_MAIN_API int HqModuleWriterAddExceptionHandler(
 	uint32_t blockId,
 	size_t bytecodeOffset,
 	int handledType,
-	const char* className
-);
+	const char* className);
 
 HQ_MAIN_API int HqModuleWriterSerialize(
 	HqModuleWriterHandle hModuleWriter,
-	HqSerializerHandle hSerializer
-);
+	HqSerializerHandle hSerializer);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -910,138 +887,116 @@ HQ_MAIN_API int HqBytecodeWriteLoadImmNull(HqSerializerHandle hSerializer,uint32
 HQ_MAIN_API int HqBytecodeWriteLoadImmBool(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	bool value
-);
+	bool value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmI8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	int8_t value
-);
+	int8_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmI16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	int16_t value
-);
+	int16_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmI32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	int32_t value
-);
+	int32_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmI64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	int64_t value
-);
+	int64_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmU8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint8_t value
-);
+	uint8_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmU16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint16_t value
-);
+	uint16_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmU32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t value
-);
+	uint32_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmU64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint64_t value
-);
+	uint64_t value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmF32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	float value
-);
+	float value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmF64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	double value
-);
+	double value);
 
 HQ_MAIN_API int HqBytecodeWriteLoadImmStr(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t stringIndex
-);
+	uint32_t stringIndex);
 
 HQ_MAIN_API int HqBytecodeWriteLoadGlobal(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t stringIndex
-);
+	uint32_t stringIndex);
 
 HQ_MAIN_API int HqBytecodeWriteLoadParam(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t ioRegIndex
-);
+	uint32_t ioRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteLoadVariable(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t vrRegIndex
-);
+	uint32_t vrRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteLoadObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
-	uint32_t memberIndex
-);
+	uint32_t memberIndex);
 
 HQ_MAIN_API int HqBytecodeWriteLoadArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
-	uint32_t gpArrIdxRegIndex
-);
+	uint32_t gpArrIdxRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteStoreGlobal(
 	HqSerializerHandle hSerializer,
 	uint32_t stringIndex,
-	uint32_t gpRegIndex
-);
+	uint32_t gpRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteStoreParam(
 	HqSerializerHandle hSerializer,
 	uint32_t ioRegIndex,
-	uint32_t gpRegIndex
-);
+	uint32_t gpRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteStoreVariable(
 	HqSerializerHandle hSerializer,
 	uint32_t vrRegIndex,
-	uint32_t gpRegIndex
-);
+	uint32_t gpRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteStoreObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
-	uint32_t memberIndex
-);
+	uint32_t memberIndex);
 
 HQ_MAIN_API int HqBytecodeWriteStoreArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
-	uint32_t gpArrIdxRegIndex
-);
+	uint32_t gpArrIdxRegIndex);
 
 HQ_MAIN_API int HqBytecodeWritePush(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
@@ -1050,269 +1005,228 @@ HQ_MAIN_API int HqBytecodeWritePop(HqSerializerHandle hSerializer, uint32_t gpRe
 HQ_MAIN_API int HqBytecodeWriteInitObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t stringIndex
-);
+	uint32_t stringIndex);
 
 HQ_MAIN_API int HqBytecodeWriteInitArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t initialCount
-);
+	uint32_t initialCount);
 
 HQ_MAIN_API int HqBytecodeWriteInitFunction(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	uint32_t stringIndex
-);
+	uint32_t stringIndex);
 
 HQ_MAIN_API int HqBytecodeWriteJump(HqSerializerHandle hSerializer, int32_t offset);
 
 HQ_MAIN_API int HqBytecodeWriteJumpIfTrue(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	int32_t offset
-);
+	int32_t offset);
 
 HQ_MAIN_API int HqBytecodeWriteJumpIfFalse(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
-	int32_t offset
-);
+	int32_t offset);
 
 HQ_MAIN_API int HqBytecodeWriteLength(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteAdd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteSub(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteMul(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteDiv(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteMod(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteExp(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteBitAnd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteBitOr(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteBitXor(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteBitNot(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteLeftShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteRightShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteLeftRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteRightRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastInt8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastInt16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastInt32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastInt64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastUint8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastUint16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastUint32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastUint64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastFloat32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastFloat64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastBool(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCastString(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCompareEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCompareNotEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCompareLess(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCompareLessEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCompareGreater(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCompareGreaterEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
-	uint32_t gpSrcRightRegIndex
-);
+	uint32_t gpSrcRightRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteTest(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteMove(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 HQ_MAIN_API int HqBytecodeWriteCopy(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
-	uint32_t gpSrcRegIndex
-);
+	uint32_t gpSrcRegIndex);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

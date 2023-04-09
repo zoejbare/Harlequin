@@ -1066,8 +1066,7 @@ void HqSysListDirectory(
 	void* const pUserData, 
 	const char* const rootPath, 
 	HqListDirectoryCallback onFileFound, 
-	HqListDirectoryCallback onDirFound
-)
+	HqListDirectoryCallback onDirFound)
 {
 	return _HqSysListDir(pUserData, rootPath, onFileFound, onDirFound);
 }
