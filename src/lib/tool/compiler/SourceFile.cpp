@@ -80,15 +80,18 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
+	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
+	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
 	ANTLRInputStream inputStream(reinterpret_cast<const char*>(hSrcFile->fileData.pData), hSrcFile->fileData.count);
 	HarlequinLexer lexer(&inputStream);
 	CommonTokenStream tokenStream(&lexer);
 	HarlequinParser parser(&tokenStream);
 
-	tree::ParseTree* pParseTreeRoot = parser.root();
+	tree::ParseTree* pAstRoot = parser.root();
 
 	HqFileParseListener listener;
-	tree::ParseTreeWalker::DEFAULT.walk(&listener, pParseTreeRoot);
+	tree::ParseTreeWalker::DEFAULT.walk(&listener, pAstRoot);
+
 	return HQ_ERROR_NOT_IMPLEMENTED;
 }
 
