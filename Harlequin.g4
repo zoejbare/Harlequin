@@ -28,6 +28,7 @@ root
 moduleDef
 	: compilerDirective
 	| usingStmt Term
+	| usingAliasStmt Term
 	| namespaceDecl
 	| classDecl
 	;
@@ -47,6 +48,11 @@ usingStmt
 	: UsingKw qualifiedId
 	;
 
+// 'using' class alias statement rule
+usingAliasStmt
+	: UsingKw qualifiedId AsKw Id (Comma Id)*
+	;
+
 // Namespace declaration rule
 namespaceDecl
 	: NamespaceKw qualifiedId namespaceDef
@@ -54,7 +60,7 @@ namespaceDecl
 
 // Namespace definition rule
 namespaceDef
-	: LeftBrace classDecl* RightBrace
+	: LeftBrace (namespaceDecl | classDecl)* RightBrace
 	;
 
 // Class declaration rule
@@ -369,6 +375,7 @@ NamespaceKw:   'namespace' ;
 ClassKw:       'class' ;
 InterfaceKw:   'interface' ;
 UsingKw:       'using' ;
+AsKw:          'as' ;
 StaticKw:      'static' ;
 InlineKw:      'inline' ;
 ConstKw:       'const' ;
