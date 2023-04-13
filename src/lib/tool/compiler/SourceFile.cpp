@@ -54,6 +54,10 @@ HqSourceFileHandle HqSourceFile::Load(
 
 	pOutput->fileData.count = fileSize;
 
+	// Initialize the source data structures.
+	NamespaceMap::Allocate(pOutput->namespaces);
+	ClassAliasMap::Allocate(pOutput->classAliases);
+
 	// Copy the input data to the file data array.
 	memcpy(pOutput->fileData.pData, pFileData, fileSize);
 
@@ -66,6 +70,29 @@ void HqSourceFile::Dispose(HqSourceFileHandle hSrcFile)
 {
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
+	// Release all mapped class alias strings.
+	{
+		ClassAliasMap::Iterator iter;
+		while(ClassAliasMap::IterateNext(hSrcFile->classAliases, iter))
+		{
+			HqString::Release(iter.pData->key);
+			HqString::Release(iter.pData->value);
+		}
+	}
+
+	// Release all used namespace strings
+	{
+		NamespaceMap::Iterator iter;
+		while(NamespaceMap::IterateNext(hSrcFile->namespaces, iter))
+		{
+			HqString::Release(iter.pData->key);
+		}
+	}
+
+	// Dispose of the source data structures.
+	NamespaceMap::Dispose(hSrcFile->namespaces);
+	ClassAliasMap::Dispose(hSrcFile->classAliases);
+
 	// Dispose of the raw file data.
 	FileData::Dispose(hSrcFile->fileData);
 
@@ -77,6 +104,7 @@ void HqSourceFile::Dispose(HqSourceFileHandle hSrcFile)
 int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 {
 	using namespace antlr4;
+	using namespace antlr4::tree;
 
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
@@ -87,10 +115,14 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	CommonTokenStream tokenStream(&lexer);
 	HarlequinParser parser(&tokenStream);
 
-	tree::ParseTree* pAstRoot = parser.root();
+	// TODO: Setup the parser error handler
 
-	HqFileParseListener listener;
-	tree::ParseTreeWalker::DEFAULT.walk(&listener, pAstRoot);
+	// Parse the source file.
+	ParseTree* pAstRoot = parser.root();
+
+	// Walk the source file's AST.
+	HqFileParseListener listener(hSrcFile);
+	ParseTreeWalker::DEFAULT.walk(&listener, pAstRoot);
 
 	return HQ_ERROR_NOT_IMPLEMENTED;
 }

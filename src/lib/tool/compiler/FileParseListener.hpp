@@ -24,7 +24,8 @@
 
 #include "generated/HarlequinBaseListener.h"
 
-#include <unordered_set>
+#include <list>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -33,18 +34,24 @@ class HqFileParseListener
 {
 public:
 
-	HqFileParseListener();
+	HqFileParseListener() = delete;
+	explicit HqFileParseListener(HqSourceFileHandle hSrcFile);
 
-	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext* pCtx) override;
+	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
+	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
+
+	virtual void enterNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
+	virtual void exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
+
+	virtual void enterClassDecl(HarlequinParser::ClassDeclContext*) override;
+	virtual void exitClassDecl(HarlequinParser::ClassDeclContext*) override;
 
 
 private:
+
+	HqSourceFileHandle m_hSrcFile;
+
+	std::list<std::string> m_namespaceStack;
 };
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline HqFileParseListener::HqFileParseListener()
-{
-}
 
 //----------------------------------------------------------------------------------------------------------------------

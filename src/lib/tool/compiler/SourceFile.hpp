@@ -22,13 +22,28 @@
 
 #include "../../Harlequin.h"
 
+#include "../../base/String.hpp"
+
 #include "../../common/Array.hpp"
+#include "../../common/HashMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct HqSourceFile
 {
 	typedef HqArray<uint8_t> FileData;
+	typedef HqHashMap<
+		HqString*,
+		HqString*,
+		HqString::StlHash,
+		HqString::StlCompare
+	> ClassAliasMap;
+	typedef HqHashMap<
+		HqString*,
+		bool,
+		HqString::StlHash,
+		HqString::StlCompare
+	> NamespaceMap;
 
 	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
 	static void Dispose(HqSourceFileHandle hSrcFile);
@@ -41,6 +56,9 @@ struct HqSourceFile
 	HqToolContextHandle hToolCtx;
 
 	FileData fileData;
+
+	NamespaceMap namespaces;
+	ClassAliasMap classAliases;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

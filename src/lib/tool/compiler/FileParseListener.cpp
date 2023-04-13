@@ -17,11 +17,123 @@
 //
 
 #include "FileParseListener.hpp"
+#include "SourceFile.hpp"
+
+#include <assert.h>
+
+//----------------------------------------------------------------------------------------------------------------------
+
+HqFileParseListener::HqFileParseListener(HqSourceFileHandle hSrcFile)
+	: m_hSrcFile(hSrcFile)
+{
+	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void HqFileParseListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
 {
+	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
+
+	HqString* const pNamespace = HqString::Create(qualifiedNamespace.c_str());
+
+	// Check to see if this namespace is already being used (we can ignore duplicate namespaces).
+	if(!HqSourceFile::NamespaceMap::Contains(m_hSrcFile->namespaces, pNamespace))
+	{
+		// Add a reference to the namespace string since it will be used as the map key.
+		HqString::AddRef(pNamespace);
+
+		HqSourceFile::NamespaceMap::Insert(
+			m_hSrcFile->namespaces, 
+			pNamespace,
+			false
+		);
+	}
+
+	// Release the extra string reference on the namespace now that we're done with it.
+	HqString::Release(pNamespace);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFileParseListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
+{
+	const std::string qualifiedClassName = pCtx->qualifiedId()->getText();
+	const auto aliasNames = pCtx->Id();
+
+	HqString* const pQualifiedName = HqString::Create(qualifiedClassName.c_str());
+
+	// Map each alias listed in the statement.
+	for(auto& alias : aliasNames)
+	{
+		const std::string aliasedClassName = alias->getText();
+
+		HqString* const pAliasedName = HqString::Create(aliasedClassName.c_str());
+
+		// Check if the class alias has not already been declared.
+		// If it has, it means there is an ambiguous reference to
+		// that class name.
+		if(!HqSourceFile::ClassAliasMap::Contains(m_hSrcFile->classAliases, pAliasedName))
+		{
+			// Add references to the strings going into the map.
+			HqString::AddRef(pQualifiedName);
+			HqString::AddRef(pAliasedName);
+
+			HqSourceFile::ClassAliasMap::Insert(
+				m_hSrcFile->classAliases, 
+				pAliasedName,
+				pQualifiedName
+			);
+		}
+		else
+		{
+			// TODO: Log a compile error.
+		}
+
+		// Release the class alias string.
+		HqString::Release(pAliasedName);
+	}
+
+	// Release the qualified class name string.
+	HqString::Release(pQualifiedName);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFileParseListener::enterNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
+{
+	const std::string shortName = pCtx->qualifiedId()->getText();
+	const std::string qualifiedName = (m_namespaceStack.size() > 0)
+		? (m_namespaceStack.back() + "." + shortName) 
+		: shortName;
+
+	m_namespaceStack.push_back(qualifiedName);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFileParseListener::exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*)
+{
+	m_namespaceStack.pop_back();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFileParseListener::enterClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
+{
+	const std::string shortName = pCtx->Id()->getText();
+	const std::string qualifiedName = (m_namespaceStack.size() > 0)
+		? (m_namespaceStack.back() + "." + shortName) 
+		: shortName;
+
+	// TODO: Setup the class declaration and push it to the class stack.
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqFileParseListener::exitClassDecl(HarlequinParser::ClassDeclContext*)
+{
+	// TODO: Pop the class stack
 }
 
 //----------------------------------------------------------------------------------------------------------------------
