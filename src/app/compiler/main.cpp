@@ -18,6 +18,8 @@
 
 #include "Harlequin.h"
 
+#include "../common/MemoryHandler.hpp"
+
 #if defined(HQ_PLATFORM_WINDOWS)
 	#include <crtdbg.h>
 #endif
@@ -79,11 +81,10 @@ int main(int argc, char* argv[])
 	// Set the program locale to the environment default.
 	setlocale(LC_ALL, "");
 
-#if defined(HQ_PLATFORM_WINDOWS)
-	// This enables tracking of global heap allocations.  If any are leaked, they will show up in the
-	// Visual Studio output window on application exit.
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
+	MemoryHandler& memory = MemoryHandler::Instance;
+
+	// Initialize the Harlequin memory handler.
+	memory.Initialize();
 
 	HqToolContextHandle hCtx = HQ_TOOL_CONTEXT_HANDLE_NULL;
 	HqToolContextInit init;
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
 	{
 		char msg[128];
 		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin tool context: error=\"%s\"", HqGetErrorCodeString(result));
-		OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
+		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_FATAL, msg);
 		return 1;
 	}
 
@@ -110,7 +111,7 @@ int main(int argc, char* argv[])
 	{
 		char msg[128];
 		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin module writer: error=\"%s\"", HqGetErrorCodeString(result));
-		OnMessageReported(NULL, HQ_MESSAGE_TYPE_FATAL, msg);
+		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_FATAL, msg);
 		return 1;
 	}
 
@@ -420,7 +421,7 @@ int main(int argc, char* argv[])
 	{
 		char msg[128];
 		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin module writer: error=\"%s\"", HqGetErrorCodeString(result));
-		OnMessageReported(NULL, HQ_MESSAGE_TYPE_WARNING, msg);
+		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 
 	// Dispose of the tool context.
@@ -429,8 +430,19 @@ int main(int argc, char* argv[])
 	{
 		char msg[128];
 		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin tool context: error=\"%s\"", HqGetErrorCodeString(result));
-		OnMessageReported(NULL, HQ_MESSAGE_TYPE_WARNING, msg);
+		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
+
+	// Check for memory leaks.
+	if(memory.HasActiveAllocations())
+	{
+		char msg[128];
+		snprintf(msg, sizeof(msg) - 1, "Memory leaks detected: %zu, totalSize=%zu", memory.GetActiveCount(), memory.GetCurrentSize());
+		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_ERROR, msg);
+	}
+
+	// Shut down the memory handler.
+	memory.Shutdown();
 
 	return 0;
 }

@@ -18,6 +18,8 @@
 
 #include "Harlequin.h"
 
+#include "../common/MemoryHandler.hpp"
+
 #if defined(HQ_PLATFORM_WINDOWS)
 	#include <crtdbg.h>
 #endif
@@ -64,6 +66,20 @@ extern "C"
 }
 #endif
 
+inline void _HqAppInit()
+{
+#ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS
+	_HqRuntimeAppPlatformInitialize();
+#endif
+}
+
+inline void _HqAppShutdown()
+{
+#ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS
+	_HqRuntimeAppPlatformShutdown();
+#endif
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 // Disabling the GC thread requires user code to manually call the API function for invoking the GC.
@@ -72,9 +88,6 @@ extern "C"
 // Setting the test iterations to anything above 1 will do special logic to add an iteration loop and remove some log prints.
 #define _STRESS_TEST_ITERATIONS 1
 #define _STRESS_TEST_ENABLED    (_STRESS_TEST_ITERATIONS > 1)
-
-// Enabling memory tracking will track memory metrics, but it will also slow things down a bit.
-#define _MEM_STATS_ENABLED 1
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -133,44 +146,6 @@ void OnDependencyRequested(void* const pUserData, const char* const moduleName)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if _MEM_STATS_ENABLED
-static size_t maxAllocSize = 0;
-static size_t minAllocSize = ~size_t(0);
-static size_t peakMemUsage = 0;
-static size_t activeAllocCount = 0;
-static size_t totalAllocCount = 0;
-static size_t mallocCount = 0;
-static size_t reallocCount = 0;
-
-static size_t currentTotalSize = 0;
-
-#if !defined(HQ_PLATFORM_PS3)
-static std::mutex allocMtx;
-#endif
-
-static void OnAlloc(const size_t size)
-{
-	if(size > maxAllocSize)
-	{
-		maxAllocSize = size;
-	}
-
-	if(size < minAllocSize)
-	{
-		minAllocSize = size;
-	}
-
-	currentTotalSize += size;
-
-	if(currentTotalSize >= peakMemUsage)
-	{
-		peakMemUsage = currentTotalSize;
-	}
-};
-#endif
-
-//----------------------------------------------------------------------------------------------------------------------
-
 int main(int argc, char* argv[])
 {
 #if !defined(HQ_PLATFORM_PSVITA)
@@ -184,123 +159,13 @@ int main(int argc, char* argv[])
 		return APPLICATION_RESULT_FAILURE;
 	}
 
-#if defined(HQ_PLATFORM_WINDOWS)
-	// This enables tracking of global heap allocations.  If any are leaked, they will show up in the
-	// Visual Studio output window on application exit.
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(2659); // Uncomment this with the allocation order number when debugging a specific allocation.
-#endif
+	// Handle any required platform initialization.
+	_HqAppInit();
 
-#ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS
-	_HqRuntimeAppPlatformInitialize();
-#endif
+	MemoryHandler& memory = MemoryHandler::Instance;
 
-	auto trackedAlloc = [](const size_t size) -> void*
-	{
-		assert(size > 0);
-
-		const size_t totalSize = size + sizeof(size_t);
-
-		size_t* const pMem = reinterpret_cast<size_t*>(malloc(totalSize));
-		assert(pMem != nullptr);
-
-		(*pMem) = size;
-
-#if _MEM_STATS_ENABLED
-		// Update stats.
-		{
-	#if !defined(HQ_PLATFORM_PS3)
-			allocMtx.lock();
-	#endif
-
-			++activeAllocCount;
-			++totalAllocCount;
-			++mallocCount;
-
-			OnAlloc(size);
-	#if !defined(HQ_PLATFORM_PS3)
-			allocMtx.unlock();
-	#endif
-		}
-#endif
-
-		return pMem + 1;
-	};
-
-	auto trackedRealloc = [](void* const pOldMem, const size_t newSize) -> void*
-	{
-		assert(newSize > 0);
-
-		const size_t totalNewSize = newSize + sizeof(size_t);
-
-		size_t* const pAlloc = (pOldMem) ? (reinterpret_cast<size_t*>(pOldMem) - 1) : nullptr;
-		size_t* const pNewMem = reinterpret_cast<size_t*>(realloc(pAlloc, totalNewSize));
-		assert(pNewMem != nullptr);
-
-		(*pNewMem) = newSize;
-
-#if _MEM_STATS_ENABLED
-		// Update stats.
-		{
-			const size_t oldSize = (pAlloc) ? (*pAlloc) : 0;
-
-	#if !defined(HQ_PLATFORM_PS3)
-			allocMtx.lock();
-	#endif
-
-			currentTotalSize -= oldSize;
-
-			if(oldSize == 0)
-			{
-				++activeAllocCount;
-				++totalAllocCount;
-				++mallocCount;
-			}
-			else
-			{
-				++reallocCount;
-			}
-
-			OnAlloc(newSize);
-
-	#if !defined(HQ_PLATFORM_PS3)
-			allocMtx.unlock();
-	#endif
-		}
-#endif
-
-		return pNewMem + 1;
-	};
-
-	auto trackedFree = [](void* const pMem)
-	{
-		size_t* const pAlloc = (pMem) ? (reinterpret_cast<size_t*>(pMem) - 1) : nullptr;
-
-		if(pAlloc)
-		{
-#if _MEM_STATS_ENABLED
-			// Update stats.
-			{
-				const size_t size = (pAlloc) ? (*pAlloc) : 0;
-
-	#if !defined(HQ_PLATFORM_PS3)
-				allocMtx.lock();
-	#endif
-
-				currentTotalSize -= size;
-
-				assert(activeAllocCount > 0);
-				--activeAllocCount;
-
-	#if !defined(HQ_PLATFORM_PS3)
-				allocMtx.unlock();
-	#endif
-			}
-#endif
-
-			free(pAlloc);
-		}
-	};
+	// Initialize the Harlequin memory handler.
+	memory.Initialize();
 
 	auto iterateCallstackFrame = [](void* const pUserData, HqFrameHandle hFrame) -> bool
 	{
@@ -352,13 +217,6 @@ int main(int argc, char* argv[])
 	vmInit.gcTimeSliceMs = HQ_VM_GC_DEFAULT_TIME_SLICE_MS;
 	vmInit.gcTimeWaitMs = HQ_VM_GC_DEFAULT_TIME_WAIT_MS;
 	vmInit.gcEnableThread = _GC_THREAD_ENABLED;
-
-	HqMemAllocator allocator;
-	allocator.allocFn = trackedAlloc;
-	allocator.reallocFn = trackedRealloc;
-	allocator.freeFn = trackedFree;
-
-	HqMemSetAllocator(allocator);
 
 	const uint64_t timerFrequency = HqClockGetFrequency();
 	const uint64_t overallTimeStart = HqClockGetTimestamp();
@@ -790,35 +648,16 @@ int main(int argc, char* argv[])
 
 	int applicationResult = APPLICATION_RESULT_SUCCESS;
 
-#if _MEM_STATS_ENABLED
-	if(activeAllocCount != 0)
+	// Check for memory leaks.
+	if(memory.HasActiveAllocations())
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg), "Leaked script allocations: %zu", activeAllocCount);
+		snprintf(msg, sizeof(msg) - 1, "Memory leaks detected: %zu, totalSize=%zu", memory.GetActiveCount(), memory.GetCurrentSize());
 		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_ERROR, msg);
-
-		applicationResult = APPLICATION_RESULT_FAILURE;
 	}
 
-	// Output memory allocation stats.
-	printf(
-		"\nMemory Stats:\n"
-		"  [Size]\n"
-		"    Min:  %zu\n"
-		"    Max:  %zu\n"
-		"    Peak: %zu\n"
-		"  [Count]\n"
-		"    Total:   %zu\n"
-		"    Malloc:  %zu\n"
-		"    Realloc: %zu\n",
-		minAllocSize,
-		maxAllocSize,
-		peakMemUsage,
-		totalAllocCount,
-		mallocCount,
-		reallocCount
-	);
-#endif
+	// Dump the memory stats.
+	memory.PrintStats(stdout);
 
 	const uint64_t overallTimeEnd = HqClockGetTimestamp();
 	totalApplicationTime = overallTimeEnd - overallTimeStart;
@@ -866,9 +705,8 @@ int main(int argc, char* argv[])
 #endif
 	);
 
-#ifdef _HQ_REQUIRES_PLATFORM_INIT_FUNCS
-	_HqRuntimeAppPlatformShutdown();
-#endif
+	// Shutdown the platform-specific, internal systems.
+	_HqAppShutdown();
 
 	return applicationResult;
 }

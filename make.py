@@ -255,6 +255,10 @@ def _setCommonLibOptions(libRootPath, outputName):
 def _setCommonAppOptions(outputName):
 	csbuild.SetOutput(outputName, csbuild.ProjectType.Application)
 
+	csbuild.AddSourceDirectories(
+		f"{HarlequinCommon.appRootPath}/common",
+	)
+
 	with csbuild.Toolchain("msvc"):
 		csbuild.SetMsvcSubsystem("CONSOLE")
 

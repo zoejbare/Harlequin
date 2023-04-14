@@ -18,6 +18,8 @@
 
 #include "Harlequin.h"
 
+#include "../common/MemoryHandler.hpp"
+
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
@@ -267,6 +269,11 @@ int main(int argc, char* argv[])
 
 	// Handle any required platform initialization.
 	_HqAppInit();
+
+	MemoryHandler& memory = MemoryHandler::Instance;
+
+	// Initialize the Harlequin memory handler.
+	memory.Initialize();
 
 	HqVmHandle hVm = HQ_VM_HANDLE_NULL;
 	HqVmInit vmInit;
@@ -521,6 +528,19 @@ int main(int argc, char* argv[])
 			);
 			OnMessageReported(nullptr, HQ_MESSAGE_TYPE_WARNING, msg);
 		}
+	}
+
+	// Check for memory leaks.
+	if(memory.HasActiveAllocations())
+	{
+		char msg[128];
+		snprintf(msg, sizeof(msg) - 1, "Memory leaks detected: %zu, totalSize=%zu", memory.GetActiveCount(), memory.GetCurrentSize());
+		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_ERROR, msg);
+	}
+
+	if(utilConfig.verboseLogging)
+	{
+		memory.PrintStats(stdout);
 	}
 
 	// Shutdown the platform-specific, internal systems.
