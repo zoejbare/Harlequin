@@ -153,6 +153,13 @@ int main(int argc, char* argv[])
 	setlocale(LC_ALL, "");
 #endif
 
+#if defined(HQ_PLATFORM_WINDOWS) && defined(_DEBUG)
+	// This enables tracking of global heap allocations. If any are leaked,
+	// they will show up in the Visual Studio output window on application exit.
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(2659); // Uncomment this with the allocation order number when debugging a specific allocation.
+#endif
+
 	if(argc < 2)
 	{
 		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_FATAL, "Missing required 'filepath' argument");

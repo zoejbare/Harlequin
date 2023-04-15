@@ -131,9 +131,12 @@ int main(int argc, char* argv[])
 	setlocale(LC_ALL, "");
 #endif
 
-#if defined(HQ_PLATFORM_WINDOWS)
-	// This enables tracking of global heap allocations.  If any are leaked, they will show up in the
-	// Visual Studio output window on application exit.
+#if defined(HQ_PLATFORM_WINDOWS) && defined(_DEBUG)
+	// This enables tracking of global heap allocations. If any are leaked,
+	// they will show up in the Visual Studio output window on application exit.
+	//
+	// NOTE: We can do this here since no compiler APIs are being used,
+	//       therefore we shouldn't need to worry about false positives.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
