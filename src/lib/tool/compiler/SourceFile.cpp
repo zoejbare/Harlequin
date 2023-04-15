@@ -19,6 +19,7 @@
 #include "SourceFile.hpp"
 
 #include "util/FileDataListener.hpp"
+#include "util/ParserErrorHandler.hpp"
 
 #include "generated/HarlequinLexer.h"
 #include "generated/HarlequinParser.h"
@@ -46,7 +47,10 @@ HqSourceFileHandle HqSourceFile::Load(
 	HqSourceFile* const pOutput = new HqSourceFile();
 	assert(pOutput != nullptr);
 
+	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+
 	pOutput->hToolCtx = hToolCtx;
+	pOutput->parsed = false;
 
 	// Initialize the file data array and reserve space for the input data.
 	FileData::Initialize(pOutput->fileData);
@@ -66,8 +70,64 @@ HqSourceFileHandle HqSourceFile::Load(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqSourceFile::Dispose(HqSourceFileHandle hSrcFile)
+int32_t HqSourceFile::AddRef(HqSourceFileHandle hSrcFile)
 {
+	return (hSrcFile)
+		? HqReference::AddRef(hSrcFile->ref)
+		: -1;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int32_t HqSourceFile::Release(HqSourceFileHandle hSrcFile)
+{
+	return (hSrcFile)
+		? HqReference::Release(hSrcFile->ref)
+		: -1;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
+{
+	using namespace antlr4;
+	using namespace antlr4::tree;
+
+	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
+
+	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
+	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
+	ANTLRInputStream inputStream(reinterpret_cast<const char*>(hSrcFile->fileData.pData), hSrcFile->fileData.count);
+	HarlequinLexer lexer(&inputStream);
+	CommonTokenStream tokenStream(&lexer);
+	HarlequinParser parser(&tokenStream);
+
+	ParserErrorHandler errorHandler;
+	parser.addErrorListener(&errorHandler);
+
+	// Parse the source file.
+	ParseTree* pAstRoot = parser.root();
+
+	if(errorHandler.GetErrorCount() > 0)
+	{
+		// Bail out if there were errors during the parse.
+		return HQ_ERROR_FAILED_TO_PARSE_FILE;
+	}
+
+	// Walk the source file's AST.
+	FileDataListener listener(hSrcFile, errorHandler);
+	ParseTreeWalker::DEFAULT.walk(&listener, pAstRoot);
+
+	hSrcFile->parsed = true;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqSourceFile::prv_onDestruct(void* const pOpaque)
+{
+	HqSourceFileHandle hSrcFile = reinterpret_cast<HqSourceFileHandle>(pOpaque);
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
 	// Release all mapped class alias strings.
@@ -97,34 +157,6 @@ void HqSourceFile::Dispose(HqSourceFileHandle hSrcFile)
 	FileData::Dispose(hSrcFile->fileData);
 
 	delete hSrcFile;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
-{
-	using namespace antlr4;
-	using namespace antlr4::tree;
-
-	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
-
-	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
-	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
-	ANTLRInputStream inputStream(reinterpret_cast<const char*>(hSrcFile->fileData.pData), hSrcFile->fileData.count);
-	HarlequinLexer lexer(&inputStream);
-	CommonTokenStream tokenStream(&lexer);
-	HarlequinParser parser(&tokenStream);
-
-	// TODO: Setup the parser error handler
-
-	// Parse the source file.
-	ParseTree* pAstRoot = parser.root();
-
-	// Walk the source file's AST.
-	FileDataListener listener(hSrcFile);
-	ParseTreeWalker::DEFAULT.walk(&listener, pAstRoot);
-
-	return HQ_ERROR_NOT_IMPLEMENTED;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

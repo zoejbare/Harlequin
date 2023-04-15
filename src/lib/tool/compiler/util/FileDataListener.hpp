@@ -29,13 +29,15 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+class ParserErrorHandler;
+
 class FileDataListener
 	: public HarlequinBaseListener
 {
 public:
 
 	FileDataListener() = delete;
-	explicit FileDataListener(HqSourceFileHandle hSrcFile);
+	FileDataListener(HqSourceFileHandle hSrcFile, ParserErrorHandler& errorHandler);
 
 	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
 	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
@@ -50,6 +52,8 @@ public:
 private:
 
 	HqSourceFileHandle m_hSrcFile;
+
+	ParserErrorHandler* m_pErrorHandler;
 
 	std::list<std::string> m_namespaceStack;
 };

@@ -179,8 +179,8 @@ int HqSourceFileDispose(HqSourceFileHandle* phSrcFile)
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	// Dispose of the loaded source file data.
-	HqSourceFile::Dispose(*phSrcFile);
+	// Release source file data.
+	HqSourceFile::Release(*phSrcFile);
 
 	(*phSrcFile) = HQ_SOURCE_FILE_HANDLE_NULL;
 

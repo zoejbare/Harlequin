@@ -17,6 +17,7 @@
 //
 
 #include "FileDataListener.hpp"
+#include "ParserErrorHandler.hpp"
 
 #include "../SourceFile.hpp"
 
@@ -24,8 +25,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile)
+FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile, ParserErrorHandler& errorHandler)
 	: m_hSrcFile(hSrcFile)
+	, m_pErrorHandler(&errorHandler)
 {
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 }

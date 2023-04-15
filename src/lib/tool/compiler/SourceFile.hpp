@@ -22,6 +22,7 @@
 
 #include "../../Harlequin.h"
 
+#include "../../base/Reference.hpp"
 #include "../../base/String.hpp"
 
 #include "../../common/Array.hpp"
@@ -46,19 +47,26 @@ struct HqSourceFile
 	> NamespaceMap;
 
 	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
-	static void Dispose(HqSourceFileHandle hSrcFile);
+
+	static int32_t AddRef(HqSourceFileHandle hSrcFile);
+	static int32_t Release(HqSourceFileHandle hSrcFile);
 
 	static int Parse(HqSourceFileHandle hSrcFile);
+
+	static void prv_onDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
+	HqReference ref;
 	HqToolContextHandle hToolCtx;
 
 	FileData fileData;
 
 	NamespaceMap namespaces;
 	ClassAliasMap classAliases;
+
+	bool parsed;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
