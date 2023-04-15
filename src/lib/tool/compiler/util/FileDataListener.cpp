@@ -16,14 +16,15 @@
 // IN THE SOFTWARE.
 //
 
-#include "FileParseListener.hpp"
-#include "SourceFile.hpp"
+#include "FileDataListener.hpp"
+
+#include "../SourceFile.hpp"
 
 #include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqFileParseListener::HqFileParseListener(HqSourceFileHandle hSrcFile)
+FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile)
 	: m_hSrcFile(hSrcFile)
 {
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
@@ -31,7 +32,7 @@ HqFileParseListener::HqFileParseListener(HqSourceFileHandle hSrcFile)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqFileParseListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
+void FileDataListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
 {
 	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
 
@@ -56,7 +57,7 @@ void HqFileParseListener::enterUsingStmt(HarlequinParser::UsingStmtContext* cons
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqFileParseListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
+void FileDataListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
 {
 	const std::string qualifiedClassName = pCtx->qualifiedId()->getText();
 	const auto aliasNames = pCtx->Id();
@@ -100,7 +101,7 @@ void HqFileParseListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtCon
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqFileParseListener::enterNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
+void FileDataListener::enterNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
 {
 	const std::string shortName = pCtx->qualifiedId()->getText();
 	const std::string qualifiedName = (m_namespaceStack.size() > 0)
@@ -112,14 +113,14 @@ void HqFileParseListener::enterNamespaceDecl(HarlequinParser::NamespaceDeclConte
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqFileParseListener::exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*)
+void FileDataListener::exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*)
 {
 	m_namespaceStack.pop_back();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqFileParseListener::enterClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
+void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
 {
 	const std::string shortName = pCtx->Id()->getText();
 	const std::string qualifiedName = (m_namespaceStack.size() > 0)
@@ -131,7 +132,7 @@ void HqFileParseListener::enterClassDecl(HarlequinParser::ClassDeclContext* cons
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqFileParseListener::exitClassDecl(HarlequinParser::ClassDeclContext*)
+void FileDataListener::exitClassDecl(HarlequinParser::ClassDeclContext*)
 {
 	// TODO: Pop the class stack
 }

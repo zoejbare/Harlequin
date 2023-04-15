@@ -41,7 +41,7 @@ void ControlFlow::Begin(
 	{
 		case Behavior::If:
 		case Behavior::While:
-			_addCommand(JmpType::Condition, JmpLoc::End);
+			prv_addCommand(JmpType::Condition, JmpLoc::End);
 			break;
 
 		default:
@@ -58,11 +58,11 @@ void ControlFlow::End()
 	switch(m_beh)
 	{
 		case Behavior::While:
-			_addCommand(JmpType::Normal, JmpLoc::Start);
+			prv_addCommand(JmpType::Normal, JmpLoc::Start);
 			break;
 
 		case Behavior::DoWhile:
-			_addCommand(JmpType::Condition, JmpLoc::Start);
+			prv_addCommand(JmpType::Condition, JmpLoc::Start);
 			break;
 
 		default:
@@ -95,7 +95,7 @@ void ControlFlow::End()
 		assert(setCmdOffset == HQ_SUCCESS); (void) setCmdOffset;
 
 		// Write the real JMP instruction using the calculated distance.
-		_writeJump(jumpDist, cmd.type);
+		prv_writeJump(jumpDist, cmd.type);
 	}
 
 	const int returnToEndOffset = HqSerializerSetStreamPosition(m_hSerializer, m_offEnd);
@@ -113,7 +113,7 @@ void ControlFlow::End()
 void ControlFlow::GoToStart()
 {
 	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
-	_addCommand(JmpType::Normal, JmpLoc::Start);
+	prv_addCommand(JmpType::Normal, JmpLoc::Start);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -121,12 +121,12 @@ void ControlFlow::GoToStart()
 void ControlFlow::GoToEnd()
 {
 	assert(m_hSerializer != HQ_SERIALIZER_HANDLE_NULL);
-	_addCommand(JmpType::Normal, JmpLoc::End);
+	prv_addCommand(JmpType::Normal, JmpLoc::End);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void ControlFlow::_writeJump(const int32_t offset, const JmpType type)
+inline void ControlFlow::prv_writeJump(const int32_t offset, const JmpType type)
 {
 	int writeJumpResult = HQ_SUCCESS;
 
@@ -157,7 +157,7 @@ inline void ControlFlow::_writeJump(const int32_t offset, const JmpType type)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void ControlFlow::_addCommand(const JmpType type, const JmpLoc loc)
+inline void ControlFlow::prv_addCommand(const JmpType type, const JmpLoc loc)
 {
 	Command cmd;
 	cmd.offset = HqSerializerGetStreamPosition(m_hSerializer);
@@ -175,7 +175,7 @@ inline void ControlFlow::_addCommand(const JmpType type, const JmpLoc loc)
 	++m_cmds.count;
 
 	// Write a temporary jump instruction that we will come back to fill in at the end.
-	_writeJump(0, type);
+	prv_writeJump(0, type);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

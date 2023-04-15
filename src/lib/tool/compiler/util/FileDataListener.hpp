@@ -20,22 +20,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../Harlequin.h"
+#include "../../../Harlequin.h"
 
-#include "generated/HarlequinBaseListener.h"
+#include "../generated/HarlequinBaseListener.h"
 
 #include <list>
 #include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class HqFileParseListener
+class FileDataListener
 	: public HarlequinBaseListener
 {
 public:
 
-	HqFileParseListener() = delete;
-	explicit HqFileParseListener(HqSourceFileHandle hSrcFile);
+	FileDataListener() = delete;
+	explicit FileDataListener(HqSourceFileHandle hSrcFile);
 
 	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
 	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;

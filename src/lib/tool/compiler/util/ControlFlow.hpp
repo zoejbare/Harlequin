@@ -20,9 +20,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../Harlequin.h"
+#include "../../../Harlequin.h"
 
-#include "../../common/Array.hpp"
+#include "../../../common/Array.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -81,8 +81,8 @@ private:
 		JmpLoc loc;
 	};
 
-	void _writeJump(int32_t, JmpType);
-	void _addCommand(JmpType, JmpLoc);
+	void prv_writeJump(int32_t, JmpType);
+	void prv_addCommand(JmpType, JmpLoc);
 
 	typedef HqArray<Command> CommandList;
 

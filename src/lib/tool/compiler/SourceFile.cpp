@@ -18,7 +18,7 @@
 
 #include "SourceFile.hpp"
 
-#include "FileParseListener.hpp"
+#include "util/FileDataListener.hpp"
 
 #include "generated/HarlequinLexer.h"
 #include "generated/HarlequinParser.h"
@@ -121,7 +121,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	ParseTree* pAstRoot = parser.root();
 
 	// Walk the source file's AST.
-	HqFileParseListener listener(hSrcFile);
+	FileDataListener listener(hSrcFile);
 	ParseTreeWalker::DEFAULT.walk(&listener, pAstRoot);
 
 	return HQ_ERROR_NOT_IMPLEMENTED;
