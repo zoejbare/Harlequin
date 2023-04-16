@@ -16,46 +16,27 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "ParserErrorListener.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../../Harlequin.h"
-
-#include "../generated/HarlequinBaseListener.h"
-
-#include <list>
-#include <string>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-class ParserErrorListener;
-
-class FileDataListener
-	: public HarlequinBaseListener
+void ParserErrorListener::syntaxError(
+	antlr4::Recognizer* const pRecognizer,
+	antlr4::Token* const pOffendingSymbol,
+	const size_t line,
+	const size_t charPositionInLine,
+	const std::string& msg,
+	std::exception_ptr e
+)
 {
-public:
-
-	FileDataListener() = delete;
-	FileDataListener(HqSourceFileHandle hSrcFile, ParserErrorListener& errorListener);
-
-	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
-	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
-
-	virtual void enterNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
-	virtual void exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
-
-	virtual void enterClassDecl(HarlequinParser::ClassDeclContext*) override;
-	virtual void exitClassDecl(HarlequinParser::ClassDeclContext*) override;
-
-
-private:
-
-	HqSourceFileHandle m_hSrcFile;
-
-	ParserErrorListener* m_pErrorListener;
-
-	std::list<std::string> m_namespaceStack;
-};
+	// TODO: Report the error message.
+	(void) pRecognizer;
+	(void) pOffendingSymbol;
+	(void) line;
+	(void) charPositionInLine;
+	(void) msg;
+	(void) e;
+	++m_errorCount;
+}
 
 //----------------------------------------------------------------------------------------------------------------------

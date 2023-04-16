@@ -19,7 +19,7 @@
 #include "SourceFile.hpp"
 
 #include "util/FileDataListener.hpp"
-#include "util/ParserErrorHandler.hpp"
+#include "util/ParserErrorListener.hpp"
 
 #include "generated/HarlequinLexer.h"
 #include "generated/HarlequinParser.h"
@@ -95,6 +95,11 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
+	if(hSrcFile->parsed)
+	{
+		return HQ_SUCCESS;
+	}
+
 	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
 	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
 	ANTLRInputStream inputStream(reinterpret_cast<const char*>(hSrcFile->fileData.pData), hSrcFile->fileData.count);
@@ -102,21 +107,35 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	CommonTokenStream tokenStream(&lexer);
 	HarlequinParser parser(&tokenStream);
 
-	ParserErrorHandler errorHandler;
-	parser.addErrorListener(&errorHandler);
+	// Remove the default error listeners.
+	lexer.removeErrorListeners();
+	parser.removeErrorListeners();
+
+	// Add our custom error listener.
+	ParserErrorListener errorListener;
+	lexer.addErrorListener(&errorListener);
+	parser.addErrorListener(&errorListener);
 
 	// Parse the source file.
 	ParseTree* pAstRoot = parser.root();
 
-	if(errorHandler.GetErrorCount() > 0)
+	// Checking for parsing+lexing error
+	if(errorListener.GetErrorCount() > 0)
 	{
-		// Bail out if there were errors during the parse.
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
 	// Walk the source file's AST.
-	FileDataListener listener(hSrcFile, errorHandler);
-	ParseTreeWalker::DEFAULT.walk(&listener, pAstRoot);
+	FileDataListener astListener(hSrcFile, errorListener);
+	ParseTreeWalker::DEFAULT.walk(&astListener, pAstRoot);
+
+	// Check for post-parsing errors.
+	if(errorListener.GetErrorCount() > 0)
+	{
+		return HQ_ERROR_FAILED_TO_PARSE_FILE;
+	}
+
+	// TODO: Fill data on the source file from the AST listener.
 
 	hSrcFile->parsed = true;
 

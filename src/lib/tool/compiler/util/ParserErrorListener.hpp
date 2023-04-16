@@ -22,19 +22,19 @@
 
 #include "../../../Harlequin.h"
 
-#include <ANTLRErrorListener.h>
+#include <BaseErrorListener.h>
 
 #include <list>
 #include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ParserErrorHandler
-	: public antlr4::ANTLRErrorListener
+class ParserErrorListener
+	: public antlr4::BaseErrorListener
 {
 public:
 
-	ParserErrorHandler();
+	ParserErrorListener();
 
 	size_t GetErrorCount() const;
 	size_t GetWarningCount() const;
@@ -48,34 +48,6 @@ public:
 		std::exception_ptr e
 	) override;
 
-	virtual void reportAmbiguity(
-		antlr4::Parser* pRecognizer,
-		const antlr4::dfa::DFA& dfa,
-		size_t startIndex,
-		size_t stopIndex,
-		bool exact,
-		const antlrcpp::BitSet& ambigAlts,
-		antlr4::atn::ATNConfigSet* pConfigs
-	) override;
-
-	virtual void reportAttemptingFullContext(
-		antlr4::Parser* pRecognizer, 
-		const antlr4::dfa::DFA& dfa, 
-		size_t startIndex, 
-		size_t stopIndex,
-		const antlrcpp::BitSet& conflictingAlts,
-		antlr4::atn::ATNConfigSet* pConfigs
-	) override;
-
-	virtual void reportContextSensitivity(
-		antlr4::Parser* pRecognizer,
-		const antlr4::dfa::DFA& dfa,
-		size_t startIndex,
-		size_t stopIndex,
-		size_t prediction,
-		antlr4::atn::ATNConfigSet* pConfigs
-	) override;
-
 
 private:
 
@@ -85,7 +57,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline ParserErrorHandler::ParserErrorHandler()
+inline ParserErrorListener::ParserErrorListener()
 	: m_errorCount(0)
 	, m_warningCount(0)
 {
@@ -93,14 +65,14 @@ inline ParserErrorHandler::ParserErrorHandler()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorHandler::GetErrorCount() const
+inline size_t ParserErrorListener::GetErrorCount() const
 {
 	return m_errorCount;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorHandler::GetWarningCount() const
+inline size_t ParserErrorListener::GetWarningCount() const
 {
 	return m_warningCount;
 }
