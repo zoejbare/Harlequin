@@ -30,6 +30,24 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+namespace antlr4
+{
+	class ANTLRInputStream;
+	class CommonTokenStream;
+
+	namespace tree
+	{
+		class ParseTree;
+	}
+}
+
+class HarlequinLexer;
+class HarlequinParser;
+
+class ParserErrorListener;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 struct HqSourceFile
 {
 	typedef HqArray<uint8_t> FileData;
@@ -60,6 +78,16 @@ struct HqSourceFile
 
 	HqReference ref;
 	HqToolContextHandle hToolCtx;
+
+	antlr4::ANTLRInputStream* pInputStream;
+	antlr4::CommonTokenStream* pTokenStream;
+
+	HarlequinLexer* pLexer;
+	HarlequinParser* pParser;
+
+	ParserErrorListener* pErrorListener;
+
+	antlr4::tree::ParseTree* pAstRoot;
 
 	FileData fileData;
 

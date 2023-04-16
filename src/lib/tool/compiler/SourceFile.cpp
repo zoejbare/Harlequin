@@ -39,6 +39,9 @@ HqSourceFileHandle HqSourceFile::Load(
 	size_t fileSize,
 	int* pErrorReason)
 {
+	using namespace antlr4;
+	using namespace antlr4::tree;
+
 	assert(hToolCtx != HQ_TOOL_CONTEXT_HANDLE_NULL);
 	assert(pFileData != nullptr);
 	assert(fileSize > 0);
@@ -50,7 +53,6 @@ HqSourceFileHandle HqSourceFile::Load(
 	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
 	pOutput->hToolCtx = hToolCtx;
-	pOutput->parsed = false;
 
 	// Initialize the file data array and reserve space for the input data.
 	FileData::Initialize(pOutput->fileData);
@@ -58,12 +60,31 @@ HqSourceFileHandle HqSourceFile::Load(
 
 	pOutput->fileData.count = fileSize;
 
+	// Copy the input data to the file data array.
+	memcpy(pOutput->fileData.pData, pFileData, fileSize);
+
 	// Initialize the source data structures.
 	NamespaceMap::Allocate(pOutput->namespaces);
 	ClassAliasMap::Allocate(pOutput->classAliases);
 
-	// Copy the input data to the file data array.
-	memcpy(pOutput->fileData.pData, pFileData, fileSize);
+	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
+	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
+	pOutput->pInputStream = new ANTLRInputStream(reinterpret_cast<const char*>(pOutput->fileData.pData), pOutput->fileData.count);
+	pOutput->pLexer = new HarlequinLexer(pOutput->pInputStream);
+	pOutput->pTokenStream = new CommonTokenStream(pOutput->pLexer);
+	pOutput->pParser = new HarlequinParser(pOutput->pTokenStream);
+	pOutput->pErrorListener = new ParserErrorListener();
+	pOutput->pAstRoot = nullptr;
+
+	pOutput->parsed = false;
+
+	// Remove the default error listeners.
+	pOutput->pLexer->removeErrorListeners();
+	pOutput->pParser->removeErrorListeners();
+
+	// Add our custom error listener.
+	pOutput->pLexer->addErrorListener(pOutput->pErrorListener);
+	pOutput->pParser->addErrorListener(pOutput->pErrorListener);
 
 	return pOutput;
 }
@@ -90,54 +111,38 @@ int32_t HqSourceFile::Release(HqSourceFileHandle hSrcFile)
 
 int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 {
-	using namespace antlr4;
 	using namespace antlr4::tree;
 
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
 	if(hSrcFile->parsed)
 	{
-		return HQ_SUCCESS;
+		return hSrcFile->pAstRoot ? HQ_SUCCESS : HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
-	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
-	ANTLRInputStream inputStream(reinterpret_cast<const char*>(hSrcFile->fileData.pData), hSrcFile->fileData.count);
-	HarlequinLexer lexer(&inputStream);
-	CommonTokenStream tokenStream(&lexer);
-	HarlequinParser parser(&tokenStream);
-
-	// Remove the default error listeners.
-	lexer.removeErrorListeners();
-	parser.removeErrorListeners();
-
-	// Add our custom error listener.
-	ParserErrorListener errorListener;
-	lexer.addErrorListener(&errorListener);
-	parser.addErrorListener(&errorListener);
-
 	// Parse the source file.
-	ParseTree* pAstRoot = parser.root();
+	hSrcFile->pAstRoot = hSrcFile->pParser->root();
+	hSrcFile->parsed = true;
 
 	// Checking for parsing+lexing error
-	if(errorListener.GetErrorCount() > 0)
+	if(hSrcFile->pErrorListener->GetErrorCount() > 0)
 	{
+		hSrcFile->pAstRoot = nullptr;
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
 	// Walk the source file's AST.
-	FileDataListener astListener(hSrcFile, errorListener);
-	ParseTreeWalker::DEFAULT.walk(&astListener, pAstRoot);
+	FileDataListener astListener(hSrcFile, *hSrcFile->pErrorListener);
+	ParseTreeWalker::DEFAULT.walk(&astListener, hSrcFile->pAstRoot);
 
 	// Check for post-parsing errors.
-	if(errorListener.GetErrorCount() > 0)
+	if(hSrcFile->pErrorListener->GetErrorCount() > 0)
 	{
+		hSrcFile->pAstRoot = nullptr;
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
 	// TODO: Fill data on the source file from the AST listener.
-
-	hSrcFile->parsed = true;
 
 	return HQ_SUCCESS;
 }
@@ -174,6 +179,12 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 
 	// Dispose of the raw file data.
 	FileData::Dispose(hSrcFile->fileData);
+
+	delete hSrcFile->pInputStream;
+	delete hSrcFile->pTokenStream;
+	delete hSrcFile->pLexer;
+	delete hSrcFile->pParser;
+	delete hSrcFile->pErrorListener;
 
 	delete hSrcFile;
 }
