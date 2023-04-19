@@ -393,8 +393,8 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
-			f"{HarlequinCommon.libRootPath}/compiler",
 			f"{HarlequinCommon.libRootPath}/runtime",
+			f"{HarlequinCommon.libRootPath}/tool",
 		)
 	else:
 		csbuild.AddSourceDirectories(f"{HarlequinCommon.libRootPath}/base")
