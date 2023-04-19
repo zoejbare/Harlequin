@@ -95,7 +95,7 @@ void FileDataListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContex
 			m_pErrorNotifier->Report(
 				MessageCode::ErrorDuplicateAlias,
 				alias->getSymbol(),
-				"duplicate class alias: %s",
+				"duplicate class alias '%s'",
 				pAliasedName->data
 			);
 		}

@@ -117,6 +117,7 @@ void ParserErrorListener::prv_report(
 		+ msg + "\n" 
 		+ pLine->data + "\n";
 
+	// Add the whitespace leading up to the underlining.
 	for(size_t i = 0; i < charPositionInLine; ++i)
 	{
 		const char charInLine = pLine->data[i];
@@ -126,9 +127,10 @@ void ParserErrorListener::prv_report(
 			: ' ';
 	}
 
+	// Add the underline that is as long as the offending token.
 	for(size_t i = startIndex; i <= stopIndex; ++i)
 	{
-		finalMsg += "^";
+		finalMsg += "~";
 	}
 
 	HqReportMessage(m_hReport, type, "%s", finalMsg.c_str());
