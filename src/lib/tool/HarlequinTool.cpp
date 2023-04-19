@@ -143,18 +143,13 @@ int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqSourceFileLoad(
-	HqSourceFileHandle* phOutSrcFile,
-	HqToolContextHandle hToolCtx,
-	const char* const name,
-	const void* const pFileData,
-	const size_t fileSize)
+int HqSourceFileLoad(HqSourceFileHandle* phOutSrcFile, HqToolContextHandle hToolCtx, const char* const filePath)
 {
 	if(!phOutSrcFile
 		|| (*phOutSrcFile)
 		|| !hToolCtx
-		|| !pFileData
-		|| fileSize == 0)
+		|| !filePath
+		|| filePath[0] == '\0')
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -162,7 +157,7 @@ int HqSourceFileLoad(
 	int result = HQ_SUCCESS;
 
 	// Load the source file data.
-	HqSourceFileHandle hSrcFile = HqSourceFile::Load(hToolCtx, name, pFileData, fileSize, &result);
+	HqSourceFileHandle hSrcFile = HqSourceFile::Load(hToolCtx, filePath, &result);
 	if(hSrcFile)
 	{
 		(*phOutSrcFile) = hSrcFile;

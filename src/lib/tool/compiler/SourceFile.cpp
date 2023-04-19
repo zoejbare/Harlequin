@@ -26,6 +26,8 @@
 
 #include "../ToolContext.hpp"
 
+#include "../../base/Serializer.hpp"
+
 #include <antlr4-runtime.h>
 
 #include <assert.h>
@@ -33,22 +35,30 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqSourceFileHandle HqSourceFile::Load(
-	HqToolContextHandle hToolCtx,
-	const char* const name,
-	const void* const pFileData,
-	const size_t fileSize,
-	int* const pErrorReason)
+HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* const filePath, int* const pErrorReason)
 {
 	using namespace antlr4;
 	using namespace antlr4::tree;
 
 	assert(hToolCtx != HQ_TOOL_CONTEXT_HANDLE_NULL);
-	assert(name != nullptr);
-	assert(name[0] != '\0');
-	assert(pFileData != nullptr);
-	assert(fileSize > 0);
+	assert(filePath != nullptr);
+	assert(filePath[0] != '\0');
 	assert(pErrorReason != nullptr);
+
+	// Create a serializer for loading the source file.
+	HqSerializerHandle hSerializer = HqSerializer::Create(HQ_SERIALIZER_MODE_READER);
+	if(!hSerializer)
+	{
+		(*pErrorReason) = HQ_ERROR_BAD_ALLOCATION;
+		return nullptr;
+	}
+
+	// Attempt to load the source file.
+	if(HqSerializer::LoadFile(hSerializer, filePath) != HQ_SUCCESS)
+	{
+		(*pErrorReason) = HQ_ERROR_FAILED_TO_OPEN_FILE;
+		return nullptr;
+	}
 
 	HqSourceFile* const pOutput = new HqSourceFile();
 	assert(pOutput != nullptr);
@@ -56,15 +66,7 @@ HqSourceFileHandle HqSourceFile::Load(
 	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
 	pOutput->hToolCtx = hToolCtx;
-
-	// Initialize the file data array and reserve space for the input data.
-	FileData::Initialize(pOutput->fileData);
-	FileData::Reserve(pOutput->fileData, fileSize);
-
-	pOutput->fileData.count = fileSize;
-
-	// Copy the input data to the file data array.
-	memcpy(pOutput->fileData.pData, pFileData, fileSize);
+	pOutput->hSerializer = hSerializer;
 
 	// Initialize the source data structures.
 	NamespaceMap::Allocate(pOutput->namespaces);
@@ -72,14 +74,17 @@ HqSourceFileHandle HqSourceFile::Load(
 
 	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
 	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
-	pOutput->pInputStream = new ANTLRInputStream(reinterpret_cast<const char*>(pOutput->fileData.pData), pOutput->fileData.count);
+	pOutput->pInputStream = new ANTLRInputStream(
+		reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData), 
+		pOutput->hSerializer->stream.count
+	);
 	pOutput->pLexer = new HarlequinLexer(pOutput->pInputStream);
 	pOutput->pTokenStream = new CommonTokenStream(pOutput->pLexer);
 	pOutput->pParser = new HarlequinParser(pOutput->pTokenStream);
 	pOutput->pAstRoot = nullptr;
 
 	// Set the file name for the input stream; this will be used when reporting errors and warnings.
-	pOutput->pInputStream->name = name;
+	pOutput->pInputStream->name = filePath;
 
 	pOutput->parsed = false;
 
@@ -240,10 +245,9 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 	// Dispose of the source data structures.
 	NamespaceMap::Dispose(hSrcFile->namespaces);
 	ClassAliasMap::Dispose(hSrcFile->classAliases);
-
-	// Dispose of the raw file data.
-	FileData::Dispose(hSrcFile->fileData);
 	LineArray::Dispose(hSrcFile->fileLines);
+
+	HqSerializer::Dispose(hSrcFile->hSerializer);
 
 	delete hSrcFile->pInputStream;
 	delete hSrcFile->pTokenStream;
