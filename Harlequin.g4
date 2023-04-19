@@ -21,17 +21,16 @@ grammar Harlequin;
 
 // Root parser rule
 root
-	: moduleDef*
+    : itemDef* EOF
 	;
 
-// Module item defintion rule
-moduleDef
-	: compilerDirective
-	| usingStmt Term
-	| usingAliasStmt Term
-	| namespaceDecl
-	| classDecl
-	;
+// High level, source item rule
+itemDef
+    : usingStmt
+    | usingAliasStmt
+    | namespaceDecl
+    | classDecl
+    ;
 
 // Compiler directive rule
 compilerDirective
@@ -45,12 +44,12 @@ qualifiedId
 
 // 'using' statement rule
 usingStmt
-	: UsingKw qualifiedId
+	: UsingKw qualifiedId Term
 	;
 
 // 'using' class alias statement rule
 usingAliasStmt
-	: UsingKw qualifiedId AsKw Id (Comma Id)*
+	: UsingKw qualifiedId AsKw Id (Comma Id)* Term
 	;
 
 // Namespace declaration rule
@@ -65,7 +64,7 @@ namespaceDef
 
 // Class declaration rule
 classDecl
-	: (accessModifier | classScopeModifier)* classType? Id classExtends? classImpls? classDef
+	: (accessModifier | classScopeModifier)* classType Id classExtends? classImpls? classDef
 	;
 
 // Class type rule
@@ -98,12 +97,7 @@ classImpls
 
 // Class definition rule
 classDef
-	: LeftBrace (classVarDecl Term | methodDecl | ctorDecl)* RightBrace
-	;
-
-// Class variable declaration rule
-classVarDecl
-	: accessModifier* varDecl
+	: LeftBrace (varDeclStmt | methodDecl | ctorDecl)* RightBrace
 	;
 
 // Typename rule
@@ -116,9 +110,13 @@ varAccessModifier
 	: ConstKw
 	;
 
+varDeclStmt
+    : varDecl Term
+    ;
+
 // Variable declaration rule
 varDecl
-	: varAccessModifier? typeName varDef (Comma varDef)* ?
+	: accessModifier* varAccessModifier? typeName varDef (Comma varDef)*
 	;
 
 // Variable definition rule
@@ -178,7 +176,7 @@ methodParam
 // Code statement rule
 codeStmt
 	: codeBlock
-	| varDecl Term
+	| varDeclStmt
 	| exprStmt
 	;
 
@@ -323,7 +321,7 @@ asmStmt
 
 // Assembly instruction rule
 asmInstr
-	: Id (asmOperand (Comma asmOperand)*)?
+	: Id (asmOperand (Comma asmOperand)*)? Term
 	;
 
 // Assembly instruction operand rule
