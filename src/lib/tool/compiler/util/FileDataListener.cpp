@@ -25,11 +25,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile, ParserErrorListener& errorListener)
+FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* const pErrorNotifier)
 	: m_hSrcFile(hSrcFile)
-	, m_pErrorListener(&errorListener)
+	, m_pErrorNotifier(pErrorNotifier)
 {
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
+	assert(pErrorNotifier != nullptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -90,7 +91,13 @@ void FileDataListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContex
 		}
 		else
 		{
-			// TODO: Log a compile error.
+			// Report the duplicate alias name as an error.
+			m_pErrorNotifier->Report(
+				MessageCode::ErrorDuplicateAlias,
+				alias->getSymbol(),
+				"duplicate class alias: %s",
+				pAliasedName->data
+			);
 		}
 
 		// Release the class alias string.

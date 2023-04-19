@@ -20,69 +20,36 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ErrorNotifier.hpp"
+#include "../../../Harlequin.h"
 
-#include "../../../base/String.hpp"
-#include "../../../common/Array.hpp"
-
-#include <BaseErrorListener.h>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ParserErrorListener
-	: public antlr4::BaseErrorListener
-	, public IErrorNotifier
+namespace antlr4
 {
-public:
-
-	ParserErrorListener() = delete;
-	ParserErrorListener(HqReportHandle hReport, const HqArray<HqString*>* pSourcLines);
-
-	size_t GetErrorCount() const;
-	size_t GetWarningCount() const;
-
-	virtual void syntaxError(
-		antlr4::Recognizer* pRecognizer,
-		antlr4::Token* pOffendingSymbol,
-		size_t line,
-		size_t charPositionInLine,
-		const std::string& msg,
-		std::exception_ptr e
-	) override;
-
-	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) override;
-
-
-private:
-
-	enum class MsgType
-	{
-		Error,
-		Warning,
-	};
-
-	void prv_report(int, MessageCode, const antlr4::Token*, const char*);
-
-	HqReportHandle m_hReport;
-
-	const HqArray<HqString*>* m_pSourceLines;
-
-	size_t m_errorCount;
-	size_t m_warningCount;
+	class Token;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorListener::GetErrorCount() const
+enum class MessageCode
 {
-	return m_errorCount;
-}
+	ErrorSyntax,
+	ErrorDuplicateAlias,
+
+	WarningTODO = 4000,
+
+	_WarningStart_ = WarningTODO,
+};
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorListener::GetWarningCount() const
+class IErrorNotifier
 {
-	return m_warningCount;
-}
+public:
+
+	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) = 0;
+};
 
 //----------------------------------------------------------------------------------------------------------------------

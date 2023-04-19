@@ -788,6 +788,7 @@ HQ_MAIN_API int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule);
 HQ_MAIN_API int HqSourceFileLoad(
 	HqSourceFileHandle* phOutSrcFile,
 	HqToolContextHandle hToolCtx,
+	const char* name,
 	const void* pFileData,
 	size_t fileSize);
 

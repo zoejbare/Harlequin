@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../../Harlequin.h"
+#include "ErrorNotifier.hpp"
 
 #include "../generated/HarlequinBaseListener.h"
 
@@ -29,15 +29,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ParserErrorListener;
-
 class FileDataListener
 	: public HarlequinBaseListener
 {
 public:
 
 	FileDataListener() = delete;
-	FileDataListener(HqSourceFileHandle hSrcFile, ParserErrorListener& errorListener);
+	FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* pErrorNotifier);
 
 	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
 	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
@@ -53,7 +51,7 @@ private:
 
 	HqSourceFileHandle m_hSrcFile;
 
-	ParserErrorListener* m_pErrorListener;
+	IErrorNotifier* m_pErrorNotifier;
 
 	std::list<std::string> m_namespaceStack;
 };

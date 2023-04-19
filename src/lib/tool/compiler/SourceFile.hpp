@@ -44,19 +44,20 @@ namespace antlr4
 class HarlequinLexer;
 class HarlequinParser;
 
-class ParserErrorListener;
-
 //----------------------------------------------------------------------------------------------------------------------
 
 struct HqSourceFile
 {
-	typedef HqArray<uint8_t> FileData;
+	typedef HqArray<uint8_t>   FileData;
+	typedef HqArray<HqString*> LineArray;
+
 	typedef HqHashMap<
 		HqString*,
 		HqString*,
 		HqString::StlHash,
 		HqString::StlCompare
 	> ClassAliasMap;
+
 	typedef HqHashMap<
 		HqString*,
 		bool,
@@ -64,12 +65,19 @@ struct HqSourceFile
 		HqString::StlCompare
 	> NamespaceMap;
 
-	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
+	static HqSourceFileHandle Load(
+		HqToolContextHandle hToolCtx, 
+		const char* name, 
+		const void* pFileData, 
+		size_t fileSize, 
+		int* pErrorReason
+	);
 
 	static int32_t AddRef(HqSourceFileHandle hSrcFile);
 	static int32_t Release(HqSourceFileHandle hSrcFile);
 
 	static int Parse(HqSourceFileHandle hSrcFile);
+	static bool WasParsedSuccessfully(HqSourceFileHandle hSrcFile);
 
 	static void prv_onDestruct(void*);
 
@@ -85,11 +93,10 @@ struct HqSourceFile
 	HarlequinLexer* pLexer;
 	HarlequinParser* pParser;
 
-	ParserErrorListener* pErrorListener;
-
 	antlr4::tree::ParseTree* pAstRoot;
 
 	FileData fileData;
+	LineArray fileLines;
 
 	NamespaceMap namespaces;
 	ClassAliasMap classAliases;
