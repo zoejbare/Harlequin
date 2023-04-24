@@ -20,41 +20,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ErrorNotifier.hpp"
-
-#include "../generated/HarlequinBaseListener.h"
-#include "../metadata/Class.hpp"
-
-#include <list>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-class FileDataListener
-	: public HarlequinBaseListener
+enum class ClassType
 {
-public:
-
-	FileDataListener() = delete;
-	FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* pErrorNotifier);
-
-	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
-	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
-
-	virtual void enterNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
-	virtual void exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
-
-	virtual void enterClassDecl(HarlequinParser::ClassDeclContext*) override;
-	virtual void exitClassDecl(HarlequinParser::ClassDeclContext*) override;
-
-
-private:
-
-	HqSourceFileHandle m_hSrcFile;
-
-	IErrorNotifier* m_pErrorNotifier;
-
-	std::list<HqString*> m_namespaceStack;
-	std::list<ClassMetaData*> m_classStack;
+	Class,
+	Interface,
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -37,6 +37,12 @@ FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* 
 
 void FileDataListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
 {
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return;
+	}
+
 	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
 
 	HqString* const pNamespace = HqString::Create(qualifiedNamespace.c_str());
@@ -62,6 +68,12 @@ void FileDataListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const p
 
 void FileDataListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
 {
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return;
+	}
+
 	const std::string qualifiedClassName = pCtx->qualifiedId()->getText();
 	const auto aliasNames = pCtx->Id();
 
@@ -112,18 +124,35 @@ void FileDataListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContex
 
 void FileDataListener::enterNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
 {
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return;
+	}
+
+	const bool isChildOfNamespace = (m_namespaceStack.size() > 0);
+
 	const std::string shortName = pCtx->qualifiedId()->getText();
-	const std::string qualifiedName = (m_namespaceStack.size() > 0)
-		? (m_namespaceStack.back() + "." + shortName) 
+	const std::string qualifiedName = isChildOfNamespace
+		? (std::string(m_namespaceStack.back()->data) + "." + shortName) 
 		: shortName;
 
-	m_namespaceStack.push_back(qualifiedName);
+	HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
+
+	m_namespaceStack.push_back(pQualifiedName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void FileDataListener::exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*)
 {
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return;
+	}
+
+	HqString::Release(m_namespaceStack.back());
 	m_namespaceStack.pop_back();
 }
 
@@ -131,19 +160,94 @@ void FileDataListener::exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*)
 
 void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
 {
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return;
+	}
+
+	const bool isChildOfNamespace = (m_namespaceStack.size() > 0);
+
+	HqString* const pNamespace = isChildOfNamespace
+		? m_namespaceStack.back()
+		: nullptr;
+
 	const std::string shortName = pCtx->Id()->getText();
-	const std::string qualifiedName = (m_namespaceStack.size() > 0)
-		? (m_namespaceStack.back() + "." + shortName) 
+	const std::string qualifiedName = isChildOfNamespace
+		? (std::string(pNamespace->data) + "." + shortName) 
 		: shortName;
 
-	// TODO: Setup the class declaration and push it to the class stack.
+	HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
+	HqString* const pShortName = HqString::Create(shortName.c_str());
+
+	// Check to see if this class has already been defined.
+	if(!HqSourceFile::ClassMetaDataMap::Contains(m_hSrcFile->classes, pQualifiedName))
+	{
+		ClassMetaData* const pClass = new ClassMetaData();
+
+		const std::string classType = pCtx->classType()->getText();
+		const std::string classScope = pCtx->scopeModifier()->getText();
+
+		pClass->pQualifiedName = pQualifiedName;
+		pClass->pShortName = pShortName;
+		pClass->pNamespace = pNamespace;
+		pClass->isStatic = (pCtx->StaticKw() != nullptr);
+
+		// Determine the class type.
+		pClass->type = (classType == "interface")
+			? ClassType::Interface
+			: ClassType::Class;
+
+		// Determine the class scope access.
+		pClass->scope = (classScope == "public")
+			? ScopeType::Public
+			: (classScope == "protected")
+				? ScopeType::Protected
+				: ScopeType::Private;
+
+		// Add string references for the class metadata.
+		HqString::AddRef(pClass->pQualifiedName);
+		HqString::AddRef(pClass->pShortName);
+		HqString::AddRef(pClass->pNamespace);
+		
+		// Add a reference to the namespace string since it will be used as the map key.
+		HqString::AddRef(pQualifiedName);
+
+		HqSourceFile::ClassMetaDataMap::Insert(
+			m_hSrcFile->classes, 
+			pQualifiedName,
+			pClass
+		);
+
+		m_classStack.push_back(pClass);
+	}
+	else
+	{
+		// Report the duplicate class declaration as an error.
+		m_pErrorNotifier->Report(
+			MessageCode::ErrorDuplicateClass,
+			pCtx->Id()->getSymbol(),
+			"duplicate class declaration '%s'",
+			pQualifiedName->data
+		);
+	}
+
+	// Release the extra string references.
+	HqString::Release(pQualifiedName);
+	HqString::Release(pShortName);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void FileDataListener::exitClassDecl(HarlequinParser::ClassDeclContext*)
 {
-	// TODO: Pop the class stack
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return;
+	}
+
+	m_classStack.pop_back();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

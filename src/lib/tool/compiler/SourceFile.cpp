@@ -71,6 +71,7 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 	// Initialize the source data structures.
 	NamespaceMap::Allocate(pOutput->namespaces);
 	ClassAliasMap::Allocate(pOutput->classAliases);
+	ClassMetaDataMap::Allocate(pOutput->classes);
 
 	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
 	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
@@ -182,7 +183,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	hSrcFile->pParser->removeErrorListeners();
 
 	// Checking for parsing+lexing error
-	if(errorListener.GetErrorCount() > 0)
+	if(errorListener.EncounteredError())
 	{
 		hSrcFile->pAstRoot = nullptr;
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
@@ -193,7 +194,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	ParseTreeWalker::DEFAULT.walk(&astListener, hSrcFile->pAstRoot);
 
 	// Check for post-parsing errors.
-	if(errorListener.GetErrorCount() > 0)
+	if(errorListener.EncounteredError())
 	{
 		hSrcFile->pAstRoot = nullptr;
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
@@ -223,6 +224,20 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 		HqString::Release(hSrcFile->fileLines.pData[i]);
 	}
 
+	// Free all class metadata.
+	{
+		ClassMetaDataMap::Iterator iter;
+		while(ClassMetaDataMap::IterateNext(hSrcFile->classes, iter))
+		{
+			HqString::Release(iter.pData->key);
+			HqString::Release(iter.pData->value->pQualifiedName);
+			HqString::Release(iter.pData->value->pShortName);
+			HqString::Release(iter.pData->value->pNamespace);
+
+			delete iter.pData->value;
+		}
+	}
+
 	// Release all mapped class alias strings.
 	{
 		ClassAliasMap::Iterator iter;
@@ -245,6 +260,7 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 	// Dispose of the source data structures.
 	NamespaceMap::Dispose(hSrcFile->namespaces);
 	ClassAliasMap::Dispose(hSrcFile->classAliases);
+	ClassMetaDataMap::Dispose(hSrcFile->classes);
 	LineArray::Dispose(hSrcFile->fileLines);
 
 	HqSerializer::Dispose(hSrcFile->hSerializer);

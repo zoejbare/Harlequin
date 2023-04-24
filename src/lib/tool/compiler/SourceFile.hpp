@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../Harlequin.h"
+#include "metadata/Class.hpp"
 
 #include "../../base/Reference.hpp"
 #include "../../base/String.hpp"
@@ -61,6 +61,12 @@ struct HqSourceFile
 		HqString::StlHash,
 		HqString::StlCompare
 	> NamespaceMap;
+	typedef HqHashMap<
+		HqString*,
+		ClassMetaData*,
+		HqString::StlHash,
+		HqString::StlCompare
+	> ClassMetaDataMap;
 
 	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const char* filePath,int* pErrorReason);
 
@@ -91,6 +97,7 @@ struct HqSourceFile
 
 	NamespaceMap namespaces;
 	ClassAliasMap classAliases;
+	ClassMetaDataMap classes;
 
 	bool parsed;
 };

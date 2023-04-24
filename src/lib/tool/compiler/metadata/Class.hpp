@@ -20,41 +20,23 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ErrorNotifier.hpp"
+#include "enum/ClassType.hpp"
+#include "enum/ScopeType.hpp"
 
-#include "../generated/HarlequinBaseListener.h"
-#include "../metadata/Class.hpp"
-
-#include <list>
+#include "../../../base/String.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class FileDataListener
-	: public HarlequinBaseListener
+struct ClassMetaData
 {
-public:
+	HqString* pQualifiedName;
+	HqString* pShortName;
+	HqString* pNamespace;
 
-	FileDataListener() = delete;
-	FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* pErrorNotifier);
+	ClassType type;
+	ScopeType scope;
 
-	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
-	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
-
-	virtual void enterNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
-	virtual void exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
-
-	virtual void enterClassDecl(HarlequinParser::ClassDeclContext*) override;
-	virtual void exitClassDecl(HarlequinParser::ClassDeclContext*) override;
-
-
-private:
-
-	HqSourceFileHandle m_hSrcFile;
-
-	IErrorNotifier* m_pErrorNotifier;
-
-	std::list<HqString*> m_namespaceStack;
-	std::list<ClassMetaData*> m_classStack;
+	bool isStatic;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
