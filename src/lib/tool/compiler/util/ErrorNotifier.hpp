@@ -39,9 +39,9 @@ enum class MessageCode
 	ErrorSyntax,
 	ErrorDuplicateAlias,
 	ErrorDuplicateClass,
+	ErrorStaticInterface,
 
 	_WarningStart_ = 5000,
-	WarningTODO,
 };
 
 //----------------------------------------------------------------------------------------------------------------------

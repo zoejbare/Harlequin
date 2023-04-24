@@ -183,43 +183,59 @@ void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const p
 	// Check to see if this class has already been defined.
 	if(!HqSourceFile::ClassMetaDataMap::Contains(m_hSrcFile->classes, pQualifiedName))
 	{
-		ClassMetaData* const pClass = new ClassMetaData();
+		const bool isStatic = (pCtx->StaticKw() != nullptr);
 
-		const std::string classType = pCtx->classType()->getText();
-		const std::string classScope = pCtx->scopeModifier()->getText();
+		const std::string classTypeStr = pCtx->classType()->getText();
+		const std::string scopeTypeStr = pCtx->scopeModifier()->getText();
 
-		pClass->pQualifiedName = pQualifiedName;
-		pClass->pShortName = pShortName;
-		pClass->pNamespace = pNamespace;
-		pClass->isStatic = (pCtx->StaticKw() != nullptr);
-
-		// Determine the class type.
-		pClass->type = (classType == "interface")
+		const ClassType classType = (classTypeStr == "interface")
 			? ClassType::Interface
 			: ClassType::Class;
-
-		// Determine the class scope access.
-		pClass->scope = (classScope == "public")
+		const ScopeType scopeType = (scopeTypeStr == "public")
 			? ScopeType::Public
-			: (classScope == "protected")
+			: (scopeTypeStr == "protected")
 				? ScopeType::Protected
 				: ScopeType::Private;
 
-		// Add string references for the class metadata.
-		HqString::AddRef(pClass->pQualifiedName);
-		HqString::AddRef(pClass->pShortName);
-		HqString::AddRef(pClass->pNamespace);
+		if(classType == ClassType::Class || (classType == ClassType::Interface && !isStatic))
+		{
+			// Create new class metadata.
+			ClassMetaData* const pClass = new ClassMetaData();
+
+			// Fill in the class properties.
+			pClass->pQualifiedName = pQualifiedName;
+			pClass->pShortName = pShortName;
+			pClass->pNamespace = pNamespace;
+			pClass->type = classType;
+			pClass->scope = scopeType;
+			pClass->isStatic = isStatic;
+
+			// Add string references for the class metadata.
+			HqString::AddRef(pClass->pQualifiedName);
+			HqString::AddRef(pClass->pShortName);
+			HqString::AddRef(pClass->pNamespace);
 		
-		// Add a reference to the namespace string since it will be used as the map key.
-		HqString::AddRef(pQualifiedName);
+			// Add a reference to the namespace string since it will be used as the map key.
+			HqString::AddRef(pQualifiedName);
 
-		HqSourceFile::ClassMetaDataMap::Insert(
-			m_hSrcFile->classes, 
-			pQualifiedName,
-			pClass
-		);
+			HqSourceFile::ClassMetaDataMap::Insert(
+				m_hSrcFile->classes, 
+				pQualifiedName,
+				pClass
+			);
 
-		m_classStack.push_back(pClass);
+			m_classStack.push_back(pClass);
+		}
+		else
+		{
+			// Report the invalid scenario of a static interface declaration.
+			m_pErrorNotifier->Report(
+				MessageCode::ErrorStaticInterface,
+				pCtx->StaticKw()->getSymbol(),
+				"illegal static interface declaration '%s'",
+				pQualifiedName->data
+			);
+		}
 	}
 	else
 	{
