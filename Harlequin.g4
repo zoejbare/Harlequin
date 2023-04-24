@@ -64,7 +64,7 @@ namespaceDef
 
 // Class declaration rule
 classDecl
-	: (accessModifier | classScopeModifier)* classType Id classExtends? classImpls? classDef
+	: scopeModifier? StaticKw? classType Id classInheritance? classDef
 	;
 
 // Class type rule
@@ -73,16 +73,17 @@ classType
 	| InterfaceKw
 	;
 
-// Class & method access modifier rule
-accessModifier
+// Class & method scope modifier rule
+scopeModifier
 	: PublicKw
 	| ProtectedKw
 	| PrivateKw
 	;
 
-// Class & method scope modifier rule
-classScopeModifier
-	: StaticKw
+// Class inheritance rule
+classInheritance
+	: classExtends classImpls?
+	| classImpls classExtends?
 	;
 
 // Class 'extends' rule
@@ -97,7 +98,7 @@ classImpls
 
 // Class definition rule
 classDef
-	: LeftBrace (varDeclStmt | methodDecl | ctorDecl)* RightBrace
+	: LeftBrace (classVarDeclStmt | methodDecl | ctorDecl)* RightBrace
 	;
 
 // Typename rule
@@ -105,23 +106,35 @@ typeName
 	: Id (LeftBracket RightBracket)*
 	;
 
-// Variable access modifier rule
-varAccessModifier
-	: ConstKw
+// Class variable declaration statement rule
+classVarDeclStmt
+	: classVarDecl Term
 	;
 
+// Class variable declaration rule
+classVarDecl
+	: scopeModifier? varDecl
+	;
+
+// Variable declaration statement rule
 varDeclStmt
     : varDecl Term
     ;
 
 // Variable declaration rule
 varDecl
-	: accessModifier* varAccessModifier? typeName varDef (Comma varDef)*
+	: varModifier? typeName varDef (Comma varDef)*
 	;
 
 // Variable definition rule
 varDef
 	: Id Assign expr
+	;
+
+// Variable modifier rule
+varModifier
+	: ConstKw StaticKw?
+	| StaticKw ConstKw?
 	;
 
 // Variable declaration or expression statement rule (primarily for use within paren'd statements)
@@ -147,15 +160,26 @@ lambdaDecl
 
 // Class construction declaration rule
 ctorDecl
-	: accessModifier? ConstructorKw LeftParen methodParamSeq? RightParen codeBlock
+	: scopeModifier? ConstructorKw LeftParen methodParamSeq? RightParen codeBlock
 	;
 
 // Method declaration rule
 methodDecl
-	: accessModifier* methodImplModifier* typeName Id LeftParen methodParamSeq? RightParen (codeBlock | Term)
+	: scopeModifier? methodModifier? typeName Id LeftParen methodParamSeq? RightParen (codeBlock | Term)
 	;
 
-// Method access modifiers rule
+// Method modifier rule
+methodModifier
+	: methodImplModifier methodAccessModifier?
+	| methodAccessModifier methodImplModifier?
+	;
+
+// Method access module rule
+methodAccessModifier
+	: StaticKw
+	;
+
+// Method implementation modifier rule
 methodImplModifier
 	: InlineKw
 	| NativeKw
