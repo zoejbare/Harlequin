@@ -35,12 +35,13 @@ namespace antlr4
 
 enum class MessageCode
 {
+	_ErrorStart_ = 1000,
 	ErrorSyntax,
 	ErrorDuplicateAlias,
+	ErrorDuplicateClass,
 
-	WarningTODO = 4000,
-
-	_WarningStart_ = WarningTODO,
+	_WarningStart_ = 5000,
+	WarningTODO,
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ class IErrorNotifier
 {
 public:
 
+	virtual bool EncounteredError() const = 0;
 	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) = 0;
 };
 

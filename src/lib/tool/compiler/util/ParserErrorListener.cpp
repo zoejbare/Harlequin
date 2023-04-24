@@ -55,6 +55,13 @@ void ParserErrorListener::syntaxError(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+bool ParserErrorListener::EncounteredError() const
+{
+	return m_errorCount > 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void ParserErrorListener::Report(const MessageCode code, const antlr4::Token* const pOffendingSymbol, const char* const fmt, ...)
 {
 	va_list vl;

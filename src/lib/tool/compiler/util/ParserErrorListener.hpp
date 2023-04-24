@@ -50,6 +50,7 @@ public:
 		std::exception_ptr e
 	) override;
 
+	virtual bool EncounteredError() const override;
 	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) override;
 
 
