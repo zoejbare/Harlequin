@@ -229,6 +229,21 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 		ClassMetaDataMap::Iterator iter;
 		while(ClassMetaDataMap::IterateNext(hSrcFile->classes, iter))
 		{
+			// Release all the implements strings.
+			for(size_t i = 0; i < iter.pData->value->implements.count; ++i)
+			{
+				HqString::Release(iter.pData->value->implements.pData[i]);
+			}
+
+			// Release all the extends strings.
+			for(size_t i = 0; i < iter.pData->value->extends.count; ++i)
+			{
+				HqString::Release(iter.pData->value->extends.pData[i]);
+			}
+
+			ClassMetaData::StringArray::Dispose(iter.pData->value->implements);
+			ClassMetaData::StringArray::Dispose(iter.pData->value->extends);
+
 			HqString::Release(iter.pData->key);
 			HqString::Release(iter.pData->value->pQualifiedName);
 			HqString::Release(iter.pData->value->pShortName);

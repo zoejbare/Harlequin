@@ -25,10 +25,17 @@
 
 #include "../../../base/String.hpp"
 
+#include "../../../common/Array.hpp"
+
 //----------------------------------------------------------------------------------------------------------------------
 
 struct ClassMetaData
 {
+	typedef HqArray<HqString*> StringArray;
+
+	StringArray implements;
+	StringArray extends;
+
 	HqString* pQualifiedName;
 	HqString* pShortName;
 	HqString* pNamespace;

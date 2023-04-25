@@ -199,8 +199,44 @@ void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const p
 
 		if(classType == ClassType::Class || (classType == ClassType::Interface && !isStatic))
 		{
+			auto* const pClassInheritanceCtx = pCtx->classInheritance();
+
 			// Create new class metadata.
 			ClassMetaData* const pClass = new ClassMetaData();
+
+			// Initialize the class data structures.
+			ClassMetaData::StringArray::Initialize(pClass->implements);
+			ClassMetaData::StringArray::Initialize(pClass->extends);
+
+			// Handle the class inheritance.
+			if(pClassInheritanceCtx)
+			{
+				auto* const pClassImplsCtx = pClassInheritanceCtx->classImpls();
+				auto* const pClassExtendsCtx = pClassInheritanceCtx->classExtends();
+
+				if(pClassImplsCtx)
+				{
+					const size_t length = pClassImplsCtx->qualifiedId().size();
+
+					ClassMetaData::StringArray::Reserve(pClass->implements, length);
+					pClass->implements.count = length;
+
+					// Extract each interface name to implement.
+					for(size_t i = 0; i < length; ++i)
+					{
+						pClass->implements.pData[i] = HqString::Create(pClassImplsCtx->qualifiedId(i)->getText().c_str());
+					}
+				}
+
+				if(pClassExtendsCtx)
+				{
+					ClassMetaData::StringArray::Reserve(pClass->extends, 1);
+
+					// Extract the class name to extend.
+					pClass->extends.count = 1;
+					pClass->extends.pData[0] = HqString::Create(pClassExtendsCtx->qualifiedId()->getText().c_str());
+				}
+			}
 
 			// Fill in the class properties.
 			pClass->pQualifiedName = pQualifiedName;
