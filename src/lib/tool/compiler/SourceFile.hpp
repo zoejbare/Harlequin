@@ -21,6 +21,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "metadata/Class.hpp"
+#include "metadata/ClassVar.hpp"
 
 #include "../../base/Reference.hpp"
 #include "../../base/String.hpp"
@@ -66,7 +67,13 @@ struct HqSourceFile
 		ClassMetaData*,
 		HqString::StlHash,
 		HqString::StlCompare
-	> ClassMetaDataMap;
+	> ClassMap;
+	typedef HqHashMap<
+		HqString*,
+		ClassVarMetaData*,
+		HqString::StlHash,
+		HqString::StlCompare
+	> ClassVarMap;
 
 	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const char* filePath,int* pErrorReason);
 
@@ -97,7 +104,9 @@ struct HqSourceFile
 
 	NamespaceMap namespaces;
 	ClassAliasMap classAliases;
-	ClassMetaDataMap classes;
+
+	ClassMap classes;
+	ClassVarMap classVars;
 
 	bool parsed;
 };

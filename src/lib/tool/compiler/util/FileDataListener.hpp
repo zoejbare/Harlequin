@@ -46,8 +46,12 @@ public:
 	virtual void enterClassDecl(HarlequinParser::ClassDeclContext*) override;
 	virtual void exitClassDecl(HarlequinParser::ClassDeclContext*) override;
 
+	virtual void enterClassVarDecl(HarlequinParser::ClassVarDeclContext*) override;
 
 private:
+
+	ClassType prv_resolveClassType(const std::string&) const;
+	ScopeType prv_resolveScopeType(const std::string&) const;
 
 	HqSourceFileHandle m_hSrcFile;
 

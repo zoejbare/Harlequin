@@ -181,21 +181,12 @@ void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const p
 	HqString* const pShortName = HqString::Create(shortName.c_str());
 
 	// Check to see if this class has already been defined.
-	if(!HqSourceFile::ClassMetaDataMap::Contains(m_hSrcFile->classes, pQualifiedName))
+	if(!HqSourceFile::ClassMap::Contains(m_hSrcFile->classes, pQualifiedName))
 	{
 		const bool isStatic = (pCtx->StaticKw() != nullptr);
 
-		const std::string classTypeStr = pCtx->classType()->getText();
-		const std::string scopeTypeStr = pCtx->scopeModifier()->getText();
-
-		const ClassType classType = (classTypeStr == "interface")
-			? ClassType::Interface
-			: ClassType::Class;
-		const ScopeType scopeType = (scopeTypeStr == "public")
-			? ScopeType::Public
-			: (scopeTypeStr == "protected")
-				? ScopeType::Protected
-				: ScopeType::Private;
+		const ClassType classType = prv_resolveClassType(pCtx->classType()->getText());
+		const ScopeType scopeType = prv_resolveScopeType(pCtx->scopeModifier()->getText());
 
 		if(classType == ClassType::Class || (classType == ClassType::Interface && !isStatic))
 		{
@@ -254,7 +245,7 @@ void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const p
 			// Add a reference to the namespace string since it will be used as the map key.
 			HqString::AddRef(pQualifiedName);
 
-			HqSourceFile::ClassMetaDataMap::Insert(
+			HqSourceFile::ClassMap::Insert(
 				m_hSrcFile->classes, 
 				pQualifiedName,
 				pClass
@@ -300,6 +291,163 @@ void FileDataListener::exitClassDecl(HarlequinParser::ClassDeclContext*)
 	}
 
 	m_classStack.pop_back();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void FileDataListener::enterClassVarDecl(HarlequinParser::ClassVarDeclContext* const pCtx)
+{
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return;
+	}
+
+	HqString* const pClassName = m_classStack.back()->pQualifiedName;
+
+	auto* const pScopeModCtx = pCtx->scopeModifier();
+	auto* const pVarDeclCtx = pCtx->varDecl();
+	auto* const pVarModCtx = pVarDeclCtx->varModifier();
+	auto* const pTypeNameCtx = pVarDeclCtx->typeName();
+	const auto varDefs = pVarDeclCtx->varDef();
+
+	const bool isStatic = (pVarModCtx && (pVarModCtx->StaticKw() != nullptr));
+	const bool isConst = (pVarModCtx && (pVarModCtx->ConstKw() != nullptr));
+
+	// When no explicit scope is present, the default is private.
+	const ScopeType scopeType = pScopeModCtx 
+		? prv_resolveScopeType(pScopeModCtx->getText()) 
+		: ScopeType::Private;
+
+	const std::string typeName = pTypeNameCtx->getText();
+	int valueType = HQ_VALUE_TYPE_OBJECT;
+
+	if(typeName == "int8")
+	{
+		valueType = HQ_VALUE_TYPE_INT8;
+	}
+	else if(typeName == "int16")
+	{
+		valueType = HQ_VALUE_TYPE_INT16;
+	}
+	else if(typeName == "int32")
+	{
+		valueType = HQ_VALUE_TYPE_INT32;
+	}
+	else if(typeName == "int64")
+	{
+		valueType = HQ_VALUE_TYPE_INT64;
+	}
+	else if(typeName == "uint8")
+	{
+		valueType = HQ_VALUE_TYPE_UINT8;
+	}
+	else if(typeName == "uint16")
+	{
+		valueType = HQ_VALUE_TYPE_UINT16;
+	}
+	else if(typeName == "uint32")
+	{
+		valueType = HQ_VALUE_TYPE_UINT32;
+	}
+	else if(typeName == "uint64")
+	{
+		valueType = HQ_VALUE_TYPE_UINT64;
+	}
+	else if(typeName == "float32")
+	{
+		valueType = HQ_VALUE_TYPE_FLOAT32;
+	}
+	else if(typeName == "float64")
+	{
+		valueType = HQ_VALUE_TYPE_FLOAT64;
+	}
+	else if(typeName == "bool")
+	{
+		valueType = HQ_VALUE_TYPE_BOOL;
+	}
+	else if(typeName == "string")
+	{
+		valueType = HQ_VALUE_TYPE_STRING;
+	}
+	else if(typeName == "native")
+	{
+		valueType = HQ_VALUE_TYPE_NATIVE;
+	}
+	else
+	{
+		// TODO: Handle arrays
+		// TODO: Handle templates?
+	}
+
+	// TODO: Make this generic for all types of variables, not just class variables.
+	for(auto* const pVarDefCtx : varDefs)
+	{
+		const std::string shortName = pVarDefCtx->Id()->getText();
+		const std::string qualifiedName = std::string(pClassName->data) + "." + shortName;
+
+		HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
+
+		if(!HqSourceFile::ClassVarMap::Contains(m_hSrcFile->classVars, pQualifiedName))
+		{
+			ClassVarMetaData* const pClassVar = new ClassVarMetaData();
+
+			pClassVar->scope = scopeType;
+			pClassVar->var.type = valueType;
+			pClassVar->var.isStatic = isStatic;
+			pClassVar->var.isConst = isConst;
+
+			// Cache the fully qualified name of the variable.
+			pClassVar->var.pName = pQualifiedName;
+			HqString::AddRef(pQualifiedName);
+
+			// Store the type name of the variable only if it's an object.
+			pClassVar->var.pTypeName = (valueType == HQ_VALUE_TYPE_OBJECT)
+				? HqString::Create(typeName.c_str())
+				: nullptr;
+
+			// Add a reference to the map key.
+			HqString::AddRef(pQualifiedName);
+
+			HqSourceFile::ClassVarMap::Insert(
+				m_hSrcFile->classVars, 
+				pQualifiedName,
+				pClassVar
+			);
+		}
+		else
+		{
+			// Report the duplicate variable name as an error.
+			m_pErrorNotifier->Report(
+				MessageCode::ErrorDuplicateVar,
+				pVarDefCtx->Id()->getSymbol(),
+				"duplicate class variable '%s'",
+				pQualifiedName->data
+			);
+		}
+
+		HqString::Release(pQualifiedName);
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline ClassType FileDataListener::prv_resolveClassType(const std::string& text) const
+{
+	return (text == "interface")
+		? ClassType::Interface
+		: ClassType::Class;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline ScopeType FileDataListener::prv_resolveScopeType(const std::string& text) const
+{
+	return (text == "public")
+		? ScopeType::Public
+		: (text == "protected")
+			? ScopeType::Protected
+			: ScopeType::Private;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -20,39 +20,17 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../../Harlequin.h"
+#include "Var.hpp"
 
-#include <string>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-namespace antlr4
-{
-	class Token;
-};
+#include "enum/ScopeType.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-enum class MessageCode
+struct ClassVarMetaData
 {
-	_ErrorStart_ = 1000,
-	ErrorSyntax,
-	ErrorStaticInterface,
-	ErrorDuplicateAlias,
-	ErrorDuplicateClass,
-	ErrorDuplicateVar,
+	VarMetaData var;
 
-	_WarningStart_ = 5000,
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-class IErrorNotifier
-{
-public:
-
-	virtual bool EncounteredError() const = 0;
-	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) = 0;
+	ScopeType scope;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

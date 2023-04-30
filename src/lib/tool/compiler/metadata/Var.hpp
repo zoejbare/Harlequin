@@ -20,39 +20,24 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../../Harlequin.h"
+#include "enum/ClassType.hpp"
+#include "enum/ScopeType.hpp"
 
-#include <string>
+#include "../../../base/String.hpp"
 
-//----------------------------------------------------------------------------------------------------------------------
-
-namespace antlr4
-{
-	class Token;
-};
+#include "../../../common/Array.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-enum class MessageCode
+struct VarMetaData
 {
-	_ErrorStart_ = 1000,
-	ErrorSyntax,
-	ErrorStaticInterface,
-	ErrorDuplicateAlias,
-	ErrorDuplicateClass,
-	ErrorDuplicateVar,
+	HqString* pName;
+	HqString* pTypeName;
 
-	_WarningStart_ = 5000,
-};
+	int type;
 
-//----------------------------------------------------------------------------------------------------------------------
-
-class IErrorNotifier
-{
-public:
-
-	virtual bool EncounteredError() const = 0;
-	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) = 0;
+	bool isStatic;
+	bool isConst;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
