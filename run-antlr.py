@@ -80,8 +80,8 @@ class GeneratorTool(Tool):
 			"java",
 			"-cp", classPath,
 			"org.antlr.v4.Tool",
-			"-listener",
-			"-no-visitor",
+			"-no-listener",
+			"-visitor",
 			"-Dlanguage=Cpp",
 			"-o", outputPath,
 			grammarFilePath
@@ -120,7 +120,7 @@ class ParseTool(Tool):
 				"java",
 				"-cp", classPath,
 				"org.antlr.v4.Tool",
-				"-listener",
+				"-no-listener",
 				"-no-visitor",
 				"-o", tempPath,
 				grammarFilePath

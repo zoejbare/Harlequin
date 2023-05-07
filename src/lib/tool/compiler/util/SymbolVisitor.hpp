@@ -22,31 +22,33 @@
 
 #include "ErrorNotifier.hpp"
 
-#include "../generated/HarlequinBaseListener.h"
+#include "../generated/HarlequinBaseVisitor.h"
 #include "../metadata/Class.hpp"
 
 #include <list>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class FileDataListener
-	: public HarlequinBaseListener
+class SymbolVisitor
+	: public HarlequinBaseVisitor
 {
 public:
 
-	FileDataListener() = delete;
-	FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* pErrorNotifier);
+	SymbolVisitor() = delete;
+	SymbolVisitor(HqSourceFileHandle hSrcFile, IErrorNotifier* pErrorNotifier);
 
-	virtual void enterUsingStmt(HarlequinParser::UsingStmtContext*) override;
-	virtual void enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
+	virtual bool shouldVisitNextChild(antlr4::tree::ParseTree* pNode, const std::any& currentResult) override;
 
-	virtual void enterNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
-	virtual void exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
+	virtual std::any visitUsingStmt(HarlequinParser::UsingStmtContext*) override;
+	virtual std::any visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
 
-	virtual void enterClassDecl(HarlequinParser::ClassDeclContext*) override;
-	virtual void exitClassDecl(HarlequinParser::ClassDeclContext*) override;
+	virtual std::any visitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
+	virtual std::any visitClassDecl(HarlequinParser::ClassDeclContext*) override;
 
-	virtual void enterClassVarDecl(HarlequinParser::ClassVarDeclContext*) override;
+	virtual std::any visitClassVarDecl(HarlequinParser::ClassVarDeclContext*) override;
+	virtual std::any visitCtorDecl(HarlequinParser::CtorDeclContext *context) override;
+	virtual std::any visitMethodDecl(HarlequinParser::MethodDeclContext *context) override;
+
 
 private:
 

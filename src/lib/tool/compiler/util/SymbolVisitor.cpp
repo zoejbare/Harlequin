@@ -16,7 +16,7 @@
 // IN THE SOFTWARE.
 //
 
-#include "FileDataListener.hpp"
+#include "SymbolVisitor.hpp"
 #include "ParserErrorListener.hpp"
 
 #include "../SourceFile.hpp"
@@ -25,7 +25,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* const pErrorNotifier)
+SymbolVisitor::SymbolVisitor(HqSourceFileHandle hSrcFile, IErrorNotifier* const pErrorNotifier)
 	: m_hSrcFile(hSrcFile)
 	, m_pErrorNotifier(pErrorNotifier)
 {
@@ -35,12 +35,22 @@ FileDataListener::FileDataListener(HqSourceFileHandle hSrcFile, IErrorNotifier* 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void FileDataListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
+bool SymbolVisitor::shouldVisitNextChild(antlr4::tree::ParseTree* const pNode, const std::any& currentResult)
+{
+	(void) pNode;
+	(void) currentResult;
+
+	return !m_pErrorNotifier->EncounteredError();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+std::any SymbolVisitor::visitUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
 {
 	if(m_pErrorNotifier->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
-		return;
+		return defaultResult();
 	}
 
 	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
@@ -62,16 +72,18 @@ void FileDataListener::enterUsingStmt(HarlequinParser::UsingStmtContext* const p
 
 	// Release the extra string reference on the namespace now that we're done with it.
 	HqString::Release(pNamespace);
+
+	return visitChildren(pCtx);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void FileDataListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
+std::any SymbolVisitor::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
 {
 	if(m_pErrorNotifier->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
-		return;
+		return defaultResult();
 	}
 
 	const std::string qualifiedClassName = pCtx->qualifiedId()->getText();
@@ -118,16 +130,18 @@ void FileDataListener::enterUsingAliasStmt(HarlequinParser::UsingAliasStmtContex
 
 	// Release the qualified class name string.
 	HqString::Release(pQualifiedName);
+
+	return visitChildren(pCtx);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void FileDataListener::enterNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
+std::any SymbolVisitor::visitNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
 {
 	if(m_pErrorNotifier->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
-		return;
+		return defaultResult();
 	}
 
 	const bool isChildOfNamespace = (m_namespaceStack.size() > 0);
@@ -140,30 +154,23 @@ void FileDataListener::enterNamespaceDecl(HarlequinParser::NamespaceDeclContext*
 	HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
 
 	m_namespaceStack.push_back(pQualifiedName);
-}
 
-//----------------------------------------------------------------------------------------------------------------------
-
-void FileDataListener::exitNamespaceDecl(HarlequinParser::NamespaceDeclContext*)
-{
-	if(m_pErrorNotifier->EncounteredError())
-	{
-		// Do nothing once an error has been encountered.
-		return;
-	}
+	std::any result = visitChildren(pCtx);
 
 	HqString::Release(m_namespaceStack.back());
 	m_namespaceStack.pop_back();
+
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
+std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
 {
 	if(m_pErrorNotifier->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
-		return;
+		return defaultResult();
 	}
 
 	const bool isChildOfNamespace = (m_namespaceStack.size() > 0);
@@ -179,6 +186,8 @@ void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const p
 
 	HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
 	HqString* const pShortName = HqString::Create(shortName.c_str());
+
+	std::any result = defaultResult();
 
 	// Check to see if this class has already been defined.
 	if(!HqSourceFile::ClassMap::Contains(m_hSrcFile->classes, pQualifiedName))
@@ -252,6 +261,10 @@ void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const p
 			);
 
 			m_classStack.push_back(pClass);
+
+			result = visitChildren(pCtx);
+
+			m_classStack.pop_back();
 		}
 		else
 		{
@@ -278,29 +291,18 @@ void FileDataListener::enterClassDecl(HarlequinParser::ClassDeclContext* const p
 	// Release the extra string references.
 	HqString::Release(pQualifiedName);
 	HqString::Release(pShortName);
+
+	return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void FileDataListener::exitClassDecl(HarlequinParser::ClassDeclContext*)
+std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* const pCtx)
 {
 	if(m_pErrorNotifier->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
-		return;
-	}
-
-	m_classStack.pop_back();
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void FileDataListener::enterClassVarDecl(HarlequinParser::ClassVarDeclContext* const pCtx)
-{
-	if(m_pErrorNotifier->EncounteredError())
-	{
-		// Do nothing once an error has been encountered.
-		return;
+		return defaultResult();
 	}
 
 	HqString* const pClassName = m_classStack.back()->pQualifiedName;
@@ -428,11 +430,45 @@ void FileDataListener::enterClassVarDecl(HarlequinParser::ClassVarDeclContext* c
 
 		HqString::Release(pQualifiedName);
 	}
+
+	return defaultResult();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline ClassType FileDataListener::prv_resolveClassType(const std::string& text) const
+std::any SymbolVisitor::visitCtorDecl(HarlequinParser::CtorDeclContext* const pCtx)
+{
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return defaultResult();
+	}
+
+	// TODO: Implement me
+	(void) pCtx;
+
+	return defaultResult();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+std::any SymbolVisitor::visitMethodDecl(HarlequinParser::MethodDeclContext* const pCtx)
+{
+	if(m_pErrorNotifier->EncounteredError())
+	{
+		// Do nothing once an error has been encountered.
+		return defaultResult();
+	}
+
+	// TODO: Implement me
+	(void) pCtx;
+
+	return defaultResult();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline ClassType SymbolVisitor::prv_resolveClassType(const std::string& text) const
 {
 	return (text == "interface")
 		? ClassType::Interface
@@ -441,7 +477,7 @@ inline ClassType FileDataListener::prv_resolveClassType(const std::string& text)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline ScopeType FileDataListener::prv_resolveScopeType(const std::string& text) const
+inline ScopeType SymbolVisitor::prv_resolveScopeType(const std::string& text) const
 {
 	return (text == "public")
 		? ScopeType::Public

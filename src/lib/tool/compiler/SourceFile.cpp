@@ -18,8 +18,8 @@
 
 #include "SourceFile.hpp"
 
-#include "util/FileDataListener.hpp"
 #include "util/ParserErrorListener.hpp"
+#include "util/SymbolVisitor.hpp"
 
 #include "generated/HarlequinLexer.h"
 #include "generated/HarlequinParser.h"
@@ -190,9 +190,9 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	// Walk the source file's AST.
-	FileDataListener astListener(hSrcFile, &errorListener);
-	ParseTreeWalker::DEFAULT.walk(&astListener, hSrcFile->pAstRoot);
+	// Walk the AST to discover the source file symbols.
+	SymbolVisitor symbolResolver(hSrcFile, &errorListener);
+	symbolResolver.visit(hSrcFile->pAstRoot);
 
 	// Check for post-parsing errors.
 	if(errorListener.EncounteredError())
