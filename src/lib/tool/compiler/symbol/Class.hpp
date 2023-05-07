@@ -20,70 +20,29 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ErrorNotifier.hpp"
-#include "SymbolTable.hpp"
+#include "enum/ClassType.hpp"
+#include "enum/ScopeType.hpp"
 
-#include "../../../base/String.hpp"
-
-#include <BaseErrorListener.h>
+#include <string>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ParserErrorListener
-	: public antlr4::BaseErrorListener
-	, public IErrorNotifier
+struct ClassSymbol
 {
-public:
+	typedef std::vector<std::string> StringArray;
 
-	ParserErrorListener() = delete;
-	ParserErrorListener(HqReportHandle hReport, const SymbolTable::SourceLineArray& srcLines);
+	StringArray implements;
+	StringArray extends;
 
-	size_t GetErrorCount() const;
-	size_t GetWarningCount() const;
+	std::string qualifiedName;
+	std::string shortName;
+	std::string namespaceName;
 
-	virtual void syntaxError(
-		antlr4::Recognizer* pRecognizer,
-		antlr4::Token* pOffendingSymbol,
-		size_t line,
-		size_t charPositionInLine,
-		const std::string& msg,
-		std::exception_ptr e
-	) override;
+	ClassType type;
+	ScopeType scope;
 
-	virtual bool EncounteredError() const override;
-	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) override;
-
-
-private:
-
-	enum class MsgType
-	{
-		Error,
-		Warning,
-	};
-
-	void prv_report(int, MessageCode, const antlr4::Token*, const char*);
-
-	HqReportHandle m_hReport;
-
-	const SymbolTable::SourceLineArray* m_pSourceLines;
-
-	size_t m_errorCount;
-	size_t m_warningCount;
+	bool isStatic;
 };
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline size_t ParserErrorListener::GetErrorCount() const
-{
-	return m_errorCount;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline size_t ParserErrorListener::GetWarningCount() const
-{
-	return m_warningCount;
-}
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -20,14 +20,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "metadata/Class.hpp"
-#include "metadata/ClassVar.hpp"
+#include "util/SymbolTable.hpp"
 
 #include "../../base/Reference.hpp"
-#include "../../base/String.hpp"
-
-#include "../../common/Array.hpp"
-#include "../../common/HashMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -49,32 +44,6 @@ class HarlequinParser;
 
 struct HqSourceFile
 {
-	typedef HqArray<HqString*> LineArray;
-	typedef HqHashMap<
-		HqString*,
-		HqString*,
-		HqString::StlHash,
-		HqString::StlCompare
-	> ClassAliasMap;
-	typedef HqHashMap<
-		HqString*,
-		bool,
-		HqString::StlHash,
-		HqString::StlCompare
-	> NamespaceMap;
-	typedef HqHashMap<
-		HqString*,
-		ClassMetaData*,
-		HqString::StlHash,
-		HqString::StlCompare
-	> ClassMap;
-	typedef HqHashMap<
-		HqString*,
-		ClassVarMetaData*,
-		HqString::StlHash,
-		HqString::StlCompare
-	> ClassVarMap;
-
 	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const char* filePath,int* pErrorReason);
 
 	static int32_t AddRef(HqSourceFileHandle hSrcFile);
@@ -100,13 +69,7 @@ struct HqSourceFile
 
 	antlr4::tree::ParseTree* pAstRoot;
 
-	LineArray fileLines;
-
-	NamespaceMap namespaces;
-	ClassAliasMap classAliases;
-
-	ClassMap classes;
-	ClassVarMap classVars;
+	SymbolTable symbolTable;
 
 	bool parsed;
 };

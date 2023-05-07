@@ -68,16 +68,10 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 	pOutput->hToolCtx = hToolCtx;
 	pOutput->hSerializer = hSerializer;
 
-	// Initialize the source data structures.
-	NamespaceMap::Allocate(pOutput->namespaces);
-	ClassAliasMap::Allocate(pOutput->classAliases);
-	ClassMap::Allocate(pOutput->classes);
-	ClassVarMap::Allocate(pOutput->classVars);
-
 	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
 	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
 	pOutput->pInputStream = new ANTLRInputStream(
-		reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData), 
+		reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData),
 		pOutput->hSerializer->stream.count
 	);
 	pOutput->pLexer = new HarlequinLexer(pOutput->pInputStream);
@@ -102,10 +96,7 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 		const size_t lineCount = std::count(fileText.begin(), fileText.end(), '\n') + 1;
 
 		// Reserve enough space in the array for each line.
-		LineArray::Initialize(pOutput->fileLines);
-		LineArray::Reserve(pOutput->fileLines, lineCount);
-
-		memset(pOutput->fileLines.pData, 0, sizeof(HqString*) * lineCount);
+		pOutput->symbolTable.srcLines.reserve(lineCount);
 
 		// Replace all carriage returns in the line with whitespace.
 		std::replace(fileText.begin(), fileText.end(), '\r', ' ');
@@ -117,21 +108,18 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 			// Strip the whitespace from the end of the line.
 			line.erase(
 				std::find_if(
-					line.rbegin(), 
-					line.rend(), 
+					line.rbegin(),
+					line.rend(),
 					[](const char ch)
-					{ 
+					{
 						return !std::isspace(ch);
 					}
-				).base(), 
+				).base(),
 				line.end()
 			);
 
-			HqString* const pLine = HqString::Create(line.c_str());
-
 			// Add the line to the array.
-			pOutput->fileLines.pData[pOutput->fileLines.count] = pLine;
-			++pOutput->fileLines.count;
+			pOutput->symbolTable.srcLines.push_back(line);
 		}
 	}
 
@@ -169,7 +157,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 		return hSrcFile->pAstRoot ? HQ_SUCCESS : HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	ParserErrorListener errorListener(&hSrcFile->hToolCtx->report, &hSrcFile->fileLines);
+	ParserErrorListener errorListener(&hSrcFile->hToolCtx->report, hSrcFile->symbolTable.srcLines);
 
 	// Add our custom error listener.
 	hSrcFile->pLexer->addErrorListener(&errorListener);
@@ -191,7 +179,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	}
 
 	// Walk the AST to discover the source file symbols.
-	SymbolVisitor symbolResolver(hSrcFile, &errorListener);
+	SymbolVisitor symbolResolver(hSrcFile->symbolTable, &errorListener);
 	symbolResolver.visit(hSrcFile->pAstRoot);
 
 	// Check for post-parsing errors.
@@ -218,79 +206,6 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 {
 	HqSourceFileHandle hSrcFile = reinterpret_cast<HqSourceFileHandle>(pOpaque);
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
-
-	// Release all file line strings.
-	for(size_t i = 0; i < hSrcFile->fileLines.count; ++i)
-	{
-		HqString::Release(hSrcFile->fileLines.pData[i]);
-	}
-
-	// Free all class metadata.
-	{
-		ClassMap::Iterator iter;
-		while(ClassMap::IterateNext(hSrcFile->classes, iter))
-		{
-			// Release all the implements strings.
-			for(size_t i = 0; i < iter.pData->value->implements.count; ++i)
-			{
-				HqString::Release(iter.pData->value->implements.pData[i]);
-			}
-
-			// Release all the extends strings.
-			for(size_t i = 0; i < iter.pData->value->extends.count; ++i)
-			{
-				HqString::Release(iter.pData->value->extends.pData[i]);
-			}
-
-			ClassMetaData::StringArray::Dispose(iter.pData->value->implements);
-			ClassMetaData::StringArray::Dispose(iter.pData->value->extends);
-
-			HqString::Release(iter.pData->key);
-			HqString::Release(iter.pData->value->pQualifiedName);
-			HqString::Release(iter.pData->value->pShortName);
-			HqString::Release(iter.pData->value->pNamespace);
-
-			delete iter.pData->value;
-		}
-	}
-
-	// Free all class variable metadata.
-	{
-		ClassVarMap::Iterator iter;
-		while(ClassVarMap::IterateNext(hSrcFile->classVars, iter))
-		{
-			HqString::Release(iter.pData->value->var.pName);
-			HqString::Release(iter.pData->value->var.pTypeName);
-
-			delete iter.pData->value;
-		}
-	}
-
-	// Release all mapped class alias strings.
-	{
-		ClassAliasMap::Iterator iter;
-		while(ClassAliasMap::IterateNext(hSrcFile->classAliases, iter))
-		{
-			HqString::Release(iter.pData->key);
-			HqString::Release(iter.pData->value);
-		}
-	}
-
-	// Release all used namespace strings
-	{
-		NamespaceMap::Iterator iter;
-		while(NamespaceMap::IterateNext(hSrcFile->namespaces, iter))
-		{
-			HqString::Release(iter.pData->key);
-		}
-	}
-
-	// Dispose of the source data structures.
-	NamespaceMap::Dispose(hSrcFile->namespaces);
-	ClassAliasMap::Dispose(hSrcFile->classAliases);
-	ClassMap::Dispose(hSrcFile->classes);
-	ClassVarMap::Dispose(hSrcFile->classVars);
-	LineArray::Dispose(hSrcFile->fileLines);
 
 	HqSerializer::Dispose(hSrcFile->hSerializer);
 

@@ -21,9 +21,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "ErrorNotifier.hpp"
+#include "SymbolTable.hpp"
 
 #include "../generated/HarlequinBaseVisitor.h"
-#include "../metadata/Class.hpp"
 
 #include <list>
 
@@ -35,7 +35,7 @@ class SymbolVisitor
 public:
 
 	SymbolVisitor() = delete;
-	SymbolVisitor(HqSourceFileHandle hSrcFile, IErrorNotifier* pErrorNotifier);
+	SymbolVisitor(SymbolTable& symbolTable, IErrorNotifier* pErrorNotifier);
 
 	virtual bool shouldVisitNextChild(antlr4::tree::ParseTree* pNode, const std::any& currentResult) override;
 
@@ -55,12 +55,12 @@ private:
 	ClassType prv_resolveClassType(const std::string&) const;
 	ScopeType prv_resolveScopeType(const std::string&) const;
 
-	HqSourceFileHandle m_hSrcFile;
+	SymbolTable* m_pSymbolTable;
 
 	IErrorNotifier* m_pErrorNotifier;
 
-	std::list<HqString*> m_namespaceStack;
-	std::list<ClassMetaData*> m_classStack;
+	std::list<std::string> m_namespaceStack;
+	std::list<ClassSymbol*> m_classStack;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

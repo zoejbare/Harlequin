@@ -25,14 +25,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-ParserErrorListener::ParserErrorListener(HqReportHandle hReport, const HqArray<HqString*>* const pSourceLines)
+ParserErrorListener::ParserErrorListener(HqReportHandle hReport, const SymbolTable::SourceLineArray& srcLines)
 	: m_hReport(hReport)
-	, m_pSourceLines(pSourceLines)
+	, m_pSourceLines(&srcLines)
 	, m_errorCount(0)
 	, m_warningCount(0)
 {
 	assert(hReport != HQ_REPORT_HANDLE_NULL);
-	assert(pSourceLines != nullptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -94,8 +93,7 @@ void ParserErrorListener::prv_report(
 	const size_t lineNumber = pOffendingSymbol->getLine();
 	const size_t charPositionInLine = pOffendingSymbol->getCharPositionInLine();
 	const std::string sourceName = pOffendingSymbol->getTokenSource()->getSourceName();
-
-	const HqString* const pLine = m_pSourceLines->pData[lineNumber - 1];
+	const std::string line = (*m_pSourceLines)[lineNumber - 1];
 
 	const char* typeStr = nullptr;
 	switch(type)
@@ -117,20 +115,20 @@ void ParserErrorListener::prv_report(
 	char codeStr[6];
 	snprintf(codeStr, sizeof(codeStr) / sizeof(char), "C%04" PRId32, int(code));
 
-	std::string finalMsg 
-		= sourceName 
-		+ "(" + std::to_string(lineNumber) + "): " 
-		+ typeStr + codeStr + ": " 
-		+ msg + "\n" 
-		+ pLine->data + "\n";
+	std::string finalMsg
+		= sourceName
+		+ "(" + std::to_string(lineNumber) + "): "
+		+ typeStr + codeStr + ": "
+		+ msg + "\n"
+		+ line + "\n";
 
 	// Add the whitespace leading up to the underlining.
 	for(size_t i = 0; i < charPositionInLine; ++i)
 	{
-		const char charInLine = pLine->data[i];
+		const char charInLine = line[i];
 
-		finalMsg += (isspace(charInLine) > 0) 
-			? charInLine 
+		finalMsg += (isspace(charInLine) > 0)
+			? charInLine
 			: ' ';
 	}
 

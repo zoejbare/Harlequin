@@ -26,10 +26,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct ClassVarMetaData
+struct ClassVarSymbol
 {
-	VarMetaData var;
-
+	VarSymbol var;
 	ScopeType scope;
 };
 

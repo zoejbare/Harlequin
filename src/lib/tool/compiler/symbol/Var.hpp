@@ -23,16 +23,14 @@
 #include "enum/ClassType.hpp"
 #include "enum/ScopeType.hpp"
 
-#include "../../../base/String.hpp"
-
-#include "../../../common/Array.hpp"
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct VarMetaData
+struct VarSymbol
 {
-	HqString* pName;
-	HqString* pTypeName;
+	std::string name;
+	std::string className;
 
 	int type;
 

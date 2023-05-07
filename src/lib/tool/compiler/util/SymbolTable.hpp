@@ -20,30 +20,50 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "enum/ClassType.hpp"
-#include "enum/ScopeType.hpp"
+#include "../symbol/Class.hpp"
+#include "../symbol/ClassVar.hpp"
+#include "../symbol/Var.hpp"
 
-#include "../../../base/String.hpp"
-
-#include "../../../common/Array.hpp"
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct ClassMetaData
+struct SymbolTable
 {
-	typedef HqArray<HqString*> StringArray;
+	typedef std::vector<std::string> SourceLineArray;
 
-	StringArray implements;
-	StringArray extends;
+	typedef std::unordered_set<std::string> NamespaceSet;
 
-	HqString* pQualifiedName;
-	HqString* pShortName;
-	HqString* pNamespace;
+	typedef std::unordered_map<std::string, std::string>     ClassAliasMap;
+	typedef std::unordered_map<std::string, ClassSymbol*>    ClassSymbolMap;
+	typedef std::unordered_map<std::string, ClassVarSymbol*> ClassVarSymbolMap;
 
-	ClassType type;
-	ScopeType scope;
+	~SymbolTable();
 
-	bool isStatic;
+	SourceLineArray srcLines;
+	NamespaceSet namespaceImports;
+	ClassAliasMap classAliases;
+	ClassSymbolMap classSymbols;
+	ClassVarSymbolMap classVarSymbols;
 };
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline SymbolTable::~SymbolTable()
+{
+	// Delete all class symbols.
+	for(auto& kv : classSymbols)
+	{
+		delete kv.second;
+	}
+
+	// Delete all class variable symbols.
+	for(auto& kv : classVarSymbols)
+	{
+		delete kv.second;
+	}
+}
 
 //----------------------------------------------------------------------------------------------------------------------

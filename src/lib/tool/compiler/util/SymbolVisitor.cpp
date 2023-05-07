@@ -25,11 +25,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-SymbolVisitor::SymbolVisitor(HqSourceFileHandle hSrcFile, IErrorNotifier* const pErrorNotifier)
-	: m_hSrcFile(hSrcFile)
+SymbolVisitor::SymbolVisitor(SymbolTable& symbolTable, IErrorNotifier* const pErrorNotifier)
+	: m_pSymbolTable(&symbolTable)
 	, m_pErrorNotifier(pErrorNotifier)
 {
-	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 	assert(pErrorNotifier != nullptr);
 }
 
@@ -55,23 +54,11 @@ std::any SymbolVisitor::visitUsingStmt(HarlequinParser::UsingStmtContext* const 
 
 	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
 
-	HqString* const pNamespace = HqString::Create(qualifiedNamespace.c_str());
-
 	// Check to see if this namespace is already being used (we can ignore duplicate namespaces).
-	if(!HqSourceFile::NamespaceMap::Contains(m_hSrcFile->namespaces, pNamespace))
+	if(!m_pSymbolTable->namespaceImports.count(qualifiedNamespace))
 	{
-		// Add a reference to the namespace string since it will be used as the map key.
-		HqString::AddRef(pNamespace);
-
-		HqSourceFile::NamespaceMap::Insert(
-			m_hSrcFile->namespaces, 
-			pNamespace,
-			false
-		);
+		m_pSymbolTable->namespaceImports.insert(qualifiedNamespace);
 	}
-
-	// Release the extra string reference on the namespace now that we're done with it.
-	HqString::Release(pNamespace);
 
 	return visitChildren(pCtx);
 }
@@ -89,29 +76,17 @@ std::any SymbolVisitor::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtConte
 	const std::string qualifiedClassName = pCtx->qualifiedId()->getText();
 	const auto aliasNames = pCtx->Id();
 
-	HqString* const pQualifiedName = HqString::Create(qualifiedClassName.c_str());
-
 	// Map each alias listed in the statement.
 	for(auto& alias : aliasNames)
 	{
 		const std::string aliasedClassName = alias->getText();
 
-		HqString* const pAliasedName = HqString::Create(aliasedClassName.c_str());
-
 		// Check if the class alias has not already been declared.
 		// If it has, it means there is an ambiguous reference to
 		// that class name.
-		if(!HqSourceFile::ClassAliasMap::Contains(m_hSrcFile->classAliases, pAliasedName))
+		if(!m_pSymbolTable->classAliases.count(aliasedClassName))\
 		{
-			// Add references to the strings going into the map.
-			HqString::AddRef(pQualifiedName);
-			HqString::AddRef(pAliasedName);
-
-			HqSourceFile::ClassAliasMap::Insert(
-				m_hSrcFile->classAliases, 
-				pAliasedName,
-				pQualifiedName
-			);
+			m_pSymbolTable->classAliases.emplace(aliasedClassName, qualifiedClassName);
 		}
 		else
 		{
@@ -120,16 +95,10 @@ std::any SymbolVisitor::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtConte
 				MessageCode::ErrorDuplicateAlias,
 				alias->getSymbol(),
 				"duplicate class alias '%s'",
-				pAliasedName->data
+				aliasedClassName.c_str()
 			);
 		}
-
-		// Release the class alias string.
-		HqString::Release(pAliasedName);
 	}
-
-	// Release the qualified class name string.
-	HqString::Release(pQualifiedName);
 
 	return visitChildren(pCtx);
 }
@@ -148,16 +117,13 @@ std::any SymbolVisitor::visitNamespaceDecl(HarlequinParser::NamespaceDeclContext
 
 	const std::string shortName = pCtx->qualifiedId()->getText();
 	const std::string qualifiedName = isChildOfNamespace
-		? (std::string(m_namespaceStack.back()->data) + "." + shortName) 
+		? m_namespaceStack.back() + "." + shortName
 		: shortName;
 
-	HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
-
-	m_namespaceStack.push_back(pQualifiedName);
+	m_namespaceStack.push_back(qualifiedName);
 
 	std::any result = visitChildren(pCtx);
 
-	HqString::Release(m_namespaceStack.back());
 	m_namespaceStack.pop_back();
 
 	return result;
@@ -175,22 +141,17 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 
 	const bool isChildOfNamespace = (m_namespaceStack.size() > 0);
 
-	HqString* const pNamespace = isChildOfNamespace
+	const std::string currentNamespace = isChildOfNamespace
 		? m_namespaceStack.back()
-		: nullptr;
+		: std::string();
 
 	const std::string shortName = pCtx->Id()->getText();
 	const std::string qualifiedName = isChildOfNamespace
-		? (std::string(pNamespace->data) + "." + shortName) 
+		? currentNamespace + "." + shortName
 		: shortName;
 
-	HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
-	HqString* const pShortName = HqString::Create(shortName.c_str());
-
-	std::any result = defaultResult();
-
 	// Check to see if this class has already been defined.
-	if(!HqSourceFile::ClassMap::Contains(m_hSrcFile->classes, pQualifiedName))
+	if(!m_pSymbolTable->classSymbols.count(qualifiedName))
 	{
 		const bool isStatic = (pCtx->StaticKw() != nullptr);
 
@@ -201,12 +162,8 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 		{
 			auto* const pClassInheritanceCtx = pCtx->classInheritance();
 
-			// Create new class metadata.
-			ClassMetaData* const pClass = new ClassMetaData();
-
-			// Initialize the class data structures.
-			ClassMetaData::StringArray::Initialize(pClass->implements);
-			ClassMetaData::StringArray::Initialize(pClass->extends);
+			// Create new class symbol.
+			ClassSymbol* const pClass = new ClassSymbol();
 
 			// Handle the class inheritance.
 			if(pClassInheritanceCtx)
@@ -218,53 +175,36 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 				{
 					const size_t length = pClassImplsCtx->qualifiedId().size();
 
-					ClassMetaData::StringArray::Reserve(pClass->implements, length);
-					pClass->implements.count = length;
+					pClass->implements.resize(length);
 
 					// Extract each interface name to implement.
 					for(size_t i = 0; i < length; ++i)
 					{
-						pClass->implements.pData[i] = HqString::Create(pClassImplsCtx->qualifiedId(i)->getText().c_str());
+						pClass->implements[i] = pClassImplsCtx->qualifiedId(i)->getText();
 					}
 				}
 
 				if(pClassExtendsCtx)
 				{
-					ClassMetaData::StringArray::Reserve(pClass->extends, 1);
+					pClass->extends.resize(1);
 
 					// Extract the class name to extend.
-					pClass->extends.count = 1;
-					pClass->extends.pData[0] = HqString::Create(pClassExtendsCtx->qualifiedId()->getText().c_str());
+					pClass->extends[0] = pClassExtendsCtx->qualifiedId()->getText();
 				}
 			}
 
 			// Fill in the class properties.
-			pClass->pQualifiedName = pQualifiedName;
-			pClass->pShortName = pShortName;
-			pClass->pNamespace = pNamespace;
+			pClass->qualifiedName = qualifiedName;
+			pClass->shortName = shortName;
+			pClass->namespaceName = currentNamespace;
 			pClass->type = classType;
 			pClass->scope = scopeType;
 			pClass->isStatic = isStatic;
 
-			// Add string references for the class metadata.
-			HqString::AddRef(pClass->pQualifiedName);
-			HqString::AddRef(pClass->pShortName);
-			HqString::AddRef(pClass->pNamespace);
-		
-			// Add a reference to the namespace string since it will be used as the map key.
-			HqString::AddRef(pQualifiedName);
-
-			HqSourceFile::ClassMap::Insert(
-				m_hSrcFile->classes, 
-				pQualifiedName,
-				pClass
-			);
+			// Add the class to the symbol table.
+			m_pSymbolTable->classSymbols.emplace(qualifiedName, pClass);
 
 			m_classStack.push_back(pClass);
-
-			result = visitChildren(pCtx);
-
-			m_classStack.pop_back();
 		}
 		else
 		{
@@ -273,7 +213,7 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 				MessageCode::ErrorStaticInterface,
 				pCtx->StaticKw()->getSymbol(),
 				"illegal static interface declaration '%s'",
-				pQualifiedName->data
+				qualifiedName.c_str()
 			);
 		}
 	}
@@ -284,13 +224,18 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 			MessageCode::ErrorDuplicateClass,
 			pCtx->Id()->getSymbol(),
 			"duplicate class declaration '%s'",
-			pQualifiedName->data
+			qualifiedName.c_str()
 		);
 	}
 
-	// Release the extra string references.
-	HqString::Release(pQualifiedName);
-	HqString::Release(pShortName);
+	std::any result = defaultResult();
+
+	if(!m_pErrorNotifier->EncounteredError())
+	{
+		result = visitChildren(pCtx);
+
+		m_classStack.pop_back();
+	}
 
 	return result;
 }
@@ -305,7 +250,7 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 		return defaultResult();
 	}
 
-	HqString* const pClassName = m_classStack.back()->pQualifiedName;
+	const std::string& className = m_classStack.back()->qualifiedName;
 
 	auto* const pScopeModCtx = pCtx->scopeModifier();
 	auto* const pVarDeclCtx = pCtx->varDecl();
@@ -317,8 +262,8 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 	const bool isConst = (pVarModCtx && (pVarModCtx->ConstKw() != nullptr));
 
 	// When no explicit scope is present, the default is private.
-	const ScopeType scopeType = pScopeModCtx 
-		? prv_resolveScopeType(pScopeModCtx->getText()) 
+	const ScopeType scopeType = pScopeModCtx
+		? prv_resolveScopeType(pScopeModCtx->getText())
 		: ScopeType::Private;
 
 	const std::string typeName = pTypeNameCtx->getText();
@@ -386,13 +331,11 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 	for(auto* const pVarDefCtx : varDefs)
 	{
 		const std::string shortName = pVarDefCtx->Id()->getText();
-		const std::string qualifiedName = std::string(pClassName->data) + "." + shortName;
+		const std::string qualifiedName = className + "." + shortName;
 
-		HqString* const pQualifiedName = HqString::Create(qualifiedName.c_str());
-
-		if(!HqSourceFile::ClassVarMap::Contains(m_hSrcFile->classVars, pQualifiedName))
+		if(!m_pSymbolTable->classVarSymbols.count(qualifiedName))
 		{
-			ClassVarMetaData* const pClassVar = new ClassVarMetaData();
+			ClassVarSymbol* const pClassVar = new ClassVarSymbol();
 
 			pClassVar->scope = scopeType;
 			pClassVar->var.type = valueType;
@@ -400,22 +343,15 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 			pClassVar->var.isConst = isConst;
 
 			// Cache the fully qualified name of the variable.
-			pClassVar->var.pName = pQualifiedName;
-			HqString::AddRef(pQualifiedName);
+			pClassVar->var.name = qualifiedName;
 
 			// Store the type name of the variable only if it's an object.
-			pClassVar->var.pTypeName = (valueType == HQ_VALUE_TYPE_OBJECT)
-				? HqString::Create(typeName.c_str())
-				: nullptr;
+			if(valueType == HQ_VALUE_TYPE_OBJECT)
+			{
+				pClassVar->var.className = typeName;
+			}
 
-			// Add a reference to the map key.
-			HqString::AddRef(pQualifiedName);
-
-			HqSourceFile::ClassVarMap::Insert(
-				m_hSrcFile->classVars, 
-				pQualifiedName,
-				pClassVar
-			);
+			m_pSymbolTable->classVarSymbols.emplace(qualifiedName, pClassVar);
 		}
 		else
 		{
@@ -424,11 +360,9 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 				MessageCode::ErrorDuplicateVar,
 				pVarDefCtx->Id()->getSymbol(),
 				"duplicate class variable '%s'",
-				pQualifiedName->data
+				qualifiedName.c_str()
 			);
 		}
-
-		HqString::Release(pQualifiedName);
 	}
 
 	return defaultResult();
