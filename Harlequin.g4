@@ -345,7 +345,7 @@ asmStmt
 
 // Assembly instruction rule
 asmInstr
-	: Id (asmOperand (Comma asmOperand)*)? Term
+	: Id (asmOperand (Comma asmOperand)*)? Term?
 	;
 
 // Assembly instruction operand rule
