@@ -171,7 +171,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	hSrcFile->pLexer->removeErrorListeners();
 	hSrcFile->pParser->removeErrorListeners();
 
-	// Checking for parsing+lexing error
+	// Checking for parsing+lexing errors.
 	if(errorListener.EncounteredError())
 	{
 		hSrcFile->pAstRoot = nullptr;
@@ -182,7 +182,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	SymbolVisitor symbolResolver(hSrcFile->symbolTable, &errorListener);
 	symbolResolver.visit(hSrcFile->pAstRoot);
 
-	// Check for post-parsing errors.
+	// Check for errors that occured during symbol resolution.
 	if(errorListener.EncounteredError())
 	{
 		hSrcFile->pAstRoot = nullptr;

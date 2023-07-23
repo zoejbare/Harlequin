@@ -793,7 +793,7 @@ extern "C" void OpCodeDisasm_LoadImmStr(HqDisassemble& disasm)
 	const uint32_t stringIndex = HqDecoder::LoadUint32(disasm.decoder);
 
 	char instr[512];
-	snprintf(instr, sizeof(instr), "LOAD_IMM_STR r(%" PRIu32 "), s%" PRIu32, registerIndex, stringIndex);
+	snprintf(instr, sizeof(instr), "LOAD_IMM_STR r(%" PRIu32 "), s(%" PRIu32 ")", registerIndex, stringIndex);
 	disasm.onDisasmFn(disasm.pUserData, instr, disasm.opcodeOffset);
 }
 
