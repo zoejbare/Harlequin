@@ -18,6 +18,8 @@
 
 #include "ParserErrorListener.hpp"
 
+#include "../../../base/String.hpp"
+
 #include <antlr4-runtime.h>
 
 #include <assert.h>

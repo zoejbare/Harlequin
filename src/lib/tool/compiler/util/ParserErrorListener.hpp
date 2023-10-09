@@ -23,8 +23,6 @@
 #include "ErrorNotifier.hpp"
 #include "SymbolTable.hpp"
 
-#include "../../../base/String.hpp"
-
 #include <BaseErrorListener.h>
 
 //----------------------------------------------------------------------------------------------------------------------
