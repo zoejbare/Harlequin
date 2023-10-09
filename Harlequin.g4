@@ -103,7 +103,8 @@ classDef
 
 // Typename rule
 typeName
-	: Id (LeftBracket RightBracket)*
+	: Id ArrayTypeSpec*
+	| Id MultiArrayTypeSpec*
 	;
 
 // Class variable declaration statement rule
@@ -240,8 +241,10 @@ expr
 	| expr LogicAnd expr                                                            # exprLogic
 	| expr LogicOr expr                                                             # exprLogic
 	| expr (Assign | ExpoAssign | AddAssign | SubAssign | MultAssign | DivAssign | ModAssign | LeftRotateAssign | RightRotateAssign | LeftShiftAssign | RightShiftAssign | BitAndAssign | BitXorAssign | BitOrAssign) expr # exprAssignment
-	| expr Comma expr                                                               # exprComma
-	| (BreakKw | ContinueKw)                                                        # exprControl
+	| expr Comma expr Comma?                                                        # exprComma
+	| NewKw Id ArrayTypeDef* ArrayTypeSpec*                                         # exprInstantiate
+	| NewKw Id MultiArrayTypeDef*                                                   # exprInstantiate
+	| (BreakKw | ContinueKw)                                                        # exprControlFlow
 	| CopyIntrinKw                                                                  # exprIntrinsic
 	| (NullLit | BoolLit | RealLit | IntLit)                                        # exprLiteral
 	| StrLit+                                                                       # exprStrLiteral
@@ -426,6 +429,7 @@ ConstructorKw: 'constructor' ;
 PublicKw:      'public' ;
 ProtectedKw:   'protected' ;
 PrivateKw:     'private' ;
+NewKw:         'new' ;
 
 // Intrinsic keyword tokens
 AsmIntrinKw:  '__asm' ;
@@ -497,11 +501,20 @@ Pound: '#' ;
 // Compiler directive keyword tokens
 LineKw: 'line' ;
 
-AsmRegId: [rR] FDigit+ ;
-
 // Value keyword literal tokens
 NullLit: 'null' ;
 BoolLit: 'true' | 'false' ;
+
+// Assembly register ID
+AsmRegId: [rR] FDigit+ ;
+
+// Typename array specifier
+ArrayTypeSpec:      LeftBracket RightBracket ;
+MultiArrayTypeSpec: LeftBracket Comma+ RightBracket ;
+
+// Type instantiation array definition
+ArrayTypeDef:      LeftBracket IntLit RightBracket ;
+MultiArrayTypeDef: LeftBracket IntLit (Comma IntLit)+ RightBracket ;
 
 // Lexer base rules (must be defined after most other lexer rules to avoid parser ambiguities)
 IntLit:  (FDigit+ | ('0x' FHex+) | ('0o' FOctal+) | ('0b' FBinary+)) FIntSuffix? ;
