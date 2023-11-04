@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "util/SymbolTable.hpp"
+#include "generator/SymbolTable.hpp"
 
 #include "../../base/Reference.hpp"
 

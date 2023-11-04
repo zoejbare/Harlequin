@@ -91,15 +91,15 @@ void ControlFlow::End()
 		}
 
 		// Go the offset of the temporary JMP instruction.
-		const int setCmdOffset = HqSerializerSetStreamPosition(m_hSerializer, cmd.offset);
-		assert(setCmdOffset == HQ_SUCCESS); (void) setCmdOffset;
+		const int setCmdOffsetResult = HqSerializerSetStreamPosition(m_hSerializer, cmd.offset);
+		assert(setCmdOffsetResult == HQ_SUCCESS); (void) setCmdOffsetResult;
 
 		// Write the real JMP instruction using the calculated distance.
 		prv_writeJump(jumpDist, cmd.type);
 	}
 
-	const int returnToEndOffset = HqSerializerSetStreamPosition(m_hSerializer, m_offEnd);
-	assert(returnToEndOffset == HQ_SUCCESS); (void) returnToEndOffset;
+	const int returnToEndOffsetResult = HqSerializerSetStreamPosition(m_hSerializer, m_offEnd);
+	assert(returnToEndOffsetResult == HQ_SUCCESS); (void) returnToEndOffsetResult;
 
 	m_cmds.count = 0;
 

@@ -23,7 +23,7 @@
 #include "ErrorNotifier.hpp"
 #include "SymbolTable.hpp"
 
-#include "../generated/HarlequinBaseVisitor.h"
+#include "../parser/HarlequinBaseVisitor.h"
 
 #include <list>
 

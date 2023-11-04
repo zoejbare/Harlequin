@@ -36,13 +36,14 @@ namespace antlr4
 enum class MessageCode
 {
 	_ErrorStart_ = 1000,
+
 	ErrorSyntax,
 	ErrorStaticInterface,
 	ErrorDuplicateAlias,
 	ErrorDuplicateClass,
 	ErrorDuplicateVar,
 
-	_WarningStart_ = 5000,
+	_WarningStart_ = 6000,
 };
 
 //----------------------------------------------------------------------------------------------------------------------

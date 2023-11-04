@@ -19,7 +19,7 @@
 #include "../FuncTestUtil.hpp"
 #include "../Memory.hpp"
 
-#include <tool/compiler/util/ControlFlow.hpp>
+#include <tool/compiler/generator/ControlFlow.hpp>
 #include <gtest/gtest.h>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ TEST_F(_HQ_TEST_NAME(TestSamples), ComputeCovarianceMatrix)
 		VECTOR__COUNT,
 	};
 
-	static constexpr const char* const mainFuncSig = "(matrix, vector) covarianceMatrix(array[vector])";
+	static constexpr const char* const mainFuncSig = "(matrix, vector) covarianceMatrix(vector[])";
 
 	static constexpr const char* const typeName[TYPE__COUNT] =
 	{

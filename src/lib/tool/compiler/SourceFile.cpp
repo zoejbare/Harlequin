@@ -18,11 +18,11 @@
 
 #include "SourceFile.hpp"
 
-#include "util/ParserErrorListener.hpp"
-#include "util/SymbolVisitor.hpp"
+#include "generator/ParserErrorListener.hpp"
+#include "generator/SymbolVisitor.hpp"
 
-#include "generated/HarlequinLexer.h"
-#include "generated/HarlequinParser.h"
+#include "parser/HarlequinLexer.h"
+#include "parser/HarlequinParser.h"
 
 #include "../ToolContext.hpp"
 

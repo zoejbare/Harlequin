@@ -139,7 +139,7 @@ varModifier
 	;
 
 // Variable declaration or expression statement rule (primarily for use within paren'd statements)
-parenExpr
+ctrlFlowExpr
 	: varDecl
 	| expr
 	;
@@ -241,7 +241,6 @@ expr
 	| expr LogicAnd expr                                                            # exprLogic
 	| expr LogicOr expr                                                             # exprLogic
 	| expr (Assign | ExpoAssign | AddAssign | SubAssign | MultAssign | DivAssign | ModAssign | LeftRotateAssign | RightRotateAssign | LeftShiftAssign | RightShiftAssign | BitAndAssign | BitXorAssign | BitOrAssign) expr # exprAssignment
-	| expr Comma expr Comma?                                                        # exprComma
 	| NewKw Id ArrayTypeDef* ArrayTypeSpec*                                         # exprInstantiate
 	| NewKw Id MultiArrayTypeDef*                                                   # exprInstantiate
 	| (BreakKw | ContinueKw)                                                        # exprControlFlow
@@ -265,17 +264,17 @@ loopStmt
 
 // While-loop definition rule
 loopWhileDef
-	: WhileKw LeftParen parenExpr RightParen codeStmt
+	: WhileKw LeftParen ctrlFlowExpr RightParen codeStmt
 	;
 
 // Do-while-loop definition rule
 loopDoWhileDef
-	: DoKw codeStmt WhileKw LeftParen parenExpr RightParen Term
+	: DoKw codeStmt WhileKw LeftParen ctrlFlowExpr RightParen Term
 	;
 
 // For-loop definition rule
 loopForDef
-	: ForKw LeftParen parenExpr? Term parenExpr? Term parenExpr? RightParen codeStmt
+	: ForKw LeftParen ctrlFlowExpr? Term ctrlFlowExpr? Term ctrlFlowExpr? RightParen codeStmt
 	;
 
 // Root conditional statement rule
@@ -286,12 +285,12 @@ conditionStmt
 
 // Condition defintion (if-fragment) rule
 condIfDef
-	: IfKw LeftParen parenExpr RightParen codeStmt
+	: IfKw LeftParen ctrlFlowExpr RightParen codeStmt
 	;
 
 // Condition defintion (elif-fragment) rule
 condElifDef
-	: ElifKw LeftParen parenExpr RightParen codeStmt
+	: ElifKw LeftParen ctrlFlowExpr RightParen codeStmt
 	;
 
 // Condition defintion (else-fragment) rule
@@ -301,7 +300,7 @@ condElseDef
 
 // Condition (switch) rule
 condSwitchDef
-	: SwitchKw LeftParen parenExpr RightParen
+	: SwitchKw LeftParen ctrlFlowExpr RightParen
 	;
 
 // Condition (case definition) rule
@@ -327,7 +326,7 @@ tryBlockDef
 
 // Catch-block definition rule
 catchBlockDef
-	: CatchKw LeftParen parenExpr? RightParen codeStmt
+	: CatchKw LeftParen ctrlFlowExpr? RightParen codeStmt
 	;
 
 // Finally-block definition rule
