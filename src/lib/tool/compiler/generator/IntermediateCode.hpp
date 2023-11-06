@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ErrorNotifier.hpp"
+#include "ParserErrorHandler.hpp"
 #include "SymbolTable.hpp"
 
 #include "../parser/HarlequinBaseVisitor.h"
@@ -29,15 +29,19 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class SymbolVisitor
-	: public HarlequinBaseVisitor
+class IntermediateCode
+	: protected HarlequinBaseVisitor
 {
 public:
 
-	SymbolVisitor() = delete;
-	SymbolVisitor(SymbolTable& symbolTable, IErrorNotifier* pErrorNotifier);
+	static IntermediateCode* Resolve(antlr4::tree::ParseTree* const pParseTree, ParserErrorHandler* const pErrorHandler);
 
-	virtual bool shouldVisitNextChild(antlr4::tree::ParseTree* pNode, const std::any& currentResult) override;
+
+private:
+
+	IntermediateCode(ParserErrorHandler*);
+
+	virtual bool shouldVisitNextChild(antlr4::tree::ParseTree*, const std::any&) override;
 
 	virtual std::any visitUsingStmt(HarlequinParser::UsingStmtContext*) override;
 	virtual std::any visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
@@ -46,18 +50,15 @@ public:
 	virtual std::any visitClassDecl(HarlequinParser::ClassDeclContext*) override;
 
 	virtual std::any visitClassVarDecl(HarlequinParser::ClassVarDeclContext*) override;
-	virtual std::any visitCtorDecl(HarlequinParser::CtorDeclContext *context) override;
-	virtual std::any visitMethodDecl(HarlequinParser::MethodDeclContext *context) override;
-
-
-private:
+	virtual std::any visitCtorDecl(HarlequinParser::CtorDeclContext*) override;
+	virtual std::any visitMethodDecl(HarlequinParser::MethodDeclContext*) override;
 
 	ClassType prv_resolveClassType(const std::string&) const;
 	ScopeType prv_resolveScopeType(const std::string&) const;
 
-	SymbolTable* m_pSymbolTable;
+	ParserErrorHandler* m_pErrorHandler;
 
-	IErrorNotifier* m_pErrorNotifier;
+	SymbolTable m_symbolTable;
 
 	std::list<std::string> m_namespaceStack;
 	std::list<ClassSymbol*> m_classStack;

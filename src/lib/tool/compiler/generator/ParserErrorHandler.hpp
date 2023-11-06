@@ -20,36 +20,31 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ErrorNotifier.hpp"
-#include "SymbolTable.hpp"
+#include "MessageCode.hpp"
+#include "SourceData.hpp"
+
+#include "../../../base/String.hpp"
 
 #include <BaseErrorListener.h>
 
+#include <varargs.h>
+
 //----------------------------------------------------------------------------------------------------------------------
 
-class ParserErrorListener
-	: public antlr4::BaseErrorListener
-	, public IErrorNotifier
+class ParserErrorHandler
+	: protected antlr4::BaseErrorListener
 {
 public:
 
-	ParserErrorListener() = delete;
-	ParserErrorListener(HqReportHandle hReport, const SymbolTable::SourceLineArray& srcLines);
+	ParserErrorHandler() = delete;
+	ParserErrorHandler(HqReportHandle hReport, const SourceData& srcData);
 
 	size_t GetErrorCount() const;
 	size_t GetWarningCount() const;
 
-	virtual void syntaxError(
-		antlr4::Recognizer* pRecognizer,
-		antlr4::Token* pOffendingSymbol,
-		size_t line,
-		size_t charPositionInLine,
-		const std::string& msg,
-		std::exception_ptr e
-	) override;
+	bool EncounteredError() const;
 
-	virtual bool EncounteredError() const override;
-	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) override;
+	void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...);
 
 
 private:
@@ -60,11 +55,20 @@ private:
 		Warning,
 	};
 
+	virtual void syntaxError(
+		antlr4::Recognizer* pRecognizer,
+		antlr4::Token* pOffendingSymbol,
+		size_t line,
+		size_t charPositionInLine,
+		const std::string& msg,
+		std::exception_ptr e
+	) override;
+
 	void prv_report(int, MessageCode, const antlr4::Token*, const char*);
 
 	HqReportHandle m_hReport;
 
-	const SymbolTable::SourceLineArray* m_pSourceLines;
+	const SourceData* m_pSrcData;
 
 	size_t m_errorCount;
 	size_t m_warningCount;
@@ -72,16 +76,47 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorListener::GetErrorCount() const
+inline size_t ParserErrorHandler::GetErrorCount() const
 {
 	return m_errorCount;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorListener::GetWarningCount() const
+inline size_t ParserErrorHandler::GetWarningCount() const
 {
 	return m_warningCount;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline bool ParserErrorHandler::EncounteredError() const
+{
+	return m_errorCount > 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void ParserErrorHandler::Report(
+	const MessageCode code, 
+	const antlr4::Token* const pOffendingSymbol, 
+	const char* const fmt, 
+	...)
+{
+	va_list vl;
+	va_start(vl, fmt);
+	const char* const message = HqString::RawFormatVarArgs(fmt, vl);
+	va_end(vl);
+
+	prv_report(
+		int(code) < int(MessageCode::_WarningStart_)
+			? HQ_MESSAGE_TYPE_ERROR
+			: HQ_MESSAGE_TYPE_WARNING,
+		code,
+		pOffendingSymbol,
+		message
+	);
+	HqMemFree((void*) message);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

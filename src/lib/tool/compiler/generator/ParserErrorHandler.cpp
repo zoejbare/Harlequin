@@ -16,9 +16,7 @@
 // IN THE SOFTWARE.
 //
 
-#include "ParserErrorListener.hpp"
-
-#include "../../../base/String.hpp"
+#include "ParserErrorHandler.hpp"
 
 #include <antlr4-runtime.h>
 
@@ -27,25 +25,25 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-ParserErrorListener::ParserErrorListener(HqReportHandle hReport, const SymbolTable::SourceLineArray& srcLines)
+ParserErrorHandler::ParserErrorHandler(HqReportHandle hReport, const SourceData& srcData)
 	: m_hReport(hReport)
-	, m_pSourceLines(&srcLines)
+	, m_pSrcData(&srcData)
 	, m_errorCount(0)
 	, m_warningCount(0)
 {
 	assert(hReport != HQ_REPORT_HANDLE_NULL);
+	assert(m_pSrcData != nullptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void ParserErrorListener::syntaxError(
+void ParserErrorHandler::syntaxError(
 	antlr4::Recognizer* const pRecognizer,
 	antlr4::Token* const pOffendingSymbol,
 	const size_t line,
 	const size_t charPositionInLine,
 	const std::string& msg,
-	std::exception_ptr e
-)
+	std::exception_ptr e)
 {
 	(void) pRecognizer;
 	(void) line;
@@ -56,46 +54,18 @@ void ParserErrorListener::syntaxError(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool ParserErrorListener::EncounteredError() const
-{
-	return m_errorCount > 0;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void ParserErrorListener::Report(const MessageCode code, const antlr4::Token* const pOffendingSymbol, const char* const fmt, ...)
-{
-	va_list vl;
-	va_start(vl, fmt);
-	const char* const message = HqString::RawFormatVarArgs(fmt, vl);
-	va_end(vl);
-
-	prv_report(
-		int(code) < int(MessageCode::_WarningStart_)
-			? HQ_MESSAGE_TYPE_ERROR
-			: HQ_MESSAGE_TYPE_WARNING,
-		code,
-		pOffendingSymbol,
-		message
-	);
-	HqMemFree((void*) message);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void ParserErrorListener::prv_report(
+void ParserErrorHandler::prv_report(
 	const int type,
 	const MessageCode code,
 	const antlr4::Token* const pOffendingSymbol,
-	const char* const msg
-)
+	const char* const msg)
 {
 	const size_t startIndex = pOffendingSymbol->getStartIndex();
 	const size_t stopIndex = pOffendingSymbol->getStopIndex();
 	const size_t lineNumber = pOffendingSymbol->getLine();
 	const size_t charPositionInLine = pOffendingSymbol->getCharPositionInLine();
 	const std::string sourceName = pOffendingSymbol->getTokenSource()->getSourceName();
-	const std::string line = (*m_pSourceLines)[lineNumber - 1];
+	const std::string line = m_pSrcData->lines[lineNumber - 1];
 
 	const char* typeStr = nullptr;
 	switch(type)

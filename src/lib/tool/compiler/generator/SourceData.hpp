@@ -20,60 +20,16 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "generator/IntermediateCode.hpp"
-#include "generator/SourceData.hpp"
-
-#include "../../base/Reference.hpp"
+#include <string>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace antlr4
+struct SourceData
 {
-	class ANTLRInputStream;
-	class CommonTokenStream;
+	typedef std::vector<std::string> Lines;
 
-	namespace tree
-	{
-		class ParseTree;
-	}
-}
-
-class HarlequinLexer;
-class HarlequinParser;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct HqSourceFile
-{
-	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const char* filePath,int* pErrorReason);
-
-	static int32_t AddRef(HqSourceFileHandle hSrcFile);
-	static int32_t Release(HqSourceFileHandle hSrcFile);
-
-	static int Parse(HqSourceFileHandle hSrcFile);
-	static bool WasParsedSuccessfully(HqSourceFileHandle hSrcFile);
-
-	static void prv_onDestruct(void*);
-
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
-
-	HqReference ref;
-	HqToolContextHandle hToolCtx;
-	HqSerializerHandle hSerializer;
-
-	antlr4::ANTLRInputStream* pInputStream;
-	antlr4::CommonTokenStream* pTokenStream;
-
-	HarlequinLexer* pLexer;
-	HarlequinParser* pParser;
-	IntermediateCode* pCode;
-
-	antlr4::tree::ParseTree* pParseTree;
-
-	SourceData srcData;
-
-	bool parsed;
+	Lines lines;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

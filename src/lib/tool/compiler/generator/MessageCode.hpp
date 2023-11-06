@@ -20,60 +20,17 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "generator/IntermediateCode.hpp"
-#include "generator/SourceData.hpp"
-
-#include "../../base/Reference.hpp"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-namespace antlr4
+enum class MessageCode
 {
-	class ANTLRInputStream;
-	class CommonTokenStream;
+	_ErrorStart_ = 1000,
 
-	namespace tree
-	{
-		class ParseTree;
-	}
-}
+	ErrorSyntax = _ErrorStart_,
+	ErrorStaticInterface,
+	ErrorDuplicateAlias,
+	ErrorDuplicateClass,
+	ErrorDuplicateVar,
 
-class HarlequinLexer;
-class HarlequinParser;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct HqSourceFile
-{
-	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const char* filePath,int* pErrorReason);
-
-	static int32_t AddRef(HqSourceFileHandle hSrcFile);
-	static int32_t Release(HqSourceFileHandle hSrcFile);
-
-	static int Parse(HqSourceFileHandle hSrcFile);
-	static bool WasParsedSuccessfully(HqSourceFileHandle hSrcFile);
-
-	static void prv_onDestruct(void*);
-
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
-
-	HqReference ref;
-	HqToolContextHandle hToolCtx;
-	HqSerializerHandle hSerializer;
-
-	antlr4::ANTLRInputStream* pInputStream;
-	antlr4::CommonTokenStream* pTokenStream;
-
-	HarlequinLexer* pLexer;
-	HarlequinParser* pParser;
-	IntermediateCode* pCode;
-
-	antlr4::tree::ParseTree* pParseTree;
-
-	SourceData srcData;
-
-	bool parsed;
+	_WarningStart_ = 6000,
 };
 
 //----------------------------------------------------------------------------------------------------------------------

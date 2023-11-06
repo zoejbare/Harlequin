@@ -26,14 +26,11 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct SymbolTable
 {
-	typedef std::vector<std::string> SourceLineArray;
-
 	typedef std::unordered_set<std::string> NamespaceSet;
 
 	typedef std::unordered_map<std::string, std::string>     ClassAliasMap;
@@ -42,7 +39,6 @@ struct SymbolTable
 
 	~SymbolTable();
 
-	SourceLineArray srcLines;
 	NamespaceSet namespaceImports;
 	ClassAliasMap classAliases;
 	ClassSymbolMap classSymbols;

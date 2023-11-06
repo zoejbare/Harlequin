@@ -16,8 +16,8 @@
 // IN THE SOFTWARE.
 //
 
-#include "SymbolVisitor.hpp"
-#include "ParserErrorListener.hpp"
+#include "IntermediateCode.hpp"
+#include "ParserErrorHandler.hpp"
 
 #include "../SourceFile.hpp"
 
@@ -25,28 +25,51 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-SymbolVisitor::SymbolVisitor(SymbolTable& symbolTable, IErrorNotifier* const pErrorNotifier)
-	: m_pSymbolTable(&symbolTable)
-	, m_pErrorNotifier(pErrorNotifier)
+IntermediateCode::IntermediateCode(ParserErrorHandler* const pErrorHandler)
+	: m_pErrorHandler(pErrorHandler)
+	, m_symbolTable()
+	, m_namespaceStack()
+	, m_classStack()
 {
-	assert(pErrorNotifier != nullptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool SymbolVisitor::shouldVisitNextChild(antlr4::tree::ParseTree* const pNode, const std::any& currentResult)
+IntermediateCode* IntermediateCode::Resolve(
+	antlr4::tree::ParseTree* const pParseTree, 
+	ParserErrorHandler* const pErrorHandler)
+{
+	IntermediateCode* pOutput = new IntermediateCode(pErrorHandler);
+
+	// Walk the parse tree to discover the source file symbols and generate
+	// the source code's intermediate representation.
+	pOutput->visit(pParseTree);
+
+	// Dispose of the code IR object if there were errors resolving the parse tree.
+	if(pErrorHandler->EncounteredError())
+	{
+		delete pOutput;
+		pOutput = nullptr;
+	}
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool IntermediateCode::shouldVisitNextChild(antlr4::tree::ParseTree* const pNode, const std::any& currentResult)
 {
 	(void) pNode;
 	(void) currentResult;
 
-	return !m_pErrorNotifier->EncounteredError();
+	return !m_pErrorHandler->EncounteredError();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any SymbolVisitor::visitUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
+std::any IntermediateCode::visitUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
 {
-	if(m_pErrorNotifier->EncounteredError())
+	if(m_pErrorHandler->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
 		return defaultResult();
@@ -55,9 +78,9 @@ std::any SymbolVisitor::visitUsingStmt(HarlequinParser::UsingStmtContext* const 
 	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
 
 	// Check to see if this namespace is already being used (we can ignore duplicate namespaces).
-	if(!m_pSymbolTable->namespaceImports.count(qualifiedNamespace))
+	if(!m_symbolTable.namespaceImports.count(qualifiedNamespace))
 	{
-		m_pSymbolTable->namespaceImports.insert(qualifiedNamespace);
+		m_symbolTable.namespaceImports.insert(qualifiedNamespace);
 	}
 
 	return visitChildren(pCtx);
@@ -65,9 +88,9 @@ std::any SymbolVisitor::visitUsingStmt(HarlequinParser::UsingStmtContext* const 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any SymbolVisitor::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
+std::any IntermediateCode::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
 {
-	if(m_pErrorNotifier->EncounteredError())
+	if(m_pErrorHandler->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
 		return defaultResult();
@@ -84,14 +107,14 @@ std::any SymbolVisitor::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtConte
 		// Check if the class alias has not already been declared.
 		// If it has, it means there is an ambiguous reference to
 		// that class name.
-		if(!m_pSymbolTable->classAliases.count(aliasedClassName))\
+		if(!m_symbolTable.classAliases.count(aliasedClassName))\
 		{
-			m_pSymbolTable->classAliases.emplace(aliasedClassName, qualifiedClassName);
+			m_symbolTable.classAliases.emplace(aliasedClassName, qualifiedClassName);
 		}
 		else
 		{
 			// Report the duplicate alias name as an error.
-			m_pErrorNotifier->Report(
+			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateAlias,
 				alias->getSymbol(),
 				"duplicate class alias '%s'",
@@ -105,9 +128,9 @@ std::any SymbolVisitor::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtConte
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any SymbolVisitor::visitNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
+std::any IntermediateCode::visitNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
 {
-	if(m_pErrorNotifier->EncounteredError())
+	if(m_pErrorHandler->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
 		return defaultResult();
@@ -131,9 +154,9 @@ std::any SymbolVisitor::visitNamespaceDecl(HarlequinParser::NamespaceDeclContext
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
+std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
 {
-	if(m_pErrorNotifier->EncounteredError())
+	if(m_pErrorHandler->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
 		return defaultResult();
@@ -151,7 +174,7 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 		: shortName;
 
 	// Check to see if this class has already been defined.
-	if(!m_pSymbolTable->classSymbols.count(qualifiedName))
+	if(!m_symbolTable.classSymbols.count(qualifiedName))
 	{
 		const bool isStatic = (pCtx->StaticKw() != nullptr);
 
@@ -202,14 +225,14 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 			pClass->isStatic = isStatic;
 
 			// Add the class to the symbol table.
-			m_pSymbolTable->classSymbols.emplace(qualifiedName, pClass);
+			m_symbolTable.classSymbols.emplace(qualifiedName, pClass);
 
 			m_classStack.push_back(pClass);
 		}
 		else
 		{
 			// Report the invalid scenario of a static interface declaration.
-			m_pErrorNotifier->Report(
+			m_pErrorHandler->Report(
 				MessageCode::ErrorStaticInterface,
 				pCtx->StaticKw()->getSymbol(),
 				"illegal static interface declaration '%s'",
@@ -220,7 +243,7 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 	else
 	{
 		// Report the duplicate class declaration as an error.
-		m_pErrorNotifier->Report(
+		m_pErrorHandler->Report(
 			MessageCode::ErrorDuplicateClass,
 			pCtx->Id()->getSymbol(),
 			"duplicate class declaration '%s'",
@@ -230,7 +253,7 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 
 	std::any result = defaultResult();
 
-	if(!m_pErrorNotifier->EncounteredError())
+	if(!m_pErrorHandler->EncounteredError())
 	{
 		result = visitChildren(pCtx);
 
@@ -242,9 +265,9 @@ std::any SymbolVisitor::visitClassDecl(HarlequinParser::ClassDeclContext* const 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* const pCtx)
+std::any IntermediateCode::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* const pCtx)
 {
-	if(m_pErrorNotifier->EncounteredError())
+	if(m_pErrorHandler->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
 		return defaultResult();
@@ -255,7 +278,7 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 	auto* const pScopeModCtx = pCtx->scopeModifier();
 	auto* const pVarDeclCtx = pCtx->varDecl();
 	auto* const pVarModCtx = pVarDeclCtx->varModifier();
-	auto* const pTypeNameCtx = pVarDeclCtx->typeName();
+	auto* const pTypeNameCtx = pVarDeclCtx->typeNameDecl();
 	const auto varDefs = pVarDeclCtx->varDef();
 
 	const bool isStatic = (pVarModCtx && (pVarModCtx->StaticKw() != nullptr));
@@ -333,7 +356,7 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 		const std::string shortName = pVarDefCtx->Id()->getText();
 		const std::string qualifiedName = className + "." + shortName;
 
-		if(!m_pSymbolTable->classVarSymbols.count(qualifiedName))
+		if(!m_symbolTable.classVarSymbols.count(qualifiedName))
 		{
 			ClassVarSymbol* const pClassVar = new ClassVarSymbol();
 
@@ -351,12 +374,12 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 				pClassVar->var.className = typeName;
 			}
 
-			m_pSymbolTable->classVarSymbols.emplace(qualifiedName, pClassVar);
+			m_symbolTable.classVarSymbols.emplace(qualifiedName, pClassVar);
 		}
 		else
 		{
 			// Report the duplicate variable name as an error.
-			m_pErrorNotifier->Report(
+			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateVar,
 				pVarDefCtx->Id()->getSymbol(),
 				"duplicate class variable '%s'",
@@ -370,9 +393,9 @@ std::any SymbolVisitor::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any SymbolVisitor::visitCtorDecl(HarlequinParser::CtorDeclContext* const pCtx)
+std::any IntermediateCode::visitCtorDecl(HarlequinParser::CtorDeclContext* const pCtx)
 {
-	if(m_pErrorNotifier->EncounteredError())
+	if(m_pErrorHandler->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
 		return defaultResult();
@@ -386,9 +409,9 @@ std::any SymbolVisitor::visitCtorDecl(HarlequinParser::CtorDeclContext* const pC
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any SymbolVisitor::visitMethodDecl(HarlequinParser::MethodDeclContext* const pCtx)
+std::any IntermediateCode::visitMethodDecl(HarlequinParser::MethodDeclContext* const pCtx)
 {
-	if(m_pErrorNotifier->EncounteredError())
+	if(m_pErrorHandler->EncounteredError())
 	{
 		// Do nothing once an error has been encountered.
 		return defaultResult();
@@ -402,7 +425,7 @@ std::any SymbolVisitor::visitMethodDecl(HarlequinParser::MethodDeclContext* cons
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline ClassType SymbolVisitor::prv_resolveClassType(const std::string& text) const
+inline ClassType IntermediateCode::prv_resolveClassType(const std::string& text) const
 {
 	return (text == "interface")
 		? ClassType::Interface
@@ -411,7 +434,7 @@ inline ClassType SymbolVisitor::prv_resolveClassType(const std::string& text) co
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline ScopeType SymbolVisitor::prv_resolveScopeType(const std::string& text) const
+inline ScopeType IntermediateCode::prv_resolveScopeType(const std::string& text) const
 {
 	return (text == "public")
 		? ScopeType::Public

@@ -18,8 +18,7 @@
 
 #include "SourceFile.hpp"
 
-#include "generator/ParserErrorListener.hpp"
-#include "generator/SymbolVisitor.hpp"
+#include "generator/ParserErrorHandler.hpp"
 
 #include "parser/HarlequinLexer.h"
 #include "parser/HarlequinParser.h"
@@ -72,12 +71,11 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
 	pOutput->pInputStream = new ANTLRInputStream(
 		reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData),
-		pOutput->hSerializer->stream.count
-	);
+		pOutput->hSerializer->stream.count);
 	pOutput->pLexer = new HarlequinLexer(pOutput->pInputStream);
 	pOutput->pTokenStream = new CommonTokenStream(pOutput->pLexer);
 	pOutput->pParser = new HarlequinParser(pOutput->pTokenStream);
-	pOutput->pAstRoot = nullptr;
+	pOutput->pParseTree = nullptr;
 
 	// Set the file name for the input stream; this will be used when reporting errors and warnings.
 	pOutput->pInputStream->name = filePath;
@@ -96,7 +94,7 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 		const size_t lineCount = std::count(fileText.begin(), fileText.end(), '\n') + 1;
 
 		// Reserve enough space in the array for each line.
-		pOutput->symbolTable.srcLines.reserve(lineCount);
+		pOutput->srcData.lines.reserve(lineCount);
 
 		// Replace all carriage returns in the line with whitespace.
 		std::replace(fileText.begin(), fileText.end(), '\r', ' ');
@@ -119,7 +117,7 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 			);
 
 			// Add the line to the array.
-			pOutput->symbolTable.srcLines.push_back(line);
+			pOutput->srcData.lines.push_back(line);
 		}
 	}
 
@@ -154,17 +152,17 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 
 	if(hSrcFile->parsed)
 	{
-		return hSrcFile->pAstRoot ? HQ_SUCCESS : HQ_ERROR_FAILED_TO_PARSE_FILE;
+		return hSrcFile->pParseTree ? HQ_SUCCESS : HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	ParserErrorListener errorListener(&hSrcFile->hToolCtx->report, hSrcFile->symbolTable.srcLines);
+	ParserErrorHandler errorHandler(&hSrcFile->hToolCtx->report, hSrcFile->srcData);
 
 	// Add our custom error listener.
-	hSrcFile->pLexer->addErrorListener(&errorListener);
-	hSrcFile->pParser->addErrorListener(&errorListener);
+	hSrcFile->pLexer->addErrorListener(reinterpret_cast<antlr4::ANTLRErrorListener*>(&errorHandler));
+	hSrcFile->pParser->addErrorListener(reinterpret_cast<antlr4::ANTLRErrorListener*>(&errorHandler));
 
 	// Parse the source file.
-	hSrcFile->pAstRoot = hSrcFile->pParser->root();
+	hSrcFile->pParseTree = hSrcFile->pParser->root();
 	hSrcFile->parsed = true;
 
 	// Remove the error listener.
@@ -172,22 +170,27 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 	hSrcFile->pParser->removeErrorListeners();
 
 	// Checking for parsing+lexing errors.
-	if(errorListener.EncounteredError())
+	if(errorHandler.EncounteredError())
 	{
-		hSrcFile->pAstRoot = nullptr;
+		hSrcFile->pParseTree = nullptr;
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	// Walk the AST to discover the source file symbols.
-	SymbolVisitor symbolResolver(hSrcFile->symbolTable, &errorListener);
-	symbolResolver.visit(hSrcFile->pAstRoot);
+	// Generate the intermediate code representation from the parse tree.
+	hSrcFile->pCode = IntermediateCode::Resolve(hSrcFile->pParseTree, &errorHandler);
 
 	// Check for errors that occured during symbol resolution.
-	if(errorListener.EncounteredError())
+	if(errorHandler.EncounteredError())
 	{
-		hSrcFile->pAstRoot = nullptr;
+		// The code IR object should not exist if there were errors.
+		assert(hSrcFile->pCode == nullptr);
+
+		hSrcFile->pParseTree = nullptr;
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
+
+	// By this point, the code IR object should always exist.
+	assert(hSrcFile->pCode != nullptr);
 
 	return HQ_SUCCESS;
 }
@@ -197,7 +200,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 bool HqSourceFile::WasParsedSuccessfully(HqSourceFileHandle hSrcFile)
 {
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
-	return hSrcFile->parsed && (hSrcFile->pAstRoot != nullptr);
+	return hSrcFile->parsed && (hSrcFile->pParseTree != nullptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -101,10 +101,24 @@ classDef
 	: LeftBrace (classVarDeclStmt | methodDecl | ctorDecl)* RightBrace
 	;
 
-// Typename rule
-typeName
-	: Id ArrayTypeSpec*
-	| Id MultiArrayTypeSpec*
+// Typename array declaration specifier
+arrayTypeDecl:
+	LeftBracket Comma* RightBracket
+	;
+
+// Typename array instantiation specifier
+arrayTypeDef:
+	LeftBracket IntLit (Comma IntLit)* Comma? RightBracket
+	;
+
+// Typename-for-declaration rule
+typeNameDecl
+	: Id arrayTypeDecl*
+	;
+
+// Typename-for-instantiation rule
+typeNameDef
+	: Id arrayTypeDef* arrayTypeDecl*
 	;
 
 // Class variable declaration statement rule
@@ -124,12 +138,12 @@ varDeclStmt
 
 // Variable declaration rule
 varDecl
-	: varModifier? typeName varDef (Comma varDef)*
+	: varModifier? typeNameDecl varDef (Comma varDef)*
 	;
 
 // Variable definition rule
 varDef
-	: Id Assign expr
+	: Id (Assign expr)?
 	;
 
 // Variable modifier rule
@@ -156,7 +170,7 @@ arrayParamElem
 
 // Lambda (embedded function) declaration rule
 lambdaDecl
-	: LambdaKw typeName Id LeftParen methodParamSeq? RightParen (CaptureKw LeftBracket Id (Comma Id)* RightBracket)? codeBlock
+	: LambdaKw typeNameDecl Id LeftParen methodParamSeq? RightParen (CaptureKw LeftBracket Id (Comma Id)* RightBracket)? codeBlock
 	;
 
 // Class construction declaration rule
@@ -166,7 +180,7 @@ ctorDecl
 
 // Method declaration rule
 methodDecl
-	: scopeModifier? methodModifier? typeName Id LeftParen methodParamSeq? RightParen (codeBlock | Term)
+	: scopeModifier? methodModifier? typeNameDecl Id LeftParen methodParamSeq? RightParen (codeBlock | Term)
 	;
 
 // Method modifier rule
@@ -195,7 +209,7 @@ methodParamSeq
 
 // Method parameter rule
 methodParam
-	: ConstKw? typeName Id?
+	: ConstKw? typeNameDecl Id?
 	;
 
 // Code statement rule
@@ -241,8 +255,7 @@ expr
 	| expr LogicAnd expr                                                            # exprLogic
 	| expr LogicOr expr                                                             # exprLogic
 	| expr (Assign | ExpoAssign | AddAssign | SubAssign | MultAssign | DivAssign | ModAssign | LeftRotateAssign | RightRotateAssign | LeftShiftAssign | RightShiftAssign | BitAndAssign | BitXorAssign | BitOrAssign) expr # exprAssignment
-	| NewKw Id ArrayTypeDef* ArrayTypeSpec*                                         # exprInstantiate
-	| NewKw Id MultiArrayTypeDef*                                                   # exprInstantiate
+	| NewKw typeNameDef expr?                                                       # exprInstantiate
 	| (BreakKw | ContinueKw)                                                        # exprControlFlow
 	| CopyIntrinKw                                                                  # exprIntrinsic
 	| (NullLit | BoolLit | RealLit | IntLit)                                        # exprLiteral
@@ -506,14 +519,6 @@ BoolLit: 'true' | 'false' ;
 
 // Assembly register ID
 AsmRegId: [rR] FDigit+ ;
-
-// Typename array specifier
-ArrayTypeSpec:      LeftBracket RightBracket ;
-MultiArrayTypeSpec: LeftBracket Comma+ RightBracket ;
-
-// Type instantiation array definition
-ArrayTypeDef:      LeftBracket IntLit RightBracket ;
-MultiArrayTypeDef: LeftBracket IntLit (Comma IntLit)+ RightBracket ;
 
 // Lexer base rules (must be defined after most other lexer rules to avoid parser ambiguities)
 IntLit:  (FDigit+ | ('0x' FHex+) | ('0o' FOctal+) | ('0b' FBinary+)) FIntSuffix? ;
