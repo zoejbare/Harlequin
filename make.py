@@ -297,7 +297,10 @@ with csbuild.Project(ExtAntlr4Runtime.projectName, ExtAntlr4Runtime.path, autoDi
 
 	csbuild.AddSourceDirectories(ExtAntlr4Runtime.path)
 	csbuild.AddIncludeDirectories(ExtAntlr4Runtime.path)
-	csbuild.AddDefines("ANTLR4CPP_EXPORTS")
+	csbuild.AddDefines(
+		"ANTLR4CPP_EXPORTS",
+		"ANTLR4_USE_THREAD_LOCAL_CACHE=1",
+	)
 
 	with csbuild.Toolchain("msvc"):
 		csbuild.AddCompilerFlags(

@@ -41,7 +41,7 @@ class Tool(ABC):
 	@staticmethod
 	def _getClassPath():
 		if not Tool._classPath:
-			antlrFilePath = os.path.abspath(os.path.join(THIS_PATH, "external", "antlr4", "antlr-4.12.0-complete.jar"))
+			antlrFilePath = os.path.abspath(os.path.join(THIS_PATH, "external", "antlr4", "antlr-4.13.1-complete.jar"))
 			assert os.access(antlrFilePath, os.F_OK), "Antlr4 tool package does not exist"
 
 			# Augment the 'CLASSPATH' env variable to include the path to the Antlr tool package.
