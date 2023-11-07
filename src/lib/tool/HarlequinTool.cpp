@@ -1274,6 +1274,31 @@ int HqBytecodeWriteLoadArray(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqBytecodeWriteLoadGrid(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpDstRegIndex,
+	const uint32_t gpSrcRegIndex,
+	const uint32_t gpGridIdxXRegIndex,
+	const uint32_t gpGridIdxYRegIndex,
+	const uint32_t gpGridIdxZRegIndex)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_LOAD_GRID);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(gpGridIdxXRegIndex);
+	_HQ_EMIT_UDWORD(gpGridIdxYRegIndex);
+	_HQ_EMIT_UDWORD(gpGridIdxZRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqBytecodeWriteStoreGlobal(
 	HqSerializerHandle hSerializer,
 	const uint32_t stringIndex,
@@ -1373,6 +1398,31 @@ int HqBytecodeWriteStoreArray(
 
 //----------------------------------------------------------------------------------------------------------------------
 
+int HqBytecodeWriteStoreGrid(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpDstRegIndex,
+	const uint32_t gpSrcRegIndex,
+	const uint32_t gpGridIdxXRegIndex,
+	const uint32_t gpGridIdxYRegIndex,
+	const uint32_t gpGridIdxZRegIndex)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_STORE_GRID);
+	_HQ_EMIT_UDWORD(gpDstRegIndex);
+	_HQ_EMIT_UDWORD(gpSrcRegIndex);
+	_HQ_EMIT_UDWORD(gpGridIdxXRegIndex);
+	_HQ_EMIT_UDWORD(gpGridIdxYRegIndex);
+	_HQ_EMIT_UDWORD(gpGridIdxZRegIndex);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 int HqBytecodeWritePush(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
@@ -1435,6 +1485,29 @@ int HqBytecodeWriteInitArray(
 	_HQ_EMIT_UBYTE(HQ_OP_CODE_INIT_ARRAY);
 	_HQ_EMIT_UDWORD(gpRegIndex);
 	_HQ_EMIT_UDWORD(initialCount);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqBytecodeWriteInitGrid(
+	HqSerializerHandle hSerializer,
+	const uint32_t gpRegIndex,
+	const uint32_t lengthX,
+	const uint32_t lengthY,
+	const uint32_t lengthZ)
+{
+	if(!hSerializer)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	_HQ_EMIT_UBYTE(HQ_OP_CODE_INIT_GRID);
+	_HQ_EMIT_UDWORD(gpRegIndex);
+	_HQ_EMIT_UDWORD(lengthX);
+	_HQ_EMIT_UDWORD(lengthY);
+	_HQ_EMIT_UDWORD(lengthZ);
 
 	return HQ_SUCCESS;
 }

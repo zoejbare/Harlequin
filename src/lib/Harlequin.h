@@ -638,6 +638,8 @@ HQ_MAIN_API HqValueHandle HqValueCreateObject(HqVmHandle hVm, const char* const 
 
 HQ_MAIN_API HqValueHandle HqValueCreateArray(HqVmHandle hVm, size_t count);
 
+HQ_MAIN_API HqValueHandle HqValueCreateGrid(HqVmHandle hVm, size_t lengthX, size_t lengthY, size_t lengthZ);
+
 HQ_MAIN_API HqValueHandle HqValueCreateNative(
 	HqVmHandle hVm,
 	void* pNativeObject,
@@ -681,6 +683,8 @@ HQ_MAIN_API bool HqValueIsFunction(HqValueHandle hValue);
 HQ_MAIN_API bool HqValueIsObject(HqValueHandle hValue);
 
 HQ_MAIN_API bool HqValueIsArray(HqValueHandle hValue);
+
+HQ_MAIN_API bool HqValueIsGrid(HqValueHandle hValue);
 
 HQ_MAIN_API bool HqValueIsNative(HqValueHandle hValue);
 
@@ -737,6 +741,16 @@ HQ_MAIN_API size_t HqValueGetArrayLength(HqValueHandle hValue);
 HQ_MAIN_API HqValueHandle HqValueGetArrayElement(HqValueHandle hValue, size_t index);
 
 HQ_MAIN_API int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqValueHandle hElementValue);
+
+HQ_MAIN_API size_t HqValueGetGridLengthX(HqValueHandle hValue);
+
+HQ_MAIN_API size_t HqValueGetGridLengthY(HqValueHandle hValue);
+
+HQ_MAIN_API size_t HqValueGetGridLengthZ(HqValueHandle hValue);
+
+HQ_MAIN_API HqValueHandle HqValueGetGridElement(HqValueHandle hValue, size_t x, size_t y, size_t z);
+
+HQ_MAIN_API int HqValueSetGridElement(HqValueHandle hValue, size_t x, size_t y, size_t z, HqValueHandle hElementValue);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
@@ -973,6 +987,14 @@ HQ_MAIN_API int HqBytecodeWriteLoadArray(
 	uint32_t gpSrcRegIndex,
 	uint32_t gpArrIdxRegIndex);
 
+HQ_MAIN_API int HqBytecodeWriteLoadGrid(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t gpGridIdxXRegIndex,
+	uint32_t gpGridIdxYRegIndex,
+	uint32_t gpGridIdxZRegIndex);
+
 HQ_MAIN_API int HqBytecodeWriteStoreGlobal(
 	HqSerializerHandle hSerializer,
 	uint32_t stringIndex,
@@ -1000,6 +1022,14 @@ HQ_MAIN_API int HqBytecodeWriteStoreArray(
 	uint32_t gpSrcRegIndex,
 	uint32_t gpArrIdxRegIndex);
 
+HQ_MAIN_API int HqBytecodeWriteStoreGrid(
+	HqSerializerHandle hSerializer,
+	uint32_t gpDstRegIndex,
+	uint32_t gpSrcRegIndex,
+	uint32_t gpGridIdxXRegIndex,
+	uint32_t gpGridIdxYRegIndex,
+	uint32_t gpGridIdxZRegIndex);
+
 HQ_MAIN_API int HqBytecodeWritePush(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
 HQ_MAIN_API int HqBytecodeWritePop(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
@@ -1013,6 +1043,13 @@ HQ_MAIN_API int HqBytecodeWriteInitArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t initialCount);
+
+HQ_MAIN_API int HqBytecodeWriteInitGrid(
+	HqSerializerHandle hSerializer,
+	uint32_t gpRegIndex,
+	uint32_t lengthX,
+	uint32_t lengthY,
+	uint32_t lengthZ);
 
 HQ_MAIN_API int HqBytecodeWriteInitFunction(
 	HqSerializerHandle hSerializer,
@@ -1257,6 +1294,7 @@ enum HqValueType
 	HQ_VALUE_TYPE_FUNCTION,
 	HQ_VALUE_TYPE_OBJECT,
 	HQ_VALUE_TYPE_ARRAY,
+	HQ_VALUE_TYPE_GRID,
 	HQ_VALUE_TYPE_NATIVE,
 
 	HQ_VALUE_TYPE__MAX_VALUE = HQ_VALUE_TYPE_NATIVE,

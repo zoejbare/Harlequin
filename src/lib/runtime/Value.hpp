@@ -32,16 +32,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqNativeValueWrapper
-{
-	void* pObject;
-
-	HqCallbackNativeValueCopy onCopy;
-	HqCallbackNativeValueDestruct onDestruct;
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
 struct HqScriptObject;
 
 struct HqValue
@@ -63,25 +53,43 @@ struct HqValue
 		HqString::StlCompare
 	> StringToBoolMap;
 
-	static HqValueHandle CreateBool(HqVmHandle hVm, const bool value);
-	static HqValueHandle CreateInt8(HqVmHandle hVm, const int8_t value);
-	static HqValueHandle CreateInt16(HqVmHandle hVm, const int16_t value);
-	static HqValueHandle CreateInt32(HqVmHandle hVm, const int32_t value);
-	static HqValueHandle CreateInt64(HqVmHandle hVm, const int64_t value);
-	static HqValueHandle CreateUint8(HqVmHandle hVm, const uint8_t value);
-	static HqValueHandle CreateUint16(HqVmHandle hVm, const uint16_t value);
-	static HqValueHandle CreateUint32(HqVmHandle hVm, const uint32_t value);
-	static HqValueHandle CreateUint64(HqVmHandle hVm, const uint64_t value);
-	static HqValueHandle CreateFloat32(HqVmHandle hVm, const float value);
-	static HqValueHandle CreateFloat64(HqVmHandle hVm, const double value);
-	static HqValueHandle CreateString(HqVmHandle hVm, const char* const string);
-	static HqValueHandle CreateString(HqVmHandle hVm, HqString* const pString);
-	static HqValueHandle CreateObject(HqVmHandle hVm, HqScriptObject* const pObjectSchema);
+	struct NativeWrapper
+	{
+		void* pObject;
+
+		HqCallbackNativeValueCopy onCopy;
+		HqCallbackNativeValueDestruct onDestruct;
+	};
+
+	struct GridWrapper
+	{
+		HandleArray array;
+
+		size_t lengthX;
+		size_t lengthY;
+		size_t lengthZ;
+	};
+
+	static HqValueHandle CreateBool(HqVmHandle hVm, bool value);
+	static HqValueHandle CreateInt8(HqVmHandle hVm, int8_t value);
+	static HqValueHandle CreateInt16(HqVmHandle hVm, int16_t value);
+	static HqValueHandle CreateInt32(HqVmHandle hVm, int32_t value);
+	static HqValueHandle CreateInt64(HqVmHandle hVm, int64_t value);
+	static HqValueHandle CreateUint8(HqVmHandle hVm, uint8_t value);
+	static HqValueHandle CreateUint16(HqVmHandle hVm, uint16_t value);
+	static HqValueHandle CreateUint32(HqVmHandle hVm, uint32_t value);
+	static HqValueHandle CreateUint64(HqVmHandle hVm, uint64_t value);
+	static HqValueHandle CreateFloat32(HqVmHandle hVm, float value);
+	static HqValueHandle CreateFloat64(HqVmHandle hVm, double value);
+	static HqValueHandle CreateString(HqVmHandle hVm, const char* string);
+	static HqValueHandle CreateString(HqVmHandle hVm, HqString* pString);
+	static HqValueHandle CreateObject(HqVmHandle hVm, HqScriptObject* pObjectSchema);
 	static HqValueHandle CreateFunction(HqVmHandle hVm, HqFunctionHandle hFunction);
-	static HqValueHandle CreateArray(HqVmHandle hVm, const size_t count);
+	static HqValueHandle CreateArray(HqVmHandle hVm, size_t count);
+	static HqValueHandle CreateGrid(HqVmHandle hVm, size_t lengthX, size_t lengthY, size_t lengthZ);
 	static HqValueHandle CreateNative(
 		HqVmHandle hVm,
-		void* const pNativeObject,
+		void* pNativeObject,
 		HqCallbackNativeValueCopy onCopy,
 		HqCallbackNativeValueDestruct onDestruct
 	);
@@ -89,16 +97,23 @@ struct HqValue
 
 	static HqString* GetDebugString(HqValueHandle hValue);
 
-	static void SetAutoMark(HqValueHandle hValue, const bool autoMark);
+	static void SetAutoMark(HqValueHandle hValue, bool autoMark);
 
 	static bool EvaluateAsBoolean(HqValueHandle hValue);
 
-	static HqValue* prv_onCreate(int, HqVmHandle);
-	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
-	static void prv_onGcDestruct(void*);
+	static size_t CalculateGridIndex(
+		size_t lengthX,
+		size_t lengthY,
+		size_t indexX,
+		size_t indexY,
+		size_t indexZ);
 
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
+	static HqValue* _onCreate(int, HqVmHandle);
+	static void _onGcDiscovery(HqGarbageCollector&, void*);
+	static void _onGcDestruct(void*);
+
+	void* operator new(size_t sizeInBytes);
+	void operator delete(void* pObject);
 
 	HqVmHandle hVm;
 
@@ -106,7 +121,9 @@ struct HqValue
 
 	union
 	{
-		HqNativeValueWrapper native;
+		NativeWrapper native;
+		GridWrapper grid;
+
 		HandleArray array;
 
 		HqString* pString;
@@ -133,3 +150,17 @@ struct HqValue
 
 	int type;
 };
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline size_t HqValue::CalculateGridIndex(
+	const size_t lengthX,
+	const size_t lengthY,
+	const size_t indexX,
+	const size_t indexY,
+	const size_t indexZ)
+{
+	return (indexZ * lengthX * lengthY) + (indexY * lengthX) + indexX;
+}
+
+//----------------------------------------------------------------------------------------------------------------------

@@ -36,7 +36,7 @@ HqValueHandle HqValue::CreateBool(HqVmHandle hVm, const bool value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_BOOL, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_BOOL, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -53,7 +53,7 @@ HqValueHandle HqValue::CreateInt8(HqVmHandle hVm, const int8_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT8, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_INT8, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -70,7 +70,7 @@ HqValueHandle HqValue::CreateInt16(HqVmHandle hVm, const int16_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT16, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_INT16, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -87,7 +87,7 @@ HqValueHandle HqValue::CreateInt32(HqVmHandle hVm, const int32_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT32, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_INT32, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -104,7 +104,7 @@ HqValueHandle HqValue::CreateInt64(HqVmHandle hVm, const int64_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_INT64, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_INT64, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -121,7 +121,7 @@ HqValueHandle HqValue::CreateUint8(HqVmHandle hVm, const uint8_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT8, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_UINT8, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -138,7 +138,7 @@ HqValueHandle HqValue::CreateUint16(HqVmHandle hVm, const uint16_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT16, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_UINT16, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -155,7 +155,7 @@ HqValueHandle HqValue::CreateUint32(HqVmHandle hVm, const uint32_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT32, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_UINT32, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -172,7 +172,7 @@ HqValueHandle HqValue::CreateUint64(HqVmHandle hVm, const uint64_t value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_UINT64, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_UINT64, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -188,7 +188,7 @@ HqValueHandle HqValue::CreateUint64(HqVmHandle hVm, const uint64_t value)
 HqValueHandle HqValue::CreateFloat32(HqVmHandle hVm, const float value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_FLOAT32, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_FLOAT32, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -205,7 +205,7 @@ HqValueHandle HqValue::CreateFloat64(HqVmHandle hVm, const double value)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_FLOAT64, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_FLOAT64, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -223,7 +223,7 @@ HqValueHandle HqValue::CreateString(HqVmHandle hVm, const char* const string)
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(string != nullptr);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_STRING, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_STRING, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -246,7 +246,7 @@ HqValueHandle HqValue::CreateString(HqVmHandle hVm, HqString* const pString)
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(pString != nullptr);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_STRING, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_STRING, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -266,7 +266,7 @@ HqValueHandle HqValue::CreateObject(HqVmHandle hVm, HqScriptObject* const pObjec
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(pObjectSchema != nullptr);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_OBJECT, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_OBJECT, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -285,7 +285,7 @@ HqValueHandle HqValue::CreateFunction(HqVmHandle hVm, HqFunctionHandle hFunction
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(hFunction != nullptr);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_FUNCTION, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_FUNCTION, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -302,13 +302,15 @@ HqValueHandle HqValue::CreateArray(HqVmHandle hVm, const size_t count)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_ARRAY, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_ARRAY, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	const size_t capacity = (count > _HQ_ARRAY_DEFAULT_CAPACITY) ? count : _HQ_ARRAY_DEFAULT_CAPACITY;
+	const size_t capacity = (count < _HQ_ARRAY_DEFAULT_CAPACITY) 
+		? _HQ_ARRAY_DEFAULT_CAPACITY
+		: count;
 
 	// Initialize the array storage.
 	HandleArray::Initialize(pOutput->as.array);
@@ -316,10 +318,45 @@ HqValueHandle HqValue::CreateArray(HqVmHandle hVm, const size_t count)
 
 	pOutput->as.array.count = count;
 
-	if(pOutput->as.array.count > 0)
+	if(count > 0)
 	{
 		// Initialize the array memory so it's not filled with garbage data.
-		memset(pOutput->as.array.pData, 0, sizeof(HqValueHandle) * pOutput->as.array.count);
+		memset(pOutput->as.array.pData, 0, sizeof(HqValueHandle) * count);
+	}
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+HqValueHandle HqValue::CreateGrid(HqVmHandle hVm, const size_t lengthX, const size_t lengthY, const size_t lengthZ)
+{
+	assert(hVm != HQ_VM_HANDLE_NULL);
+
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_GRID, hVm);
+	if(!pOutput)
+	{
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
+	const size_t totalCount = lengthX * lengthY * lengthZ;
+	const size_t capacity = (totalCount < _HQ_ARRAY_DEFAULT_CAPACITY) 
+		? _HQ_ARRAY_DEFAULT_CAPACITY
+		: totalCount;
+
+	// Initialize the array storage.
+	HandleArray::Initialize(pOutput->as.grid.array);
+	HandleArray::Reserve(pOutput->as.grid.array, capacity);
+
+	pOutput->as.grid.array.count = totalCount;
+	pOutput->as.grid.lengthX = lengthX;
+	pOutput->as.grid.lengthY = lengthY;
+	pOutput->as.grid.lengthZ = lengthZ;
+
+	if(totalCount > 0)
+	{
+		// Initialize the grid array memory so it's not filled with garbage data.
+		memset(pOutput->as.grid.array.pData, 0, sizeof(HqValueHandle) * totalCount);
 	}
 
 	return pOutput;
@@ -338,7 +375,7 @@ HqValueHandle HqValue::CreateNative(
 	assert(onCopy != nullptr);
 	assert(onDestruct != nullptr);
 
-	HqValue* const pOutput = prv_onCreate(HQ_VALUE_TYPE_NATIVE, hVm);
+	HqValue* const pOutput = _onCreate(HQ_VALUE_TYPE_NATIVE, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -362,7 +399,7 @@ HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 		return HQ_VALUE_HANDLE_NULL;
 	}
 
-	HqValue* pOutput = prv_onCreate(hValue->type, hVm);
+	HqValue* pOutput = _onCreate(hValue->type, hVm);
 	if(!pOutput)
 	{
 		return HQ_VALUE_HANDLE_NULL;
@@ -443,6 +480,30 @@ HqValueHandle HqValue::Copy(HqVmHandle hVm, HqValueHandle hValue)
 					pOutput->as.array.pData,
 					hValue->as.array.pData,
 					sizeof(HqValueHandle) * pOutput->as.array.count
+				);
+			}
+			break;
+
+		case HQ_VALUE_TYPE_GRID:
+			HandleArray::Initialize(pOutput->as.grid.array);
+			HandleArray::Reserve(
+				pOutput->as.grid.array,
+				(hValue->as.grid.array.count > _HQ_ARRAY_DEFAULT_CAPACITY)
+					? hValue->as.grid.array.count
+					: _HQ_ARRAY_DEFAULT_CAPACITY
+			);
+
+			pOutput->as.grid.array.count = hValue->as.grid.array.count;
+			pOutput->as.grid.lengthX = hValue->as.grid.lengthX;
+			pOutput->as.grid.lengthY = hValue->as.grid.lengthY;
+			pOutput->as.grid.lengthZ = hValue->as.grid.lengthZ;
+
+			if(pOutput->as.array.count > 0)
+			{
+				memcpy(
+					pOutput->as.grid.array.pData,
+					hValue->as.grid.array.pData,
+					sizeof(HqValueHandle) * pOutput->as.grid.array.count
 				);
 			}
 			break;
@@ -552,6 +613,15 @@ HqString* HqValue::GetDebugString(HqValueHandle hValue)
 				);
 				break;
 
+			case HQ_VALUE_TYPE_GRID:
+				snprintf(
+					str,
+					sizeof(str),
+					"<grid: 0x%" PRIXPTR ">",
+					reinterpret_cast<uintptr_t>(hValue->as.grid.array.pData)
+				);
+				break;
+
 			case HQ_VALUE_TYPE_NATIVE:
 				snprintf(
 					str,
@@ -634,11 +704,14 @@ bool HqValue::EvaluateAsBoolean(HqValueHandle hValue)
 			// and they only way for these types to not exist is to be null.
 			return true;
 
-		case HQ_VALUE_TYPE_NATIVE:
-			return hValue->as.native.pObject != nullptr;
-
 		case HQ_VALUE_TYPE_ARRAY:
 			return hValue->as.array.count > 0;
+
+		case HQ_VALUE_TYPE_GRID:
+			return hValue->as.grid.array.count > 0;
+
+		case HQ_VALUE_TYPE_NATIVE:
+			return hValue->as.native.pObject != nullptr;
 
 		default:
 			assert(false);
@@ -650,7 +723,7 @@ bool HqValue::EvaluateAsBoolean(HqValueHandle hValue)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqValue* HqValue::prv_onCreate(const int valueType, HqVmHandle hVm)
+HqValue* HqValue::_onCreate(const int valueType, HqVmHandle hVm)
 {
 	assert(valueType >= 0);
 	assert(valueType <= HQ_VALUE_TYPE__MAX_VALUE);
@@ -661,14 +734,16 @@ HqValue* HqValue::prv_onCreate(const int valueType, HqVmHandle hVm)
 	pOutput->hVm = hVm;
 	pOutput->type = valueType;
 
-	const bool needsDiscovery = (valueType == HQ_VALUE_TYPE_OBJECT || valueType == HQ_VALUE_TYPE_ARRAY);
+	const bool needsDiscovery = valueType == HQ_VALUE_TYPE_OBJECT 
+		|| valueType == HQ_VALUE_TYPE_ARRAY 
+		|| valueType == HQ_VALUE_TYPE_GRID;
 
 	// All values will auto-mark initially. This will allow values to be kept alive outside of script execution.
 	HqGcProxy::Initialize(
 		pOutput->gcProxy,
 		hVm->gc,
-		prv_onGcDiscovery,
-		prv_onGcDestruct,
+		_onGcDiscovery,
+		_onGcDestruct,
 		pOutput,
 		true,
 		needsDiscovery
@@ -679,7 +754,7 @@ HqValue* HqValue::prv_onCreate(const int valueType, HqVmHandle hVm)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
+void HqValue::_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 {
 	HqValueHandle hValue = reinterpret_cast<HqValueHandle>(pOpaque);
 	assert(hValue != HQ_VALUE_HANDLE_NULL);
@@ -720,6 +795,23 @@ void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 			break;
 		}
 
+		case HQ_VALUE_TYPE_GRID:
+		{
+			HandleArray& array = hValue->as.grid.array;
+
+			// Mark each element in the array.
+			for(size_t i = 0; i < array.count; ++i)
+			{
+				HqValueHandle hIndexValue = array.pData[i];
+				if(hIndexValue)
+				{
+					HqGarbageCollector::MarkObject(gc, &hIndexValue->gcProxy);
+				}
+			}
+
+			break;
+		}
+
 		default:
 			// This should never happen since discovery should be disabled
 			// on all value types without dependent GC data references.
@@ -730,7 +822,7 @@ void HqValue::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqValue::prv_onGcDestruct(void* const pOpaqueValue)
+void HqValue::_onGcDestruct(void* const pOpaqueValue)
 {
 	assert(pOpaqueValue != nullptr);
 
@@ -752,6 +844,10 @@ void HqValue::prv_onGcDestruct(void* const pOpaqueValue)
 
 		case HQ_VALUE_TYPE_ARRAY:
 			HandleArray::Dispose(hValue->as.array);
+			break;
+
+		case HQ_VALUE_TYPE_GRID:
+			HandleArray::Dispose(hValue->as.grid.array);
 			break;
 
 		default:

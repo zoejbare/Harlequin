@@ -1752,6 +1752,18 @@ HqValueHandle HqValueCreateArray(HqVmHandle hVm, const size_t count)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+HqValueHandle HqValueCreateGrid(HqVmHandle hVm, const size_t lengthX, const size_t lengthY, const size_t lengthZ)
+{
+	if(!hVm)
+	{
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
+	return HqValue::CreateGrid(hVm, lengthX, lengthY, lengthZ);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 HqValueHandle HqValueCreateNative(
 	HqVmHandle hVm,
 	void* pNativeObject,
@@ -1940,6 +1952,13 @@ bool HqValueIsObject(HqValueHandle hValue)
 bool HqValueIsArray(HqValueHandle hValue)
 {
 	return hValue && (hValue->type == HQ_VALUE_TYPE_ARRAY);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+bool HqValueIsGrid(HqValueHandle hValue)
+{
+	return hValue && (hValue->type == HQ_VALUE_TYPE_GRID);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2353,6 +2372,95 @@ int HqValueSetArrayElement(HqValueHandle hValue, size_t index, HqValueHandle hEl
 	}
 
 	hValue->as.array.pData[index] = hElementValue;
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t HqValueGetGridLengthX(HqValueHandle hValue)
+{
+	if(!HqValueIsGrid(hValue))
+	{
+		return 0;
+	}
+
+	return hValue->as.grid.lengthX;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t HqValueGetGridLengthY(HqValueHandle hValue)
+{
+	if(!HqValueIsGrid(hValue))
+	{
+		return 0;
+	}
+
+	return hValue->as.grid.lengthY;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+size_t HqValueGetGridLengthZ(HqValueHandle hValue)
+{
+	if(!HqValueIsGrid(hValue))
+	{
+		return 0;
+	}
+
+	return hValue->as.grid.lengthZ;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+HqValueHandle HqValueGetGridElement(HqValueHandle hValue, const size_t indexX, const size_t indexY, const size_t indexZ)
+{
+	if(!HqValueIsGrid(hValue))
+	{
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
+	const size_t lengthX = hValue->as.grid.lengthX;
+	const size_t lengthY = hValue->as.grid.lengthY;
+	const size_t lengthZ = hValue->as.grid.lengthZ;
+
+	if(indexX >= lengthX || indexY >= lengthY || indexZ >= lengthZ)
+	{
+		return HQ_VALUE_HANDLE_NULL;
+	}
+
+	const size_t finalIndex = (indexZ * lengthX * lengthY) + (indexY * lengthX) + indexX;
+
+	return hValue->as.array.pData[finalIndex];
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqValueSetGridElement(
+	HqValueHandle hValue, 
+	const size_t indexX, 
+	const size_t indexY, 
+	const size_t indexZ, 
+	HqValueHandle hElementValue)
+{
+	if(!HqValueIsGrid(hValue))
+	{
+		return HQ_ERROR_INVALID_TYPE;
+	}
+
+	const size_t lengthX = hValue->as.grid.lengthX;
+	const size_t lengthY = hValue->as.grid.lengthY;
+	const size_t lengthZ = hValue->as.grid.lengthZ;
+
+	if(indexX >= lengthX || indexY >= lengthY || indexZ >= lengthZ)
+	{
+		return HQ_ERROR_INDEX_OUT_OF_RANGE;
+	}
+
+	const size_t finalIndex = HqValue::CalculateGridIndex(lengthX, lengthY, indexX, indexY, indexZ);
+
+	hValue->as.array.pData[finalIndex] = hElementValue;
 
 	return HQ_SUCCESS;
 }

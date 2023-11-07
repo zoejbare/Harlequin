@@ -919,6 +919,110 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+TEST_F(_HQ_TEST_NAME(TestOpCodes), InitGrid_LoadGrid_StoreGrid)
+{
+#if 1
+	static constexpr int32_t testValueData = 12345;
+
+	auto compilerCallback = [](HqModuleWriterHandle hModuleWriter, int endianness)
+	{
+		HqSerializerHandle hFuncSerializer = HQ_SERIALIZER_HANDLE_NULL;
+
+		// Set the function serializer.
+		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
+
+		// Write the INIT_GRID instruction to initialize an instance of an grid into a GP register.
+		ASSERT_EQ(HqBytecodeWriteInitGrid(hFuncSerializer, 0, 1, 2, 3), HQ_SUCCESS);
+
+		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
+		ASSERT_EQ(HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData), HQ_SUCCESS);
+
+		// Write the LOAD_IMM_I8 instruction with the grid X index.
+		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 2, 0), HQ_SUCCESS);
+
+		// Write the LOAD_IMM_I8 instruction with the grid Y index.
+		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 3, 1), HQ_SUCCESS);
+
+		// Write the LOAD_IMM_I8 instruction with the grid Z index.
+		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 4, 2), HQ_SUCCESS);
+
+		// Write the STORE_GRID instruction to set the value at the specified grid indices to the test data.
+		ASSERT_EQ(HqBytecodeWriteStoreGrid(hFuncSerializer, 0, 1, 2, 3, 4), HQ_SUCCESS);
+
+		// Write the LOAD_GRID instruction to pull the value data from the grid element into a GP register for inspection.
+		ASSERT_EQ(HqBytecodeWriteLoadGrid(hFuncSerializer, 2, 0, 2, 3, 4), HQ_SUCCESS);
+
+		// Write a YIELD instruction so we can examine the values.
+		ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
+
+		// Finalize the serializer and add it to the module.
+		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
+	};
+
+	auto runtimeCallback = [](HqVmHandle hVm, HqExecutionHandle hExec)
+	{
+		(void) hVm;
+
+		// Run the execution context.
+		const int execRunResult = HqExecutionRun(hExec, HQ_RUN_FULL);
+		ASSERT_EQ(execRunResult, HQ_SUCCESS);
+
+		// Get the status of the execution context.
+		ExecStatus status;
+		Util::GetExecutionStatus(status, hExec);
+		ASSERT_TRUE(status.yield);
+		ASSERT_TRUE(status.running);
+		ASSERT_FALSE(status.complete);
+		ASSERT_FALSE(status.exception);
+		ASSERT_FALSE(status.abort);
+
+		// Verify the grid instance data.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 0);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsGrid(hValue));
+			ASSERT_EQ(HqValueGetGridLengthX(hValue), 1);
+			ASSERT_EQ(HqValueGetGridLengthY(hValue), 2);
+			ASSERT_EQ(HqValueGetGridLengthZ(hValue), 3);
+
+			HqValueHandle hIndexValue = HqValueGetGridElement(hValue, 0, 1, 2);
+
+			// Validate the grid element value.
+			ASSERT_NE(hIndexValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hIndexValue));
+			ASSERT_EQ(HqValueGetInt32(hIndexValue), testValueData);
+		}
+
+		// Verify the value extracted from the object.
+		{
+			// Get the register value we want to inspect.
+			HqValueHandle hValue = HQ_VALUE_HANDLE_NULL;
+			Util::GetGpRegister(hValue, hExec, 2);
+
+			// Validate the register value.
+			ASSERT_NE(hValue, HQ_VALUE_HANDLE_NULL);
+			ASSERT_TRUE(HqValueIsInt32(hValue));
+			ASSERT_EQ(HqValueGetInt32(hValue), testValueData);
+		}
+	};
+
+	std::vector<uint8_t> bytecode;
+
+	// Construct the module bytecode for the test.
+	Util::CompileBytecode(bytecode, compilerCallback);
+	ASSERT_GT(bytecode.size(), 0u);
+
+	// Run the module bytecode.
+	Util::ProcessBytecode("TestOpCodes", Function::main, runtimeCallback, bytecode);
+#endif
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 {
 	static constexpr const char* const functionName = "int32_t test(int32_t)";
