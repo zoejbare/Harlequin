@@ -216,6 +216,7 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 	delete hSrcFile->pTokenStream;
 	delete hSrcFile->pLexer;
 	delete hSrcFile->pParser;
+	delete hSrcFile->pCode;
 
 	delete hSrcFile;
 }
