@@ -29,7 +29,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class IntermediateCode
+class IntermediateCode final
 	: protected HarlequinBaseVisitor
 {
 public:
@@ -49,12 +49,19 @@ private:
 	virtual std::any visitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
 	virtual std::any visitClassDecl(HarlequinParser::ClassDeclContext*) override;
 
-	virtual std::any visitClassVarDecl(HarlequinParser::ClassVarDeclContext*) override;
+	virtual std::any visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext*) override;
 	virtual std::any visitCtorDecl(HarlequinParser::CtorDeclContext*) override;
 	virtual std::any visitMethodDecl(HarlequinParser::MethodDeclContext*) override;
 
-	ClassType prv_resolveClassType(const std::string&) const;
-	ScopeType prv_resolveScopeType(const std::string&) const;
+	void _resolveAccessSpecifier(
+		detail::AccessType&,
+		detail::StringArray&,
+		HarlequinParser::AccessSpecifierContext*);
+	void _resolveVariableCommonData(
+		detail::VariableBase&, 
+		HarlequinParser::VarDeclContext*, 
+		HarlequinParser::ConstQualifierContext*);
+	void _resolveQualifiedIdArray(detail::StringArray&, const std::vector<HarlequinParser::QualifiedIdContext*>&);
 
 	ParserErrorHandler* m_pErrorHandler;
 

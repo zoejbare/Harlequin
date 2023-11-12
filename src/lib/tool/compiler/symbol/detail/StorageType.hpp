@@ -20,28 +20,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "detail/AccessType.hpp"
-#include "detail/StringArray.hpp"
-#include "detail/VariableBase.hpp"
-
-#include <memory>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct ClassVarSymbol
+namespace detail
 {
-	typedef std::unique_ptr<ClassVarSymbol> Ptr;
-
-	inline static Ptr New()
+	enum class StorageType
 	{
-		return std::make_unique<ClassVarSymbol>();
-	}
-
-	detail::StringArray accessLimitTypes;
-	detail::VariableBase base;
-
-	detail::AccessType accessType;
-	detail::StorageType storageType;
-};
+		Default,
+		Static,
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------

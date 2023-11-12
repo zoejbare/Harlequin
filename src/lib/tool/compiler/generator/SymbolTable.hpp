@@ -22,7 +22,6 @@
 
 #include "../symbol/Class.hpp"
 #include "../symbol/ClassVar.hpp"
-#include "../symbol/Var.hpp"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -33,33 +32,14 @@ struct SymbolTable
 {
 	typedef std::unordered_set<std::string> NamespaceSet;
 
-	typedef std::unordered_map<std::string, std::string>     ClassAliasMap;
-	typedef std::unordered_map<std::string, ClassSymbol*>    ClassSymbolMap;
-	typedef std::unordered_map<std::string, ClassVarSymbol*> ClassVarSymbolMap;
-
-	~SymbolTable();
+	typedef std::unordered_map<std::string, std::string>         ClassAliasMap;
+	typedef std::unordered_map<std::string, ClassSymbol::Ptr>    ClassSymbolMap;
+	typedef std::unordered_map<std::string, ClassVarSymbol::Ptr> ClassVarSymbolMap;
 
 	NamespaceSet namespaceImports;
 	ClassAliasMap classAliases;
 	ClassSymbolMap classSymbols;
 	ClassVarSymbolMap classVarSymbols;
 };
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline SymbolTable::~SymbolTable()
-{
-	// Delete all class symbols.
-	for(auto& kv : classSymbols)
-	{
-		delete kv.second;
-	}
-
-	// Delete all class variable symbols.
-	for(auto& kv : classVarSymbols)
-	{
-		delete kv.second;
-	}
-}
 
 //----------------------------------------------------------------------------------------------------------------------

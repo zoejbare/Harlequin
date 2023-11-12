@@ -20,9 +20,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "enum/ClassType.hpp"
-#include "enum/ScopeType.hpp"
+#include "detail/AccessType.hpp"
+#include "detail/ClassType.hpp"
+#include "detail/StorageType.hpp"
+#include "detail/StringArray.hpp"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -30,19 +33,23 @@
 
 struct ClassSymbol
 {
-	typedef std::vector<std::string> StringArray;
+	typedef std::unique_ptr<ClassSymbol> Ptr;
 
-	StringArray implements;
-	StringArray extends;
+	inline static Ptr New()
+	{
+		return std::make_unique<ClassSymbol>();
+	}
+
+	detail::StringArray implements;
+	detail::StringArray extends;
 
 	std::string qualifiedName;
 	std::string shortName;
 	std::string namespaceName;
 
-	ClassType type;
-	ScopeType scope;
-
-	bool isStatic;
+	detail::ClassType classType;
+	detail::AccessType accessType;
+	detail::StorageType storageType;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

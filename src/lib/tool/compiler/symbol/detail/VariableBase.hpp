@@ -20,28 +20,25 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "detail/AccessType.hpp"
-#include "detail/StringArray.hpp"
-#include "detail/VariableBase.hpp"
+#include "ArrayType.hpp"
+#include "ConstType.hpp"
+#include "VarType.hpp"
 
-#include <memory>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct ClassVarSymbol
+namespace detail
 {
-	typedef std::unique_ptr<ClassVarSymbol> Ptr;
-
-	inline static Ptr New()
+	struct VariableBase
 	{
-		return std::make_unique<ClassVarSymbol>();
-	}
+		std::string varName;
+		std::string typeName;
 
-	detail::StringArray accessLimitTypes;
-	detail::VariableBase base;
-
-	detail::AccessType accessType;
-	detail::StorageType storageType;
-};
+		detail::VarType varType;
+		detail::ArrayType arrayType;
+		detail::ConstType constType;
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------

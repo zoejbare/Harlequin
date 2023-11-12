@@ -20,40 +20,33 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "../symbol/detail/AccessType.hpp"
+#include "../symbol/detail/ArrayType.hpp"
+#include "../symbol/detail/ClassType.hpp"
+#include "../symbol/detail/StorageType.hpp"
+#include "../symbol/detail/VarType.hpp"
+
 #include "../../../Harlequin.h"
 
 #include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace antlr4
-{
-	class Token;
-};
+class ParserErrorHandler;
 
-//----------------------------------------------------------------------------------------------------------------------
-
-enum class MessageCode
-{
-	_ErrorStart_ = 1000,
-
-	ErrorSyntax,
-	ErrorStaticInterface,
-	ErrorDuplicateAlias,
-	ErrorDuplicateClass,
-	ErrorDuplicateVar,
-
-	_WarningStart_ = 6000,
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
-class IErrorNotifier
+class CompilerUtil
 {
 public:
 
-	virtual bool EncounteredError() const = 0;
-	virtual void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...) = 0;
+	CompilerUtil() = delete;
+	CompilerUtil(const CompilerUtil&) = delete;
+	CompilerUtil(CompilerUtil&&) = delete;
+
+	static detail::AccessType GetAccessType(const std::string& accessType);
+	static detail::ArrayType GetArrayType(const std::string& arraySpec);
+	static detail::ClassType GetClassType(const std::string& classType);
+	static detail::StorageType GetStorageType(const std::string& storageType);
+	static detail::VarType GetVarType(const std::string& typeName);
 };
 
 //----------------------------------------------------------------------------------------------------------------------

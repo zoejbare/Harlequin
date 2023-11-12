@@ -29,6 +29,7 @@ enum class MessageCode
 	ErrorDuplicateAlias,
 	ErrorDuplicateClass,
 	ErrorDuplicateVar,
+	ErrorInvalidAccessSpec,
 
 	_WarningStart_ = 6000,
 };

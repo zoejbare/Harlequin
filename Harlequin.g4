@@ -64,7 +64,7 @@ namespaceDef
 
 // Class declaration rule
 classDecl
-	: scopeModifier? StaticKw? classType Id classInheritance? classDef
+	: accessBaseSpecifier? storageSpecifier? classType Id classInheritance? classDef
 	;
 
 // Class type rule
@@ -73,11 +73,59 @@ classType
 	| InterfaceKw
 	;
 
-// Class & method scope modifier rule
-scopeModifier
+// Base access specifier rule
+accessBaseSpecifier
 	: PublicKw
 	| ProtectedKw
 	| PrivateKw
+	;
+
+// Limit access specifier rule
+accessLimitSpecifier
+	: LimitedKw LeftBracket qualifiedId (Comma qualifiedId)* RightBracket
+	;
+
+// Access specifier rule
+accessSpecifier
+	: accessBaseSpecifier accessLimitSpecifier?
+	| accessLimitSpecifier accessBaseSpecifier?
+	;
+
+// Storage specifier rule
+storageSpecifier
+	: StaticKw
+	;
+
+// Function specifier rule
+functionSpecifier
+	: InlineKw
+	| VirtualKw
+	| NativeKw
+	;
+
+// Constant qualifier rule
+constQualifier
+	: ConstKw
+	;
+
+// Method declaration specifier sequence rule
+methodDeclSpecSeq
+	: accessSpecifier? storageSpecifier? functionSpecifier?
+	;
+
+// Class variable delcaration specifier sequence rule
+classVarDeclSpecSeq
+	: accessSpecifier? storageSpecifier? constQualifier?
+	;
+
+// Local variable declaration specifier sequence rule
+localVarDeclSpecSeq
+	: storageSpecifier? constQualifier?
+	;
+
+// Method parameter variable declaration specifier sequence rule
+paramVarDeclSpecSeq
+	: constQualifier?
 	;
 
 // Class inheritance rule
@@ -93,7 +141,7 @@ classExtends
 
 // Class 'implements' rule
 classImpls
-	: ImplementsKw qualifiedId (Comma qualifiedId)* Comma?
+	: ImplementsKw qualifiedId (Comma qualifiedId)*
 	;
 
 // Class definition rule
@@ -103,32 +151,37 @@ classDef
 
 // Typename array declaration specifier
 arrayTypeDecl:
-	LeftBracket Comma* RightBracket
+	LeftBracket Comma? Comma? RightBracket
 	;
 
 // Typename array instantiation specifier
 arrayTypeDef:
-	LeftBracket IntLit (Comma IntLit)* Comma? RightBracket
+	LeftBracket expr (Comma expr)? (Comma expr)? RightBracket
 	;
 
-// Typename-for-declaration rule
+// Typename declaration rule
 typeNameDecl
-	: Id arrayTypeDecl*
+	: Id arrayTypeDecl?
 	;
 
-// Typename-for-instantiation rule
-typeNameDef
-	: Id arrayTypeDef* arrayTypeDecl*
+// Braced initializer rule
+bracedInitializer
+	: LeftBrace expr? RightBrace
+	;
+
+// Explicit call-to-constructor rule
+ctorCall
+	: LeftParen expr? RightParen
 	;
 
 // Class variable declaration statement rule
 classVarDeclStmt
-	: classVarDecl Term
+	: classVarDeclSpecSeq varDeclStmt
 	;
 
-// Class variable declaration rule
-classVarDecl
-	: scopeModifier? varDecl
+// Local variable declaration statement rule
+localVarDeclStmt
+	: localVarDeclSpecSeq varDeclStmt
 	;
 
 // Variable declaration statement rule
@@ -138,18 +191,12 @@ varDeclStmt
 
 // Variable declaration rule
 varDecl
-	: varModifier? typeNameDecl varDef (Comma varDef)*
+	: typeNameDecl Id (Assign expr)? (Comma nextVarDecl)*
 	;
 
-// Variable definition rule
-varDef
+// Variable declaration rule (used only in a sequence of variable declarations after the initial declaration)
+nextVarDecl
 	: Id (Assign expr)?
-	;
-
-// Variable modifier rule
-varModifier
-	: ConstKw StaticKw?
-	| StaticKw ConstKw?
 	;
 
 // Variable declaration or expression statement rule (primarily for use within paren'd statements)
@@ -175,31 +222,24 @@ lambdaDecl
 
 // Class construction declaration rule
 ctorDecl
-	: scopeModifier? ConstructorKw LeftParen methodParamSeq? RightParen codeBlock
+	: methodDeclSpecSeq ConstructorKw LeftParen methodParamSeq? RightParen codeBlock
 	;
 
 // Method declaration rule
 methodDecl
-	: scopeModifier? methodModifier? typeNameDecl Id LeftParen methodParamSeq? RightParen (codeBlock | Term)
+	: methodDeclSpecSeq typeNameDecl Id LeftParen methodParamSeq? RightParen constQualifier? (codeBlock | Term)
 	;
 
-// Method modifier rule
-methodModifier
-	: methodImplModifier methodAccessModifier?
-	| methodAccessModifier methodImplModifier?
-	;
-
-// Method access module rule
-methodAccessModifier
-	: StaticKw
+// Method qualifier rule
+methodQualifier
+	: ConstKw
 	;
 
 // Method implementation modifier rule
-methodImplModifier
+methodStorageModifier
 	: InlineKw
 	| NativeKw
 	| VirtualKw
-	| StaticKw
 	;
 
 // Method parameter sequence rule
@@ -209,19 +249,25 @@ methodParamSeq
 
 // Method parameter rule
 methodParam
-	: ConstKw? typeNameDecl Id?
+	: paramVarDeclSpecSeq typeNameDecl Id?
+	;
+
+// Braced code block rule
+codeBlock
+	: LeftBrace codeBlockStmt* RightBrace
+	;
+
+// Code block statement rule
+codeBlockStmt
+	: codeBlock
+	| localVarDeclStmt
+	| exprStmt
 	;
 
 // Code statement rule
 codeStmt
 	: codeBlock
-	| varDeclStmt
 	| exprStmt
-	;
-
-// Braced code block rule
-codeBlock
-	: LeftBrace codeStmt* RightBrace
 	;
 
 // Expression statement rule
@@ -255,7 +301,7 @@ expr
 	| expr LogicAnd expr                                                            # exprLogic
 	| expr LogicOr expr                                                             # exprLogic
 	| expr (Assign | ExpoAssign | AddAssign | SubAssign | MultAssign | DivAssign | ModAssign | LeftRotateAssign | RightRotateAssign | LeftShiftAssign | RightShiftAssign | BitAndAssign | BitXorAssign | BitOrAssign) expr # exprAssignment
-	| NewKw typeNameDef expr?                                                       # exprInstantiate
+	| NewKw Id? ctorCall? (arrayTypeDef | arrayTypeDecl)? bracedInitializer?        # exprInstantiate
 	| (BreakKw | ContinueKw)                                                        # exprControlFlow
 	| CopyIntrinKw                                                                  # exprIntrinsic
 	| (NullLit | BoolLit | RealLit | IntLit)                                        # exprLiteral
@@ -441,6 +487,8 @@ ConstructorKw: 'constructor' ;
 PublicKw:      'public' ;
 ProtectedKw:   'protected' ;
 PrivateKw:     'private' ;
+InternalKw:    'internal' ;
+LimitedKw:     'limited' ;
 NewKw:         'new' ;
 
 // Intrinsic keyword tokens

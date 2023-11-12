@@ -31,7 +31,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ParserErrorHandler
+class ParserErrorHandler final
 	: protected antlr4::BaseErrorListener
 {
 public:

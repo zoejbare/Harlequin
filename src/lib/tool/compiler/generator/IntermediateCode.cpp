@@ -15,8 +15,10 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //
-
+	
 #include "IntermediateCode.hpp"
+
+#include "CompilerUtil.hpp"
 #include "ParserErrorHandler.hpp"
 
 #include "../SourceFile.hpp"
@@ -45,7 +47,10 @@ IntermediateCode* IntermediateCode::Resolve(
 	// the source code's intermediate representation.
 	pOutput->visit(pParseTree);
 
-	// Dispose of the code IR object if there were errors resolving the parse tree.
+	// The error handler is unnecessary now that we've finished walking the parse tree.
+	pOutput->m_pErrorHandler = nullptr;
+
+	// Dispose of the code IR object if there were errors while walking the parse tree.
 	if(pErrorHandler->EncounteredError())
 	{
 		delete pOutput;
@@ -176,17 +181,21 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 	// Check to see if this class has already been defined.
 	if(!m_symbolTable.classSymbols.count(qualifiedName))
 	{
-		const bool isStatic = (pCtx->StaticKw() != nullptr);
+		auto* const pAccessBaseSpecCtx = pCtx->accessBaseSpecifier();
+		auto* const pStorageSpecCtx = pCtx->storageSpecifier();
 
-		const ClassType classType = prv_resolveClassType(pCtx->classType()->getText());
-		const ScopeType scopeType = prv_resolveScopeType(pCtx->scopeModifier()->getText());
+		const detail::ClassType classType = CompilerUtil::GetClassType(pCtx->classType()->getText());
+		const detail::AccessType accessType = CompilerUtil::GetAccessType(pAccessBaseSpecCtx ? pAccessBaseSpecCtx->getText() : "");
+		const detail::StorageType storageType = CompilerUtil::GetStorageType(pStorageSpecCtx ? pStorageSpecCtx->getText() : "");
 
-		if(classType == ClassType::Class || (classType == ClassType::Interface && !isStatic))
+		// Only create class symbols for classes and non-static interfaces.
+		if(classType == detail::ClassType::Class 
+			|| (classType == detail::ClassType::Interface && storageType == detail::StorageType::Default))
 		{
 			auto* const pClassInheritanceCtx = pCtx->classInheritance();
 
 			// Create new class symbol.
-			ClassSymbol* const pClass = new ClassSymbol();
+			ClassSymbol::Ptr pClass = ClassSymbol::New();
 
 			// Handle the class inheritance.
 			if(pClassInheritanceCtx)
@@ -196,15 +205,7 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 
 				if(pClassImplsCtx)
 				{
-					const size_t length = pClassImplsCtx->qualifiedId().size();
-
-					pClass->implements.resize(length);
-
-					// Extract each interface name to implement.
-					for(size_t i = 0; i < length; ++i)
-					{
-						pClass->implements[i] = pClassImplsCtx->qualifiedId(i)->getText();
-					}
+					_resolveQualifiedIdArray(pClass->implements, pClassImplsCtx->qualifiedId());
 				}
 
 				if(pClassExtendsCtx)
@@ -220,21 +221,22 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 			pClass->qualifiedName = qualifiedName;
 			pClass->shortName = shortName;
 			pClass->namespaceName = currentNamespace;
-			pClass->type = classType;
-			pClass->scope = scopeType;
-			pClass->isStatic = isStatic;
+			pClass->classType = classType;
+			pClass->accessType = accessType;
+			pClass->storageType = storageType;
+
+			// Keep track of the current class.
+			m_classStack.push_back(pClass.get());
 
 			// Add the class to the symbol table.
-			m_symbolTable.classSymbols.emplace(qualifiedName, pClass);
-
-			m_classStack.push_back(pClass);
+			m_symbolTable.classSymbols.emplace(qualifiedName, std::move(pClass));
 		}
 		else
 		{
 			// Report the invalid scenario of a static interface declaration.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorStaticInterface,
-				pCtx->StaticKw()->getSymbol(),
+				pCtx->storageSpecifier()->StaticKw()->getSymbol(),
 				"illegal static interface declaration '%s'",
 				qualifiedName.c_str()
 			);
@@ -265,7 +267,7 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitClassVarDecl(HarlequinParser::ClassVarDeclContext* const pCtx)
+std::any IntermediateCode::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -274,118 +276,79 @@ std::any IntermediateCode::visitClassVarDecl(HarlequinParser::ClassVarDeclContex
 	}
 
 	const std::string& className = m_classStack.back()->qualifiedName;
+	const std::string& varNamePrefix = className + ".";
 
-	auto* const pScopeModCtx = pCtx->scopeModifier();
-	auto* const pVarDeclCtx = pCtx->varDecl();
-	auto* const pVarModCtx = pVarDeclCtx->varModifier();
-	auto* const pTypeNameCtx = pVarDeclCtx->typeNameDecl();
-	const auto varDefs = pVarDeclCtx->varDef();
+	auto* const pVarDeclSpecSeq = pCtx->classVarDeclSpecSeq();
 
-	const bool isStatic = (pVarModCtx && (pVarModCtx->StaticKw() != nullptr));
-	const bool isConst = (pVarModCtx && (pVarModCtx->ConstKw() != nullptr));
+	auto* const pAccessSpecCtx = pVarDeclSpecSeq->accessSpecifier();
+	auto* const pStorageSpecCtx = pVarDeclSpecSeq->storageSpecifier();
+	auto* const pConstQualCtx = pVarDeclSpecSeq->constQualifier();
 
-	// When no explicit scope is present, the default is private.
-	const ScopeType scopeType = pScopeModCtx
-		? prv_resolveScopeType(pScopeModCtx->getText())
-		: ScopeType::Private;
+	auto* const pVarDeclStmtCtx = pCtx->varDeclStmt();
+	auto* const pVarDeclCtx = pVarDeclStmtCtx->varDecl();
 
-	const std::string typeName = pTypeNameCtx->getText();
-	int valueType = HQ_VALUE_TYPE_OBJECT;
+	//auto* const pAssignExprCtx = pVarDeclCtx->expr();
+	const auto nextVarDecls = pVarDeclCtx->nextVarDecl();
 
-	if(typeName == "int8")
-	{
-		valueType = HQ_VALUE_TYPE_INT8;
-	}
-	else if(typeName == "int16")
-	{
-		valueType = HQ_VALUE_TYPE_INT16;
-	}
-	else if(typeName == "int32")
-	{
-		valueType = HQ_VALUE_TYPE_INT32;
-	}
-	else if(typeName == "int64")
-	{
-		valueType = HQ_VALUE_TYPE_INT64;
-	}
-	else if(typeName == "uint8")
-	{
-		valueType = HQ_VALUE_TYPE_UINT8;
-	}
-	else if(typeName == "uint16")
-	{
-		valueType = HQ_VALUE_TYPE_UINT16;
-	}
-	else if(typeName == "uint32")
-	{
-		valueType = HQ_VALUE_TYPE_UINT32;
-	}
-	else if(typeName == "uint64")
-	{
-		valueType = HQ_VALUE_TYPE_UINT64;
-	}
-	else if(typeName == "float32")
-	{
-		valueType = HQ_VALUE_TYPE_FLOAT32;
-	}
-	else if(typeName == "float64")
-	{
-		valueType = HQ_VALUE_TYPE_FLOAT64;
-	}
-	else if(typeName == "bool")
-	{
-		valueType = HQ_VALUE_TYPE_BOOL;
-	}
-	else if(typeName == "string")
-	{
-		valueType = HQ_VALUE_TYPE_STRING;
-	}
-	else if(typeName == "native")
-	{
-		valueType = HQ_VALUE_TYPE_NATIVE;
-	}
-	else
-	{
-		// TODO: Handle arrays
-		// TODO: Handle templates?
-	}
+	const detail::StorageType storageType = CompilerUtil::GetStorageType(pStorageSpecCtx ? pStorageSpecCtx->getText() : "");
 
-	// TODO: Make this generic for all types of variables, not just class variables.
-	for(auto* const pVarDefCtx : varDefs)
-	{
-		const std::string shortName = pVarDefCtx->Id()->getText();
-		const std::string qualifiedName = className + "." + shortName;
+	// Resolve data that will shared by all variables defined here.
+	detail::VariableBase varBase;
+	_resolveVariableCommonData(varBase, pVarDeclCtx, pConstQualCtx);
 
-		if(!m_symbolTable.classVarSymbols.count(qualifiedName))
+	// Resolve the variable's access specifier.
+	detail::AccessType accessType;
+	detail::StringArray accessLimitTypes;
+	_resolveAccessSpecifier(accessType, accessLimitTypes, pAccessSpecCtx);
+
+	auto registerVariable = 
+		[this, &varNamePrefix, &storageType, &accessType, &varBase, &accessLimitTypes]
+		(antlr4::tree::TerminalNode* const pNameId)
+	{
+		const std::string varNameShort = pNameId->getText();
+
+		// Construct the variable's fully qualified name.
+		const std::string varNameQualified = varNamePrefix + varNameShort;
+
+		if(!m_symbolTable.classVarSymbols.count(varNameQualified))
 		{
-			ClassVarSymbol* const pClassVar = new ClassVarSymbol();
+			ClassVarSymbol::Ptr pClassVar = ClassVarSymbol::New();
 
-			pClassVar->scope = scopeType;
-			pClassVar->var.type = valueType;
-			pClassVar->var.isStatic = isStatic;
-			pClassVar->var.isConst = isConst;
+			// Copy the access limiters to the variable.
+			pClassVar->accessLimitTypes = accessLimitTypes;
 
-			// Cache the fully qualified name of the variable.
-			pClassVar->var.name = qualifiedName;
+			// Copy the variable common data we resolved from the start of the declaration.
+			pClassVar->base = varBase;
 
-			// Store the type name of the variable only if it's an object.
-			if(valueType == HQ_VALUE_TYPE_OBJECT)
-			{
-				pClassVar->var.className = typeName;
-			}
+			// Cache the variable's name.
+			pClassVar->base.varName = varNameQualified;
 
-			m_symbolTable.classVarSymbols.emplace(qualifiedName, pClassVar);
+			// Cache the remaining variable properties.
+			pClassVar->accessType = accessType;
+			pClassVar->storageType = storageType;
+
+			// Map the new variable symbol.
+			m_symbolTable.classVarSymbols.emplace(varNameQualified, std::move(pClassVar));
 		}
 		else
 		{
 			// Report the duplicate variable name as an error.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateVar,
-				pVarDefCtx->Id()->getSymbol(),
+				pNameId->getSymbol(),
 				"duplicate class variable '%s'",
-				qualifiedName.c_str()
+				varNameQualified.c_str()
 			);
 		}
+	};
+
+	// Register the first variable in the declaration.
+	registerVariable(pVarDeclCtx->Id());
+
+	// Register each subsequent variable for this declaration.
+	for(auto* const pNextVarDeclCtx : nextVarDecls)
+	{
+		registerVariable(pNextVarDeclCtx->Id());
 	}
 
 	return defaultResult();
@@ -425,22 +388,97 @@ std::any IntermediateCode::visitMethodDecl(HarlequinParser::MethodDeclContext* c
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline ClassType IntermediateCode::prv_resolveClassType(const std::string& text) const
+inline void IntermediateCode::_resolveAccessSpecifier(
+	detail::AccessType& outputAccessType,
+	detail::StringArray& outputLimitTypes,
+	HarlequinParser::AccessSpecifierContext* const pAccessSpecCtx)
 {
-	return (text == "interface")
-		? ClassType::Interface
-		: ClassType::Class;
+	if(pAccessSpecCtx)
+	{
+		auto* const pAccessBaseSpecCtx = pAccessSpecCtx->accessBaseSpecifier();
+		auto* const pAccessLimitSpecCtx = pAccessSpecCtx->accessLimitSpecifier();
+
+		// The default access type is 'private', so setting that here ahead of time will simply some of the logic below.
+		outputAccessType = detail::AccessType::Private;
+
+		const detail::AccessType tempAccessType = pAccessBaseSpecCtx
+			? CompilerUtil::GetAccessType(pAccessBaseSpecCtx->getText())
+			: outputAccessType;
+
+		if(pAccessLimitSpecCtx)
+		{
+			// Get the type IDs specified in the access limiter list.
+			_resolveQualifiedIdArray(outputLimitTypes, pAccessLimitSpecCtx->qualifiedId());
+
+			// The grammar should not allow specifying an empty list.
+			assert(outputLimitTypes.size() > 0);
+
+			if(pAccessBaseSpecCtx)
+			{
+				// This is to handle special cases where valid base+limited specifier combinations have slightly different behavior.
+				switch(tempAccessType)
+				{
+					case detail::AccessType::Protected:
+						// Valid specifier combination.
+						outputAccessType = tempAccessType;
+						break;
+
+					default:
+					{
+						// Report the invalid access specifier combination.
+						m_pErrorHandler->Report(
+							MessageCode::ErrorInvalidAccessSpec,
+							pAccessBaseSpecCtx->getStart(),
+							"'%s' access specifier is not compatible with the 'limited' access specifier",
+							pAccessBaseSpecCtx->getText().c_str());
+						break;
+					}
+				}
+			}
+		}
+		else if(pAccessBaseSpecCtx)
+		{
+			// No special case handling here, just use the base type as-is.
+			outputAccessType = tempAccessType;
+		}
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline ScopeType IntermediateCode::prv_resolveScopeType(const std::string& text) const
+inline void IntermediateCode::_resolveVariableCommonData(
+	detail::VariableBase& output, 
+	HarlequinParser::VarDeclContext* const pVarDeclCtx,
+	HarlequinParser::ConstQualifierContext* const pConstQualCtx)
 {
-	return (text == "public")
-		? ScopeType::Public
-		: (text == "protected")
-			? ScopeType::Protected
-			: ScopeType::Private;
+	auto* const pTypeNameDeclCtx = pVarDeclCtx->typeNameDecl();
+	auto* const pArrayTypeDeclCtx = pTypeNameDeclCtx->arrayTypeDecl();
+
+	output.typeName = pTypeNameDeclCtx->Id()->getText();
+	output.varType = CompilerUtil::GetVarType(output.typeName);
+	output.arrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
+
+	// All variable with the 'const' qualifier will start off as immutable.
+	// They can be upgraded to literal during expression resolution.
+	output.constType = (pConstQualCtx) ? detail::ConstType::Immutable : detail::ConstType::None;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void IntermediateCode::_resolveQualifiedIdArray(
+	detail::StringArray& output,
+	const std::vector<HarlequinParser::QualifiedIdContext*>& qualifiedIds)
+{
+	const size_t length = qualifiedIds.size();
+
+	// Resize the output to the exact number of type names given.
+	output.resize(length);
+
+	// Extract each type name ID.
+	for(size_t i = 0; i < length; ++i)
+	{
+		output[i] = qualifiedIds[i]->getText();
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------

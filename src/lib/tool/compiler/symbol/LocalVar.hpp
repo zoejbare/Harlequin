@@ -20,27 +20,23 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "detail/AccessType.hpp"
-#include "detail/StringArray.hpp"
+#include "detail/StorageType.hpp"
 #include "detail/VariableBase.hpp"
 
 #include <memory>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct ClassVarSymbol
+struct LocalVarSymbol
 {
-	typedef std::unique_ptr<ClassVarSymbol> Ptr;
+	typedef std::unique_ptr<LocalVarSymbol> Ptr;
 
 	inline static Ptr New()
 	{
-		return std::make_unique<ClassVarSymbol>();
+		return std::make_unique<LocalVarSymbol>();
 	}
 
-	detail::StringArray accessLimitTypes;
 	detail::VariableBase base;
-
-	detail::AccessType accessType;
 	detail::StorageType storageType;
 };
 

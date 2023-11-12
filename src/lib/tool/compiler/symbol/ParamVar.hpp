@@ -20,22 +20,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "enum/ClassType.hpp"
-#include "enum/ScopeType.hpp"
+#include "detail/VariableBase.hpp"
 
-#include <string>
+#include <memory>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct VarSymbol
+struct ParamVarSymbol
 {
-	std::string name;
-	std::string className;
+	typedef std::unique_ptr<ParamVarSymbol> Ptr;
 
-	int type;
+	inline static Ptr New()
+	{
+		return std::make_unique<ParamVarSymbol>();
+	}
 
-	bool isStatic;
-	bool isConst;
+	detail::VariableBase base;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
