@@ -18,6 +18,8 @@
 
 #include "CompilerUtil.hpp"
 
+#include <algorithm>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 detail::AccessType CompilerUtil::GetAccessType(const std::string& accessType)
