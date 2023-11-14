@@ -20,6 +20,8 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "ClassVar.hpp"
+
 #include "detail/AccessType.hpp"
 #include "detail/ClassType.hpp"
 #include "detail/StorageType.hpp"
@@ -27,25 +29,33 @@
 
 #include <memory>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
+struct NamespaceSymbol;
 struct ClassSymbol
 {
-	typedef std::unique_ptr<ClassSymbol> Ptr;
+	typedef std::unique_ptr<ClassSymbol>                  Ptr;
+	typedef std::unordered_map<std::string, Ptr>          PtrMap;
+	typedef std::unordered_map<std::string, ClassSymbol*> RawPtrMap;
 
 	inline static Ptr New()
 	{
 		return std::make_unique<ClassSymbol>();
 	}
 
+	NamespaceSymbol* pParentNamespace;
+	ClassSymbol* pParentClass;
+
+	PtrMap classes;
+	ClassVarSymbol::PtrMap variables;
+
 	detail::StringArray implements;
 	detail::StringArray extends;
 
-	std::string qualifiedName;
 	std::string shortName;
-	std::string namespaceName;
+	std::string qualifiedName;
 
 	detail::ClassType classType;
 	detail::AccessType accessType;

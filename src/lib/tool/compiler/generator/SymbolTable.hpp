@@ -22,24 +22,24 @@
 
 #include "../symbol/Class.hpp"
 #include "../symbol/ClassVar.hpp"
+#include "../symbol/Namespace.hpp"
 
-#include <unordered_map>
-#include <unordered_set>
+#include "../symbol/detail/StringSet.hpp"
+#include "../symbol/detail/StringToStringMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct SymbolTable
 {
-	typedef std::unordered_set<std::string> NamespaceSet;
+	detail::StringSet imports;
+	detail::StringToStringMap classAliases;
 
-	typedef std::unordered_map<std::string, std::string>         ClassAliasMap;
-	typedef std::unordered_map<std::string, ClassSymbol::Ptr>    ClassSymbolMap;
-	typedef std::unordered_map<std::string, ClassVarSymbol::Ptr> ClassVarSymbolMap;
+	NamespaceSymbol::PtrMap namespaces;
 
-	NamespaceSet namespaceImports;
-	ClassAliasMap classAliases;
-	ClassSymbolMap classSymbols;
-	ClassVarSymbolMap classVarSymbols;
+	ClassSymbol::PtrMap rootClasses;
+	ClassSymbol::RawPtrMap allClasses;
+
+	ClassVarSymbol::RawPtrMap allClassVariables;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

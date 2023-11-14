@@ -20,61 +20,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "generator/SourceData.hpp"
-#include "generator/SymbolTable.hpp"
-#include "generator/SymbolTableGenerator.hpp"
+#include "Class.hpp"
 
-#include "../../base/Reference.hpp"
+#include <memory>
+#include <string>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace antlr4
+struct NamespaceSymbol
 {
-	class ANTLRInputStream;
-	class CommonTokenStream;
+	typedef std::unique_ptr<NamespaceSymbol>     Ptr;
+	typedef std::unordered_map<std::string, Ptr> PtrMap;
 
-	namespace tree
+	inline static Ptr New()
 	{
-		class ParseTree;
+		return std::make_unique<NamespaceSymbol>();
 	}
-}
 
-class HarlequinLexer;
-class HarlequinParser;
+	ClassSymbol::PtrMap classes;
 
-//----------------------------------------------------------------------------------------------------------------------
-
-struct HqSourceFile
-{
-	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const char* filePath,int* pErrorReason);
-
-	static int32_t AddRef(HqSourceFileHandle hSrcFile);
-	static int32_t Release(HqSourceFileHandle hSrcFile);
-
-	static int Parse(HqSourceFileHandle hSrcFile);
-	static bool WasParsedSuccessfully(HqSourceFileHandle hSrcFile);
-
-	static void prv_onDestruct(void*);
-
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
-
-	HqReference ref;
-	HqToolContextHandle hToolCtx;
-	HqSerializerHandle hSerializer;
-
-	antlr4::ANTLRInputStream* pInputStream;
-	antlr4::CommonTokenStream* pTokenStream;
-
-	HarlequinLexer* pLexer;
-	HarlequinParser* pParser;
-
-	antlr4::tree::ParseTree* pParseTree;
-
-	SourceData srcData;
-	SymbolTable symbolTable;
-
-	bool parsed;
+	std::string shortName;
+	std::string qualifiedName;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -29,17 +29,20 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class IntermediateCode final
+class SymbolTableGenerator final
 	: protected HarlequinBaseVisitor
 {
 public:
 
-	static IntermediateCode* Resolve(antlr4::tree::ParseTree* const pParseTree, ParserErrorHandler* const pErrorHandler);
+	static void Run(
+		antlr4::tree::ParseTree* pParseTree,
+		ParserErrorHandler* pErrorHandler,
+		SymbolTable* pSymbolTable);
 
 
 private:
 
-	IntermediateCode(ParserErrorHandler*);
+	SymbolTableGenerator(ParserErrorHandler*, SymbolTable*);
 
 	virtual bool shouldVisitNextChild(antlr4::tree::ParseTree*, const std::any&) override;
 
@@ -64,11 +67,11 @@ private:
 	void _resolveQualifiedIdArray(detail::StringArray&, const std::vector<HarlequinParser::QualifiedIdContext*>&);
 
 	ParserErrorHandler* m_pErrorHandler;
+	SymbolTable* m_pSymbolTable;
 
-	SymbolTable m_symbolTable;
-
-	std::list<std::string> m_namespaceStack;
+	std::list<NamespaceSymbol*> m_namespaceStack;
 	std::list<ClassSymbol*> m_classStack;
+	std::list<ClassVarSymbol*> m_classVarStack;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

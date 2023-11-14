@@ -176,21 +176,15 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	// Generate the intermediate code representation from the parse tree.
-	hSrcFile->pCode = IntermediateCode::Resolve(hSrcFile->pParseTree, &errorHandler);
+	// Generate the symbol table from the parse tree.
+	SymbolTableGenerator::Run(hSrcFile->pParseTree, &errorHandler, &hSrcFile->symbolTable);
 
 	// Check for errors that occured during symbol resolution.
 	if(errorHandler.EncounteredError())
 	{
-		// The code IR object should not exist if there were errors.
-		assert(hSrcFile->pCode == nullptr);
-
 		hSrcFile->pParseTree = nullptr;
 		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
-
-	// By this point, the code IR object should always exist.
-	assert(hSrcFile->pCode != nullptr);
 
 	return HQ_SUCCESS;
 }
@@ -216,7 +210,6 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 	delete hSrcFile->pTokenStream;
 	delete hSrcFile->pLexer;
 	delete hSrcFile->pParser;
-	delete hSrcFile->pCode;
 
 	delete hSrcFile;
 }

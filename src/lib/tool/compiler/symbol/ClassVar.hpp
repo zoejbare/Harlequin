@@ -21,21 +21,29 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "detail/AccessType.hpp"
+#include "detail/StorageType.hpp"
 #include "detail/StringArray.hpp"
 #include "detail/VariableBase.hpp"
 
 #include <memory>
+#include <string>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
+struct ClassSymbol;
 struct ClassVarSymbol
 {
-	typedef std::unique_ptr<ClassVarSymbol> Ptr;
+	typedef std::unique_ptr<ClassVarSymbol>                  Ptr;
+	typedef std::unordered_map<std::string, Ptr>             PtrMap;
+	typedef std::unordered_map<std::string, ClassVarSymbol*> RawPtrMap;
 
 	inline static Ptr New()
 	{
 		return std::make_unique<ClassVarSymbol>();
 	}
+
+	ClassSymbol* pParent;
 
 	detail::StringArray accessLimitTypes;
 	detail::VariableBase base;

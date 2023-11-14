@@ -15,8 +15,8 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //
-	
-#include "IntermediateCode.hpp"
+
+#include "SymbolTableGenerator.hpp"
 
 #include "CompilerUtil.hpp"
 #include "ParserErrorHandler.hpp"
@@ -27,42 +27,34 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-IntermediateCode::IntermediateCode(ParserErrorHandler* const pErrorHandler)
+SymbolTableGenerator::SymbolTableGenerator(ParserErrorHandler* const pErrorHandler, SymbolTable* const pSymbolTable)
 	: m_pErrorHandler(pErrorHandler)
-	, m_symbolTable()
+	, m_pSymbolTable(pSymbolTable)
 	, m_namespaceStack()
 	, m_classStack()
+	, m_classVarStack()
 {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-IntermediateCode* IntermediateCode::Resolve(
+void SymbolTableGenerator::Run(
 	antlr4::tree::ParseTree* const pParseTree, 
-	ParserErrorHandler* const pErrorHandler)
+	ParserErrorHandler* const pErrorHandler,
+	SymbolTable* const pSymbolTable)
 {
-	IntermediateCode* pOutput = new IntermediateCode(pErrorHandler);
+	SymbolTableGenerator* pGenerator = new SymbolTableGenerator(pErrorHandler, pSymbolTable);
 
-	// Walk the parse tree to discover the source file symbols and generate
-	// the source code's intermediate representation.
-	pOutput->visit(pParseTree);
+	// Walk the parse tree to discover the source file symbols
+	// and fill the source code's symbole table.
+	pGenerator->visit(pParseTree);
 
-	// The error handler is unnecessary now that we've finished walking the parse tree.
-	pOutput->m_pErrorHandler = nullptr;
-
-	// Dispose of the code IR object if there were errors while walking the parse tree.
-	if(pErrorHandler->EncounteredError())
-	{
-		delete pOutput;
-		pOutput = nullptr;
-	}
-
-	return pOutput;
+	delete pGenerator;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool IntermediateCode::shouldVisitNextChild(antlr4::tree::ParseTree* const pNode, const std::any& currentResult)
+bool SymbolTableGenerator::shouldVisitNextChild(antlr4::tree::ParseTree* const pNode, const std::any& currentResult)
 {
 	(void) pNode;
 	(void) currentResult;
@@ -72,7 +64,7 @@ bool IntermediateCode::shouldVisitNextChild(antlr4::tree::ParseTree* const pNode
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
+std::any SymbolTableGenerator::visitUsingStmt(HarlequinParser::UsingStmtContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -83,9 +75,9 @@ std::any IntermediateCode::visitUsingStmt(HarlequinParser::UsingStmtContext* con
 	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
 
 	// Check to see if this namespace is already being used (we can ignore duplicate namespaces).
-	if(!m_symbolTable.namespaceImports.count(qualifiedNamespace))
+	if(!m_pSymbolTable->imports.count(qualifiedNamespace))
 	{
-		m_symbolTable.namespaceImports.insert(qualifiedNamespace);
+		m_pSymbolTable->imports.insert(qualifiedNamespace);
 	}
 
 	return visitChildren(pCtx);
@@ -93,7 +85,7 @@ std::any IntermediateCode::visitUsingStmt(HarlequinParser::UsingStmtContext* con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
+std::any SymbolTableGenerator::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -112,9 +104,9 @@ std::any IntermediateCode::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtCo
 		// Check if the class alias has not already been declared.
 		// If it has, it means there is an ambiguous reference to
 		// that class name.
-		if(!m_symbolTable.classAliases.count(aliasedClassName))\
+		if(!m_pSymbolTable->classAliases.count(aliasedClassName))
 		{
-			m_symbolTable.classAliases.emplace(aliasedClassName, qualifiedClassName);
+			m_pSymbolTable->classAliases.emplace(aliasedClassName, qualifiedClassName);
 		}
 		else
 		{
@@ -133,7 +125,7 @@ std::any IntermediateCode::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtCo
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
+std::any SymbolTableGenerator::visitNamespaceDecl(HarlequinParser::NamespaceDeclContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -141,17 +133,46 @@ std::any IntermediateCode::visitNamespaceDecl(HarlequinParser::NamespaceDeclCont
 		return defaultResult();
 	}
 
-	const bool isChildOfNamespace = (m_namespaceStack.size() > 0);
+	NamespaceSymbol* const pParentNamespace = m_namespaceStack.size() > 0
+		? m_namespaceStack.back()
+		: nullptr;
+
+	NamespaceSymbol* pCurrentNamespace = nullptr;
 
 	const std::string shortName = pCtx->qualifiedId()->getText();
-	const std::string qualifiedName = isChildOfNamespace
-		? m_namespaceStack.back() + "." + shortName
+	const std::string qualifiedName = pParentNamespace
+		? pParentNamespace->qualifiedName + "." + shortName
 		: shortName;
 
-	m_namespaceStack.push_back(qualifiedName);
+	// Check if this namespace has already been defined.
+	auto kv = m_pSymbolTable->namespaces.find(shortName);
+	if(kv == m_pSymbolTable->namespaces.end())
+	{
+		// This is the first time this namespace has been encountered.
+		NamespaceSymbol::Ptr pNamespace = NamespaceSymbol::New();
 
+		pNamespace->shortName = shortName;
+		pNamespace->qualifiedName = qualifiedName;
+
+		// Cache the raw pointer to the new namespace symbol.
+		pCurrentNamespace = pNamespace.get();
+
+		// Move the new namespace into the symbol table.
+		m_pSymbolTable->namespaces.emplace(qualifiedName, std::move(pNamespace));
+	}
+	else
+	{
+		// Cache the raw pointer to the existing namespace symbol.
+		pCurrentNamespace = kv->second.get();
+	}
+
+	// Add the current namespace to the stack.
+	m_namespaceStack.push_back(pCurrentNamespace);
+
+	// Recursively visit all children contained within this namespace.
 	std::any result = visitChildren(pCtx);
 
+	// Pop the current namespace from the stack.
 	m_namespaceStack.pop_back();
 
 	return result;
@@ -159,7 +180,7 @@ std::any IntermediateCode::visitNamespaceDecl(HarlequinParser::NamespaceDeclCont
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
+std::any SymbolTableGenerator::visitClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -167,19 +188,30 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 		return defaultResult();
 	}
 
-	const bool isChildOfNamespace = (m_namespaceStack.size() > 0);
-
-	const std::string currentNamespace = isChildOfNamespace
+	NamespaceSymbol* const pParentNamespace = m_namespaceStack.size() > 0
 		? m_namespaceStack.back()
-		: std::string();
+		: nullptr;
+
+	ClassSymbol* const pParentClass = m_classStack.size() > 0
+		? m_classStack.back()
+		: nullptr;
 
 	const std::string shortName = pCtx->Id()->getText();
-	const std::string qualifiedName = isChildOfNamespace
-		? currentNamespace + "." + shortName
-		: shortName;
+	const std::string qualifiedName = pParentClass
+		? pParentClass->qualifiedName + "." + shortName
+		: pParentNamespace
+			? pParentNamespace->qualifiedName + "." + shortName
+			: shortName;
+
+	ClassSymbol::PtrMap* pDestMap = pParentClass
+		? &pParentClass->classes
+		: pParentNamespace
+			? &pParentNamespace->classes
+			: &m_pSymbolTable->rootClasses;
 
 	// Check to see if this class has already been defined.
-	if(!m_symbolTable.classSymbols.count(qualifiedName))
+	auto kv = pDestMap->find(shortName);
+	if(kv == pDestMap->end())
 	{
 		auto* const pAccessBaseSpecCtx = pCtx->accessBaseSpecifier();
 		auto* const pStorageSpecCtx = pCtx->storageSpecifier();
@@ -218,9 +250,10 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 			}
 
 			// Fill in the class properties.
+			pClass->pParentNamespace = !pParentClass ? pParentNamespace : nullptr;
+			pClass->pParentClass = pParentClass;
 			pClass->qualifiedName = qualifiedName;
 			pClass->shortName = shortName;
-			pClass->namespaceName = currentNamespace;
 			pClass->classType = classType;
 			pClass->accessType = accessType;
 			pClass->storageType = storageType;
@@ -228,8 +261,12 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 			// Keep track of the current class.
 			m_classStack.push_back(pClass.get());
 
-			// Add the class to the symbol table.
-			m_symbolTable.classSymbols.emplace(qualifiedName, std::move(pClass));
+			// Add the new class to the symbol table.
+			assert(m_pSymbolTable->allClasses.count(qualifiedName) == 0);
+			m_pSymbolTable->allClasses.emplace(qualifiedName, pClass.get());
+
+			// Move the new class into the destination map.
+			pDestMap->emplace(shortName, std::move(pClass));
 		}
 		else
 		{
@@ -255,6 +292,7 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 
 	std::any result = defaultResult();
 
+	// Visit each of this rule's children.
 	if(!m_pErrorHandler->EncounteredError())
 	{
 		result = visitChildren(pCtx);
@@ -267,7 +305,7 @@ std::any IntermediateCode::visitClassDecl(HarlequinParser::ClassDeclContext* con
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext* const pCtx)
+std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -275,8 +313,12 @@ std::any IntermediateCode::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclSt
 		return defaultResult();
 	}
 
-	const std::string& className = m_classStack.back()->qualifiedName;
-	const std::string& varNamePrefix = className + ".";
+	// There should always be a parent class when discovering class variables.
+	assert(m_classStack.size() > 0);
+
+	ClassSymbol* const pParentClass = m_classStack.back();
+
+	const std::string& varNamePrefix = pParentClass->qualifiedName + ".";
 
 	auto* const pVarDeclSpecSeq = pCtx->classVarDeclSpecSeq();
 
@@ -302,7 +344,7 @@ std::any IntermediateCode::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclSt
 	_resolveAccessSpecifier(accessType, accessLimitTypes, pAccessSpecCtx);
 
 	auto registerVariable = 
-		[this, &varNamePrefix, &storageType, &accessType, &varBase, &accessLimitTypes]
+		[this, &pParentClass, &varNamePrefix, &storageType, &accessType, &varBase, &accessLimitTypes]
 		(antlr4::tree::TerminalNode* const pNameId)
 	{
 		const std::string varNameShort = pNameId->getText();
@@ -310,7 +352,7 @@ std::any IntermediateCode::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclSt
 		// Construct the variable's fully qualified name.
 		const std::string varNameQualified = varNamePrefix + varNameShort;
 
-		if(!m_symbolTable.classVarSymbols.count(varNameQualified))
+		if(!pParentClass->variables.count(varNameShort))
 		{
 			ClassVarSymbol::Ptr pClassVar = ClassVarSymbol::New();
 
@@ -321,14 +363,19 @@ std::any IntermediateCode::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclSt
 			pClassVar->base = varBase;
 
 			// Cache the variable's name.
-			pClassVar->base.varName = varNameQualified;
+			pClassVar->base.varName = varNameShort;
 
 			// Cache the remaining variable properties.
+			pClassVar->pParent = pParentClass;
 			pClassVar->accessType = accessType;
 			pClassVar->storageType = storageType;
 
-			// Map the new variable symbol.
-			m_symbolTable.classVarSymbols.emplace(varNameQualified, std::move(pClassVar));
+			// Add the new class variable to the global map in the symbol table.
+			assert(m_pSymbolTable->allClassVariables.count(varNameQualified) == 0);
+			m_pSymbolTable->allClassVariables.emplace(varNameQualified, pClassVar.get());
+
+			// Move the new class symbol to the parent class.
+			pParentClass->variables.emplace(varNameShort, std::move(pClassVar));
 		}
 		else
 		{
@@ -356,7 +403,7 @@ std::any IntermediateCode::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclSt
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitCtorDecl(HarlequinParser::CtorDeclContext* const pCtx)
+std::any SymbolTableGenerator::visitCtorDecl(HarlequinParser::CtorDeclContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -372,7 +419,7 @@ std::any IntermediateCode::visitCtorDecl(HarlequinParser::CtorDeclContext* const
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::any IntermediateCode::visitMethodDecl(HarlequinParser::MethodDeclContext* const pCtx)
+std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContext* const pCtx)
 {
 	if(m_pErrorHandler->EncounteredError())
 	{
@@ -388,7 +435,7 @@ std::any IntermediateCode::visitMethodDecl(HarlequinParser::MethodDeclContext* c
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void IntermediateCode::_resolveAccessSpecifier(
+inline void SymbolTableGenerator::_resolveAccessSpecifier(
 	detail::AccessType& outputAccessType,
 	detail::StringArray& outputLimitTypes,
 	HarlequinParser::AccessSpecifierContext* const pAccessSpecCtx)
@@ -446,7 +493,7 @@ inline void IntermediateCode::_resolveAccessSpecifier(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void IntermediateCode::_resolveVariableCommonData(
+inline void SymbolTableGenerator::_resolveVariableCommonData(
 	detail::VariableBase& output, 
 	HarlequinParser::VarDeclContext* const pVarDeclCtx,
 	HarlequinParser::ConstQualifierContext* const pConstQualCtx)
@@ -465,7 +512,7 @@ inline void IntermediateCode::_resolveVariableCommonData(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void IntermediateCode::_resolveQualifiedIdArray(
+inline void SymbolTableGenerator::_resolveQualifiedIdArray(
 	detail::StringArray& output,
 	const std::vector<HarlequinParser::QualifiedIdContext*>& qualifiedIds)
 {

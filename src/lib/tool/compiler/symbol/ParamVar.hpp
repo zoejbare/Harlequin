@@ -23,12 +23,15 @@
 #include "detail/VariableBase.hpp"
 
 #include <memory>
+#include <string>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct ParamVarSymbol
 {
-	typedef std::unique_ptr<ParamVarSymbol> Ptr;
+	typedef std::unique_ptr<ParamVarSymbol>      Ptr;
+	typedef std::unordered_map<std::string, Ptr> PtrMap;
 
 	inline static Ptr New()
 	{

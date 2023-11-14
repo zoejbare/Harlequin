@@ -24,12 +24,15 @@
 #include "detail/VariableBase.hpp"
 
 #include <memory>
+#include <string>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 struct LocalVarSymbol
 {
-	typedef std::unique_ptr<LocalVarSymbol> Ptr;
+	typedef std::unique_ptr<LocalVarSymbol>      Ptr;
+	typedef std::unordered_map<std::string, Ptr> PtrMap;
 
 	inline static Ptr New()
 	{
