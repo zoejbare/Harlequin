@@ -20,28 +20,20 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
+#include "ArrayType.hpp"
+#include "VarType.hpp"
 
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+namespace detail
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
-
-	NamespaceSymbol::PtrMap namespaces;
-
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
-
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
-};
+	struct ReturnValue
+	{
+		detail::VarType varType;
+		detail::ArrayType arrayType;
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------

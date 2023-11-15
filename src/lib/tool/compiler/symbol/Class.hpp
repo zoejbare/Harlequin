@@ -21,6 +21,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "ClassVar.hpp"
+#include "Method.hpp"
 
 #include "detail/AccessType.hpp"
 #include "detail/ClassType.hpp"
@@ -50,6 +51,7 @@ struct ClassSymbol
 
 	PtrMap classes;
 	ClassVarSymbol::PtrMap variables;
+	MethodSymbol::PtrMap methods;
 
 	detail::StringArray implements;
 	detail::StringArray extends;

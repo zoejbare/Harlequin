@@ -61,6 +61,19 @@ detail::ClassType CompilerUtil::GetClassType(const std::string& classType)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+detail::FunctionType CompilerUtil::GetFunctionType(const std::string& funcType)
+{
+	return (funcType == "inline")
+		? detail::FunctionType::Inline
+		: (funcType == "virtual")
+			? detail::FunctionType::Virtual
+			: (funcType == "native")
+				? detail::FunctionType::Native
+				: detail::FunctionType::Default;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 detail::StorageType CompilerUtil::GetStorageType(const std::string& storageType)
 {
 	return (storageType == "static")

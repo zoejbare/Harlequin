@@ -274,7 +274,7 @@ std::any SymbolTableGenerator::visitClassDecl(HarlequinParser::ClassDeclContext*
 			m_pErrorHandler->Report(
 				MessageCode::ErrorStaticInterface,
 				pCtx->storageSpecifier()->StaticKw()->getSymbol(),
-				"illegal static interface declaration '%s'",
+				"illegal static interface declaration: '%s'",
 				qualifiedName.c_str()
 			);
 		}
@@ -285,7 +285,7 @@ std::any SymbolTableGenerator::visitClassDecl(HarlequinParser::ClassDeclContext*
 		m_pErrorHandler->Report(
 			MessageCode::ErrorDuplicateClass,
 			pCtx->Id()->getSymbol(),
-			"duplicate class declaration '%s'",
+			"duplicate class declaration: '%s'",
 			qualifiedName.c_str()
 		);
 	}
@@ -376,6 +376,8 @@ std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDe
 
 			// Move the new class symbol to the parent class.
 			pParentClass->variables.emplace(varNameShort, std::move(pClassVar));
+
+			// TODO: Visit the variable expression if there is one.
 		}
 		else
 		{
@@ -383,7 +385,7 @@ std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDe
 			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateVar,
 				pNameId->getSymbol(),
-				"duplicate class variable '%s'",
+				"duplicate class variable: '%s'",
 				varNameQualified.c_str()
 			);
 		}
@@ -427,8 +429,151 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		return defaultResult();
 	}
 
-	// TODO: Implement me
-	(void) pCtx;
+	// There should always be a parent class when discovering class variables.
+	assert(m_classStack.size() > 0);
+
+	ClassSymbol* const pParentClass = m_classStack.back();
+
+	auto* const pNameId = pCtx->Id();
+
+	const std::string shortName = pNameId->getText();
+	const std::string qualifiedName = pParentClass->qualifiedName + "." + shortName;
+
+	if(!pParentClass->methods.count(shortName))
+	{
+		auto* const pMethodDeclSpecCtx = pCtx->methodDeclSpecSeq();
+		auto* const pMethodParamSeqCtx = pCtx->methodParamSeq();
+		auto* const pTypeNameDeclCtx = pCtx->typeNameDecl();
+		auto* const pConstQualCtx = pCtx->constQualifier();
+		auto* const pCodeBlockCtx = pCtx->codeBlock();
+
+		auto* const pAccessSpecCtx = pMethodDeclSpecCtx->accessSpecifier();
+		auto* const pStorageSpecCtx = pMethodDeclSpecCtx->storageSpecifier();
+		auto* const pFunctionSpecCtx = pMethodDeclSpecCtx->functionSpecifier();
+
+		auto* const pArrayTypeDeclCtx = pTypeNameDeclCtx->arrayTypeDecl();
+
+		const detail::VarType returnVarType = CompilerUtil::GetVarType(pTypeNameDeclCtx->Id()->getText());
+		const detail::ArrayType returnArrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
+
+		const detail::FunctionType funcType = CompilerUtil::GetFunctionType(pFunctionSpecCtx ? pFunctionSpecCtx->getText() : "");
+		const detail::StorageType storageType = CompilerUtil::GetStorageType(pStorageSpecCtx ? pStorageSpecCtx->getText() : "");
+
+		const bool isConst = (pConstQualCtx != nullptr);
+		bool isAbstract = false;
+
+		// Resolve the method's access specifier.
+		detail::AccessType accessType;
+		detail::StringArray accessLimitTypes;
+		_resolveAccessSpecifier(accessType, accessLimitTypes, pAccessSpecCtx);
+
+		// Verify the function isn't marked both 'virtual' and 'const'.
+		if(storageType == detail::StorageType::Static && isConst)
+		{
+			// Report the invalid method spec as an error.
+			m_pErrorHandler->Report(
+				MessageCode::ErrorStaticConstMethod,
+				pConstQualCtx->getStart(),
+				"method is marked both 'virtual' and 'const': '%s'",
+				qualifiedName.c_str()
+			);
+			return defaultResult();
+		}
+
+		// Validate the function type.
+		switch(funcType)
+		{
+			case detail::FunctionType::Native:
+			{
+				// Native methods are not allowed to have implementations.
+				if(pCodeBlockCtx)
+				{
+					// Report the provided code block as an error.
+					m_pErrorHandler->Report(
+						MessageCode::ErrorNativeMethodWithBody,
+						pFunctionSpecCtx->getStart(),
+						"native method with implementation: '%s'",
+						qualifiedName.c_str()
+					);
+					return defaultResult();
+				}
+				break;
+			}
+
+			case detail::FunctionType::Virtual:
+				// Verify the function isn't marked both 'virtual' and 'static'.
+				if(storageType == detail::StorageType::Static)
+				{
+					// Report the invalid method spec as an error.
+					m_pErrorHandler->Report(
+						MessageCode::ErrorStaticVirtualMethod,
+						pFunctionSpecCtx->getStart(),
+						"method is marked both 'virtual' and 'static': '%s'",
+						qualifiedName.c_str()
+					);
+					return defaultResult();
+				}
+
+				// Virtual methods are allowed to not have an implementation,
+				// but when they don't, they're considered abstract.
+				isAbstract = (pCodeBlockCtx == nullptr);
+				break;
+
+			default:
+			{
+				// All other function types are required to have an implementation.
+				if(!pCodeBlockCtx)
+				{
+					// Report the missing code block as an error.
+					m_pErrorHandler->Report(
+						MessageCode::ErrorNoMethodImpl,
+						pFunctionSpecCtx->getStart(),
+						"method has no implementation: '%s'",
+						qualifiedName.c_str()
+					);
+					return defaultResult();
+				}
+				break;
+			}
+		}
+
+		MethodSymbol::Ptr pMethod = MethodSymbol::New();
+
+		pMethod->shortName = shortName;
+		pMethod->qualifiedName = qualifiedName;
+
+		pMethod->accessLimitTypes = std::move(accessLimitTypes);
+
+		pMethod->retVal.varType = returnVarType;
+		pMethod->retVal.arrayType = returnArrayType;
+
+		pMethod->accessType = accessType;
+		pMethod->funcType = funcType;
+		pMethod->storageType = storageType;
+
+		pMethod->isConst = isConst;
+		pMethod->isAbstract = isAbstract;
+
+		// TODO: Read the method params into the map of local variables.
+		// TODO: Cache the current method, then visit the code block.
+
+		// Add the new method to the global map in the symbol table.
+		assert(m_pSymbolTable->allMethods.count(qualifiedName) == 0);
+		m_pSymbolTable->allMethods.emplace(qualifiedName, pMethod.get());
+
+		// Move the new method symbol to the parent class.
+		pParentClass->methods.emplace(shortName, std::move(pMethod));
+	}
+	else
+	{
+		// Report the duplicate method name as an error.
+		m_pErrorHandler->Report(
+			MessageCode::ErrorDuplicateMethod,
+			pNameId->getSymbol(),
+			"duplicate method: '%s'",
+			qualifiedName.c_str()
+		);
+	}
 
 	return defaultResult();
 }

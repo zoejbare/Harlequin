@@ -23,6 +23,7 @@
 #include "../symbol/detail/AccessType.hpp"
 #include "../symbol/detail/ArrayType.hpp"
 #include "../symbol/detail/ClassType.hpp"
+#include "../symbol/detail/FunctionType.hpp"
 #include "../symbol/detail/StorageType.hpp"
 #include "../symbol/detail/VarType.hpp"
 
@@ -45,6 +46,7 @@ public:
 	static detail::AccessType GetAccessType(const std::string& accessType);
 	static detail::ArrayType GetArrayType(const std::string& arraySpec);
 	static detail::ClassType GetClassType(const std::string& classType);
+	static detail::FunctionType GetFunctionType(const std::string& funcType);
 	static detail::StorageType GetStorageType(const std::string& storageType);
 	static detail::VarType GetVarType(const std::string& typeName);
 };

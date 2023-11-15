@@ -20,28 +20,44 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
+#include "LocalVar.hpp"
 
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
+#include "detail/AccessType.hpp"
+#include "detail/FunctionType.hpp"
+#include "detail/ReturnValue.hpp"
+#include "detail/StringArray.hpp"
+
+#include <memory>
+#include <string>
+#include <unordered_map>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+struct MethodSymbol
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
+	typedef std::unique_ptr<MethodSymbol>                  Ptr;
+	typedef std::unordered_map<std::string, Ptr>           PtrMap;
+	typedef std::unordered_map<std::string, MethodSymbol*> RawPtrMap;
 
-	NamespaceSymbol::PtrMap namespaces;
+	inline static Ptr New()
+	{
+		return std::make_unique<MethodSymbol>();
+	}
 
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
+	LocalVarSymbol::PtrMap localVars;
 
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
+	std::string shortName;
+	std::string qualifiedName;
+
+	detail::StringArray accessLimitTypes;
+	detail::ReturnValue retVal;
+
+	detail::AccessType accessType;
+	detail::FunctionType funcType;
+	detail::StorageType storageType;
+
+	bool isConst;
+	bool isAbstract;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -29,7 +29,12 @@ enum class MessageCode
 	ErrorDuplicateAlias,
 	ErrorDuplicateClass,
 	ErrorDuplicateVar,
+	ErrorDuplicateMethod,
 	ErrorInvalidAccessSpec,
+	ErrorNoMethodImpl,
+	ErrorNativeMethodWithBody,
+	ErrorStaticVirtualMethod,
+	ErrorStaticConstMethod,
 
 	_WarningStart_ = 6000,
 };
