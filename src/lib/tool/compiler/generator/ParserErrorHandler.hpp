@@ -22,6 +22,7 @@
 
 #include "MessageCode.hpp"
 #include "SourceData.hpp"
+#include "TokenSpan.hpp"
 
 #include "../../../base/String.hpp"
 
@@ -44,7 +45,7 @@ public:
 
 	bool EncounteredError() const;
 
-	void Report(MessageCode code, const antlr4::Token* pOffendingSymbol, const char* fmt, ...);
+	void Report(MessageCode code, const TokenSpan& span, const char* fmt, ...);
 
 
 private:
@@ -64,7 +65,7 @@ private:
 		std::exception_ptr e
 	) override;
 
-	void prv_report(int, MessageCode, const antlr4::Token*, const char*);
+	void prv_report(int, MessageCode, const TokenSpan&, const char*);
 
 	HqReportHandle m_hReport;
 
@@ -99,7 +100,7 @@ inline bool ParserErrorHandler::EncounteredError() const
 
 inline void ParserErrorHandler::Report(
 	const MessageCode code, 
-	const antlr4::Token* const pOffendingSymbol, 
+	const TokenSpan& span, 
 	const char* const fmt, 
 	...)
 {
@@ -113,7 +114,7 @@ inline void ParserErrorHandler::Report(
 			? HQ_MESSAGE_TYPE_ERROR
 			: HQ_MESSAGE_TYPE_WARNING,
 		code,
-		pOffendingSymbol,
+		span,
 		message
 	);
 	HqMemFree((void*) message);

@@ -49,7 +49,7 @@ void ParserErrorHandler::syntaxError(
 	(void) line;
 	(void) charPositionInLine;
 	(void) e;
-	prv_report(HQ_MESSAGE_TYPE_ERROR, MessageCode::ErrorSyntax, pOffendingSymbol, msg.c_str());
+	prv_report(HQ_MESSAGE_TYPE_ERROR, MessageCode::ErrorSyntax, TokenSpan::LineInspect(pOffendingSymbol), msg.c_str());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -57,16 +57,9 @@ void ParserErrorHandler::syntaxError(
 void ParserErrorHandler::prv_report(
 	const int type,
 	const MessageCode code,
-	const antlr4::Token* const pOffendingSymbol,
+	const TokenSpan& span,
 	const char* const msg)
 {
-	const size_t startIndex = pOffendingSymbol->getStartIndex();
-	const size_t stopIndex = pOffendingSymbol->getStopIndex();
-	const size_t lineNumber = pOffendingSymbol->getLine();
-	const size_t charPositionInLine = pOffendingSymbol->getCharPositionInLine();
-	const std::string sourceName = pOffendingSymbol->getTokenSource()->getSourceName();
-	const std::string line = m_pSrcData->lines[lineNumber - 1];
-
 	const char* typeStr = nullptr;
 	switch(type)
 	{
@@ -87,30 +80,39 @@ void ParserErrorHandler::prv_report(
 	char codeStr[6];
 	snprintf(codeStr, sizeof(codeStr) / sizeof(char), "C%04" PRId32, int(code));
 
-	std::string finalMsg
-		= sourceName
-		+ "(" + std::to_string(lineNumber) + "): "
-		+ typeStr + codeStr + ": "
-		+ msg + "\n"
-		+ line + "\n";
+	std::stringstream msgStream;
+	msgStream
+		<< span.sourceName
+		<< "(" << span.lineNumber << "): "
+		<< typeStr << codeStr << ": "
+		<< msg << std::endl;
 
-	// Add the whitespace leading up to the underlining.
-	for(size_t i = 0; i < charPositionInLine; ++i)
+	if(span.startIndex != span.stopIndex)
 	{
-		const char charInLine = line[i];
+		const std::string sourceCode = m_pSrcData->lines[span.lineNumber - 1];
 
-		finalMsg += (isspace(charInLine) > 0)
-			? charInLine
-			: ' ';
+		// Add the source code text to the message.
+		msgStream << sourceCode << std::endl;
+
+		// Add the whitespace leading up to the underlining.
+		for(size_t i = 0; i < span.positionInLine; ++i)
+		{
+			const char charInLine = sourceCode[i];
+			const char charToWrite = (isspace(charInLine) > 0)
+				? charInLine
+				: ' ';
+
+			msgStream << charToWrite;
+		}
+
+		// Add the underline that is as long as the offending token.
+		for(size_t i = span.startIndex; i <= span.stopIndex; ++i)
+		{
+			msgStream << '~';
+		}
 	}
 
-	// Add the underline that is as long as the offending token.
-	for(size_t i = startIndex; i <= stopIndex; ++i)
-	{
-		finalMsg += "~";
-	}
-
-	HqReportMessage(m_hReport, type, "%s", finalMsg.c_str());
+	HqReportMessage(m_hReport, type, "%s", msgStream.str().c_str());
 
 	if(type == HQ_MESSAGE_TYPE_ERROR)
 	{

@@ -97,9 +97,9 @@ std::any SymbolTableGenerator::visitUsingAliasStmt(HarlequinParser::UsingAliasSt
 	const auto aliasNames = pCtx->Id();
 
 	// Map each alias listed in the statement.
-	for(auto& alias : aliasNames)
+	for(auto* const pAliasToken : aliasNames)
 	{
-		const std::string aliasedClassName = alias->getText();
+		const std::string aliasedClassName = pAliasToken->getText();
 
 		// Check if the class alias has not already been declared.
 		// If it has, it means there is an ambiguous reference to
@@ -113,7 +113,7 @@ std::any SymbolTableGenerator::visitUsingAliasStmt(HarlequinParser::UsingAliasSt
 			// Report the duplicate alias name as an error.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateAlias,
-				alias->getSymbol(),
+				TokenSpan::LineInspect(pAliasToken->getSymbol()),
 				"duplicate class alias '%s'",
 				aliasedClassName.c_str()
 			);
@@ -273,7 +273,7 @@ std::any SymbolTableGenerator::visitClassDecl(HarlequinParser::ClassDeclContext*
 			// Report the invalid scenario of a static interface declaration.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorStaticInterface,
-				pCtx->storageSpecifier()->StaticKw()->getSymbol(),
+				TokenSpan::LineInspect(pStorageSpecCtx->StaticKw()->getSymbol()),
 				"illegal static interface declaration: '%s'",
 				qualifiedName.c_str()
 			);
@@ -284,7 +284,7 @@ std::any SymbolTableGenerator::visitClassDecl(HarlequinParser::ClassDeclContext*
 		// Report the duplicate class declaration as an error.
 		m_pErrorHandler->Report(
 			MessageCode::ErrorDuplicateClass,
-			pCtx->Id()->getSymbol(),
+			TokenSpan::LineInspect(pCtx->Id()->getSymbol()),
 			"duplicate class declaration: '%s'",
 			qualifiedName.c_str()
 		);
@@ -384,7 +384,7 @@ std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDe
 			// Report the duplicate variable name as an error.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateVar,
-				pNameId->getSymbol(),
+				TokenSpan::LineInspect(pNameId->getSymbol()),
 				"duplicate class variable: '%s'",
 				varNameQualified.c_str()
 			);
@@ -473,8 +473,8 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 			// Report the invalid method spec as an error.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorStaticConstMethod,
-				pConstQualCtx->getStart(),
-				"method is marked both 'virtual' and 'const': '%s'",
+				TokenSpan::LineInspect(pConstQualCtx->getStop()),
+				"method is marked both 'static' and 'const': '%s'",
 				qualifiedName.c_str()
 			);
 			return defaultResult();
@@ -491,7 +491,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 					// Report the provided code block as an error.
 					m_pErrorHandler->Report(
 						MessageCode::ErrorNativeMethodWithBody,
-						pFunctionSpecCtx->getStart(),
+						TokenSpan::LineInspect(pFunctionSpecCtx->getStart()),
 						"native method with implementation: '%s'",
 						qualifiedName.c_str()
 					);
@@ -507,7 +507,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 					// Report the invalid method spec as an error.
 					m_pErrorHandler->Report(
 						MessageCode::ErrorStaticVirtualMethod,
-						pFunctionSpecCtx->getStart(),
+						TokenSpan::LineInspect(pFunctionSpecCtx->getStart()),
 						"method is marked both 'virtual' and 'static': '%s'",
 						qualifiedName.c_str()
 					);
@@ -527,7 +527,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 					// Report the missing code block as an error.
 					m_pErrorHandler->Report(
 						MessageCode::ErrorNoMethodImpl,
-						pFunctionSpecCtx->getStart(),
+						TokenSpan::LineInspect(pFunctionSpecCtx->getStart()),
 						"method has no implementation: '%s'",
 						qualifiedName.c_str()
 					);
@@ -569,7 +569,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		// Report the duplicate method name as an error.
 		m_pErrorHandler->Report(
 			MessageCode::ErrorDuplicateMethod,
-			pNameId->getSymbol(),
+			TokenSpan::LineInspect(pNameId->getSymbol()),
 			"duplicate method: '%s'",
 			qualifiedName.c_str()
 		);
@@ -620,7 +620,7 @@ inline void SymbolTableGenerator::_resolveAccessSpecifier(
 						// Report the invalid access specifier combination.
 						m_pErrorHandler->Report(
 							MessageCode::ErrorInvalidAccessSpec,
-							pAccessBaseSpecCtx->getStart(),
+							TokenSpan::LineInspect(pAccessBaseSpecCtx->getStart()),
 							"'%s' access specifier is not compatible with the 'limited' access specifier",
 							pAccessBaseSpecCtx->getText().c_str());
 						break;
