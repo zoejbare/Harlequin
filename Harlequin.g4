@@ -217,17 +217,17 @@ arrayParamElem
 
 // Lambda (embedded function) declaration rule
 lambdaDecl
-	: LambdaKw typeNameDecl Id LeftParen methodParamSeq? RightParen (CaptureKw LeftBracket Id (Comma Id)* RightBracket)? codeBlock
+	: LambdaKw typeNameDecl Id LeftParen methodArgSeq? RightParen (CaptureKw LeftBracket Id (Comma Id)* Comma? RightBracket)? codeBlock
 	;
 
 // Class construction declaration rule
 ctorDecl
-	: methodDeclSpecSeq ConstructorKw LeftParen methodParamSeq? RightParen codeBlock
+	: methodDeclSpecSeq ConstructorKw LeftParen methodArgSeq? RightParen codeBlock
 	;
 
 // Method declaration rule
 methodDecl
-	: methodDeclSpecSeq typeNameDecl Id LeftParen methodParamSeq? RightParen constQualifier? (codeBlock | Term)
+	: methodDeclSpecSeq typeNameDecl Id LeftParen methodArgSeq? RightParen constQualifier? (codeBlock | Term)
 	;
 
 // Method qualifier rule
@@ -242,14 +242,14 @@ methodStorageModifier
 	| VirtualKw
 	;
 
-// Method parameter sequence rule
-methodParamSeq
-	: methodParam (Comma methodParam)* Comma?
+// Method argument sequence rule
+methodArgSeq
+	: methodArg (Comma methodArg)* Comma?
 	;
 
-// Method parameter rule
-methodParam
-	: paramVarDeclSpecSeq typeNameDecl Id?
+// Method argument rule
+methodArg
+	: paramVarDeclSpecSeq typeNameDecl (Id (Assign expr)?)?
 	;
 
 // Braced code block rule

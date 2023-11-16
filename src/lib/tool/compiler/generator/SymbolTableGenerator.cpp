@@ -442,7 +442,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 	if(!pParentClass->methods.count(shortName))
 	{
 		auto* const pMethodDeclSpecCtx = pCtx->methodDeclSpecSeq();
-		auto* const pMethodParamSeqCtx = pCtx->methodParamSeq();
+		auto* const pMethodArgSeqCtx = pCtx->methodArgSeq();
 		auto* const pTypeNameDeclCtx = pCtx->typeNameDecl();
 		auto* const pConstQualCtx = pCtx->constQualifier();
 		auto* const pCodeBlockCtx = pCtx->codeBlock();
