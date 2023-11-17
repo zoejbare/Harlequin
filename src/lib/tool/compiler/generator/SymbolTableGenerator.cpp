@@ -472,11 +472,15 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		detail::StringArray accessLimits;
 		_resolveAccessSpecifier(accessType, accessLimits, pAccessSpecCtx);
 
-		LocalVarSymbol::PtrMap localVars;
+		LocalVarSymbol::PtrMap argVars;
 		detail::StringArray argNameSeq;
 
 		std::stringstream argSignature;
+		std::stringstream argDefaultName;
+
 		std::string methodSignature;
+
+		uint32_t argDefaultIndex = 0;
 
 		if(pMethodArgSeqCtx)
 		{
@@ -495,6 +499,8 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				detail::VariableBase varBase;
 				_resolveVariableCommonData(varBase, pArgTypeNameDeclCtx, pArgVarDeclSpecCtx->constQualifier());
 
+				// TODO: Handle the assignment expression for default argument values
+
 				if(argNameSeq.size() > 0)
 				{
 					// Add a comma between successive arguments.
@@ -506,40 +512,48 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				// Add the current argument to the method's argument signature stream.
 				argSignature << CompilerUtil::GetVarTypeSignature(argTypeName, varBase.arrayType);
 
+				argDefaultName.clear();
+
+				bool isUnused = false;
+
+				if(!pArgNameId)
+				{
+					argDefaultName << "!unused_" << argDefaultIndex;
+					isUnused = true;
+
+					++argDefaultIndex;
+				}
+
 				const std::string argVarName = pArgNameId
 					? pArgNameId->getText()
-					: "";
+					: argDefaultName.str();
 
 				// Update the method argument sequence with the name of the current argument.
 				// This will be used to validate argument data later.
 				argNameSeq.push_back(argVarName);
 
-				if(pArgNameId)
+				if(!argVars.count(varBase.varName))
 				{
-					// TODO: Handle the assignment expression for default argument values
+					LocalVarSymbol::Ptr pArgVar = LocalVarSymbol::New();
 
-					if(!localVars.count(varBase.varName))
-					{
-						LocalVarSymbol::Ptr pLocalVar = LocalVarSymbol::New();
+					pArgVar->base = varBase;
+					pArgVar->base.varName = argVarName;
+					pArgVar->storageType = detail::StorageType::Default;
+					pArgVar->isUnused = isUnused;
 
-						pLocalVar->base = varBase;
-						pLocalVar->base.varName = argVarName;
-						pLocalVar->storageType = detail::StorageType::Default;
+					// Move the new method argument variable symbol to the argument table.
+					argVars.emplace(argVarName, std::move(pArgVar));
+				}
+				else
+				{
+					std::stringstream stream;
+					stream << "duplicate method argument: '" << argVarName << "'";
 
-						// Move the new variable symbol to the local map.
-						localVars.emplace(argVarName, std::move(pLocalVar));
-					}
-					else
-					{
-						std::stringstream stream;
-						stream << "duplicate class variable: '" << argVarName << "'";
-
-						// Report the duplicate variable name as an error.
-						m_pErrorHandler->Report(
-							MessageCode::ErrorDuplicateVar,
-							TokenSpan::WithSourceText(pNameId->getSymbol()),
-							stream.str());
-					}
+					// Report the duplicate variable name as an error.
+					m_pErrorHandler->Report(
+						MessageCode::ErrorDuplicateVar,
+						TokenSpan::WithSourceText(pNameId->getSymbol()),
+						stream.str());
 				}
 			}
 		}
@@ -624,9 +638,9 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		{
 			MethodSymbol::Ptr pMethod = MethodSymbol::New();
 
-			pMethod->localVars = std::move(localVars);
-			pMethod->accessLimits = std::move(accessLimits);
+			pMethod->argVars = std::move(argVars);
 			pMethod->argNameSeq = std::move(argNameSeq);
+			pMethod->accessLimits = std::move(accessLimits);
 
 			pMethod->returnVarType = returnVarType;
 			pMethod->returnArrayType = returnArrayType;

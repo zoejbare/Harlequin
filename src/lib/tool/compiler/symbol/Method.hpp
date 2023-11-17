@@ -43,10 +43,10 @@ struct MethodSymbol
 		return std::make_unique<MethodSymbol>();
 	}
 
-	LocalVarSymbol::PtrMap localVars;
+	LocalVarSymbol::PtrMap argVars;
 
-	detail::StringArray accessLimits;
 	detail::StringArray argNameSeq;
+	detail::StringArray accessLimits;
 
 	detail::VarType returnVarType;
 	detail::ArrayType returnArrayType;

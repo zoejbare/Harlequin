@@ -41,6 +41,8 @@ struct LocalVarSymbol
 
 	detail::VariableBase base;
 	detail::StorageType storageType;
+
+	bool isUnused;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
