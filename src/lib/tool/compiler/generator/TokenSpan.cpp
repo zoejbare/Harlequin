@@ -36,7 +36,7 @@ TokenSpan TokenSpan::Minimal(const antlr4::Token* const pToken)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TokenSpan TokenSpan::LineInspect(const antlr4::Token* const pToken)
+TokenSpan TokenSpan::WithSourceText(const antlr4::Token* const pToken)
 {
 	TokenSpan output;
 	output.sourceName = pToken->getTokenSource()->getSourceName();

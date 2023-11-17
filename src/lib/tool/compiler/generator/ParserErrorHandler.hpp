@@ -45,7 +45,8 @@ public:
 
 	bool EncounteredError() const;
 
-	void Report(MessageCode code, const TokenSpan& span, const char* fmt, ...);
+	void Report(MessageCode code, const TokenSpan& span, const std::string& msg);
+	void Report(MessageCode code, const TokenSpan& span, const std::string& primaryMsg, const std::string& secondaryMsg);
 
 
 private:
@@ -65,7 +66,7 @@ private:
 		std::exception_ptr e
 	) override;
 
-	void prv_report(int, MessageCode, const TokenSpan&, const char*);
+	int _getMsgType(MessageCode);
 
 	HqReportHandle m_hReport;
 
@@ -101,23 +102,20 @@ inline bool ParserErrorHandler::EncounteredError() const
 inline void ParserErrorHandler::Report(
 	const MessageCode code, 
 	const TokenSpan& span, 
-	const char* const fmt, 
-	...)
+	const std::string& msg)
 {
-	va_list vl;
-	va_start(vl, fmt);
-	const char* const message = HqString::RawFormatVarArgs(fmt, vl);
-	va_end(vl);
+	static const std::string empty;
 
-	prv_report(
-		int(code) < int(MessageCode::_WarningStart_)
-			? HQ_MESSAGE_TYPE_ERROR
-			: HQ_MESSAGE_TYPE_WARNING,
-		code,
-		span,
-		message
-	);
-	HqMemFree((void*) message);
+	Report(code, span, msg, empty);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline int ParserErrorHandler::_getMsgType(const MessageCode code)
+{
+	return (int(code) < int(MessageCode::_WarningStart_))
+		? HQ_MESSAGE_TYPE_ERROR
+		: HQ_MESSAGE_TYPE_WARNING;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

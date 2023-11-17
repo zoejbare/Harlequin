@@ -110,13 +110,14 @@ std::any SymbolTableGenerator::visitUsingAliasStmt(HarlequinParser::UsingAliasSt
 		}
 		else
 		{
+			std::stringstream stream;
+			stream << "duplicate class alias '" << aliasedClassName << "'";
+
 			// Report the duplicate alias name as an error.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateAlias,
-				TokenSpan::LineInspect(pAliasToken->getSymbol()),
-				"duplicate class alias '%s'",
-				aliasedClassName.c_str()
-			);
+				TokenSpan::WithSourceText(pAliasToken->getSymbol()),
+				stream.str());
 		}
 	}
 
@@ -270,24 +271,26 @@ std::any SymbolTableGenerator::visitClassDecl(HarlequinParser::ClassDeclContext*
 		}
 		else
 		{
+			std::stringstream stream;
+			stream << "illegal static interface declaration: '" << qualifiedName << "'";
+
 			// Report the invalid scenario of a static interface declaration.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorStaticInterface,
-				TokenSpan::LineInspect(pStorageSpecCtx->StaticKw()->getSymbol()),
-				"illegal static interface declaration: '%s'",
-				qualifiedName.c_str()
-			);
+				TokenSpan::WithSourceText(pStorageSpecCtx->StaticKw()->getSymbol()),
+				stream.str());
 		}
 	}
 	else
 	{
+		std::stringstream stream;
+		stream << "duplicate class declaration: '" << qualifiedName << "'";
+
 		// Report the duplicate class declaration as an error.
 		m_pErrorHandler->Report(
 			MessageCode::ErrorDuplicateClass,
-			TokenSpan::LineInspect(pCtx->Id()->getSymbol()),
-			"duplicate class declaration: '%s'",
-			qualifiedName.c_str()
-		);
+			TokenSpan::WithSourceText(pCtx->Id()->getSymbol()),
+			stream.str());
 	}
 
 	std::any result = defaultResult();
@@ -381,13 +384,14 @@ std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDe
 		}
 		else
 		{
+			std::stringstream stream;
+			stream << "duplicate class variable: '" << varNameQualified << "'";
+
 			// Report the duplicate variable name as an error.
 			m_pErrorHandler->Report(
 				MessageCode::ErrorDuplicateVar,
-				TokenSpan::LineInspect(pNameId->getSymbol()),
-				"duplicate class variable: '%s'",
-				varNameQualified.c_str()
-			);
+				TokenSpan::WithSourceText(pNameId->getSymbol()),
+				stream.str());
 		}
 	};
 
@@ -467,19 +471,6 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		detail::StringArray accessLimitTypes;
 		_resolveAccessSpecifier(accessType, accessLimitTypes, pAccessSpecCtx);
 
-		// Verify the function isn't marked both 'virtual' and 'const'.
-		if(storageType == detail::StorageType::Static && isConst)
-		{
-			// Report the invalid method spec as an error.
-			m_pErrorHandler->Report(
-				MessageCode::ErrorStaticConstMethod,
-				TokenSpan::LineInspect(pConstQualCtx->getStop()),
-				"method is marked both 'static' and 'const': '%s'",
-				qualifiedName.c_str()
-			);
-			return defaultResult();
-		}
-
 		// Validate the function type.
 		switch(funcType)
 		{
@@ -488,14 +479,14 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				// Native methods are not allowed to have implementations.
 				if(pCodeBlockCtx)
 				{
+					std::stringstream stream;
+					stream << "native method with implementation: '" << qualifiedName << "'";
+
 					// Report the provided code block as an error.
 					m_pErrorHandler->Report(
 						MessageCode::ErrorNativeMethodWithBody,
-						TokenSpan::LineInspect(pFunctionSpecCtx->getStart()),
-						"native method with implementation: '%s'",
-						qualifiedName.c_str()
-					);
-					return defaultResult();
+						TokenSpan::WithSourceText(pFunctionSpecCtx->getStart()),
+						stream.str());
 				}
 				break;
 			}
@@ -504,14 +495,14 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				// Verify the function isn't marked both 'virtual' and 'static'.
 				if(storageType == detail::StorageType::Static)
 				{
+					std::stringstream stream;
+					stream << "method is marked both 'virtual' and 'static': '" << qualifiedName << "'";
+
 					// Report the invalid method spec as an error.
 					m_pErrorHandler->Report(
 						MessageCode::ErrorStaticVirtualMethod,
-						TokenSpan::LineInspect(pFunctionSpecCtx->getStart()),
-						"method is marked both 'virtual' and 'static': '%s'",
-						qualifiedName.c_str()
-					);
-					return defaultResult();
+						TokenSpan::WithSourceText(pFunctionSpecCtx->getStart()),
+						stream.str());
 				}
 
 				// Virtual methods are allowed to not have an implementation,
@@ -524,55 +515,72 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				// All other function types are required to have an implementation.
 				if(!pCodeBlockCtx)
 				{
+					std::stringstream stream;
+					stream << "method has no implementation: '" << qualifiedName << "'";
+
 					// Report the missing code block as an error.
 					m_pErrorHandler->Report(
 						MessageCode::ErrorNoMethodImpl,
-						TokenSpan::LineInspect(pFunctionSpecCtx->getStart()),
-						"method has no implementation: '%s'",
-						qualifiedName.c_str()
-					);
-					return defaultResult();
+						TokenSpan::WithSourceText(pFunctionSpecCtx->getStart()),
+						stream.str());
 				}
 				break;
 			}
 		}
 
-		MethodSymbol::Ptr pMethod = MethodSymbol::New();
+		// Verify the method isn't marked both 'virtual' and 'const'.
+		if(storageType == detail::StorageType::Static && isConst)
+		{
+			std::stringstream stream;
+			stream << "method is marked both 'static' and 'const': '" << qualifiedName << "'";
 
-		pMethod->shortName = shortName;
-		pMethod->qualifiedName = qualifiedName;
+			// Report the invalid method spec as an error.
+			m_pErrorHandler->Report(
+				MessageCode::ErrorStaticConstMethod,
+				TokenSpan::WithSourceText(pConstQualCtx->getStop()),
+				stream.str());
+		}
 
-		pMethod->accessLimitTypes = std::move(accessLimitTypes);
+		if(!m_pErrorHandler->EncounteredError())
+		{
+			MethodSymbol::Ptr pMethod = MethodSymbol::New();
 
-		pMethod->retVal.varType = returnVarType;
-		pMethod->retVal.arrayType = returnArrayType;
+			pMethod->shortName = shortName;
+			pMethod->qualifiedName = qualifiedName;
 
-		pMethod->accessType = accessType;
-		pMethod->funcType = funcType;
-		pMethod->storageType = storageType;
+			pMethod->accessLimitTypes = std::move(accessLimitTypes);
 
-		pMethod->isConst = isConst;
-		pMethod->isAbstract = isAbstract;
+			pMethod->retVal.varType = returnVarType;
+			pMethod->retVal.arrayType = returnArrayType;
 
-		// TODO: Read the method params into the map of local variables.
-		// TODO: Cache the current method, then visit the code block.
+			pMethod->accessType = accessType;
+			pMethod->funcType = funcType;
+			pMethod->storageType = storageType;
 
-		// Add the new method to the global map in the symbol table.
-		assert(m_pSymbolTable->allMethods.count(qualifiedName) == 0);
-		m_pSymbolTable->allMethods.emplace(qualifiedName, pMethod.get());
+			pMethod->isConst = isConst;
+			pMethod->isAbstract = isAbstract;
 
-		// Move the new method symbol to the parent class.
-		pParentClass->methods.emplace(shortName, std::move(pMethod));
+			// TODO: Read the method params into the map of local variables.
+			// TODO: Cache the current method, then visit the code block.
+
+			// Add the new method to the global map in the symbol table.
+			assert(m_pSymbolTable->allMethods.count(qualifiedName) == 0);
+			m_pSymbolTable->allMethods.emplace(qualifiedName, pMethod.get());
+
+			// Move the new method symbol to the parent class.
+			pParentClass->methods.emplace(shortName, std::move(pMethod));
+		}
 	}
 	else
 	{
+		std::stringstream stream;
+		stream << "duplicate method: '" << qualifiedName <<"'";
+
 		// Report the duplicate method name as an error.
 		m_pErrorHandler->Report(
 			MessageCode::ErrorDuplicateMethod,
-			TokenSpan::LineInspect(pNameId->getSymbol()),
-			"duplicate method: '%s'",
-			qualifiedName.c_str()
-		);
+			TokenSpan::WithSourceText(pNameId->getSymbol()),
+			stream.str());
 	}
 
 	return defaultResult();
@@ -617,12 +625,15 @@ inline void SymbolTableGenerator::_resolveAccessSpecifier(
 
 					default:
 					{
+						std::stringstream stream;
+						stream << "access specifier is not compatible with the 'limited' access specifier: '" << pAccessBaseSpecCtx->getText() << "'";
+
 						// Report the invalid access specifier combination.
 						m_pErrorHandler->Report(
 							MessageCode::ErrorInvalidAccessSpec,
-							TokenSpan::LineInspect(pAccessBaseSpecCtx->getStart()),
-							"'%s' access specifier is not compatible with the 'limited' access specifier",
-							pAccessBaseSpecCtx->getText().c_str());
+							TokenSpan::WithSourceText(pAccessBaseSpecCtx->getStart()),
+							stream.str());
+
 						break;
 					}
 				}

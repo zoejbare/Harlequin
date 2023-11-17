@@ -49,19 +49,21 @@ void ParserErrorHandler::syntaxError(
 	(void) line;
 	(void) charPositionInLine;
 	(void) e;
-	prv_report(HQ_MESSAGE_TYPE_ERROR, MessageCode::ErrorSyntax, TokenSpan::LineInspect(pOffendingSymbol), msg.c_str());
+	Report(MessageCode::ErrorSyntax, TokenSpan::WithSourceText(pOffendingSymbol), msg);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void ParserErrorHandler::prv_report(
-	const int type,
+void ParserErrorHandler::Report(
 	const MessageCode code,
 	const TokenSpan& span,
-	const char* const msg)
+	const std::string& primaryMsg,
+	const std::string& secondaryMsg)
 {
+	const int msgType = _getMsgType(code);
+
 	const char* typeStr = nullptr;
-	switch(type)
+	switch(msgType)
 	{
 		case HQ_MESSAGE_TYPE_ERROR:
 			typeStr = "error ";
@@ -78,21 +80,21 @@ void ParserErrorHandler::prv_report(
 	}
 
 	char codeStr[6];
-	snprintf(codeStr, sizeof(codeStr) / sizeof(char), "C%04" PRId32, int(code));
+	snprintf(codeStr, sizeof(codeStr) / sizeof(char), "C%04" PRIu16, uint16_t(code));
 
 	std::stringstream msgStream;
 	msgStream
 		<< span.sourceName
 		<< "(" << span.lineNumber << "): "
 		<< typeStr << codeStr << ": "
-		<< msg << std::endl;
+		<< primaryMsg;
 
-	if(span.startIndex != span.stopIndex)
+	if(span.startIndex < span.stopIndex)
 	{
 		const std::string sourceCode = m_pSrcData->lines[span.lineNumber - 1];
 
 		// Add the source code text to the message.
-		msgStream << sourceCode << std::endl;
+		msgStream << std::endl << sourceCode << std::endl;
 
 		// Add the whitespace leading up to the underlining.
 		for(size_t i = 0; i < span.positionInLine; ++i)
@@ -112,9 +114,16 @@ void ParserErrorHandler::prv_report(
 		}
 	}
 
-	HqReportMessage(m_hReport, type, "%s", msgStream.str().c_str());
+	if(!secondaryMsg.empty())
+	{
+		// Append the secondary message to the end of the stream.
+		msgStream << std::endl << primaryMsg;
+	}
 
-	if(type == HQ_MESSAGE_TYPE_ERROR)
+	// Pass the final message string to the API's reporting mechanism.
+	HqReportMessage(m_hReport, msgType, "%s", msgStream.str().c_str());
+
+	if(msgType == HQ_MESSAGE_TYPE_ERROR)
 	{
 		++m_errorCount;
 	}

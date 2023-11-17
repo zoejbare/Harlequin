@@ -29,7 +29,7 @@
 struct TokenSpan
 {
 	static TokenSpan Minimal(const antlr4::Token* pToken);
-	static TokenSpan LineInspect(const antlr4::Token* pToken);
+	static TokenSpan WithSourceText(const antlr4::Token* pToken);
 
 	std::string sourceName;
 

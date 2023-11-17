@@ -22,7 +22,7 @@
 
 enum class MessageCode
 {
-	_ErrorStart_ = 1000,
+	_ErrorStart_ = 0,
 
 	ErrorSyntax = _ErrorStart_,
 	ErrorStaticInterface,
@@ -36,7 +36,7 @@ enum class MessageCode
 	ErrorStaticVirtualMethod,
 	ErrorStaticConstMethod,
 
-	_WarningStart_ = 6000,
+	_WarningStart_ = 5000,
 };
 
 //----------------------------------------------------------------------------------------------------------------------
