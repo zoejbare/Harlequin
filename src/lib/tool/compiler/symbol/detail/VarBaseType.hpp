@@ -20,25 +20,29 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "detail/VariableBase.hpp"
-
-#include <memory>
-#include <string>
-#include <unordered_map>
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct ParamVarSymbol
+namespace detail
 {
-	typedef std::unique_ptr<ParamVarSymbol>      Ptr;
-	typedef std::unordered_map<std::string, Ptr> PtrMap;
-
-	inline static Ptr New()
+	enum class VarBaseType
 	{
-		return std::make_unique<ParamVarSymbol>();
-	}
+		Int8,
+		Int16,
+		Int32,
+		Int64,
 
-	detail::VariableBase base;
-};
+		Uint8,
+		Uint16,
+		Uint32,
+		Uint64,
+
+		Float32,
+		Float64,
+
+		Bool,
+
+		String,
+		Object,
+		Native,
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------

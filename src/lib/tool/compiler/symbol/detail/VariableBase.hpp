@@ -22,7 +22,7 @@
 
 #include "ArrayType.hpp"
 #include "ConstType.hpp"
-#include "VarType.hpp"
+#include "VariableType.hpp"
 
 #include <string>
 
@@ -35,8 +35,7 @@ namespace detail
 		std::string varName;
 		std::string typeName;
 
-		detail::VarType varType;
-		detail::ArrayType arrayType;
+		detail::VariableType varType;
 		detail::ConstType constType;
 	};
 }

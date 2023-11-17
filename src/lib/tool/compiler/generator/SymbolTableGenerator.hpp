@@ -62,7 +62,7 @@ private:
 		HarlequinParser::AccessSpecifierContext*);
 	void _resolveVariableCommonData(
 		detail::VariableBase&, 
-		HarlequinParser::VarDeclContext*, 
+		HarlequinParser::TypeNameDeclContext*, 
 		HarlequinParser::ConstQualifierContext*);
 	void _resolveQualifiedIdArray(detail::StringArray&, const std::vector<HarlequinParser::QualifiedIdContext*>&);
 
@@ -72,6 +72,8 @@ private:
 	std::list<NamespaceSymbol*> m_namespaceStack;
 	std::list<ClassSymbol*> m_classStack;
 	std::list<ClassVarSymbol*> m_classVarStack;
+
+	MethodSymbol* m_pMethod;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

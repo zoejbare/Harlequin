@@ -21,18 +21,20 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "ArrayType.hpp"
-#include "VarType.hpp"
+#include "VarBaseType.hpp"
 
-#include <string>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace detail
 {
-	struct ReturnValue
+	struct VariableType
 	{
-		detail::VarType varType;
-		detail::ArrayType arrayType;
+		typedef std::vector<VariableType> Array;
+
+		VarBaseType baseType;
+		ArrayType arrayType;
 	};
 }
 

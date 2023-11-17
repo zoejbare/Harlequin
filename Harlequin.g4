@@ -123,8 +123,8 @@ localVarDeclSpecSeq
 	: storageSpecifier? constQualifier?
 	;
 
-// Method parameter variable declaration specifier sequence rule
-paramVarDeclSpecSeq
+// Method argument variable declaration specifier sequence rule
+argVarDeclSpecSeq
 	: constQualifier?
 	;
 
@@ -249,7 +249,7 @@ methodArgSeq
 
 // Method argument rule
 methodArg
-	: paramVarDeclSpecSeq typeNameDecl (Id (Assign expr)?)?
+	: argVarDeclSpecSeq typeNameDecl (Id (Assign expr)?)?
 	;
 
 // Braced code block rule

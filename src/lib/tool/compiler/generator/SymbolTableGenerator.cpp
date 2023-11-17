@@ -33,6 +33,7 @@ SymbolTableGenerator::SymbolTableGenerator(ParserErrorHandler* const pErrorHandl
 	, m_namespaceStack()
 	, m_classStack()
 	, m_classVarStack()
+	, m_pMethod(nullptr)
 {
 }
 
@@ -339,7 +340,7 @@ std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDe
 
 	// Resolve data that will shared by all variables defined here.
 	detail::VariableBase varBase;
-	_resolveVariableCommonData(varBase, pVarDeclCtx, pConstQualCtx);
+	_resolveVariableCommonData(varBase, pVarDeclCtx->typeNameDecl(), pConstQualCtx);
 
 	// Resolve the variable's access specifier.
 	detail::AccessType accessType;
@@ -457,7 +458,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 
 		auto* const pArrayTypeDeclCtx = pTypeNameDeclCtx->arrayTypeDecl();
 
-		const detail::VarType returnVarType = CompilerUtil::GetVarType(pTypeNameDeclCtx->Id()->getText());
+		const detail::VarBaseType returnVarBaseType = CompilerUtil::GetVarBaseType(pTypeNameDeclCtx->Id()->getText());
 		const detail::ArrayType returnArrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
 
 		const detail::FunctionType funcType = CompilerUtil::GetFunctionType(pFunctionSpecCtx ? pFunctionSpecCtx->getText() : "");
@@ -471,6 +472,79 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		detail::StringArray accessLimitTypes;
 		_resolveAccessSpecifier(accessType, accessLimitTypes, pAccessSpecCtx);
 
+		LocalVarSymbol::PtrMap localVars;
+		detail::VariableType::Array argTypes;
+
+		std::stringstream argSignature;
+		std::string methodSignature;
+
+		if(pMethodArgSeqCtx)
+		{
+			const auto& methodArgs = pMethodArgSeqCtx->methodArg();
+
+			argTypes.reserve(methodArgs.size());
+
+			for(auto* const pMethodArgCtx : methodArgs)
+			{
+				auto* const pArgVarDeclSpecCtx = pMethodArgCtx->argVarDeclSpecSeq();
+				auto* const pArgTypeNameDeclCtx = pMethodArgCtx->typeNameDecl();
+				auto* const pArgNameId = pMethodArgCtx->Id();
+
+				// Resolve the common variable data.
+				detail::VariableBase varBase;
+				_resolveVariableCommonData(varBase, pArgTypeNameDeclCtx, pArgVarDeclSpecCtx->constQualifier());
+
+				if(argTypes.size() > 0)
+				{
+					argSignature << ",";
+				}
+
+				const std::string argTypeName = pArgTypeNameDeclCtx->Id()->getText();
+
+				// Add the current argument to the method's argument signature stream.
+				argSignature << CompilerUtil::GetVarTypeSignature(argTypeName, varBase.varType.arrayType);
+
+				// Track the current argument's variable type.
+				argTypes.push_back(varBase.varType);
+
+				if(pArgNameId)
+				{
+					const std::string varName = pArgNameId->getText();
+
+					// TODO: Handle the assignment expression for default argument values
+
+					if(!localVars.count(varBase.varName))
+					{
+						LocalVarSymbol::Ptr pLocalVar = LocalVarSymbol::New();
+
+						pLocalVar->base = varBase;
+						pLocalVar->base.varName = varName;
+						pLocalVar->storageType = detail::StorageType::Default;
+
+						// Move the new variable symbol to the local map.
+						localVars.emplace(varName, std::move(pLocalVar));
+					}
+					else
+					{
+						std::stringstream stream;
+						stream << "duplicate class variable: '" << varName << "'";
+
+						// Report the duplicate variable name as an error.
+						m_pErrorHandler->Report(
+							MessageCode::ErrorDuplicateVar,
+							TokenSpan::WithSourceText(pNameId->getSymbol()),
+							stream.str());
+					}
+				}
+			}
+		}
+
+		// Construct the method's full signature.
+		std::stringstream signatureStream;
+		signatureStream << qualifiedName << "(" << argSignature.str() << ")";
+
+		methodSignature = signatureStream.str();
+
 		// Validate the function type.
 		switch(funcType)
 		{
@@ -480,7 +554,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				if(pCodeBlockCtx)
 				{
 					std::stringstream stream;
-					stream << "native method with implementation: '" << qualifiedName << "'";
+					stream << "native method with implementation: '" << methodSignature << "'";
 
 					// Report the provided code block as an error.
 					m_pErrorHandler->Report(
@@ -496,7 +570,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				if(storageType == detail::StorageType::Static)
 				{
 					std::stringstream stream;
-					stream << "method is marked both 'virtual' and 'static': '" << qualifiedName << "'";
+					stream << "method is marked both 'virtual' and 'static': '" << methodSignature << "'";
 
 					// Report the invalid method spec as an error.
 					m_pErrorHandler->Report(
@@ -516,7 +590,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				if(!pCodeBlockCtx)
 				{
 					std::stringstream stream;
-					stream << "method has no implementation: '" << qualifiedName << "'";
+					stream << "method has no implementation: '" << methodSignature << "'";
 
 					// Report the missing code block as an error.
 					m_pErrorHandler->Report(
@@ -532,7 +606,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		if(storageType == detail::StorageType::Static && isConst)
 		{
 			std::stringstream stream;
-			stream << "method is marked both 'static' and 'const': '" << qualifiedName << "'";
+			stream << "method is marked both 'static' and 'const': '" << methodSignature << "'";
 
 			// Report the invalid method spec as an error.
 			m_pErrorHandler->Report(
@@ -545,13 +619,15 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		{
 			MethodSymbol::Ptr pMethod = MethodSymbol::New();
 
-			pMethod->shortName = shortName;
-			pMethod->qualifiedName = qualifiedName;
-
+			pMethod->localVars = std::move(localVars);
 			pMethod->accessLimitTypes = std::move(accessLimitTypes);
+			pMethod->argTypes = std::move(argTypes);
 
-			pMethod->retVal.varType = returnVarType;
+			pMethod->retVal.baseType = returnVarBaseType;
 			pMethod->retVal.arrayType = returnArrayType;
+
+			pMethod->name = shortName;
+			pMethod->signature = methodSignature;
 
 			pMethod->accessType = accessType;
 			pMethod->funcType = funcType;
@@ -560,15 +636,20 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 			pMethod->isConst = isConst;
 			pMethod->isAbstract = isAbstract;
 
-			// TODO: Read the method params into the map of local variables.
-			// TODO: Cache the current method, then visit the code block.
+			// Cache the current method so child contexts can access it.
+			m_pMethod = pMethod.get();
 
 			// Add the new method to the global map in the symbol table.
-			assert(m_pSymbolTable->allMethods.count(qualifiedName) == 0);
-			m_pSymbolTable->allMethods.emplace(qualifiedName, pMethod.get());
+			assert(m_pSymbolTable->allMethods.count(methodSignature) == 0);
+			m_pSymbolTable->allMethods.emplace(methodSignature, m_pMethod);
 
 			// Move the new method symbol to the parent class.
 			pParentClass->methods.emplace(shortName, std::move(pMethod));
+
+			// TODO: Visit the code block.
+
+			// Clear the cached method now that we're done with it.
+			m_pMethod = nullptr;
 		}
 	}
 	else
@@ -651,15 +732,14 @@ inline void SymbolTableGenerator::_resolveAccessSpecifier(
 
 inline void SymbolTableGenerator::_resolveVariableCommonData(
 	detail::VariableBase& output, 
-	HarlequinParser::VarDeclContext* const pVarDeclCtx,
+	HarlequinParser::TypeNameDeclContext* const pTypeNameDeclCtx,
 	HarlequinParser::ConstQualifierContext* const pConstQualCtx)
 {
-	auto* const pTypeNameDeclCtx = pVarDeclCtx->typeNameDecl();
 	auto* const pArrayTypeDeclCtx = pTypeNameDeclCtx->arrayTypeDecl();
 
 	output.typeName = pTypeNameDeclCtx->Id()->getText();
-	output.varType = CompilerUtil::GetVarType(output.typeName);
-	output.arrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
+	output.varType.baseType = CompilerUtil::GetVarBaseType(output.typeName);
+	output.varType.arrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
 
 	// All variable with the 'const' qualifier will start off as immutable.
 	// They can be upgraded to literal during expression resolution.

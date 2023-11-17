@@ -25,7 +25,7 @@
 #include "../symbol/detail/ClassType.hpp"
 #include "../symbol/detail/FunctionType.hpp"
 #include "../symbol/detail/StorageType.hpp"
-#include "../symbol/detail/VarType.hpp"
+#include "../symbol/detail/VarBaseType.hpp"
 
 #include "../../../Harlequin.h"
 
@@ -48,7 +48,9 @@ public:
 	static detail::ClassType GetClassType(const std::string& classType);
 	static detail::FunctionType GetFunctionType(const std::string& funcType);
 	static detail::StorageType GetStorageType(const std::string& storageType);
-	static detail::VarType GetVarType(const std::string& typeName);
+	static detail::VarBaseType GetVarBaseType(const std::string& typeName);
+
+	static std::string GetVarTypeSignature(const std::string& typeName, const detail::ArrayType& arrayType);
 };
 
 //----------------------------------------------------------------------------------------------------------------------

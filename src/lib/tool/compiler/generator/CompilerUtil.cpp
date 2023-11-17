@@ -19,6 +19,7 @@
 #include "CompilerUtil.hpp"
 
 #include <algorithm>
+#include <sstream>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -83,62 +84,82 @@ detail::StorageType CompilerUtil::GetStorageType(const std::string& storageType)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::VarType CompilerUtil::GetVarType(const std::string& typeName)
+detail::VarBaseType CompilerUtil::GetVarBaseType(const std::string& typeName)
 {
 	if(typeName == "int8")
 	{
-		return detail::VarType::Int8;
+		return detail::VarBaseType::Int8;
 	}
 	else if(typeName == "int16")
 	{
-		return detail::VarType::Int16;
+		return detail::VarBaseType::Int16;
 	}
 	else if(typeName == "int32")
 	{
-		return detail::VarType::Int32;
+		return detail::VarBaseType::Int32;
 	}
 	else if(typeName == "int64")
 	{
-		return detail::VarType::Int64;
+		return detail::VarBaseType::Int64;
 	}
 	else if(typeName == "uint8")
 	{
-		return detail::VarType::Uint8;
+		return detail::VarBaseType::Uint8;
 	}
 	else if(typeName == "uint16")
 	{
-		return detail::VarType::Uint16;
+		return detail::VarBaseType::Uint16;
 	}
 	else if(typeName == "uint32")
 	{
-		return detail::VarType::Uint32;
+		return detail::VarBaseType::Uint32;
 	}
 	else if(typeName == "uint64")
 	{
-		return detail::VarType::Uint64;
+		return detail::VarBaseType::Uint64;
 	}
 	else if(typeName == "float32")
 	{
-		return detail::VarType::Float32;
+		return detail::VarBaseType::Float32;
 	}
 	else if(typeName == "float64")
 	{
-		return detail::VarType::Float64;
+		return detail::VarBaseType::Float64;
 	}
 	else if(typeName == "bool")
 	{
-		return detail::VarType::Bool;
+		return detail::VarBaseType::Bool;
 	}
 	else if(typeName == "string")
 	{
-		return detail::VarType::String;
+		return detail::VarBaseType::String;
 	}
 	else if(typeName == "native")
 	{
-		return detail::VarType::Native;
+		return detail::VarBaseType::Native;
 	}
 
-	return detail::VarType::Object;
+	return detail::VarBaseType::Object;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+std::string CompilerUtil::GetVarTypeSignature(const std::string& typeName, const detail::ArrayType& arrayType)
+{
+	std::stringstream stream;
+	stream << typeName;
+
+	switch(arrayType)
+	{
+		case detail::ArrayType::Linear: stream << "[]";   break;
+		case detail::ArrayType::Grid2D: stream << "[,]";  break;
+		case detail::ArrayType::Grid3D: stream << "[,,]"; break;
+
+		default:
+			break;
+	}
+
+	return stream.str();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

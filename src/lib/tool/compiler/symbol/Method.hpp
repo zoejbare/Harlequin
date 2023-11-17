@@ -24,8 +24,8 @@
 
 #include "detail/AccessType.hpp"
 #include "detail/FunctionType.hpp"
-#include "detail/ReturnValue.hpp"
 #include "detail/StringArray.hpp"
+#include "detail/VariableType.hpp"
 
 #include <memory>
 #include <string>
@@ -46,11 +46,12 @@ struct MethodSymbol
 
 	LocalVarSymbol::PtrMap localVars;
 
-	std::string shortName;
-	std::string qualifiedName;
-
 	detail::StringArray accessLimitTypes;
-	detail::ReturnValue retVal;
+	detail::VariableType::Array argTypes;
+	detail::VariableType retVal;
+
+	std::string name;
+	std::string signature;
 
 	detail::AccessType accessType;
 	detail::FunctionType funcType;
