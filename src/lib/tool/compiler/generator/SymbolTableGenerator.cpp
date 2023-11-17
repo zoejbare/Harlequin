@@ -344,11 +344,11 @@ std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDe
 
 	// Resolve the variable's access specifier.
 	detail::AccessType accessType;
-	detail::StringArray accessLimitTypes;
-	_resolveAccessSpecifier(accessType, accessLimitTypes, pAccessSpecCtx);
+	detail::StringArray accessLimits;
+	_resolveAccessSpecifier(accessType, accessLimits, pAccessSpecCtx);
 
 	auto registerVariable = 
-		[this, &pParentClass, &varNamePrefix, &storageType, &accessType, &varBase, &accessLimitTypes]
+		[this, &pParentClass, &varNamePrefix, &storageType, &accessType, &varBase, &accessLimits]
 		(antlr4::tree::TerminalNode* const pNameId)
 	{
 		const std::string varNameShort = pNameId->getText();
@@ -361,7 +361,7 @@ std::any SymbolTableGenerator::visitClassVarDeclStmt(HarlequinParser::ClassVarDe
 			ClassVarSymbol::Ptr pClassVar = ClassVarSymbol::New();
 
 			// Copy the access limiters to the variable.
-			pClassVar->accessLimitTypes = accessLimitTypes;
+			pClassVar->accessLimits = accessLimits;
 
 			// Copy the variable common data we resolved from the start of the declaration.
 			pClassVar->base = varBase;
@@ -458,7 +458,7 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 
 		auto* const pArrayTypeDeclCtx = pTypeNameDeclCtx->arrayTypeDecl();
 
-		const detail::VarBaseType returnVarBaseType = CompilerUtil::GetVarBaseType(pTypeNameDeclCtx->Id()->getText());
+		const detail::VarType returnVarType = CompilerUtil::GetVarType(pTypeNameDeclCtx->Id()->getText());
 		const detail::ArrayType returnArrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
 
 		const detail::FunctionType funcType = CompilerUtil::GetFunctionType(pFunctionSpecCtx ? pFunctionSpecCtx->getText() : "");
@@ -469,11 +469,11 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 
 		// Resolve the method's access specifier.
 		detail::AccessType accessType;
-		detail::StringArray accessLimitTypes;
-		_resolveAccessSpecifier(accessType, accessLimitTypes, pAccessSpecCtx);
+		detail::StringArray accessLimits;
+		_resolveAccessSpecifier(accessType, accessLimits, pAccessSpecCtx);
 
 		LocalVarSymbol::PtrMap localVars;
-		detail::VariableType::Array argTypes;
+		detail::StringArray argNameSeq;
 
 		std::stringstream argSignature;
 		std::string methodSignature;
@@ -482,7 +482,8 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 		{
 			const auto& methodArgs = pMethodArgSeqCtx->methodArg();
 
-			argTypes.reserve(methodArgs.size());
+			// Allocate space in the method argument sequence array.
+			argNameSeq.reserve(methodArgs.size());
 
 			for(auto* const pMethodArgCtx : methodArgs)
 			{
@@ -494,23 +495,27 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 				detail::VariableBase varBase;
 				_resolveVariableCommonData(varBase, pArgTypeNameDeclCtx, pArgVarDeclSpecCtx->constQualifier());
 
-				if(argTypes.size() > 0)
+				if(argNameSeq.size() > 0)
 				{
+					// Add a comma between successive arguments.
 					argSignature << ",";
 				}
 
 				const std::string argTypeName = pArgTypeNameDeclCtx->Id()->getText();
 
 				// Add the current argument to the method's argument signature stream.
-				argSignature << CompilerUtil::GetVarTypeSignature(argTypeName, varBase.varType.arrayType);
+				argSignature << CompilerUtil::GetVarTypeSignature(argTypeName, varBase.arrayType);
 
-				// Track the current argument's variable type.
-				argTypes.push_back(varBase.varType);
+				const std::string argVarName = pArgNameId
+					? pArgNameId->getText()
+					: "";
+
+				// Update the method argument sequence with the name of the current argument.
+				// This will be used to validate argument data later.
+				argNameSeq.push_back(argVarName);
 
 				if(pArgNameId)
 				{
-					const std::string varName = pArgNameId->getText();
-
 					// TODO: Handle the assignment expression for default argument values
 
 					if(!localVars.count(varBase.varName))
@@ -518,16 +523,16 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 						LocalVarSymbol::Ptr pLocalVar = LocalVarSymbol::New();
 
 						pLocalVar->base = varBase;
-						pLocalVar->base.varName = varName;
+						pLocalVar->base.varName = argVarName;
 						pLocalVar->storageType = detail::StorageType::Default;
 
 						// Move the new variable symbol to the local map.
-						localVars.emplace(varName, std::move(pLocalVar));
+						localVars.emplace(argVarName, std::move(pLocalVar));
 					}
 					else
 					{
 						std::stringstream stream;
-						stream << "duplicate class variable: '" << varName << "'";
+						stream << "duplicate class variable: '" << argVarName << "'";
 
 						// Report the duplicate variable name as an error.
 						m_pErrorHandler->Report(
@@ -620,11 +625,11 @@ std::any SymbolTableGenerator::visitMethodDecl(HarlequinParser::MethodDeclContex
 			MethodSymbol::Ptr pMethod = MethodSymbol::New();
 
 			pMethod->localVars = std::move(localVars);
-			pMethod->accessLimitTypes = std::move(accessLimitTypes);
-			pMethod->argTypes = std::move(argTypes);
+			pMethod->accessLimits = std::move(accessLimits);
+			pMethod->argNameSeq = std::move(argNameSeq);
 
-			pMethod->retVal.baseType = returnVarBaseType;
-			pMethod->retVal.arrayType = returnArrayType;
+			pMethod->returnVarType = returnVarType;
+			pMethod->returnArrayType = returnArrayType;
 
 			pMethod->name = shortName;
 			pMethod->signature = methodSignature;
@@ -674,13 +679,14 @@ inline void SymbolTableGenerator::_resolveAccessSpecifier(
 	detail::StringArray& outputLimitTypes,
 	HarlequinParser::AccessSpecifierContext* const pAccessSpecCtx)
 {
+	// The default access type is 'private', so setting that here ahead
+	// of time will potentially simplify some of the logic below.
+	outputAccessType = detail::AccessType::Private;
+
 	if(pAccessSpecCtx)
 	{
 		auto* const pAccessBaseSpecCtx = pAccessSpecCtx->accessBaseSpecifier();
 		auto* const pAccessLimitSpecCtx = pAccessSpecCtx->accessLimitSpecifier();
-
-		// The default access type is 'private', so setting that here ahead of time will simply some of the logic below.
-		outputAccessType = detail::AccessType::Private;
 
 		const detail::AccessType tempAccessType = pAccessBaseSpecCtx
 			? CompilerUtil::GetAccessType(pAccessBaseSpecCtx->getText())
@@ -738,8 +744,8 @@ inline void SymbolTableGenerator::_resolveVariableCommonData(
 	auto* const pArrayTypeDeclCtx = pTypeNameDeclCtx->arrayTypeDecl();
 
 	output.typeName = pTypeNameDeclCtx->Id()->getText();
-	output.varType.baseType = CompilerUtil::GetVarBaseType(output.typeName);
-	output.varType.arrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
+	output.varType = CompilerUtil::GetVarType(output.typeName);
+	output.arrayType = CompilerUtil::GetArrayType(pArrayTypeDeclCtx ? pArrayTypeDeclCtx->getText() : "");
 
 	// All variable with the 'const' qualifier will start off as immutable.
 	// They can be upgraded to literal during expression resolution.

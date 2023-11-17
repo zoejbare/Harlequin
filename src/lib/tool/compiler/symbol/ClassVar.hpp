@@ -45,7 +45,7 @@ struct ClassVarSymbol
 
 	ClassSymbol* pParent;
 
-	detail::StringArray accessLimitTypes;
+	detail::StringArray accessLimits;
 	detail::VariableBase base;
 
 	detail::AccessType accessType;

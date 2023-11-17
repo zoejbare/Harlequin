@@ -20,21 +20,28 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ArrayType.hpp"
-#include "VarBaseType.hpp"
-
-#include <vector>
-
-//----------------------------------------------------------------------------------------------------------------------
-
 namespace detail
 {
-	struct VariableType
+	enum class VarType
 	{
-		typedef std::vector<VariableType> Array;
+		Int8,
+		Int16,
+		Int32,
+		Int64,
 
-		VarBaseType baseType;
-		ArrayType arrayType;
+		Uint8,
+		Uint16,
+		Uint32,
+		Uint64,
+
+		Float32,
+		Float64,
+
+		Bool,
+
+		String,
+		Object,
+		Native,
 	};
 }
 

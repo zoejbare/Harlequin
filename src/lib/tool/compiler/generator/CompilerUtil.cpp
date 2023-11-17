@@ -84,62 +84,62 @@ detail::StorageType CompilerUtil::GetStorageType(const std::string& storageType)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::VarBaseType CompilerUtil::GetVarBaseType(const std::string& typeName)
+detail::VarType CompilerUtil::GetVarType(const std::string& typeName)
 {
 	if(typeName == "int8")
 	{
-		return detail::VarBaseType::Int8;
+		return detail::VarType::Int8;
 	}
 	else if(typeName == "int16")
 	{
-		return detail::VarBaseType::Int16;
+		return detail::VarType::Int16;
 	}
 	else if(typeName == "int32")
 	{
-		return detail::VarBaseType::Int32;
+		return detail::VarType::Int32;
 	}
 	else if(typeName == "int64")
 	{
-		return detail::VarBaseType::Int64;
+		return detail::VarType::Int64;
 	}
 	else if(typeName == "uint8")
 	{
-		return detail::VarBaseType::Uint8;
+		return detail::VarType::Uint8;
 	}
 	else if(typeName == "uint16")
 	{
-		return detail::VarBaseType::Uint16;
+		return detail::VarType::Uint16;
 	}
 	else if(typeName == "uint32")
 	{
-		return detail::VarBaseType::Uint32;
+		return detail::VarType::Uint32;
 	}
 	else if(typeName == "uint64")
 	{
-		return detail::VarBaseType::Uint64;
+		return detail::VarType::Uint64;
 	}
 	else if(typeName == "float32")
 	{
-		return detail::VarBaseType::Float32;
+		return detail::VarType::Float32;
 	}
 	else if(typeName == "float64")
 	{
-		return detail::VarBaseType::Float64;
+		return detail::VarType::Float64;
 	}
 	else if(typeName == "bool")
 	{
-		return detail::VarBaseType::Bool;
+		return detail::VarType::Bool;
 	}
 	else if(typeName == "string")
 	{
-		return detail::VarBaseType::String;
+		return detail::VarType::String;
 	}
 	else if(typeName == "native")
 	{
-		return detail::VarBaseType::Native;
+		return detail::VarType::Native;
 	}
 
-	return detail::VarBaseType::Object;
+	return detail::VarType::Object;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
