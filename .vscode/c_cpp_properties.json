@@ -25,7 +25,26 @@
             "cppStandard": "c++11"
         },
         {
-            "name": "macOS",
+            "name": "macOS (arm64)",
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "intelliSenseMode": "macos-clang-arm64",
+            "compilerPath": "/usr/bin/clang",
+            "includePath": [
+                "${defaultIncludePaths}"
+            ],
+            "defines": [
+                "_XOPEN_SOURCE",
+                "HQ_LIB_COMPILER",
+                "HQ_LIB_RUNTIME"
+            ],
+            "cStandard": "c99",
+            "cppStandard": "c++11"
+        },
+        {
+            "name": "macOS (x64)",
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
                 "/Library/Frameworks"
