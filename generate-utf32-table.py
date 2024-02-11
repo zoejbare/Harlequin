@@ -191,7 +191,7 @@ def _parseSpecialCasingLine(line, recordTable):
 ########################################################################################################################
 
 def _downloadUnicodeDataFile():
-	url = "https://www.unicode.org/Public/15.1.0/ucd/UnicodeData.txt"
+	url = "https://www.unicode.org/Public/16.0.0/ucd/UnicodeData.txt"
 	
 	print(f"Downloading {url} ...")
 
@@ -206,7 +206,7 @@ def _downloadUnicodeDataFile():
 ########################################################################################################################
 
 def _downloadSpecialCasingFile():
-	url = "https://www.unicode.org/Public/15.1.0/ucd/SpecialCasing.txt"
+	url = "https://www.unicode.org/Public/16.0.0/ucd/SpecialCasing.txt"
 
 	print(f"Downloading {url} ...")
 
