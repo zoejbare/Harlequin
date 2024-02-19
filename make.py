@@ -49,8 +49,9 @@ _PLATFORM_REPO_PATHS = [
 ]
 _PLATFORM_REPO_PATHS = [x for x in _PLATFORM_REPO_PATHS if os.access(x, os.F_OK)]
 
-# Patch the sys path so we can search for modules in the platform support directories.
-sys.path = _PLATFORM_REPO_PATHS + sys.path
+# Patch the sys path so we can search for setup modules in the platform support directories.
+if _PLATFORM_REPO_PATHS:
+	sys.path = _PLATFORM_REPO_PATHS + sys.path
 
 ###################################################################################################
 

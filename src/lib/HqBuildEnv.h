@@ -21,12 +21,6 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-/*---------------------------------------------------------------------------------------------------------------------*/
-
 #if defined(_HQ_BUILD_FOR_PS3_)
 	#define HQ_PLATFORM_PS3
 
@@ -58,6 +52,21 @@
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
+#if defined(HQ_PLATFORM_PS3)
+	/* The standard C macros are not defined by default, so we need to enable to preprocessor extensions. */
+	#define __STDC_LIMIT_MACROS
+	#define __STDC_CONSTANT_MACROS
+
+#endif
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
 #if defined(__powerpc__) || defined(__powerpc64__) || defined(__PPC__) || defined(__PPC64__) || defined(_M_PPC) || defined(_M_PPCBE)
 	#define HQ_CPU_TYPE_PPC
 
@@ -78,7 +87,7 @@
 	|| defined(__aarch64__) || defined(_M_PPC) || defined(_M_PPCBE)
 	#define HQ_CPU_WORD_64_BIT
 
-	#if (UINTPTR_MAX == UINT_MAX)
+	#if (SIZE_MAX == UINT32_MAX)
 		/* Some older platforms use a 64-bit CPU, but still define their native word to 32 bits. */
 		#undef HQ_CPU_WORD_64_BIT
 		#define HQ_CPU_WORD_32_BIT
