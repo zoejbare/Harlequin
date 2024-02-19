@@ -44,42 +44,74 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 	assert(filePath[0] != '\0');
 	assert(pErrorReason != nullptr);
 
+	HqReportHandle hReport = &hToolCtx->report;
+
 	// Create a serializer for loading the source file.
 	HqSerializerHandle hSerializer = HqSerializer::Create(HQ_SERIALIZER_MODE_READER);
 	if(!hSerializer)
 	{
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to allocate file input serializer");
 		(*pErrorReason) = HQ_ERROR_BAD_ALLOCATION;
 		return nullptr;
 	}
 
 	// Attempt to load the source file.
-	if(HqSerializer::LoadFile(hSerializer, filePath) != HQ_SUCCESS)
 	{
-		(*pErrorReason) = HQ_ERROR_FAILED_TO_OPEN_FILE;
-		return nullptr;
+		const int result = HqSerializer::LoadFile(hSerializer, filePath);
+		if(result != HQ_SUCCESS)
+		{
+			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to load input file: reason=%s", HqGetErrorCodeString(result));
+			(*pErrorReason) = HQ_ERROR_FAILED_TO_OPEN_FILE;
+			return nullptr;
+		}
 	}
 
 	HqSourceFile* const pOutput = new HqSourceFile();
-	assert(pOutput != nullptr);
+	if(!pOutput)
+	{
+		HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to allocate HqSourceFile object");
+		(*pErrorReason) = HQ_ERROR_BAD_ALLOCATION;
+		return nullptr;
+	}
 
 	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
 	pOutput->hToolCtx = hToolCtx;
 	pOutput->hSerializer = hSerializer;
 
-	// NOTE: Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
-	//       MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown.
-	pOutput->pInputStream = new ANTLRInputStream(
-		reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData),
-		pOutput->hSerializer->stream.count);
-	pOutput->pLexer = new HarlequinLexer(pOutput->pInputStream);
-	pOutput->pTokenStream = new CommonTokenStream(pOutput->pLexer);
-	pOutput->pParser = new HarlequinParser(pOutput->pTokenStream);
-	pOutput->pParseTree = nullptr;
+	const char* const streamData = reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData);
+	const size_t streamLength = pOutput->hSerializer->stream.count;
+
+	// [NOTE]
+	//   Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
+	//   MSVC's CRT leak check API, there will be a ton of false positives reported on shutdown. The better
+	//   way to check for leaky memory is to setup a custom allocator and dump any allocations that are
+	//   still around after disposing of all the HQ compiler resources.
+
+#define _HQ_ANTLR_ALLOC(object, type, ...) \
+	{ \
+		(object) = reinterpret_cast<type*>(HqMemAlloc(sizeof(type))); \
+		if(!(object)) \
+		{ \
+			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to allocate ANTLR object: type=%s", #type); \
+			(*pErrorReason) = HQ_ERROR_BAD_ALLOCATION; \
+			return nullptr; \
+		} \
+		new(object) type(__VA_ARGS__); \
+	}
+
+	// Parse the input file.
+	_HQ_ANTLR_ALLOC(pOutput->pInputStream, ANTLRInputStream, streamData, streamLength);
+	_HQ_ANTLR_ALLOC(pOutput->pLexer, HarlequinLexer, pOutput->pInputStream);
+	_HQ_ANTLR_ALLOC(pOutput->pTokenStream, CommonTokenStream, pOutput->pLexer);
+	_HQ_ANTLR_ALLOC(pOutput->pParser, HarlequinParser, pOutput->pTokenStream);
+
+#undef _HQ_ANTLR_ALLOC
 
 	// Set the file name for the input stream; this will be used when reporting errors and warnings.
 	pOutput->pInputStream->name = filePath;
 
+	pOutput->pParseTree = nullptr;
 	pOutput->parsed = false;
 
 	// Remove the default error listeners.
@@ -201,15 +233,26 @@ bool HqSourceFile::WasParsedSuccessfully(HqSourceFileHandle hSrcFile)
 
 void HqSourceFile::prv_onDestruct(void* const pOpaque)
 {
+	using namespace antlr4;
+
 	HqSourceFileHandle hSrcFile = reinterpret_cast<HqSourceFileHandle>(pOpaque);
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
 	HqSerializer::Dispose(hSrcFile->hSerializer);
 
-	delete hSrcFile->pInputStream;
-	delete hSrcFile->pTokenStream;
-	delete hSrcFile->pLexer;
-	delete hSrcFile->pParser;
+#define _HQ_ANTLR_FREE(object, type) \
+	if(object) \
+	{ \
+		object->~type(); \
+		HqMemFree(object); \
+	}
+
+	_HQ_ANTLR_FREE(hSrcFile->pParser, HarlequinParser);
+	_HQ_ANTLR_FREE(hSrcFile->pTokenStream, CommonTokenStream);
+	_HQ_ANTLR_FREE(hSrcFile->pLexer, HarlequinLexer);
+	_HQ_ANTLR_FREE(hSrcFile->pInputStream, ANTLRInputStream);
+
+#undef _HQ_ANTLR_FREE
 
 	delete hSrcFile;
 }

@@ -73,11 +73,14 @@ std::any SymbolTableGenerator::visitUsingStmt(HarlequinParser::UsingStmtContext*
 		return defaultResult();
 	}
 
-	const std::string qualifiedNamespace = pCtx->qualifiedId()->getText();
+	auto* const pQualifiedIdCtx = pCtx->qualifiedId();
+
+	const std::string qualifiedNamespace = pQualifiedIdCtx->getText();
 
 	// Check to see if this namespace is already being used (we can ignore duplicate namespaces).
 	if(!m_pSymbolTable->imports.count(qualifiedNamespace))
 	{
+		// TODO: During validation, verify the imported namespace exists.
 		m_pSymbolTable->imports.insert(qualifiedNamespace);
 	}
 
@@ -94,7 +97,9 @@ std::any SymbolTableGenerator::visitUsingAliasStmt(HarlequinParser::UsingAliasSt
 		return defaultResult();
 	}
 
-	const std::string qualifiedClassName = pCtx->qualifiedId()->getText();
+	auto* const pQualifiedIdCtx = pCtx->qualifiedId();
+
+	const std::string originalClassName = pQualifiedIdCtx->getText();
 	const auto aliasNames = pCtx->Id();
 
 	// Map each alias listed in the statement.
@@ -107,7 +112,8 @@ std::any SymbolTableGenerator::visitUsingAliasStmt(HarlequinParser::UsingAliasSt
 		// that class name.
 		if(!m_pSymbolTable->classAliases.count(aliasedClassName))
 		{
-			m_pSymbolTable->classAliases.emplace(aliasedClassName, qualifiedClassName);
+			// TODO: During validation, make sure the class aliases don't overlap with any defined or imported classes.
+			m_pSymbolTable->classAliases.emplace(aliasedClassName, originalClassName);
 		}
 		else
 		{
