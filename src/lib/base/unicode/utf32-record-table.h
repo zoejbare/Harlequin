@@ -7,16 +7,16 @@
 extern "C" {
 #endif
 
-#define HQ_UTF32_FULL_MAPPING_ARRAY_LENGTH 3
-#define HQ_UTF32_RECORD_ENTRY_COUNT        4384
-#define HQ_UTF32_RECORD_INDEX_COUNT        125252
-#define HQ_UTF32_RECORD_INDEX_TYPE         uint16_t
+#define HQ_UTF32_STRICT_MAPPING_ARRAY_LENGTH 3
+#define HQ_UTF32_RECORD_ENTRY_COUNT          4384
+#define HQ_UTF32_RECORD_INDEX_COUNT          125252
+#define HQ_UTF32_RECORD_INDEX_TYPE           uint16_t
 
 struct HqUtf32Mapping
 {
-	char32_t full[HQ_UTF32_FULL_MAPPING_ARRAY_LENGTH];
+	char32_t strict[HQ_UTF32_STRICT_MAPPING_ARRAY_LENGTH];
 	char32_t simple;
-	size_t fullLength;
+	size_t strictLength;
 };
 
 struct HqUtf32Record

@@ -30,14 +30,14 @@ struct HQ_BASE_API HqString
 {
 	struct HQ_BASE_API StlCompare
 	{
-		bool operator()(HqString* pLeft, HqString* pRight);
-		bool operator()(const HqString* pLeft, const HqString* pRight) const;
+		inline bool operator()(HqString* pLeft, HqString* pRight) { return FastCompare(pLeft, pRight); }
+		inline bool operator()(const HqString* pLeft, const HqString* pRight) const { return FastCompare(pLeft, pRight); }
 	};
 
 	struct HQ_BASE_API StlHash
 	{
-		size_t operator()(HqString* pString);
-		size_t operator()(const HqString* pString) const;
+		inline size_t operator()(HqString* pString) { return pString->hash; }
+		inline size_t operator()(const HqString* pString) const { return pString->hash; }
 	};
 
 	static HqString* Create(const char* stringData);
@@ -55,9 +55,9 @@ struct HQ_BASE_API HqString
 	static void ToSimpleUpperCase(HqString* pString);
 	static void ToSimpleTitleCase(HqString* pString);
 
-	static void ToFullLowerCase(HqString* pString);
-	static void ToFullUpperCase(HqString* pString);
-	static void ToFullTitleCase(HqString* pString);
+	static void ToStrictLowerCase(HqString* pString);
+	static void ToStrictUpperCase(HqString* pString);
+	static void ToStrictTitleCase(HqString* pString);
 
 	static void prv_onDestruct(void*);
 

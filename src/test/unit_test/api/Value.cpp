@@ -249,10 +249,10 @@ TEST_F(_HQ_TEST_NAME(TestValue), CreateStringValue)
 	const size_t nativeStringHash = HqValueGetStringHash(hValue);
 
 #ifdef HQ_CPU_WORD_64_BIT
-	EXPECT_EQ(nativeStringHash, 8219377559199927259);
+	EXPECT_EQ(nativeStringHash, 1799107708520249771ull);
 
 #else
-	EXPECT_EQ(nativeStringHash, 2965409582);
+	EXPECT_EQ(nativeStringHash, 4033797468u);
 
 #endif
 

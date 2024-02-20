@@ -27,29 +27,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(HQ_PLATFORM_PSVITA)
-	// Work around xxhash using the wrong 'restrict' keyword.
-	#pragma push_macro("restrict")
-	#define restrict __restrict__
-#endif
-
-#if defined(HQ_PLATFORM_PS3)
-	#pragma push_macro("__GNUC__")
-	#undef __GNUC__
-#endif
-
-#define XXH_INLINE_ALL 1
-#define XXH_ACCEPT_NULL_INPUT_POINTER 1
-#include <xxhash.h>
-
-#if defined(HQ_PLATFORM_PSVITA)
-	#pragma pop_macro("restrict")
-#endif
-
-#if defined(HQ_PLATFORM_PS3)
-	#pragma pop_macro("__GNUC__")
-#endif
-
 //----------------------------------------------------------------------------------------------------------------------
 
 #define _HQ_INVALID_CODE_POINT 0xFFFD
@@ -293,7 +270,7 @@ inline char32_t _HqCharToUtf32SimpleTitle(const char32_t codePoint)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t _HqCharToUtf32FullLower(char32_t* const pOutCodePoints, const char32_t codePoint)
+inline size_t _HqCharToUtf32StrictLower(char32_t* const pOutCodePoints, const char32_t codePoint)
 {
 	assert(pOutCodePoints != nullptr);
 
@@ -305,9 +282,9 @@ inline size_t _HqCharToUtf32FullLower(char32_t* const pOutCodePoints, const char
 	{
 		const HqUtf32Mapping& mapping = utf32RecordTable.records[recordIndex].lowerCase;
 
-		memcpy(pOutCodePoints, mapping.full, sizeof(char32_t) * mapping.fullLength);
+		memcpy(pOutCodePoints, mapping.strict, sizeof(char32_t) * mapping.strictLength);
 
-		return mapping.fullLength;
+		return mapping.strictLength;
 	}
 
 	// The input code point is out of the supported range or has no case mapping data.
@@ -317,7 +294,7 @@ inline size_t _HqCharToUtf32FullLower(char32_t* const pOutCodePoints, const char
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t _HqCharToUtf32FullUpper(char32_t* const pOutCodePoints, const char32_t codePoint)
+inline size_t _HqCharToUtf32StrictUpper(char32_t* const pOutCodePoints, const char32_t codePoint)
 {
 	assert(pOutCodePoints != nullptr);
 
@@ -329,9 +306,9 @@ inline size_t _HqCharToUtf32FullUpper(char32_t* const pOutCodePoints, const char
 	{
 		const HqUtf32Mapping& mapping = utf32RecordTable.records[recordIndex].upperCase;
 
-		memcpy(pOutCodePoints, mapping.full, sizeof(char32_t) * mapping.fullLength);
+		memcpy(pOutCodePoints, mapping.strict, sizeof(char32_t) * mapping.strictLength);
 
-		return mapping.fullLength;
+		return mapping.strictLength;
 	}
 
 	// The input code point is out of the supported range or has no case mapping data.
@@ -341,7 +318,7 @@ inline size_t _HqCharToUtf32FullUpper(char32_t* const pOutCodePoints, const char
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t _HqCharToUtf32FullTitle(char32_t* const pOutCodePoints, const char32_t codePoint)
+inline size_t _HqCharToUtf32StrictTitle(char32_t* const pOutCodePoints, const char32_t codePoint)
 {
 	assert(pOutCodePoints != nullptr);
 
@@ -353,9 +330,9 @@ inline size_t _HqCharToUtf32FullTitle(char32_t* const pOutCodePoints, const char
 	{
 		const HqUtf32Mapping& mapping = utf32RecordTable.records[recordIndex].titleCase;
 
-		memcpy(pOutCodePoints, mapping.full, sizeof(char32_t) * mapping.fullLength);
+		memcpy(pOutCodePoints, mapping.strict, sizeof(char32_t) * mapping.strictLength);
 
-		return mapping.fullLength;
+		return mapping.strictLength;
 	}
 
 	// The input code point is out of the supported range or has no case mapping data.
@@ -422,7 +399,7 @@ inline void _HqStringSimpleCaseOperation(HqString* const pString, char32_t (*Sim
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void _HqStringFullCaseOperation(HqString* const pString, size_t (*FullCaseOpFunc)(char32_t*, char32_t))
+inline void _HqStringStrictCaseOperation(HqString* const pString, size_t (*FullCaseOpFunc)(char32_t*, char32_t))
 {
 	assert(pString != nullptr);
 	assert(FullCaseOpFunc != nullptr);
@@ -431,7 +408,7 @@ inline void _HqStringFullCaseOperation(HqString* const pString, size_t (*FullCas
 	{
 		size_t outputStringLength = 0;
 		char tempUtf8[4];
-		char32_t tempUtf32[HQ_UTF32_FULL_MAPPING_ARRAY_LENGTH];
+		char32_t tempUtf32[HQ_UTF32_STRICT_MAPPING_ARRAY_LENGTH];
 
 		// Calculate the required size for the output string.
 		// This is not optimal, but the output string can potentially
@@ -492,44 +469,8 @@ inline void _HqStringFullCaseOperation(HqString* const pString, size_t (*FullCas
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool HqString::StlCompare::operator()(
-	HqString* const pLeft,
-	HqString* const pRight
-)
-{
-	return FastCompare(pLeft, pRight);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-bool HqString::StlCompare::operator()(
-	const HqString* const pLeft,
-	const HqString* const pRight
-) const
-{
-	return FastCompare(pLeft, pRight) ;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-size_t HqString::StlHash::operator()(HqString* const pObject)
-{
-	return pObject->hash;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-size_t HqString::StlHash::operator()(const HqString* const pObject) const
-{
-	return pObject->hash;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 HqString* HqString::Create(const char* const stringData)
 {
-	// TODO: Implement string pooling.
-
 	HqString* const pOutput = new HqString();
 	assert(pOutput != nullptr);
 
@@ -554,8 +495,6 @@ HqString* HqString::Create(const char* const stringData)
 
 HqString* HqString::CreateFmt(const char* const fmt, ...)
 {
-	// TODO: Implement string pooling.
-
 	if(!fmt || fmt[0] == '\0')
 	{
 		return Create("");
@@ -651,8 +590,9 @@ bool HqString::FastCompare(const HqString* const pLeft, const HqString* const pR
 	}
 
 	// We should only get here if the two strings are located in different spots in memory, have the same length,
-	// and have same hash. In reality, this should only ever happen if identical string data exists in two
-	// separate string objects, so it's not likely to happen much.
+	// and have same hash. This case is *possible* for two different strings if they have their lengths are the same,
+	// but contain different data. That would be the result of a hash collision, but more often than not, it'll be
+	// because the two string objects are separate objects, but happen to contain identical data.
 	return memcmp(pLeft->data, pRight->data, pLeft->length) == 0;
 }
 
@@ -663,16 +603,8 @@ size_t HqString::RawHash(const char* const string)
 	assert(string != nullptr);
 
 	const size_t length = strlen(string);
-	const size_t seed = HqStd::Fnv1aHash(reinterpret_cast<const uint8_t*>(string), length);
 
-	return size_t(
-#ifdef HQ_CPU_WORD_64_BIT
-		XXH64
-#else
-		XXH32
-#endif
-		(string, length, seed)
-	);
+	return HqStd::Fnv2zHash(reinterpret_cast<const uint8_t*>(string), length);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -732,23 +664,23 @@ void HqString::ToSimpleTitleCase(HqString* const pString)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqString::ToFullLowerCase(HqString* const pString)
+void HqString::ToStrictLowerCase(HqString* const pString)
 {
-	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullLower);
+	_HqStringStrictCaseOperation(pString, _HqCharToUtf32StrictLower);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqString::ToFullUpperCase(HqString* const pString)
+void HqString::ToStrictUpperCase(HqString* const pString)
 {
-	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullUpper);
+	_HqStringStrictCaseOperation(pString, _HqCharToUtf32StrictUpper);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqString::ToFullTitleCase(HqString* const pString)
+void HqString::ToStrictTitleCase(HqString* const pString)
 {
-	_HqStringFullCaseOperation(pString, _HqCharToUtf32FullTitle);
+	_HqStringStrictCaseOperation(pString, _HqCharToUtf32StrictTitle);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

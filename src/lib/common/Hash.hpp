@@ -33,21 +33,58 @@ namespace HqStd
 		const uint64_t fnvOffsetBasis = 0xCBF29CE484222325ull;
 		const uint64_t fnvPrime = 0x00000100000001B3ull;
 
-		uint64_t output = fnvOffsetBasis;
+#else
+		const uint32_t fnvOffsetBasis = 0x811C9DC5ul;
+		const uint32_t fnvPrime = 0x01000193ul;
+
+#endif
+
+		size_t output = size_t(fnvOffsetBasis);
+
+		// Calculate the FNV-1a hash from the input data.
+		for(size_t i = 0; i < length; ++i)
+		{
+			output = (output ^ data[i]) * fnvPrime;
+		}
+
+		return size_t(output);
+	}
+
+	inline size_t Fnv2zHash(const uint8_t* const data, const size_t length)
+	{
+		// This is basically the same as FNV-1a, but it operates on data one word at a time.
+		// However, this is slightly different from the FNV-2 presented in smhasher since we
+		// hash the word-sized data chunks first and handle the remaining bytes at the end,
+		// hence we call it FNV-2z to disambiguate it.
+
+		const size_t chunkSize = sizeof(size_t);
+		const size_t lengthInChunks = length / chunkSize;
+		const size_t remainderIndex = lengthInChunks * chunkSize;
+
+		const size_t* chunkData = reinterpret_cast<const size_t*>(data);
+
+#ifdef HQ_CPU_WORD_64_BIT
+		const uint64_t fnvOffsetBasis = 0xCBF29CE484222325ull;
+		const uint64_t fnvPrime = 0x00000100000001B3ull;
 
 #else
 		const uint32_t fnvOffsetBasis = 0x811C9DC5ul;
 		const uint32_t fnvPrime = 0x01000193ul;
 
-		uint32_t output = fnvOffsetBasis;
-
 #endif
 
-		// Calculate the FNV1a hash from the input data.
-		for(size_t i = 0; i < length; ++i)
+		size_t output = size_t(fnvOffsetBasis);
+
+		// Calculate the hash from the input data.
+		for(size_t i = 0; i < lengthInChunks; ++i)
 		{
-			output ^= data[i];
-			output *= fnvPrime;
+			output = (output ^ chunkData[i]) * fnvPrime;
+		}
+
+		// Finish calculate the hash from the remainder at the end of the input buffer
+		for(size_t i = remainderIndex; i < length; ++i)
+		{
+			output = (output ^ data[i]) * fnvPrime;
 		}
 
 		return size_t(output);

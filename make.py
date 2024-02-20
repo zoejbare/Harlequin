@@ -361,18 +361,6 @@ with csbuild.Project(ExtRapidXmlNs.projectName, ExtRapidXmlNs.path, autoDiscover
 
 ###################################################################################################
 
-class ExtXxHash(object):
-	projectName = "ExtStub_xxhash"
-	path = "external/xxHash"
-
-with csbuild.Project(ExtXxHash.projectName, ExtXxHash.path, autoDiscoverSourceFiles=False):
-	csbuild.SetOutput("{name}", csbuild.ProjectType.Stub)
-
-	with csbuild.Scope(csbuild.ScopeDef.Children):
-		csbuild.AddIncludeDirectories(ExtXxHash.path)
-
-###################################################################################################
-
 class HarlequinCommon(object):
 	appRootPath = "src/app"
 	libRootPath = "src/lib"
@@ -383,9 +371,7 @@ class HarlequinCommon(object):
 class LibHarlequinBase(object):
 	projectName = "HqLib_Base"
 	outputName = "libhqbase"
-	dependencies = [
-		ExtXxHash.projectName,
-	]
+	dependencies = []
 
 with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, LibHarlequinBase.dependencies, autoDiscoverSourceFiles=False):
 	_setCommonLibOptions(HarlequinCommon.libRootPath, LibHarlequinBase.outputName)

@@ -52,7 +52,7 @@ class RecordRange(object):
 class CharacterMapping(object):
 	def __init__(self, simple):
 		self.simple = simple
-		self.full = [simple]
+		self.strict = [simple]
 
 ########################################################################################################################
 
@@ -180,13 +180,13 @@ def _parseSpecialCasingLine(line, recordTable):
 	record = recordTable[codePoint]
 
 	if lowerCaseMapping:
-		record.lowerMapping.full = lowerCaseMapping
+		record.lowerMapping.strict = lowerCaseMapping
 
 	if titleCaseMapping:
-		record.titleMapping.full = titleCaseMapping
+		record.titleMapping.strict = titleCaseMapping
 
 	if upperCaseMapping:
-		record.upperMapping.full = upperCaseMapping
+		record.upperMapping.strict = upperCaseMapping
 
 ########################################################################################################################
 
@@ -270,16 +270,16 @@ def _writeSourceFiles(recordTable):
 
 	# Calculate the required bounds of the record table.
 	for _, record in recordTable.items():
-		fullUpperLen = len(record.upperMapping.full)
-		fullLowerLen = len(record.lowerMapping.full)
-		fullTitleLen = len(record.titleMapping.full)
+		strictUpperLen = len(record.upperMapping.strict)
+		strictLowerLen = len(record.lowerMapping.strict)
+		strictTitleLen = len(record.titleMapping.strict)
 
-		if mappingArrayLen < fullUpperLen:
-			mappingArrayLen = fullUpperLen
-		if mappingArrayLen < fullLowerLen:
-			mappingArrayLen = fullLowerLen
-		if mappingArrayLen < fullTitleLen:
-			mappingArrayLen = fullTitleLen
+		if mappingArrayLen < strictUpperLen:
+			mappingArrayLen = strictUpperLen
+		if mappingArrayLen < strictLowerLen:
+			mappingArrayLen = strictLowerLen
+		if mappingArrayLen < strictTitleLen:
+			mappingArrayLen = strictTitleLen
 
 		if maxCodePoint < record.codePoint:
 			maxCodePoint = record.codePoint
@@ -298,14 +298,14 @@ def _writeSourceFiles(recordTable):
 		record = recordTable.get(index, None)
 
 		if record:
-			fullLowerMappings = ", ".join([hex(x) for x in record.lowerMapping.full])
-			fullUpperMappings = ", ".join([hex(x) for x in record.upperMapping.full])
-			fullTitleMappings = ", ".join([hex(x) for x in record.titleMapping.full])
+			strictLowerMappings = ", ".join([hex(x) for x in record.lowerMapping.strict])
+			strictUpperMappings = ", ".join([hex(x) for x in record.upperMapping.strict])
+			strictTitleMappings = ", ".join([hex(x) for x in record.titleMapping.strict])
 
 			line = "{ " \
-				f"{{ {{ {fullLowerMappings} }}, {hex(record.lowerMapping.simple)}, {len(record.lowerMapping.full)} }}, " \
-				f"{{ {{ {fullUpperMappings} }}, {hex(record.upperMapping.simple)}, {len(record.upperMapping.full)} }}, " \
-				f"{{ {{ {fullTitleMappings} }}, {hex(record.titleMapping.simple)}, {len(record.titleMapping.full)} }}, " \
+				f"{{ {{ {strictLowerMappings} }}, {hex(record.lowerMapping.simple)}, {len(record.lowerMapping.strict)} }}, " \
+				f"{{ {{ {strictUpperMappings} }}, {hex(record.upperMapping.simple)}, {len(record.upperMapping.strict)} }}, " \
+				f"{{ {{ {strictTitleMappings} }}, {hex(record.titleMapping.simple)}, {len(record.titleMapping.strict)} }}, " \
 				f"{hex(record.codePoint)}" \
 				" }"
 
@@ -358,16 +358,16 @@ HQ_BASE_API const struct HqUtf32RecordTable utf32RecordTable =
 extern "C" {{
 #endif
 
-#define HQ_UTF32_FULL_MAPPING_ARRAY_LENGTH {mappingArrayLen}
-#define HQ_UTF32_RECORD_ENTRY_COUNT        {recordTableLength}
-#define HQ_UTF32_RECORD_INDEX_COUNT        {codePointRange}
-#define HQ_UTF32_RECORD_INDEX_TYPE         {indexType}
+#define HQ_UTF32_STRICT_MAPPING_ARRAY_LENGTH {mappingArrayLen}
+#define HQ_UTF32_RECORD_ENTRY_COUNT          {recordTableLength}
+#define HQ_UTF32_RECORD_INDEX_COUNT          {codePointRange}
+#define HQ_UTF32_RECORD_INDEX_TYPE           {indexType}
 
 struct HqUtf32Mapping
 {{
-	char32_t full[HQ_UTF32_FULL_MAPPING_ARRAY_LENGTH];
+	char32_t strict[HQ_UTF32_STRICT_MAPPING_ARRAY_LENGTH];
 	char32_t simple;
-	size_t fullLength;
+	size_t strictLength;
 }};
 
 struct HqUtf32Record

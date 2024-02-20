@@ -26,7 +26,7 @@
 
 TEST(_HQ_TEST_NAME(TestHqString), CreateThenRelease)
 {
-	const char* const stringData = "test";
+	const char* const stringData = "This is a test string ...";
 	const size_t stringLength = strlen(stringData);
 
 	// Create a new string object.
@@ -36,10 +36,10 @@ TEST(_HQ_TEST_NAME(TestHqString), CreateThenRelease)
 	EXPECT_STREQ(pString->data, stringData);
 
 #ifdef HQ_CPU_WORD_64_BIT
-	EXPECT_EQ(pString->hash, 14140177864371587597ull);
+	EXPECT_EQ(pString->hash, 15218553742286699720ull);
 
 #else
-	EXPECT_EQ(pString->hash, 2121145288u);
+	EXPECT_EQ(pString->hash, 2838149378u);
 
 #endif
 
@@ -52,7 +52,7 @@ TEST(_HQ_TEST_NAME(TestHqString), CreateThenRelease)
 
 TEST(_HQ_TEST_NAME(TestHqString), CreateFmtThenRelease)
 {
-	const char* const stringData = "test";
+	const char* const stringData = "This is a test string ...";
 	const size_t stringLength = strlen(stringData);
 
 	// Create a new string object.
@@ -62,10 +62,10 @@ TEST(_HQ_TEST_NAME(TestHqString), CreateFmtThenRelease)
 	EXPECT_STREQ(pString->data, stringData);
 
 #ifdef HQ_CPU_WORD_64_BIT
-	EXPECT_EQ(pString->hash, 14140177864371587597ull);
+	EXPECT_EQ(pString->hash, 15218553742286699720ull);
 
 #else
-	EXPECT_EQ(pString->hash, 2121145288u);
+	EXPECT_EQ(pString->hash, 2838149378u);
 
 #endif
 
