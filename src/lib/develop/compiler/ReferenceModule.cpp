@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2023, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -16,25 +16,64 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
+#include "ReferenceModule.hpp"
+
+#include "../DevContext.hpp"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../Harlequin.h"
-
-#include "../common/Report.hpp"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-struct HqToolContext
+HqReferenceModuleHandle HqReferenceModule::Load(
+	HqDevContextHandle hCtx,
+	const void* pFileData,
+	size_t fileSize,
+	int* pErrorReason)
 {
-	static HqToolContextHandle Create(HqToolContextInit init);
-	static void Dispose(HqToolContextHandle hToolCtx);
+	assert(hCtx != HQ_DEV_CONTEXT_HANDLE_NULL);
+	assert(pFileData != nullptr);
+	assert(fileSize > 0);
+	assert(pErrorReason != nullptr);
 
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
+	HqReferenceModule* const pOutput = new HqReferenceModule();
+	assert(pOutput != nullptr);
 
-	HqReport report;
-};
+	// Attempt to load the module metadata, disregarding the bytecode.
+	if(!HqModuleLoader::Load(pOutput->data, &hCtx->report, pFileData, fileSize, HqModuleLoader::DISCARD_BYTECODE))
+	{
+		(*pErrorReason) = HQ_ERROR_FAILED_TO_OPEN_FILE;
+		delete pOutput;
+		return nullptr;
+	}
+
+	pOutput->hCtx = hCtx;
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqReferenceModule::Dispose(HqReferenceModuleHandle hRefModule)
+{
+	assert(hRefModule != HQ_REFERENCE_MODULE_HANDLE_NULL);
+
+	HqModuleLoader::Dispose(hRefModule->data);
+
+	delete hRefModule;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void* HqReferenceModule::operator new(const size_t sizeInBytes)
+{
+	return HqMemAlloc(sizeInBytes);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void HqReferenceModule::operator delete(void* const pObject)
+{
+	HqMemFree(pObject);
+}
 
 //----------------------------------------------------------------------------------------------------------------------

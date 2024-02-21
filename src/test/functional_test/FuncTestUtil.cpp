@@ -26,16 +26,16 @@
 void Util::CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback callback)
 {
 	// Set the memory context so we have a better idea of where to look when memory validation failures occur.
-	Memory::Instance.SetContext("tool-context");
+	Memory::Instance.SetContext("dev-context");
 
 	constexpr int endianness = HQ_ENDIAN_ORDER_NATIVE;
 
-	const HqToolContextInit init = GetDefaultHqToolContextInit(nullptr, DefaultMessageCallback, HQ_MESSAGE_TYPE_WARNING);
+	const HqDevContextInit init = GetDefaultHqDevContextInit(nullptr, DefaultMessageCallback, HQ_MESSAGE_TYPE_WARNING);
 
-	// Create the tool context.
-	HqToolContextHandle hCtx = HQ_TOOL_CONTEXT_HANDLE_NULL;
-	const int createToolCtxResult = HqToolContextCreate(&hCtx, init);
-	ASSERT_EQ(createToolCtxResult, HQ_SUCCESS);
+	// Create the develop context.
+	HqDevContextHandle hCtx = HQ_DEV_CONTEXT_HANDLE_NULL;
+	const int createDevCtxResult = HqDevContextCreate(&hCtx, init);
+	ASSERT_EQ(createDevCtxResult, HQ_SUCCESS);
 
 	// Create the module writer.
 	HqModuleWriterHandle hModuleWriter = HQ_MODULE_WRITER_HANDLE_NULL;
@@ -75,9 +75,9 @@ void Util::CompileBytecode(std::vector<uint8_t>& outBytecode, CompilerCallback c
 	const int disposeModuleWriterResult = HqModuleWriterDispose(&hModuleWriter);
 	ASSERT_EQ(disposeModuleWriterResult, HQ_SUCCESS);
 
-	// Dispose of the tool context.
-	const int disposeToolCoreResult = HqToolContextDispose(&hCtx);
-	ASSERT_EQ(disposeToolCoreResult, HQ_SUCCESS);
+	// Dispose of the develop context.
+	const int disposeDevCoreResult = HqDevContextDispose(&hCtx);
+	ASSERT_EQ(disposeDevCoreResult, HQ_SUCCESS);
 
 	// Verify all memory has been freed.
 	Memory::Instance.Validate();

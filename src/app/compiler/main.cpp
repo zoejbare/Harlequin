@@ -86,19 +86,19 @@ int main(int argc, char* argv[])
 	// Initialize the Harlequin memory handler.
 	memory.Initialize();
 
-	HqToolContextHandle hCtx = HQ_TOOL_CONTEXT_HANDLE_NULL;
-	HqToolContextInit init;
+	HqDevContextHandle hCtx = HQ_DEV_CONTEXT_HANDLE_NULL;
+	HqDevContextInit init;
 
 	init.common.report.onMessageFn = OnMessageReported;
 	init.common.report.pUserData = nullptr;
 	init.common.report.reportLevel = HQ_MESSAGE_TYPE_VERBOSE;
 
-	// Create the tool context.
-	int result = HqToolContextCreate(&hCtx, init);
+	// Create the develop context.
+	int result = HqDevContextCreate(&hCtx, init);
 	if(result != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin tool context: error=\"%s\"", HqGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg) - 1, "Failed to create Harlequin develop context: error=\"%s\"", HqGetErrorCodeString(result));
 		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_FATAL, msg);
 		return 1;
 	}
@@ -424,12 +424,12 @@ int main(int argc, char* argv[])
 		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 
-	// Dispose of the tool context.
-	result = HqToolContextDispose(&hCtx);
+	// Dispose of the develop context.
+	result = HqDevContextDispose(&hCtx);
 	if(result != HQ_SUCCESS)
 	{
 		char msg[128];
-		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin tool context: error=\"%s\"", HqGetErrorCodeString(result));
+		snprintf(msg, sizeof(msg) - 1, "Failed to dispose of Harlequin develop context: error=\"%s\"", HqGetErrorCodeString(result));
 		OnMessageReported(nullptr, HQ_MESSAGE_TYPE_WARNING, msg);
 	}
 

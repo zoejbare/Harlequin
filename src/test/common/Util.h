@@ -104,7 +104,7 @@ extern void DefaultMessageCallback(void* pUserData, int messageType, const char*
 //----------------------------------------------------------------------------------------------------------------------
 
 extern HqVmInit GetDefaultHqVmInit(void* pUserData, HqMessageCallback onMessageFn, int reportLevel);
-extern HqToolContextInit GetDefaultHqToolContextInit(void* pUserData, HqMessageCallback onMessageFn, int reportLevel);
+extern HqDevContextInit GetDefaultHqDevContextInit(void* pUserData, HqMessageCallback onMessageFn, int reportLevel);
 
 //----------------------------------------------------------------------------------------------------------------------
 

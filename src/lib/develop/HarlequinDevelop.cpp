@@ -20,7 +20,7 @@
 
 #include "FunctionData.hpp"
 #include "ModuleWriter.hpp"
-#include "ToolContext.hpp"
+#include "DevContext.hpp"
 
 #include "compiler/ReferenceModule.hpp"
 #include "compiler/SourceFile.hpp"
@@ -38,59 +38,59 @@ extern "C" {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqToolContextCreate(HqToolContextHandle* phOutToolContext, HqToolContextInit init)
+int HqDevContextCreate(HqDevContextHandle* phOutCtx, HqDevContextInit init)
 {
-	if(!phOutToolContext
-		|| (*phOutToolContext)
+	if(!phOutCtx
+		|| (*phOutCtx)
 		|| init.common.report.reportLevel < HQ_MESSAGE_TYPE_VERBOSE
 		|| init.common.report.reportLevel > HQ_MESSAGE_TYPE_FATAL)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqToolContextHandle hToolContext = HqToolContext::Create(init);
-	if(!hToolContext)
+	HqDevContextHandle hCtx = HqDevContext::Create(init);
+	if(!hCtx)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;
 	}
 
-	// The message has to be printed *after* creating the tool context since the object is used in this function.
-	HqReportMessage(&hToolContext->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin tool context");
+	// The message has to be printed *after* creating the dev context since the object is used in this function.
+	HqReportMessage(&hCtx->report, HQ_MESSAGE_TYPE_VERBOSE, "Initializing Harlequin develop context");
 
-	(*phOutToolContext) = hToolContext;
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-int HqToolContextDispose(HqToolContextHandle* phToolCtx)
-{
-	if(!phToolCtx || !(*phToolCtx))
-	{
-		return HQ_ERROR_INVALID_ARG;
-	}
-
-	HqToolContextHandle hToolCtx = (*phToolCtx);
-
-	(*phToolCtx) = HQ_TOOL_CONTEXT_HANDLE_NULL;
-
-	HqReportMessage(&hToolCtx->report, HQ_MESSAGE_TYPE_VERBOSE, "Releasing Harlequin tool context");
-	HqToolContext::Dispose(hToolCtx);
+	(*phOutCtx) = hCtx;
 
 	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqReportHandle* phOutReport)
+int HqDevContextDispose(HqDevContextHandle* phCtx)
 {
-	if(!hToolCtx || !phOutReport)
+	if(!phCtx || !(*phCtx))
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	(*phOutReport) = &hToolCtx->report;
+	HqDevContextHandle hCtx = (*phCtx);
+
+	(*phCtx) = HQ_DEV_CONTEXT_HANDLE_NULL;
+
+	HqReportMessage(&hCtx->report, HQ_MESSAGE_TYPE_VERBOSE, "Releasing Harlequin develop context");
+	HqDevContext::Dispose(hCtx);
+
+	return HQ_SUCCESS;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqDevContextGetReportHandle(HqDevContextHandle hCtx, HqReportHandle* phOutReport)
+{
+	if(!hCtx || !phOutReport)
+	{
+		return HQ_ERROR_INVALID_ARG;
+	}
+
+	(*phOutReport) = &hCtx->report;
 
 	return HQ_SUCCESS;
 }
@@ -99,13 +99,13 @@ int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqReportHandle* p
 
 int HqReferenceModuleLoad(
 	HqReferenceModuleHandle* phOutRefModule,
-	HqToolContextHandle hToolCtx,
+	HqDevContextHandle hCtx,
 	const void* pFileData,
 	size_t fileSize)
 {
 	if(!phOutRefModule
 		|| (*phOutRefModule)
-		|| !hToolCtx
+		|| !hCtx
 		|| !pFileData
 		|| fileSize == 0)
 	{
@@ -115,7 +115,7 @@ int HqReferenceModuleLoad(
 	int result = HQ_SUCCESS;
 
 	// Load the module data.
-	HqReferenceModuleHandle hRefModule = HqReferenceModule::Load(hToolCtx, pFileData, fileSize, &result);
+	HqReferenceModuleHandle hRefModule = HqReferenceModule::Load(hCtx, pFileData, fileSize, &result);
 	if(hRefModule)
 	{
 		(*phOutRefModule) = hRefModule;
@@ -143,11 +143,11 @@ int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqSourceFileLoad(HqSourceFileHandle* phOutSrcFile, HqToolContextHandle hToolCtx, const char* const filePath)
+int HqSourceFileLoad(HqSourceFileHandle* phOutSrcFile, HqDevContextHandle hCtx, const char* const filePath)
 {
 	if(!phOutSrcFile
 		|| (*phOutSrcFile)
-		|| !hToolCtx
+		|| !hCtx
 		|| !filePath
 		|| filePath[0] == '\0')
 	{
@@ -157,7 +157,7 @@ int HqSourceFileLoad(HqSourceFileHandle* phOutSrcFile, HqToolContextHandle hTool
 	int result = HQ_SUCCESS;
 
 	// Load the source file data.
-	HqSourceFileHandle hSrcFile = HqSourceFile::Load(hToolCtx, filePath, &result);
+	HqSourceFileHandle hSrcFile = HqSourceFile::Load(hCtx, filePath, &result);
 	if(hSrcFile)
 	{
 		(*phOutSrcFile) = hSrcFile;
@@ -197,9 +197,9 @@ int HqSourceFileParse(HqSourceFileHandle hSrcFile)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqSourceModuleCreate(HqSourceModuleHandle* phOutSrcModule, HqToolContextHandle hToolCtx)
+int HqSourceModuleCreate(HqSourceModuleHandle* phOutSrcModule, HqDevContextHandle hCtx)
 {
-	if(!phOutSrcModule || (*phOutSrcModule) || !hToolCtx)
+	if(!phOutSrcModule || (*phOutSrcModule) || !hCtx)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
@@ -267,14 +267,14 @@ int HqSourceModuleCompile(HqSourceModuleHandle hSrcModule)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqToolContextHandle hToolCtx)
+int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqDevContextHandle hCtx)
 {
-	if(!phOutModuleWriter || (*phOutModuleWriter) || !hToolCtx)
+	if(!phOutModuleWriter || (*phOutModuleWriter) || !hCtx)
 	{
 		return HQ_ERROR_INVALID_ARG;
 	}
 
-	HqModuleWriterHandle hWriter = HqModuleWriter::Create(hToolCtx);
+	HqModuleWriterHandle hWriter = HqModuleWriter::Create(hCtx);
 	if(!hWriter)
 	{
 		return HQ_ERROR_BAD_ALLOCATION;

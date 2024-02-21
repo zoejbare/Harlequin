@@ -46,7 +46,7 @@ class HarlequinParser;
 
 struct HqSourceFile
 {
-	static HqSourceFileHandle Load(HqToolContextHandle hToolCtx, const char* filePath,int* pErrorReason);
+	static HqSourceFileHandle Load(HqDevContextHandle hCtx, const char* filePath,int* pErrorReason);
 
 	static int32_t AddRef(HqSourceFileHandle hSrcFile);
 	static int32_t Release(HqSourceFileHandle hSrcFile);
@@ -60,7 +60,7 @@ struct HqSourceFile
 	void operator delete(void* const pObject);
 
 	HqReference ref;
-	HqToolContextHandle hToolCtx;
+	HqDevContextHandle hCtx;
 	HqSerializerHandle hSerializer;
 
 	antlr4::ANTLRInputStream* pInputStream;

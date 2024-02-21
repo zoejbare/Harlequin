@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2021, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,23 +20,21 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../Harlequin.h"
+#include "../Harlequin.h"
 
-#include "../../base/ModuleLoader.hpp"
+#include "../common/Report.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqReferenceModule
+struct HqDevContext
 {
-	static HqReferenceModuleHandle Load(HqToolContextHandle hToolCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
-	static void Dispose(HqReferenceModuleHandle hRefModule);
+	static HqDevContextHandle Create(HqDevContextInit init);
+	static void Dispose(HqDevContextHandle hCtx);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
 
-	HqToolContextHandle hToolCtx;
-
-	HqModuleLoader data;
+	HqReport report;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

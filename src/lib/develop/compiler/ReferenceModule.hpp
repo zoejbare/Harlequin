@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021, Zoe J. Bare
+// Copyright (c) 2023, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -16,44 +16,27 @@
 // IN THE SOFTWARE.
 //
 
-#include "ToolContext.hpp"
-
-#include <assert.h>
+#pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqToolContextHandle HqToolContext::Create(HqToolContextInit init)
-{
-	HqToolContext* const pOutput = new HqToolContext();
-	assert(pOutput != nullptr);
+#include "../../Harlequin.h"
 
-	pOutput->report.onMessageFn = init.common.report.onMessageFn;
-	pOutput->report.pUserData = init.common.report.pUserData;
-	pOutput->report.level = init.common.report.reportLevel;
-
-	return pOutput;
-}
+#include "../../base/ModuleLoader.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqToolContext::Dispose(HqToolContextHandle hToolCtx)
+struct HqReferenceModule
 {
-	assert(hToolCtx != HQ_TOOL_CONTEXT_HANDLE_NULL);
-	delete hToolCtx;
-}
+	static HqReferenceModuleHandle Load(HqDevContextHandle hCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
+	static void Dispose(HqReferenceModuleHandle hRefModule);
 
-//----------------------------------------------------------------------------------------------------------------------
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
 
-void* HqToolContext::operator new(const size_t sizeInBytes)
-{
-	return HqMemAlloc(sizeInBytes);
-}
+	HqDevContextHandle hCtx;
 
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqToolContext::operator delete(void* const pObject)
-{
-	HqMemFree(pObject);
-}
+	HqModuleLoader data;
+};
 
 //----------------------------------------------------------------------------------------------------------------------

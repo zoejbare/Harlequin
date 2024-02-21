@@ -101,6 +101,35 @@ enum HqEndianOrderEnum
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
+enum HqValueTypeEnum
+{
+	HQ_VALUE_TYPE_INT8,
+	HQ_VALUE_TYPE_INT16,
+	HQ_VALUE_TYPE_INT32,
+	HQ_VALUE_TYPE_INT64,
+
+	HQ_VALUE_TYPE_UINT8,
+	HQ_VALUE_TYPE_UINT16,
+	HQ_VALUE_TYPE_UINT32,
+	HQ_VALUE_TYPE_UINT64,
+
+	HQ_VALUE_TYPE_FLOAT32,
+	HQ_VALUE_TYPE_FLOAT64,
+
+	HQ_VALUE_TYPE_BOOL,
+
+	HQ_VALUE_TYPE_STRING,
+	HQ_VALUE_TYPE_FUNCTION,
+	HQ_VALUE_TYPE_OBJECT,
+	HQ_VALUE_TYPE_ARRAY,
+	HQ_VALUE_TYPE_GRID,
+	HQ_VALUE_TYPE_NATIVE,
+
+	HQ_VALUE_TYPE__MAX_VALUE = HQ_VALUE_TYPE_NATIVE,
+};
+
+/*---------------------------------------------------------------------------------------------------------------------*/
+
 HQ_BASE_API const char* HqGetErrorCodeString(int errorCode);
 
 HQ_BASE_API const char* HqGetEndiannessString(int endianness);
@@ -758,11 +787,11 @@ HQ_MAIN_API int HqValueSetGridElement(HqValueHandle hValue, size_t x, size_t y, 
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#ifdef HQ_LIB_TOOL
+#ifdef HQ_LIB_DEVELOP
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-typedef struct HqToolContext*     HqToolContextHandle;
+typedef struct HqDevContext*      HqDevContextHandle;
 typedef struct HqModuleWriter*    HqModuleWriterHandle;
 typedef struct HqReferenceModule* HqReferenceModuleHandle;
 typedef struct HqSourceFile*      HqSourceFileHandle;
@@ -771,9 +800,9 @@ typedef struct HqSourceModule*    HqSourceModuleHandle;
 typedef struct
 {
 	HqCommonInit common;
-} HqToolContextInit;
+} HqDevContextInit;
 
-#define HQ_TOOL_CONTEXT_HANDLE_NULL     ((HqToolContextHandle)0)
+#define HQ_DEV_CONTEXT_HANDLE_NULL      ((HqDevContextHandle)0)
 #define HQ_MODULE_WRITER_HANDLE_NULL    ((HqModuleWriterHandle)0)
 #define HQ_REFERENCE_MODULE_HANDLE_NULL ((HqReferenceModuleHandle)0)
 #define HQ_SOURCE_FILE_HANDLE_NULL      ((HqSourceFileHandle)0)
@@ -781,17 +810,17 @@ typedef struct
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqToolContextCreate(HqToolContextHandle* phOutToolCtx, HqToolContextInit init);
+HQ_MAIN_API int HqDevContextCreate(HqDevContextHandle* phOutCtx, HqDevContextInit init);
 
-HQ_MAIN_API int HqToolContextDispose(HqToolContextHandle* phToolCtx);
+HQ_MAIN_API int HqDevContextDispose(HqDevContextHandle* phCtx);
 
-HQ_MAIN_API int HqToolContextGetReportHandle(HqToolContextHandle hToolCtx, HqReportHandle* phOutReport);
+HQ_MAIN_API int HqDevContextGetReportHandle(HqDevContextHandle hCtx, HqReportHandle* phOutReport);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
 HQ_MAIN_API int HqReferenceModuleLoad(
 	HqReferenceModuleHandle* phOutRefModule,
-	HqToolContextHandle hToolCtx,
+	HqDevContextHandle hCtx,
 	const void* pFileData,
 	size_t fileSize);
 
@@ -799,7 +828,7 @@ HQ_MAIN_API int HqReferenceModuleDispose(HqReferenceModuleHandle* phRefModule);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqSourceFileLoad(HqSourceFileHandle* phOutSrcFile, HqToolContextHandle hToolCtx, const char* filePath);
+HQ_MAIN_API int HqSourceFileLoad(HqSourceFileHandle* phOutSrcFile, HqDevContextHandle hCtx, const char* filePath);
 
 HQ_MAIN_API int HqSourceFileDispose(HqSourceFileHandle* phSrcFile);
 
@@ -807,7 +836,7 @@ HQ_MAIN_API int HqSourceFileParse(HqSourceFileHandle hSrcFile);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqSourceModuleCreate(HqSourceModuleHandle* phOutSrcModule, HqToolContextHandle hToolCtx);
+HQ_MAIN_API int HqSourceModuleCreate(HqSourceModuleHandle* phOutSrcModule, HqDevContextHandle hCtx);
 
 HQ_MAIN_API int HqSourceModuleDispose(HqSourceModuleHandle* phSrcModule);
 
@@ -825,7 +854,7 @@ HQ_MAIN_API int HqSourceModuleCompile(HqSourceModuleHandle hSrcModule);
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqToolContextHandle hToolContext);
+HQ_MAIN_API int HqModuleWriterCreate(HqModuleWriterHandle* phOutModuleWriter, HqDevContextHandle hCtx);
 
 HQ_MAIN_API int HqModuleWriterDispose(HqModuleWriterHandle* phModuleWriter);
 
@@ -1269,36 +1298,7 @@ HQ_MAIN_API int HqBytecodeWriteCopy(
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-#endif /* HQ_LIB_TOOL */
-
-//----------------------------------------------------------------------------------------------------------------------
-
-enum HqValueType
-{
-	HQ_VALUE_TYPE_INT8,
-	HQ_VALUE_TYPE_INT16,
-	HQ_VALUE_TYPE_INT32,
-	HQ_VALUE_TYPE_INT64,
-
-	HQ_VALUE_TYPE_UINT8,
-	HQ_VALUE_TYPE_UINT16,
-	HQ_VALUE_TYPE_UINT32,
-	HQ_VALUE_TYPE_UINT64,
-
-	HQ_VALUE_TYPE_FLOAT32,
-	HQ_VALUE_TYPE_FLOAT64,
-
-	HQ_VALUE_TYPE_BOOL,
-
-	HQ_VALUE_TYPE_STRING,
-	HQ_VALUE_TYPE_FUNCTION,
-	HQ_VALUE_TYPE_OBJECT,
-	HQ_VALUE_TYPE_ARRAY,
-	HQ_VALUE_TYPE_GRID,
-	HQ_VALUE_TYPE_NATIVE,
-
-	HQ_VALUE_TYPE__MAX_VALUE = HQ_VALUE_TYPE_NATIVE,
-};
+#endif /* HQ_LIB_DEVELOP */
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 

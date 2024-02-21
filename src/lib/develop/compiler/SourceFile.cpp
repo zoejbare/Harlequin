@@ -23,7 +23,7 @@
 #include "parser/HarlequinLexer.h"
 #include "parser/HarlequinParser.h"
 
-#include "../ToolContext.hpp"
+#include "../DevContext.hpp"
 
 #include "../../base/Serializer.hpp"
 
@@ -34,17 +34,17 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* const filePath, int* const pErrorReason)
+HqSourceFileHandle HqSourceFile::Load(HqDevContextHandle hCtx, const char* const filePath, int* const pErrorReason)
 {
 	using namespace antlr4;
 	using namespace antlr4::tree;
 
-	assert(hToolCtx != HQ_TOOL_CONTEXT_HANDLE_NULL);
+	assert(hCtx != HQ_DEV_CONTEXT_HANDLE_NULL);
 	assert(filePath != nullptr);
 	assert(filePath[0] != '\0');
 	assert(pErrorReason != nullptr);
 
-	HqReportHandle hReport = &hToolCtx->report;
+	HqReportHandle hReport = &hCtx->report;
 
 	// Create a serializer for loading the source file.
 	HqSerializerHandle hSerializer = HqSerializer::Create(HQ_SERIALIZER_MODE_READER);
@@ -76,7 +76,7 @@ HqSourceFileHandle HqSourceFile::Load(HqToolContextHandle hToolCtx, const char* 
 
 	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
 
-	pOutput->hToolCtx = hToolCtx;
+	pOutput->hCtx = hCtx;
 	pOutput->hSerializer = hSerializer;
 
 	const char* const streamData = reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData);
@@ -187,7 +187,7 @@ int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
 		return hSrcFile->pParseTree ? HQ_SUCCESS : HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	ParserErrorHandler errorHandler(&hSrcFile->hToolCtx->report, hSrcFile->srcData);
+	ParserErrorHandler errorHandler(&hSrcFile->hCtx->report, hSrcFile->srcData);
 
 	// Add our custom error listener.
 	hSrcFile->pLexer->addErrorListener(reinterpret_cast<antlr4::ANTLRErrorListener*>(&errorHandler));

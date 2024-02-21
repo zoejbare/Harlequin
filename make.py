@@ -384,7 +384,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 	if csbuild.GetRunMode() == csbuild.RunMode.GenerateSolution:
 		csbuild.AddExcludeDirectories(
 			f"{HarlequinCommon.libRootPath}/runtime",
-			f"{HarlequinCommon.libRootPath}/tool",
+			f"{HarlequinCommon.libRootPath}/develop",
 		)
 	else:
 		csbuild.AddSourceDirectories(f"{HarlequinCommon.libRootPath}/base")
@@ -421,7 +421,7 @@ with csbuild.Project(LibHarlequinBase.projectName, HarlequinCommon.libRootPath, 
 
 class LibHarlequinRuntime(object):
 	projectName = "HqLib_Runtime"
-	outputName = "libhqruntime"
+	outputName = "libhqrun"
 	dependencies = [
 		LibHarlequinBase.projectName,
 	]
@@ -433,7 +433,7 @@ with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPat
 		csbuild.AddExcludeDirectories(
 			f"{HarlequinCommon.libRootPath}/base",
 			f"{HarlequinCommon.libRootPath}/common",
-			f"{HarlequinCommon.libRootPath}/tool",
+			f"{HarlequinCommon.libRootPath}/develop",
 		)
 
 	else:
@@ -449,17 +449,17 @@ with csbuild.Project(LibHarlequinRuntime.projectName, HarlequinCommon.libRootPat
 
 ###################################################################################################
 
-class LibHarlequinTool(object):
-	projectName = "HqLib_Tool"
-	outputName = "libhqtool"
+class LibHarlequinDevelop(object):
+	projectName = "HqLib_Develop"
+	outputName = "libhqdev"
 	dependencies = [
 		LibHarlequinBase.projectName,
 		ExtAntlr4Runtime.projectName,
 		ExtRapidXmlNs.projectName,
 	]
 
-with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, LibHarlequinTool.dependencies, autoDiscoverSourceFiles=False):
-	_setCommonLibOptions(HarlequinCommon.libRootPath, LibHarlequinTool.outputName)
+with csbuild.Project(LibHarlequinDevelop.projectName, HarlequinCommon.libRootPath, LibHarlequinDevelop.dependencies, autoDiscoverSourceFiles=False):
+	_setCommonLibOptions(HarlequinCommon.libRootPath, LibHarlequinDevelop.outputName)
 
 	csbuild.SetSupportedToolchains("msvc", "gcc", "clang")
 
@@ -478,11 +478,11 @@ with csbuild.Project(LibHarlequinTool.projectName, HarlequinCommon.libRootPath, 
 
 	else:
 		csbuild.AddSourceDirectories(
-			f"{HarlequinCommon.libRootPath}/tool",
+			f"{HarlequinCommon.libRootPath}/develop",
 		)
 
 	with csbuild.Scope(csbuild.ScopeDef.All):
-		csbuild.AddDefines("HQ_LIB_TOOL")
+		csbuild.AddDefines("HQ_LIB_DEVELOP")
 
 	with csbuild.Toolchain("msvc", "gcc", "clang"):
 		csbuild.AddDefines("HQ_BUILD_MAIN_LIB_EXPORT")
@@ -494,7 +494,7 @@ class HarlequinCompiler(object):
 	outputName = "hqc"
 	path = f"{HarlequinCommon.appRootPath}/compiler"
 	dependencies = [
-		LibHarlequinTool.projectName,
+		LibHarlequinDevelop.projectName,
 	]
 
 with csbuild.Project(HarlequinCompiler.projectName, HarlequinCompiler.path, HarlequinCompiler.dependencies):
@@ -542,7 +542,7 @@ class HarlequinUnitTest(object):
 	projectName = "HqTest_UnitTest"
 	outputName = "hq_unit_test"
 	dependencies = [
-		LibHarlequinTool.projectName,
+		LibHarlequinDevelop.projectName,
 		LibHarlequinRuntime.projectName,
 		ExtGoogleTest.projectName,
 	]
@@ -564,7 +564,7 @@ class HarlequinFunctionalTest(object):
 	projectName = "HqTest_FunctionalTest"
 	outputName = "hq_func_test"
 	dependencies = [
-		LibHarlequinTool.projectName,
+		LibHarlequinDevelop.projectName,
 		LibHarlequinRuntime.projectName,
 		ExtGoogleTest.projectName,
 	]
