@@ -20,13 +20,16 @@
 
 #include "../common/MemoryHandler.hpp"
 
-#if defined(HQ_PLATFORM_WINDOWS)
-	#include <crtdbg.h>
-#endif
-
 #include <assert.h>
 #include <locale.h>
 #include <stdio.h>
+
+#if defined(HQ_PLATFORM_WINDOWS)
+	#include <malloc.h>
+	#define alloca _alloca
+#else
+	#include <alloca.h>
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -68,7 +71,28 @@ void OnMessageReported(void* const pUserData, const int messageType, const char*
 			break;
 	}
 
-	fprintf((messageType >= HQ_MESSAGE_TYPE_ERROR) ? stderr : stdout, "[%s] %s\n", tag, message);
+	constexpr size_t stackBufferMaxSize = 256;
+
+	const size_t bufferSize = strlen(message) + 6;
+	char* const temp = (bufferSize > stackBufferMaxSize)
+		? reinterpret_cast<char*>(HqMemAlloc(sizeof(char) * bufferSize))
+		: reinterpret_cast<char*>(alloca(bufferSize));
+
+	snprintf(temp, bufferSize, "[%s] %s\n", tag, message);
+
+	FILE* const pStream = (messageType >= HQ_MESSAGE_TYPE_WARNING) ? stderr : stdout;
+
+	fprintf(pStream, "%s", temp);
+	fflush(pStream);
+
+#if defined(HQ_PLATFORM_WINDOWS)
+	OutputDebugStringA(temp);
+#endif
+
+	if(bufferSize > stackBufferMaxSize)
+	{
+		HqMemFree(temp);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
