@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <locale.h>
 #include <stdio.h>
+#include <string.h>
 
 #if defined(HQ_PLATFORM_WINDOWS)
 	#include <malloc.h>

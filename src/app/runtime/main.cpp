@@ -30,7 +30,9 @@
 	#include <crtdbg.h>
 	#include <malloc.h>
 	#define alloca _alloca
-#else
+#endif
+
+#if defined(HQ_PLATFORM_LINUX) || defined(HQ_PLATFORM_MAC_OS)
 	#include <alloca.h>
 #endif
 
