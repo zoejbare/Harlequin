@@ -17,32 +17,26 @@
 //
 
 #pragma once
-#if 0
-//----------------------------------------------------------------------------------------------------------------------
-
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
-
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+#include "../Harlequin.h"
+
+#include "../base/ModuleLoader.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
+struct HqReferenceModule
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
+	static HqReferenceModuleHandle Load(HqDevContextHandle hCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
+	static void Dispose(HqReferenceModuleHandle hRefModule);
 
-	NamespaceSymbol::PtrMap namespaces;
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
 
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
+	HqDevContextHandle hCtx;
 
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
+	HqModuleLoader data;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-#endif

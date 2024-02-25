@@ -21,16 +21,8 @@ grammar Harlequin;
 
 // Root parser rule
 root
-    : itemDef* EOF
+    : (usingStmt | usingAliasStmt | namespaceDecl | classDecl)* EOF
 	;
-
-// High level, source item rule
-itemDef
-    : usingStmt
-    | usingAliasStmt
-    | namespaceDecl
-    | classDecl
-    ;
 
 // Compiler directive rule
 compilerDirective
@@ -49,7 +41,7 @@ usingStmt
 
 // 'using' class alias statement rule
 usingAliasStmt
-	: UsingKw qualifiedId AsKw Id (Comma Id)* Term
+	: UsingKw qualifiedId AsKw Id Term
 	;
 
 // Namespace declaration rule

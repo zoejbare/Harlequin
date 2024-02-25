@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -16,33 +16,35 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
-#if 0
-//----------------------------------------------------------------------------------------------------------------------
+#include "TokenSpan.hpp"
 
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
-
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
+#include <antlr4-runtime.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+detail::TokenSpan detail::TokenSpan::Extract(const antlr4::Token* const pToken, const TokenSpanFlags flags)
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
+	TokenSpan output;
 
-	NamespaceSymbol::PtrMap namespaces;
+	if(pToken)
+	{
+		const bool withSourceText = (flags & TOKEN_SPAN_FLAG_WITH_SOURCE_TEXT) > 0;
 
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
+		output.sourceName = pToken->getTokenSource()->getSourceName();
+		output.lineNumber = pToken->getLine();
+		output.positionInLine = pToken->getCharPositionInLine();
+		output.startIndex = withSourceText ? pToken->getStartIndex() : 0;
+		output.stopIndex = withSourceText ? pToken->getStopIndex() : 0;
+	}
+	else
+	{
+		output.lineNumber = 0;
+		output.positionInLine = 0;
+		output.startIndex = 0;
+		output.stopIndex = 0;
+	}
 
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
-};
+	return output;
+}
 
 //----------------------------------------------------------------------------------------------------------------------
-#endif

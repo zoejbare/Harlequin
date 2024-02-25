@@ -16,64 +16,105 @@
 // IN THE SOFTWARE.
 //
 
-#include "ReferenceModule.hpp"
-
-#include "../DevContext.hpp"
-
-#include <assert.h>
+#pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqReferenceModuleHandle HqReferenceModule::Load(
-	HqDevContextHandle hCtx,
-	const void* pFileData,
-	size_t fileSize,
-	int* pErrorReason)
+#include "../../Harlequin.h"
+
+#include "../../common/Array.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class HQ_MAIN_API ControlFlow
 {
-	assert(hCtx != HQ_DEV_CONTEXT_HANDLE_NULL);
-	assert(pFileData != nullptr);
-	assert(fileSize > 0);
-	assert(pErrorReason != nullptr);
+public:
 
-	HqReferenceModule* const pOutput = new HqReferenceModule();
-	assert(pOutput != nullptr);
-
-	// Attempt to load the module metadata, disregarding the bytecode.
-	if(!HqModuleLoader::Load(pOutput->data, &hCtx->report, pFileData, fileSize, HqModuleLoader::DISCARD_BYTECODE))
+	enum class Behavior
 	{
-		(*pErrorReason) = HQ_ERROR_FAILED_TO_OPEN_FILE;
-		delete pOutput;
-		return nullptr;
-	}
+		If,
+		While,
+		DoWhile,
+	};
 
-	pOutput->hCtx = hCtx;
+	enum class Condition
+	{
+		None,
+		True,
+		False,
+	};
 
-	return pOutput;
+	ControlFlow(const ControlFlow&) = delete;
+	ControlFlow(ControlFlow&&) = delete;
+
+	ControlFlow& operator =(const ControlFlow&) = delete;
+	ControlFlow& operator =(ControlFlow&&) = delete;
+
+	ControlFlow();
+	~ControlFlow();
+
+	void Begin(HqSerializerHandle hSerializer, Behavior behavior, Condition condition, uint32_t gpRegIndex);
+	void End();
+
+	void GoToStart();
+	void GoToEnd();
+
+
+private:
+
+	enum class JmpType
+	{
+		Normal,
+		Condition,
+	};
+
+	enum class JmpLoc
+	{
+		Start,
+		End,
+	};
+
+	struct Command
+	{
+		size_t offset;
+		JmpType type;
+		JmpLoc loc;
+	};
+
+	void _writeJump(int32_t, JmpType);
+	void _addCommand(JmpType, JmpLoc);
+
+	typedef HqArray<Command> CommandList;
+
+	CommandList m_cmds;
+
+	HqSerializerHandle m_hSerializer;
+	size_t m_offStart;
+	size_t m_offEnd;
+	uint32_t m_reg;
+	Behavior m_beh;
+	Condition m_cond;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline ControlFlow::ControlFlow()
+	: m_cmds()
+	, m_hSerializer(HQ_SERIALIZER_HANDLE_NULL)
+	, m_offStart(0)
+	, m_offEnd(0)
+	, m_reg(0)
+	, m_beh(Behavior::If)
+	, m_cond(Condition::None)
+{
+	CommandList::Initialize(m_cmds);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqReferenceModule::Dispose(HqReferenceModuleHandle hRefModule)
+inline ControlFlow::~ControlFlow()
 {
-	assert(hRefModule != HQ_REFERENCE_MODULE_HANDLE_NULL);
-
-	HqModuleLoader::Dispose(hRefModule->data);
-
-	delete hRefModule;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void* HqReferenceModule::operator new(const size_t sizeInBytes)
-{
-	return HqMemAlloc(sizeInBytes);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void HqReferenceModule::operator delete(void* const pObject)
-{
-	HqMemFree(pObject);
+	CommandList::Dispose(m_cmds);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

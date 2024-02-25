@@ -21,8 +21,6 @@ public:
    */
     virtual std::any visitRoot(HarlequinParser::RootContext *context) = 0;
 
-    virtual std::any visitItemDef(HarlequinParser::ItemDefContext *context) = 0;
-
     virtual std::any visitCompilerDirective(HarlequinParser::CompilerDirectiveContext *context) = 0;
 
     virtual std::any visitQualifiedId(HarlequinParser::QualifiedIdContext *context) = 0;

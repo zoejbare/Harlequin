@@ -35,27 +35,27 @@ public:
   };
 
   enum {
-    RuleRoot = 0, RuleItemDef = 1, RuleCompilerDirective = 2, RuleQualifiedId = 3, 
-    RuleUsingStmt = 4, RuleUsingAliasStmt = 5, RuleNamespaceDecl = 6, RuleNamespaceDef = 7, 
-    RuleClassDecl = 8, RuleClassType = 9, RuleAccessBaseSpecifier = 10, 
-    RuleAccessLimitSpecifier = 11, RuleAccessSpecifier = 12, RuleStorageSpecifier = 13, 
-    RuleFunctionSpecifier = 14, RuleConstQualifier = 15, RuleMethodDeclSpecSeq = 16, 
-    RuleClassVarDeclSpecSeq = 17, RuleLocalVarDeclSpecSeq = 18, RuleArgVarDeclSpecSeq = 19, 
-    RuleClassInheritance = 20, RuleClassExtends = 21, RuleClassImpls = 22, 
-    RuleClassDef = 23, RuleArrayTypeDecl = 24, RuleArrayTypeDef = 25, RuleTypeNameDecl = 26, 
-    RuleBracedInitializer = 27, RuleCtorCall = 28, RuleClassVarDeclStmt = 29, 
-    RuleLocalVarDeclStmt = 30, RuleVarDeclStmt = 31, RuleVarDecl = 32, RuleNextVarDecl = 33, 
-    RuleCtrlFlowExpr = 34, RuleArrayParamSeq = 35, RuleArrayParamElem = 36, 
-    RuleLambdaDecl = 37, RuleCtorDecl = 38, RuleMethodDecl = 39, RuleMethodQualifier = 40, 
-    RuleMethodStorageModifier = 41, RuleMethodArgSeq = 42, RuleMethodArg = 43, 
-    RuleCodeBlock = 44, RuleCodeBlockStmt = 45, RuleCodeStmt = 46, RuleExprStmt = 47, 
-    RuleExpr = 48, RuleReturnStmt = 49, RuleLoopStmt = 50, RuleLoopWhileDef = 51, 
-    RuleLoopDoWhileDef = 52, RuleLoopForDef = 53, RuleConditionStmt = 54, 
-    RuleCondIfDef = 55, RuleCondElifDef = 56, RuleCondElseDef = 57, RuleCondSwitchDef = 58, 
-    RuleCondCaseDef = 59, RuleCondCaseResult = 60, RuleExceptionHandler = 61, 
-    RuleTryBlockDef = 62, RuleCatchBlockDef = 63, RuleFinallyBlockDef = 64, 
-    RuleAsmBlock = 65, RuleAsmStmt = 66, RuleAsmInstr = 67, RuleAsmOperand = 68, 
-    RuleAsmLit = 69, RuleAsmReg = 70, RuleAsmVar = 71, RuleAsmLabel = 72
+    RuleRoot = 0, RuleCompilerDirective = 1, RuleQualifiedId = 2, RuleUsingStmt = 3, 
+    RuleUsingAliasStmt = 4, RuleNamespaceDecl = 5, RuleNamespaceDef = 6, 
+    RuleClassDecl = 7, RuleClassType = 8, RuleAccessBaseSpecifier = 9, RuleAccessLimitSpecifier = 10, 
+    RuleAccessSpecifier = 11, RuleStorageSpecifier = 12, RuleFunctionSpecifier = 13, 
+    RuleConstQualifier = 14, RuleMethodDeclSpecSeq = 15, RuleClassVarDeclSpecSeq = 16, 
+    RuleLocalVarDeclSpecSeq = 17, RuleArgVarDeclSpecSeq = 18, RuleClassInheritance = 19, 
+    RuleClassExtends = 20, RuleClassImpls = 21, RuleClassDef = 22, RuleArrayTypeDecl = 23, 
+    RuleArrayTypeDef = 24, RuleTypeNameDecl = 25, RuleBracedInitializer = 26, 
+    RuleCtorCall = 27, RuleClassVarDeclStmt = 28, RuleLocalVarDeclStmt = 29, 
+    RuleVarDeclStmt = 30, RuleVarDecl = 31, RuleNextVarDecl = 32, RuleCtrlFlowExpr = 33, 
+    RuleArrayParamSeq = 34, RuleArrayParamElem = 35, RuleLambdaDecl = 36, 
+    RuleCtorDecl = 37, RuleMethodDecl = 38, RuleMethodQualifier = 39, RuleMethodStorageModifier = 40, 
+    RuleMethodArgSeq = 41, RuleMethodArg = 42, RuleCodeBlock = 43, RuleCodeBlockStmt = 44, 
+    RuleCodeStmt = 45, RuleExprStmt = 46, RuleExpr = 47, RuleReturnStmt = 48, 
+    RuleLoopStmt = 49, RuleLoopWhileDef = 50, RuleLoopDoWhileDef = 51, RuleLoopForDef = 52, 
+    RuleConditionStmt = 53, RuleCondIfDef = 54, RuleCondElifDef = 55, RuleCondElseDef = 56, 
+    RuleCondSwitchDef = 57, RuleCondCaseDef = 58, RuleCondCaseResult = 59, 
+    RuleExceptionHandler = 60, RuleTryBlockDef = 61, RuleCatchBlockDef = 62, 
+    RuleFinallyBlockDef = 63, RuleAsmBlock = 64, RuleAsmStmt = 65, RuleAsmInstr = 66, 
+    RuleAsmOperand = 67, RuleAsmLit = 68, RuleAsmReg = 69, RuleAsmVar = 70, 
+    RuleAsmLabel = 71
   };
 
   explicit HarlequinParser(antlr4::TokenStream *input);
@@ -76,7 +76,6 @@ public:
 
 
   class RootContext;
-  class ItemDefContext;
   class CompilerDirectiveContext;
   class QualifiedIdContext;
   class UsingStmtContext;
@@ -154,8 +153,14 @@ public:
     RootContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *EOF();
-    std::vector<ItemDefContext *> itemDef();
-    ItemDefContext* itemDef(size_t i);
+    std::vector<UsingStmtContext *> usingStmt();
+    UsingStmtContext* usingStmt(size_t i);
+    std::vector<UsingAliasStmtContext *> usingAliasStmt();
+    UsingAliasStmtContext* usingAliasStmt(size_t i);
+    std::vector<NamespaceDeclContext *> namespaceDecl();
+    NamespaceDeclContext* namespaceDecl(size_t i);
+    std::vector<ClassDeclContext *> classDecl();
+    ClassDeclContext* classDecl(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -163,22 +168,6 @@ public:
   };
 
   RootContext* root();
-
-  class  ItemDefContext : public antlr4::ParserRuleContext {
-  public:
-    ItemDefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    UsingStmtContext *usingStmt();
-    UsingAliasStmtContext *usingAliasStmt();
-    NamespaceDeclContext *namespaceDecl();
-    ClassDeclContext *classDecl();
-
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ItemDefContext* itemDef();
 
   class  CompilerDirectiveContext : public antlr4::ParserRuleContext {
   public:
@@ -233,11 +222,8 @@ public:
     antlr4::tree::TerminalNode *UsingKw();
     QualifiedIdContext *qualifiedId();
     antlr4::tree::TerminalNode *AsKw();
-    std::vector<antlr4::tree::TerminalNode *> Id();
-    antlr4::tree::TerminalNode* Id(size_t i);
+    antlr4::tree::TerminalNode *Id();
     antlr4::tree::TerminalNode *Term();
-    std::vector<antlr4::tree::TerminalNode *> Comma();
-    antlr4::tree::TerminalNode* Comma(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

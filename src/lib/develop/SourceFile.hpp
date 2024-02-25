@@ -16,36 +16,43 @@
 // IN THE SOFTWARE.
 //
 
-#include "TokenSpan.hpp"
-
-#include <antlr4-runtime.h>
+#pragma once
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TokenSpan TokenSpan::Minimal(const antlr4::Token* const pToken)
-{
-	TokenSpan output;
-	output.sourceName = pToken->getTokenSource()->getSourceName();
-	output.lineNumber = pToken->getLine();
-	output.positionInLine = pToken->getCharPositionInLine();
-	output.startIndex = 0;
-	output.stopIndex = 0;
+#include "compiler/SourceContext.hpp"
 
-	return output;
-}
+#include "compiler/ast/RootNode.hpp"
+#include "compiler/detail/ParseResult.hpp"
+
+#include "../base/Reference.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-TokenSpan TokenSpan::WithSourceText(const antlr4::Token* const pToken)
+struct HqSourceFile
 {
-	TokenSpan output;
-	output.sourceName = pToken->getTokenSource()->getSourceName();
-	output.lineNumber = pToken->getLine();
-	output.positionInLine = pToken->getCharPositionInLine();
-	output.startIndex = pToken->getStartIndex();
-	output.stopIndex = pToken->getStopIndex();
+	static HqSourceFileHandle Load(HqDevContextHandle hCtx, const char* filePath, int* pErrorReason);
 
-	return output;
-}
+	static int Parse(HqSourceFileHandle hSrcFile);
+	static bool WasParsedSuccessfully(HqSourceFileHandle hSrcFile);
+
+	static int32_t AddRef(HqSourceFileHandle hSrcFile);
+	static int32_t Release(HqSourceFileHandle hSrcFile);
+
+	static void _onDestruct(void*);
+
+	void* operator new(const size_t sizeInBytes);
+	void operator delete(void* const pObject);
+
+	HqReference ref;
+	HqDevContextHandle hCtx;
+	HqSerializerHandle hSerializer;
+
+	SourceContext srcCtx;
+
+	RootNode::Ptr pAstRootNode;
+
+	detail::ParseResult parseResult;
+};
 
 //----------------------------------------------------------------------------------------------------------------------

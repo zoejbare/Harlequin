@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,101 +20,36 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../../Harlequin.h"
+#include <Token.h>
 
-#include "../../../common/Array.hpp"
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class HQ_MAIN_API ControlFlow
+namespace detail
 {
-public:
+	struct TokenSpan;
 
-	enum class Behavior
+	enum TokenSpanFlag_
 	{
-		If,
-		While,
-		DoWhile,
+		TOKEN_SPAN_FLAG_NONE = 0x0,
+		TOKEN_SPAN_FLAG_WITH_SOURCE_TEXT = 0x1,
 	};
+	typedef uint32_t TokenSpanFlags;
+}
 
-	enum class Condition
-	{
-		None,
-		True,
-		False,
-	};
+//----------------------------------------------------------------------------------------------------------------------
 
-	ControlFlow(const ControlFlow&) = delete;
-	ControlFlow(ControlFlow&&) = delete;
+struct detail::TokenSpan
+{
+	static TokenSpan Extract(const antlr4::Token* pToken, TokenSpanFlags flags = TOKEN_SPAN_FLAG_WITH_SOURCE_TEXT);
 
-	ControlFlow& operator =(const ControlFlow&) = delete;
-	ControlFlow& operator =(ControlFlow&&) = delete;
+	std::string sourceName;
 
-	ControlFlow();
-	~ControlFlow();
-
-	void Begin(HqSerializerHandle hSerializer, Behavior behavior, Condition condition, uint32_t gpRegIndex);
-	void End();
-
-	void GoToStart();
-	void GoToEnd();
-
-
-private:
-
-	enum class JmpType
-	{
-		Normal,
-		Condition,
-	};
-
-	enum class JmpLoc
-	{
-		Start,
-		End,
-	};
-
-	struct Command
-	{
-		size_t offset;
-		JmpType type;
-		JmpLoc loc;
-	};
-
-	void prv_writeJump(int32_t, JmpType);
-	void prv_addCommand(JmpType, JmpLoc);
-
-	typedef HqArray<Command> CommandList;
-
-	CommandList m_cmds;
-
-	HqSerializerHandle m_hSerializer;
-	size_t m_offStart;
-	size_t m_offEnd;
-	uint32_t m_reg;
-	Behavior m_beh;
-	Condition m_cond;
+	size_t lineNumber;
+	size_t positionInLine;
+	size_t startIndex;
+	size_t stopIndex;
 };
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline ControlFlow::ControlFlow()
-	: m_cmds()
-	, m_hSerializer(HQ_SERIALIZER_HANDLE_NULL)
-	, m_offStart(0)
-	, m_offEnd(0)
-	, m_reg(0)
-	, m_beh(Behavior::If)
-	, m_cond(Condition::None)
-{
-	CommandList::Initialize(m_cmds);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-inline ControlFlow::~ControlFlow()
-{
-	CommandList::Dispose(m_cmds);
-}
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -19,10 +19,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitItemDef(HarlequinParser::ItemDefContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitCompilerDirective(HarlequinParser::CompilerDirectiveContext *ctx) override {
     return visitChildren(ctx);
   }

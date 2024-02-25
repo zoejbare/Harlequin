@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,23 +20,39 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include <Token.h>
+#include "AstBaseNode.hpp"
 
+#include "../detail/TokenSpan.hpp"
+
+#include <memory>
+#include <deque>
 #include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct TokenSpan
+class AliasNode final
+	: public AstBaseNode
 {
-	static TokenSpan Minimal(const antlr4::Token* pToken);
-	static TokenSpan WithSourceText(const antlr4::Token* pToken);
+public:
 
-	std::string sourceName;
+	typedef std::shared_ptr<AliasNode> Ptr;
+	typedef std::deque<Ptr>            PtrDeque;
 
-	size_t lineNumber;
-	size_t positionInLine;
-	size_t startIndex;
-	size_t stopIndex;
+	inline static Ptr New()
+	{
+		return std::make_shared<AliasNode>();
+	}
+
+	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
+	{
+		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
+	}
+
+	std::string originalName;
+	std::string aliasedName;
+
+	detail::TokenSpan originalNameTokenSpan;
+	detail::TokenSpan aliasedNameTokenSpan;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -2,4 +2,4 @@
 .idea/*
 .vs/*
 _*/*
-src/lib/tool/compiler/parser/*
+src/lib/tool/compiler/autogen/*

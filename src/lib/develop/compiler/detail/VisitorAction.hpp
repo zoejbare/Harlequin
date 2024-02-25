@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -17,32 +17,16 @@
 //
 
 #pragma once
-#if 0
-//----------------------------------------------------------------------------------------------------------------------
-
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
-
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+namespace detail
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
-
-	NamespaceSymbol::PtrMap namespaces;
-
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
-
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
-};
+	enum class VisitorAction
+	{
+		Continue,
+		Stop,
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------
-#endif

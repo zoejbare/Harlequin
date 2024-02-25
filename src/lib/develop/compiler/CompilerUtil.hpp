@@ -17,32 +17,40 @@
 //
 
 #pragma once
-#if 0
-//----------------------------------------------------------------------------------------------------------------------
-
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
-
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+#include "detail/AccessType.hpp"
+#include "detail/ArrayType.hpp"
+#include "detail/ClassType.hpp"
+#include "detail/FunctionType.hpp"
+#include "detail/StorageType.hpp"
+#include "detail/VarType.hpp"
+
+#include "../../Harlequin.h"
+
+#include <string>
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class ParserErrorHandler;
+
+class CompilerUtil
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
+public:
 
-	NamespaceSymbol::PtrMap namespaces;
+	CompilerUtil() = delete;
+	CompilerUtil(const CompilerUtil&) = delete;
+	CompilerUtil(CompilerUtil&&) = delete;
 
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
+	static detail::AccessType GetAccessType(const std::string& accessType);
+	static detail::ArrayType GetArrayType(const std::string& arraySpec);
+	static detail::ClassType GetClassType(const std::string& classType);
+	static detail::FunctionType GetFunctionType(const std::string& funcType);
+	static detail::StorageType GetStorageType(const std::string& storageType);
+	static detail::VarType GetVarType(const std::string& typeName);
 
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
+	static std::string GetVarTypeSignature(const std::string& typeName, const detail::ArrayType& arrayType);
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-#endif

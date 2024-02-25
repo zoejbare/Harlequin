@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,23 +20,43 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../../Harlequin.h"
+#include "../SourceContext.hpp"
 
-#include "../../base/ModuleLoader.hpp"
+#include "../ast/RootNode.hpp"
+#include "../autogen/HarlequinBaseVisitor.h"
+
+#include <list>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct HqReferenceModule
+class AntlrAstBuilder final
+	: protected HarlequinBaseVisitor
 {
-	static HqReferenceModuleHandle Load(HqDevContextHandle hCtx, const void* pFileData, size_t fileSize, int* pErrorReason);
-	static void Dispose(HqReferenceModuleHandle hRefModule);
+public:
 
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
+	static RootNode::Ptr Run(SourceContext& srcCtx, antlr4::tree::ParseTree* pParseTree);
 
-	HqDevContextHandle hCtx;
 
-	HqModuleLoader data;
+private:
+
+	AntlrAstBuilder() = delete;
+	explicit AntlrAstBuilder(SourceContext&);
+
+	virtual std::any visitRoot(HarlequinParser::RootContext*) override;
+
+	virtual std::any visitUsingStmt(HarlequinParser::UsingStmtContext*) override;
+	virtual std::any visitUsingAliasStmt(HarlequinParser::UsingAliasStmtContext*) override;
+
+	virtual std::any visitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
+	virtual std::any visitClassDecl(HarlequinParser::ClassDeclContext*) override;
+
+	static antlr4::Token* _getAccessSpecToken(HarlequinParser::AccessBaseSpecifierContext*);
+	static antlr4::Token* _getStorageSpecToken(HarlequinParser::StorageSpecifierContext*);
+	static antlr4::Token* _getClassTypeToken(HarlequinParser::ClassTypeContext*);
+
+	SourceContext* m_pSrcCtx;
+
+	std::list<std::string> m_namespaceStack;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

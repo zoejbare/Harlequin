@@ -18,14 +18,15 @@
 
 #include "SourceFile.hpp"
 
-#include "generator/ParserErrorHandler.hpp"
+#include "compiler/antlr/AntlrAstBuilder.hpp"
+#include "compiler/antlr/AntlrErrorHandler.hpp"
 
-#include "parser/HarlequinLexer.h"
-#include "parser/HarlequinParser.h"
+#include "compiler/autogen/HarlequinLexer.h"
+#include "compiler/autogen/HarlequinParser.h"
 
-#include "../DevContext.hpp"
+#include "DevContext.hpp"
 
-#include "../../base/Serializer.hpp"
+#include "../base/Serializer.hpp"
 
 #include <antlr4-runtime.h>
 
@@ -36,9 +37,6 @@
 
 HqSourceFileHandle HqSourceFile::Load(HqDevContextHandle hCtx, const char* const filePath, int* const pErrorReason)
 {
-	using namespace antlr4;
-	using namespace antlr4::tree;
-
 	assert(hCtx != HQ_DEV_CONTEXT_HANDLE_NULL);
 	assert(filePath != nullptr);
 	assert(filePath[0] != '\0');
@@ -74,13 +72,44 @@ HqSourceFileHandle HqSourceFile::Load(HqDevContextHandle hCtx, const char* const
 		return nullptr;
 	}
 
-	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+	HqReference::Initialize(pOutput->ref, _onDestruct, pOutput);
 
 	pOutput->hCtx = hCtx;
 	pOutput->hSerializer = hSerializer;
+	pOutput->parseResult = detail::ParseResult::Pending;
 
 	const char* const streamData = reinterpret_cast<const char*>(pOutput->hSerializer->stream.pData);
 	const size_t streamLength = pOutput->hSerializer->stream.count;
+
+	// Initialize the source context which will let the compiler directly
+	// reference the input source file when reporting messages to the user.
+	pOutput->srcCtx.Initialize(hReport, filePath, streamData, streamLength);
+
+	return pOutput;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
+{
+	using namespace antlr4;
+	using namespace antlr4::tree;
+
+	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
+
+	switch(hSrcFile->parseResult)
+	{
+		case detail::ParseResult::Success: return HQ_SUCCESS;
+		case detail::ParseResult::Failure: return HQ_ERROR_FAILED_TO_PARSE_FILE;
+
+		default:
+			break;
+	}
+
+	const char* const streamData = reinterpret_cast<const char*>(hSrcFile->hSerializer->stream.pData);
+	const size_t streamLength = hSrcFile->hSerializer->stream.count;
+
+	ParseTree* pParseTree = nullptr;
 
 	// [NOTE]
 	//   Antlr utilizes a lot of static memory which *is* cleaned up on exit, but this means when using
@@ -88,72 +117,64 @@ HqSourceFileHandle HqSourceFile::Load(HqDevContextHandle hCtx, const char* const
 	//   way to check for leaky memory is to setup a custom allocator and dump any allocations that are
 	//   still around after disposing of all the HQ compiler resources.
 
-#define _HQ_ANTLR_ALLOC(object, type, ...) \
-	{ \
-		(object) = reinterpret_cast<type*>(HqMemAlloc(sizeof(type))); \
-		if(!(object)) \
-		{ \
-			HqReportMessage(hReport, HQ_MESSAGE_TYPE_ERROR, "Failed to allocate ANTLR object: type=%s", #type); \
-			(*pErrorReason) = HQ_ERROR_BAD_ALLOCATION; \
-			return nullptr; \
-		} \
-		new(object) type(__VA_ARGS__); \
-	}
+	// Setup the ANTLR lexer and parser.
+	ANTLRInputStream inputStream(streamData, streamLength);
+	HarlequinLexer lexer(&inputStream);
+	CommonTokenStream tokenStream(&lexer);
+	HarlequinParser parser(&tokenStream);
 
-	// Parse the input file.
-	_HQ_ANTLR_ALLOC(pOutput->pInputStream, ANTLRInputStream, streamData, streamLength);
-	_HQ_ANTLR_ALLOC(pOutput->pLexer, HarlequinLexer, pOutput->pInputStream);
-	_HQ_ANTLR_ALLOC(pOutput->pTokenStream, CommonTokenStream, pOutput->pLexer);
-	_HQ_ANTLR_ALLOC(pOutput->pParser, HarlequinParser, pOutput->pTokenStream);
-
-#undef _HQ_ANTLR_ALLOC
-
-	// Set the file name for the input stream; this will be used when reporting errors and warnings.
-	pOutput->pInputStream->name = filePath;
-
-	pOutput->pParseTree = nullptr;
-	pOutput->parsed = false;
+	// Set the file name for the input stream; this will be used when reporting errors and warnings while parsing.
+	inputStream.name = hSrcFile->srcCtx.GetFilePath();
 
 	// Remove the default error listeners.
-	pOutput->pLexer->removeErrorListeners();
-	pOutput->pParser->removeErrorListeners();
+	lexer.removeErrorListeners();
+	parser.removeErrorListeners();
 
-	// Resolve the file data stream to an array of lines that will be used when displaying error/warning messages.
+	AntlrErrorHandler errorHandler(hSrcFile->srcCtx);
+
+	// Add our custom error listener.
+	lexer.addErrorListener(reinterpret_cast<antlr4::ANTLRErrorListener*>(&errorHandler));
+	parser.addErrorListener(reinterpret_cast<antlr4::ANTLRErrorListener*>(&errorHandler));
+
+	// Parse the source file.
+	pParseTree = parser.root();
+
+	// Pre-emptively set the parse result to the 'failure' state in case any errors are detected.
+	// The result will be updated to the 'success' state if we manage to get to the end of this
+	// function without any errors.
+	hSrcFile->parseResult = detail::ParseResult::Failure;
+
+	// Checking for parsing/lexing errors.
+	if(hSrcFile->srcCtx.EncounteredErrors())
 	{
-		std::string fileText = pOutput->pInputStream->toString();
-
-		// Calculate the number of lines there are in the file text.
-		const size_t lineCount = std::count(fileText.begin(), fileText.end(), '\n') + 1;
-
-		// Reserve enough space in the array for each line.
-		pOutput->srcData.lines.reserve(lineCount);
-
-		// Replace all carriage returns in the line with whitespace.
-		std::replace(fileText.begin(), fileText.end(), '\r', ' ');
-
-		// Extract each line from the text.
-		std::stringstream ss(fileText);
-		for(std::string line; std::getline(ss, line, '\n');)
-		{
-			// Strip the whitespace from the end of the line.
-			line.erase(
-				std::find_if(
-					line.rbegin(),
-					line.rend(),
-					[](const char ch)
-					{
-						return !std::isspace(ch);
-					}
-				).base(),
-				line.end()
-			);
-
-			// Add the line to the array.
-			pOutput->srcData.lines.push_back(line);
-		}
+		return HQ_ERROR_FAILED_TO_PARSE_FILE;
 	}
 
-	return pOutput;
+	// Convert the ANTLR parse tree to our custom AST.
+	RootNode::Ptr pRootNode = AntlrAstBuilder::Run(hSrcFile->srcCtx, pParseTree);
+
+	// Checking for errors that occurred while building the AST.
+	if(hSrcFile->srcCtx.EncounteredErrors())
+	{
+		return HQ_ERROR_FAILED_TO_PARSE_FILE;
+	}
+
+	// Do the first pass of semantic analysis on the AST. This first pass will only do analysis of this
+	// translation unit without regard for any imports or aliases since that information is not yet available.
+	// Cross-unit analysis will happen during the linking phase later.
+	// TODO: Walk the AST for analysis.
+
+	// Check for errors that occured during semantic analysis.
+	if(hSrcFile->srcCtx.EncounteredErrors())
+	{
+		return HQ_ERROR_FAILED_TO_PARSE_FILE;
+	}
+
+	// Parsing was successful, and the developers rejoiced!
+	hSrcFile->pAstRootNode = std::move(pRootNode);
+	hSrcFile->parseResult = detail::ParseResult::Success;
+
+	return HQ_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -176,62 +197,15 @@ int32_t HqSourceFile::Release(HqSourceFileHandle hSrcFile)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqSourceFile::Parse(HqSourceFileHandle hSrcFile)
-{
-	using namespace antlr4::tree;
-
-	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
-
-	if(hSrcFile->parsed)
-	{
-		return hSrcFile->pParseTree ? HQ_SUCCESS : HQ_ERROR_FAILED_TO_PARSE_FILE;
-	}
-
-	ParserErrorHandler errorHandler(&hSrcFile->hCtx->report, hSrcFile->srcData);
-
-	// Add our custom error listener.
-	hSrcFile->pLexer->addErrorListener(reinterpret_cast<antlr4::ANTLRErrorListener*>(&errorHandler));
-	hSrcFile->pParser->addErrorListener(reinterpret_cast<antlr4::ANTLRErrorListener*>(&errorHandler));
-
-	// Parse the source file.
-	hSrcFile->pParseTree = hSrcFile->pParser->root();
-	hSrcFile->parsed = true;
-
-	// Remove the error listener.
-	hSrcFile->pLexer->removeErrorListeners();
-	hSrcFile->pParser->removeErrorListeners();
-
-	// Checking for parsing+lexing errors.
-	if(errorHandler.EncounteredError())
-	{
-		hSrcFile->pParseTree = nullptr;
-		return HQ_ERROR_FAILED_TO_PARSE_FILE;
-	}
-
-	// Generate the symbol table from the parse tree.
-	SymbolTableGenerator::Run(hSrcFile->pParseTree, &errorHandler, &hSrcFile->symbolTable);
-
-	// Check for errors that occured during symbol resolution.
-	if(errorHandler.EncounteredError())
-	{
-		hSrcFile->pParseTree = nullptr;
-		return HQ_ERROR_FAILED_TO_PARSE_FILE;
-	}
-
-	return HQ_SUCCESS;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 bool HqSourceFile::WasParsedSuccessfully(HqSourceFileHandle hSrcFile)
 {
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
-	return hSrcFile->parsed && (hSrcFile->pParseTree != nullptr);
+	return hSrcFile->parseResult == detail::ParseResult::Success;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqSourceFile::prv_onDestruct(void* const pOpaque)
+void HqSourceFile::_onDestruct(void* const pOpaque)
 {
 	using namespace antlr4;
 
@@ -239,20 +213,6 @@ void HqSourceFile::prv_onDestruct(void* const pOpaque)
 	assert(hSrcFile != HQ_SOURCE_FILE_HANDLE_NULL);
 
 	HqSerializer::Dispose(hSrcFile->hSerializer);
-
-#define _HQ_ANTLR_FREE(object, type) \
-	if(object) \
-	{ \
-		object->~type(); \
-		HqMemFree(object); \
-	}
-
-	_HQ_ANTLR_FREE(hSrcFile->pParser, HarlequinParser);
-	_HQ_ANTLR_FREE(hSrcFile->pTokenStream, CommonTokenStream);
-	_HQ_ANTLR_FREE(hSrcFile->pLexer, HarlequinLexer);
-	_HQ_ANTLR_FREE(hSrcFile->pInputStream, ANTLRInputStream);
-
-#undef _HQ_ANTLR_FREE
 
 	delete hSrcFile;
 }

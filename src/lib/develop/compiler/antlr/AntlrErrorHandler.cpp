@@ -16,33 +16,38 @@
 // IN THE SOFTWARE.
 //
 
-#pragma once
-#if 0
-//----------------------------------------------------------------------------------------------------------------------
+#include "AntlrErrorHandler.hpp"
 
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
+#include "../SourceContext.hpp"
 
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
+#include <antlr4-runtime.h>
+
+#include <assert.h>
+#include <inttypes.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+AntlrErrorHandler::AntlrErrorHandler(SourceContext& srcCtx)
+	: m_pSrcCtx(&srcCtx)
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
-
-	NamespaceSymbol::PtrMap namespaces;
-
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
-
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
-};
+	assert(m_pSrcCtx != nullptr);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
-#endif
+
+void AntlrErrorHandler::syntaxError(
+	antlr4::Recognizer* const pRecognizer,
+	antlr4::Token* const pOffendingSymbol,
+	const size_t line,
+	const size_t charPositionInLine,
+	const std::string& msg,
+	std::exception_ptr e)
+{
+	(void) pRecognizer;
+	(void) line;
+	(void) charPositionInLine;
+	(void) e;
+	m_pSrcCtx->Report(MessageCode::ErrorSyntax, detail::TokenSpan::Extract(pOffendingSymbol), msg);
+}
+
+//----------------------------------------------------------------------------------------------------------------------

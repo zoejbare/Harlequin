@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -17,32 +17,45 @@
 //
 
 #pragma once
-#if 0
-//----------------------------------------------------------------------------------------------------------------------
-
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
-
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+#include "../detail/TokenSpan.hpp"
+#include "../visitor/AstBaseVisitor.hpp"
+
+#include <Harlequin.h>
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#define _HQ_AST_NODE_WALK_PREAMBLE(baseType_, srcCtx_, visitor_, shouldVisit_) \
+	{ \
+		if((shouldVisit_) && visitor_->Visit(srcCtx_, this) == detail::VisitorAction::Stop) \
+		{ \
+			return; \
+		} \
+		baseType_::Walk(srcCtx_, visitor_, false); \
+	}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class AstBaseNode
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
+public:
 
-	NamespaceSymbol::PtrMap namespaces;
+	void* operator new(const size_t sizeInBytes)
+	{
+		return HqMemAlloc(sizeInBytes);
+	}
 
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
+	void operator delete(void* const pObject)
+	{
+		HqMemFree(pObject);
+	}
 
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
+	virtual void Walk(SourceContext&, AstBaseVisitor*, const bool visit = true) const
+	{
+		(void) visit;
+	}
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-#endif

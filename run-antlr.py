@@ -63,7 +63,7 @@ class GeneratorTool(Tool):
 		Tool.__init__(self, toolName)
 
 	def invoke(self, grammarFilePath, _, __):
-		outputPath = os.path.join(THIS_PATH, "src", "lib", "tool", "compiler", "parser")
+		outputPath = os.path.join(THIS_PATH, "src", "lib", "develop", "compiler", "autogen")
 		classPath = Tool._getClassPath()
 
 		print(

@@ -22,8 +22,8 @@
 #include "ModuleWriter.hpp"
 #include "DevContext.hpp"
 
-#include "compiler/ReferenceModule.hpp"
-#include "compiler/SourceFile.hpp"
+#include "ReferenceModule.hpp"
+#include "SourceFile.hpp"
 
 #include "../base/Serializer.hpp"
 #include "../base/String.hpp"

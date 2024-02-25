@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -16,47 +16,77 @@
 // IN THE SOFTWARE.
 //
 
-#include "ParserErrorHandler.hpp"
-
-#include <antlr4-runtime.h>
+#include "SourceContext.hpp"
 
 #include <assert.h>
 #include <inttypes.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-ParserErrorHandler::ParserErrorHandler(HqReportHandle hReport, const SourceData& srcData)
-	: m_hReport(hReport)
-	, m_pSrcData(&srcData)
-	, m_errorCount(0)
-	, m_warningCount(0)
+void SourceContext::Initialize(
+	HqReportHandle hReport,
+	const char* const filePath,
+	const char* const fileData, 
+	const size_t fileLength)
 {
 	assert(hReport != HQ_REPORT_HANDLE_NULL);
-	assert(m_pSrcData != nullptr);
+	assert(filePath != nullptr);
+	assert(filePath[0] != '\0');
+	assert(fileData != nullptr);
+	assert(m_hReport == HQ_REPORT_HANDLE_NULL); // Allow initialization only once per context.
+
+	m_hReport = hReport;
+
+	m_filePath = std::string(filePath);
+	m_fileContents = std::string(fileData, fileLength);
+
+	// Replace all carriage returns in the file text with whitespaces.
+	std::replace(m_fileContents.begin(), m_fileContents.end(), '\r', ' ');
+
+	// Calculate the number of lines there are in the file text.
+	const size_t lineCount = std::count(m_fileContents.begin(), m_fileContents.end(), '\n') + 1;
+
+	// Reserve enough space in the array for each line.
+	m_fileLines.reserve(lineCount);
+
+	char* lineStart = m_fileContents.data();
+
+	// Keep track of each line as a string reference back into the file contents string.
+	for(;;)
+	{
+		char* const lineEnd = strchr(lineStart, '\n');
+
+		// We'll calculate the string view at the proper length so the newline character at the
+		// end of the line is functionally a null terminator. If there is no newline character,
+		// we can let the line go all the way to end of the main string.
+		size_t length = lineEnd 
+			? size_t(lineEnd - lineStart) 
+			: strlen(lineStart);
+
+		// Trim the whitespace from the end of the line.
+		while(length > 0 && isspace(lineStart[length - 1]))
+		{
+			--length;
+		}
+
+		m_fileLines.push_back(std::string_view(lineStart, length));
+
+		if(!lineEnd)
+		{
+			// End of the file has been reached.
+			break;
+		}
+
+		// Set the start of the next line just past the end of the current line.
+		lineStart = lineEnd + 1;
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void ParserErrorHandler::syntaxError(
-	antlr4::Recognizer* const pRecognizer,
-	antlr4::Token* const pOffendingSymbol,
-	const size_t line,
-	const size_t charPositionInLine,
-	const std::string& msg,
-	std::exception_ptr e)
-{
-	(void) pRecognizer;
-	(void) line;
-	(void) charPositionInLine;
-	(void) e;
-	Report(MessageCode::ErrorSyntax, TokenSpan::WithSourceText(pOffendingSymbol), msg);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-void ParserErrorHandler::Report(
+void SourceContext::Report(
 	const MessageCode code,
-	const TokenSpan& span,
+	const detail::TokenSpan& span,
 	const std::string& primaryMsg,
 	const std::string& secondaryMsg)
 {
@@ -91,7 +121,7 @@ void ParserErrorHandler::Report(
 
 	if(span.startIndex < span.stopIndex)
 	{
-		const std::string sourceCode = m_pSrcData->lines[span.lineNumber - 1];
+		const std::string_view& sourceCode = m_fileLines[span.lineNumber - 1];
 
 		// Add the source code text to the message.
 		msgStream << std::endl << sourceCode << std::endl;

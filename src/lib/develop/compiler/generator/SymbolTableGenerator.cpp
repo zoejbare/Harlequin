@@ -15,7 +15,7 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //
-
+#if 0
 #include "SymbolTableGenerator.hpp"
 
 #include "CompilerUtil.hpp"
@@ -791,3 +791,4 @@ inline void SymbolTableGenerator::_resolveQualifiedIdArray(
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+#endif

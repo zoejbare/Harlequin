@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,61 +20,36 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "generator/SourceData.hpp"
-#include "generator/SymbolTable.hpp"
-#include "generator/SymbolTableGenerator.hpp"
+#include "AstBaseNode.hpp"
 
-#include "../../base/Reference.hpp"
+#include "../detail/TokenSpan.hpp"
+
+#include <memory>
+#include <deque>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace antlr4
+class UsingNode final
+	: public AstBaseNode
 {
-	class ANTLRInputStream;
-	class CommonTokenStream;
+public:
 
-	namespace tree
+	typedef std::shared_ptr<UsingNode> Ptr;
+	typedef std::deque<Ptr>            PtrDeque;
+
+	inline static Ptr New()
 	{
-		class ParseTree;
+		return std::make_shared<UsingNode>();
 	}
-}
 
-class HarlequinLexer;
-class HarlequinParser;
+	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
+	{
+		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
+	}
 
-//----------------------------------------------------------------------------------------------------------------------
-
-struct HqSourceFile
-{
-	static HqSourceFileHandle Load(HqDevContextHandle hCtx, const char* filePath,int* pErrorReason);
-
-	static int32_t AddRef(HqSourceFileHandle hSrcFile);
-	static int32_t Release(HqSourceFileHandle hSrcFile);
-
-	static int Parse(HqSourceFileHandle hSrcFile);
-	static bool WasParsedSuccessfully(HqSourceFileHandle hSrcFile);
-
-	static void prv_onDestruct(void*);
-
-	void* operator new(const size_t sizeInBytes);
-	void operator delete(void* const pObject);
-
-	HqReference ref;
-	HqDevContextHandle hCtx;
-	HqSerializerHandle hSerializer;
-
-	antlr4::ANTLRInputStream* pInputStream;
-	antlr4::CommonTokenStream* pTokenStream;
-
-	HarlequinLexer* pLexer;
-	HarlequinParser* pParser;
-
-	antlr4::tree::ParseTree* pParseTree;
-
-	SourceData srcData;
-	SymbolTable symbolTable;
-
-	bool parsed;
+	std::string name;
+	detail::TokenSpan nameTokenSpan;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -17,32 +17,53 @@
 //
 
 #pragma once
-#if 0
-//----------------------------------------------------------------------------------------------------------------------
-
-#include "../symbol/Class.hpp"
-#include "../symbol/ClassVar.hpp"
-#include "../symbol/Method.hpp"
-#include "../symbol/Namespace.hpp"
-
-#include "../symbol/detail/StringSet.hpp"
-#include "../symbol/detail/StringToStringMap.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-struct SymbolTable
+#include "ClassNode.hpp"
+
+#include <memory>
+#include <deque>
+#include <string>
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class NamespaceNode final
+	: public AstBaseNode
 {
-	detail::StringSet imports;
-	detail::StringToStringMap classAliases;
+public:
 
-	NamespaceSymbol::PtrMap namespaces;
+	typedef std::shared_ptr<NamespaceNode> Ptr;
+	typedef std::deque<Ptr>                PtrDeque;
 
-	ClassSymbol::PtrMap rootClasses;
-	ClassSymbol::RawPtrMap allClasses;
+	inline static Ptr New()
+	{
+		return std::make_shared<NamespaceNode>();
+	}
 
-	ClassVarSymbol::RawPtrMap allClassVariables;
-	MethodSymbol::RawPtrMap allMethods;
+	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
+	{
+		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
+
+		// Visit all 'namespace' nodes.
+		for(const Ptr& pNode : namespaces)
+		{
+			pNode->Walk(srcCtx, pVisitor);
+		}
+
+		// Visit all 'class' nodes.
+		for(const ClassNode::Ptr& pNode : classes)
+		{
+			pNode->Walk(srcCtx, pVisitor);
+		}
+	}
+
+	std::string shortName;
+	std::string qualifiedName;
+
+	PtrDeque namespaces;
+
+	ClassNode::PtrDeque classes;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-#endif

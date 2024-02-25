@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,36 +20,44 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "MessageCode.hpp"
-#include "SourceData.hpp"
-#include "TokenSpan.hpp"
+#include "detail/MessageCode.hpp"
+#include "detail/TokenSpan.hpp"
 
-#include "../../../base/String.hpp"
-
+#include <Harlequin.h>
 #include <BaseErrorListener.h>
 
-#include <stdarg.h>
+#include <string>
+#include <string_view>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ParserErrorHandler final
-	: protected antlr4::BaseErrorListener
+class SourceContext
 {
 public:
 
-	ParserErrorHandler() = delete;
-	ParserErrorHandler(HqReportHandle hReport, const SourceData& srcData);
+	SourceContext();
+
+	void Initialize(
+		HqReportHandle hReport, 
+		const char* filePath, 
+		const char* fileData, 
+		size_t fileLength);
+
+	const std::string& GetFilePath() const;
 
 	size_t GetErrorCount() const;
 	size_t GetWarningCount() const;
 
-	bool EncounteredError() const;
+	bool EncounteredErrors() const;
 
-	void Report(MessageCode code, const TokenSpan& span, const std::string& msg);
-	void Report(MessageCode code, const TokenSpan& span, const std::string& primaryMsg, const std::string& secondaryMsg);
+	void Report(MessageCode code, const detail::TokenSpan& span, const std::string& msg);
+	void Report(MessageCode code, const detail::TokenSpan& span, const std::string& primaryMsg, const std::string& secondaryMsg);
 
 
 private:
+
+	typedef std::vector<std::string_view> Lines;
 
 	enum class MsgType
 	{
@@ -57,20 +65,14 @@ private:
 		Warning,
 	};
 
-	virtual void syntaxError(
-		antlr4::Recognizer* pRecognizer,
-		antlr4::Token* pOffendingSymbol,
-		size_t line,
-		size_t charPositionInLine,
-		const std::string& msg,
-		std::exception_ptr e
-	) override;
-
 	int _getMsgType(MessageCode);
 
 	HqReportHandle m_hReport;
 
-	const SourceData* m_pSrcData;
+	std::string m_filePath;
+	std::string m_fileContents;
+
+	Lines m_fileLines;
 
 	size_t m_errorCount;
 	size_t m_warningCount;
@@ -78,30 +80,49 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorHandler::GetErrorCount() const
+inline SourceContext::SourceContext()
+	: m_hReport(HQ_REPORT_HANDLE_NULL)
+	, m_filePath()
+	, m_fileContents()
+	, m_fileLines()
+	, m_errorCount(0)
+	, m_warningCount(0)
+{
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline const std::string& SourceContext::GetFilePath() const
+{
+	return m_filePath;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline size_t SourceContext::GetErrorCount() const
 {
 	return m_errorCount;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline size_t ParserErrorHandler::GetWarningCount() const
+inline size_t SourceContext::GetWarningCount() const
 {
 	return m_warningCount;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool ParserErrorHandler::EncounteredError() const
+inline bool SourceContext::EncounteredErrors() const
 {
 	return m_errorCount > 0;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void ParserErrorHandler::Report(
+inline void SourceContext::Report(
 	const MessageCode code, 
-	const TokenSpan& span, 
+	const detail::TokenSpan& span, 
 	const std::string& msg)
 {
 	static const std::string empty;
@@ -111,7 +132,7 @@ inline void ParserErrorHandler::Report(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline int ParserErrorHandler::_getMsgType(const MessageCode code)
+inline int SourceContext::_getMsgType(const MessageCode code)
 {
 	return (int(code) < int(MessageCode::_WarningStart_))
 		? HQ_MESSAGE_TYPE_ERROR
