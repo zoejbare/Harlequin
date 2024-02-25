@@ -32,7 +32,10 @@
 	#define alloca _alloca
 #endif
 
-#if defined(HQ_PLATFORM_LINUX) || defined(HQ_PLATFORM_MAC_OS)
+#if defined(HQ_PLATFORM_LINUX) \
+	|| defined(HQ_PLATFORM_MAC_OS) \
+	|| defined(HQ_PLATFORM_PS3) \
+	|| defined(HQ_PLATFORM_PSVITA)
 	#include <alloca.h>
 #endif
 
