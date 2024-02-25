@@ -67,7 +67,7 @@ HqScriptObject* HqScriptObject::CreateInstance(HqScriptObject* const pSchema)
 {
 	assert(pSchema != nullptr);
 
-	HqScriptObject* const pOutput = HqScriptObject::prv_createObject(pSchema);
+	HqScriptObject* const pOutput = HqScriptObject::_createObject(pSchema);
 	assert(pOutput != nullptr);
 
 	pOutput->pSchema = pSchema;
@@ -81,7 +81,7 @@ HqScriptObject* HqScriptObject::CreateCopy(HqScriptObject* const pObject)
 {
 	assert(pObject != nullptr);
 
-	HqScriptObject* const pOutput = HqScriptObject::prv_createObject(pObject);
+	HqScriptObject* const pOutput = HqScriptObject::_createObject(pObject);
 	assert(pOutput != nullptr);
 
 	pOutput->pSchema = pObject->pSchema;
@@ -178,7 +178,7 @@ int HqScriptObject::SetMemberValue(HqScriptObject* const pObject, const uint32_t
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HqScriptObject* HqScriptObject::prv_createObject(HqScriptObject* const pOriginalObject)
+HqScriptObject* HqScriptObject::_createObject(HqScriptObject* const pOriginalObject)
 {
 	assert(pOriginalObject != nullptr);
 

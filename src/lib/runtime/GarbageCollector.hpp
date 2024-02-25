@@ -37,12 +37,12 @@ struct HqGarbageCollector
 	static void LinkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy);
 	static void MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGcProxy);
 
-	static int prv_runPhase(HqGarbageCollector&);
-	static bool prv_hasReachedTimeSlice(HqGarbageCollector&);
-	static void prv_reset(HqGarbageCollector&);
-	static void prv_proxyInsertBefore(HqGcProxy*, HqGcProxy*);
-	static void prv_proxyInsertAfter(HqGcProxy*, HqGcProxy*);
-	static void prv_proxyUnlink(HqGcProxy*);
+	static int _runPhase(HqGarbageCollector&);
+	static bool _hasReachedTimeSlice(HqGarbageCollector&);
+	static void _reset(HqGarbageCollector&);
+	static void _proxyInsertBefore(HqGcProxy*, HqGcProxy*);
+	static void _proxyInsertAfter(HqGcProxy*, HqGcProxy*);
+	static void _proxyUnlink(HqGcProxy*);
 
 	HqRwLock rwLock;
 	HqMutex pendingLock;

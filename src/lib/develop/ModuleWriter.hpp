@@ -49,16 +49,16 @@ struct HqModuleWriter
 
 	static uint32_t AddString(HqModuleWriterHandle hWriter, HqString* const pString);
 
-	static bool prv_writeFileHeader(HqSerializerHandle, const HqModuleFileHeader&, int&, size_t&);
-	static bool prv_writeTableOfContents(HqSerializerHandle, const HqModuleTableOfContents&, int&, size_t&);
+	static bool _writeFileHeader(HqSerializerHandle, const HqModuleFileHeader&, int&, size_t&);
+	static bool _writeTableOfContents(HqSerializerHandle, const HqModuleTableOfContents&, int&, size_t&);
 
-	static bool prv_writeBuffer(HqSerializerHandle, const void*, size_t, int&, size_t&);
-	static bool prv_writeString(HqSerializerHandle, const char*, size_t, int&, size_t&);
-	static bool prv_writeUint8(HqSerializerHandle, uint8_t, int&, size_t&);
-	static bool prv_writeUint16(HqSerializerHandle, uint16_t, int&, size_t&);
-	static bool prv_writeUint32(HqSerializerHandle, uint32_t, int&, size_t&);
-	static bool prv_writeBool8(HqSerializerHandle, bool, int&, size_t&);
-	static bool prv_writeBool32(HqSerializerHandle, bool, int&, size_t&);
+	static bool _writeBuffer(HqSerializerHandle, const void*, size_t, int&, size_t&);
+	static bool _writeString(HqSerializerHandle, const char*, size_t, int&, size_t&);
+	static bool _writeUint8(HqSerializerHandle, uint8_t, int&, size_t&);
+	static bool _writeUint16(HqSerializerHandle, uint16_t, int&, size_t&);
+	static bool _writeUint32(HqSerializerHandle, uint32_t, int&, size_t&);
+	static bool _writeBool8(HqSerializerHandle, bool, int&, size_t&);
+	static bool _writeBool32(HqSerializerHandle, bool, int&, size_t&);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

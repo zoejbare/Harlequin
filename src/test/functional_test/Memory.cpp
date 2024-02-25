@@ -44,15 +44,15 @@ Memory::Memory()
 
 	auto mallocFn = [](const size_t memSize) -> void*
 	{
-		return Memory::Instance.prv_malloc(memSize);
+		return Memory::Instance._malloc(memSize);
 	};
 	auto reallocFn = [](void* const pMem, const size_t memSize) -> void*
 	{
-		return Memory::Instance.prv_realloc(pMem, memSize);
+		return Memory::Instance._realloc(pMem, memSize);
 	};
 	auto freeFn = [](void* const pMem)
 	{
-		return Memory::Instance.prv_free(pMem);
+		return Memory::Instance._free(pMem);
 	};
 
 	HqMemAllocator allocator;
@@ -129,7 +129,7 @@ void Memory::Reset()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void* Memory::prv_malloc(const size_t memSize)
+inline void* Memory::_malloc(const size_t memSize)
 {
 	assert(memSize > 0);
 
@@ -147,7 +147,7 @@ inline void* Memory::prv_malloc(const size_t memSize)
 	++m_totalAllocCount;
 	++m_mallocCount;
 
-	prv_onAlloc(memSize);
+	_onAlloc(memSize);
 	HqMutex::Unlock(m_mutex);
 
 	return pMem + 1;
@@ -155,7 +155,7 @@ inline void* Memory::prv_malloc(const size_t memSize)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void* Memory::prv_realloc(void* const pMem, const size_t memSize)
+inline void* Memory::_realloc(void* const pMem, const size_t memSize)
 {
 	assert(memSize > 0);
 
@@ -189,7 +189,7 @@ inline void* Memory::prv_realloc(void* const pMem, const size_t memSize)
 		++m_reallocCount;
 	}
 
-	prv_onAlloc(memSize);
+	_onAlloc(memSize);
 	HqMutex::Unlock(m_mutex);
 
 	return pNewMem + 1;
@@ -197,7 +197,7 @@ inline void* Memory::prv_realloc(void* const pMem, const size_t memSize)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void Memory::prv_free(void* const pMem)
+inline void Memory::_free(void* const pMem)
 {
 	size_t* const pAlloc = (pMem) ? (reinterpret_cast<size_t*>(pMem) - 1) : nullptr;
 
@@ -221,7 +221,7 @@ inline void Memory::prv_free(void* const pMem)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void Memory::prv_onAlloc(const size_t memSize)
+inline void Memory::_onAlloc(const size_t memSize)
 {
 	if(memSize > m_maxAllocSize)
 	{

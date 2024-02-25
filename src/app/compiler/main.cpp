@@ -128,6 +128,15 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	//--- BEGIN_TEMP ---
+	{
+		HqSourceFileHandle hSrcFile = HQ_SOURCE_FILE_HANDLE_NULL;
+		HqSourceFileLoad(&hSrcFile, hCtx, "../../../_support/test.hq");
+		HqSourceFileParse(hSrcFile);
+		HqSourceFileDispose(&hSrcFile);
+	}
+	//--- END_TEMP ---
+
 	HqModuleWriterHandle hModuleWriter = HQ_MODULE_WRITER_HANDLE_NULL;
 
 	// Create the module writer.

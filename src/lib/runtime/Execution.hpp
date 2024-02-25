@@ -55,11 +55,11 @@ struct HqExecution
 	static void RaiseException(HqExecutionHandle hExec, HqValueHandle hValue, const int severity);
 	static void RaiseOpCodeException(HqExecutionHandle hExec, const int type, const char* const fmt, ...);
 
-	static void prv_createMainFiber(HqExecutionHandle);
-	static void prv_runFiberLoop(void*);
-	static void prv_runStep(HqExecutionHandle);
-	static void prv_onGcDiscovery(HqGarbageCollector&, void*);
-	static void prv_onGcDestruct(void*);
+	static void _createMainFiber(HqExecutionHandle);
+	static void _runFiberLoop(void*);
+	static void _runStep(HqExecutionHandle);
+	static void _onGcDiscovery(HqGarbageCollector&, void*);
+	static void _onGcDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

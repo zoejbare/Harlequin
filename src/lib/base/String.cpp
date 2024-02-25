@@ -480,7 +480,7 @@ HqString* HqString::Create(const char* const stringData)
 	pOutput->hash = RawHash(stringData ? stringData : "");
 	pOutput->data = reinterpret_cast<char*>(HqMemAlloc(length + 1));
 
-	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+	HqReference::Initialize(pOutput->ref, _onDestruct, pOutput);
 
 	if(stringData && pOutput->data)
 	{
@@ -517,7 +517,7 @@ HqString* HqString::CreateFmt(const char* const fmt, ...)
 	pOutput->hash = RawHash(stringData);
 	pOutput->data = stringData;
 
-	HqReference::Initialize(pOutput->ref, prv_onDestruct, pOutput);
+	HqReference::Initialize(pOutput->ref, _onDestruct, pOutput);
 
 	return pOutput;
 }
@@ -685,7 +685,7 @@ void HqString::ToStrictTitleCase(HqString* const pString)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqString::prv_onDestruct(void* const pOpaque)
+void HqString::_onDestruct(void* const pOpaque)
 {
 	HqString* const pString = reinterpret_cast<HqString*>(pOpaque);
 

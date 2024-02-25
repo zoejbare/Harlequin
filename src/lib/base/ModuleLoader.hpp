@@ -98,27 +98,27 @@ struct HQ_BASE_API HqModuleLoader
 	static bool Load(HqModuleLoader& output, HqReportHandle hReport, const void* fileData, size_t fileLength, uint32_t flags);
 	static void Dispose(HqModuleLoader& output);
 
-	static bool prv_load(HqModuleLoader&, HqReportHandle, HqSerializerHandle, uint32_t);
-	static bool prv_loadFileHeader(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadTableOfContents(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadStrings(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadDependencies(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadGlobals(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadObjectTypes(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadFunctions(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadInitBytecode(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
-	static bool prv_loadBytecode(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _load(HqModuleLoader&, HqReportHandle, HqSerializerHandle, uint32_t);
+	static bool _loadFileHeader(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadTableOfContents(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadStrings(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadDependencies(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadGlobals(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadObjectTypes(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadFunctions(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadInitBytecode(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
+	static bool _loadBytecode(HqModuleLoader&, HqReportHandle, HqSerializerHandle);
 
-	static void prv_initialize(HqModuleLoader&);
+	static void _initialize(HqModuleLoader&);
 
-	static bool prv_readStringFromIndex(const HqModuleLoader&, HqSerializerHandle, HqString**, int&, size_t&);
-	static bool prv_readBuffer(HqSerializerHandle, size_t, void*, int&, size_t&);
-	static bool prv_readString(HqSerializerHandle, HqString**, int&, size_t&);
-	static bool prv_readBool8(HqSerializerHandle, bool*, int&, size_t&);
-	static bool prv_readBool32(HqSerializerHandle, bool*, int&, size_t&);
-	static bool prv_readUint32(HqSerializerHandle, uint32_t*, int&, size_t&);
-	static bool prv_readUint32AsUint8(HqSerializerHandle, uint8_t*, int&, size_t&);
-	static bool prv_readUint16(HqSerializerHandle, uint16_t*, int&, size_t&);
+	static bool _readStringFromIndex(const HqModuleLoader&, HqSerializerHandle, HqString**, int&, size_t&);
+	static bool _readBuffer(HqSerializerHandle, size_t, void*, int&, size_t&);
+	static bool _readString(HqSerializerHandle, HqString**, int&, size_t&);
+	static bool _readBool8(HqSerializerHandle, bool*, int&, size_t&);
+	static bool _readBool32(HqSerializerHandle, bool*, int&, size_t&);
+	static bool _readUint32(HqSerializerHandle, uint32_t*, int&, size_t&);
+	static bool _readUint32AsUint8(HqSerializerHandle, uint8_t*, int&, size_t&);
+	static bool _readUint16(HqSerializerHandle, uint16_t*, int&, size_t&);
 
 	HqModuleFileHeader fileHeader;
 	HqModuleTableOfContents contents;

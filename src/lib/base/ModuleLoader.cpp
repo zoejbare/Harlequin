@@ -28,7 +28,7 @@ bool HqModuleLoader::Load(HqModuleLoader& output, HqReportHandle hReport, const 
 {
 	assert(filePath != nullptr);
 
-	prv_initialize(output);
+	_initialize(output);
 
 	int result = HQ_SUCCESS;
 
@@ -65,7 +65,7 @@ bool HqModuleLoader::Load(HqModuleLoader& output, HqReportHandle hReport, const 
 	}
 
 	// Load the module from the serializer.
-	const bool loadSuccess = prv_load(output, hReport, hSerializer, flags);
+	const bool loadSuccess = _load(output, hReport, hSerializer, flags);
 
 	// Dispose of the serializer now that we're done with it.
 	HqSerializerDispose(&hSerializer);
@@ -86,7 +86,7 @@ bool HqModuleLoader::Load(
 	assert(fileData != nullptr);
 	assert(fileLength > 0);
 
-	prv_initialize(output);
+	_initialize(output);
 
 	int result = HQ_SUCCESS;
 
@@ -120,7 +120,7 @@ bool HqModuleLoader::Load(
 	}
 
 	// Load the module from the serializer.
-	const bool loadSuccess = prv_load(output, hReport, hSerializer, flags);
+	const bool loadSuccess = _load(output, hReport, hSerializer, flags);
 
 	// Dispose of the serializer now that we're done with it.
 	HqSerializerDispose(&hSerializer);
@@ -172,53 +172,53 @@ void HqModuleLoader::Dispose(HqModuleLoader& output)
 	ByteArray::Dispose(output.bytecode);
 
 	// Initialize the module loader object to prevent issues if it happens to be disposed of multiple times.
-	prv_initialize(output);
+	_initialize(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_load(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer, const uint32_t flags)
+inline bool HqModuleLoader::_load(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer, const uint32_t flags)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
 	// Load the file header data.
-	if(!prv_loadFileHeader(output, hReport, hSerializer))
+	if(!_loadFileHeader(output, hReport, hSerializer))
 	{
 		return false;
 	}
 
 	// Load the module's table of contents.
-	if(!prv_loadTableOfContents(output, hReport, hSerializer))
+	if(!_loadTableOfContents(output, hReport, hSerializer))
 	{
 		return false;
 	}
 
 	// Load the string table.
-	if(!prv_loadStrings(output, hReport, hSerializer))
+	if(!_loadStrings(output, hReport, hSerializer))
 	{
 		return false;
 	}
 
 	// Load the module dependencies.
-	if(!prv_loadDependencies(output, hReport, hSerializer))
+	if(!_loadDependencies(output, hReport, hSerializer))
 	{
 		return false;
 	}
 
 	// Load the global variable table.
-	if(!prv_loadGlobals(output, hReport, hSerializer))
+	if(!_loadGlobals(output, hReport, hSerializer))
 	{
 		return false;
 	}
 
 	// Load the object types defined in this module.
-	if(!prv_loadObjectTypes(output, hReport, hSerializer))
+	if(!_loadObjectTypes(output, hReport, hSerializer))
 	{
 		return false;
 	}
 
 	// Load the functions defined in this module.
-	if(!prv_loadFunctions(output, hReport, hSerializer))
+	if(!_loadFunctions(output, hReport, hSerializer))
 	{
 		return false;
 	}
@@ -226,13 +226,13 @@ inline bool HqModuleLoader::prv_load(HqModuleLoader& output, HqReportHandle hRep
 	if((flags & DISCARD_BYTECODE) == 0)
 	{
 		// Load the module init function bytecode.
-		if(!prv_loadInitBytecode(output, hReport, hSerializer))
+		if(!_loadInitBytecode(output, hReport, hSerializer))
 		{
 			return false;
 		}
 
 		// Load the module bytecode.
-		if(!prv_loadBytecode(output, hReport, hSerializer))
+		if(!_loadBytecode(output, hReport, hSerializer))
 		{
 			return false;
 		}
@@ -243,7 +243,7 @@ inline bool HqModuleLoader::prv_load(HqModuleLoader& output, HqReportHandle hRep
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadFileHeader(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadFileHeader(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -251,7 +251,7 @@ inline bool HqModuleLoader::prv_loadFileHeader(HqModuleLoader& output, HqReportH
 	size_t streamOffset = 0;
 
 	// Read the file magic number.
-	if(!prv_readBuffer(hSerializer, sizeof(output.fileHeader.magicNumber), output.fileHeader.magicNumber, result, streamOffset))
+	if(!_readBuffer(hSerializer, sizeof(output.fileHeader.magicNumber), output.fileHeader.magicNumber, result, streamOffset))
 	{
 		HqReportMessage(
 			hReport,
@@ -285,7 +285,7 @@ inline bool HqModuleLoader::prv_loadFileHeader(HqModuleLoader& output, HqReportH
 	}
 	
 	// Read the reserved section of the file header.
-	if(!prv_readBuffer(hSerializer, sizeof(output.fileHeader.reserved), output.fileHeader.reserved, result, streamOffset))
+	if(!_readBuffer(hSerializer, sizeof(output.fileHeader.reserved), output.fileHeader.reserved, result, streamOffset))
 	{
 		HqReportMessage(
 			hReport,
@@ -300,7 +300,7 @@ inline bool HqModuleLoader::prv_loadFileHeader(HqModuleLoader& output, HqReportH
 	}
 
 	// Read the 'isBigEndian' flag.
-	if(!prv_readBool8(hSerializer, &output.fileHeader.isBigEndian, result, streamOffset))
+	if(!_readBool8(hSerializer, &output.fileHeader.isBigEndian, result, streamOffset))
 	{
 		HqReportMessage(
 			hReport,
@@ -336,7 +336,7 @@ inline bool HqModuleLoader::prv_loadFileHeader(HqModuleLoader& output, HqReportH
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadTableOfContents(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -346,7 +346,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 	// String table
 	{
 		// Read the byte offset.
-		if(!prv_readUint32(hSerializer, &output.contents.stringTable.offset, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.stringTable.offset, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -359,7 +359,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 		}
 
 		// Read the number of entries.
-		if(!prv_readUint32(hSerializer, &output.contents.stringTable.length, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.stringTable.length, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -377,7 +377,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 	// Dependency table
 	{
 		// Read the byte offset.
-		if(!prv_readUint32(hSerializer, &output.contents.dependencyTable.offset, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.dependencyTable.offset, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -392,7 +392,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 		}
 
 		// Read the number of entries.
-		if(!prv_readUint32(hSerializer, &output.contents.dependencyTable.length, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.dependencyTable.length, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -410,7 +410,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 	// Global variable table
 	{
 		// Read the byte offset.
-		if(!prv_readUint32(hSerializer, &output.contents.globalTable.offset, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.globalTable.offset, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -425,7 +425,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 		}
 
 		// Read the number of entries.
-		if(!prv_readUint32(hSerializer, &output.contents.globalTable.length, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.globalTable.length, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -443,7 +443,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 	// Object table
 	{
 		// Read the byte offset.
-		if(!prv_readUint32(hSerializer, &output.contents.objectTable.offset, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.objectTable.offset, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -458,7 +458,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 		}
 
 		// Read the number of entries.
-		if(!prv_readUint32(hSerializer, &output.contents.objectTable.length, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.objectTable.length, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -476,7 +476,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 	// Function table
 	{
 		// Read the byte offset.
-		if(!prv_readUint32(hSerializer, &output.contents.functionTable.offset, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.functionTable.offset, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -491,7 +491,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 		}
 
 		// Read the number of entries.
-		if(!prv_readUint32(hSerializer, &output.contents.functionTable.length, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.functionTable.length, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -509,7 +509,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 	// Module init bytecode
 	{
 		// Read the byte offset.
-		if(!prv_readUint32(hSerializer, &output.contents.initBytecode.offset, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.initBytecode.offset, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -524,7 +524,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 		}
 
 		// Read the byte length.
-		if(!prv_readUint32(hSerializer, &output.contents.initBytecode.length, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.initBytecode.length, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -542,7 +542,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 	// General bytecode
 	{
 		// Read the byte offset.
-		if(!prv_readUint32(hSerializer, &output.contents.bytecode.offset, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.bytecode.offset, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -557,7 +557,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 		}
 
 		// Read the byte length.
-		if(!prv_readUint32(hSerializer, &output.contents.bytecode.length, result, streamOffset))
+		if(!_readUint32(hSerializer, &output.contents.bytecode.length, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -577,7 +577,7 @@ inline bool HqModuleLoader::prv_loadTableOfContents(HqModuleLoader& output, HqRe
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadStrings(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadStrings(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -613,7 +613,7 @@ inline bool HqModuleLoader::prv_loadStrings(HqModuleLoader& output, HqReportHand
 	for(; output.strings.count < output.contents.stringTable.length; ++output.strings.count)
 	{
 		// Read the string.
-		if(!prv_readString(hSerializer, &output.strings.pData[output.strings.count], result, streamOffset))
+		if(!_readString(hSerializer, &output.strings.pData[output.strings.count], result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -635,7 +635,7 @@ inline bool HqModuleLoader::prv_loadStrings(HqModuleLoader& output, HqReportHand
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadDependencies(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadDependencies(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -671,7 +671,7 @@ inline bool HqModuleLoader::prv_loadDependencies(HqModuleLoader& output, HqRepor
 	for(; output.dependencies.count < output.contents.dependencyTable.length; ++output.dependencies.count)
 	{
 		// Read the global variable string.
-		if(!prv_readStringFromIndex(output, hSerializer, &output.dependencies.pData[output.dependencies.count], result, streamOffset))
+		if(!_readStringFromIndex(output, hSerializer, &output.dependencies.pData[output.dependencies.count], result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -693,7 +693,7 @@ inline bool HqModuleLoader::prv_loadDependencies(HqModuleLoader& output, HqRepor
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadGlobals(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadGlobals(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -729,7 +729,7 @@ inline bool HqModuleLoader::prv_loadGlobals(HqModuleLoader& output, HqReportHand
 	for(; output.globals.count < output.contents.globalTable.length; ++output.globals.count)
 	{
 		// Read the global variable string.
-		if(!prv_readStringFromIndex(output, hSerializer, &output.globals.pData[output.globals.count], result, streamOffset))
+		if(!_readStringFromIndex(output, hSerializer, &output.globals.pData[output.globals.count], result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -751,7 +751,7 @@ inline bool HqModuleLoader::prv_loadGlobals(HqModuleLoader& output, HqReportHand
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadObjectTypes(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadObjectTypes(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -792,7 +792,7 @@ inline bool HqModuleLoader::prv_loadObjectTypes(HqModuleLoader& output, HqReport
 		ObjectType::MemberDefinitionArray::Initialize(type.memberDefinitions);
 
 		// Read the object member name string.
-		if(!prv_readStringFromIndex(output, hSerializer, &type.pName, result, streamOffset))
+		if(!_readStringFromIndex(output, hSerializer, &type.pName, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -810,7 +810,7 @@ inline bool HqModuleLoader::prv_loadObjectTypes(HqModuleLoader& output, HqReport
 
 		// Read the number of members on the object.
 		uint32_t memberCount = 0;
-		if(!prv_readUint32(hSerializer, &memberCount, result, streamOffset))
+		if(!_readUint32(hSerializer, &memberCount, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -835,7 +835,7 @@ inline bool HqModuleLoader::prv_loadObjectTypes(HqModuleLoader& output, HqReport
 			ObjectType::MemberDefinition& memberDef = type.memberDefinitions.pData[type.memberDefinitions.count];
 
 			// Read the object member name string.
-			if(!prv_readStringFromIndex(output, hSerializer, &memberDef.pName, result, streamOffset))
+			if(!_readStringFromIndex(output, hSerializer, &memberDef.pName, result, streamOffset))
 			{
 				HqReportMessage(
 					hReport,
@@ -854,7 +854,7 @@ inline bool HqModuleLoader::prv_loadObjectTypes(HqModuleLoader& output, HqReport
 			}
 
 			// Read the type of the current object member.
-			if(!prv_readUint32AsUint8(hSerializer, &memberDef.type, result, streamOffset))
+			if(!_readUint32AsUint8(hSerializer, &memberDef.type, result, streamOffset))
 			{
 				HqReportMessage(
 					hReport,
@@ -879,7 +879,7 @@ inline bool HqModuleLoader::prv_loadObjectTypes(HqModuleLoader& output, HqReport
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadFunctions(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -920,7 +920,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 		Function::GuardedBlockArray::Initialize(func.guardedBlocks);
 
 		// Read the function signature string.
-		if(!prv_readStringFromIndex(output, hSerializer, &func.pSignature, result, streamOffset))
+		if(!_readStringFromIndex(output, hSerializer, &func.pSignature, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -937,7 +937,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 		}
 
 		// Read the function's number of input values.
-		if(!prv_readUint16(hSerializer, &func.numInputs, result, streamOffset))
+		if(!_readUint16(hSerializer, &func.numInputs, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -954,7 +954,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 		}
 
 		// Read the function's number of output values.
-		if(!prv_readUint16(hSerializer, &func.numOutputs, result, streamOffset))
+		if(!_readUint16(hSerializer, &func.numOutputs, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -971,7 +971,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 		}
 
 		// Read the function 'isNative' flag.
-		if(!prv_readBool32(hSerializer, &func.isNative, result, streamOffset))
+		if(!_readBool32(hSerializer, &func.isNative, result, streamOffset))
 		{
 			HqReportMessage(
 				hReport,
@@ -990,7 +990,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 		if(!func.isNative)
 		{
 			// Read the function's bytecode offset.
-			if(!prv_readUint32(hSerializer, &func.offset, result, streamOffset))
+			if(!_readUint32(hSerializer, &func.offset, result, streamOffset))
 			{
 				HqReportMessage(
 					hReport,
@@ -1007,7 +1007,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 			}
 
 			// Read the function's bytecode length.
-			if(!prv_readUint32(hSerializer, &func.length, result, streamOffset))
+			if(!_readUint32(hSerializer, &func.length, result, streamOffset))
 			{
 				HqReportMessage(
 					hReport,
@@ -1025,7 +1025,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 
 			// Read the number of guarded blocks belonging to the function.
 			uint32_t numGuardedBlocks = 0;
-			if(!prv_readUint32(hSerializer, &numGuardedBlocks, result, streamOffset))
+			if(!_readUint32(hSerializer, &numGuardedBlocks, result, streamOffset))
 			{
 				HqReportMessage(
 					hReport,
@@ -1053,7 +1053,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 				Function::GuardedBlock::ExceptionHandlerArray::Initialize(block.exceptionHandlers);
 
 				// Read the guarded block's bytecode offset.
-				if(!prv_readUint32(hSerializer, &block.offset, result, streamOffset))
+				if(!_readUint32(hSerializer, &block.offset, result, streamOffset))
 				{
 					HqReportMessage(
 						hReport,
@@ -1072,7 +1072,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 				}
 
 				// Read the guarded block's bytecode length.
-				if(!prv_readUint32(hSerializer, &block.length, result, streamOffset))
+				if(!_readUint32(hSerializer, &block.length, result, streamOffset))
 				{
 					HqReportMessage(
 						hReport,
@@ -1092,7 +1092,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 
 				// Read the guarded block's number of exception handlers.
 				uint32_t numExceptionHandlers = 0;
-				if(!prv_readUint32(hSerializer, &numExceptionHandlers, result, streamOffset))
+				if(!_readUint32(hSerializer, &numExceptionHandlers, result, streamOffset))
 				{
 					HqReportMessage(
 						hReport,
@@ -1120,7 +1120,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 					handler.pClassName = nullptr;
 
 					// Read the exception handler's bytecode offset.
-					if(!prv_readUint32(hSerializer, &handler.offset, result, streamOffset))
+					if(!_readUint32(hSerializer, &handler.offset, result, streamOffset))
 					{
 						HqReportMessage(
 							hReport,
@@ -1141,7 +1141,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 					}
 
 					// Read the exception handler's handled value type.
-					if(!prv_readUint32AsUint8(hSerializer, &handler.type, result, streamOffset))
+					if(!_readUint32AsUint8(hSerializer, &handler.type, result, streamOffset))
 					{
 						HqReportMessage(
 							hReport,
@@ -1164,7 +1164,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 					if(handler.type == HQ_VALUE_TYPE_OBJECT)
 					{
 						// Read the exception handler object type string.
-						if(!prv_readStringFromIndex(output, hSerializer, &handler.pClassName, result, streamOffset))
+						if(!_readStringFromIndex(output, hSerializer, &handler.pClassName, result, streamOffset))
 						{
 							HqReportMessage(
 								hReport,
@@ -1194,7 +1194,7 @@ inline bool HqModuleLoader::prv_loadFunctions(HqModuleLoader& output, HqReportHa
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadInitBytecode(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadInitBytecode(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -1230,7 +1230,7 @@ inline bool HqModuleLoader::prv_loadInitBytecode(HqModuleLoader& output, HqRepor
 	output.initBytecode.count = size_t(output.contents.initBytecode.length);
 
 	// Read the module init function bytecode into the output buffer.
-	if(!prv_readBuffer(hSerializer, output.initBytecode.count, output.initBytecode.pData, result, streamOffset))
+	if(!_readBuffer(hSerializer, output.initBytecode.count, output.initBytecode.pData, result, streamOffset))
 	{
 		HqReportMessage(
 			hReport,
@@ -1247,7 +1247,7 @@ inline bool HqModuleLoader::prv_loadInitBytecode(HqModuleLoader& output, HqRepor
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_loadBytecode(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
+inline bool HqModuleLoader::_loadBytecode(HqModuleLoader& output, HqReportHandle hReport, HqSerializerHandle hSerializer)
 {
 	assert(hSerializer != HQ_SERIALIZER_HANDLE_NULL);
 
@@ -1283,7 +1283,7 @@ inline bool HqModuleLoader::prv_loadBytecode(HqModuleLoader& output, HqReportHan
 	output.bytecode.count = size_t(output.contents.bytecode.length);
 
 	// Read the module bytecode into the output buffer.
-	if(!prv_readBuffer(hSerializer, output.bytecode.count, output.bytecode.pData, result, streamOffset))
+	if(!_readBuffer(hSerializer, output.bytecode.count, output.bytecode.pData, result, streamOffset))
 	{
 		HqReportMessage(
 			hReport,
@@ -1300,7 +1300,7 @@ inline bool HqModuleLoader::prv_loadBytecode(HqModuleLoader& output, HqReportHan
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqModuleLoader::prv_initialize(HqModuleLoader& output)
+inline void HqModuleLoader::_initialize(HqModuleLoader& output)
 {
 	memset(&output.fileHeader, 0, sizeof(output.fileHeader));
 	memset(&output.contents, 0, sizeof(output.contents));
@@ -1316,7 +1316,7 @@ inline void HqModuleLoader::prv_initialize(HqModuleLoader& output)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readBuffer(
+inline bool HqModuleLoader::_readBuffer(
 	HqSerializerHandle hSerializer,
 	const size_t bufferLength,
 	void* const pOutBuffer,
@@ -1336,7 +1336,7 @@ inline bool HqModuleLoader::prv_readBuffer(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readString(
+inline bool HqModuleLoader::_readString(
 	HqSerializerHandle hSerializer,
 	HqString** const ppOutString,
 	int& outResult,
@@ -1391,7 +1391,7 @@ inline bool HqModuleLoader::prv_readString(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readStringFromIndex(
+inline bool HqModuleLoader::_readStringFromIndex(
 	const HqModuleLoader& output,
 	HqSerializerHandle hSerializer,
 	HqString** const ppOutString,
@@ -1404,7 +1404,7 @@ inline bool HqModuleLoader::prv_readStringFromIndex(
 
 	// Read the string table index.
 	uint32_t stringIndex = 0;
-	if(!prv_readUint32(hSerializer, &stringIndex, outResult, outOffset))
+	if(!_readUint32(hSerializer, &stringIndex, outResult, outOffset))
 	{
 		return false;
 	}
@@ -1423,7 +1423,7 @@ inline bool HqModuleLoader::prv_readStringFromIndex(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readBool8(
+inline bool HqModuleLoader::_readBool8(
 	HqSerializerHandle hSerializer, 
 	bool* pOutValue, 
 	int& outResult, 
@@ -1441,7 +1441,7 @@ inline bool HqModuleLoader::prv_readBool8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readBool32(
+inline bool HqModuleLoader::_readBool32(
 	HqSerializerHandle hSerializer, 
 	bool* pOutValue, 
 	int& outResult, 
@@ -1459,7 +1459,7 @@ inline bool HqModuleLoader::prv_readBool32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readUint32(
+inline bool HqModuleLoader::_readUint32(
 	HqSerializerHandle hSerializer,
 	uint32_t* pOutValue,
 	int& outResult,
@@ -1477,7 +1477,7 @@ inline bool HqModuleLoader::prv_readUint32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readUint32AsUint8(
+inline bool HqModuleLoader::_readUint32AsUint8(
 	HqSerializerHandle hSerializer,
 	uint8_t* pOutValue,
 	int& outResult,
@@ -1498,7 +1498,7 @@ inline bool HqModuleLoader::prv_readUint32AsUint8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModuleLoader::prv_readUint16(
+inline bool HqModuleLoader::_readUint16(
 	HqSerializerHandle hSerializer,
 	uint16_t* pOutValue,
 	int& outResult,

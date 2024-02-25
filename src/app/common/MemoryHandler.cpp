@@ -30,15 +30,15 @@ void MemoryHandler::Initialize()
 {
 	auto mallocFn = [](const size_t memSize) -> void*
 	{
-		return MemoryHandler::Instance.prv_malloc(memSize);
+		return MemoryHandler::Instance._malloc(memSize);
 	};
 	auto reallocFn = [](void* const pMem, const size_t memSize) -> void*
 	{
-		return MemoryHandler::Instance.prv_realloc(pMem, memSize);
+		return MemoryHandler::Instance._realloc(pMem, memSize);
 	};
 	auto freeFn = [](void* const pMem)
 	{
-		return MemoryHandler::Instance.prv_free(pMem);
+		return MemoryHandler::Instance._free(pMem);
 	};
 
 	HqMemAllocator allocator;
@@ -90,7 +90,7 @@ void MemoryHandler::PrintStats(FILE* const pOutputStream) const
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void* MemoryHandler::prv_malloc(const size_t memSize)
+inline void* MemoryHandler::_malloc(const size_t memSize)
 {
 	assert(memSize > 0);
 
@@ -108,7 +108,7 @@ inline void* MemoryHandler::prv_malloc(const size_t memSize)
 	++m_totalAllocCount;
 	++m_mallocCount;
 
-	prv_onAlloc(memSize);
+	_onAlloc(memSize);
 	HqMutex::Unlock(m_mutex);
 
 	return pMem + 1;
@@ -116,7 +116,7 @@ inline void* MemoryHandler::prv_malloc(const size_t memSize)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void* MemoryHandler::prv_realloc(void* const pMem, const size_t memSize)
+inline void* MemoryHandler::_realloc(void* const pMem, const size_t memSize)
 {
 	assert(memSize > 0);
 
@@ -150,7 +150,7 @@ inline void* MemoryHandler::prv_realloc(void* const pMem, const size_t memSize)
 		++m_reallocCount;
 	}
 
-	prv_onAlloc(memSize);
+	_onAlloc(memSize);
 	HqMutex::Unlock(m_mutex);
 
 	return pNewMem + 1;
@@ -158,7 +158,7 @@ inline void* MemoryHandler::prv_realloc(void* const pMem, const size_t memSize)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void MemoryHandler::prv_free(void* const pMem)
+inline void MemoryHandler::_free(void* const pMem)
 {
 	size_t* const pAlloc = (pMem) ? (reinterpret_cast<size_t*>(pMem) - 1) : nullptr;
 
@@ -182,7 +182,7 @@ inline void MemoryHandler::prv_free(void* const pMem)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void MemoryHandler::prv_onAlloc(const size_t memSize)
+inline void MemoryHandler::_onAlloc(const size_t memSize)
 {
 	if(memSize > m_maxAllocSize)
 	{

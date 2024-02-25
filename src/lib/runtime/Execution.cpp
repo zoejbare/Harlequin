@@ -52,7 +52,7 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 
 	// Initialize the GC proxy to make this object visible to the garbage collector.
 	// Keep the execution context alive indefinitely until we're ready to dispose of it.
-	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, prv_onGcDiscovery, prv_onGcDestruct, pOutput, true, true);
+	HqGcProxy::Initialize(pOutput->gcProxy, hVm->gc, _onGcDiscovery, _onGcDestruct, pOutput, true, true);
 
 	HqFrame::HandleStack::Initialize(pOutput->frameStack, HQ_VM_FRAME_STACK_SIZE);
 	HqFrame::HandleStack::Initialize(pOutput->framePool, HQ_VM_FRAME_STACK_SIZE);
@@ -65,7 +65,7 @@ HqExecutionHandle HqExecution::Create(HqVmHandle hVm)
 	memset(pOutput->registers.pData, 0, sizeof(HqValueHandle) * pOutput->registers.count);
 
 	// Create the main execution fiber.
-	prv_createMainFiber(pOutput);
+	_createMainFiber(pOutput);
 
 	// The execution context has finished being created.
 	pOutput->created = true;
@@ -124,7 +124,7 @@ int HqExecution::Reset(HqExecutionHandle hExec)
 			// Dispose of the existing fiber before re-creating it.
 			HqFiber::Dispose(hExec->mainFiber);
 
-			prv_createMainFiber(hExec);
+			_createMainFiber(hExec);
 		}
 
 		hExec->firstRun = true;
@@ -490,12 +490,12 @@ void HqExecution::RaiseOpCodeException(HqExecutionHandle hExec, const int type, 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqExecution::prv_createMainFiber(HqExecutionHandle hExec)
+void HqExecution::_createMainFiber(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
 	HqFiberConfig runFiberConfig;
-	runFiberConfig.mainFn = prv_runFiberLoop;
+	runFiberConfig.mainFn = _runFiberLoop;
 	runFiberConfig.pArg = hExec;
 	runFiberConfig.stackSize = HQ_VM_THREAD_MINIMUM_STACK_SIZE;
 	strncpy(runFiberConfig.name, "ExecMainFiber", sizeof(runFiberConfig.name) - 1);
@@ -506,7 +506,7 @@ void HqExecution::prv_createMainFiber(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqExecution::prv_runFiberLoop(void* const pArg)
+void HqExecution::_runFiberLoop(void* const pArg)
 {
 	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pArg);
 
@@ -529,7 +529,7 @@ void HqExecution::prv_runFiberLoop(void* const pArg)
 				HqRwLock::ReadLock(hExec->hVm->gc.rwLock);
 			}
 
-			prv_runStep(hExec);
+			_runStep(hExec);
 
 			if(runMode == HQ_RUN_STEP)
 			{
@@ -551,7 +551,7 @@ void HqExecution::prv_runFiberLoop(void* const pArg)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqExecution::prv_runStep(HqExecutionHandle hExec)
+void HqExecution::_runStep(HqExecutionHandle hExec)
 {
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
 
@@ -570,7 +570,7 @@ void HqExecution::prv_runStep(HqExecutionHandle hExec)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
+void HqExecution::_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 {
 	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pOpaque);
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);
@@ -633,7 +633,7 @@ void HqExecution::prv_onGcDiscovery(HqGarbageCollector& gc, void* const pOpaque)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqExecution::prv_onGcDestruct(void* pObject)
+void HqExecution::_onGcDestruct(void* pObject)
 {
 	HqExecutionHandle hExec = reinterpret_cast<HqExecutionHandle>(pObject);
 	assert(hExec != HQ_EXECUTION_HANDLE_NULL);

@@ -60,7 +60,7 @@ struct HqScriptObject
 
 	static int SetMemberValue(HqScriptObject* const pObject, const uint32_t memberIndex, HqValueHandle hValue);
 
-	static HqScriptObject* prv_createObject(HqScriptObject*);
+	static HqScriptObject* _createObject(HqScriptObject*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

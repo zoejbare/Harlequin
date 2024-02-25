@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqVm::prv_setupEmbeddedExceptions(HqVmHandle hVm)
+void HqVm::_setupEmbeddedExceptions(HqVmHandle hVm)
 {
 	// Can't think of a more elegant way to handle this other than manually creating object values that match the
 	// definitions of the base exception types in the standard library. As long as the type names and member definitions

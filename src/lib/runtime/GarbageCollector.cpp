@@ -79,7 +79,7 @@ void HqGarbageCollector::Initialize(HqGarbageCollector& output, HqVmHandle hVm, 
 	output.lastPhase = 0;
 
 	// Reset the garbage collector so we're guaranteed to kick things off in a good state.
-	prv_reset(output);
+	_reset(output);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ void HqGarbageCollector::RunStep(HqGarbageCollector& gc)
 	gc.timeCheck = 0;
 
 	// Keep running phases while the GC reports there is more work that can be done right now.
-	while(prv_runPhase(gc) == _HQ_GC_RUN_MORE_WORK)
+	while(_runPhase(gc) == _HQ_GC_RUN_MORE_WORK)
 	{
 	}
 }
@@ -161,7 +161,7 @@ void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 	HqScopedWriteLock writeLock(gc.rwLock, gc.hVm->isGcThreadEnabled);
 
 	// Reset the garbage collector state so that running it again starts at the beginning of the 1st phase.
-	prv_reset(gc);
+	_reset(gc);
 
 	// To minimize the number of steps that need to be run, we cache the maximum time slice allowed for a single GC phase,
 	// then override it to 0, effectively disabling the timeout. This will allow us to run each phase as a single step.
@@ -171,7 +171,7 @@ void HqGarbageCollector::RunFull(HqGarbageCollector& gc)
 	// Run the garbage collector until all phases have been run.
 	for(;;)
 	{
-		const int result = prv_runPhase(gc);
+		const int result = _runPhase(gc);
 		assert(result != _HQ_GC_RUN_TIME_OUT);
 
 		if(result == _HQ_GC_RUN_COMPLETE)
@@ -197,7 +197,7 @@ void HqGarbageCollector::LinkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 
 	if(gc.pPendingHead)
 	{
-		prv_proxyInsertBefore(gc.pPendingHead, pGcProxy);
+		_proxyInsertBefore(gc.pPendingHead, pGcProxy);
 	}
 
 	gc.pPendingHead = pGcProxy;
@@ -229,7 +229,7 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 		}
 
 		// Unlink the current proxy from its current list.
-		prv_proxyUnlink(pGcProxy);
+		_proxyUnlink(pGcProxy);
 
 		if(pGcProxy->pending)
 		{
@@ -252,7 +252,7 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 			else
 			{
 				// Append this proxy to the end of the marked list.
-				prv_proxyInsertAfter(gc.pMarkedTail, pGcProxy);
+				_proxyInsertAfter(gc.pMarkedTail, pGcProxy);
 
 				// This proxy becomes the new tail of the marked list.
 				gc.pMarkedTail = pGcProxy;
@@ -272,7 +272,7 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 			else
 			{
 				// Append this proxy to the end of the marked leaf list.
-				prv_proxyInsertAfter(gc.pMarkedLeafTail, pGcProxy);
+				_proxyInsertAfter(gc.pMarkedLeafTail, pGcProxy);
 
 				// This proxy becomes the new tail of the marked leaf list.
 				gc.pMarkedLeafTail = pGcProxy;
@@ -283,7 +283,7 @@ void HqGarbageCollector::MarkObject(HqGarbageCollector& gc, HqGcProxy* const pGc
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
+inline int HqGarbageCollector::_runPhase(HqGarbageCollector& gc)
 {
 	const bool isPhaseStart = (gc.lastPhase != gc.phase);
 
@@ -301,7 +301,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pPendingHead)
 			{
-				if(prv_hasReachedTimeSlice(gc))
+				if(_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
 					timeOut = true;
@@ -311,12 +311,12 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 				HqGcProxy* const pCurrent = gc.pPendingHead;
 				HqGcProxy* const pNext = pCurrent->pNext;
 
-				prv_proxyUnlink(pCurrent);
+				_proxyUnlink(pCurrent);
 
 				// Link the object at the head of the pending list to the head of the active unmarked list.
 				if(gc.pUnmarkedHead)
 				{
-					prv_proxyInsertBefore(gc.pUnmarkedHead, pCurrent);
+					_proxyInsertBefore(gc.pUnmarkedHead, pCurrent);
 				}
 
 				// Clear the proxy's 'pending' state.
@@ -351,7 +351,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pIterCurrent)
 			{
-				if(prv_hasReachedTimeSlice(gc))
+				if(_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
 					timeOut = true;
@@ -389,7 +389,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// If we managed to reach this point right as we run out of time, it's better to signal the timeout now.
 			// Doing this will allow the global marking phase longer to run without potentially exceeding the time
 			// allowed for a single GC step.
-			if(prv_hasReachedTimeSlice(gc))
+			if(_hasReachedTimeSlice(gc))
 			{
 				// We ran out of time.
 				timeOut = true;
@@ -433,7 +433,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pIterCurrent)
 			{
-				if(prv_hasReachedTimeSlice(gc))
+				if(_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
 					timeOut = true;
@@ -461,7 +461,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 			// Iterate until the end of the list has been reached.
 			while(gc.pUnmarkedHead)
 			{
-				if(prv_hasReachedTimeSlice(gc))
+				if(_hasReachedTimeSlice(gc))
 				{
 					// We ran out of time.
 					timeOut = true;
@@ -514,7 +514,7 @@ inline int HqGarbageCollector::prv_runPhase(HqGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc)
+inline bool HqGarbageCollector::_hasReachedTimeSlice(HqGarbageCollector& gc)
 {
 	if(gc.maxTimeSlice == 0)
 	{
@@ -534,7 +534,7 @@ inline bool HqGarbageCollector::prv_hasReachedTimeSlice(HqGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
+inline void HqGarbageCollector::_reset(HqGarbageCollector& gc)
 {
 	if(gc.pMarkedLeafHead)
 	{
@@ -586,7 +586,7 @@ inline void HqGarbageCollector::prv_reset(HqGarbageCollector& gc)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqGarbageCollector::prv_proxyInsertBefore(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
+inline void HqGarbageCollector::_proxyInsertBefore(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
 {
 	assert(pGcListProxy != nullptr);
 	assert(pGcInsertProxy != nullptr);
@@ -606,7 +606,7 @@ inline void HqGarbageCollector::prv_proxyInsertBefore(HqGcProxy* const pGcListPr
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqGarbageCollector::prv_proxyInsertAfter(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
+inline void HqGarbageCollector::_proxyInsertAfter(HqGcProxy* const pGcListProxy, HqGcProxy* const pGcInsertProxy)
 {
 	assert(pGcListProxy != nullptr);
 	assert(pGcInsertProxy != nullptr);
@@ -626,7 +626,7 @@ inline void HqGarbageCollector::prv_proxyInsertAfter(HqGcProxy* const pGcListPro
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void HqGarbageCollector::prv_proxyUnlink(HqGcProxy* const pGcProxy)
+inline void HqGarbageCollector::_proxyUnlink(HqGcProxy* const pGcProxy)
 {
 	assert(pGcProxy != nullptr);
 

@@ -56,8 +56,8 @@ struct HqModule
 
 	static HqString* GetString(HqModuleHandle hModule, const uint32_t index, int* const pOutResult);
 
-	static bool prv_init(HqVmHandle, HqReportHandle, HqModuleHandle, HqModuleLoader&, HqString*);
-	static bool prv_verify(HqVmHandle, HqReportHandle, HqModuleLoader&, HqString*);
+	static bool _init(HqVmHandle, HqReportHandle, HqModuleHandle, HqModuleLoader&, HqString*);
+	static bool _verify(HqVmHandle, HqReportHandle, HqModuleLoader&, HqString*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

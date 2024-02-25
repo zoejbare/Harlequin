@@ -54,8 +54,8 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	HqValue::StringToHandleMap::Allocate(pOutput->globals);
 	HqScriptObject::StringToPtrMap::Allocate(pOutput->objectSchemas);
 
-	prv_setupOpCodes(pOutput);
-	prv_setupEmbeddedExceptions(pOutput);
+	_setupOpCodes(pOutput);
+	_setupEmbeddedExceptions(pOutput);
 
 	HqMutex::Create(pOutput->lock);
 
@@ -64,7 +64,7 @@ HqVmHandle HqVm::Create(const HqVmInit& init)
 	pOutput->isShuttingDown = false;
 
 	HqThreadConfig threadConfig;
-	threadConfig.mainFn = prv_gcThreadMain;
+	threadConfig.mainFn = _gcThreadMain;
 	threadConfig.pArg = pOutput;
 	threadConfig.stackSize = init.gcThreadStackSize;
 	snprintf(threadConfig.name, sizeof(threadConfig.name), "%s", "HqGarbageCollector");
@@ -392,7 +392,7 @@ void HqVm::EndianSwapOpCode(HqVmHandle hVm, HqDecoder& decoder, const uint32_t o
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int32_t HqVm::prv_gcThreadMain(void* const pArg)
+int32_t HqVm::_gcThreadMain(void* const pArg)
 {
 	HqVmHandle hVm = reinterpret_cast<HqVmHandle>(pArg);
 	assert(hVm != HQ_VM_HANDLE_NULL);

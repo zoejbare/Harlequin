@@ -23,7 +23,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void HqVm::prv_setupOpCodes(HqVmHandle hVm)
+void HqVm::_setupOpCodes(HqVmHandle hVm)
 {
 	#define _HQ_BIND_OP_CODE(op_code, name) \
 		hVm->opCodes.pData[HQ_OP_CODE_ ## op_code].execFn = OpCodeExec_ ## name; \

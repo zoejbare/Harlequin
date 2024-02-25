@@ -51,7 +51,7 @@ HqModuleHandle HqModule::Create(HqVmHandle hVm, HqString* const pModuleName, con
 		assert(pOutput != nullptr);
 
 		// Add the loaded module data to the runtime.
-		if(!prv_init(hVm, hReport, pOutput, loader, pModuleName))
+		if(!_init(hVm, hReport, pOutput, loader, pModuleName))
 		{
 			// The module data failed verification, so we abandon the load.
 			Dispose(pOutput);
@@ -91,7 +91,7 @@ HqModuleHandle HqModule::Create(
 		assert(pOutput != nullptr);
 
 		// Add the loaded module data to the runtime.
-		if(!prv_init(hVm, hReport, pOutput, loader, pModuleName))
+		if(!_init(hVm, hReport, pOutput, loader, pModuleName))
 		{
 			// The module data failed verification, so we abandon the load.
 			Dispose(pOutput);
@@ -204,7 +204,7 @@ HqString* HqModule::GetString(HqModuleHandle hModule, const uint32_t index, int*
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleHandle hModule, HqModuleLoader& loader, HqString* const pModuleName)
+inline bool HqModule::_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleHandle hModule, HqModuleLoader& loader, HqString* const pModuleName)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(hModule != HQ_MODULE_HANDLE_NULL);
@@ -258,7 +258,7 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 		HqScopedReadLock gcLock(hVm->gc.rwLock, hVm->isGcThreadEnabled);
 
 		// Verify the module can initialized in the VM.
-		if(!prv_verify(hVm, hReport, loader, pModuleName))
+		if(!_verify(hVm, hReport, loader, pModuleName))
 		{
 			return false;
 		}
@@ -573,7 +573,7 @@ inline bool HqModule::prv_init(HqVmHandle hVm, HqReportHandle hReport, HqModuleH
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline bool HqModule::prv_verify(HqVmHandle hVm, HqReportHandle hReport, HqModuleLoader& loader, HqString* const pModuleName)
+inline bool HqModule::_verify(HqVmHandle hVm, HqReportHandle hReport, HqModuleLoader& loader, HqString* const pModuleName)
 {
 	assert(hVm != HQ_VM_HANDLE_NULL);
 	assert(pModuleName != nullptr);

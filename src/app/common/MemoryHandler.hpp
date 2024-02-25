@@ -45,10 +45,10 @@ private:
 
 	MemoryHandler();
 
-	void* prv_malloc(size_t memSize);
-	void* prv_realloc(void* pMem, size_t memSize);
-	void prv_free(void* pMem);
-	void prv_onAlloc(size_t);
+	void* _malloc(size_t memSize);
+	void* _realloc(void* pMem, size_t memSize);
+	void _free(void* pMem);
+	void _onAlloc(size_t);
 
 	HqMutex m_mutex;
 

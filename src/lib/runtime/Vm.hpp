@@ -77,10 +77,10 @@ struct HqVm
 	static void DisassembleOpCode(HqVmHandle hVm, HqDisassemble& disasm, const uint32_t opCode);
 	static void EndianSwapOpCode(HqVmHandle hVm, HqDecoder& decoder, const uint32_t opCode);
 
-	static void prv_setupOpCodes(HqVmHandle);
-	static void prv_setupEmbeddedExceptions(HqVmHandle);
+	static void _setupOpCodes(HqVmHandle);
+	static void _setupEmbeddedExceptions(HqVmHandle);
 
-	static int32_t prv_gcThreadMain(void*);
+	static int32_t _gcThreadMain(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);

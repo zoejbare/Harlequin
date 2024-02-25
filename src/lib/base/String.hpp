@@ -59,7 +59,7 @@ struct HQ_BASE_API HqString
 	static void ToStrictUpperCase(HqString* pString);
 	static void ToStrictTitleCase(HqString* pString);
 
-	static void prv_onDestruct(void*);
+	static void _onDestruct(void*);
 
 	void* operator new(const size_t sizeInBytes);
 	void operator delete(void* const pObject);
