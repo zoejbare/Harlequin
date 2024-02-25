@@ -170,7 +170,7 @@ void Util::FinalizeFunctionSerializer(
 	const char* const functionSignature)
 {
 	// All functions should end with a RETURN opcode.
-	ASSERT_EQ(HqBytecodeWriteReturn(hSerializer), HQ_SUCCESS);
+	ASSERT_EQ(HqBytecodeEmitReturn(hSerializer), HQ_SUCCESS);
 
 	const void* const pFuncData = HqSerializerGetRawStreamPointer(hSerializer);
 	const size_t funcLength = HqSerializerGetStreamLength(hSerializer);

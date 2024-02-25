@@ -755,7 +755,7 @@ int HqModuleWriterSerialize(
 		HqSerializerSetEndianness(hInitSerializer, hSerializer->endianness);
 
 		// The default init function just returns.
-		HqBytecodeWriteReturn(hInitSerializer);
+		HqBytecodeEmitReturn(hInitSerializer);
 
 		const void* const pInitBytecode = HqSerializerGetRawStreamPointer(hInitSerializer);
 		const size_t initBytecodeLength = HqSerializerGetStreamLength(hInitSerializer);
@@ -831,7 +831,7 @@ int HqModuleWriterSerialize(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteNop(HqSerializerHandle hSerializer)
+int HqBytecodeEmitNop(HqSerializerHandle hSerializer)
 {
 	if(!hSerializer)
 	{
@@ -845,7 +845,7 @@ int HqBytecodeWriteNop(HqSerializerHandle hSerializer)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteAbort(HqSerializerHandle hSerializer)
+int HqBytecodeEmitAbort(HqSerializerHandle hSerializer)
 {
 	if(!hSerializer)
 	{
@@ -859,7 +859,7 @@ int HqBytecodeWriteAbort(HqSerializerHandle hSerializer)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteReturn(HqSerializerHandle hSerializer)
+int HqBytecodeEmitReturn(HqSerializerHandle hSerializer)
 {
 	if(!hSerializer)
 	{
@@ -873,7 +873,7 @@ int HqBytecodeWriteReturn(HqSerializerHandle hSerializer)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteYield(HqSerializerHandle hSerializer)
+int HqBytecodeEmitYield(HqSerializerHandle hSerializer)
 {
 	if(!hSerializer)
 	{
@@ -887,7 +887,7 @@ int HqBytecodeWriteYield(HqSerializerHandle hSerializer)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCall(HqSerializerHandle hSerializer, const uint32_t stringIndex)
+int HqBytecodeEmitCall(HqSerializerHandle hSerializer, const uint32_t stringIndex)
 {
 	if(!hSerializer)
 	{
@@ -902,7 +902,7 @@ int HqBytecodeWriteCall(HqSerializerHandle hSerializer, const uint32_t stringInd
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
+int HqBytecodeEmitCallValue(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
 	{
@@ -917,7 +917,7 @@ int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, const uint32_t gpRe
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
+int HqBytecodeEmitRaise(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
 	{
@@ -932,7 +932,7 @@ int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, const uint32_t gpRegInd
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmNull(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
+int HqBytecodeEmitLoadImmNull(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
 	{
@@ -947,7 +947,7 @@ int HqBytecodeWriteLoadImmNull(HqSerializerHandle hSerializer, const uint32_t gp
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmBool(
+int HqBytecodeEmitLoadImmBool(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const bool value)
@@ -966,7 +966,7 @@ int HqBytecodeWriteLoadImmBool(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmI8(
+int HqBytecodeEmitLoadImmI8(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int8_t value)
@@ -985,7 +985,7 @@ int HqBytecodeWriteLoadImmI8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmI16(
+int HqBytecodeEmitLoadImmI16(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int16_t value)
@@ -1004,7 +1004,7 @@ int HqBytecodeWriteLoadImmI16(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmI32(
+int HqBytecodeEmitLoadImmI32(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int32_t value)
@@ -1023,7 +1023,7 @@ int HqBytecodeWriteLoadImmI32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmI64(
+int HqBytecodeEmitLoadImmI64(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int64_t value)
@@ -1042,7 +1042,7 @@ int HqBytecodeWriteLoadImmI64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmU8(
+int HqBytecodeEmitLoadImmU8(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint8_t value)
@@ -1061,7 +1061,7 @@ int HqBytecodeWriteLoadImmU8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmU16(
+int HqBytecodeEmitLoadImmU16(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint16_t value)
@@ -1080,7 +1080,7 @@ int HqBytecodeWriteLoadImmU16(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmU32(
+int HqBytecodeEmitLoadImmU32(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t value)
@@ -1099,7 +1099,7 @@ int HqBytecodeWriteLoadImmU32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmU64(
+int HqBytecodeEmitLoadImmU64(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint64_t value)
@@ -1118,7 +1118,7 @@ int HqBytecodeWriteLoadImmU64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmF32(
+int HqBytecodeEmitLoadImmF32(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const float value)
@@ -1137,7 +1137,7 @@ int HqBytecodeWriteLoadImmF32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmF64(
+int HqBytecodeEmitLoadImmF64(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const double value)
@@ -1156,7 +1156,7 @@ int HqBytecodeWriteLoadImmF64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadImmStr(
+int HqBytecodeEmitLoadImmStr(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t stringIndex)
@@ -1175,7 +1175,7 @@ int HqBytecodeWriteLoadImmStr(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadGlobal(
+int HqBytecodeEmitLoadGlobal(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t stringIndex)
@@ -1194,7 +1194,7 @@ int HqBytecodeWriteLoadGlobal(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadParam(
+int HqBytecodeEmitLoadParam(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t ioRegIndex)
@@ -1213,7 +1213,7 @@ int HqBytecodeWriteLoadParam(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadVariable(
+int HqBytecodeEmitLoadVariable(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t vrRegIndex)
@@ -1232,7 +1232,7 @@ int HqBytecodeWriteLoadVariable(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadObject(
+int HqBytecodeEmitLoadObject(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
@@ -1253,7 +1253,7 @@ int HqBytecodeWriteLoadObject(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadArray(
+int HqBytecodeEmitLoadArray(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
@@ -1274,7 +1274,7 @@ int HqBytecodeWriteLoadArray(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLoadGrid(
+int HqBytecodeEmitLoadGrid(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
@@ -1299,7 +1299,7 @@ int HqBytecodeWriteLoadGrid(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteStoreGlobal(
+int HqBytecodeEmitStoreGlobal(
 	HqSerializerHandle hSerializer,
 	const uint32_t stringIndex,
 	const uint32_t gpRegIndex)
@@ -1318,7 +1318,7 @@ int HqBytecodeWriteStoreGlobal(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteStoreParam(
+int HqBytecodeEmitStoreParam(
 	HqSerializerHandle hSerializer,
 	const uint32_t ioRegIndex,
 	const uint32_t gpRegIndex)
@@ -1337,7 +1337,7 @@ int HqBytecodeWriteStoreParam(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteStoreVariable(
+int HqBytecodeEmitStoreVariable(
 	HqSerializerHandle hSerializer,
 	const uint32_t vrRegIndex,
 	const uint32_t gpRegIndex)
@@ -1356,7 +1356,7 @@ int HqBytecodeWriteStoreVariable(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteStoreObject(
+int HqBytecodeEmitStoreObject(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
@@ -1377,7 +1377,7 @@ int HqBytecodeWriteStoreObject(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteStoreArray(
+int HqBytecodeEmitStoreArray(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
@@ -1398,7 +1398,7 @@ int HqBytecodeWriteStoreArray(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteStoreGrid(
+int HqBytecodeEmitStoreGrid(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpDstRegIndex,
 	const uint32_t gpSrcRegIndex,
@@ -1423,7 +1423,7 @@ int HqBytecodeWriteStoreGrid(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWritePush(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
+int HqBytecodeEmitPush(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
 	{
@@ -1438,7 +1438,7 @@ int HqBytecodeWritePush(HqSerializerHandle hSerializer, const uint32_t gpRegInde
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWritePop(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
+int HqBytecodeEmitPop(HqSerializerHandle hSerializer, const uint32_t gpRegIndex)
 {
 	if(!hSerializer)
 	{
@@ -1453,7 +1453,7 @@ int HqBytecodeWritePop(HqSerializerHandle hSerializer, const uint32_t gpRegIndex
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteInitObject(
+int HqBytecodeEmitInitObject(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t stringIndex)
@@ -1472,7 +1472,7 @@ int HqBytecodeWriteInitObject(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteInitArray(
+int HqBytecodeEmitInitArray(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t initialCount)
@@ -1491,7 +1491,7 @@ int HqBytecodeWriteInitArray(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteInitGrid(
+int HqBytecodeEmitInitGrid(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t lengthX,
@@ -1514,7 +1514,7 @@ int HqBytecodeWriteInitGrid(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteInitFunction(
+int HqBytecodeEmitInitFunction(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const uint32_t stringIndex)
@@ -1533,7 +1533,7 @@ int HqBytecodeWriteInitFunction(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteJump(HqSerializerHandle hSerializer, const int32_t offset)
+int HqBytecodeEmitJump(HqSerializerHandle hSerializer, const int32_t offset)
 {
 	if(!hSerializer)
 	{
@@ -1548,7 +1548,7 @@ int HqBytecodeWriteJump(HqSerializerHandle hSerializer, const int32_t offset)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteJumpIfTrue(
+int HqBytecodeEmitJumpIfTrue(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int32_t offset)
@@ -1567,7 +1567,7 @@ int HqBytecodeWriteJumpIfTrue(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteJumpIfFalse(
+int HqBytecodeEmitJumpIfFalse(
 	HqSerializerHandle hSerializer,
 	const uint32_t gpRegIndex,
 	const int32_t offset)
@@ -1586,7 +1586,7 @@ int HqBytecodeWriteJumpIfFalse(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLength(
+int HqBytecodeEmitLength(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -1605,7 +1605,7 @@ int HqBytecodeWriteLength(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteAdd(
+int HqBytecodeEmitAdd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1626,7 +1626,7 @@ int HqBytecodeWriteAdd(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteSub(
+int HqBytecodeEmitSub(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1647,7 +1647,7 @@ int HqBytecodeWriteSub(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteMul(
+int HqBytecodeEmitMul(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1668,7 +1668,7 @@ int HqBytecodeWriteMul(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteDiv(
+int HqBytecodeEmitDiv(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1689,7 +1689,7 @@ int HqBytecodeWriteDiv(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteMod(
+int HqBytecodeEmitMod(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1710,7 +1710,7 @@ int HqBytecodeWriteMod(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteExp(
+int HqBytecodeEmitExp(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1731,7 +1731,7 @@ int HqBytecodeWriteExp(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteBitAnd(
+int HqBytecodeEmitBitAnd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1752,7 +1752,7 @@ int HqBytecodeWriteBitAnd(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteBitOr(
+int HqBytecodeEmitBitOr(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1773,7 +1773,7 @@ int HqBytecodeWriteBitOr(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteBitXor(
+int HqBytecodeEmitBitXor(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1794,7 +1794,7 @@ int HqBytecodeWriteBitXor(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteBitNot(
+int HqBytecodeEmitBitNot(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -1813,7 +1813,7 @@ int HqBytecodeWriteBitNot(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLeftShift(
+int HqBytecodeEmitLeftShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1834,7 +1834,7 @@ int HqBytecodeWriteLeftShift(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteRightShift(
+int HqBytecodeEmitRightShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1855,7 +1855,7 @@ int HqBytecodeWriteRightShift(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteLeftRotate(
+int HqBytecodeEmitLeftRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1876,7 +1876,7 @@ int HqBytecodeWriteLeftRotate(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteRightRotate(
+int HqBytecodeEmitRightRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -1897,7 +1897,7 @@ int HqBytecodeWriteRightRotate(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastInt8(
+int HqBytecodeEmitCastInt8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -1916,7 +1916,7 @@ int HqBytecodeWriteCastInt8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastInt16(
+int HqBytecodeEmitCastInt16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -1935,7 +1935,7 @@ int HqBytecodeWriteCastInt16(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastInt32(
+int HqBytecodeEmitCastInt32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -1954,7 +1954,7 @@ int HqBytecodeWriteCastInt32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastInt64(
+int HqBytecodeEmitCastInt64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -1973,7 +1973,7 @@ int HqBytecodeWriteCastInt64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastUint8(
+int HqBytecodeEmitCastUint8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -1992,7 +1992,7 @@ int HqBytecodeWriteCastUint8(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastUint16(
+int HqBytecodeEmitCastUint16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2011,7 +2011,7 @@ int HqBytecodeWriteCastUint16(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastUint32(
+int HqBytecodeEmitCastUint32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2030,7 +2030,7 @@ int HqBytecodeWriteCastUint32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastUint64(
+int HqBytecodeEmitCastUint64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2049,7 +2049,7 @@ int HqBytecodeWriteCastUint64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastFloat32(
+int HqBytecodeEmitCastFloat32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2068,7 +2068,7 @@ int HqBytecodeWriteCastFloat32(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastFloat64(
+int HqBytecodeEmitCastFloat64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2087,7 +2087,7 @@ int HqBytecodeWriteCastFloat64(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastBool(
+int HqBytecodeEmitCastBool(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2106,7 +2106,7 @@ int HqBytecodeWriteCastBool(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCastString(
+int HqBytecodeEmitCastString(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2125,7 +2125,7 @@ int HqBytecodeWriteCastString(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCompareEqual(
+int HqBytecodeEmitCompareEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -2146,7 +2146,7 @@ int HqBytecodeWriteCompareEqual(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCompareNotEqual(
+int HqBytecodeEmitCompareNotEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -2167,7 +2167,7 @@ int HqBytecodeWriteCompareNotEqual(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCompareLess(
+int HqBytecodeEmitCompareLess(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -2188,7 +2188,7 @@ int HqBytecodeWriteCompareLess(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCompareLessEqual(
+int HqBytecodeEmitCompareLessEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -2209,7 +2209,7 @@ int HqBytecodeWriteCompareLessEqual(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCompareGreater(
+int HqBytecodeEmitCompareGreater(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -2230,7 +2230,7 @@ int HqBytecodeWriteCompareGreater(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCompareGreaterEqual(
+int HqBytecodeEmitCompareGreaterEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
@@ -2251,7 +2251,7 @@ int HqBytecodeWriteCompareGreaterEqual(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteTest(
+int HqBytecodeEmitTest(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2270,7 +2270,7 @@ int HqBytecodeWriteTest(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteMove(
+int HqBytecodeEmitMove(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)
@@ -2289,7 +2289,7 @@ int HqBytecodeWriteMove(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int HqBytecodeWriteCopy(
+int HqBytecodeEmitCopy(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex)

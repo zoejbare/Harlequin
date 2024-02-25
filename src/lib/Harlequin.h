@@ -913,110 +913,110 @@ HQ_MAIN_API int HqModuleWriterSerialize(
 
 /*---------------------------------------------------------------------------------------------------------------------*/
 
-HQ_MAIN_API int HqBytecodeWriteNop(HqSerializerHandle hSerializer);
+HQ_MAIN_API int HqBytecodeEmitNop(HqSerializerHandle hSerializer);
 
-HQ_MAIN_API int HqBytecodeWriteAbort(HqSerializerHandle hSerializer);
+HQ_MAIN_API int HqBytecodeEmitAbort(HqSerializerHandle hSerializer);
 
-HQ_MAIN_API int HqBytecodeWriteReturn(HqSerializerHandle hSerializer);
+HQ_MAIN_API int HqBytecodeEmitReturn(HqSerializerHandle hSerializer);
 
-HQ_MAIN_API int HqBytecodeWriteYield(HqSerializerHandle hSerializer);
+HQ_MAIN_API int HqBytecodeEmitYield(HqSerializerHandle hSerializer);
 
-HQ_MAIN_API int HqBytecodeWriteCall(HqSerializerHandle hSerializer, uint32_t stringIndex);
+HQ_MAIN_API int HqBytecodeEmitCall(HqSerializerHandle hSerializer, uint32_t stringIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCallValue(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
+HQ_MAIN_API int HqBytecodeEmitCallValue(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteRaise(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
+HQ_MAIN_API int HqBytecodeEmitRaise(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmNull(HqSerializerHandle hSerializer,uint32_t gpRegIndex);
+HQ_MAIN_API int HqBytecodeEmitLoadImmNull(HqSerializerHandle hSerializer,uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmBool(
+HQ_MAIN_API int HqBytecodeEmitLoadImmBool(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	bool value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmI8(
+HQ_MAIN_API int HqBytecodeEmitLoadImmI8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int8_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmI16(
+HQ_MAIN_API int HqBytecodeEmitLoadImmI16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int16_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmI32(
+HQ_MAIN_API int HqBytecodeEmitLoadImmI32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int32_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmI64(
+HQ_MAIN_API int HqBytecodeEmitLoadImmI64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int64_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmU8(
+HQ_MAIN_API int HqBytecodeEmitLoadImmU8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint8_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmU16(
+HQ_MAIN_API int HqBytecodeEmitLoadImmU16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint16_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmU32(
+HQ_MAIN_API int HqBytecodeEmitLoadImmU32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmU64(
+HQ_MAIN_API int HqBytecodeEmitLoadImmU64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint64_t value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmF32(
+HQ_MAIN_API int HqBytecodeEmitLoadImmF32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	float value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmF64(
+HQ_MAIN_API int HqBytecodeEmitLoadImmF64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	double value);
 
-HQ_MAIN_API int HqBytecodeWriteLoadImmStr(
+HQ_MAIN_API int HqBytecodeEmitLoadImmStr(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t stringIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadGlobal(
+HQ_MAIN_API int HqBytecodeEmitLoadGlobal(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t stringIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadParam(
+HQ_MAIN_API int HqBytecodeEmitLoadParam(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t ioRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadVariable(
+HQ_MAIN_API int HqBytecodeEmitLoadVariable(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t vrRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadObject(
+HQ_MAIN_API int HqBytecodeEmitLoadObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
 	uint32_t memberIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadArray(
+HQ_MAIN_API int HqBytecodeEmitLoadArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
 	uint32_t gpArrIdxRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLoadGrid(
+HQ_MAIN_API int HqBytecodeEmitLoadGrid(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
@@ -1024,34 +1024,34 @@ HQ_MAIN_API int HqBytecodeWriteLoadGrid(
 	uint32_t gpGridIdxYRegIndex,
 	uint32_t gpGridIdxZRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteStoreGlobal(
+HQ_MAIN_API int HqBytecodeEmitStoreGlobal(
 	HqSerializerHandle hSerializer,
 	uint32_t stringIndex,
 	uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteStoreParam(
+HQ_MAIN_API int HqBytecodeEmitStoreParam(
 	HqSerializerHandle hSerializer,
 	uint32_t ioRegIndex,
 	uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteStoreVariable(
+HQ_MAIN_API int HqBytecodeEmitStoreVariable(
 	HqSerializerHandle hSerializer,
 	uint32_t vrRegIndex,
 	uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteStoreObject(
+HQ_MAIN_API int HqBytecodeEmitStoreObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
 	uint32_t memberIndex);
 
-HQ_MAIN_API int HqBytecodeWriteStoreArray(
+HQ_MAIN_API int HqBytecodeEmitStoreArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
 	uint32_t gpArrIdxRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteStoreGrid(
+HQ_MAIN_API int HqBytecodeEmitStoreGrid(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex,
@@ -1059,239 +1059,239 @@ HQ_MAIN_API int HqBytecodeWriteStoreGrid(
 	uint32_t gpGridIdxYRegIndex,
 	uint32_t gpGridIdxZRegIndex);
 
-HQ_MAIN_API int HqBytecodeWritePush(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
+HQ_MAIN_API int HqBytecodeEmitPush(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWritePop(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
+HQ_MAIN_API int HqBytecodeEmitPop(HqSerializerHandle hSerializer, uint32_t gpRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteInitObject(
+HQ_MAIN_API int HqBytecodeEmitInitObject(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t stringIndex);
 
-HQ_MAIN_API int HqBytecodeWriteInitArray(
+HQ_MAIN_API int HqBytecodeEmitInitArray(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t initialCount);
 
-HQ_MAIN_API int HqBytecodeWriteInitGrid(
+HQ_MAIN_API int HqBytecodeEmitInitGrid(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t lengthX,
 	uint32_t lengthY,
 	uint32_t lengthZ);
 
-HQ_MAIN_API int HqBytecodeWriteInitFunction(
+HQ_MAIN_API int HqBytecodeEmitInitFunction(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	uint32_t stringIndex);
 
-HQ_MAIN_API int HqBytecodeWriteJump(HqSerializerHandle hSerializer, int32_t offset);
+HQ_MAIN_API int HqBytecodeEmitJump(HqSerializerHandle hSerializer, int32_t offset);
 
-HQ_MAIN_API int HqBytecodeWriteJumpIfTrue(
+HQ_MAIN_API int HqBytecodeEmitJumpIfTrue(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int32_t offset);
 
-HQ_MAIN_API int HqBytecodeWriteJumpIfFalse(
+HQ_MAIN_API int HqBytecodeEmitJumpIfFalse(
 	HqSerializerHandle hSerializer,
 	uint32_t gpRegIndex,
 	int32_t offset);
 
-HQ_MAIN_API int HqBytecodeWriteLength(
+HQ_MAIN_API int HqBytecodeEmitLength(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteAdd(
+HQ_MAIN_API int HqBytecodeEmitAdd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteSub(
+HQ_MAIN_API int HqBytecodeEmitSub(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteMul(
+HQ_MAIN_API int HqBytecodeEmitMul(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteDiv(
+HQ_MAIN_API int HqBytecodeEmitDiv(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteMod(
+HQ_MAIN_API int HqBytecodeEmitMod(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteExp(
+HQ_MAIN_API int HqBytecodeEmitExp(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteBitAnd(
+HQ_MAIN_API int HqBytecodeEmitBitAnd(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteBitOr(
+HQ_MAIN_API int HqBytecodeEmitBitOr(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteBitXor(
+HQ_MAIN_API int HqBytecodeEmitBitXor(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteBitNot(
+HQ_MAIN_API int HqBytecodeEmitBitNot(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLeftShift(
+HQ_MAIN_API int HqBytecodeEmitLeftShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteRightShift(
+HQ_MAIN_API int HqBytecodeEmitRightShift(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteLeftRotate(
+HQ_MAIN_API int HqBytecodeEmitLeftRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteRightRotate(
+HQ_MAIN_API int HqBytecodeEmitRightRotate(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastInt8(
+HQ_MAIN_API int HqBytecodeEmitCastInt8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastInt16(
+HQ_MAIN_API int HqBytecodeEmitCastInt16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastInt32(
+HQ_MAIN_API int HqBytecodeEmitCastInt32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastInt64(
+HQ_MAIN_API int HqBytecodeEmitCastInt64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastUint8(
+HQ_MAIN_API int HqBytecodeEmitCastUint8(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastUint16(
+HQ_MAIN_API int HqBytecodeEmitCastUint16(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastUint32(
+HQ_MAIN_API int HqBytecodeEmitCastUint32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastUint64(
+HQ_MAIN_API int HqBytecodeEmitCastUint64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastFloat32(
+HQ_MAIN_API int HqBytecodeEmitCastFloat32(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastFloat64(
+HQ_MAIN_API int HqBytecodeEmitCastFloat64(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastBool(
+HQ_MAIN_API int HqBytecodeEmitCastBool(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCastString(
+HQ_MAIN_API int HqBytecodeEmitCastString(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCompareEqual(
+HQ_MAIN_API int HqBytecodeEmitCompareEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCompareNotEqual(
+HQ_MAIN_API int HqBytecodeEmitCompareNotEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCompareLess(
+HQ_MAIN_API int HqBytecodeEmitCompareLess(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCompareLessEqual(
+HQ_MAIN_API int HqBytecodeEmitCompareLessEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCompareGreater(
+HQ_MAIN_API int HqBytecodeEmitCompareGreater(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCompareGreaterEqual(
+HQ_MAIN_API int HqBytecodeEmitCompareGreaterEqual(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcLeftRegIndex,
 	uint32_t gpSrcRightRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteTest(
+HQ_MAIN_API int HqBytecodeEmitTest(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteMove(
+HQ_MAIN_API int HqBytecodeEmitMove(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);
 
-HQ_MAIN_API int HqBytecodeWriteCopy(
+HQ_MAIN_API int HqBytecodeEmitCopy(
 	HqSerializerHandle hSerializer,
 	uint32_t gpDstRegIndex,
 	uint32_t gpSrcRegIndex);

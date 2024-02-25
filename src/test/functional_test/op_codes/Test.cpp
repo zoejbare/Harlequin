@@ -71,7 +71,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Nop)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
-		const int writeNopInstrResult = HqBytecodeWriteNop(hFuncSerializer);
+		const int writeNopInstrResult = HqBytecodeEmitNop(hFuncSerializer);
 		ASSERT_EQ(writeNopInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -118,7 +118,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Abort)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
-		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+		const int writeAbortInstrResult = HqBytecodeEmitAbort(hFuncSerializer);
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -165,7 +165,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Yield)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -232,59 +232,59 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadImm)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM_NULL instruction.
-		const int writeLoadNullInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 0);
+		const int writeLoadNullInstrResult = HqBytecodeEmitLoadImmNull(hFuncSerializer, 0);
 		ASSERT_EQ(writeLoadNullInstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_BOOL instruction.
-		const int writeLoadBoolInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 1, true);
+		const int writeLoadBoolInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 1, true);
 		ASSERT_EQ(writeLoadBoolInstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_I8 instruction.
-		const int writeLoadI8InstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 2, testValueDataI8);
+		const int writeLoadI8InstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 2, testValueDataI8);
 		ASSERT_EQ(writeLoadI8InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_I16 instruction.
-		const int writeLoadI16InstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 3, testValueDataI16);
+		const int writeLoadI16InstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 3, testValueDataI16);
 		ASSERT_EQ(writeLoadI16InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_I32 instruction.
-		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 4, testValueDataI32);
+		const int writeLoadI32InstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 4, testValueDataI32);
 		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_I64 instruction.
-		const int writeLoadI64InstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 5, testValueDataI64);
+		const int writeLoadI64InstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 5, testValueDataI64);
 		ASSERT_EQ(writeLoadI64InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_U8 instruction.
-		const int writeLoadU8InstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 6, testValueDataU8);
+		const int writeLoadU8InstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 6, testValueDataU8);
 		ASSERT_EQ(writeLoadU8InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_U16 instruction.
-		const int writeLoadU16InstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 7, testValueDataU16);
+		const int writeLoadU16InstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 7, testValueDataU16);
 		ASSERT_EQ(writeLoadU16InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_U32 instruction.
-		const int writeLoadU32InstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 8, testValueDataU32);
+		const int writeLoadU32InstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 8, testValueDataU32);
 		ASSERT_EQ(writeLoadU32InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_U64 instruction.
-		const int writeLoadU64InstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 9, testValueDataU64);
+		const int writeLoadU64InstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 9, testValueDataU64);
 		ASSERT_EQ(writeLoadU64InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_F32 instruction.
-		const int writeLoadF32InstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 10, testValueDataF32);
+		const int writeLoadF32InstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 10, testValueDataF32);
 		ASSERT_EQ(writeLoadF32InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_F64 instruction.
-		const int writeLoadF64InstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 11, testValueDataF64);
+		const int writeLoadF64InstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 11, testValueDataF64);
 		ASSERT_EQ(writeLoadF64InstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_STR instruction.
-		const int writeLoadStrInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 12, 0);
+		const int writeLoadStrInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 12, 0);
 		ASSERT_EQ(writeLoadStrInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the GP registers in the frame.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -497,19 +497,19 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadGlobal_StoreGlobal)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM instruction so we have data to put in the global variable.
-		const int writeLoadImmInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		const int writeLoadImmInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 		ASSERT_EQ(writeLoadImmInstrResult, HQ_SUCCESS);
 
 		// Write the STORE_GLOBAL instruction to give the global variable some data.
-		const int writeStoreInstrResult = HqBytecodeWriteStoreGlobal(hFuncSerializer, stringIndex, 0);
+		const int writeStoreInstrResult = HqBytecodeEmitStoreGlobal(hFuncSerializer, stringIndex, 0);
 		ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 		// Write the LOAD_GLOBAL instruction to a GP register that we can inspect.
-		const int writeLoadGlobalInstrResult = HqBytecodeWriteLoadGlobal(hFuncSerializer, 1, stringIndex);
+		const int writeLoadGlobalInstrResult = HqBytecodeEmitLoadGlobal(hFuncSerializer, 1, stringIndex);
 		ASSERT_EQ(writeLoadGlobalInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -575,19 +575,19 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadParam_StoreParam)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM instruction so we have data to put in the I/O register.
-		const int writeLoadImmInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		const int writeLoadImmInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 		ASSERT_EQ(writeLoadImmInstrResult, HQ_SUCCESS);
 
 		// Write the STORE_PARAM instruction to have some data to work with.
-		const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 2, 0);
+		const int writeStoreInstrResult = HqBytecodeEmitStoreParam(hFuncSerializer, 2, 0);
 		ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 		// Write the LOAD_PARAM instruction to a GP register that we can inspect.
-		const int writeLoadGlobalInstrResult = HqBytecodeWriteLoadParam(hFuncSerializer, 1, 2);
+		const int writeLoadGlobalInstrResult = HqBytecodeEmitLoadParam(hFuncSerializer, 1, 2);
 		ASSERT_EQ(writeLoadGlobalInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -652,16 +652,16 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LoadVariable_StoreVariable)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM instruction so we have data to put in the I/O register.
-		ASSERT_EQ(HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData), HQ_SUCCESS);
 
 		// Write the STORE_VAR instruction to give have some data to work with.
-		ASSERT_EQ(HqBytecodeWriteStoreVariable(hFuncSerializer, 2, 0), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitStoreVariable(hFuncSerializer, 2, 0), HQ_SUCCESS);
 
 		// Write the LOAD_VAR instruction to a GP register that we can inspect.
-		ASSERT_EQ(HqBytecodeWriteLoadVariable(hFuncSerializer, 1, 2), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadVariable(hFuncSerializer, 1, 2), HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the values.
-		ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitYield(hFuncSerializer), HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
 		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -735,23 +735,23 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitObject_LoadObject_StoreObject)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_OBJECT instruction to initialize an instance of an object into a GP register.
-		const int writeInitObjInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 0, 0);
+		const int writeInitObjInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 0, 0);
 		ASSERT_EQ(writeInitObjInstrResult, HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I32 instruction so we have test data to assign to the object member.
-		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData);
+		const int writeLoadI32InstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 1, testValueData);
 		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
 
 		// Write the STORE_OBJECT instruction to set the object member to the test data.
-		const int writeStoreObjInstrResult = HqBytecodeWriteStoreObject(hFuncSerializer, 0, 1, memberIndex);
+		const int writeStoreObjInstrResult = HqBytecodeEmitStoreObject(hFuncSerializer, 0, 1, memberIndex);
 		ASSERT_EQ(writeStoreObjInstrResult, HQ_SUCCESS);
 
 		// Write the LOAD_OBJECT instruction to pull the object member data into a GP register for inspection.
-		const int writeLoadObjInstrResult = HqBytecodeWriteLoadObject(hFuncSerializer, 2, 0, memberIndex);
+		const int writeLoadObjInstrResult = HqBytecodeEmitLoadObject(hFuncSerializer, 2, 0, memberIndex);
 		ASSERT_EQ(writeLoadObjInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -837,22 +837,22 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitArray_LoadArray_StoreArray)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_ARRAY instruction to initialize an instance of an array into a GP register.
-		ASSERT_EQ(HqBytecodeWriteInitArray(hFuncSerializer, 0, 1), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitInitArray(hFuncSerializer, 0, 1), HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
-		ASSERT_EQ(HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadImmI32(hFuncSerializer, 1, testValueData), HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I8 instruction with the array index.
-		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 2, 0), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadImmI8(hFuncSerializer, 2, 0), HQ_SUCCESS);
 
 		// Write the STORE_ARRAY instruction to set the value at the specified array index to the test data.
-		ASSERT_EQ(HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 2), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitStoreArray(hFuncSerializer, 0, 1, 2), HQ_SUCCESS);
 
 		// Write the LOAD_ARRAY instruction to pull the value data from the array element into a GP register for inspection.
-		ASSERT_EQ(HqBytecodeWriteLoadArray(hFuncSerializer, 2, 0, 2), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadArray(hFuncSerializer, 2, 0, 2), HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the values.
-		ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitYield(hFuncSerializer), HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
 		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -932,28 +932,28 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), InitGrid_LoadGrid_StoreGrid)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_GRID instruction to initialize an instance of an grid into a GP register.
-		ASSERT_EQ(HqBytecodeWriteInitGrid(hFuncSerializer, 0, 1, 2, 3), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitInitGrid(hFuncSerializer, 0, 1, 2, 3), HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
-		ASSERT_EQ(HqBytecodeWriteLoadImmI32(hFuncSerializer, 1, testValueData), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadImmI32(hFuncSerializer, 1, testValueData), HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I8 instruction with the grid X index.
-		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 2, 0), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadImmI8(hFuncSerializer, 2, 0), HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I8 instruction with the grid Y index.
-		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 3, 1), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadImmI8(hFuncSerializer, 3, 1), HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I8 instruction with the grid Z index.
-		ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 4, 2), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadImmI8(hFuncSerializer, 4, 2), HQ_SUCCESS);
 
 		// Write the STORE_GRID instruction to set the value at the specified grid indices to the test data.
-		ASSERT_EQ(HqBytecodeWriteStoreGrid(hFuncSerializer, 0, 1, 2, 3, 4), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitStoreGrid(hFuncSerializer, 0, 1, 2, 3, 4), HQ_SUCCESS);
 
 		// Write the LOAD_GRID instruction to pull the value data from the grid element into a GP register for inspection.
-		ASSERT_EQ(HqBytecodeWriteLoadGrid(hFuncSerializer, 2, 0, 2, 3, 4), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitLoadGrid(hFuncSerializer, 2, 0, 2, 3, 4), HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the values.
-		ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
+		ASSERT_EQ(HqBytecodeEmitYield(hFuncSerializer), HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
 		Util::FinalizeFunctionSerializer(hFuncSerializer, hModuleWriter, Function::main);
@@ -1043,19 +1043,19 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write the instruction that we're going to test.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a STORE_PARAM instruction so we can pass the test value to the function.
-			const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 0, 0);
+			const int writeStoreInstrResult = HqBytecodeEmitStoreParam(hFuncSerializer, 0, 0);
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Write the CALL isntruction to invoke the function.
-			const int writeCallInstrResult = HqBytecodeWriteCall(hFuncSerializer, stringIndex);
+			const int writeCallInstrResult = HqBytecodeEmitCall(hFuncSerializer, stringIndex);
 			ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine the registers.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
@@ -1068,13 +1068,13 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Script)
 			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write a LOAD_PARAM instruction to load the input parameter to a GP register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadParam(hFuncSerializer, 0, 0);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadParam(hFuncSerializer, 0, 0);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a STORE_PARAM instruction to pass the input value back to the main function.
 			// We intentionally store this on different I/O register, otherwise the check would
 			// be meaningless since it would functionally be the same as not calling this function.
-			const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 1, 0);
+			const int writeStoreInstrResult = HqBytecodeEmitStoreParam(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
@@ -1143,19 +1143,19 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$Native)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
-		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 		// Write a STORE_PARAM instruction so we can pass the test value to the function.
-		const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 0, 0);
+		const int writeStoreInstrResult = HqBytecodeEmitStoreParam(hFuncSerializer, 0, 0);
 		ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 		// Write the CALL isntruction to invoke the function.
-		const int writeCallInstrResult = HqBytecodeWriteCall(hFuncSerializer, stringIndex);
+		const int writeCallInstrResult = HqBytecodeEmitCall(hFuncSerializer, stringIndex);
 		ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the registers.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -1223,7 +1223,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Call$NativeNonExistent)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the CALL isntruction to attempt invoke the function.
-		const int writeCallInstrResult = HqBytecodeWriteCall(hFuncSerializer, stringIndex);
+		const int writeCallInstrResult = HqBytecodeEmitCall(hFuncSerializer, stringIndex);
 		ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -1281,23 +1281,23 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write the instruction that we're going to test.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write the INIT_FUNC instruction to create a value pointing to the function we want to call.
-			const int writeInitFuncInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 1, stringIndex);
+			const int writeInitFuncInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 1, stringIndex);
 			ASSERT_EQ(writeInitFuncInstrResult, HQ_SUCCESS);
 
 			// Write a STORE_PARAM instruction so we can pass the test value to the function.
-			const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 0, 0);
+			const int writeStoreInstrResult = HqBytecodeEmitStoreParam(hFuncSerializer, 0, 0);
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Write the CALL_VALUE isntruction to invoke the function.
-			const int writeCallInstrResult = HqBytecodeWriteCallValue(hFuncSerializer, 1);
+			const int writeCallInstrResult = HqBytecodeEmitCallValue(hFuncSerializer, 1);
 			ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine the registers.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
@@ -1310,13 +1310,13 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Script)
 			Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 			// Write a LOAD_PARAM instruction to load the input parameter to a GP register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadParam(hFuncSerializer, 0, 0);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadParam(hFuncSerializer, 0, 0);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a STORE_PARAM instruction to pass the input value back to the main function.
 			// We intentionally store this on different I/O register, otherwise the check would
 			// be meaningless since it would functionally be the same as not calling this function.
-			const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 1, 0);
+			const int writeStoreInstrResult = HqBytecodeEmitStoreParam(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Finalize the serializer and add it to the module.
@@ -1385,23 +1385,23 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$Native)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the instruction that we're going to test.
-		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 		// Write the INIT_FUNC instruction to create a value pointing to the function we want to call.
-		const int writeInitFuncInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 1, stringIndex);
+		const int writeInitFuncInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 1, stringIndex);
 		ASSERT_EQ(writeInitFuncInstrResult, HQ_SUCCESS);
 
 		// Write a STORE_PARAM instruction so we can pass the test value to the function.
-		const int writeStoreInstrResult = HqBytecodeWriteStoreParam(hFuncSerializer, 0, 0);
+		const int writeStoreInstrResult = HqBytecodeEmitStoreParam(hFuncSerializer, 0, 0);
 		ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 		// Write the CALL_VALUE isntruction to invoke the function.
-		const int writeCallInstrResult = HqBytecodeWriteCallValue(hFuncSerializer, 1);
+		const int writeCallInstrResult = HqBytecodeEmitCallValue(hFuncSerializer, 1);
 		ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the registers.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -1469,11 +1469,11 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CallValue$NativeNonExistent)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the INIT_FUNC instruction to create a value pointing to the function we want to call.
-		const int writeInitFuncInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 0, stringIndex);
+		const int writeInitFuncInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 0, stringIndex);
 		ASSERT_EQ(writeInitFuncInstrResult, HQ_SUCCESS);
 
 		// Write the CALL_VALUE isntruction to invoke the function.
-		const int writeCallInstrResult = HqBytecodeWriteCallValue(hFuncSerializer, 0);
+		const int writeCallInstrResult = HqBytecodeEmitCallValue(hFuncSerializer, 0);
 		ASSERT_EQ(writeCallInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -1535,31 +1535,31 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Raise)
 		const size_t guardOffsetStart = HqSerializerGetStreamPosition(hFuncSerializer);
 
 		// Write the INIT_OBJECT instruction so we have a value to raise for the exception.
-		const int writeLoadObjInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 0, objStringIndex);
+		const int writeLoadObjInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 0, objStringIndex);
 		ASSERT_EQ(writeLoadObjInstrResult, HQ_SUCCESS);
 
 		// Write the RAISE instruction to test a handled exception.
-		const int writeRaiseHandledInstrResult = HqBytecodeWriteRaise(hFuncSerializer, 0);
+		const int writeRaiseHandledInstrResult = HqBytecodeEmitRaise(hFuncSerializer, 0);
 		ASSERT_EQ(writeRaiseHandledInstrResult, HQ_SUCCESS);
 
 		const size_t guardOffsetEnd = HqSerializerGetStreamPosition(hFuncSerializer);
 
 		// Write an ABORT instruction that should never get called.
-		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+		const int writeAbortInstrResult = HqBytecodeEmitAbort(hFuncSerializer);
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 		const size_t handlerOffset = HqSerializerGetStreamPosition(hFuncSerializer);
 
 		// Write a YIELD instruction so we can examine the exception value.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Write the LOAD_IMM_I32 instruction as our next exception value.
-		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		const int writeLoadI32InstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
 
 		// Write the RAISE instruction to test an unhandled exception.
-		const int writeRaiseUnhandledInstrResult = HqBytecodeWriteRaise(hFuncSerializer, 0);
+		const int writeRaiseUnhandledInstrResult = HqBytecodeEmitRaise(hFuncSerializer, 0);
 		ASSERT_EQ(writeRaiseUnhandledInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -1666,23 +1666,23 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Push_Pop)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write the LOAD_IMM_I32 instruction so we have test data to assign into the array.
-		const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueData);
+		const int writeLoadI32InstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueData);
 		ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
 
 		// Write a PUSH instruction so we have some data on the stack.
-		const int writePushInstrResult = HqBytecodeWritePush(hFuncSerializer, 0);
+		const int writePushInstrResult = HqBytecodeEmitPush(hFuncSerializer, 0);
 		ASSERT_EQ(writePushInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine the stack.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Write a POP instruction so we can pull the value we pushed into a GP register.
-		const int writePopInstrResult = HqBytecodeWritePop(hFuncSerializer, 1);
+		const int writePopInstrResult = HqBytecodeEmitPop(hFuncSerializer, 1);
 		ASSERT_EQ(writePopInstrResult, HQ_SUCCESS);
 
 		// Write one more YIELD instruction so we can examine the GP register.
-		const int writeAnotherYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeAnotherYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeAnotherYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -1771,7 +1771,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Jmp)
 
 		// Write an ABORT opcode just so we have an error case to check for
 		// in case the JMP opcode doesn't branch correctly.
-		const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+		const int writeAbortInstrResult = HqBytecodeEmitAbort(hFuncSerializer);
 		ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 		// End the block indicating where the instruction pointer will jump to.
@@ -1849,49 +1849,49 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 
 		// Load the immediate values that we expect evaluate to true.
 		{
-			const int writeLoadBoolInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 0, true);
+			const int writeLoadBoolInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 0, true);
 			ASSERT_EQ(writeLoadBoolInstrResult, HQ_SUCCESS);
 
-			const int writeLoadI8InstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 1, 123);
+			const int writeLoadI8InstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 1, 123);
 			ASSERT_EQ(writeLoadI8InstrResult, HQ_SUCCESS);
 
-			const int writeLoadI16InstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 2, 12345);
+			const int writeLoadI16InstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 2, 12345);
 			ASSERT_EQ(writeLoadI16InstrResult, HQ_SUCCESS);
 
-			const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 3, 1234567);
+			const int writeLoadI32InstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 3, 1234567);
 			ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
 
-			const int writeLoadI64InstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 4, 12345678901ll);
+			const int writeLoadI64InstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 4, 12345678901ll);
 			ASSERT_EQ(writeLoadI64InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU8InstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 5, 234);
+			const int writeLoadU8InstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 5, 234);
 			ASSERT_EQ(writeLoadU8InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU16InstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 6, 23456);
+			const int writeLoadU16InstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 6, 23456);
 			ASSERT_EQ(writeLoadU16InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU32InstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 7, 2345678u);
+			const int writeLoadU32InstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 7, 2345678u);
 			ASSERT_EQ(writeLoadU32InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU64InstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 8, 23456789012ull);
+			const int writeLoadU64InstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 8, 23456789012ull);
 			ASSERT_EQ(writeLoadU64InstrResult, HQ_SUCCESS);
 
-			const int writeLoadF32InstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 9, 3.1415926535897932384626433832795f);
+			const int writeLoadF32InstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 9, 3.1415926535897932384626433832795f);
 			ASSERT_EQ(writeLoadF32InstrResult, HQ_SUCCESS);
 
-			const int writeLoadF64InstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 10, 6.283185307179586476925286766559);
+			const int writeLoadF64InstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 10, 6.283185307179586476925286766559);
 			ASSERT_EQ(writeLoadF64InstrResult, HQ_SUCCESS);
 
-			const int writeLoadStrInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 11, nonEmptyStringIndex);
+			const int writeLoadStrInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 11, nonEmptyStringIndex);
 			ASSERT_EQ(writeLoadStrInstrResult, HQ_SUCCESS);
 
-			const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 12, 1);
+			const int writeInitArrayInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 12, 1);
 			ASSERT_EQ(writeInitArrayInstrResult, HQ_SUCCESS);
 
-			const int writeInitObjInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 13, objTypeStringIndex);
+			const int writeInitObjInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 13, objTypeStringIndex);
 			ASSERT_EQ(writeInitObjInstrResult, HQ_SUCCESS);
 
-			const int writeInitFuncInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 14, funcStringIndex);
+			const int writeInitFuncInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 14, funcStringIndex);
 			ASSERT_EQ(writeInitFuncInstrResult, HQ_SUCCESS);
 		}
 
@@ -1904,7 +1904,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfTrue)
 
 			// Write an ABORT opcode just so we have an error case to check for
 			// in case the jump operation doesn't branch correctly.
-			const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+			const int writeAbortInstrResult = HqBytecodeEmitAbort(hFuncSerializer);
 			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 			// End the block indicating where the instruction pointer will jump to.
@@ -1977,46 +1977,46 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 
 		// Load the immediate values that we expect evaluate to true.
 		{
-			const int writeLoadNullInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 0);
+			const int writeLoadNullInstrResult = HqBytecodeEmitLoadImmNull(hFuncSerializer, 0);
 			ASSERT_EQ(writeLoadNullInstrResult, HQ_SUCCESS);
 
-			const int writeLoadBoolInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 1, false);
+			const int writeLoadBoolInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 1, false);
 			ASSERT_EQ(writeLoadBoolInstrResult, HQ_SUCCESS);
 
-			const int writeLoadI8InstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 2, 0);
+			const int writeLoadI8InstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 2, 0);
 			ASSERT_EQ(writeLoadI8InstrResult, HQ_SUCCESS);
 
-			const int writeLoadI16InstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 3, 0);
+			const int writeLoadI16InstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 3, 0);
 			ASSERT_EQ(writeLoadI16InstrResult, HQ_SUCCESS);
 
-			const int writeLoadI32InstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 4, 0);
+			const int writeLoadI32InstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 4, 0);
 			ASSERT_EQ(writeLoadI32InstrResult, HQ_SUCCESS);
 
-			const int writeLoadI64InstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 5, 0);
+			const int writeLoadI64InstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 5, 0);
 			ASSERT_EQ(writeLoadI64InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU8InstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 6, 0);
+			const int writeLoadU8InstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 6, 0);
 			ASSERT_EQ(writeLoadU8InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU16InstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 7, 0);
+			const int writeLoadU16InstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 7, 0);
 			ASSERT_EQ(writeLoadU16InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU32InstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 8, 0);
+			const int writeLoadU32InstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 8, 0);
 			ASSERT_EQ(writeLoadU32InstrResult, HQ_SUCCESS);
 
-			const int writeLoadU64InstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 9, 0);
+			const int writeLoadU64InstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 9, 0);
 			ASSERT_EQ(writeLoadU64InstrResult, HQ_SUCCESS);
 
-			const int writeLoadF32InstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 10, 0.0f);
+			const int writeLoadF32InstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 10, 0.0f);
 			ASSERT_EQ(writeLoadF32InstrResult, HQ_SUCCESS);
 
-			const int writeLoadF64InstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 11, 0.0);
+			const int writeLoadF64InstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 11, 0.0);
 			ASSERT_EQ(writeLoadF64InstrResult, HQ_SUCCESS);
 
-			const int writeLoadStrInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 12, emptyStringIndex);
+			const int writeLoadStrInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 12, emptyStringIndex);
 			ASSERT_EQ(writeLoadStrInstrResult, HQ_SUCCESS);
 
-			const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 13, 0);
+			const int writeInitArrayInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 13, 0);
 			ASSERT_EQ(writeInitArrayInstrResult, HQ_SUCCESS);
 		}
 
@@ -2029,7 +2029,7 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), JmpIfFalse)
 
 			// Write an ABORT opcode just so we have an error case to check for
 			// in case the jump operation doesn't branch correctly.
-			const int writeAbortInstrResult = HqBytecodeWriteAbort(hFuncSerializer);
+			const int writeAbortInstrResult = HqBytecodeEmitAbort(hFuncSerializer);
 			ASSERT_EQ(writeAbortInstrResult, HQ_SUCCESS);
 
 			// End the block indicating where the instruction pointer will jump to.
@@ -2102,27 +2102,27 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Length)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write an INIT_ARRAY instruction to create an array we can query.
-		const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 0, arrayLength);
+		const int writeInitArrayInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 0, arrayLength);
 		ASSERT_EQ(writeInitArrayInstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_STR instruction to create a string value we can query.
-		const int writeLoadStrInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 1, stringIndex);
+		const int writeLoadStrInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 1, stringIndex);
 		ASSERT_EQ(writeLoadStrInstrResult, HQ_SUCCESS);
 
 		// Write a LOAD_IMM_NULL instruction to demonstrate a failure when attempting to get the length of an invalid value type.
-		const int writeLoadNullInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 2);
+		const int writeLoadNullInstrResult = HqBytecodeEmitLoadImmNull(hFuncSerializer, 2);
 		ASSERT_EQ(writeLoadNullInstrResult, HQ_SUCCESS);
 
 		// Write a LENGTH instruction to query the length of a string.
-		const int writeLengthStrInstrResult = HqBytecodeWriteLength(hFuncSerializer, 0, 0);
+		const int writeLengthStrInstrResult = HqBytecodeEmitLength(hFuncSerializer, 0, 0);
 		ASSERT_EQ(writeLengthStrInstrResult, HQ_SUCCESS);
 
 		// Write a LENGTH instruction to query the length of an array.
-		const int writeLengthArrayInstrResult = HqBytecodeWriteLength(hFuncSerializer, 1, 1);
+		const int writeLengthArrayInstrResult = HqBytecodeEmitLength(hFuncSerializer, 1, 1);
 		ASSERT_EQ(writeLengthArrayInstrResult, HQ_SUCCESS);
 
 		// Write a LENGTH instruction to attempt to query an invalid value type.
-		const int writeLengthNullInstrResult = HqBytecodeWriteLength(hFuncSerializer, 2, 2);
+		const int writeLengthNullInstrResult = HqBytecodeEmitLength(hFuncSerializer, 2, 2);
 		ASSERT_EQ(writeLengthNullInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -2250,162 +2250,162 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Add)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 0, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 1, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 2, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 3, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 4, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 5, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 6, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 7, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 8, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 9, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 9, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 10, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 10, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// string
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 11, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 11, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// array
 		{
-			const int writeInitLeftInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 20, leftArraySize);
+			const int writeInitLeftInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 20, leftArraySize);
 			ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-			const int writeInitRightInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 21, rightArraySize);
+			const int writeInitRightInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 21, rightArraySize);
 			ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-			const int writeAddInstrResult = HqBytecodeWriteAdd(hFuncSerializer, 12, 20, 21);
+			const int writeAddInstrResult = HqBytecodeEmitAdd(hFuncSerializer, 12, 20, 21);
 			ASSERT_EQ(writeAddInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -2650,138 +2650,138 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Sub)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 0, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 1, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 2, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 3, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 4, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 5, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 6, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 7, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 8, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 9, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 9, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeSubInstrResult = HqBytecodeWriteSub(hFuncSerializer, 10, 20, 21);
+			const int writeSubInstrResult = HqBytecodeEmitSub(hFuncSerializer, 10, 20, 21);
 			ASSERT_EQ(writeSubInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -2991,138 +2991,138 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mul)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 0, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 1, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 2, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 3, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 4, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 5, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 6, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 7, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 8, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 9, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 9, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeMulInstrResult = HqBytecodeWriteMul(hFuncSerializer, 10, 20, 21);
+			const int writeMulInstrResult = HqBytecodeEmitMul(hFuncSerializer, 10, 20, 21);
 			ASSERT_EQ(writeMulInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -3332,138 +3332,138 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Div)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 0, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 1, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 2, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 3, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 4, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 5, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 6, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 7, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 8, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 9, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 9, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeDivInstrResult = HqBytecodeWriteDiv(hFuncSerializer, 10, 20, 21);
+			const int writeDivInstrResult = HqBytecodeEmitDiv(hFuncSerializer, 10, 20, 21);
 			ASSERT_EQ(writeDivInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -3673,126 +3673,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Mod)
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 1, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 2, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 3, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 4, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 5, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 6, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 7, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 8, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 9, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 9, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeModInstrResult = HqBytecodeWriteMod(hFuncSerializer, 10, 20, 21);
+			const int writeModInstrResult = HqBytecodeEmitMod(hFuncSerializer, 10, 20, 21);
 			ASSERT_EQ(writeModInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -3990,138 +3990,138 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Exp)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 0, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 1, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 2, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 3, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 4, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 5, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 6, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 7, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 8, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 9, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 9, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeExpInstrResult = HqBytecodeWriteExp(hFuncSerializer, 10, 20, 21);
+			const int writeExpInstrResult = HqBytecodeEmitExp(hFuncSerializer, 10, 20, 21);
 			ASSERT_EQ(writeExpInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -4385,114 +4385,114 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitAnd)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 0, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 1, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 2, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 3, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 4, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 5, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 6, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 7, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitAndInstrResult = HqBytecodeWriteBitAnd(hFuncSerializer, 8, 20, 21);
+			const int writeBitAndInstrResult = HqBytecodeEmitBitAnd(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeBitAndInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -4672,114 +4672,114 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitOr)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 0, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 1, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 2, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 3, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 4, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 5, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 6, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 7, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitOrInstrResult = HqBytecodeWriteBitOr(hFuncSerializer, 8, 20, 21);
+			const int writeBitOrInstrResult = HqBytecodeEmitBitOr(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeBitOrInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -4959,114 +4959,114 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitXor)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 0, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 0, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 1, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 2, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 3, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 4, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 5, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 6, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 7, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitXor(hFuncSerializer, 8, 20, 21);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitXor(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -5231,87 +5231,87 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), BitNot)
 
 		// Bool
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 0, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 0, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, testValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, testValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 1, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 1, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, testValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, testValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 2, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 2, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, testValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, testValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 3, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 3, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, testValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, testValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 4, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 4, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, testValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, testValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 5, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 5, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, testValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, testValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 6, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 6, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, testValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, testValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 7, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 7, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, testValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, testValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeBitXorInstrResult = HqBytecodeWriteBitNot(hFuncSerializer, 8, 20);
+			const int writeBitXorInstrResult = HqBytecodeEmitBitNot(hFuncSerializer, 8, 20);
 			ASSERT_EQ(writeBitXorInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -5491,102 +5491,102 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftShift)
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 1, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 2, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 3, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 4, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 5, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 6, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 7, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftShiftInstrResult = HqBytecodeWriteLeftShift(hFuncSerializer, 8, 20, 21);
+			const int writeLeftShiftInstrResult = HqBytecodeEmitLeftShift(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeLeftShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -5754,102 +5754,102 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightShift)
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 1, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 2, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 3, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 4, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 5, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 6, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 7, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightShiftInstrResult = HqBytecodeWriteRightShift(hFuncSerializer, 8, 20, 21);
+			const int writeRightShiftInstrResult = HqBytecodeEmitRightShift(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeRightShiftInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -6017,102 +6017,102 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), LeftRotate)
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 1, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 2, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 3, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 4, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 5, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 6, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 7, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeLeftRotInstrResult = HqBytecodeWriteLeftRotate(hFuncSerializer, 8, 20, 21);
+			const int writeLeftRotInstrResult = HqBytecodeEmitLeftRotate(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeLeftRotInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -6296,102 +6296,102 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), RightRotate)
 
 		// int8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 1, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 1, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 2, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 2, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 3, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 3, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 4, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 4, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 5, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 5, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 6, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 6, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 7, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 7, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
-			const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+			const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 			ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-			const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+			const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 			ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-			const int writeRightRotInstrResult = HqBytecodeWriteRightRotate(hFuncSerializer, 8, 20, 21);
+			const int writeRightRotInstrResult = HqBytecodeEmitRightRotate(hFuncSerializer, 8, 20, 21);
 			ASSERT_EQ(writeRightRotInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine the values.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -6565,126 +6565,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastBool)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastBool(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastBool(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -6878,126 +6878,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt8)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt8(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt8(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -7211,126 +7211,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt16)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt16(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt16(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -7544,126 +7544,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt32)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt32(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt32(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -7877,126 +7877,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastInt64)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastInt64(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastInt64(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -8210,126 +8210,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint8)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint8(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint8(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -8543,126 +8543,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint16)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint16(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint16(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -8876,126 +8876,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint32)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint32(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint32(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -9209,126 +9209,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastUint64)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastUint64(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastUint64(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -9542,126 +9542,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat32)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat32(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat32(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -9875,126 +9875,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastFloat64)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastFloat64(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastFloat64(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -10208,126 +10208,126 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CastString)
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, tempRegIndex, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, tempRegIndex, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 0, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 0, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, tempRegIndex, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 1, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 1, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, tempRegIndex, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 2, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 2, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, tempRegIndex, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 3, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 3, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, tempRegIndex, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 4, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 4, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, tempRegIndex, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 5, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 5, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, tempRegIndex, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 6, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 6, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, tempRegIndex, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 7, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 7, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, tempRegIndex, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 8, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 8, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, tempRegIndex, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 9, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 9, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, tempRegIndex, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a CAST instruction to create a new value from the source register, casting to the destination type.
-			const int writeCopyInstrResult = HqBytecodeWriteCastString(hFuncSerializer, 10, tempRegIndex);
+			const int writeCopyInstrResult = HqBytecodeEmitCastString(hFuncSerializer, 10, tempRegIndex);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 		}
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -10577,171 +10577,171 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, leftValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, leftValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, leftValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, leftValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, leftValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, leftValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, leftValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, leftValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, leftStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// function
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, mainFuncStringIndex);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 21, mainFuncStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Same value reference
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, trueRegCount++, 20, 20);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, trueRegCount++, 20, 20);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -10749,186 +10749,186 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// array
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 20, leftArraySize);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 20, leftArraySize);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 21, rightArraySize);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 21, rightArraySize);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// object
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 20, objTypeStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 20, objTypeStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 21, objTypeStringIndex);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 21, objTypeStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// function
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, dummyFuncStringIndex);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 21, dummyFuncStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -11085,171 +11085,171 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareNotEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, leftValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, leftValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, leftValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, leftValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, leftValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, leftValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, leftValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, leftValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, leftStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// function
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, mainFuncStringIndex);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 21, mainFuncStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Same value reference
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 20);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, trueRegCount++, 20, 20);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -11257,186 +11257,186 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareNotEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// array
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 20, leftArraySize);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 20, leftArraySize);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 21, rightArraySize);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 21, rightArraySize);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// object
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 20, objTypeStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 20, objTypeStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 21, objTypeStringIndex);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 21, objTypeStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// function
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeInitRightInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 21, dummyFuncStringIndex);
+				const int writeInitRightInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 21, dummyFuncStringIndex);
 				ASSERT_EQ(writeInitRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareNotEqual(hFuncSerializer, falseRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -11569,150 +11569,150 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareLess)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -11720,159 +11720,159 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareLess)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, leftValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, leftValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, leftValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, leftValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, leftValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, leftValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, leftValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, leftValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, leftStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Same value reference
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLess(hFuncSerializer, equalToRegCount++, 20, 20);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLess(hFuncSerializer, equalToRegCount++, 20, 20);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -12005,150 +12005,150 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareLessEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, lessThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -12156,159 +12156,159 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareLessEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, leftValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, leftValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, leftValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, leftValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, leftValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, leftValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, leftValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, leftValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, leftStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Same value reference
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 20);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 20);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -12441,150 +12441,150 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareGreater)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, false);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, false);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -12592,159 +12592,159 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareGreater)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, leftValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, leftValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, leftValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, leftValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, leftValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, leftValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, leftValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, leftValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, leftStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Same value reference
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreater(hFuncSerializer, equalToRegCount++, 20, 20);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreater(hFuncSerializer, equalToRegCount++, 20, 20);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -12877,150 +12877,150 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareGreaterEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, false);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, false);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, rightValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, rightValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, rightValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, rightValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, rightValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, rightValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, rightValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, rightValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, rightValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, rightValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, rightValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, rightValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, rightValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, rightValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, rightValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, rightValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, rightValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, rightValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, rightStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, rightStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareGreaterEqual(hFuncSerializer, greaterThanRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -13028,159 +13028,159 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), CompareGreaterEqual)
 		{
 			// Bool
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 21, true);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 21, true);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, leftValueInt8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, leftValueInt8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 21, leftValueInt8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 21, leftValueInt8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, leftValueInt16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, leftValueInt16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 21, leftValueInt16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 21, leftValueInt16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, leftValueInt32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, leftValueInt32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 21, leftValueInt32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 21, leftValueInt32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, leftValueInt64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, leftValueInt64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 21, leftValueInt64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 21, leftValueInt64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, leftValueUint8);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, leftValueUint8);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 21, leftValueUint8);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 21, leftValueUint8);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, leftValueUint16);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, leftValueUint16);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 21, leftValueUint16);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 21, leftValueUint16);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, leftValueUint32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, leftValueUint32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 21, leftValueUint32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 21, leftValueUint32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, leftValueUint64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, leftValueUint64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 21, leftValueUint64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 21, leftValueUint64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, leftValueFloat32);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 21, leftValueFloat32);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, leftValueFloat64);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 21, leftValueFloat64);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadLeftInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, leftStringIndex);
+				const int writeLoadLeftInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, leftStringIndex);
 				ASSERT_EQ(writeLoadLeftInstrResult, HQ_SUCCESS);
 
-				const int writeLoadRightInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 21, leftStringIndex);
+				const int writeLoadRightInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 21, leftStringIndex);
 				ASSERT_EQ(writeLoadRightInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 21);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Same value reference
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeCompareInstrResult = HqBytecodeWriteCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 20);
+				const int writeCompareInstrResult = HqBytecodeEmitCompareLessEqual(hFuncSerializer, equalToRegCount++, 20, 20);
 				ASSERT_EQ(writeCompareInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -13307,141 +13307,141 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 		{
 			// Bool
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, true);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, true);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, testValueInt8);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, testValueInt8);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, testValueInt16);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, testValueInt16);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, testValueInt32);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, testValueInt32);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, testValueInt64);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, testValueInt64);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, testValueUint8);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, testValueUint8);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, testValueUint16);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, testValueUint16);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, testValueUint32);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, testValueUint32);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, testValueUint64);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, testValueUint64);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, testValueFloat32);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, testValueFloat32);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, testValueFloat64);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, testValueFloat64);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, nonEmptyStringIndex);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, nonEmptyStringIndex);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// array
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 20, 1);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 20, 1);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// object
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 20, objTypeStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 20, objTypeStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// function
 			{
-				const int writeInitLeftInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
+				const int writeInitLeftInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 20, mainFuncStringIndex);
 				ASSERT_EQ(writeInitLeftInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, trueRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, trueRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -13449,132 +13449,132 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Test)
 		{
 			// Bool
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 20, false);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 20, false);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int8
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int16
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int32
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// int64
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint8
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint16
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint32
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// uint64
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 20, 0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// float32
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 20, 0.0f);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 20, 0.0f);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// float64
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 20, 0.0);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 20, 0.0);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// string
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 20, emptyStringIndex);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 20, emptyStringIndex);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// array
 			{
-				const int writeInitArrayInstrResult = HqBytecodeWriteInitArray(hFuncSerializer, 20, 0);
+				const int writeInitArrayInstrResult = HqBytecodeEmitInitArray(hFuncSerializer, 20, 0);
 				ASSERT_EQ(writeInitArrayInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// null
 			{
-				const int writeLoadInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 20);
+				const int writeLoadInstrResult = HqBytecodeEmitLoadImmNull(hFuncSerializer, 20);
 				ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
-				const int writeTestInstrResult = HqBytecodeWriteTest(hFuncSerializer, falseRegCount++, 20);
+				const int writeTestInstrResult = HqBytecodeEmitTest(hFuncSerializer, falseRegCount++, 20);
 				ASSERT_EQ(writeTestInstrResult, HQ_SUCCESS);
 			}
 
 			// Write a YIELD instruction so we can examine the values.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
@@ -13660,15 +13660,15 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Move)
 		Util::SetupFunctionSerializer(hFuncSerializer, endianness);
 
 		// Write a LOAD_IMM_I8 instruction just to have a value to move.
-		const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 0, 123);
+		const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 0, 123);
 		ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 		// Write a MOV instruction to copy the value reference to another register.
-		const int writeMovInstrResult = HqBytecodeWriteMove(hFuncSerializer, 1, 0);
+		const int writeMovInstrResult = HqBytecodeEmitMove(hFuncSerializer, 1, 0);
 		ASSERT_EQ(writeMovInstrResult, HQ_SUCCESS);
 
 		// Write a YIELD instruction so we can examine register data.
-		const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+		const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 		ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 
 		// Finalize the serializer and add it to the module.
@@ -13763,255 +13763,255 @@ TEST_F(_HQ_TEST_NAME(TestOpCodes), Copy)
 		// null
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmNull(hFuncSerializer, 0);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmNull(hFuncSerializer, 0);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// bool
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmBool(hFuncSerializer, 0, true);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmBool(hFuncSerializer, 0, true);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// int8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 0, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 0, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// int16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI16(hFuncSerializer, 0, testValueInt16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI16(hFuncSerializer, 0, testValueInt16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// int32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI32(hFuncSerializer, 0, testValueInt32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI32(hFuncSerializer, 0, testValueInt32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// int64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI64(hFuncSerializer, 0, testValueInt64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI64(hFuncSerializer, 0, testValueInt64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// uint8
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU8(hFuncSerializer, 0, testValueUint8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU8(hFuncSerializer, 0, testValueUint8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// uint16
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU16(hFuncSerializer, 0, testValueUint16);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU16(hFuncSerializer, 0, testValueUint16);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// uint32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU32(hFuncSerializer, 0, testValueUint32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU32(hFuncSerializer, 0, testValueUint32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// uint64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmU64(hFuncSerializer, 0, testValueUint64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmU64(hFuncSerializer, 0, testValueUint64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// float32
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF32(hFuncSerializer, 0, testValueFloat32);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF32(hFuncSerializer, 0, testValueFloat32);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// float64
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmF64(hFuncSerializer, 0, testValueFloat64);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmF64(hFuncSerializer, 0, testValueFloat64);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// string
 		{
 			// Write an instruction to load the initial value into a register.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmStr(hFuncSerializer, 0, testStringIndex);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmStr(hFuncSerializer, 0, testStringIndex);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// function
 		{
 			// Write an INIT_FUNC instruction to create a function value.
-			const int writeLoadInstrResult = HqBytecodeWriteInitFunction(hFuncSerializer, 0, funcStringIndex);
+			const int writeLoadInstrResult = HqBytecodeEmitInitFunction(hFuncSerializer, 0, funcStringIndex);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// object
 		{
 			// Write an INIT_OBJECT instruction to create an array value.
-			const int writeInitInstrResult = HqBytecodeWriteInitObject(hFuncSerializer, 0, objTypeStringIndex);
+			const int writeInitInstrResult = HqBytecodeEmitInitObject(hFuncSerializer, 0, objTypeStringIndex);
 			ASSERT_EQ(writeInitInstrResult, HQ_SUCCESS);
 
 			// Write an instruction to load some data into a register that will live in the array.
-			const int writeLoadInstrResult = HqBytecodeWriteLoadImmI8(hFuncSerializer, 1, testValueInt8);
+			const int writeLoadInstrResult = HqBytecodeEmitLoadImmI8(hFuncSerializer, 1, testValueInt8);
 			ASSERT_EQ(writeLoadInstrResult, HQ_SUCCESS);
 
 			// Write a STORE_OBJECT instruction to place the loaded value in the object.
-			const int writeStoreInstrResult = HqBytecodeWriteStoreObject(hFuncSerializer, 0, 1, objMemberIndex);
+			const int writeStoreInstrResult = HqBytecodeEmitStoreObject(hFuncSerializer, 0, 1, objMemberIndex);
 			ASSERT_EQ(writeStoreInstrResult, HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			const int writeCopyInstrResult = HqBytecodeWriteCopy(hFuncSerializer, 1, 0);
+			const int writeCopyInstrResult = HqBytecodeEmitCopy(hFuncSerializer, 1, 0);
 			ASSERT_EQ(writeCopyInstrResult, HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			const int writeYieldInstrResult = HqBytecodeWriteYield(hFuncSerializer);
+			const int writeYieldInstrResult = HqBytecodeEmitYield(hFuncSerializer);
 			ASSERT_EQ(writeYieldInstrResult, HQ_SUCCESS);
 		}
 
 		// array
 		{
 			// Write an INIT_ARRAY instruction to create an array value.
-			ASSERT_EQ(HqBytecodeWriteInitArray(hFuncSerializer, 0, 1), HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeEmitInitArray(hFuncSerializer, 0, 1), HQ_SUCCESS);
 
 			// Write an instruction to load some data into a register that will live in the array.
-			ASSERT_EQ(HqBytecodeWriteLoadImmI8(hFuncSerializer, 1, testValueInt8), HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeEmitLoadImmI8(hFuncSerializer, 1, testValueInt8), HQ_SUCCESS);
 
 			// Write an instruction to store the array index.
-			ASSERT_EQ(HqBytecodeWriteLoadImmI16(hFuncSerializer, 2, 0), HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeEmitLoadImmI16(hFuncSerializer, 2, 0), HQ_SUCCESS);
 
 			// Write a STORE_ARRAY instruction to place the loaded value in the array.
-			ASSERT_EQ(HqBytecodeWriteStoreArray(hFuncSerializer, 0, 1, 2), HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeEmitStoreArray(hFuncSerializer, 0, 1, 2), HQ_SUCCESS);
 
 			// Write a COPY instruction to create a new value from the source register.
-			ASSERT_EQ(HqBytecodeWriteCopy(hFuncSerializer, 1, 0), HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeEmitCopy(hFuncSerializer, 1, 0), HQ_SUCCESS);
 
 			// Write a YIELD instruction so we can examine register data.
-			ASSERT_EQ(HqBytecodeWriteYield(hFuncSerializer), HQ_SUCCESS);
+			ASSERT_EQ(HqBytecodeEmitYield(hFuncSerializer), HQ_SUCCESS);
 		}
 
 		// Finalize the serializer and add it to the module.

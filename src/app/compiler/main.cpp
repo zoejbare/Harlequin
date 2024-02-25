@@ -128,15 +128,6 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	//--- BEGIN_TEMP ---
-	{
-		HqSourceFileHandle hSrcFile = HQ_SOURCE_FILE_HANDLE_NULL;
-		HqSourceFileLoad(&hSrcFile, hCtx, "../../../_support/test.hq");
-		HqSourceFileParse(hSrcFile);
-		HqSourceFileDispose(&hSrcFile);
-	}
-	//--- END_TEMP ---
-
 	HqModuleWriterHandle hModuleWriter = HQ_MODULE_WRITER_HANDLE_NULL;
 
 	// Create the module writer.
@@ -201,80 +192,80 @@ int main(int argc, char* argv[])
 
 	// void Program.Main()
 	{
-		HqBytecodeWriteLoadImmNull(hMainFuncSerializer, 0);
-		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 1, 20);
-		HqBytecodeWriteLoadImmI16(hMainFuncSerializer, 2, 31);
-		HqBytecodeWriteLoadImmI32(hMainFuncSerializer, 3, 123);
-		HqBytecodeWriteLoadImmI64(hMainFuncSerializer, 4, 53);
-		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 5, 23);
-		HqBytecodeWriteLoadImmU16(hMainFuncSerializer, 6, 75);
-		HqBytecodeWriteLoadImmU32(hMainFuncSerializer, 7, 86);
-		HqBytecodeWriteLoadImmU64(hMainFuncSerializer, 8, 97);
-		HqBytecodeWriteLoadImmF32(hMainFuncSerializer, 9, 3.1415926535897932384626433832795f);
-		HqBytecodeWriteLoadImmF64(hMainFuncSerializer, 10, 1.2345);
-		HqBytecodeWriteLoadImmF64(hMainFuncSerializer, 11, 2.3456);
-		HqBytecodeWriteLoadImmStr(hMainFuncSerializer, 12, stringIndex0);
-		HqBytecodeWriteLoadImmStr(hMainFuncSerializer, 13, stringIndex1);
-		HqBytecodeWriteLoadImmStr(hMainFuncSerializer, 14, stringIndex2);
-		HqBytecodeWriteNop(hMainFuncSerializer);
+		HqBytecodeEmitLoadImmNull(hMainFuncSerializer, 0);
+		HqBytecodeEmitLoadImmI8(hMainFuncSerializer, 1, 20);
+		HqBytecodeEmitLoadImmI16(hMainFuncSerializer, 2, 31);
+		HqBytecodeEmitLoadImmI32(hMainFuncSerializer, 3, 123);
+		HqBytecodeEmitLoadImmI64(hMainFuncSerializer, 4, 53);
+		HqBytecodeEmitLoadImmU8(hMainFuncSerializer, 5, 23);
+		HqBytecodeEmitLoadImmU16(hMainFuncSerializer, 6, 75);
+		HqBytecodeEmitLoadImmU32(hMainFuncSerializer, 7, 86);
+		HqBytecodeEmitLoadImmU64(hMainFuncSerializer, 8, 97);
+		HqBytecodeEmitLoadImmF32(hMainFuncSerializer, 9, 3.1415926535897932384626433832795f);
+		HqBytecodeEmitLoadImmF64(hMainFuncSerializer, 10, 1.2345);
+		HqBytecodeEmitLoadImmF64(hMainFuncSerializer, 11, 2.3456);
+		HqBytecodeEmitLoadImmStr(hMainFuncSerializer, 12, stringIndex0);
+		HqBytecodeEmitLoadImmStr(hMainFuncSerializer, 13, stringIndex1);
+		HqBytecodeEmitLoadImmStr(hMainFuncSerializer, 14, stringIndex2);
+		HqBytecodeEmitNop(hMainFuncSerializer);
 
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 0);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 1);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 2);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 3);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 4);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 5);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 6);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 7);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 8);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 9);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 10);
-		HqBytecodeWriteTest(hMainFuncSerializer, 20, 12);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 0);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 1);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 2);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 3);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 4);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 5);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 6);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 7);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 8);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 9);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 10);
+		HqBytecodeEmitTest(hMainFuncSerializer, 20, 12);
 
-		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 7);
-		HqBytecodeWriteMod(hMainFuncSerializer, 20, 1, 20);
+		HqBytecodeEmitLoadImmI8(hMainFuncSerializer, 20, 7);
+		HqBytecodeEmitMod(hMainFuncSerializer, 20, 1, 20);
 
-		HqBytecodeWriteLoadImmF32(hMainFuncSerializer, 20, 0.5772156649015328606065120900824f);
-		HqBytecodeWriteMod(hMainFuncSerializer, 20, 9, 20);
+		HqBytecodeEmitLoadImmF32(hMainFuncSerializer, 20, 0.5772156649015328606065120900824f);
+		HqBytecodeEmitMod(hMainFuncSerializer, 20, 9, 20);
 
-		HqBytecodeWriteLoadImmI32(hMainFuncSerializer, 20, 3);
-		HqBytecodeWriteExp(hMainFuncSerializer, 20, 3, 20);
+		HqBytecodeEmitLoadImmI32(hMainFuncSerializer, 20, 3);
+		HqBytecodeEmitExp(hMainFuncSerializer, 20, 3, 20);
 
-		HqBytecodeWriteLoadImmF32(hMainFuncSerializer, 20, 2.7182818284590452353602874713527f);
-		HqBytecodeWriteExp(hMainFuncSerializer, 20, 9, 20);
+		HqBytecodeEmitLoadImmF32(hMainFuncSerializer, 20, 2.7182818284590452353602874713527f);
+		HqBytecodeEmitExp(hMainFuncSerializer, 20, 9, 20);
 
-		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 100);
-		HqBytecodeWriteBitAnd(hMainFuncSerializer, 20, 1, 20);
+		HqBytecodeEmitLoadImmI8(hMainFuncSerializer, 20, 100);
+		HqBytecodeEmitBitAnd(hMainFuncSerializer, 20, 1, 20);
 
-		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 100);
-		HqBytecodeWriteBitOr(hMainFuncSerializer, 20, 1, 20);
+		HqBytecodeEmitLoadImmI8(hMainFuncSerializer, 20, 100);
+		HqBytecodeEmitBitOr(hMainFuncSerializer, 20, 1, 20);
 
-		HqBytecodeWriteLoadImmI8(hMainFuncSerializer, 20, 100);
-		HqBytecodeWriteBitXor(hMainFuncSerializer, 20, 1, 20);
+		HqBytecodeEmitLoadImmI8(hMainFuncSerializer, 20, 100);
+		HqBytecodeEmitBitXor(hMainFuncSerializer, 20, 1, 20);
 
-		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 3);
-		HqBytecodeWriteLeftShift(hMainFuncSerializer, 20, 5, 20);
+		HqBytecodeEmitLoadImmU8(hMainFuncSerializer, 20, 3);
+		HqBytecodeEmitLeftShift(hMainFuncSerializer, 20, 5, 20);
 
-		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 2);
-		HqBytecodeWriteRightShift(hMainFuncSerializer, 20, 5, 20);
+		HqBytecodeEmitLoadImmU8(hMainFuncSerializer, 20, 2);
+		HqBytecodeEmitRightShift(hMainFuncSerializer, 20, 5, 20);
 
-		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 2);
-		HqBytecodeWriteLeftRotate(hMainFuncSerializer, 20, 5, 20);
+		HqBytecodeEmitLoadImmU8(hMainFuncSerializer, 20, 2);
+		HqBytecodeEmitLeftRotate(hMainFuncSerializer, 20, 5, 20);
 
-		HqBytecodeWriteLoadImmU8(hMainFuncSerializer, 20, 4);
-		HqBytecodeWriteRightRotate(hMainFuncSerializer, 20, 5, 20);
+		HqBytecodeEmitLoadImmU8(hMainFuncSerializer, 20, 4);
+		HqBytecodeEmitRightRotate(hMainFuncSerializer, 20, 5, 20);
 
-		HqBytecodeWriteLoadGlobal(hMainFuncSerializer, 15, stringIndex2);
-		HqBytecodeWriteStoreGlobal(hMainFuncSerializer, stringIndex2, 13);
+		HqBytecodeEmitLoadGlobal(hMainFuncSerializer, 15, stringIndex2);
+		HqBytecodeEmitStoreGlobal(hMainFuncSerializer, stringIndex2, 13);
 
-		HqBytecodeWriteStoreParam(hMainFuncSerializer, 0, 11);
-		HqBytecodeWriteCall(hMainFuncSerializer, stringIndex3);
-		HqBytecodeWriteLoadParam(hMainFuncSerializer, 8, 0);
+		HqBytecodeEmitStoreParam(hMainFuncSerializer, 0, 11);
+		HqBytecodeEmitCall(hMainFuncSerializer, stringIndex3);
+		HqBytecodeEmitLoadParam(hMainFuncSerializer, 8, 0);
 
-		HqBytecodeWriteInitFunction(hMainFuncSerializer, 0, stringIndex13);
-		HqBytecodeWriteCallValue(hMainFuncSerializer, 0);
+		HqBytecodeEmitInitFunction(hMainFuncSerializer, 0, stringIndex13);
+		HqBytecodeEmitCallValue(hMainFuncSerializer, 0);
 
-		HqBytecodeWriteReturn(hMainFuncSerializer);
+		HqBytecodeEmitReturn(hMainFuncSerializer);
 
 		const void* const pMainFuncData = HqSerializerGetRawStreamPointer(hMainFuncSerializer);
 		const size_t mainFuncLength = HqSerializerGetStreamLength(hMainFuncSerializer);
@@ -284,67 +275,67 @@ int main(int argc, char* argv[])
 
 	// int32 Program.DoWork(float64)
 	{
-		HqBytecodeWriteLoadImmF64(hSubFuncSerializer, 0, 1.2345);
-		HqBytecodeWriteMove(hSubFuncSerializer, 1, 0);
+		HqBytecodeEmitLoadImmF64(hSubFuncSerializer, 0, 1.2345);
+		HqBytecodeEmitMove(hSubFuncSerializer, 1, 0);
 
-		HqBytecodeWritePush(hSubFuncSerializer, 0);
-		HqBytecodeWriteYield(hSubFuncSerializer);
-		HqBytecodeWritePop(hSubFuncSerializer, 1);
+		HqBytecodeEmitPush(hSubFuncSerializer, 0);
+		HqBytecodeEmitYield(hSubFuncSerializer);
+		HqBytecodeEmitPop(hSubFuncSerializer, 1);
 
-		HqBytecodeWriteInitObject(hSubFuncSerializer, 2, stringIndex8);
-		HqBytecodeWriteLoadImmI32(hSubFuncSerializer, 1, 5);
-		HqBytecodeWriteStoreObject(hSubFuncSerializer, 2, 1, 0);
+		HqBytecodeEmitInitObject(hSubFuncSerializer, 2, stringIndex8);
+		HqBytecodeEmitLoadImmI32(hSubFuncSerializer, 1, 5);
+		HqBytecodeEmitStoreObject(hSubFuncSerializer, 2, 1, 0);
 
-		HqBytecodeWriteMove(hSubFuncSerializer, 3, 2);
-		HqBytecodeWriteCompareEqual(hSubFuncSerializer, 3, 2, 3);
+		HqBytecodeEmitMove(hSubFuncSerializer, 3, 2);
+		HqBytecodeEmitCompareEqual(hSubFuncSerializer, 3, 2, 3);
 
-		HqBytecodeWriteCopy(hSubFuncSerializer, 3, 2);
-		HqBytecodeWriteCompareEqual(hSubFuncSerializer, 3, 2, 3);
+		HqBytecodeEmitCopy(hSubFuncSerializer, 3, 2);
+		HqBytecodeEmitCompareEqual(hSubFuncSerializer, 3, 2, 3);
 
-		HqBytecodeWriteLoadImmStr(hSubFuncSerializer, 0, stringIndex0);
-		HqBytecodeWriteLoadImmStr(hSubFuncSerializer, 1, stringIndex1);
-		HqBytecodeWriteAdd(hSubFuncSerializer, 0, 0, 1);
+		HqBytecodeEmitLoadImmStr(hSubFuncSerializer, 0, stringIndex0);
+		HqBytecodeEmitLoadImmStr(hSubFuncSerializer, 1, stringIndex1);
+		HqBytecodeEmitAdd(hSubFuncSerializer, 0, 0, 1);
 
-		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
-		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex4);
+		HqBytecodeEmitStoreParam(hSubFuncSerializer, 0, 0);
+		HqBytecodeEmitCall(hSubFuncSerializer, stringIndex4);
 
-		HqBytecodeWriteLength(hSubFuncSerializer, 1, 0);
-		HqBytecodeWriteCastString(hSubFuncSerializer, 1, 1);
+		HqBytecodeEmitLength(hSubFuncSerializer, 1, 0);
+		HqBytecodeEmitCastString(hSubFuncSerializer, 1, 1);
 
-		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 1);
-		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex4);
+		HqBytecodeEmitStoreParam(hSubFuncSerializer, 0, 1);
+		HqBytecodeEmitCall(hSubFuncSerializer, stringIndex4);
 
-		HqBytecodeWriteLoadImmI32(hSubFuncSerializer, 0, 5);
-		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
-		HqBytecodeWriteStoreParam(hSubFuncSerializer, 1, 0);
+		HqBytecodeEmitLoadImmI32(hSubFuncSerializer, 0, 5);
+		HqBytecodeEmitStoreParam(hSubFuncSerializer, 0, 0);
+		HqBytecodeEmitStoreParam(hSubFuncSerializer, 1, 0);
 
 		const size_t loopOffsetStart = HqSerializerGetStreamPosition(hSubFuncSerializer);
 
-		HqBytecodeWriteLoadObject(hSubFuncSerializer, 0, 2, 0);
-		HqBytecodeWriteCastString(hSubFuncSerializer, 1, 0);
+		HqBytecodeEmitLoadObject(hSubFuncSerializer, 0, 2, 0);
+		HqBytecodeEmitCastString(hSubFuncSerializer, 1, 0);
 
-		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 1);
-		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex4);
+		HqBytecodeEmitStoreParam(hSubFuncSerializer, 0, 1);
+		HqBytecodeEmitCall(hSubFuncSerializer, stringIndex4);
 
-		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
-		HqBytecodeWriteCall(hSubFuncSerializer, stringIndex10);
-		HqBytecodeWriteLoadParam(hSubFuncSerializer, 0, 0);
-		HqBytecodeWriteStoreObject(hSubFuncSerializer, 2, 0, 0);
+		HqBytecodeEmitStoreParam(hSubFuncSerializer, 0, 0);
+		HqBytecodeEmitCall(hSubFuncSerializer, stringIndex10);
+		HqBytecodeEmitLoadParam(hSubFuncSerializer, 0, 0);
+		HqBytecodeEmitStoreObject(hSubFuncSerializer, 2, 0, 0);
 
-		HqBytecodeWriteLoadParam(hSubFuncSerializer, 0, 1);
-		HqBytecodeWriteJumpIfTrue(hSubFuncSerializer, 0, 20);
+		HqBytecodeEmitLoadParam(hSubFuncSerializer, 0, 1);
+		HqBytecodeEmitJumpIfTrue(hSubFuncSerializer, 0, 20);
 
 		const size_t loopOffsetEnd = HqSerializerGetStreamPosition(hSubFuncSerializer);
 		const int32_t loopRelativeOffset = int32_t(loopOffsetEnd - loopOffsetStart);
 
-		HqBytecodeWriteJump(hSubFuncSerializer, -loopRelativeOffset);
+		HqBytecodeEmitJump(hSubFuncSerializer, -loopRelativeOffset);
 
-		HqBytecodeWriteLoadObject(hSubFuncSerializer, 0, 2, 0);
-		HqBytecodeWriteJumpIfFalse(hSubFuncSerializer, 0, 16);
-		HqBytecodeWriteAbort(hSubFuncSerializer);
+		HqBytecodeEmitLoadObject(hSubFuncSerializer, 0, 2, 0);
+		HqBytecodeEmitJumpIfFalse(hSubFuncSerializer, 0, 16);
+		HqBytecodeEmitAbort(hSubFuncSerializer);
 
-		HqBytecodeWriteStoreParam(hSubFuncSerializer, 0, 0);
-		HqBytecodeWriteReturn(hSubFuncSerializer);
+		HqBytecodeEmitStoreParam(hSubFuncSerializer, 0, 0);
+		HqBytecodeEmitReturn(hSubFuncSerializer);
 
 		const void* const pFuncData = HqSerializerGetRawStreamPointer(hSubFuncSerializer);
 		const size_t funcLength = HqSerializerGetStreamLength(hSubFuncSerializer);
@@ -372,46 +363,46 @@ int main(int argc, char* argv[])
 		{
 			tryBlockStart = HqSerializerGetStreamPosition(hExcFuncSerializer);
 
-			HqBytecodeWriteInitArray(hExcFuncSerializer, 0, 4);
-			HqBytecodeWriteLoadImmStr(hExcFuncSerializer, 1, stringIndex14);
-			HqBytecodeWriteLoadImmStr(hExcFuncSerializer, 2, stringIndex8);
-			HqBytecodeWriteLoadImmU8(hExcFuncSerializer, 3, 1);
-			HqBytecodeWriteStoreArray(hExcFuncSerializer, 0, 1, 3);
-			HqBytecodeWriteLoadImmU16(hExcFuncSerializer, 3, 3);
-			HqBytecodeWriteStoreArray(hExcFuncSerializer, 0, 2, 3);
-			HqBytecodeWriteLoadImmNull(hExcFuncSerializer, 2);
+			HqBytecodeEmitInitArray(hExcFuncSerializer, 0, 4);
+			HqBytecodeEmitLoadImmStr(hExcFuncSerializer, 1, stringIndex14);
+			HqBytecodeEmitLoadImmStr(hExcFuncSerializer, 2, stringIndex8);
+			HqBytecodeEmitLoadImmU8(hExcFuncSerializer, 3, 1);
+			HqBytecodeEmitStoreArray(hExcFuncSerializer, 0, 1, 3);
+			HqBytecodeEmitLoadImmU16(hExcFuncSerializer, 3, 3);
+			HqBytecodeEmitStoreArray(hExcFuncSerializer, 0, 2, 3);
+			HqBytecodeEmitLoadImmNull(hExcFuncSerializer, 2);
 
-			HqBytecodeWriteLength(hExcFuncSerializer, 1, 0);
+			HqBytecodeEmitLength(hExcFuncSerializer, 1, 0);
 
-			HqBytecodeWriteLoadImmU32(hExcFuncSerializer, 3, 1);
-			HqBytecodeWriteLoadArray(hExcFuncSerializer, 0, 0, 3);
-			HqBytecodeWriteRaise(hExcFuncSerializer, 0);
-			HqBytecodeWriteAbort(hExcFuncSerializer);
+			HqBytecodeEmitLoadImmU32(hExcFuncSerializer, 3, 1);
+			HqBytecodeEmitLoadArray(hExcFuncSerializer, 0, 0, 3);
+			HqBytecodeEmitRaise(hExcFuncSerializer, 0);
+			HqBytecodeEmitAbort(hExcFuncSerializer);
 
 			tryBlockEnd = HqSerializerGetStreamPosition(hExcFuncSerializer);
 		}
 
-		HqBytecodeWriteNop(hExcFuncSerializer);
-		HqBytecodeWriteNop(hExcFuncSerializer);
-		HqBytecodeWriteNop(hExcFuncSerializer);
+		HqBytecodeEmitNop(hExcFuncSerializer);
+		HqBytecodeEmitNop(hExcFuncSerializer);
+		HqBytecodeEmitNop(hExcFuncSerializer);
 
 		// Write the exception handling section.
 		{
 			exceptionHandlerStart = HqSerializerGetStreamPosition(hExcFuncSerializer);
 
-			HqBytecodeWriteCall(hExcFuncSerializer, stringIndex4);
-			HqBytecodeWriteJump(hExcFuncSerializer, 8);
+			HqBytecodeEmitCall(hExcFuncSerializer, stringIndex4);
+			HqBytecodeEmitJump(hExcFuncSerializer, 8);
 		}
 
-		HqBytecodeWriteNop(hExcFuncSerializer);
-		HqBytecodeWriteNop(hExcFuncSerializer);
-		HqBytecodeWriteNop(hExcFuncSerializer);
+		HqBytecodeEmitNop(hExcFuncSerializer);
+		HqBytecodeEmitNop(hExcFuncSerializer);
+		HqBytecodeEmitNop(hExcFuncSerializer);
 
-		HqBytecodeWriteLoadImmStr(hExcFuncSerializer, 0, stringIndex15);
-		HqBytecodeWriteStoreParam(hExcFuncSerializer, 0, 0);
-		HqBytecodeWriteCall(hExcFuncSerializer, stringIndex4);
+		HqBytecodeEmitLoadImmStr(hExcFuncSerializer, 0, stringIndex15);
+		HqBytecodeEmitStoreParam(hExcFuncSerializer, 0, 0);
+		HqBytecodeEmitCall(hExcFuncSerializer, stringIndex4);
 
-		HqBytecodeWriteReturn(hExcFuncSerializer);
+		HqBytecodeEmitReturn(hExcFuncSerializer);
 
 		const void* const pFuncData = HqSerializerGetRawStreamPointer(hExcFuncSerializer);
 		const size_t funcLength = HqSerializerGetStreamLength(hExcFuncSerializer);

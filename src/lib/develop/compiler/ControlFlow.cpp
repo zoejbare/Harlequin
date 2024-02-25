@@ -135,21 +135,21 @@ inline void ControlFlow::_writeJump(const int32_t offset, const JmpType type)
 		switch(m_cond)
 		{
 			case Condition::True:
-				writeJumpResult = HqBytecodeWriteJumpIfTrue(m_hSerializer, m_reg, offset);
+				writeJumpResult = HqBytecodeEmitJumpIfTrue(m_hSerializer, m_reg, offset);
 				break;
 
 			case Condition::False:
-				writeJumpResult = HqBytecodeWriteJumpIfFalse(m_hSerializer, m_reg, offset);
+				writeJumpResult = HqBytecodeEmitJumpIfFalse(m_hSerializer, m_reg, offset);
 				break;
 
 			default:
-				writeJumpResult = HqBytecodeWriteJump(m_hSerializer, offset);
+				writeJumpResult = HqBytecodeEmitJump(m_hSerializer, offset);
 				break;
 		}
 	}
 	else
 	{
-		writeJumpResult = HqBytecodeWriteJump(m_hSerializer, offset);
+		writeJumpResult = HqBytecodeEmitJump(m_hSerializer, offset);
 	}
 
 	assert(writeJumpResult == HQ_SUCCESS); (void) writeJumpResult;
