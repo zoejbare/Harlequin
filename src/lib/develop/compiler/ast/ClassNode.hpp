@@ -38,8 +38,15 @@ class ClassNode final
 {
 public:
 
+	struct BaseType
+	{
+		std::string name;
+		detail::TokenSpan tokenSpan;
+	};
+
 	typedef std::shared_ptr<ClassNode> Ptr;
 	typedef std::deque<Ptr>            PtrDeque;
+	typedef std::deque<BaseType>       BaseTypeDeque;
 
 	inline static Ptr New()
 	{
@@ -49,18 +56,31 @@ public:
 	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
 	{
 		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
+
+		// Visit the internal 'class' nodes.
+		for(const auto& pNode : internalClasses)
+		{
+			pNode->Walk(srcCtx, pVisitor);
+		}
 	}
 
-	std::string name;
+	PtrDeque internalClasses;
 
-	detail::AccessType accessType;
+	BaseTypeDeque extends;
+	BaseTypeDeque implements;
+
+	std::string shortName;
+	std::string qualifiedName;
+
 	detail::ClassType classType;
-	detail::StorageType storageType;
+
+	detail::AccessType accessSpec;
+	detail::StorageType storageSpec;
 
 	detail::TokenSpan nameTokenSpan;
+	detail::TokenSpan classTypeTokenSpan;
 	detail::TokenSpan accessSpecTokenSpan;
 	detail::TokenSpan storageSpecTokenSpan;
-	detail::TokenSpan classTypeTokenSpan;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

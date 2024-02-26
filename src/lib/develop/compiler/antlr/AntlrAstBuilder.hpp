@@ -57,6 +57,7 @@ private:
 	SourceContext* m_pSrcCtx;
 
 	std::list<std::string> m_namespaceStack;
+	std::list<std::string> m_classStack;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

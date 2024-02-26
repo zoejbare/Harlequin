@@ -494,6 +494,8 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LeftBrace();
     antlr4::tree::TerminalNode *RightBrace();
+    std::vector<ClassDeclContext *> classDecl();
+    ClassDeclContext* classDecl(size_t i);
     std::vector<ClassVarDeclStmtContext *> classVarDeclStmt();
     ClassVarDeclStmtContext* classVarDeclStmt(size_t i);
     std::vector<MethodDeclContext *> methodDecl();

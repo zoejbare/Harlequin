@@ -36,6 +36,7 @@
 AntlrAstBuilder::AntlrAstBuilder(SourceContext& srcCtx)
 	: m_pSrcCtx(&srcCtx)
 	, m_namespaceStack()
+	, m_classStack()
 {
 	assert(m_pSrcCtx != nullptr);
 }
@@ -168,6 +169,8 @@ std::any AntlrAstBuilder::visitNamespaceDecl(HarlequinParser::NamespaceDeclConte
 		}
 	}
 
+	m_namespaceStack.pop_back();
+
 	return std::make_any<NamespaceNode::Ptr>(pAstNode);
 }
 
@@ -175,6 +178,8 @@ std::any AntlrAstBuilder::visitNamespaceDecl(HarlequinParser::NamespaceDeclConte
 
 std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
 {
+	static const std::string emptyString;
+
 	_HQ_ANTLR_AST_BUILDER_PREAMBLE();
 
 	ClassNode::Ptr pAstNode = ClassNode::New();
@@ -182,16 +187,79 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 	auto* const pAccessSpecCtx = pCtx->accessBaseSpecifier();
 	auto* const pStorageSpecCtx = pCtx->storageSpecifier();
 	auto* const pClassTypeCtx = pCtx->classType();
+	auto* const pInheritanceCtx = pCtx->classInheritance();
+	auto* const pClassDefCtx = pCtx->classDef();
 
-	pAstNode->name = pCtx->Id()->getText();
-	pAstNode->accessType = CompilerUtil::GetAccessType(pAccessSpecCtx->getText());
-	pAstNode->storageType = CompilerUtil::GetStorageType(pStorageSpecCtx->getText());
+	const std::string namespacePrefix = !m_namespaceStack.empty()
+		? m_namespaceStack.back() + "."
+		: "";
+
+	const std::string classPrefix = !m_classStack.empty()
+		? m_classStack.back() + "."
+		: "";
+
+	const std::string qualifiedNamePrefix = namespacePrefix + classPrefix;
+	const std::string shortName = pCtx->Id()->getText();
+
+	m_classStack.push_back(classPrefix + shortName);
+
+	pAstNode->shortName = shortName;
+	pAstNode->qualifiedName = qualifiedNamePrefix + shortName;
 	pAstNode->classType = CompilerUtil::GetClassType(pClassTypeCtx->getText());
+	pAstNode->accessSpec = CompilerUtil::GetAccessType(pAccessSpecCtx ? pAccessSpecCtx->getText() : emptyString);
+	pAstNode->storageSpec = CompilerUtil::GetStorageType(pStorageSpecCtx ? pStorageSpecCtx->getText() : emptyString);
 
 	pAstNode->nameTokenSpan = detail::TokenSpan::Extract(pCtx->Id()->getSymbol());
-	pAstNode->accessSpecTokenSpan = detail::TokenSpan::Extract(_getAccessSpecToken(pAccessSpecCtx));
-	pAstNode->storageSpecTokenSpan = detail::TokenSpan::Extract(_getStorageSpecToken(pStorageSpecCtx));
 	pAstNode->classTypeTokenSpan = detail::TokenSpan::Extract(_getClassTypeToken(pClassTypeCtx));
+	pAstNode->accessSpecTokenSpan = detail::TokenSpan::Extract(pAccessSpecCtx ? _getAccessSpecToken(pAccessSpecCtx) : nullptr);
+	pAstNode->storageSpecTokenSpan = detail::TokenSpan::Extract(pStorageSpecCtx ? _getStorageSpecToken(pStorageSpecCtx) : nullptr);
+
+	if(pInheritanceCtx)
+	{
+		auto* const pExtendsCtx = pInheritanceCtx->classExtends();
+		auto* const pImplementsCtx = pInheritanceCtx->classImpls();
+
+		if(pExtendsCtx)
+		{
+			auto* const pIdCtx = pExtendsCtx->qualifiedId();
+
+			ClassNode::BaseType baseType;
+			baseType.name = pIdCtx->getText();
+			baseType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
+
+			pAstNode->extends.push_back(baseType);
+		}
+
+		if(pImplementsCtx)
+		{
+			auto idCtxList = pImplementsCtx->qualifiedId();
+
+			for(auto* const pIdCtx : idCtxList)
+			{
+				ClassNode::BaseType baseType;
+				baseType.name = pIdCtx->getText();
+				baseType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
+
+				pAstNode->implements.push_back(baseType);
+			}
+		}
+	}
+
+	// Visit each internal 'class' context.
+	{
+		auto subClassDecls = pClassDefCtx->classDecl();
+		
+		for(auto* const pSubClassDeclCtx : subClassDecls)
+		{
+			std::any result = visit(pSubClassDeclCtx);
+			if(result.has_value())
+			{
+				pAstNode->internalClasses.push_back(std::any_cast<ClassNode::Ptr>(result));
+			}
+		}
+	}
+
+	m_classStack.pop_back();
 
 	return std::make_any<ClassNode::Ptr>(pAstNode);
 }

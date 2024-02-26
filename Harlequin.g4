@@ -138,7 +138,7 @@ classImpls
 
 // Class definition rule
 classDef
-	: LeftBrace (classVarDeclStmt | methodDecl | ctorDecl)* RightBrace
+	: LeftBrace (classDecl | classVarDeclStmt | methodDecl | ctorDecl)* RightBrace
 	;
 
 // Typename array declaration specifier
