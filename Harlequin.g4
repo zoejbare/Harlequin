@@ -46,7 +46,7 @@ usingAliasStmt
 
 // Namespace declaration rule
 namespaceDecl
-	: NamespaceKw qualifiedId namespaceDef
+	: NamespaceKw qualifiedId namespaceDef Term?
 	;
 
 // Namespace definition rule
@@ -56,7 +56,7 @@ namespaceDef
 
 // Class declaration rule
 classDecl
-	: accessBaseSpecifier? storageSpecifier? classType Id classInheritance? classDef
+	: accessBaseSpecifier? storageSpecifier? classType Id classInheritance? classDef Term?
 	;
 
 // Class type rule
@@ -214,12 +214,12 @@ lambdaDecl
 
 // Class construction declaration rule
 ctorDecl
-	: methodDeclSpecSeq ConstructorKw LeftParen methodArgSeq? RightParen codeBlock
+	: methodDeclSpecSeq ConstructorKw LeftParen methodArgSeq? RightParen codeBlock Term?
 	;
 
 // Method declaration rule
 methodDecl
-	: methodDeclSpecSeq typeNameDecl Id LeftParen methodArgSeq? RightParen constQualifier? (codeBlock | Term)
+	: methodDeclSpecSeq typeNameDecl Id LeftParen methodArgSeq? RightParen constQualifier? (codeBlock Term? | Term)
 	;
 
 // Method qualifier rule

@@ -239,6 +239,7 @@ public:
     antlr4::tree::TerminalNode *NamespaceKw();
     QualifiedIdContext *qualifiedId();
     NamespaceDefContext *namespaceDef();
+    antlr4::tree::TerminalNode *Term();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -275,6 +276,7 @@ public:
     AccessBaseSpecifierContext *accessBaseSpecifier();
     StorageSpecifierContext *storageSpecifier();
     ClassInheritanceContext *classInheritance();
+    antlr4::tree::TerminalNode *Term();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -747,6 +749,7 @@ public:
     antlr4::tree::TerminalNode *RightParen();
     CodeBlockContext *codeBlock();
     MethodArgSeqContext *methodArgSeq();
+    antlr4::tree::TerminalNode *Term();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
