@@ -142,13 +142,13 @@ classDef
 	;
 
 // Typename array declaration specifier
-arrayTypeDecl:
-	LeftBracket Comma? Comma? RightBracket
+arrayTypeDecl
+	: LeftBracket Comma? Comma? RightBracket
 	;
 
 // Typename array instantiation specifier
-arrayTypeDef:
-	LeftBracket expr (Comma expr)? (Comma expr)? RightBracket
+arrayTypeDef
+	: LeftBracket expr (Comma expr)? (Comma expr)? RightBracket
 	;
 
 // Typename declaration rule

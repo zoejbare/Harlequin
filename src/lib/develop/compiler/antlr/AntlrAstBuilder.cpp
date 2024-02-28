@@ -47,8 +47,7 @@ RootNode::Ptr AntlrAstBuilder::Run(SourceContext& srcCtx, antlr4::tree::ParseTre
 {
 	AntlrAstBuilder builder(srcCtx);
 
-	// Walk the parse tree to discover the source file symbols
-	// and fill the source code's symbole table.
+	// Walk the parse tree to build the AST, returning its root node.
 	std::any result = builder.visit(pParseTree);
 
 	return std::any_cast<RootNode::Ptr>(result);
@@ -149,7 +148,7 @@ std::any AntlrAstBuilder::visitNamespaceDecl(HarlequinParser::NamespaceDeclConte
 
 	m_namespaceStack.push_back(pAstNode->qualifiedName);
 	
-	// Visit each 'namespace' declaration.
+	// Visit each namespace declaration.
 	for(auto* const pNamespaceDeclCtx : pNamespaceDefCtx->namespaceDecl())
 	{
 		std::any result = visit(pNamespaceDeclCtx);
@@ -159,7 +158,7 @@ std::any AntlrAstBuilder::visitNamespaceDecl(HarlequinParser::NamespaceDeclConte
 		}
 	}
 
-	// Visit each 'class' declaration.
+	// Visit each class declaration.
 	for(auto* const pClassDeclCtx : pNamespaceDefCtx->classDecl())
 	{
 		std::any result = visit(pClassDeclCtx);
@@ -178,8 +177,6 @@ std::any AntlrAstBuilder::visitNamespaceDecl(HarlequinParser::NamespaceDeclConte
 
 std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* const pCtx)
 {
-	static const std::string emptyString;
-
 	_HQ_ANTLR_AST_BUILDER_PREAMBLE();
 
 	ClassNode::Ptr pAstNode = ClassNode::New();
@@ -205,14 +202,12 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 
 	pAstNode->shortName = shortName;
 	pAstNode->qualifiedName = qualifiedNamePrefix + shortName;
-	pAstNode->classType = CompilerUtil::GetClassType(pClassTypeCtx->getText());
-	pAstNode->accessSpec = CompilerUtil::GetAccessType(pAccessSpecCtx ? pAccessSpecCtx->getText() : emptyString);
-	pAstNode->storageSpec = CompilerUtil::GetStorageType(pStorageSpecCtx ? pStorageSpecCtx->getText() : emptyString);
 
 	pAstNode->nameTokenSpan = detail::TokenSpan::Extract(pCtx->Id()->getSymbol());
-	pAstNode->classTypeTokenSpan = detail::TokenSpan::Extract(_getClassTypeToken(pClassTypeCtx));
-	pAstNode->accessSpecTokenSpan = detail::TokenSpan::Extract(pAccessSpecCtx ? _getAccessSpecToken(pAccessSpecCtx) : nullptr);
-	pAstNode->storageSpecTokenSpan = detail::TokenSpan::Extract(pStorageSpecCtx ? _getStorageSpecToken(pStorageSpecCtx) : nullptr);
+
+	_getClassType(pClassTypeCtx, pAstNode->classType, pAstNode->classTypeTokenSpan);
+	_getAccessSpec(pAccessSpecCtx, pAstNode->accessSpec, pAstNode->accessSpecTokenSpan);
+	_getStorageSpec(pStorageSpecCtx, pAstNode->storageSpec, pAstNode->storageSpecTokenSpan);
 
 	if(pInheritanceCtx)
 	{
@@ -223,7 +218,7 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 		{
 			auto* const pIdCtx = pExtendsCtx->qualifiedId();
 
-			ClassNode::BaseType baseType;
+			detail::TypeName baseType;
 			baseType.name = pIdCtx->getText();
 			baseType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
 
@@ -236,7 +231,7 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 
 			for(auto* const pIdCtx : idCtxList)
 			{
-				ClassNode::BaseType baseType;
+				detail::TypeName baseType;
 				baseType.name = pIdCtx->getText();
 				baseType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
 
@@ -245,7 +240,7 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 		}
 	}
 
-	// Visit each internal 'class' context.
+	// Visit each internal class context.
 	{
 		auto subClassDecls = pClassDefCtx->classDecl();
 		
@@ -259,6 +254,20 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 		}
 	}
 
+	// Visit each class variable declaration context.
+	{
+		auto classVarDecls = pClassDefCtx->classVarDeclStmt();
+
+		for(auto* const pClassVarDeclCtx : classVarDecls)
+		{
+			std::any result = visit(pClassVarDeclCtx);
+			if(result.has_value())
+			{
+				pAstNode->variables.push_back(std::any_cast<ClassVariableNode::Ptr>(result));
+			}
+		}
+	}
+
 	m_classStack.pop_back();
 
 	return std::make_any<ClassNode::Ptr>(pAstNode);
@@ -266,7 +275,223 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 
 //----------------------------------------------------------------------------------------------------------------------
 
-antlr4::Token* AntlrAstBuilder::_getAccessSpecToken(HarlequinParser::AccessBaseSpecifierContext* const pCtx)
+std::any AntlrAstBuilder::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext* const pCtx)
+{
+	_HQ_ANTLR_AST_BUILDER_PREAMBLE();
+
+	auto* const pSpecSeqCtx = pCtx->classVarDeclSpecSeq();
+	auto* const pAccessSpecCtx = pSpecSeqCtx->accessSpecifier();
+	auto* const pStorageSpecCtx = pSpecSeqCtx->storageSpecifier();
+	auto* const pConstQualCtx = pSpecSeqCtx->constQualifier();
+
+	auto* const pVarDeclStmtCtx = pCtx->varDeclStmt();
+	auto* const pVarDeclCtx = pVarDeclStmtCtx->varDecl();
+	auto* const pTypeNameDeclCtx = pVarDeclCtx->typeNameDecl();
+
+	ClassVariableNode::Ptr pAstNode = ClassVariableNode::New();
+
+	const std::string namespacePrefix = !m_namespaceStack.empty()
+		? m_namespaceStack.back() + "."
+		: "";
+
+	const std::string classPrefix = !m_classStack.empty()
+		? m_classStack.back() + "."
+		: "";
+
+	const std::string qualifiedNamePrefix = namespacePrefix + classPrefix;
+	const std::string shortName = pVarDeclCtx->Id()->getText();
+
+	pAstNode->shortName = shortName;
+	pAstNode->qualifiedName = qualifiedNamePrefix + shortName;
+
+	pAstNode->nameTokenSpan = detail::TokenSpan::Extract(pVarDeclCtx->Id()->getSymbol());
+
+	_getAccessSpec(pAccessSpecCtx, pAstNode->accessSpec, pAstNode->accessSpecToken, pAstNode->limitedTypes);
+	_getStorageSpec(pStorageSpecCtx, pAstNode->storageSpec, pAstNode->storageSpecToken);
+	_getConstQualifier(pConstQualCtx, pAstNode->constType, pAstNode->constTypeToken);
+	_getVarType(pTypeNameDeclCtx, pAstNode->varType, pAstNode->varTypeTokenSpan, pAstNode->arrayType, pAstNode->arrayTypeTokenSpan);
+
+	// TODO: Build the variable's expression here.
+	// TODO: Fix up the const type if the qualifier is present.
+
+	return std::make_any<ClassVariableNode::Ptr>(pAstNode);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getClassType(
+	HarlequinParser::ClassTypeContext* const pCtx,
+	detail::ClassType& outputType,
+	detail::TokenSpan& outputTokenSpan)
+{
+	// The context here should never be null.
+	assert(pCtx != nullptr);
+
+	outputType = CompilerUtil::GetClassType(pCtx->getText());
+	outputTokenSpan = detail::TokenSpan::Extract(_getClassTypeToken(pCtx));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getAccessSpec(
+	HarlequinParser::AccessBaseSpecifierContext* const pCtx,
+	detail::AccessType& outputSpec,
+	detail::TokenSpan& outputTokenSpan)
+{
+	if(pCtx)
+	{
+		outputSpec = CompilerUtil::GetAccessType(pCtx->getText());
+		outputTokenSpan = detail::TokenSpan::Extract(_getAccessSpecToken(pCtx));
+	}
+	else
+	{
+		outputSpec = detail::AccessType::Private;
+		outputTokenSpan = detail::TokenSpan::Default();
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getAccessSpec(
+	HarlequinParser::AccessSpecifierContext* const pCtx,
+	detail::AccessType& outputSpec,
+	detail::TokenSpan& outputTokenSpan,
+	detail::TypeName::Deque& outputLimitedTypes)
+{
+	if(pCtx)
+	{
+		auto* const pBaseCtx = pCtx->accessBaseSpecifier();
+		auto* const pLimitCtx = pCtx->accessLimitSpecifier();
+
+		if(pLimitCtx)
+		{
+			outputSpec = detail::AccessType::Public;
+			outputTokenSpan = detail::TokenSpan::Extract(pLimitCtx->LimitedKw()->getSymbol());
+
+			const auto& typeIdCtxs = pLimitCtx->qualifiedId();
+
+			// Get all the referenced limited type ID names.
+			for(auto* const pIdCtx : typeIdCtxs)
+			{
+				detail::TypeName limitedType;
+				limitedType.name = pIdCtx->getText();
+				limitedType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
+
+				outputLimitedTypes.push_back(std::move(limitedType));
+			}
+		}
+		else
+		{
+			_getAccessSpec(pBaseCtx, outputSpec, outputTokenSpan);
+			outputLimitedTypes.clear();
+		}
+	}
+	else
+	{
+		outputSpec = detail::AccessType::Private;
+		outputTokenSpan = detail::TokenSpan::Default();
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getStorageSpec(
+	HarlequinParser::StorageSpecifierContext* const pCtx,
+	detail::StorageType& outputSpec,
+	detail::TokenSpan& outputTokenSpan)
+{
+	if(pCtx)
+	{
+		outputSpec = CompilerUtil::GetStorageType(pCtx->getText());
+		outputTokenSpan = detail::TokenSpan::Extract(_getStorageSpecToken(pCtx));
+	}
+	else
+	{
+		outputSpec = detail::StorageType::Default;
+		outputTokenSpan = detail::TokenSpan::Default();
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getConstQualifier(
+	HarlequinParser::ConstQualifierContext* const pCtx,
+	detail::ConstType& outputType,
+	detail::TokenSpan& outputTokenSpan)
+{
+	if(pCtx)
+	{
+		// For now, we assume all const variables are just immutable. If any are actually literals,
+		// their types will be promoted after their expression trees have been built.
+		outputType = detail::ConstType::Immutable;
+		outputTokenSpan = detail::TokenSpan::Extract(pCtx->ConstKw()->getSymbol());
+	}
+	else
+	{
+		outputType = detail::ConstType::None;
+		outputTokenSpan = detail::TokenSpan::Default();
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getVarType(
+	HarlequinParser::TypeNameDeclContext* const pCtx,
+	detail::VarType& outputVarType,
+	detail::TokenSpan& outputVarTypeTokenSpan,
+	detail::ArrayType& outputArrayType,
+	detail::TokenSpan& outputArrayTypeTokenSpan)
+{
+	// The type name context should never be null.
+	assert(pCtx != nullptr);
+
+	outputVarType = CompilerUtil::GetVarType(pCtx->Id()->getText());
+	outputVarTypeTokenSpan = detail::TokenSpan::Extract(pCtx->Id()->getSymbol());
+
+	auto* const pArrayTypeDeclCtx = pCtx->arrayTypeDecl();
+
+	if(pArrayTypeDeclCtx)
+	{
+		const auto& arrayCommas = pArrayTypeDeclCtx->Comma();
+
+		const size_t commaCount = arrayCommas.size();
+
+		const detail::TokenSpan startSpan = detail::TokenSpan::Extract(pArrayTypeDeclCtx->LeftBracket()->getSymbol());
+		const detail::TokenSpan endSpan = detail::TokenSpan::Extract(pArrayTypeDeclCtx->RightBracket()->getSymbol());
+		
+		// TODO: We need to support both start and end spans.
+		outputArrayTypeTokenSpan = startSpan;
+
+		switch(commaCount)
+		{
+			case 0:
+				outputArrayType = detail::ArrayType::Linear;
+				break;
+
+			case 1:
+				outputArrayType = detail::ArrayType::Grid2D;
+				break;
+
+			case 2:
+				outputArrayType = detail::ArrayType::Grid3D;
+				break;
+
+			default:
+				// This should never happen since the grammar enforces the syntax for all valid array declarations.
+				assert(false);
+				break;
+		}
+	}
+	else
+	{
+		outputArrayType = detail::ArrayType::None;
+		outputArrayTypeTokenSpan = detail::TokenSpan::Default();
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline antlr4::Token* AntlrAstBuilder::_getAccessSpecToken(HarlequinParser::AccessBaseSpecifierContext* const pCtx)
 {
 	using namespace antlr4;
 	using namespace antlr4::tree;
@@ -287,20 +512,7 @@ antlr4::Token* AntlrAstBuilder::_getAccessSpecToken(HarlequinParser::AccessBaseS
 
 //----------------------------------------------------------------------------------------------------------------------
 
-antlr4::Token* AntlrAstBuilder::_getStorageSpecToken(HarlequinParser::StorageSpecifierContext* const pCtx)
-{
-	using namespace antlr4::tree;
-
-	TerminalNode* const pStaticToken = pCtx->StaticKw();
-
-	return pStaticToken
-		? pStaticToken->getSymbol()
-		: nullptr;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-antlr4::Token* AntlrAstBuilder::_getClassTypeToken(HarlequinParser::ClassTypeContext* const pCtx)
+inline antlr4::Token* AntlrAstBuilder::_getClassTypeToken(HarlequinParser::ClassTypeContext* const pCtx)
 {
 	using namespace antlr4;
 	using namespace antlr4::tree;
@@ -314,6 +526,19 @@ antlr4::Token* AntlrAstBuilder::_getClassTypeToken(HarlequinParser::ClassTypeCon
 	assert(pTypeToken != nullptr);
 
 	return pTypeToken;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline antlr4::Token* AntlrAstBuilder::_getStorageSpecToken(HarlequinParser::StorageSpecifierContext* const pCtx)
+{
+	using namespace antlr4::tree;
+
+	TerminalNode* const pStaticToken = pCtx->StaticKw();
+
+	return pStaticToken
+		? pStaticToken->getSymbol()
+		: nullptr;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

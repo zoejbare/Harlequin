@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,14 +20,42 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include <string>
-#include <vector>
+#include "VariableNode.hpp"
+
+#include "../detail/AccessType.hpp"
+#include "../detail/ConstType.hpp"
+#include "../detail/StorageType.hpp"
+#include "../detail/TypeName.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace detail
+class ClassVariableNode
+	: public VariableNode
 {
-	typedef std::vector<std::string> StringArray;
-}
+public:
+
+	typedef std::shared_ptr<ClassVariableNode> Ptr;
+	typedef std::deque<Ptr>                    PtrDeque;
+
+	inline static Ptr New()
+	{
+		return std::make_shared<ClassVariableNode>();
+	}
+
+	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
+	{
+		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
+	}
+
+	detail::TypeName::Deque limitedTypes;
+
+	detail::AccessType accessSpec;
+	detail::StorageType storageSpec;
+	detail::ConstType constType;
+
+	detail::TokenSpan accessSpecToken;
+	detail::TokenSpan storageSpecToken;
+	detail::TokenSpan constTypeToken;
+};
 
 //----------------------------------------------------------------------------------------------------------------------

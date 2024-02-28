@@ -20,16 +20,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "AstBaseNode.hpp"
+#include "ClassVariableNode.hpp"
 
-#include "../detail/AccessType.hpp"
 #include "../detail/ClassType.hpp"
-#include "../detail/StorageType.hpp"
-#include "../detail/TokenSpan.hpp"
-
-#include <memory>
-#include <deque>
-#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -38,15 +31,8 @@ class ClassNode final
 {
 public:
 
-	struct BaseType
-	{
-		std::string name;
-		detail::TokenSpan tokenSpan;
-	};
-
 	typedef std::shared_ptr<ClassNode> Ptr;
 	typedef std::deque<Ptr>            PtrDeque;
-	typedef std::deque<BaseType>       BaseTypeDeque;
 
 	inline static Ptr New()
 	{
@@ -57,8 +43,14 @@ public:
 	{
 		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
 
-		// Visit the internal 'class' nodes.
+		// Visit the internal class nodes.
 		for(const auto& pNode : internalClasses)
+		{
+			pNode->Walk(srcCtx, pVisitor);
+		}
+
+		// Visit the class variable nodes.
+		for(const auto& pNode : variables)
 		{
 			pNode->Walk(srcCtx, pVisitor);
 		}
@@ -66,8 +58,10 @@ public:
 
 	PtrDeque internalClasses;
 
-	BaseTypeDeque extends;
-	BaseTypeDeque implements;
+	ClassVariableNode::PtrDeque variables;
+
+	detail::TypeName::Deque extends;
+	detail::TypeName::Deque implements;
 
 	std::string shortName;
 	std::string qualifiedName;

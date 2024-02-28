@@ -20,50 +20,44 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "AliasNode.hpp"
-#include "NamespaceNode.hpp"
-#include "UsingNode.hpp"
+#include "AstBaseNode.hpp"
+
+#include "../detail/ArrayType.hpp"
+#include "../detail/TokenSpan.hpp"
+#include "../detail/VarType.hpp"
+
+#include <memory>
+#include <deque>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class RootNode final
+class VariableNode
 	: public AstBaseNode
 {
 public:
 
-	typedef std::shared_ptr<RootNode> Ptr;
+	typedef std::shared_ptr<VariableNode> Ptr;
+	typedef std::deque<Ptr>               PtrDeque;
 
-	inline static Ptr New()
-	{
-		return std::make_shared<RootNode>();
-	}
-
-	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* const pVisitor, const bool visit = true) const override
+	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
 	{
 		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
 
-		// Visit all import nodes.
-		for(const auto& pNode : imports)
-		{
-			pNode->Walk(srcCtx, pVisitor);
-		}
-
-		// Visit all class type alias nodes.
-		for(const auto& pNode : aliases)
-		{
-			pNode->Walk(srcCtx, pVisitor);
-		}
-
-		// Visit all namespace nodes.
-		for(const auto& pNode : namespaces)
-		{
-			pNode->Walk(srcCtx, pVisitor);
-		}
+		// TODO: Visit the assignment expression node
 	}
 
-	UsingNode::PtrDeque imports;
-	AliasNode::PtrDeque aliases;
-	NamespaceNode::PtrDeque namespaces;
+	// TODO: Add assignment expression node here
+
+	std::string shortName;
+	std::string qualifiedName;
+
+	detail::VarType varType;
+	detail::ArrayType arrayType;
+
+	detail::TokenSpan nameTokenSpan;
+	detail::TokenSpan varTypeTokenSpan;
+	detail::TokenSpan arrayTypeTokenSpan;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

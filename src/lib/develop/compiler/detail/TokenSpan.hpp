@@ -42,6 +42,7 @@ namespace detail
 
 struct detail::TokenSpan
 {
+	static TokenSpan Default();
 	static TokenSpan Extract(const antlr4::Token* pToken, TokenSpanFlags flags = TOKEN_SPAN_FLAG_WITH_SOURCE_TEXT);
 
 	std::string sourceName;

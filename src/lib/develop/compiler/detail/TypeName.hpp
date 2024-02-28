@@ -20,50 +20,21 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "AliasNode.hpp"
-#include "NamespaceNode.hpp"
-#include "UsingNode.hpp"
+#include "TokenSpan.hpp"
+
+#include <deque>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class RootNode final
-	: public AstBaseNode
+namespace detail
 {
-public:
-
-	typedef std::shared_ptr<RootNode> Ptr;
-
-	inline static Ptr New()
+	struct TypeName
 	{
-		return std::make_shared<RootNode>();
-	}
+		typedef std::deque<TypeName> Deque;
 
-	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* const pVisitor, const bool visit = true) const override
-	{
-		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
-
-		// Visit all import nodes.
-		for(const auto& pNode : imports)
-		{
-			pNode->Walk(srcCtx, pVisitor);
-		}
-
-		// Visit all class type alias nodes.
-		for(const auto& pNode : aliases)
-		{
-			pNode->Walk(srcCtx, pVisitor);
-		}
-
-		// Visit all namespace nodes.
-		for(const auto& pNode : namespaces)
-		{
-			pNode->Walk(srcCtx, pVisitor);
-		}
-	}
-
-	UsingNode::PtrDeque imports;
-	AliasNode::PtrDeque aliases;
-	NamespaceNode::PtrDeque namespaces;
-};
+		std::string name;
+		TokenSpan tokenSpan;
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------

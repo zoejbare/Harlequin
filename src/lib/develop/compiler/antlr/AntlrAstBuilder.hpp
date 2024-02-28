@@ -50,9 +50,18 @@ private:
 	virtual std::any visitNamespaceDecl(HarlequinParser::NamespaceDeclContext*) override;
 	virtual std::any visitClassDecl(HarlequinParser::ClassDeclContext*) override;
 
+	virtual std::any visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext*) override;
+
+	void _getClassType(HarlequinParser::ClassTypeContext*, detail::ClassType&, detail::TokenSpan&);
+	void _getAccessSpec(HarlequinParser::AccessBaseSpecifierContext*, detail::AccessType&, detail::TokenSpan&);
+	void _getAccessSpec(HarlequinParser::AccessSpecifierContext*, detail::AccessType&, detail::TokenSpan&, detail::TypeName::Deque&);
+	void _getStorageSpec(HarlequinParser::StorageSpecifierContext*, detail::StorageType&, detail::TokenSpan&);
+	void _getConstQualifier(HarlequinParser::ConstQualifierContext*, detail::ConstType&, detail::TokenSpan&);
+	void _getVarType(HarlequinParser::TypeNameDeclContext*, detail::VarType&, detail::TokenSpan&, detail::ArrayType&, detail::TokenSpan&);
+
+	static antlr4::Token* _getClassTypeToken(HarlequinParser::ClassTypeContext*);
 	static antlr4::Token* _getAccessSpecToken(HarlequinParser::AccessBaseSpecifierContext*);
 	static antlr4::Token* _getStorageSpecToken(HarlequinParser::StorageSpecifierContext*);
-	static antlr4::Token* _getClassTypeToken(HarlequinParser::ClassTypeContext*);
 
 	SourceContext* m_pSrcCtx;
 

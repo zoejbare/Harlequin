@@ -22,29 +22,37 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::TokenSpan detail::TokenSpan::Extract(const antlr4::Token* const pToken, const TokenSpanFlags flags)
+detail::TokenSpan detail::TokenSpan::Default()
 {
 	TokenSpan output;
+	output.lineNumber = 0;
+	output.positionInLine = 0;
+	output.startIndex = 0;
+	output.stopIndex = 0;
+
+	return output;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+detail::TokenSpan detail::TokenSpan::Extract(const antlr4::Token* const pToken, const TokenSpanFlags flags)
+{
 
 	if(pToken)
 	{
 		const bool withSourceText = (flags & TOKEN_SPAN_FLAG_WITH_SOURCE_TEXT) > 0;
 
+		TokenSpan output;
 		output.sourceName = pToken->getTokenSource()->getSourceName();
 		output.lineNumber = pToken->getLine();
 		output.positionInLine = pToken->getCharPositionInLine();
 		output.startIndex = withSourceText ? pToken->getStartIndex() : 0;
 		output.stopIndex = withSourceText ? pToken->getStopIndex() : 0;
-	}
-	else
-	{
-		output.lineNumber = 0;
-		output.positionInLine = 0;
-		output.startIndex = 0;
-		output.stopIndex = 0;
+
+		return output;
 	}
 
-	return output;
+	return Default();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
