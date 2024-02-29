@@ -22,10 +22,9 @@
 
 #include "VariableNode.hpp"
 
-#include "../detail/AccessType.hpp"
-#include "../detail/ConstType.hpp"
-#include "../detail/StorageType.hpp"
-#include "../detail/TypeName.hpp"
+#include "../detail/AccessDecl.hpp"
+#include "../detail/ConstDecl.hpp"
+#include "../detail/StorageDecl.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -47,15 +46,11 @@ public:
 		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
 	}
 
-	detail::TypeName::Deque limitedTypes;
+	detail::TypeName::Deque limitedTypeIds;
 
-	detail::AccessType accessSpec;
-	detail::StorageType storageSpec;
-	detail::ConstType constType;
-
-	detail::TokenSpan accessSpecToken;
-	detail::TokenSpan storageSpecToken;
-	detail::TokenSpan constTypeToken;
+	detail::AccessDecl accessDecl;
+	detail::StorageDecl storageDecl;
+	detail::ConstDecl constDecl;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

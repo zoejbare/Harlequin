@@ -20,12 +20,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "detail/AccessType.hpp"
-#include "detail/ArrayType.hpp"
-#include "detail/ClassType.hpp"
-#include "detail/FunctionType.hpp"
-#include "detail/StorageType.hpp"
-#include "detail/VarType.hpp"
+#include "detail/AccessDecl.hpp"
+#include "detail/ArrayDecl.hpp"
+#include "detail/ClassDecl.hpp"
+#include "detail/FuncDecl.hpp"
+#include "detail/StorageDecl.hpp"
+#include "detail/VarDecl.hpp"
 
 #include "../../Harlequin.h"
 
@@ -43,14 +43,14 @@ public:
 	CompilerUtil(const CompilerUtil&) = delete;
 	CompilerUtil(CompilerUtil&&) = delete;
 
-	static detail::AccessType GetAccessType(const std::string& accessType);
-	static detail::ArrayType GetArrayType(const std::string& arraySpec);
-	static detail::ClassType GetClassType(const std::string& classType);
-	static detail::FunctionType GetFunctionType(const std::string& funcType);
-	static detail::StorageType GetStorageType(const std::string& storageType);
-	static detail::VarType GetVarType(const std::string& typeName);
+	static detail::AccessDecl::Type GetAccessType(const std::string& accessType);
+	static detail::ArrayDecl::Type GetArrayType(const std::string& arrayType);
+	static detail::ClassDecl::Type GetClassType(const std::string& classType);
+	static detail::FuncDecl::Type GetFunctionType(const std::string& funcType);
+	static detail::StorageDecl::Type GetStorageType(const std::string& storageType);
+	static detail::VarDecl::Type GetVarType(const std::string& typeName);
 
-	static std::string GetVarTypeSignature(const std::string& typeName, const detail::ArrayType& arrayType);
+	static std::string GetTypeSignature(const std::string& typeName, detail::ArrayDecl::Type arrayType);
 };
 
 //----------------------------------------------------------------------------------------------------------------------

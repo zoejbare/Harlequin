@@ -20,28 +20,38 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "TokenSpan.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace detail
 {
-	enum class VarType
+	struct VarDecl
 	{
-		Int8,
-		Int16,
-		Int32,
-		Int64,
+		enum class Type
+		{
+			Int8,
+			Int16,
+			Int32,
+			Int64,
 
-		Uint8,
-		Uint16,
-		Uint32,
-		Uint64,
+			Uint8,
+			Uint16,
+			Uint32,
+			Uint64,
 
-		Float32,
-		Float64,
+			Float32,
+			Float64,
 
-		Bool,
+			Bool,
 
-		String,
-		Object,
-		Native,
+			String,
+			Object,
+			Native,
+		};
+
+		Type type;
+		TokenSpan span;
 	};
 }
 

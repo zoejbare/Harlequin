@@ -22,7 +22,7 @@
 
 #include "AstBaseNode.hpp"
 
-#include "../detail/TokenSpan.hpp"
+#include "../detail/TypeName.hpp"
 
 #include <memory>
 #include <deque>
@@ -48,11 +48,8 @@ public:
 		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
 	}
 
-	std::string originalName;
-	std::string aliasedName;
-
-	detail::TokenSpan originalNameTokenSpan;
-	detail::TokenSpan aliasedNameTokenSpan;
+	detail::TypeName originalId;
+	detail::TypeName aliasedId;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

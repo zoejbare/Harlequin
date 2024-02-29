@@ -35,8 +35,7 @@
 
 AntlrAstBuilder::AntlrAstBuilder(SourceContext& srcCtx)
 	: m_pSrcCtx(&srcCtx)
-	, m_namespaceStack()
-	, m_classStack()
+	, m_prefixStack()
 {
 	assert(m_pSrcCtx != nullptr);
 }
@@ -104,8 +103,9 @@ std::any AntlrAstBuilder::visitUsingStmt(HarlequinParser::UsingStmtContext* cons
 
 	auto* const pQualifiedIdCtx = pCtx->qualifiedId();
 
-	pAstNode->name = pQualifiedIdCtx->getText();
-	pAstNode->nameTokenSpan = detail::TokenSpan::Extract(pQualifiedIdCtx->Id().back()->getSymbol());
+	pAstNode->id.name = pQualifiedIdCtx->getText();
+	pAstNode->id.beginSpan = detail::TokenSpan::Extract(pQualifiedIdCtx->Id().front()->getSymbol());
+	pAstNode->id.endSpan = detail::TokenSpan::Extract(pQualifiedIdCtx->Id().back()->getSymbol());
 
 	return std::make_any<UsingNode::Ptr>(pAstNode);
 }
@@ -121,11 +121,13 @@ std::any AntlrAstBuilder::visitUsingAliasStmt(HarlequinParser::UsingAliasStmtCon
 	auto* const pQualifiedIdCtx = pCtx->qualifiedId();
 	auto* const pAliasToken = pCtx->Id();
 
-	pAstNode->originalName = pQualifiedIdCtx->getText();
-	pAstNode->aliasedName = pAliasToken->getText();
+	pAstNode->originalId.name = pQualifiedIdCtx->getText();
+	pAstNode->originalId.beginSpan = detail::TokenSpan::Extract(pQualifiedIdCtx->Id().front()->getSymbol());
+	pAstNode->originalId.endSpan = detail::TokenSpan::Extract(pQualifiedIdCtx->Id().back()->getSymbol());
 
-	pAstNode->originalNameTokenSpan = detail::TokenSpan::Extract(pQualifiedIdCtx->Id().back()->getSymbol());
-	pAstNode->aliasedNameTokenSpan = detail::TokenSpan::Extract(pAliasToken->getSymbol());
+	pAstNode->aliasedId.name = pAliasToken->getText();
+	pAstNode->aliasedId.beginSpan = detail::TokenSpan::Extract(pAliasToken->getSymbol());
+	pAstNode->aliasedId.endSpan = pAstNode->aliasedId.beginSpan;
 
 	return std::make_any<AliasNode::Ptr>(pAstNode);
 }
@@ -141,12 +143,9 @@ std::any AntlrAstBuilder::visitNamespaceDecl(HarlequinParser::NamespaceDeclConte
 	auto* const pQualifiedIdCtx = pCtx->qualifiedId();
 	auto* const pNamespaceDefCtx = pCtx->namespaceDef();
 
-	pAstNode->shortName = pQualifiedIdCtx->getText();
-	pAstNode->qualifiedName = !m_namespaceStack.empty()
-		? m_namespaceStack.back() + "." + pAstNode->shortName
-		: pAstNode->shortName;
+	_getQualifiedName(pQualifiedIdCtx, pAstNode->id);
 
-	m_namespaceStack.push_back(pAstNode->qualifiedName);
+	m_prefixStack.push_back(pAstNode->id.longName);
 	
 	// Visit each namespace declaration.
 	for(auto* const pNamespaceDeclCtx : pNamespaceDefCtx->namespaceDecl())
@@ -168,7 +167,7 @@ std::any AntlrAstBuilder::visitNamespaceDecl(HarlequinParser::NamespaceDeclConte
 		}
 	}
 
-	m_namespaceStack.pop_back();
+	m_prefixStack.pop_back();
 
 	return std::make_any<NamespaceNode::Ptr>(pAstNode);
 }
@@ -187,27 +186,13 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 	auto* const pInheritanceCtx = pCtx->classInheritance();
 	auto* const pClassDefCtx = pCtx->classDef();
 
-	const std::string namespacePrefix = !m_namespaceStack.empty()
-		? m_namespaceStack.back() + "."
-		: "";
+	_getQualifiedName(pCtx->Id(), pAstNode->id);
 
-	const std::string classPrefix = !m_classStack.empty()
-		? m_classStack.back() + "."
-		: "";
+	_getAccessDecl(pAccessSpecCtx, pAstNode->accessDecl);
+	_getClassDecl(pClassTypeCtx, pAstNode->classDecl);
+	_getStorageDecl(pStorageSpecCtx, pAstNode->storageDecl);
 
-	const std::string qualifiedNamePrefix = namespacePrefix + classPrefix;
-	const std::string shortName = pCtx->Id()->getText();
-
-	m_classStack.push_back(classPrefix + shortName);
-
-	pAstNode->shortName = shortName;
-	pAstNode->qualifiedName = qualifiedNamePrefix + shortName;
-
-	pAstNode->nameTokenSpan = detail::TokenSpan::Extract(pCtx->Id()->getSymbol());
-
-	_getClassType(pClassTypeCtx, pAstNode->classType, pAstNode->classTypeTokenSpan);
-	_getAccessSpec(pAccessSpecCtx, pAstNode->accessSpec, pAstNode->accessSpecTokenSpan);
-	_getStorageSpec(pStorageSpecCtx, pAstNode->storageSpec, pAstNode->storageSpecTokenSpan);
+	m_prefixStack.push_back(pAstNode->id.longName);
 
 	if(pInheritanceCtx)
 	{
@@ -218,11 +203,12 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 		{
 			auto* const pIdCtx = pExtendsCtx->qualifiedId();
 
-			detail::TypeName baseType;
-			baseType.name = pIdCtx->getText();
-			baseType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
+			detail::TypeName id;
+			id.name = pIdCtx->getText();
+			id.beginSpan = detail::TokenSpan::Extract(pIdCtx->Id().front()->getSymbol());
+			id.endSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
 
-			pAstNode->extends.push_back(baseType);
+			pAstNode->extends.push_back(id);
 		}
 
 		if(pImplementsCtx)
@@ -231,11 +217,12 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 
 			for(auto* const pIdCtx : idCtxList)
 			{
-				detail::TypeName baseType;
-				baseType.name = pIdCtx->getText();
-				baseType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
+				detail::TypeName id;
+				id.name = pIdCtx->getText();
+				id.beginSpan = detail::TokenSpan::Extract(pIdCtx->Id().front()->getSymbol());
+				id.endSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
 
-				pAstNode->implements.push_back(baseType);
+				pAstNode->implements.push_back(id);
 			}
 		}
 	}
@@ -268,7 +255,7 @@ std::any AntlrAstBuilder::visitClassDecl(HarlequinParser::ClassDeclContext* cons
 		}
 	}
 
-	m_classStack.pop_back();
+	m_prefixStack.pop_back();
 
 	return std::make_any<ClassNode::Ptr>(pAstNode);
 }
@@ -290,26 +277,12 @@ std::any AntlrAstBuilder::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStm
 
 	ClassVariableNode::Ptr pAstNode = ClassVariableNode::New();
 
-	const std::string namespacePrefix = !m_namespaceStack.empty()
-		? m_namespaceStack.back() + "."
-		: "";
+	_getQualifiedName(pVarDeclCtx->Id(), pAstNode->id);
 
-	const std::string classPrefix = !m_classStack.empty()
-		? m_classStack.back() + "."
-		: "";
-
-	const std::string qualifiedNamePrefix = namespacePrefix + classPrefix;
-	const std::string shortName = pVarDeclCtx->Id()->getText();
-
-	pAstNode->shortName = shortName;
-	pAstNode->qualifiedName = qualifiedNamePrefix + shortName;
-
-	pAstNode->nameTokenSpan = detail::TokenSpan::Extract(pVarDeclCtx->Id()->getSymbol());
-
-	_getAccessSpec(pAccessSpecCtx, pAstNode->accessSpec, pAstNode->accessSpecToken, pAstNode->limitedTypes);
-	_getStorageSpec(pStorageSpecCtx, pAstNode->storageSpec, pAstNode->storageSpecToken);
-	_getConstQualifier(pConstQualCtx, pAstNode->constType, pAstNode->constTypeToken);
-	_getVarType(pTypeNameDeclCtx, pAstNode->varType, pAstNode->varTypeTokenSpan, pAstNode->arrayType, pAstNode->arrayTypeTokenSpan);
+	_getAccessDecl(pAccessSpecCtx, pAstNode->accessDecl, pAstNode->limitedTypeIds);
+	_getStorageDecl(pStorageSpecCtx, pAstNode->storageDecl);
+	_getConstDecl(pConstQualCtx, pAstNode->constDecl);
+	_getVarDecl(pTypeNameDeclCtx, pAstNode->varDecl, pAstNode->arrayDecl);
 
 	// TODO: Build the variable's expression here.
 	// TODO: Fix up the const type if the qualifier is present.
@@ -319,44 +292,54 @@ std::any AntlrAstBuilder::visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStm
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void AntlrAstBuilder::_getClassType(
-	HarlequinParser::ClassTypeContext* const pCtx,
-	detail::ClassType& outputType,
-	detail::TokenSpan& outputTokenSpan)
+void AntlrAstBuilder::_getQualifiedName(HarlequinParser::QualifiedIdContext* const pCtx, detail::QualifiedTypeName& outId) const
 {
-	// The context here should never be null.
-	assert(pCtx != nullptr);
+	const std::string prefix = !m_prefixStack.empty()
+		? std::string(m_prefixStack.back()) + "."
+		: "";
 
-	outputType = CompilerUtil::GetClassType(pCtx->getText());
-	outputTokenSpan = detail::TokenSpan::Extract(_getClassTypeToken(pCtx));
+	outId.shortName = pCtx->getText();
+	outId.longName = prefix + outId.shortName;
+	outId.beginSpan = detail::TokenSpan::Extract(pCtx->Id().front()->getSymbol());
+	outId.endSpan = detail::TokenSpan::Extract(pCtx->Id().back()->getSymbol());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void AntlrAstBuilder::_getAccessSpec(
-	HarlequinParser::AccessBaseSpecifierContext* const pCtx,
-	detail::AccessType& outputSpec,
-	detail::TokenSpan& outputTokenSpan)
+void AntlrAstBuilder::_getQualifiedName(antlr4::tree::TerminalNode* const pToken, detail::QualifiedTypeName& outId) const
+{
+	const std::string prefix = !m_prefixStack.empty()
+		? std::string(m_prefixStack.back()) + "."
+		: "";
+
+	outId.shortName = pToken->getText();
+	outId.longName = prefix + outId.shortName;
+	outId.beginSpan = detail::TokenSpan::Extract(pToken->getSymbol());
+	outId.endSpan = outId.beginSpan;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getAccessDecl(HarlequinParser::AccessBaseSpecifierContext* const pCtx, detail::AccessDecl& outputDecl) const
 {
 	if(pCtx)
 	{
-		outputSpec = CompilerUtil::GetAccessType(pCtx->getText());
-		outputTokenSpan = detail::TokenSpan::Extract(_getAccessSpecToken(pCtx));
+		outputDecl.type = CompilerUtil::GetAccessType(pCtx->getText());
+		outputDecl.span = detail::TokenSpan::Extract(_getAccessSpecToken(pCtx));
 	}
 	else
 	{
-		outputSpec = detail::AccessType::Private;
-		outputTokenSpan = detail::TokenSpan::Default();
+		outputDecl.type = detail::AccessDecl::Type::Private;
+		outputDecl.span = detail::TokenSpan::Default();
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void AntlrAstBuilder::_getAccessSpec(
+inline void AntlrAstBuilder::_getAccessDecl(
 	HarlequinParser::AccessSpecifierContext* const pCtx,
-	detail::AccessType& outputSpec,
-	detail::TokenSpan& outputTokenSpan,
-	detail::TypeName::Deque& outputLimitedTypes)
+	detail::AccessDecl& outputDecl,
+	detail::TypeName::Deque& outputLimitedTypes) const
 {
 	if(pCtx)
 	{
@@ -365,127 +348,120 @@ inline void AntlrAstBuilder::_getAccessSpec(
 
 		if(pLimitCtx)
 		{
-			outputSpec = detail::AccessType::Public;
-			outputTokenSpan = detail::TokenSpan::Extract(pLimitCtx->LimitedKw()->getSymbol());
+			outputDecl.type = detail::AccessDecl::Type::Public;
+			outputDecl.span = detail::TokenSpan::Extract(pLimitCtx->LimitedKw()->getSymbol());
 
 			const auto& typeIdCtxs = pLimitCtx->qualifiedId();
 
 			// Get all the referenced limited type ID names.
 			for(auto* const pIdCtx : typeIdCtxs)
 			{
-				detail::TypeName limitedType;
-				limitedType.name = pIdCtx->getText();
-				limitedType.tokenSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
+				detail::TypeName id;
+				id.name = pIdCtx->getText();
+				id.beginSpan = detail::TokenSpan::Extract(pIdCtx->Id().front()->getSymbol());
+				id.endSpan = detail::TokenSpan::Extract(pIdCtx->Id().back()->getSymbol());
 
-				outputLimitedTypes.push_back(std::move(limitedType));
+				outputLimitedTypes.push_back(std::move(id));
 			}
 		}
 		else
 		{
-			_getAccessSpec(pBaseCtx, outputSpec, outputTokenSpan);
+			_getAccessDecl(pBaseCtx, outputDecl);
 			outputLimitedTypes.clear();
 		}
 	}
 	else
 	{
-		outputSpec = detail::AccessType::Private;
-		outputTokenSpan = detail::TokenSpan::Default();
+		outputDecl.type = detail::AccessDecl::Type::Private;
+		outputDecl.span = detail::TokenSpan::Default();
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void AntlrAstBuilder::_getStorageSpec(
-	HarlequinParser::StorageSpecifierContext* const pCtx,
-	detail::StorageType& outputSpec,
-	detail::TokenSpan& outputTokenSpan)
+inline void AntlrAstBuilder::_getClassDecl(HarlequinParser::ClassTypeContext* const pCtx, detail::ClassDecl& outputDecl) const
+{
+	// The context here should never be null.
+	assert(pCtx != nullptr);
+
+	outputDecl.type = CompilerUtil::GetClassType(pCtx->getText());
+	outputDecl.span = detail::TokenSpan::Extract(_getClassTypeToken(pCtx));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void AntlrAstBuilder::_getStorageDecl(HarlequinParser::StorageSpecifierContext* const pCtx, detail::StorageDecl& outputDecl) const
 {
 	if(pCtx)
 	{
-		outputSpec = CompilerUtil::GetStorageType(pCtx->getText());
-		outputTokenSpan = detail::TokenSpan::Extract(_getStorageSpecToken(pCtx));
+		outputDecl.type = CompilerUtil::GetStorageType(pCtx->getText());
+		outputDecl.span = detail::TokenSpan::Extract(_getStorageSpecToken(pCtx));
 	}
 	else
 	{
-		outputSpec = detail::StorageType::Default;
-		outputTokenSpan = detail::TokenSpan::Default();
+		outputDecl.type = detail::StorageDecl::Type::Default;
+		outputDecl.span = detail::TokenSpan::Default();
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void AntlrAstBuilder::_getConstQualifier(
-	HarlequinParser::ConstQualifierContext* const pCtx,
-	detail::ConstType& outputType,
-	detail::TokenSpan& outputTokenSpan)
+inline void AntlrAstBuilder::_getConstDecl(HarlequinParser::ConstQualifierContext* const pCtx, detail::ConstDecl& outputDecl) const
 {
 	if(pCtx)
 	{
 		// For now, we assume all const variables are just immutable. If any are actually literals,
 		// their types will be promoted after their expression trees have been built.
-		outputType = detail::ConstType::Immutable;
-		outputTokenSpan = detail::TokenSpan::Extract(pCtx->ConstKw()->getSymbol());
+		outputDecl.type = detail::ConstDecl::Type::Immutable;
+		outputDecl.span = detail::TokenSpan::Extract(pCtx->ConstKw()->getSymbol());
 	}
 	else
 	{
-		outputType = detail::ConstType::None;
-		outputTokenSpan = detail::TokenSpan::Default();
+		outputDecl.type = detail::ConstDecl::Type::None;
+		outputDecl.span = detail::TokenSpan::Default();
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline void AntlrAstBuilder::_getVarType(
+inline void AntlrAstBuilder::_getVarDecl(
 	HarlequinParser::TypeNameDeclContext* const pCtx,
-	detail::VarType& outputVarType,
-	detail::TokenSpan& outputVarTypeTokenSpan,
-	detail::ArrayType& outputArrayType,
-	detail::TokenSpan& outputArrayTypeTokenSpan)
+	detail::VarDecl& outputVarDecl,
+	detail::ArrayDecl& outputArrayDecl) const
 {
 	// The type name context should never be null.
 	assert(pCtx != nullptr);
 
-	outputVarType = CompilerUtil::GetVarType(pCtx->Id()->getText());
-	outputVarTypeTokenSpan = detail::TokenSpan::Extract(pCtx->Id()->getSymbol());
+	outputVarDecl.type = CompilerUtil::GetVarType(pCtx->Id()->getText());
+	outputVarDecl.span = detail::TokenSpan::Extract(pCtx->Id()->getSymbol());
 
 	auto* const pArrayTypeDeclCtx = pCtx->arrayTypeDecl();
 
 	if(pArrayTypeDeclCtx)
 	{
 		const auto& arrayCommas = pArrayTypeDeclCtx->Comma();
-
 		const size_t commaCount = arrayCommas.size();
-
-		const detail::TokenSpan startSpan = detail::TokenSpan::Extract(pArrayTypeDeclCtx->LeftBracket()->getSymbol());
-		const detail::TokenSpan endSpan = detail::TokenSpan::Extract(pArrayTypeDeclCtx->RightBracket()->getSymbol());
-		
-		// TODO: We need to support both start and end spans.
-		outputArrayTypeTokenSpan = startSpan;
 
 		switch(commaCount)
 		{
-			case 0:
-				outputArrayType = detail::ArrayType::Linear;
-				break;
-
-			case 1:
-				outputArrayType = detail::ArrayType::Grid2D;
-				break;
-
-			case 2:
-				outputArrayType = detail::ArrayType::Grid3D;
-				break;
+			case 0: outputArrayDecl.type = detail::ArrayDecl::Type::Linear; break;
+			case 1: outputArrayDecl.type = detail::ArrayDecl::Type::Grid2D; break;
+			case 2: outputArrayDecl.type = detail::ArrayDecl::Type::Grid3D; break;
 
 			default:
 				// This should never happen since the grammar enforces the syntax for all valid array declarations.
 				assert(false);
 				break;
 		}
+
+		outputArrayDecl.beginSpan = detail::TokenSpan::Extract(pArrayTypeDeclCtx->LeftBracket()->getSymbol());
+		outputArrayDecl.endSpan = detail::TokenSpan::Extract(pArrayTypeDeclCtx->RightBracket()->getSymbol());
 	}
 	else
 	{
-		outputArrayType = detail::ArrayType::None;
-		outputArrayTypeTokenSpan = detail::TokenSpan::Default();
+		outputArrayDecl.type = detail::ArrayDecl::Type::None;
+		outputArrayDecl.beginSpan = detail::TokenSpan::Default();
+		outputArrayDecl.endSpan = detail::TokenSpan::Default();
 	}
 }
 

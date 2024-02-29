@@ -22,9 +22,9 @@
 
 #include "AstBaseNode.hpp"
 
-#include "../detail/ArrayType.hpp"
-#include "../detail/TokenSpan.hpp"
-#include "../detail/VarType.hpp"
+#include "../detail/ArrayDecl.hpp"
+#include "../detail/VarDecl.hpp"
+#include "../detail/TypeName.hpp"
 
 #include <memory>
 #include <deque>
@@ -49,15 +49,10 @@ public:
 
 	// TODO: Add assignment expression node here
 
-	std::string shortName;
-	std::string qualifiedName;
+	detail::QualifiedTypeName id;
 
-	detail::VarType varType;
-	detail::ArrayType arrayType;
-
-	detail::TokenSpan nameTokenSpan;
-	detail::TokenSpan varTypeTokenSpan;
-	detail::TokenSpan arrayTypeTokenSpan;
+	detail::VarDecl varDecl;
+	detail::ArrayDecl arrayDecl;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

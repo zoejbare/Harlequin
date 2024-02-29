@@ -20,12 +20,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "TokenSpan.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace detail
 {
-	enum class StorageType
+	struct StorageDecl
 	{
-		Default,
-		Static,
+		enum class Type
+		{
+			Default,
+			Static,
+		};
+
+		Type type;
+		TokenSpan span;
 	};
 }
 

@@ -20,13 +20,25 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "TokenSpan.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace detail
 {
-	enum class ConstType
+	struct ArrayDecl
 	{
-		None,
-		Immutable,
-		Literal,
+		enum class Type
+		{
+			None,
+			Linear,
+			Grid2D,
+			Grid3D,
+		};
+
+		Type type;
+		TokenSpan beginSpan;
+		TokenSpan endSpan;
 	};
 }
 

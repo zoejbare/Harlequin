@@ -20,14 +20,23 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "TokenSpan.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace detail
 {
-	enum class ArrayType
+	struct AccessDecl
 	{
-		None,
-		Linear,
-		Grid2D,
-		Grid3D,
+		enum class Type
+		{
+			Public,
+			Protected,
+			Private,
+		};
+
+		Type type;
+		TokenSpan span;
 	};
 }
 

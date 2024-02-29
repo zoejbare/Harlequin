@@ -26,6 +26,7 @@
 #include "../autogen/HarlequinBaseVisitor.h"
 
 #include <list>
+#include <string_view>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -38,6 +39,8 @@ public:
 
 
 private:
+
+	typedef std::list<std::string_view> StringStack;
 
 	AntlrAstBuilder() = delete;
 	explicit AntlrAstBuilder(SourceContext&);
@@ -52,12 +55,15 @@ private:
 
 	virtual std::any visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext*) override;
 
-	void _getClassType(HarlequinParser::ClassTypeContext*, detail::ClassType&, detail::TokenSpan&);
-	void _getAccessSpec(HarlequinParser::AccessBaseSpecifierContext*, detail::AccessType&, detail::TokenSpan&);
-	void _getAccessSpec(HarlequinParser::AccessSpecifierContext*, detail::AccessType&, detail::TokenSpan&, detail::TypeName::Deque&);
-	void _getStorageSpec(HarlequinParser::StorageSpecifierContext*, detail::StorageType&, detail::TokenSpan&);
-	void _getConstQualifier(HarlequinParser::ConstQualifierContext*, detail::ConstType&, detail::TokenSpan&);
-	void _getVarType(HarlequinParser::TypeNameDeclContext*, detail::VarType&, detail::TokenSpan&, detail::ArrayType&, detail::TokenSpan&);
+	void _getQualifiedName(HarlequinParser::QualifiedIdContext*, detail::QualifiedTypeName&) const;
+	void _getQualifiedName(antlr4::tree::TerminalNode*, detail::QualifiedTypeName&) const;
+
+	void _getAccessDecl(HarlequinParser::AccessBaseSpecifierContext*, detail::AccessDecl&) const;
+	void _getAccessDecl(HarlequinParser::AccessSpecifierContext*, detail::AccessDecl&, detail::TypeName::Deque&) const;
+	void _getClassDecl(HarlequinParser::ClassTypeContext*, detail::ClassDecl&) const;
+	void _getStorageDecl(HarlequinParser::StorageSpecifierContext*, detail::StorageDecl&) const;
+	void _getConstDecl(HarlequinParser::ConstQualifierContext*, detail::ConstDecl&) const;
+	void _getVarDecl(HarlequinParser::TypeNameDeclContext*, detail::VarDecl&, detail::ArrayDecl&) const;
 
 	static antlr4::Token* _getClassTypeToken(HarlequinParser::ClassTypeContext*);
 	static antlr4::Token* _getAccessSpecToken(HarlequinParser::AccessBaseSpecifierContext*);
@@ -65,8 +71,7 @@ private:
 
 	SourceContext* m_pSrcCtx;
 
-	std::list<std::string> m_namespaceStack;
-	std::list<std::string> m_classStack;
+	StringStack m_prefixStack;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

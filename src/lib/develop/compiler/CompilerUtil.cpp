@@ -23,137 +23,137 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::AccessType CompilerUtil::GetAccessType(const std::string& accessType)
+detail::AccessDecl::Type CompilerUtil::GetAccessType(const std::string& accessType)
 {
 	return (accessType == "public")
-		? detail::AccessType::Public
+		? detail::AccessDecl::Type::Public
 		: (accessType == "protected")
-			? detail::AccessType::Protected
-			: detail::AccessType::Private;
+			? detail::AccessDecl::Type::Protected
+			: detail::AccessDecl::Type::Private;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::ArrayType CompilerUtil::GetArrayType(const std::string& arraySpec)
+detail::ArrayDecl::Type CompilerUtil::GetArrayType(const std::string& arraySpec)
 {
 	if(arraySpec.empty())
 	{
-		return detail::ArrayType::None;
+		return detail::ArrayDecl::Type::None;
 	}
 
 	const size_t commaCount = std::count(arraySpec.begin(), arraySpec.end(), ',');
 
 	switch(commaCount)
 	{
-		case 0:  return detail::ArrayType::Linear;
-		case 1:  return detail::ArrayType::Grid2D;
-		default: return detail::ArrayType::Grid3D;
+		case 0:  return detail::ArrayDecl::Type::Linear;
+		case 1:  return detail::ArrayDecl::Type::Grid2D;
+		default: return detail::ArrayDecl::Type::Grid3D;
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::ClassType CompilerUtil::GetClassType(const std::string& classType)
+detail::ClassDecl::Type CompilerUtil::GetClassType(const std::string& classType)
 {
 	return (classType == "interface")
-		? detail::ClassType::Interface
-		: detail::ClassType::Class;
+		? detail::ClassDecl::Type::Interface
+		: detail::ClassDecl::Type::Class;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::FunctionType CompilerUtil::GetFunctionType(const std::string& funcType)
+detail::FuncDecl::Type CompilerUtil::GetFunctionType(const std::string& funcType)
 {
 	return (funcType == "inline")
-		? detail::FunctionType::Inline
+		? detail::FuncDecl::Type::Inline
 		: (funcType == "virtual")
-			? detail::FunctionType::Virtual
+			? detail::FuncDecl::Type::Virtual
 			: (funcType == "native")
-				? detail::FunctionType::Native
-				: detail::FunctionType::Default;
+				? detail::FuncDecl::Type::Native
+				: detail::FuncDecl::Type::Default;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::StorageType CompilerUtil::GetStorageType(const std::string& storageType)
+detail::StorageDecl::Type CompilerUtil::GetStorageType(const std::string& storageType)
 {
 	return (storageType == "static")
-		? detail::StorageType::Static
-		: detail::StorageType::Default;
+		? detail::StorageDecl::Type::Static
+		: detail::StorageDecl::Type::Default;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::VarType CompilerUtil::GetVarType(const std::string& typeName)
+detail::VarDecl::Type CompilerUtil::GetVarType(const std::string& typeName)
 {
 	if(typeName == "int8")
 	{
-		return detail::VarType::Int8;
+		return detail::VarDecl::Type::Int8;
 	}
 	else if(typeName == "int16")
 	{
-		return detail::VarType::Int16;
+		return detail::VarDecl::Type::Int16;
 	}
 	else if(typeName == "int32")
 	{
-		return detail::VarType::Int32;
+		return detail::VarDecl::Type::Int32;
 	}
 	else if(typeName == "int64")
 	{
-		return detail::VarType::Int64;
+		return detail::VarDecl::Type::Int64;
 	}
 	else if(typeName == "uint8")
 	{
-		return detail::VarType::Uint8;
+		return detail::VarDecl::Type::Uint8;
 	}
 	else if(typeName == "uint16")
 	{
-		return detail::VarType::Uint16;
+		return detail::VarDecl::Type::Uint16;
 	}
 	else if(typeName == "uint32")
 	{
-		return detail::VarType::Uint32;
+		return detail::VarDecl::Type::Uint32;
 	}
 	else if(typeName == "uint64")
 	{
-		return detail::VarType::Uint64;
+		return detail::VarDecl::Type::Uint64;
 	}
 	else if(typeName == "float32")
 	{
-		return detail::VarType::Float32;
+		return detail::VarDecl::Type::Float32;
 	}
 	else if(typeName == "float64")
 	{
-		return detail::VarType::Float64;
+		return detail::VarDecl::Type::Float64;
 	}
 	else if(typeName == "bool")
 	{
-		return detail::VarType::Bool;
+		return detail::VarDecl::Type::Bool;
 	}
 	else if(typeName == "string")
 	{
-		return detail::VarType::String;
+		return detail::VarDecl::Type::String;
 	}
 	else if(typeName == "native")
 	{
-		return detail::VarType::Native;
+		return detail::VarDecl::Type::Native;
 	}
 
-	return detail::VarType::Object;
+	return detail::VarDecl::Type::Object;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-std::string CompilerUtil::GetVarTypeSignature(const std::string& typeName, const detail::ArrayType& arrayType)
+std::string CompilerUtil::GetTypeSignature(const std::string& typeName, const detail::ArrayDecl::Type arrayType)
 {
 	std::stringstream stream;
 	stream << typeName;
 
 	switch(arrayType)
 	{
-		case detail::ArrayType::Linear: stream << "[]";   break;
-		case detail::ArrayType::Grid2D: stream << "[,]";  break;
-		case detail::ArrayType::Grid3D: stream << "[,,]"; break;
+		case detail::ArrayDecl::Type::Linear: stream << "[]";   break;
+		case detail::ArrayDecl::Type::Grid2D: stream << "[,]";  break;
+		case detail::ArrayDecl::Type::Grid3D: stream << "[,,]"; break;
 
 		default:
 			break;

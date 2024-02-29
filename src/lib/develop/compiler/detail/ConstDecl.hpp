@@ -20,12 +20,23 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "TokenSpan.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace detail
 {
-	enum class ClassType
+	struct ConstDecl
 	{
-		Class,
-		Interface,
+		enum class Type
+		{
+			None,
+			Immutable,
+			Literal,
+		};
+
+		Type type;
+		TokenSpan span;
 	};
 }
 

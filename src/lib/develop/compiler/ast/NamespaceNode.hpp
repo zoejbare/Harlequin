@@ -58,8 +58,7 @@ public:
 		}
 	}
 
-	std::string shortName;
-	std::string qualifiedName;
+	detail::QualifiedTypeName id;
 
 	PtrDeque namespaces;
 

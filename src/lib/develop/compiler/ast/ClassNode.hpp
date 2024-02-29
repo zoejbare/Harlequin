@@ -22,7 +22,7 @@
 
 #include "ClassVariableNode.hpp"
 
-#include "../detail/ClassType.hpp"
+#include "../detail/ClassDecl.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -63,18 +63,11 @@ public:
 	detail::TypeName::Deque extends;
 	detail::TypeName::Deque implements;
 
-	std::string shortName;
-	std::string qualifiedName;
+	detail::QualifiedTypeName id;
 
-	detail::ClassType classType;
-
-	detail::AccessType accessSpec;
-	detail::StorageType storageSpec;
-
-	detail::TokenSpan nameTokenSpan;
-	detail::TokenSpan classTypeTokenSpan;
-	detail::TokenSpan accessSpecTokenSpan;
-	detail::TokenSpan storageSpecTokenSpan;
+	detail::AccessDecl accessDecl;
+	detail::ClassDecl classDecl;
+	detail::StorageDecl storageDecl;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

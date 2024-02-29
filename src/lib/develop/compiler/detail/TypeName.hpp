@@ -23,6 +23,7 @@
 #include "TokenSpan.hpp"
 
 #include <deque>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +34,18 @@ namespace detail
 		typedef std::deque<TypeName> Deque;
 
 		std::string name;
-		TokenSpan tokenSpan;
+
+		TokenSpan beginSpan;
+		TokenSpan endSpan;
+	};
+
+	struct QualifiedTypeName
+	{
+		std::string shortName;
+		std::string longName;
+
+		TokenSpan beginSpan;
+		TokenSpan endSpan;
 	};
 }
 

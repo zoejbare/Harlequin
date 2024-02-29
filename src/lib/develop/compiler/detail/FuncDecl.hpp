@@ -20,14 +20,24 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "TokenSpan.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace detail
 {
-	enum class FunctionType
+	struct FuncDecl
 	{
-		Default,
-		Inline,
-		Virtual,
-		Native,
+		enum class Type
+		{
+			Default,
+			Inline,
+			Virtual,
+			Native,
+		};
+
+		Type type;
+		TokenSpan span;
 	};
 }
 

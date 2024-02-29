@@ -20,13 +20,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+#include "TokenSpan.hpp"
+
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace detail
 {
-	enum class AccessType
+	struct ClassDecl
 	{
-		Public,
-		Protected,
-		Private,
+		enum class Type
+		{
+			Class,
+			Interface,
+		};
+
+		Type type;
+		TokenSpan span;
 	};
 }
 
