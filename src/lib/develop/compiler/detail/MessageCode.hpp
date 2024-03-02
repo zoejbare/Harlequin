@@ -36,7 +36,7 @@ enum class MessageCode
 	ErrorStaticVirtualMethod,
 	ErrorStaticConstMethod,
 
-	_WarningStart_ = 5000,
+	_WarningStart_ = 10000,
 };
 
 //----------------------------------------------------------------------------------------------------------------------

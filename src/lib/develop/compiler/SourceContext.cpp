@@ -101,14 +101,21 @@ void SourceContext::Report(
 	const int msgType = _getMsgType(code);
 
 	const char* typeStr = nullptr;
+	const char* codePrefix = nullptr;
+	uint32_t adjustedCode = 0;
+
 	switch(msgType)
 	{
 		case HQ_MESSAGE_TYPE_ERROR:
 			typeStr = "error ";
+			codePrefix = "E";
+			adjustedCode = uint32_t(code) - uint32_t(MessageCode::_ErrorStart_);
 			break;
 
 		case HQ_MESSAGE_TYPE_WARNING:
 			typeStr = "warning ";
+			codePrefix = "W";
+			adjustedCode = uint32_t(code) - uint32_t(MessageCode::_WarningStart_);
 			break;
 
 		default:
@@ -117,8 +124,13 @@ void SourceContext::Report(
 			break;
 	}
 
+	// The message code outputs as a 4-digit integer, so it supports a maximum
+	// of 10000 individual codes per category. If somehow we've adjusted to over
+	// this amount, something has gone very wrong.
+	assert(adjustedCode < 10000);
+
 	char codeStr[6];
-	snprintf(codeStr, sizeof(codeStr) / sizeof(char), "C%04" PRIu16, uint16_t(code));
+	snprintf(codeStr, sizeof(codeStr) / sizeof(char), "%s%04" PRIu16, codePrefix, adjustedCode);
 
 	std::stringstream msgStream;
 	msgStream
