@@ -51,13 +51,33 @@ public:
 
 	bool EncounteredErrors() const;
 
-	void Report(MessageCode code, const detail::TokenSpan& span, const std::string& msg);
-	void Report(MessageCode code, const detail::TokenSpan& span, const std::string& primaryMsg, const std::string& secondaryMsg);
+	void Report(
+		MessageCode code, 
+		const detail::TokenSpan& span, 
+		const std::string& msg);
+	void Report(
+		MessageCode code, 
+		const detail::TokenSpan& span, 
+		const std::string& primaryMsg, 
+		const std::string& secondaryMsg);
+
+	void Report(
+		MessageCode code, 
+		const detail::TokenSpan& beginSpan, 
+		const detail::TokenSpan& endSpan, 
+		const std::string& msg);
+	void Report(
+		MessageCode code, 
+		const detail::TokenSpan& beginSpan, 
+		const detail::TokenSpan& endSpan, 
+		const std::string& primaryMsg, 
+		const std::string& secondaryMsg);
 
 
 private:
 
-	typedef std::vector<std::string_view> Lines;
+	typedef std::vector<std::string_view> LineStrings;
+	typedef std::vector<size_t>           LineIndices;
 
 	enum class MsgType
 	{
@@ -72,7 +92,8 @@ private:
 	std::string m_filePath;
 	std::string m_fileContents;
 
-	Lines m_fileLines;
+	LineStrings m_lineStrings;
+	LineIndices m_lineIndices;
 
 	size_t m_errorCount;
 	size_t m_warningCount;
@@ -84,7 +105,8 @@ inline SourceContext::SourceContext()
 	: m_hReport(HQ_REPORT_HANDLE_NULL)
 	, m_filePath()
 	, m_fileContents()
-	, m_fileLines()
+	, m_lineStrings()
+	, m_lineIndices()
 	, m_errorCount(0)
 	, m_warningCount(0)
 {
@@ -128,6 +150,30 @@ inline void SourceContext::Report(
 	static const std::string empty;
 
 	Report(code, span, msg, empty);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void SourceContext::Report(
+	const MessageCode code,
+	const detail::TokenSpan& span,
+	const std::string& primaryMsg,
+	const std::string& secondaryMsg)
+{
+	Report(code, span, span, primaryMsg, secondaryMsg);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline void SourceContext::Report(
+	const MessageCode code, 
+	const detail::TokenSpan& beginSpan, 
+	const detail::TokenSpan& endSpan, 
+	const std::string& msg)
+{
+	static const std::string empty;
+
+	Report(code, beginSpan, endSpan, msg, empty);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -48,9 +48,11 @@ void SourceContext::Initialize(
 	const size_t lineCount = std::count(m_fileContents.begin(), m_fileContents.end(), '\n') + 1;
 
 	// Reserve enough space in the array for each line.
-	m_fileLines.reserve(lineCount);
+	m_lineStrings.reserve(lineCount);
+	m_lineIndices.reserve(lineCount);
 
-	char* lineStart = m_fileContents.data();
+	char* const fileStart = m_fileContents.data();
+	char* lineStart = fileStart;
 
 	// Keep track of each line as a string reference back into the file contents string.
 	for(;;)
@@ -61,7 +63,7 @@ void SourceContext::Initialize(
 		// end of the line is functionally a null terminator. If there is no newline character,
 		// we can let the line go all the way to end of the main string.
 		size_t length = lineEnd 
-			? size_t(lineEnd - lineStart) 
+			? size_t(lineEnd - lineStart)
 			: strlen(lineStart);
 
 		// Trim the whitespace from the end of the line.
@@ -70,7 +72,8 @@ void SourceContext::Initialize(
 			--length;
 		}
 
-		m_fileLines.push_back(std::string_view(lineStart, length));
+		m_lineStrings.push_back(std::string_view(lineStart, length));
+		m_lineIndices.push_back(size_t(lineStart - fileStart));
 
 		if(!lineEnd)
 		{
@@ -87,10 +90,14 @@ void SourceContext::Initialize(
 
 void SourceContext::Report(
 	const MessageCode code,
-	const detail::TokenSpan& span,
+	const detail::TokenSpan& beginSpan,
+	const detail::TokenSpan& endSpan,
 	const std::string& primaryMsg,
 	const std::string& secondaryMsg)
 {
+	// Both spans should refer to the same source file.
+	assert(beginSpan.sourceName == endSpan.sourceName);
+
 	const int msgType = _getMsgType(code);
 
 	const char* typeStr = nullptr;
@@ -115,33 +122,59 @@ void SourceContext::Report(
 
 	std::stringstream msgStream;
 	msgStream
-		<< span.sourceName
-		<< "(" << span.lineNumber << "): "
+		<< beginSpan.sourceName
+		<< "(" << beginSpan.lineNumber << "): "
 		<< typeStr << codeStr << ": "
 		<< primaryMsg;
 
-	if(span.startIndex < span.stopIndex)
+	const size_t beginSpanIndex = beginSpan.startIndex;
+	const size_t endSpanIndex = endSpan.stopIndex;
+
+	if(beginSpanIndex < endSpanIndex)
 	{
-		const std::string_view& sourceCode = m_fileLines[span.lineNumber - 1];
-
-		// Add the source code text to the message.
-		msgStream << std::endl << sourceCode << std::endl;
-
-		// Add the whitespace leading up to the underlining.
-		for(size_t i = 0; i < span.positionInLine; ++i)
+		for(size_t lineIndex = beginSpan.lineNumber - 1; lineIndex < endSpan.lineNumber; ++lineIndex)
 		{
-			const char charInLine = sourceCode[i];
-			const char charToWrite = (isspace(charInLine) > 0)
-				? charInLine
-				: ' ';
+			const std::string_view& sourceCode = m_lineStrings[lineIndex];
+			const size_t lineStartIndex = m_lineIndices[lineIndex];
+			const size_t lineEndIndex = lineStartIndex + sourceCode.size();
 
-			msgStream << charToWrite;
-		}
+			if(lineStartIndex == lineEndIndex)
+			{
+				// Skip empty lines to save a bit of terminal real estate.
+				continue;
+			}
 
-		// Add the underline that is as long as the offending token.
-		for(size_t i = span.startIndex; i <= span.stopIndex; ++i)
-		{
-			msgStream << '~';
+			// Add the source code text to the message.
+			msgStream << std::endl << sourceCode << std::endl;
+
+			// Add the diagnostic section to the message stream.
+			for(size_t absoluteIndex = lineStartIndex; absoluteIndex < lineEndIndex; ++absoluteIndex)
+			{
+				const size_t lineLocalIndex = absoluteIndex - lineStartIndex;
+				const char charInLine = sourceCode[lineLocalIndex];
+				const bool isWhitespace = (isspace(charInLine) > 0);
+
+				char charToWrite = '\0';
+
+				if(absoluteIndex < beginSpanIndex)
+				{
+					// If this is the first line, there will be some padding necessary before
+					// the underlining can begin. We'll fill this padded area with either an
+					// explicit space character or whatever whitespace exists at the padded index.
+					charToWrite = isWhitespace
+						? charInLine
+						: ' ';
+				}
+				else
+				{
+					// Within the specific token span, we only underline non-whitespace characters.
+					charToWrite = isWhitespace
+						? charInLine
+						: '~';
+				}
+
+				msgStream << charToWrite;
+			}
 		}
 	}
 

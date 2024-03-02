@@ -26,7 +26,6 @@ detail::TokenSpan detail::TokenSpan::Default()
 {
 	TokenSpan output;
 	output.lineNumber = 0;
-	output.positionInLine = 0;
 	output.startIndex = 0;
 	output.stopIndex = 0;
 
@@ -45,7 +44,6 @@ detail::TokenSpan detail::TokenSpan::Extract(const antlr4::Token* const pToken, 
 		TokenSpan output;
 		output.sourceName = pToken->getTokenSource()->getSourceName();
 		output.lineNumber = pToken->getLine();
-		output.positionInLine = pToken->getCharPositionInLine();
 		output.startIndex = withSourceText ? pToken->getStartIndex() : 0;
 		output.stopIndex = withSourceText ? pToken->getStopIndex() : 0;
 

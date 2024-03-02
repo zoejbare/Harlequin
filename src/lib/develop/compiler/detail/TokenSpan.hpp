@@ -48,7 +48,6 @@ struct detail::TokenSpan
 	std::string sourceName;
 
 	size_t lineNumber;
-	size_t positionInLine;
 	size_t startIndex;
 	size_t stopIndex;
 };
