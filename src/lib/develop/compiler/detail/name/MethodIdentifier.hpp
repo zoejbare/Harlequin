@@ -20,35 +20,21 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ExprVariableNode.hpp"
+#include "../TokenSpan.hpp"
 
-#include "../detail/decl/AccessDecl.hpp"
-#include "../detail/decl/ConstDecl.hpp"
-#include "../detail/decl/StorageDecl.hpp"
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ClassVariableNode final
-	: public ExprVariableNode
+namespace detail
 {
-public:
-
-	typedef std::shared_ptr<ClassVariableNode> Ptr;
-	typedef std::deque<Ptr>                    PtrDeque;
-
-	inline static Ptr New()
+	struct MethodIdentifier
 	{
-		return std::make_shared<ClassVariableNode>();
-	}
+		std::string name;
+		std::string signature;
 
-	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
-	{
-		_HQ_AST_NODE_WALK_PREAMBLE(ExprVariableNode, srcCtx, pVisitor, visit);
-	}
-
-	detail::AccessDecl accessDecl;
-	detail::StorageDecl storageDecl;
-	detail::ConstDecl constDecl;
-};
+		TokenSpan nameSpan;
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -23,7 +23,7 @@
 #include "compiler/SourceContext.hpp"
 
 #include "compiler/ast/RootNode.hpp"
-#include "compiler/detail/ParseResult.hpp"
+#include "compiler/detail/enum/ParseResult.hpp"
 
 #include "../base/Reference.hpp"
 

@@ -22,7 +22,7 @@
 
 #include "AstBaseNode.hpp"
 
-#include "../detail/TypeName.hpp"
+#include "../detail/name/SimpleIdentifier.hpp"
 
 #include <memory>
 #include <deque>
@@ -48,7 +48,7 @@ public:
 		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
 	}
 
-	detail::TypeName id;
+	detail::SimpleIdentifier id;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

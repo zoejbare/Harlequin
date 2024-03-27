@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024, Zoe J. Bare
+// Copyright (c) 2023, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,32 +20,25 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "TokenSpan.hpp"
-
-#include <deque>
-#include <string>
+#include "../name/SimpleIdentifier.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace detail
 {
-	struct TypeName
+	struct AccessDecl
 	{
-		typedef std::deque<TypeName> Deque;
+		enum class Type
+		{
+			Public,
+			Protected,
+			Private,
+		};
 
-		std::string name;
+		SimpleIdentifier::Deque limitedTypeIds;
 
-		TokenSpan beginSpan;
-		TokenSpan endSpan;
-	};
-
-	struct QualifiedTypeName
-	{
-		std::string shortName;
-		std::string longName;
-
-		TokenSpan beginSpan;
-		TokenSpan endSpan;
+		Type type;
+		TokenSpan span;
 	};
 }
 

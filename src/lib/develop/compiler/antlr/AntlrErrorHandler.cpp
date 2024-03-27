@@ -47,7 +47,7 @@ void AntlrErrorHandler::syntaxError(
 	(void) line;
 	(void) charPositionInLine;
 	(void) e;
-	m_pSrcCtx->Report(MessageCode::ErrorSyntax, detail::TokenSpan::Extract(pOffendingSymbol), msg);
+	m_pSrcCtx->Report(detail::MessageCode::ErrorSyntax, detail::TokenSpan::Extract(pOffendingSymbol), msg);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -62,6 +62,66 @@ detail::ClassDecl::Type CompilerUtil::GetClassType(const std::string& classType)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+detail::TypeDecl::Type CompilerUtil::GetDataType(const std::string& typeName)
+{
+	if(typeName == "int8")
+	{
+		return detail::TypeDecl::Type::Int8;
+	}
+	else if(typeName == "int16")
+	{
+		return detail::TypeDecl::Type::Int16;
+	}
+	else if(typeName == "int32")
+	{
+		return detail::TypeDecl::Type::Int32;
+	}
+	else if(typeName == "int64")
+	{
+		return detail::TypeDecl::Type::Int64;
+	}
+	else if(typeName == "uint8")
+	{
+		return detail::TypeDecl::Type::Uint8;
+	}
+	else if(typeName == "uint16")
+	{
+		return detail::TypeDecl::Type::Uint16;
+	}
+	else if(typeName == "uint32")
+	{
+		return detail::TypeDecl::Type::Uint32;
+	}
+	else if(typeName == "uint64")
+	{
+		return detail::TypeDecl::Type::Uint64;
+	}
+	else if(typeName == "float32")
+	{
+		return detail::TypeDecl::Type::Float32;
+	}
+	else if(typeName == "float64")
+	{
+		return detail::TypeDecl::Type::Float64;
+	}
+	else if(typeName == "bool")
+	{
+		return detail::TypeDecl::Type::Bool;
+	}
+	else if(typeName == "string")
+	{
+		return detail::TypeDecl::Type::String;
+	}
+	else if(typeName == "native")
+	{
+		return detail::TypeDecl::Type::Native;
+	}
+
+	return detail::TypeDecl::Type::Object;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 detail::FuncDecl::Type CompilerUtil::GetFunctionType(const std::string& funcType)
 {
 	return (funcType == "inline")
@@ -84,72 +144,42 @@ detail::StorageDecl::Type CompilerUtil::GetStorageType(const std::string& storag
 
 //----------------------------------------------------------------------------------------------------------------------
 
-detail::VarDecl::Type CompilerUtil::GetVarType(const std::string& typeName)
-{
-	if(typeName == "int8")
-	{
-		return detail::VarDecl::Type::Int8;
-	}
-	else if(typeName == "int16")
-	{
-		return detail::VarDecl::Type::Int16;
-	}
-	else if(typeName == "int32")
-	{
-		return detail::VarDecl::Type::Int32;
-	}
-	else if(typeName == "int64")
-	{
-		return detail::VarDecl::Type::Int64;
-	}
-	else if(typeName == "uint8")
-	{
-		return detail::VarDecl::Type::Uint8;
-	}
-	else if(typeName == "uint16")
-	{
-		return detail::VarDecl::Type::Uint16;
-	}
-	else if(typeName == "uint32")
-	{
-		return detail::VarDecl::Type::Uint32;
-	}
-	else if(typeName == "uint64")
-	{
-		return detail::VarDecl::Type::Uint64;
-	}
-	else if(typeName == "float32")
-	{
-		return detail::VarDecl::Type::Float32;
-	}
-	else if(typeName == "float64")
-	{
-		return detail::VarDecl::Type::Float64;
-	}
-	else if(typeName == "bool")
-	{
-		return detail::VarDecl::Type::Bool;
-	}
-	else if(typeName == "string")
-	{
-		return detail::VarDecl::Type::String;
-	}
-	else if(typeName == "native")
-	{
-		return detail::VarDecl::Type::Native;
-	}
-
-	return detail::VarDecl::Type::Object;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-std::string CompilerUtil::GetTypeSignature(const std::string& typeName, const detail::ArrayDecl::Type arrayType)
+std::string CompilerUtil::GetTypeSignature(const detail::VarDecl& varDecl, const detail::ConstDecl& constDecl)
 {
 	std::stringstream stream;
-	stream << typeName;
 
-	switch(arrayType)
+	if(constDecl.type != detail::ConstDecl::Type::None && varDecl.typeDecl.type == detail::TypeDecl::Type::Object)
+	{
+		// Only objects will need to care about the 'const' qualifier since their underlying data is not implicitly immutable.
+		// Native types also don't need this since they are exclusively manipulated from managed code and no qualifier here
+		// would be capable of enforcing whatever native code wants to do to them.
+		stream << "const ";
+	}
+
+	switch(varDecl.typeDecl.type)
+	{
+		case detail::TypeDecl::Type::Int8:    stream << "int8";                      break;
+		case detail::TypeDecl::Type::Int16:   stream << "int16";                     break;
+		case detail::TypeDecl::Type::Int32:   stream << "int32";                     break;
+		case detail::TypeDecl::Type::Int64:   stream << "int64";                     break;
+		case detail::TypeDecl::Type::Uint8:   stream << "uint8";                     break;
+		case detail::TypeDecl::Type::Uint16:  stream << "uint16";                    break;
+		case detail::TypeDecl::Type::Uint32:  stream << "uint32";                    break;
+		case detail::TypeDecl::Type::Uint64:  stream << "uint64";                    break;
+		case detail::TypeDecl::Type::Float32: stream << "float32";                   break;
+		case detail::TypeDecl::Type::Float64: stream << "float64";                   break;
+		case detail::TypeDecl::Type::Bool:    stream << "bool";                      break;
+		case detail::TypeDecl::Type::String:  stream << "string";                    break;
+		case detail::TypeDecl::Type::Object:  stream << varDecl.typeDecl.objectName; break;
+		case detail::TypeDecl::Type::Native:  stream << "native";                    break;
+
+		default:
+			// This should never happen.
+			assert(false);
+			break;
+	}
+
+	switch(varDecl.arrayDecl.type)
 	{
 		case detail::ArrayDecl::Type::Linear: stream << "[]";   break;
 		case detail::ArrayDecl::Type::Grid2D: stream << "[,]";  break;

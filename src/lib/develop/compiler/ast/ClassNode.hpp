@@ -21,8 +21,10 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 #include "ClassVariableNode.hpp"
+#include "MethodNode.hpp"
 
-#include "../detail/ClassDecl.hpp"
+#include "../detail/decl/ClassDecl.hpp"
+#include "../detail/name/QualifiedIdentifier.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -54,16 +56,23 @@ public:
 		{
 			pNode->Walk(srcCtx, pVisitor);
 		}
+
+		// Visit the method nodes.
+		for(const auto& pNode : methods)
+		{
+			pNode->Walk(srcCtx, pVisitor);
+		}
 	}
 
 	PtrDeque internalClasses;
 
 	ClassVariableNode::PtrDeque variables;
+	MethodNode::PtrDeque methods;
 
-	detail::TypeName::Deque extends;
-	detail::TypeName::Deque implements;
+	detail::SimpleIdentifier::Deque extends;
+	detail::SimpleIdentifier::Deque implements;
 
-	detail::QualifiedTypeName id;
+	detail::QualifiedIdentifier id;
 
 	detail::AccessDecl accessDecl;
 	detail::ClassDecl classDecl;

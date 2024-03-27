@@ -20,8 +20,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "detail/MessageCode.hpp"
 #include "detail/TokenSpan.hpp"
+
+#include "detail/enum/MessageCode.hpp"
 
 #include <Harlequin.h>
 #include <BaseErrorListener.h>
@@ -52,22 +53,22 @@ public:
 	bool EncounteredErrors() const;
 
 	void Report(
-		MessageCode code, 
+		detail::MessageCode code, 
 		const detail::TokenSpan& span, 
 		const std::string& msg);
 	void Report(
-		MessageCode code, 
+		detail::MessageCode code, 
 		const detail::TokenSpan& span, 
 		const std::string& primaryMsg, 
 		const std::string& secondaryMsg);
 
 	void Report(
-		MessageCode code, 
+		detail::MessageCode code, 
 		const detail::TokenSpan& beginSpan, 
 		const detail::TokenSpan& endSpan, 
 		const std::string& msg);
 	void Report(
-		MessageCode code, 
+		detail::MessageCode code, 
 		const detail::TokenSpan& beginSpan, 
 		const detail::TokenSpan& endSpan, 
 		const std::string& primaryMsg, 
@@ -85,7 +86,7 @@ private:
 		Warning,
 	};
 
-	int _getMsgType(MessageCode);
+	int _getMsgType(detail::MessageCode);
 
 	HqReportHandle m_hReport;
 
@@ -143,7 +144,7 @@ inline bool SourceContext::EncounteredErrors() const
 //----------------------------------------------------------------------------------------------------------------------
 
 inline void SourceContext::Report(
-	const MessageCode code, 
+	const detail::MessageCode code, 
 	const detail::TokenSpan& span, 
 	const std::string& msg)
 {
@@ -155,7 +156,7 @@ inline void SourceContext::Report(
 //----------------------------------------------------------------------------------------------------------------------
 
 inline void SourceContext::Report(
-	const MessageCode code,
+	const detail::MessageCode code,
 	const detail::TokenSpan& span,
 	const std::string& primaryMsg,
 	const std::string& secondaryMsg)
@@ -166,7 +167,7 @@ inline void SourceContext::Report(
 //----------------------------------------------------------------------------------------------------------------------
 
 inline void SourceContext::Report(
-	const MessageCode code, 
+	const detail::MessageCode code, 
 	const detail::TokenSpan& beginSpan, 
 	const detail::TokenSpan& endSpan, 
 	const std::string& msg)
@@ -178,9 +179,9 @@ inline void SourceContext::Report(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline int SourceContext::_getMsgType(const MessageCode code)
+inline int SourceContext::_getMsgType(const detail::MessageCode code)
 {
-	return (int(code) < int(MessageCode::_WarningStart_))
+	return (int(code) < int(detail::MessageCode::_WarningStart_))
 		? HQ_MESSAGE_TYPE_ERROR
 		: HQ_MESSAGE_TYPE_WARNING;
 }

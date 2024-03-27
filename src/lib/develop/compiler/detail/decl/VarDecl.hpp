@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2024, Zoe J. Bare
+// Copyright (c) 2023, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,35 +20,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ExprVariableNode.hpp"
-
-#include "../detail/decl/AccessDecl.hpp"
-#include "../detail/decl/ConstDecl.hpp"
-#include "../detail/decl/StorageDecl.hpp"
+#include "ArrayDecl.hpp"
+#include "TypeDecl.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ClassVariableNode final
-	: public ExprVariableNode
+namespace detail
 {
-public:
-
-	typedef std::shared_ptr<ClassVariableNode> Ptr;
-	typedef std::deque<Ptr>                    PtrDeque;
-
-	inline static Ptr New()
+	struct VarDecl
 	{
-		return std::make_shared<ClassVariableNode>();
-	}
-
-	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
-	{
-		_HQ_AST_NODE_WALK_PREAMBLE(ExprVariableNode, srcCtx, pVisitor, visit);
-	}
-
-	detail::AccessDecl accessDecl;
-	detail::StorageDecl storageDecl;
-	detail::ConstDecl constDecl;
-};
+		TypeDecl typeDecl;
+		ArrayDecl arrayDecl;
+	};
+}
 
 //----------------------------------------------------------------------------------------------------------------------

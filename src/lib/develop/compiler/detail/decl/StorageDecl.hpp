@@ -20,25 +20,22 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "TokenSpan.hpp"
+#include "../TokenSpan.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace detail
 {
-	struct ArrayDecl
+	struct StorageDecl
 	{
 		enum class Type
 		{
-			None,
-			Linear,
-			Grid2D,
-			Grid3D,
+			Default,
+			Static,
 		};
 
 		Type type;
-		TokenSpan beginSpan;
-		TokenSpan endSpan;
+		TokenSpan span;
 	};
 }
 

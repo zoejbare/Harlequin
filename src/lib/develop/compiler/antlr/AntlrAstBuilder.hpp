@@ -55,18 +55,29 @@ private:
 
 	virtual std::any visitClassVarDeclStmt(HarlequinParser::ClassVarDeclStmtContext*) override;
 
-	void _getQualifiedName(HarlequinParser::QualifiedIdContext*, detail::QualifiedTypeName&) const;
-	void _getQualifiedName(antlr4::tree::TerminalNode*, detail::QualifiedTypeName&) const;
+	virtual std::any visitMethodDecl(HarlequinParser::MethodDeclContext*) override;
+	virtual std::any visitMethodArg(HarlequinParser::MethodArgContext*) override;
+
+	std::string _getIdPrefix() const;
+
+	void _getQualifiedName(HarlequinParser::QualifiedIdContext*, detail::QualifiedIdentifier&) const;
+	void _getQualifiedName(antlr4::tree::TerminalNode*, detail::QualifiedIdentifier&) const;
+	void _getMethodSignature(const std::string&, antlr4::tree::TerminalNode*, const ArgVariableNode::PtrDeque&, detail::MethodIdentifier&) const;
+
+	void _getMethodArgs(HarlequinParser::MethodArgSeqContext*, ArgVariableNode::PtrDeque&);
 
 	void _getAccessDecl(HarlequinParser::AccessBaseSpecifierContext*, detail::AccessDecl&) const;
-	void _getAccessDecl(HarlequinParser::AccessSpecifierContext*, detail::AccessDecl&, detail::TypeName::Deque&) const;
+	void _getAccessDecl(HarlequinParser::AccessSpecifierContext*, detail::AccessDecl&) const;
 	void _getClassDecl(HarlequinParser::ClassTypeContext*, detail::ClassDecl&) const;
-	void _getStorageDecl(HarlequinParser::StorageSpecifierContext*, detail::StorageDecl&) const;
 	void _getConstDecl(HarlequinParser::ConstQualifierContext*, detail::ConstDecl&) const;
-	void _getVarDecl(HarlequinParser::TypeNameDeclContext*, detail::VarDecl&, detail::ArrayDecl&) const;
+	void _getFuncDecl(HarlequinParser::FunctionSpecifierContext*, detail::FuncDecl&) const;
+	void _getStorageDecl(HarlequinParser::StorageSpecifierContext*, detail::StorageDecl&) const;
+	void _getVarDecl(HarlequinParser::TypeNameDeclContext*, detail::VarDecl&) const;
 
 	static antlr4::Token* _getClassTypeToken(HarlequinParser::ClassTypeContext*);
+
 	static antlr4::Token* _getAccessSpecToken(HarlequinParser::AccessBaseSpecifierContext*);
+	static antlr4::Token* _getFuncSpecToken(HarlequinParser::FunctionSpecifierContext*);
 	static antlr4::Token* _getStorageSpecToken(HarlequinParser::StorageSpecifierContext*);
 
 	SourceContext* m_pSrcCtx;

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,22 +20,23 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "TokenSpan.hpp"
+#include "../TokenSpan.hpp"
+
+#include <deque>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace detail
 {
-	struct StorageDecl
+	struct SimpleIdentifier
 	{
-		enum class Type
-		{
-			Default,
-			Static,
-		};
+		typedef std::deque<SimpleIdentifier> Deque;
 
-		Type type;
-		TokenSpan span;
+		std::string name;
+
+		TokenSpan beginSpan;
+		TokenSpan endSpan;
 	};
 }
 

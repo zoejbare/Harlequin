@@ -20,8 +20,9 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "../detail/MessageCode.hpp"
 #include "../detail/TokenSpan.hpp"
+
+#include "../detail/enum/MessageCode.hpp"
 
 #include <BaseErrorListener.h>
 

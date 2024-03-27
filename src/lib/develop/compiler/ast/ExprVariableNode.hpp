@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,23 +20,30 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-enum class MessageCode
+#include "VariableNode.hpp"
+
+#include <memory>
+#include <deque>
+#include <string>
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class ExprVariableNode
+	: public VariableNode
 {
-	_ErrorStart_ = 0,
+public:
 
-	ErrorSyntax = _ErrorStart_,
-	ErrorStaticInterface,
-	ErrorDuplicateAlias,
-	ErrorDuplicateClass,
-	ErrorDuplicateVar,
-	ErrorDuplicateMethod,
-	ErrorInvalidAccessSpec,
-	ErrorNoMethodImpl,
-	ErrorNativeMethodWithBody,
-	ErrorStaticVirtualMethod,
-	ErrorStaticConstMethod,
+	typedef std::shared_ptr<ExprVariableNode> Ptr;
+	typedef std::deque<Ptr>                   PtrDeque;
 
-	_WarningStart_ = 10000,
+	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
+	{
+		_HQ_AST_NODE_WALK_PREAMBLE(VariableNode, srcCtx, pVisitor, visit);
+
+		// TODO: Visit the assignment expression node
+	}
+
+	// TODO: Add assignment expression node here
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -22,9 +22,8 @@
 
 #include "AstBaseNode.hpp"
 
-#include "../detail/ArrayDecl.hpp"
-#include "../detail/VarDecl.hpp"
-#include "../detail/TypeName.hpp"
+#include "../detail/decl/VarDecl.hpp"
+#include "../detail/name/QualifiedIdentifier.hpp"
 
 #include <memory>
 #include <deque>
@@ -43,16 +42,11 @@ public:
 	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
 	{
 		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
-
-		// TODO: Visit the assignment expression node
 	}
 
-	// TODO: Add assignment expression node here
-
-	detail::QualifiedTypeName id;
+	detail::QualifiedIdentifier id;
 
 	detail::VarDecl varDecl;
-	detail::ArrayDecl arrayDecl;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

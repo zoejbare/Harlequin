@@ -20,12 +20,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "detail/AccessDecl.hpp"
-#include "detail/ArrayDecl.hpp"
-#include "detail/ClassDecl.hpp"
-#include "detail/FuncDecl.hpp"
-#include "detail/StorageDecl.hpp"
-#include "detail/VarDecl.hpp"
+#include "detail/decl/AccessDecl.hpp"
+#include "detail/decl/ArrayDecl.hpp"
+#include "detail/decl/ClassDecl.hpp"
+#include "detail/decl/ConstDecl.hpp"
+#include "detail/decl/FuncDecl.hpp"
+#include "detail/decl/StorageDecl.hpp"
+#include "detail/decl/VarDecl.hpp"
 
 #include "../../Harlequin.h"
 
@@ -46,11 +47,11 @@ public:
 	static detail::AccessDecl::Type GetAccessType(const std::string& accessType);
 	static detail::ArrayDecl::Type GetArrayType(const std::string& arrayType);
 	static detail::ClassDecl::Type GetClassType(const std::string& classType);
+	static detail::TypeDecl::Type GetDataType(const std::string& typeName);
 	static detail::FuncDecl::Type GetFunctionType(const std::string& funcType);
 	static detail::StorageDecl::Type GetStorageType(const std::string& storageType);
-	static detail::VarDecl::Type GetVarType(const std::string& typeName);
 
-	static std::string GetTypeSignature(const std::string& typeName, detail::ArrayDecl::Type arrayType);
+	static std::string GetTypeSignature(const detail::VarDecl& varDecl, const detail::ConstDecl& constDecl);
 };
 
 //----------------------------------------------------------------------------------------------------------------------

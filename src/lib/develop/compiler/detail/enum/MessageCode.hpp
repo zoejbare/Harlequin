@@ -20,24 +20,27 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "TokenSpan.hpp"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-namespace detail
+namespace detail 
 {
-	struct FuncDecl
+	enum class MessageCode
 	{
-		enum class Type
-		{
-			Default,
-			Inline,
-			Virtual,
-			Native,
-		};
+		_ErrorStart_ = 0,
 
-		Type type;
-		TokenSpan span;
+		ErrorSyntax = _ErrorStart_,
+		ErrorStaticInterface,
+		ErrorDuplicateAlias,
+		ErrorDuplicateClass,
+		ErrorDuplicateVar,
+		ErrorDuplicateMethod,
+		ErrorInvalidAccessSpec,
+		ErrorNoMethodImpl,
+		ErrorNativeMethodImpl,
+		ErrorStaticVirtualMethod,
+		ErrorStaticConstMethod,
+		ErrorConstNativeVar,
+
+		_WarningStart_ = 10000,
+		WarningNativeConstMethod = _WarningStart_,
 	};
 }
 

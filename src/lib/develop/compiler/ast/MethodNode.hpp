@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2023, Zoe J. Bare
+// Copyright (c) 2024, Zoe J. Bare
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,39 +20,54 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "TokenSpan.hpp"
+#include "ArgVariableNode.hpp"
+
+#include "../detail/decl/AccessDecl.hpp"
+#include "../detail/decl/FuncDecl.hpp"
+#include "../detail/decl/StorageDecl.hpp"
+#include "../detail/decl/VarDecl.hpp"
+
+#include "../detail/name/MethodIdentifier.hpp"
+
+#include <memory>
+#include <deque>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace detail
+class MethodNode final
+	: public AstBaseNode
 {
-	struct VarDecl
+public:
+
+	typedef std::shared_ptr<MethodNode> Ptr;
+	typedef std::deque<Ptr>             PtrDeque;
+
+	inline static Ptr New()
 	{
-		enum class Type
+		return std::make_shared<MethodNode>();
+	}
+
+	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
+	{
+		_HQ_AST_NODE_WALK_PREAMBLE(AstBaseNode, srcCtx, pVisitor, visit);
+
+		// Visit all method argument nodes.
+		for(auto& pNode : args)
 		{
-			Int8,
-			Int16,
-			Int32,
-			Int64,
+			pNode->Walk(srcCtx, pVisitor);
+		}
+	}
 
-			Uint8,
-			Uint16,
-			Uint32,
-			Uint64,
+	ArgVariableNode::PtrDeque args;
 
-			Float32,
-			Float64,
+	detail::MethodIdentifier id;
 
-			Bool,
-
-			String,
-			Object,
-			Native,
-		};
-
-		Type type;
-		TokenSpan span;
-	};
-}
+	detail::AccessDecl accessDecl;
+	detail::ConstDecl constDecl;
+	detail::FuncDecl funcDecl;
+	detail::StorageDecl storageDecl;
+	detail::VarDecl returnType;
+};
 
 //----------------------------------------------------------------------------------------------------------------------

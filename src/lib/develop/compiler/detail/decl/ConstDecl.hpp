@@ -20,19 +20,19 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "TokenSpan.hpp"
+#include "../TokenSpan.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace detail
 {
-	struct AccessDecl
+	struct ConstDecl
 	{
 		enum class Type
 		{
-			Public,
-			Protected,
-			Private,
+			None,
+			Immutable,
+			Literal,
 		};
 
 		Type type;

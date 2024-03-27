@@ -89,7 +89,7 @@ void SourceContext::Initialize(
 //----------------------------------------------------------------------------------------------------------------------
 
 void SourceContext::Report(
-	const MessageCode code,
+	const detail::MessageCode code,
 	const detail::TokenSpan& beginSpan,
 	const detail::TokenSpan& endSpan,
 	const std::string& primaryMsg,
@@ -109,13 +109,13 @@ void SourceContext::Report(
 		case HQ_MESSAGE_TYPE_ERROR:
 			typeStr = "error ";
 			codePrefix = "E";
-			adjustedCode = uint32_t(code) - uint32_t(MessageCode::_ErrorStart_);
+			adjustedCode = uint32_t(code) - uint32_t(detail::MessageCode::_ErrorStart_);
 			break;
 
 		case HQ_MESSAGE_TYPE_WARNING:
 			typeStr = "warning ";
 			codePrefix = "W";
-			adjustedCode = uint32_t(code) - uint32_t(MessageCode::_WarningStart_);
+			adjustedCode = uint32_t(code) - uint32_t(detail::MessageCode::_WarningStart_);
 			break;
 
 		default:
@@ -160,7 +160,7 @@ void SourceContext::Report(
 			msgStream << std::endl << sourceCode << std::endl;
 
 			// Add the diagnostic section to the message stream.
-			for(size_t absoluteIndex = lineStartIndex; absoluteIndex < lineEndIndex; ++absoluteIndex)
+			for(size_t absoluteIndex = lineStartIndex; absoluteIndex < lineEndIndex && absoluteIndex < endSpanIndex + 1; ++absoluteIndex)
 			{
 				const size_t lineLocalIndex = absoluteIndex - lineStartIndex;
 				const char charInLine = sourceCode[lineLocalIndex];

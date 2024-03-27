@@ -20,34 +20,30 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#include "ExprVariableNode.hpp"
+#include "VariableNode.hpp"
 
-#include "../detail/decl/AccessDecl.hpp"
 #include "../detail/decl/ConstDecl.hpp"
-#include "../detail/decl/StorageDecl.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ClassVariableNode final
-	: public ExprVariableNode
+class ArgVariableNode final
+	: public VariableNode
 {
 public:
 
-	typedef std::shared_ptr<ClassVariableNode> Ptr;
-	typedef std::deque<Ptr>                    PtrDeque;
+	typedef std::shared_ptr<ArgVariableNode> Ptr;
+	typedef std::deque<Ptr>                  PtrDeque;
 
 	inline static Ptr New()
 	{
-		return std::make_shared<ClassVariableNode>();
+		return std::make_shared<ArgVariableNode>();
 	}
 
 	virtual void Walk(SourceContext& srcCtx, AstBaseVisitor* pVisitor, bool visit = true) const override
 	{
-		_HQ_AST_NODE_WALK_PREAMBLE(ExprVariableNode, srcCtx, pVisitor, visit);
+		_HQ_AST_NODE_WALK_PREAMBLE(VariableNode, srcCtx, pVisitor, visit);
 	}
 
-	detail::AccessDecl accessDecl;
-	detail::StorageDecl storageDecl;
 	detail::ConstDecl constDecl;
 };
 

@@ -22,6 +22,8 @@
 
 #include "ClassNode.hpp"
 
+#include "../detail/name/QualifiedIdentifier.hpp"
+
 #include <memory>
 #include <deque>
 #include <string>
@@ -58,7 +60,7 @@ public:
 		}
 	}
 
-	detail::QualifiedTypeName id;
+	detail::QualifiedIdentifier id;
 
 	PtrDeque namespaces;
 
